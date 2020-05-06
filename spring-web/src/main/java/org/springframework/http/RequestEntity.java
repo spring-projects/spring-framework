@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -43,9 +44,13 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * <p>If you would like to provide a URI template with variables, consider using
- * {@link org.springframework.web.util.UriTemplate}:
+ * {@link org.springframework.web.util.DefaultUriBuilderFactory DefaultUriBuilderFactory}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;https://example.com/{foo}&quot;).expand(&quot;bar&quot;);
+ * // Create shared factory
+ * UriBuilderFactory factory = new DefaultUriBuilderFactory();
+ *
+ * // Use factory to create URL from template
+ * URI uri = factory.uriString(&quot;https://example.com/{foo}&quot;).build(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -316,6 +321,27 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		B header(String headerName, String... headerValues);
 
 		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing HttpHeaders to copy from
+		 * @return this builder
+		 * @since 5.2
+		 * @see HttpHeaders#add(String, String)
+		 */
+		B headers(@Nullable HttpHeaders headers);
+
+		/**
+		 * Manipulate this entity's headers with the given consumer. The
+		 * headers provided to the consumer are "live", so that the consumer can be used to
+		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
+		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
+		 * {@link HttpHeaders} methods.
+		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
+		 * @return this builder
+		 * @since 5.2
+		 */
+		B headers(Consumer<HttpHeaders> headersConsumer);
+
+		/**
 		 * Set the list of acceptable {@linkplain MediaType media types}, as
 		 * specified by the {@code Accept} header.
 		 * @param acceptableMediaTypes the acceptable media types
@@ -427,6 +453,20 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			for (String headerValue : headerValues) {
 				this.headers.add(headerName, headerValue);
 			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(@Nullable HttpHeaders headers) {
+			if (headers != null) {
+				this.headers.putAll(headers);
+			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+			headersConsumer.accept(this.headers);
 			return this;
 		}
 

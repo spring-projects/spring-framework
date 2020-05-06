@@ -25,14 +25,25 @@ target different advice with the same pointcut.
 The `org.springframework.aop.Pointcut` interface is the central interface, used to
 target advices to particular classes and methods. The complete interface follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Pointcut {
 
 		ClassFilter getClassFilter();
 
 		MethodMatcher getMethodMatcher();
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Pointcut {
+
+		fun getClassFilter(): ClassFilter
+
+		fun getMethodMatcher(): MethodMatcher
 
 	}
 ----
@@ -45,19 +56,27 @@ The `ClassFilter` interface is used to restrict the pointcut to a given set of t
 classes. If the `matches()` method always returns true, all target classes are
 matched. The following listing shows the `ClassFilter` interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface ClassFilter {
 
 		boolean matches(Class clazz);
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface ClassFilter {
+
+		fun matches(clazz: Class<*>): Boolean
+	}
+----
 
 The `MethodMatcher` interface is normally more important. The complete interface follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface MethodMatcher {
 
@@ -66,6 +85,18 @@ The `MethodMatcher` interface is normally more important. The complete interface
 		boolean isRuntime();
 
 		boolean matches(Method m, Class targetClass, Object[] args);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface MethodMatcher {
+
+		val isRuntime: Boolean
+
+		fun matches(m: Method, targetClass: Class<*>): Boolean
+
+		fun matches(m: Method, targetClass: Class<*>, args: Array<Any>): Boolean
 	}
 ----
 
@@ -143,8 +174,7 @@ effectively the union of these pointcuts.)
 
 The following example shows how to use `JdkRegexpMethodPointcut`:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulatePointcut"
 			class="org.springframework.aop.support.JdkRegexpMethodPointcut">
@@ -163,8 +193,7 @@ throws advice, and others). Behind the scenes, Spring uses a `JdkRegexpMethodPoi
 Using `RegexpMethodPointcutAdvisor` simplifies wiring, as the one bean encapsulates both
 pointcut and advice, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<bean id="settersAndAbsquatulateAdvisor"
 			class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
@@ -225,12 +254,22 @@ Because static pointcuts are most useful, you should probably subclass
 abstract method (although you can override other methods to customize behavior). The
 following example shows how to subclass `StaticMethodMatcherPointcut`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	class TestStaticPointcut extends StaticMethodMatcherPointcut {
 
 		public boolean matches(Method m, Class targetClass) {
+			// return true if custom criteria match
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class TestStaticPointcut : StaticMethodMatcherPointcut() {
+
+		override fun matches(method: Method, targetClass: Class<*>): Boolean {
 			// return true if custom criteria match
 		}
 	}
@@ -296,12 +335,20 @@ Spring is compliant with the AOP `Alliance` interface for around advice that use
 interception. Classes that implement `MethodInterceptor` and that implement around advice should also implement the
 following interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface MethodInterceptor extends Interceptor {
 
 		Object invoke(MethodInvocation invocation) throws Throwable;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface MethodInterceptor : Interceptor {
+
+		fun invoke(invocation: MethodInvocation) : Any
 	}
 ----
 
@@ -312,8 +359,8 @@ point.
 
 The following example shows a simple `MethodInterceptor` implementation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class DebugInterceptor implements MethodInterceptor {
 
@@ -322,6 +369,19 @@ The following example shows a simple `MethodInterceptor` implementation:
 			Object rval = invocation.proceed();
 			System.out.println("Invocation returned");
 			return rval;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class DebugInterceptor : MethodInterceptor {
+
+		override fun invoke(invocation: MethodInvocation): Any {
+			println("Before: invocation=[$invocation]")
+			val rval = invocation.proceed()
+			println("Invocation returned")
+			return rval
 		}
 	}
 ----
@@ -353,13 +413,21 @@ interceptor chain.
 
 The following listing shows the `MethodBeforeAdvice` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface MethodBeforeAdvice extends BeforeAdvice {
 
 		void before(Method m, Object[] args, Object target) throws Throwable;
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+interface MethodBeforeAdvice : BeforeAdvice {
+	
+	fun before(m: Method, args: Array<Any>, target: Any)
+}
 ----
 
 (Spring's API design would allow for
@@ -375,8 +443,8 @@ wrapped in an unchecked exception by the AOP proxy.
 
 The following example shows a before advice in Spring, which counts all method invocations:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class CountingBeforeAdvice implements MethodBeforeAdvice {
 
@@ -388,6 +456,18 @@ The following example shows a before advice in Spring, which counts all method i
 
 		public int getCount() {
 			return count;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class CountingBeforeAdvice : MethodBeforeAdvice {
+
+		var count: Int = 0
+		
+		override fun before(m: Method, args: Array<Any>, target: Any?) {
+			++count
 		}
 	}
 ----
@@ -404,8 +484,7 @@ an exception. Spring offers typed throws advice. Note that this means that the
 tag interface identifying that the given object implements one or more typed throws
 advice methods. These should be in the following form:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	afterThrowing([Method, args, target], subclassOfThrowable)
 ----
@@ -416,12 +495,22 @@ arguments. The next two listing show classes that are examples of throws advice.
 
 The following advice is invoked if a `RemoteException` is thrown (including from subclasses):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class RemoteThrowsAdvice implements ThrowsAdvice {
 
 		public void afterThrowing(RemoteException ex) throws Throwable {
+			// Do something with remote exception
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class RemoteThrowsAdvice : ThrowsAdvice {
+		
+		fun afterThrowing(ex: RemoteException) {
 			// Do something with remote exception
 		}
 	}
@@ -431,12 +520,22 @@ Unlike the preceding
 advice, the next example declares four arguments, so that it has access to the invoked method, method
 arguments, and target object. The following advice is invoked if a `ServletException` is thrown:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
 		public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
+			// Do something with all arguments
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ServletThrowsAdviceWithArguments : ThrowsAdvice {
+
+		fun afterThrowing(m: Method, args: Array<Any>, target: Any, ex: ServletException) {
 			// Do something with all arguments
 		}
 	}
@@ -446,8 +545,8 @@ The final example illustrates how these two methods could be used in a single cl
 that handles both `RemoteException` and `ServletException`. Any number of throws advice
 methods can be combined in a single class. The following listing shows the final example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public static class CombinedThrowsAdvice implements ThrowsAdvice {
 
@@ -460,10 +559,24 @@ methods can be combined in a single class. The following listing shows the final
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class CombinedThrowsAdvice : ThrowsAdvice {
+		
+		fun afterThrowing(ex: RemoteException) {
+			// Do something with remote exception
+		}
+
+		fun afterThrowing(m: Method, args: Array<Any>, target: Any, ex: ServletException) {
+			// Do something with all arguments
+		}
+	}
+----
 
 NOTE: If a throws-advice method throws an exception itself, it overrides the
 original exception (that is, it changes the exception thrown to the user). The overriding
-exception is typically a RuntimeException, which is is compatible with any method
+exception is typically a RuntimeException, which is compatible with any method
 signature. However, if a throws-advice method throws a checked exception, it must
 match the declared exceptions of the target method and is, hence, to some degree
 coupled to specific target method signatures. _Do not throw an undeclared checked
@@ -478,13 +591,21 @@ TIP: Throws advice can be used with any pointcut.
 An after returning advice in Spring must implement the
 `org.springframework.aop.AfterReturningAdvice` interface, which the following listing shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface AfterReturningAdvice extends Advice {
 
 		void afterReturning(Object returnValue, Method m, Object[] args, Object target)
 				throws Throwable;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface AfterReturningAdvice : Advice {
+		
+		fun afterReturning(returnValue: Any, m: Method, args: Array<Any>, target: Any)
 	}
 ----
 
@@ -494,8 +615,8 @@ the invoked method, the method's arguments, and the target.
 The following after returning advice counts all successful method invocations that have
 not thrown exceptions:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class CountingAfterReturningAdvice implements AfterReturningAdvice {
 
@@ -508,6 +629,19 @@ not thrown exceptions:
 
 		public int getCount() {
 			return count;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class CountingAfterReturningAdvice : AfterReturningAdvice {
+
+		var count: Int = 0
+			private set
+		
+		override fun afterReturning(returnValue: Any?, m: Method, args: Array<Any>, target: Any?) {
+			++count
 		}
 	}
 ----
@@ -526,12 +660,20 @@ Spring treats introduction advice as a special kind of interception advice.
 Introduction requires an `IntroductionAdvisor` and an `IntroductionInterceptor` that
 implement the following interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface IntroductionInterceptor extends MethodInterceptor {
 
 		boolean implementsInterface(Class intf);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface IntroductionInterceptor : MethodInterceptor {
+
+		fun implementsInterface(intf: Class<*>): Boolean
 	}
 ----
 
@@ -544,8 +686,8 @@ Introduction advice cannot be used with any pointcut, as it applies only at the 
 rather than the method, level. You can only use introduction advice with the
 `IntroductionAdvisor`, which has the following methods:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
@@ -556,7 +698,23 @@ rather than the method, level. You can only use introduction advice with the
 
 	public interface IntroductionInfo {
 
-		Class[] getInterfaces();
+		Class<?>[] getInterfaces();
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface IntroductionAdvisor : Advisor, IntroductionInfo {
+
+		val classFilter: ClassFilter
+		
+		@Throws(IllegalArgumentException::class)
+		fun validateInterfaces()
+	}
+
+	interface IntroductionInfo {
+
+		val interfaces: Array<Class<*>>
 	}
 ----
 
@@ -571,13 +729,22 @@ introduced interfaces can be implemented by the configured `IntroductionIntercep
 Consider an example from the Spring test suite and suppose we want to
 introduce the following interface to one or more objects:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Lockable {
 		void lock();
 		void unlock();
 		boolean locked();
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Lockable {
+		fun lock()
+		fun unlock()
+		fun locked(): Boolean
 	}
 ----
 
@@ -616,8 +783,8 @@ to that held in the target object.
 
 The following example shows the example `LockMixin` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 
@@ -644,6 +811,34 @@ The following example shows the example `LockMixin` class:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class LockMixin : DelegatingIntroductionInterceptor(), Lockable {
+
+		private var locked: Boolean = false
+
+		fun lock() {
+			this.locked = true
+		}
+
+		fun unlock() {
+			this.locked = false
+		}
+
+		fun locked(): Boolean {
+			return this.locked
+		}
+		
+		override fun invoke(invocation: MethodInvocation): Any? {
+			if (locked() && invocation.method.name.indexOf("set") == 0) {
+				throw LockedException()
+			}
+			return super.invoke(invocation)
+		}
+
+	}
+----
 
 Often, you need not override the `invoke()` method. The
 `DelegatingIntroductionInterceptor` implementation (which calls the `delegate` method if
@@ -658,8 +853,8 @@ interceptor (which would be defined as a prototype). In this case, there is no
 configuration relevant for a `LockMixin`, so we create it by using `new`.
 The following example shows our `LockMixinAdvisor` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
@@ -667,6 +862,11 @@ The following example shows our `LockMixinAdvisor` class:
 			super(new LockMixin(), Lockable.class);
 		}
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class LockMixinAdvisor : DefaultIntroductionAdvisor(LockMixin(), Lockable::class.java)
 ----
 
 We can apply this advisor very simply, because it requires no configuration. (However, it
@@ -857,8 +1057,7 @@ Consider a simple example of `ProxyFactoryBean` in action. This example involves
 
 The following listing shows the example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="personTarget" class="com.mycompany.PersonImpl">
 		<property name="name" value="Tony"/>
@@ -899,17 +1098,21 @@ an instance of the prototype from the factory. Holding a reference is not suffic
 The `person` bean definition shown earlier can be used in place of a `Person` implementation, as
 follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Person person = (Person) factory.getBean("person");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val person = factory.getBean("person") as Person;
 ----
 
 Other beans in the same IoC context can express a strongly typed dependency on it, as
 with an ordinary Java object. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="personUser" class="com.mycompany.PersonUser">
 		<property name="person"><ref bean="person"/></property>
@@ -926,8 +1129,7 @@ inner bean. Only the `ProxyFactoryBean` definition is different. The
 advice is included only for completeness. The following example shows how to use an
 anonymous inner bean:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myAdvisor" class="com.mycompany.MyAdvisor">
 		<property name="someProperty" value="Custom string property value"/>
@@ -1004,8 +1206,7 @@ the part before the asterisk are added to the advisor chain. This can come in ha
 if you need to add a standard set of "`global`" advisors. The following example defines
 two global advisors:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target" ref="service"/>
@@ -1032,8 +1233,7 @@ definitions, can result in much cleaner and more concise proxy definitions.
 
 First, we create a parent, template, bean definition for the proxy, as follows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="txProxyTemplate" abstract="true"
 			class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
@@ -1051,8 +1251,7 @@ that needs to be created is a child bean definition, which wraps the target of t
 proxy as an inner bean definition, since the target is never used on its own anyway.
 The following example shows such a child bean:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myService" parent="txProxyTemplate">
 		<property name="target">
@@ -1065,8 +1264,7 @@ The following example shows such a child bean:
 You can override properties from the parent template. In the following example,
 we override the transaction propagation settings:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="mySpecialService" parent="txProxyTemplate">
 		<property name="target">
@@ -1107,13 +1305,21 @@ The interfaces implemented by the target object are
 automatically proxied. The following listing shows creation of a proxy for a target object, with one
 interceptor and one advisor:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
 	factory.addAdvice(myMethodInterceptor);
 	factory.addAdvisor(myAdvisor);
 	MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val factory = ProxyFactory(myBusinessInterfaceImpl)
+	factory.addAdvice(myMethodInterceptor)
+	factory.addAdvisor(myAdvisor)
+	val tb = factory.proxy as MyBusinessInterface
 ----
 
 The first step is to construct an object of type
@@ -1145,8 +1351,8 @@ However you create AOP proxies, you can manipulate them BY using the
 interface, no matter which other interfaces it implements. This interface includes the
 following methods:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Advisor[] getAdvisors();
 
@@ -1167,6 +1373,36 @@ following methods:
 	boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
 
 	boolean isFrozen();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun getAdvisors(): Array<Advisor>
+
+	@Throws(AopConfigException::class)
+	fun addAdvice(advice: Advice)
+
+	@Throws(AopConfigException::class)
+	fun addAdvice(pos: Int, advice: Advice)
+
+	@Throws(AopConfigException::class)
+	fun addAdvisor(advisor: Advisor)
+
+	@Throws(AopConfigException::class)
+	fun addAdvisor(pos: Int, advisor: Advisor)
+
+	fun indexOf(advisor: Advisor): Int
+
+	@Throws(AopConfigException::class)
+	fun removeAdvisor(advisor: Advisor): Boolean
+
+	@Throws(AopConfigException::class)
+	fun removeAdvisor(index: Int)
+
+	@Throws(AopConfigException::class)
+	fun replaceAdvisor(a: Advisor, b: Advisor): Boolean
+
+	fun isFrozen(): Boolean
 ----
 
 The `getAdvisors()` method returns an `Advisor` for every advisor, interceptor, or
@@ -1189,8 +1425,8 @@ change. (You can obtain a new proxy from the factory to avoid this problem.)
 The following example shows casting an AOP proxy to the `Advised` interface and examining and
 manipulating its advice:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Advised advised = (Advised) myObject;
 	Advisor[] advisors = advised.getAdvisors();
@@ -1206,6 +1442,24 @@ manipulating its advice:
 	advised.addAdvisor(new DefaultPointcutAdvisor(mySpecialPointcut, myAdvice));
 
 	assertEquals("Added two advisors", oldAdvisorCount + 2, advised.getAdvisors().length);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val advised = myObject as Advised
+	val advisors = advised.advisors
+	val oldAdvisorCount = advisors.size
+	println("$oldAdvisorCount advisors")
+
+	// Add an advice like an interceptor without a pointcut
+	// Will match all proxied methods
+	// Can use for interceptors, before, after returning or throws advice
+	advised.addAdvice(DebugInterceptor())
+
+	// Add selective advice using a pointcut
+	advised.addAdvisor(DefaultPointcutAdvisor(mySpecialPointcut, myAdvice))
+
+	assertEquals("Added two advisors", oldAdvisorCount + 2, advised.advisors.size)
 ----
 
 NOTE: It is questionable whether it is advisable (no pun intended) to modify advice on a
@@ -1261,8 +1515,7 @@ The `BeanNameAutoProxyCreator` class is a `BeanPostProcessor` that automatically
 AOP proxies for beans with names that match literal values or wildcards. The following
 example shows how to create a `BeanNameAutoProxyCreator` bean:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
 		<property name="beanNames" value="jdk*,onlyJdk"/>
@@ -1324,8 +1577,7 @@ bean`" idiom shown earlier also offers this benefit.)
 The following example creates a `DefaultAdvisorAutoProxyCreator` bean and the other
 elements discussed in this section:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
@@ -1394,17 +1646,22 @@ Changing the target source's target takes effect immediately. The
 
 You can change the target by using the `swap()` method on HotSwappableTargetSource, as the follow example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 	Object oldTarget = swapper.swap(newTarget);
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val swapper = beanFactory.getBean("swapper") as HotSwappableTargetSource
+	val oldTarget = swapper.swap(newTarget)
+----
 
 The following example shows the required XML definitions:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="initialTarget" class="mycompany.OldTarget"/>
 
@@ -1448,8 +1705,7 @@ NOTE: Commons Pool 1.5+ is also supported but is deprecated as of Spring Framewo
 
 The following listing shows an example configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject"
 			scope="prototype">
@@ -1483,8 +1739,7 @@ You can configure Spring to be able to cast any pooled object to the
 about the configuration and current size of the pool through an introduction. You
 need to define an advisor similar to the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject" ref="poolTargetSource"/>
@@ -1499,11 +1754,17 @@ the `ProxyFactoryBean` that exposes the pooled object.
 
 The cast is defined as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 	System.out.println("Max pool size is " + conf.getMaxSize());
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val conf = beanFactory.getBean("businessObject") as PoolingConfig
+	println("Max pool size is " + conf.maxSize)
 ----
 
 NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
@@ -1527,8 +1788,7 @@ use this approach without very good reason.
 To do this, you could modify the `poolTargetSource` definition shown earlier as follows
 (we also changed the name, for clarity):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
 		<property name="targetBeanName" ref="businessObjectTarget"/>
@@ -1550,8 +1810,7 @@ facility to transparently store a resource alongside a thread. Setting up a
 `ThreadLocalTargetSource` is pretty much the same as was explained for the other types
 of target source, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
 		<property name="targetBeanName" value="businessObjectTarget"/>

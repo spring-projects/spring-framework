@@ -23,12 +23,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link HttpStatusCodeException} and subclasses.
@@ -51,14 +50,14 @@ public class HttpStatusCodeExceptionTests {
 		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 		HttpStatusCodeException ex2 =
 				(HttpStatusCodeException) new ObjectInputStream(in).readObject();
-		assertThat(ex2.getResponseBodyAsString(), equalTo(ex1.getResponseBodyAsString()));
+		assertThat(ex2.getResponseBodyAsString()).isEqualTo(ex1.getResponseBodyAsString());
 	}
 
 	@Test
 	public void emptyStatusText() {
 		HttpStatusCodeException ex = new HttpClientErrorException(HttpStatus.NOT_FOUND, "");
 
-		assertEquals("404 Not Found", ex.getMessage());
+		assertThat(ex.getMessage()).isEqualTo("404 Not Found");
 	}
 
 }

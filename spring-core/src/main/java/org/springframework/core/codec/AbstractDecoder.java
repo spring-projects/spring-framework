@@ -40,9 +40,9 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractDecoder<T> implements Decoder<T> {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	private final List<MimeType> decodableMimeTypes;
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 
 	protected AbstractDecoder(MimeType... supportedMimeTypes) {

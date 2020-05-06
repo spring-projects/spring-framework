@@ -40,8 +40,8 @@ public abstract class MergedAnnotationSelectors {
 
 
 	/**
-	 * Select the nearest annotation, i.e. the one with the lowest depth.
-	 * @return a selector that picks the annotation with the lowest depth
+	 * Select the nearest annotation, i.e. the one with the lowest distance.
+	 * @return a selector that picks the annotation with the lowest distance
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> MergedAnnotationSelector<A> nearest() {
@@ -49,8 +49,8 @@ public abstract class MergedAnnotationSelectors {
 	}
 
 	/**
-	 * Select the first directly declared annotation when possible. If not direct
-	 * annotations are declared then the earliest annotation is selected.
+	 * Select the first directly declared annotation when possible. If no direct
+	 * annotations are declared then the nearest annotation is selected.
 	 * @return a selector that picks the first directly declared annotation whenever possible
 	 */
 	@SuppressWarnings("unchecked")
@@ -66,14 +66,14 @@ public abstract class MergedAnnotationSelectors {
 
 		@Override
 		public boolean isBestCandidate(MergedAnnotation<Annotation> annotation) {
-			return annotation.getDepth() == 0;
+			return annotation.getDistance() == 0;
 		}
 
 		@Override
 		public MergedAnnotation<Annotation> select(
 				MergedAnnotation<Annotation> existing, MergedAnnotation<Annotation> candidate) {
 
-			if (candidate.getDepth() < existing.getDepth()) {
+			if (candidate.getDistance() < existing.getDistance()) {
 				return candidate;
 			}
 			return existing;
@@ -90,14 +90,14 @@ public abstract class MergedAnnotationSelectors {
 
 		@Override
 		public boolean isBestCandidate(MergedAnnotation<Annotation> annotation) {
-			return annotation.getDepth() == 0;
+			return annotation.getDistance() == 0;
 		}
 
 		@Override
 		public MergedAnnotation<Annotation> select(
 				MergedAnnotation<Annotation> existing, MergedAnnotation<Annotation> candidate) {
 
-			if (existing.getDepth() > 0 && candidate.getDepth() == 0) {
+			if (existing.getDistance() > 0 && candidate.getDistance() == 0) {
 				return candidate;
 			}
 			return existing;

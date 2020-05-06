@@ -24,10 +24,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
@@ -36,13 +37,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -61,7 +62,7 @@ public class DefaultEntityResponseBuilderTests {
 	public void fromObject() {
 		String body = "foo";
 		EntityResponse<String> response = EntityResponse.fromObject(body).build();
-		assertSame(body, response.entity());
+		assertThat(response.entity()).isSameAs(body);
 	}
 
 	@Test
@@ -71,7 +72,7 @@ public class DefaultEntityResponseBuilderTests {
 				new ParameterizedTypeReference<String>() {})
 				.build();
 
-		assertSame(body, response.entity());
+		assertThat(response.entity()).isSameAs(body);
 	}
 
 	@Test
@@ -80,7 +81,8 @@ public class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject(body).status(HttpStatus.CREATED).build();
 
-		assertEquals(HttpStatus.CREATED, result.statusCode());
+		assertThat(result.statusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(result.rawStatusCode()).isEqualTo(201);
 	}
 
 	@Test
@@ -89,14 +91,14 @@ public class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject(body).allow(HttpMethod.GET).build();
 		Set<HttpMethod> expected = EnumSet.of(HttpMethod.GET);
-		assertEquals(expected, result.headers().getAllow());
+		assertThat(result.headers().getAllow()).isEqualTo(expected);
 	}
 
 	@Test
 	public void contentLength() {
 		String body = "foo";
 		EntityResponse<String> result = EntityResponse.fromObject(body).contentLength(42).build();
-		assertEquals(42, result.headers().getContentLength());
+		assertThat(result.headers().getContentLength()).isEqualTo(42);
 	}
 
 	@Test
@@ -106,7 +108,7 @@ public class DefaultEntityResponseBuilderTests {
 				result =
 				EntityResponse.fromObject(body).contentType(MediaType.APPLICATION_JSON).build();
 
-		assertEquals(MediaType.APPLICATION_JSON, result.headers().getContentType());
+		assertThat(result.headers().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -114,7 +116,7 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		EntityResponse<String> result = EntityResponse.fromObject(body).eTag("foo").build();
 
-		assertEquals("\"foo\"", result.headers().getETag());
+		assertThat(result.headers().getETag()).isEqualTo("\"foo\"");
 	}
 
 	@Test
@@ -123,7 +125,7 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		EntityResponse<String> result = EntityResponse.fromObject(body).lastModified(now).build();
 		long expected = now.toInstant().toEpochMilli() / 1000;
-		assertEquals(expected, result.headers().getLastModified() / 1000);
+		assertThat(result.headers().getLastModified() / 1000).isEqualTo(expected);
 	}
 
 	@Test
@@ -131,7 +133,7 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		EntityResponse<String> result =
 				EntityResponse.fromObject(body).cacheControl(CacheControl.noCache()).build();
-		assertEquals("no-cache", result.headers().getCacheControl());
+		assertThat(result.headers().getCacheControl()).isEqualTo("no-cache");
 	}
 
 	@Test
@@ -139,14 +141,14 @@ public class DefaultEntityResponseBuilderTests {
 		String body = "foo";
 		EntityResponse<String> result = EntityResponse.fromObject(body).varyBy("foo").build();
 		List<String> expected = Collections.singletonList("foo");
-		assertEquals(expected, result.headers().getVary());
+		assertThat(result.headers().getVary()).isEqualTo(expected);
 	}
 
 	@Test
 	public void header() {
 		String body = "foo";
 		EntityResponse<String> result = EntityResponse.fromObject(body).header("foo", "bar").build();
-		assertEquals("bar", result.headers().getFirst("foo"));
+		assertThat(result.headers().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -157,7 +159,7 @@ public class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result = EntityResponse.fromObject(body)
 				.headers(h -> h.addAll(headers))
 				.build();
-		assertEquals(headers, result.headers());
+		assertThat(result.headers()).isEqualTo(headers);
 	}
 
 	@Test
@@ -166,7 +168,7 @@ public class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject("foo").cookie(cookie)
 						.build();
-		assertTrue(result.cookies().get("name").contains(cookie));
+		assertThat(result.cookies().get("name").contains(cookie)).isTrue();
 	}
 
 	@Test
@@ -176,7 +178,7 @@ public class DefaultEntityResponseBuilderTests {
 		EntityResponse<String> result =
 				EntityResponse.fromObject("foo").cookies(cookies -> cookies.addAll(newCookies))
 						.build();
-		assertEquals(newCookies, result.cookies());
+		assertThat(result.cookies()).isEqualTo(newCookies);
 	}
 
 	@Test
@@ -192,9 +194,9 @@ public class DefaultEntityResponseBuilderTests {
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
 
 		ModelAndView mav = entityResponse.writeTo(mockRequest, mockResponse, EMPTY_CONTEXT);
-		assertNull(mav);
+		assertThat(mav).isNull();
 
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), mockResponse.getStatus());
+		assertThat(mockResponse.getStatus()).isEqualTo(HttpStatus.NOT_MODIFIED.value());
 	}
 
 
@@ -213,9 +215,9 @@ public class DefaultEntityResponseBuilderTests {
 		MockHttpServletResponse mockResponse = new MockHttpServletResponse();
 
 		ModelAndView mav = entityResponse.writeTo(mockRequest, mockResponse, EMPTY_CONTEXT);
-		assertNull(mav);
+		assertThat(mav).isNull();
 
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), mockResponse.getStatus());
+		assertThat(mockResponse.getStatus()).isEqualTo(HttpStatus.NOT_MODIFIED.value());
 	}
 
 }

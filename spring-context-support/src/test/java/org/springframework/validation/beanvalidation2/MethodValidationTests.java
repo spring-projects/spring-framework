@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.validation.beanvalidation2;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -41,7 +43,8 @@ import org.springframework.validation.beanvalidation.CustomValidatorBean;
 import org.springframework.validation.beanvalidation.MethodValidationInterceptor;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -73,53 +76,21 @@ public class MethodValidationTests {
 	}
 
 	private void doTestProxyValidation(MyValidInterface<String> proxy) {
-		assertNotNull(proxy.myValidMethod("value", 5));
-		try {
-			assertNotNull(proxy.myValidMethod("value", 15));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			assertNotNull(proxy.myValidMethod(null, 5));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			assertNotNull(proxy.myValidMethod("value", 0));
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-
+		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod("value", 15));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod(null, 5));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidMethod("value", 0));
 		proxy.myValidAsyncMethod("value", 5);
-		try {
-			proxy.myValidAsyncMethod("value", 15);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-		try {
-			proxy.myValidAsyncMethod(null, 5);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
-
-		assertEquals("myValue", proxy.myGenericMethod("myValue"));
-		try {
-			proxy.myGenericMethod(null);
-			fail("Should have thrown ValidationException");
-		}
-		catch (javax.validation.ValidationException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidAsyncMethod("value", 15));
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myValidAsyncMethod(null, 5));
+		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
+		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+				proxy.myGenericMethod(null));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
 	 * is called and it returns {@code true}.
 	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value.
-	 * @return true if the return value type represents an async value.
+	 * @param returnType the type of the return value
+	 * @return {@code true} if the return value type represents an async value
 	 */
 	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
 
@@ -58,9 +58,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * {@link #supportsReturnType(org.springframework.core.MethodParameter)}
 	 * is called and it returns {@code true}.
 	 * @param returnValue the value returned from the handler method
-	 * @param returnType the type of the return value.
-	 * @return the resulting ListenableFuture or {@code null} in which case no
-	 * further handling will be performed.
+	 * @param returnType the type of the return value
+	 * @return the resulting ListenableFuture, or {@code null} in which case
+	 * no further handling will be performed
 	 */
 	@Nullable
 	ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType);

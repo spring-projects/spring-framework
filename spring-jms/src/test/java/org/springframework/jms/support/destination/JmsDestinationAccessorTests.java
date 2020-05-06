@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package org.springframework.jms.support.destination;
 
 import javax.jms.ConnectionFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rick Evans
@@ -33,26 +34,18 @@ public class JmsDestinationAccessorTests {
 	public void testChokesIfDestinationResolverIsetToNullExplicitly() throws Exception {
 		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
-		try {
-			JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
-			accessor.setConnectionFactory(connectionFactory);
-			accessor.setDestinationResolver(null);
-			accessor.afterPropertiesSet();
-			fail("expected IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
-
+		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
+		accessor.setConnectionFactory(connectionFactory);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				accessor.setDestinationResolver(null));
 	}
 
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
-		assertFalse("The [pubSubDomain] property of JmsDestinationAccessor must default to " +
+		assertThat(accessor.isPubSubDomain()).as("The [pubSubDomain] property of JmsDestinationAccessor must default to " +
 				"false (i.e. Queues are used by default). Change this test (and the " +
-				"attendant Javadoc) if you have changed the default.",
-				accessor.isPubSubDomain());
+				"attendant Javadoc) if you have changed the default.").isFalse();
 	}
 
 

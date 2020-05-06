@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.persistenceunit;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+
 import javax.persistence.spi.ClassTransformer;
 
 import org.apache.commons.logging.Log;

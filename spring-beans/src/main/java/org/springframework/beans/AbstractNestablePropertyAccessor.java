@@ -115,7 +115,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	/**
 	 * Create a new accessor for the given object.
-	 * @param object object wrapped by this accessor
+	 * @param object the object wrapped by this accessor
 	 */
 	protected AbstractNestablePropertyAccessor(Object object) {
 		registerDefaultEditors();
@@ -134,7 +134,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	/**
 	 * Create a new accessor for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this accessor
+	 * @param object the object wrapped by this accessor
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -146,7 +146,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	/**
 	 * Create a new accessor for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this accessor
+	 * @param object the object wrapped by this accessor
 	 * @param nestedPath the nested path of the object
 	 * @param parent the containing accessor (must not be {@code null})
 	 */
@@ -737,7 +737,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	/**
 	 * Create a new nested property accessor instance.
 	 * Can be overridden in subclasses to create a PropertyAccessor subclass.
-	 * @param object object wrapped by this PropertyAccessor
+	 * @param object the object wrapped by this PropertyAccessor
 	 * @param nestedPath the nested path of the object
 	 * @return the nested PropertyAccessor instance
 	 */
@@ -837,7 +837,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object value = getPropertyValue(tokens);
-		if (value == null || (value instanceof Optional && !((Optional) value).isPresent())) {
+		if (value == null || (value instanceof Optional && !((Optional<?>) value).isPresent())) {
 			if (isAutoGrowNestedPaths()) {
 				value = setDefaultValue(tokens);
 			}
@@ -987,14 +987,11 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getName());
-		if (this.wrappedObject != null) {
-			sb.append(": wrapping object [").append(ObjectUtils.identityToString(this.wrappedObject)).append("]");
+		String className = getClass().getName();
+		if (this.wrappedObject == null) {
+			return className + ": no wrapped object set";
 		}
-		else {
-			sb.append(": no wrapped object set");
-		}
-		return sb.toString();
+		return className + ": wrapping object [" + ObjectUtils.identityToString(this.wrappedObject) + ']';
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link ComparableComparator}.
@@ -31,27 +30,24 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Phillip Webb
  */
-public class ComparableComparatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+class ComparableComparatorTests {
 
 	@Test
-	public void testComparableComparator() {
+	void comparableComparator() {
 		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
-		assertTrue(c.compare(s1, s2) < 0);
+		assertThat(c.compare(s1, s2) < 0).isTrue();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void shouldNeedComparable() {
+	void shouldNeedComparable() {
 		Comparator c = new ComparableComparator();
 		Object o1 = new Object();
 		Object o2 = new Object();
-		thrown.expect(ClassCastException.class);
-		c.compare(o1, o2);
+		assertThatExceptionOfType(ClassCastException.class).isThrownBy(() ->
+				c.compare(o1, o2));
 	}
 
 }

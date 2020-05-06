@@ -181,15 +181,7 @@ public abstract class CollectionUtils {
 	 * @return whether any of the candidates has been found
 	 */
 	public static boolean containsAny(Collection<?> source, Collection<?> candidates) {
-		if (isEmpty(source) || isEmpty(candidates)) {
-			return false;
-		}
-		for (Object candidate : candidates) {
-			if (source.contains(candidate)) {
-				return true;
-			}
-		}
-		return false;
+		return findFirstMatch(source, candidates) != null;
 	}
 
 	/**
@@ -311,6 +303,47 @@ public abstract class CollectionUtils {
 			}
 		}
 		return candidate;
+	}
+
+	/**
+	 * Retrieve the first element of the given Set, using {@link SortedSet#first()}
+	 * or otherwise using the iterator.
+	 * @param set the Set to check (may be {@code null} or empty)
+	 * @return the first element, or {@code null} if none
+	 * @since 5.2.3
+	 * @see SortedSet
+	 * @see LinkedHashMap#keySet()
+	 * @see java.util.LinkedHashSet
+	 */
+	@Nullable
+	public static <T> T firstElement(@Nullable Set<T> set) {
+		if (isEmpty(set)) {
+			return null;
+		}
+		if (set instanceof SortedSet) {
+			return ((SortedSet<T>) set).first();
+		}
+
+		Iterator<T> it = set.iterator();
+		T first = null;
+		if (it.hasNext()) {
+			first = it.next();
+		}
+		return first;
+	}
+
+	/**
+	 * Retrieve the first element of the given List, accessing the zero index.
+	 * @param list the List to check (may be {@code null} or empty)
+	 * @return the first element, or {@code null} if none
+	 * @since 5.2.3
+	 */
+	@Nullable
+	public static <T> T firstElement(@Nullable List<T> list) {
+		if (isEmpty(list)) {
+			return null;
+		}
+		return list.get(0);
 	}
 
 	/**
@@ -553,7 +586,7 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

@@ -25,22 +25,22 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.MultiValueMap;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link MergedAnnotationCollectors}.
  *
  * @author Phillip Webb
  */
-public class MergedAnnotationCollectorsTests {
+class MergedAnnotationCollectorsTests {
 
 	@Test
-	public void toAnnotationSetCollectsLinkedHashSetWithSynthesizedAnnotations() {
+	void toAnnotationSetCollectsLinkedHashSetWithSynthesizedAnnotations() {
 		Set<TestAnnotation> set = stream().collect(
 				MergedAnnotationCollectors.toAnnotationSet());
 		assertThat(set).isInstanceOf(LinkedHashSet.class).flatExtracting(
@@ -49,7 +49,7 @@ public class MergedAnnotationCollectorsTests {
 	}
 
 	@Test
-	public void toAnnotationArrayCollectsAnnotationArrayWithSynthesizedAnnotations() {
+	void toAnnotationArrayCollectsAnnotationArrayWithSynthesizedAnnotations() {
 		Annotation[] array = stream().collect(
 				MergedAnnotationCollectors.toAnnotationArray());
 		assertThat(Arrays.stream(array).map(
@@ -59,7 +59,7 @@ public class MergedAnnotationCollectorsTests {
 	}
 
 	@Test
-	public void toSuppliedAnnotationArrayCollectsAnnotationArrayWithSynthesizedAnnotations() {
+	void toSuppliedAnnotationArrayCollectsAnnotationArrayWithSynthesizedAnnotations() {
 		TestAnnotation[] array = stream().collect(
 				MergedAnnotationCollectors.toAnnotationArray(TestAnnotation[]::new));
 		assertThat(Arrays.stream(array).map(TestAnnotation::value)).containsExactly("a",
@@ -68,7 +68,7 @@ public class MergedAnnotationCollectorsTests {
 	}
 
 	@Test
-	public void toMultiValueMapCollectsMultiValueMap() {
+	void toMultiValueMapCollectsMultiValueMap() {
 		MultiValueMap<String, Object> map = stream().map(
 				MergedAnnotation::filterDefaultValues).collect(
 						MergedAnnotationCollectors.toMultiValueMap(
@@ -79,7 +79,7 @@ public class MergedAnnotationCollectorsTests {
 	}
 
 	@Test
-	public void toFinishedMultiValueMapCollectsMultiValueMap() {
+	void toFinishedMultiValueMapCollectsMultiValueMap() {
 		MultiValueMap<String, Object> map = stream().collect(
 				MergedAnnotationCollectors.toMultiValueMap(result -> {
 					result.add("finished", true);

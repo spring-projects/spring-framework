@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheRemove;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -42,7 +42,7 @@ public class CacheRemoveOperationTests extends AbstractCacheOperationTests<Cache
 		CacheRemoveOperation operation = createSimpleOperation();
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L);
-		assertEquals(1, allParameters.length);
+		assertThat(allParameters.length).isEqualTo(1);
 		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 	}
 

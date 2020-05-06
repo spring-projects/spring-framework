@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,7 +71,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	/**
 	 * The default charset used by the converter.
 	 */
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	@Nullable
+	@Deprecated
+	public static final Charset DEFAULT_CHARSET = null;
 
 
 	protected ObjectMapper objectMapper;
@@ -86,7 +87,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
-		setDefaultCharset(DEFAULT_CHARSET);
 		DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
 		prettyPrinter.indentObjectsWith(new DefaultIndenter("  ", "\ndata:"));
 		this.ssePrettyPrinter = prettyPrinter;

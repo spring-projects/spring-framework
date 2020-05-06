@@ -81,6 +81,14 @@ class InvocableHelper {
 	}
 
 	/**
+	 * Return the configured resolvers.
+	 * @since 5.2.2
+	 */
+	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.argumentResolvers;
+	}
+
+	/**
 	 * Add the return value handlers to use for message handling and exception
 	 * handling methods.
 	 */
@@ -155,9 +163,10 @@ class InvocableHelper {
 			exceptionHandlerMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
 		}
 		else {
-			for (MessagingAdviceBean advice : this.exceptionHandlerAdviceCache.keySet()) {
+			for (Map.Entry<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
+				MessagingAdviceBean advice = entry.getKey();
 				if (advice.isApplicableToBeanType(beanType)) {
-					resolver = this.exceptionHandlerAdviceCache.get(advice);
+					resolver = entry.getValue();
 					method = resolver.resolveMethod(ex);
 					if (method != null) {
 						exceptionHandlerMethod = new InvocableHandlerMethod(advice.resolveBean(), method);

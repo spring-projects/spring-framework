@@ -3,12 +3,12 @@
 
 <beans>
 
-	<bean id="rod" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="rod" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="age"><value>31</value></property>
 	</bean>
 
-	<bean id="kerryX" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="kerryX" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
 		<property name="spouse"><ref bean="rod"/></property>

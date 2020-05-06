@@ -22,18 +22,14 @@ import java.time.Duration;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.reactive.result.view.ZeroDemandResponse;
@@ -41,11 +37,16 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
 import org.springframework.web.server.session.DefaultWebSessionManager;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class FreeMarkerViewTests {
 
@@ -56,17 +57,13 @@ public class FreeMarkerViewTests {
 	private final MockServerWebExchange exchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));
 
-	private GenericApplicationContext context;
+	private final GenericApplicationContext context = new GenericApplicationContext();
 
 	private Configuration freeMarkerConfig;
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		this.context = new GenericApplicationContext();
 		this.context.refresh();
 
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
@@ -79,22 +76,20 @@ public class FreeMarkerViewTests {
 
 	@Test
 	public void noFreeMarkerConfig() throws Exception {
-		this.exception.expect(ApplicationContextException.class);
-		this.exception.expectMessage("Must define a single FreeMarkerConfig bean");
-
 		FreeMarkerView view = new FreeMarkerView();
 		view.setApplicationContext(this.context);
 		view.setUrl("anythingButNull");
-		view.afterPropertiesSet();
+		assertThatExceptionOfType(ApplicationContextException.class).isThrownBy(
+				view::afterPropertiesSet)
+			.withMessageContaining("Must define a single FreeMarkerConfig bean");
 	}
 
 	@Test
 	public void noTemplateName() throws Exception {
-		this.exception.expect(IllegalArgumentException.class);
-		this.exception.expectMessage("Property 'url' is required");
-
 		FreeMarkerView freeMarkerView = new FreeMarkerView();
-		freeMarkerView.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				freeMarkerView::afterPropertiesSet)
+			.withMessageContaining("Property 'url' is required");
 	}
 
 	@Test
@@ -103,12 +98,13 @@ public class FreeMarkerViewTests {
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 
-		assertTrue(view.checkResourceExists(Locale.US));
+		assertThat(view.checkResourceExists(Locale.US)).isTrue();
 	}
 
 	@Test
 	public void render() {
 		FreeMarkerView view = new FreeMarkerView();
+		view.setApplicationContext(this.context);
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 
@@ -117,7 +113,7 @@ public class FreeMarkerViewTests {
 		view.render(model, null, this.exchange).block(Duration.ofMillis(5000));
 
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf)))
+				.consumeNextWith(buf -> assertThat(asString(buf)).isEqualTo("<html><body>hi FreeMarker</body></html>"))
 				.expectComplete()
 				.verify();
 	}
@@ -131,6 +127,7 @@ public class FreeMarkerViewTests {
 				new AcceptHeaderLocaleContextResolver());
 
 		FreeMarkerView view = new FreeMarkerView();
+		view.setApplicationContext(this.context);
 		view.setConfiguration(this.freeMarkerConfig);
 		view.setUrl("test.ftl");
 

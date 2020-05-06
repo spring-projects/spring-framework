@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -33,7 +33,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link OrderedMessageSender}.
@@ -51,7 +51,7 @@ public class OrderedMessageSenderTests {
 	private ThreadPoolTaskExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.executor = new ThreadPoolTaskExecutor();
 		this.executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
@@ -65,7 +65,7 @@ public class OrderedMessageSenderTests {
 
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.executor.shutdown();
 	}
@@ -112,7 +112,7 @@ public class OrderedMessageSenderTests {
 		}
 
 		latch.await(10, TimeUnit.SECONDS);
-		assertEquals("Done", result.get());
+		assertThat(result.get()).isEqualTo("Done");
 	}
 
 }

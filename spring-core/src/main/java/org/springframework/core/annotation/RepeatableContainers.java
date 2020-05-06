@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Repeatable;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -83,7 +82,7 @@ public abstract class RepeatableContainers {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		return Objects.equals(this.parent, ((RepeatableContainers) other).parent);
+		return ObjectUtils.nullSafeEquals(this.parent, ((RepeatableContainers) other).parent);
 	}
 
 	@Override
@@ -163,11 +162,8 @@ public abstract class RepeatableContainers {
 
 		private static Object computeRepeatedAnnotationsMethod(Class<? extends Annotation> annotationType) {
 			AttributeMethods methods = AttributeMethods.forAnnotationType(annotationType);
-			if (methods.isOnlyValueAttribute()) {
-				Method method = methods.get("value");
-				if (method == null) {
-					return NONE;
-				}
+			if (methods.hasOnlyValueAttribute()) {
+				Method method = methods.get(0);
 				Class<?> returnType = method.getReturnType();
 				if (returnType.isArray()) {
 					Class<?> componentType = returnType.getComponentType();
@@ -201,7 +197,7 @@ public abstract class RepeatableContainers {
 			if (container == null) {
 				container = deduceContainer(repeatable);
 			}
-			Method valueMethod = AttributeMethods.forAnnotationType(container).get("value");
+			Method valueMethod = AttributeMethods.forAnnotationType(container).get(MergedAnnotation.VALUE);
 			try {
 				if (valueMethod == null) {
 					throw new NoSuchMethodException("No value method found");

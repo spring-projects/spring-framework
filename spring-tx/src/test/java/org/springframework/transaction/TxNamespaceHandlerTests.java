@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@ package org.springframework.transaction;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Rob Harrop
@@ -45,7 +46,7 @@ public class TxNamespaceHandlerTests {
 	private Method setAgeMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge");
@@ -56,7 +57,7 @@ public class TxNamespaceHandlerTests {
 	@Test
 	public void isProxy() {
 		ITestBean bean = getTestBean();
-		assertTrue("testBean is not a proxy", AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).as("testBean is not a proxy").isTrue();
 	}
 
 	@Test
@@ -65,25 +66,21 @@ public class TxNamespaceHandlerTests {
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
 		// try with transactional
-		assertEquals("Should not have any started transactions", 0, ptm.begun);
+		assertThat(ptm.begun).as("Should not have any started transactions").isEqualTo(0);
 		testBean.getName();
-		assertTrue(ptm.lastDefinition.isReadOnly());
-		assertEquals("Should have 1 started transaction", 1, ptm.begun);
-		assertEquals("Should have 1 committed transaction", 1, ptm.commits);
+		assertThat(ptm.lastDefinition.isReadOnly()).isTrue();
+		assertThat(ptm.begun).as("Should have 1 started transaction").isEqualTo(1);
+		assertThat(ptm.commits).as("Should have 1 committed transaction").isEqualTo(1);
 
 		// try with non-transaction
 		testBean.haveBirthday();
-		assertEquals("Should not have started another transaction", 1, ptm.begun);
+		assertThat(ptm.begun).as("Should not have started another transaction").isEqualTo(1);
 
 		// try with exceptional
-		try {
-			testBean.exceptional(new IllegalArgumentException("foo"));
-			fail("Should NEVER get here");
-		}
-		catch (Throwable throwable) {
-			assertEquals("Should have another started transaction", 2, ptm.begun);
-			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
-		}
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				testBean.exceptional(new IllegalArgumentException("foo")));
+		assertThat(ptm.begun).as("Should have another started transaction").isEqualTo(2);
+		assertThat(ptm.rollbacks).as("Should have 1 rolled back transaction").isEqualTo(1);
 	}
 
 	@Test
@@ -91,10 +88,10 @@ public class TxNamespaceHandlerTests {
 		TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
 		TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
 		TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod,ITestBean.class);
-		assertTrue("should be configured to rollback on Exception",txAttr.rollbackOn(new Exception()));
+		assertThat(txAttr.rollbackOn(new Exception())).as("should be configured to rollback on Exception").isTrue();
 
 		txAttr = txAttrSource.getTransactionAttribute(setAgeMethod, ITestBean.class);
-		assertFalse("should not rollback on RuntimeException",txAttr.rollbackOn(new RuntimeException()));
+		assertThat(txAttr.rollbackOn(new RuntimeException())).as("should not rollback on RuntimeException").isFalse();
 	}
 
 	private ITestBean getTestBean() {

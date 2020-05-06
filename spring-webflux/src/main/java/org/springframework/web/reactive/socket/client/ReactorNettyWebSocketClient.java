@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,12 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(ReactorNettyWebSocketClient.class);
 
-	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
 
 	private final HttpClient httpClient;
+
+	private int maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
+
+	private boolean handlePing;
 
 
 	/**
@@ -64,6 +67,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		Assert.notNull(httpClient, "HttpClient is required");
 		this.httpClient = httpClient;
 	}
+
 
 	/**
 	 * Return the configured {@link HttpClient}.
@@ -95,6 +99,28 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 		return this.maxFramePayloadLength;
 	}
 
+	/**
+	 * Configure whether to let ping frames through to be handled by the
+	 * {@link WebSocketHandler} given to the execute method. By default, Reactor
+	 * Netty automatically replies with pong frames in response to pings. This is
+	 * useful in a proxy for allowing ping and pong frames through.
+	 * <p>By default this is set to {@code false} in which case ping frames are
+	 * handled automatically by Reactor Netty. If set to {@code true}, ping
+	 * frames will be passed through to the {@link WebSocketHandler}.
+	 * @param handlePing whether to let Ping frames through for handling
+	 * @since 5.2.4
+	 */
+	public void setHandlePing(boolean handlePing) {
+		this.handlePing = handlePing;
+	}
+
+	/**
+	 * Return the configured {@link #setHandlePing(boolean)}.
+	 * @since 5.2.4
+	 */
+	public boolean getHandlePing() {
+		return this.handlePing;
+	}
 
 	@Override
 	public Mono<Void> execute(URI url, WebSocketHandler handler) {
@@ -102,11 +128,12 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<Void> execute(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
 		String protocols = StringUtils.collectionToCommaDelimitedString(handler.getSubProtocols());
 		return getHttpClient()
 				.headers(nettyHeaders -> setNettyHeaders(requestHeaders, nettyHeaders))
-				.websocket(protocols, getMaxFramePayloadLength())
+				.websocket(protocols, getMaxFramePayloadLength(), this.handlePing)
 				.uri(url.toString())
 				.handle((inbound, outbound) -> {
 					HttpHeaders responseHeaders = toHttpHeaders(inbound);

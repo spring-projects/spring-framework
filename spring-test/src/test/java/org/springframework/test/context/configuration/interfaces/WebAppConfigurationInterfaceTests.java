@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,29 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@RunWith(SpringRunner.class)
-public class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
+@ExtendWith(SpringExtension.class)
+class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
 
 	@Autowired
 	WebApplicationContext wac;
 
 
 	@Test
-	public void wacLoaded() {
-		assertNotNull(wac);
+	void wacLoaded() {
+		assertThat(wac).isNotNull();
 	}
 
 }

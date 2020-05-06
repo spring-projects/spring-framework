@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebFlux
- * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
+ * &#064;ComponentScan
  * public class MyConfiguration {
  * }
  * </pre>
@@ -45,15 +45,23 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebFlux
- * &#064;ComponentScan(basePackageClasses = MyConfiguration.class)
+ * &#064;ComponentScan
  * public class MyConfiguration implements WebFluxConfigurer {
  *
- * 	   &#064;Override
- * 	   public void configureMessageWriters(List&lt;HttpMessageWriter&lt;?&gt&gt messageWriters) {
- *         messageWriters.add(new MyHttpMessageWriter());
- * 	   }
+ *     &#064;Autowired
+ *     private ObjectMapper objectMapper;
  *
- * 	   // ...
+ *     &#064;Override
+ *     public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+ *         configurer.defaultCodecs().jackson2JsonEncoder(
+ *             new Jackson2JsonEncoder(objectMapper)
+ *         );
+ *         configurer.defaultCodecs().jackson2JsonDecoder(
+ *             new Jackson2JsonDecoder(objectMapper)
+ *         );
+ *     }
+ *
+ *     // ...
  * }
  * </pre>
  *

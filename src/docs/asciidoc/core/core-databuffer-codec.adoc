@@ -140,8 +140,8 @@ An `Encoder` allocates data buffers that others must read (and release). So an `
 doesn't have much to do. However an `Encoder` must take care to release a data buffer if
 a serialization error occurs while populating the buffer with data. For example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	DataBuffer buffer = factory.allocateBuffer();
 	boolean release = true;
@@ -155,6 +155,21 @@ a serialization error occurs while populating the buffer with data. For example:
 		}
 	}
 	return buffer;
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val buffer = factory.allocateBuffer()
+	var release = true
+	try {
+		// serialize and populate buffer..
+		release = false
+	} finally {
+		if (release) {
+			DataBufferUtils.release(buffer)
+		}
+	}
+	return buffer
 ----
 
 The consumer of an `Encoder` is responsible for releasing the data buffers it receives.

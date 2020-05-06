@@ -19,23 +19,23 @@ package org.springframework.web.reactive.result.method;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.http.server.PathContainer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
@@ -54,7 +54,7 @@ public class HandlerMethodMappingTests {
 	private Method method2;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.mapping = new MyHandlerMethodMapping();
 		this.handler = new MyHandler();
@@ -63,10 +63,11 @@ public class HandlerMethodMappingTests {
 	}
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void registerDuplicates() {
 		this.mapping.registerMapping("foo", this.handler, this.method1);
-		this.mapping.registerMapping("foo", this.handler, this.method2);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.registerMapping("foo", this.handler, this.method2));
 	}
 
 	@Test
@@ -76,7 +77,7 @@ public class HandlerMethodMappingTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(key));
 		Mono<Object> result = this.mapping.getHandler(exchange);
 
-		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
+		assertThat(((HandlerMethod) result.block()).getMethod()).isEqualTo(this.method1);
 	}
 
 	@Test
@@ -86,7 +87,7 @@ public class HandlerMethodMappingTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 		Mono<Object> result = this.mapping.getHandler(exchange);
-		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
+		assertThat(((HandlerMethod) result.block()).getMethod()).isEqualTo(this.method1);
 	}
 
 	@Test
@@ -106,8 +107,8 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(),
-				Matchers.contains(key1, key2));
+		assertThat(this.mapping.getMappingRegistry().getMappings())
+				.containsKeys(key1, key2);
 	}
 
 	@Test
@@ -119,7 +120,8 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.contains(key1, key2));
+		assertThat(this.mapping.getMappingRegistry().getMappings())
+				.containsKeys(key1, key2);
 	}
 
 	@Test
@@ -128,13 +130,13 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
-		assertNotNull(result.block());
+		assertThat(result.block()).isNotNull();
 
 		this.mapping.unregisterMapping(key);
 		result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
-		assertNull(result.block());
-		assertThat(this.mapping.getMappingRegistry().getMappings().keySet(), Matchers.not(Matchers.contains(key)));
+		assertThat(result.block()).isNull();
+		assertThat(this.mapping.getMappingRegistry().getMappings().keySet()).doesNotContain(key);
 	}
 
 

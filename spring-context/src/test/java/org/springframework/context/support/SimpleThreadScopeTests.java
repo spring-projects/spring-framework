@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.springframework.context.support;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -40,10 +40,10 @@ public class SimpleThreadScopeTests {
 	public void getFromScope() throws Exception {
 		String name = "threadScopedObject";
 		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
-		assertNotNull(bean);
-		assertSame(bean, this.applicationContext.getBean(name));
+		assertThat(bean).isNotNull();
+		assertThat(this.applicationContext.getBean(name)).isSameAs(bean);
 		TestBean bean2 = this.applicationContext.getBean(name, TestBean.class);
-		assertSame(bean, bean2);
+		assertThat(bean2).isSameAs(bean);
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SimpleThreadScopeTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> (beans[0] != null) && (beans[1] != null));
-		assertNotSame(beans[0], beans[1]);
+		assertThat(beans[1]).isNotSameAs(beans[0]);
 	}
 
 }

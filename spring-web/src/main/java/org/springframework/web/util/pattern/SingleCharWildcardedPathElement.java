@@ -126,6 +126,7 @@ class SingleCharWildcardedPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "SingleCharWildcarded(" + String.valueOf(this.text) + ")";
 	}

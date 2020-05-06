@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -390,7 +391,7 @@ public class CallMetaDataContext {
 					if (param == null) {
 						throw new InvalidDataAccessApiUsageException(
 								"Unable to locate declared parameter for function return value - " +
-								" add a SqlOutParameter with name '" + getFunctionReturnName() + "'");
+								" add an SqlOutParameter with name '" + getFunctionReturnName() + "'");
 					}
 					else if (paramName != null) {
 						setFunctionReturnName(paramName);

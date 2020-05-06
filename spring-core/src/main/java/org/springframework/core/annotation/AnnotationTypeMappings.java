@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,22 @@ final class AnnotationTypeMappings {
 
 	private static final IntrospectionFailureLogger failureLogger = IntrospectionFailureLogger.DEBUG;
 
-	private static final Map<AnnotationFilter, Cache> cache = new ConcurrentReferenceHashMap<>();
+	private static final Map<AnnotationFilter, Cache> standardRepeatablesCache = new ConcurrentReferenceHashMap<>();
 
+	private static final Map<AnnotationFilter, Cache> noRepeatablesCache = new ConcurrentReferenceHashMap<>();
+
+
+	private final RepeatableContainers repeatableContainers;
 
 	private final AnnotationFilter filter;
 
 	private final List<AnnotationTypeMapping> mappings;
 
 
-	private AnnotationTypeMappings(AnnotationFilter filter, Class<? extends Annotation> annotationType) {
+	private AnnotationTypeMappings(RepeatableContainers repeatableContainers,
+			AnnotationFilter filter, Class<? extends Annotation> annotationType) {
+
+		this.repeatableContainers = repeatableContainers;
 		this.filter = filter;
 		this.mappings = new ArrayList<>();
 		addAllMappings(annotationType);
@@ -73,64 +80,64 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent) {
+	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source) {
 		Annotation[] metaAnnotations =
-				AnnotationsScanner.getDeclaredAnnotations(parent.getAnnotationType(), false);
+				AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
-			if (!isMappable(parent, metaAnnotation)) {
+			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
-			Annotation[] repeatedAnnotations = RepeatableContainers.standardRepeatables()
+			Annotation[] repeatedAnnotations = this.repeatableContainers
 					.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
-					if (!isMappable(parent, metaAnnotation)) {
+					if (!isMappable(source, metaAnnotation)) {
 						continue;
 					}
-					addIfPossible(queue, parent, repeatedAnnotation);
+					addIfPossible(queue, source, repeatedAnnotation);
 				}
 			}
 			else {
-				addIfPossible(queue, parent, metaAnnotation);
+				addIfPossible(queue, source, metaAnnotation);
 			}
 		}
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping parent, Annotation ann) {
-		addIfPossible(queue, parent, ann.annotationType(), ann);
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
+			AnnotationTypeMapping source, Annotation ann) {
+
+		addIfPossible(queue, source, ann.annotationType(), ann);
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping parent,
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping source,
 			Class<? extends Annotation> annotationType, @Nullable Annotation ann) {
 
 		try {
-			queue.addLast(new AnnotationTypeMapping(parent, annotationType, ann));
+			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann));
 		}
 		catch (Exception ex) {
-			if (ex instanceof AnnotationConfigurationException) {
-				throw (AnnotationConfigurationException) ex;
-			}
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			if (failureLogger.isEnabled()) {
 				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
-						(parent != null ? parent.getAnnotationType() : null), ex);
+						(source != null ? source.getAnnotationType() : null), ex);
 			}
 		}
 	}
 
-	private boolean isMappable(AnnotationTypeMapping parent, @Nullable Annotation metaAnnotation) {
+	private boolean isMappable(AnnotationTypeMapping source, @Nullable Annotation metaAnnotation) {
 		return (metaAnnotation != null && !this.filter.matches(metaAnnotation) &&
-				!AnnotationFilter.PLAIN.matches(parent.getAnnotationType()) &&
-				!isAlreadyMapped(parent, metaAnnotation));
+				!AnnotationFilter.PLAIN.matches(source.getAnnotationType()) &&
+				!isAlreadyMapped(source, metaAnnotation));
 	}
 
-	private boolean isAlreadyMapped(AnnotationTypeMapping parent, Annotation metaAnnotation) {
+	private boolean isAlreadyMapped(AnnotationTypeMapping source, Annotation metaAnnotation) {
 		Class<? extends Annotation> annotationType = metaAnnotation.annotationType();
-		AnnotationTypeMapping mapping = parent;
+		AnnotationTypeMapping mapping = source;
 		while (mapping != null) {
 			if (mapping.getAnnotationType() == annotationType) {
 				return true;
 			}
-			mapping = mapping.getParent();
+			mapping = mapping.getSource();
 		}
 		return false;
 	}
@@ -176,11 +183,37 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(
 			Class<? extends Annotation> annotationType, AnnotationFilter annotationFilter) {
 
-		return cache.computeIfAbsent(annotationFilter, Cache::new).get(annotationType);
+		return forAnnotationType(annotationType,
+				RepeatableContainers.standardRepeatables(), annotationFilter);
+	}
+
+	/**
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
+	 * @param annotationType the source annotation type
+	 * @param annotationFilter the annotation filter used to limit which
+	 * annotations are considered
+	 * @return type mappings for the annotation type
+	 */
+	static AnnotationTypeMappings forAnnotationType(
+			Class<? extends Annotation> annotationType,
+			RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
+
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).get(annotationType);
+		}
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter,
+				annotationType);
 	}
 
 	static void clearCache() {
-		cache.clear();
+		standardRepeatablesCache.clear();
+		noRepeatablesCache.clear();
 	}
 
 
@@ -188,6 +221,8 @@ final class AnnotationTypeMappings {
 	 * Cache created per {@link AnnotationFilter}.
 	 */
 	private static class Cache {
+
+		private final RepeatableContainers repeatableContainers;
 
 		private final AnnotationFilter filter;
 
@@ -197,22 +232,23 @@ final class AnnotationTypeMappings {
 		 * Create a cache instance with the specified filter.
 		 * @param filter the annotation filter
 		 */
-		Cache(AnnotationFilter filter) {
+		Cache(RepeatableContainers repeatableContainers, AnnotationFilter filter) {
+			this.repeatableContainers = repeatableContainers;
 			this.filter = filter;
 			this.mappings = new ConcurrentReferenceHashMap<>();
 		}
 
 		/**
-		 * Return or create {@link AnnotationTypeMappings} for the specified annotation type.
+		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
-		 * @return a new or existing {@link AnnotationTypeMapping} instance
+		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
 		AnnotationTypeMappings get(Class<? extends Annotation> annotationType) {
 			return this.mappings.computeIfAbsent(annotationType, this::createMappings);
 		}
 
 		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
-			return new AnnotationTypeMappings(this.filter, annotationType);
+			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType);
 		}
 	}
 

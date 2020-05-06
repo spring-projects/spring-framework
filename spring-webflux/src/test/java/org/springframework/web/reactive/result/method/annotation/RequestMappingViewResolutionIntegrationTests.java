@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Optional;
 
-import org.junit.Test;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -42,15 +40,16 @@ import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code @RequestMapping} integration tests with view resolution scenarios.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -61,24 +60,30 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	}
 
 
-	@Test
-	public void html() throws Exception {
+	@ParameterizedHttpServerTest
+	void html(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "<html><body>Hello: Jason!</body></html>";
-		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
+		assertThat(performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void etagCheckWithNotModifiedResponse() throws Exception {
+	@ParameterizedHttpServerTest
+	void etagCheckWithNotModifiedResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		URI uri = new URI("http://localhost:" + this.port + "/html");
 		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
 		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
 
-		assertEquals(HttpStatus.NOT_MODIFIED, response.getStatusCode());
-		assertNull(response.getBody());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+		assertThat(response.getBody()).isNull();
 	}
 
-	@Test  // SPR-15291
-	public void redirect() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-15291
+	void redirect(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
 			@Override
 			protected void prepareConnection(HttpURLConnection conn, String method) throws IOException {
@@ -91,8 +96,8 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
 		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);
 
-		assertEquals(HttpStatus.SEE_OTHER, response.getStatusCode());
-		assertEquals("/", response.getHeaders().getLocation().toString());
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.SEE_OTHER);
+		assertThat(response.getHeaders().getLocation().toString()).isEqualTo("/");
 	}
 
 

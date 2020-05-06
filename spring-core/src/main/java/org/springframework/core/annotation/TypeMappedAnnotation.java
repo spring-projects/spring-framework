@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -61,13 +63,33 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.2
  * @param <A> the annotation type
  * @see TypeMappedAnnotations
  */
 final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
 
+	private static final Map<Class<?>, Object> EMPTY_ARRAYS;
+	static {
+		Map<Class<?>, Object> emptyArrays = new HashMap<>();
+		emptyArrays.put(boolean.class, new boolean[0]);
+		emptyArrays.put(byte.class, new byte[0]);
+		emptyArrays.put(char.class, new char[0]);
+		emptyArrays.put(double.class, new double[0]);
+		emptyArrays.put(float.class, new float[0]);
+		emptyArrays.put(int.class, new int[0]);
+		emptyArrays.put(long.class, new long[0]);
+		emptyArrays.put(short.class, new short[0]);
+		emptyArrays.put(String.class, new String[0]);
+		EMPTY_ARRAYS = Collections.unmodifiableMap(emptyArrays);
+	}
+
+
 	private final AnnotationTypeMapping mapping;
+
+	@Nullable
+	private final ClassLoader classLoader;
 
 	@Nullable
 	private final Object source;
@@ -75,7 +97,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Nullable
 	private final Object rootAttributes;
 
-	private final BiFunction<Method, Object, Object> valueExtractor;
+	private final ValueExtractor valueExtractor;
 
 	private final int aggregateIndex;
 
@@ -88,39 +110,38 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private final int[] resolvedMirrors;
 
-	@Nullable
-	private String string;
 
-
-	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable Object source,
-			@Nullable Object rootAttributes, BiFunction<Method, Object, Object> valueExtractor,
+	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
+			@Nullable Object source, @Nullable Object rootAttributes, ValueExtractor valueExtractor,
 			int aggregateIndex) {
 
-		this(mapping, source, rootAttributes, valueExtractor, aggregateIndex, null);
+		this(mapping, classLoader, source, rootAttributes, valueExtractor, aggregateIndex, null);
 	}
 
-	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable Object source,
-			@Nullable Object rootAttributes, BiFunction<Method, Object, Object> valueExtractor,
+	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
+			@Nullable Object source, @Nullable Object rootAttributes, ValueExtractor valueExtractor,
 			int aggregateIndex, @Nullable int[] resolvedRootMirrors) {
 
+		this.mapping = mapping;
+		this.classLoader = classLoader;
 		this.source = source;
 		this.rootAttributes = rootAttributes;
 		this.valueExtractor = valueExtractor;
-		this.mapping = mapping;
 		this.aggregateIndex = aggregateIndex;
 		this.useMergedValues = true;
 		this.attributeFilter = null;
 		this.resolvedRootMirrors = (resolvedRootMirrors != null ? resolvedRootMirrors :
 				mapping.getRoot().getMirrorSets().resolve(source, rootAttributes, this.valueExtractor));
-		this.resolvedMirrors = (getDepth() == 0 ? this.resolvedRootMirrors :
+		this.resolvedMirrors = (getDistance() == 0 ? this.resolvedRootMirrors :
 				mapping.getMirrorSets().resolve(source, this, this::getValueForMirrorResolution));
 	}
 
-	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable Object source,
-			@Nullable Object rootAnnotation, BiFunction<Method, Object, Object> valueExtractor,
+	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
+			@Nullable Object source, @Nullable Object rootAnnotation, ValueExtractor valueExtractor,
 			int aggregateIndex, boolean useMergedValues, @Nullable Predicate<String> attributeFilter,
 			int[] resolvedRootMirrors, int[] resolvedMirrors) {
 
+		this.classLoader = classLoader;
 		this.source = source;
 		this.rootAttributes = rootAnnotation;
 		this.valueExtractor = valueExtractor;
@@ -140,13 +161,18 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
+	public List<Class<? extends Annotation>> getMetaTypes() {
+		return this.mapping.getMetaTypes();
+	}
+
+	@Override
 	public boolean isPresent() {
 		return true;
 	}
 
 	@Override
-	public int getDepth() {
-		return this.mapping.getDepth();
+	public int getDistance() {
+		return this.mapping.getDistance();
 	}
 
 	@Override
@@ -162,13 +188,23 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	@Nullable
-	public MergedAnnotation<?> getParent() {
-		AnnotationTypeMapping parentMapping = this.mapping.getParent();
-		if (parentMapping == null) {
+	public MergedAnnotation<?> getMetaSource() {
+		AnnotationTypeMapping metaSourceMapping = this.mapping.getSource();
+		if (metaSourceMapping == null) {
 			return null;
 		}
-		return new TypeMappedAnnotation<>(parentMapping, this.source, this.rootAttributes,
-				this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
+		return new TypeMappedAnnotation<>(metaSourceMapping, this.classLoader, this.source,
+				this.rootAttributes, this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
+	}
+
+	@Override
+	public MergedAnnotation<?> getRoot() {
+		if (getDistance() == 0) {
+			return this;
+		}
+		AnnotationTypeMapping rootMapping = this.mapping.getRoot();
+		return new TypeMappedAnnotation<>(rootMapping, this.classLoader, this.source,
+				this.rootAttributes, this.valueExtractor, this.aggregateIndex, this.resolvedRootMirrors);
 	}
 
 	@Override
@@ -188,7 +224,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		Assert.notNull(type, "Type must not be null");
 		Assert.isAssignable(type, attribute.getReturnType(),
 				() -> "Attribute " + attributeName + " type mismatch:");
-		return (MergedAnnotation<T>) getRequiredValue(attributeIndex);
+		return (MergedAnnotation<T>) getRequiredValue(attributeIndex, attributeName);
 	}
 
 	@Override
@@ -202,7 +238,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		Assert.notNull(type, "Type must not be null");
 		Assert.notNull(componentType, () -> "Attribute " + attributeName + " is not an array");
 		Assert.isAssignable(type, componentType, () -> "Attribute " + attributeName + " component type mismatch:");
-		return (MergedAnnotation<T>[]) getRequiredValue(attributeIndex);
+		return (MergedAnnotation<T>[]) getRequiredValue(attributeIndex, attributeName);
 	}
 
 	@Override
@@ -220,14 +256,14 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		if (this.attributeFilter != null) {
 			predicate = this.attributeFilter.and(predicate);
 		}
-		return new TypeMappedAnnotation<>(this.mapping, this.source, this.rootAttributes,
+		return new TypeMappedAnnotation<>(this.mapping, this.classLoader, this.source, this.rootAttributes,
 				this.valueExtractor, this.aggregateIndex, this.useMergedValues, predicate,
 				this.resolvedRootMirrors, this.resolvedMirrors);
 	}
 
 	@Override
 	public MergedAnnotation<A> withNonMergedAttributes() {
-		return new TypeMappedAnnotation<>(this.mapping, this.source, this.rootAttributes,
+		return new TypeMappedAnnotation<>(this.mapping, this.classLoader, this.source, this.rootAttributes,
 				this.valueExtractor, this.aggregateIndex, false, this.attributeFilter,
 				this.resolvedRootMirrors, this.resolvedMirrors);
 	}
@@ -291,62 +327,34 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected A createSynthesized() {
+		if (getType().isInstance(this.rootAttributes) && !isSynthesizable()) {
+			return (A) this.rootAttributes;
+		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
 	}
 
+	private boolean isSynthesizable() {
+		// Already synthesized?
+		if (this.rootAttributes instanceof SynthesizedAnnotation) {
+			return false;
+		}
+		return this.mapping.isSynthesizable();
+	}
+
 	@Override
-	public String toString() {
-		String string = this.string;
-		if (string == null) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("@");
-			builder.append(getType().getName());
-			builder.append("(");
-			for (int i = 0; i < this.mapping.getAttributes().size(); i++) {
-				Method attribute = this.mapping.getAttributes().get(i);
-				builder.append(i == 0 ? "" : ", ");
-				builder.append(attribute.getName());
-				builder.append("=");
-				builder.append(toString(getValue(i, Object.class)));
-			}
-			builder.append(")");
-			string = builder.toString();
-			this.string = string;
-		}
-		return string;
-	}
-
-	private Object toString(@Nullable Object value) {
-		if (value == null) {
-			return "";
-		}
-		if (value instanceof Class) {
-			return ((Class<?>) value).getName();
-		}
-		if (value.getClass().isArray()) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("[");
-			for (int i = 0; i < Array.getLength(value); i++) {
-				builder.append(i == 0 ? "" : ", ");
-				builder.append(toString(Array.get(value, i)));
-			}
-			builder.append("]");
-			return builder.toString();
-		}
-		return String.valueOf(value);
-	}
-
 	@Nullable
 	protected <T> T getAttributeValue(String attributeName, Class<T> type) {
 		int attributeIndex = getAttributeIndex(attributeName, false);
 		return (attributeIndex != -1 ? getValue(attributeIndex, type) : null);
 	}
 
-	private final Object getRequiredValue(int attributeIndex) {
+	private Object getRequiredValue(int attributeIndex, String attributeName) {
 		Object value = getValue(attributeIndex, Object.class);
 		if (value == null) {
-			throw new NoSuchElementException("No element at attribute index " + attributeIndex);
+			throw new NoSuchElementException("No element at attribute index "
+					+ attributeIndex + " for name " + attributeName);
 		}
 		return value;
 	}
@@ -375,29 +383,31 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 		}
 		if (!forMirrorResolution) {
-			attributeIndex = (mapping.getDepth() != 0 ?
-					this.resolvedMirrors :
-					this.resolvedRootMirrors)[attributeIndex];
+			attributeIndex =
+					(mapping.getDistance() != 0 ? this.resolvedMirrors : this.resolvedRootMirrors)[attributeIndex];
 		}
 		if (attributeIndex == -1) {
 			return null;
 		}
-		if (mapping.getDepth() == 0) {
+		if (mapping.getDistance() == 0) {
 			Method attribute = mapping.getAttributes().get(attributeIndex);
-			return this.valueExtractor.apply(attribute, this.rootAttributes);
+			Object result = this.valueExtractor.extract(attribute, this.rootAttributes);
+			return (result != null ? result : attribute.getDefaultValue());
 		}
 		return getValueFromMetaAnnotation(attributeIndex, forMirrorResolution);
 	}
 
 	@Nullable
-	private Object getValueFromMetaAnnotation(int attributeIndex,
-			boolean forMirrorResolution) {
-
-		if (this.useMergedValues && !forMirrorResolution) {
-			return this.mapping.getMappedAnnotationValue(attributeIndex);
+	private Object getValueFromMetaAnnotation(int attributeIndex, boolean forMirrorResolution) {
+		Object value = null;
+		if (this.useMergedValues || forMirrorResolution) {
+			value = this.mapping.getMappedAnnotationValue(attributeIndex, forMirrorResolution);
 		}
-		Method attribute = this.mapping.getAttributes().get(attributeIndex);
-		return ReflectionUtils.invokeMethod(attribute, this.mapping.getAnnotation());
+		if (value == null) {
+			Method attribute = this.mapping.getAttributes().get(attributeIndex);
+			value = ReflectionUtils.invokeMethod(attribute, this.mapping.getAnnotation());
+		}
+		return value;
 	}
 
 	@Nullable
@@ -414,19 +424,28 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return null;
 		}
 		value = adaptForAttribute(attribute, value);
-		if (type == Object.class) {
-			type = (Class<T>) getDefaultAdaptType(attribute);
-		}
-		else if (value instanceof Class && type == String.class) {
+		type = getAdaptType(attribute, type);
+		if (value instanceof Class && type == String.class) {
 			value = ((Class<?>) value).getName();
 		}
+		else if (value instanceof String && type == Class.class) {
+			value = ClassUtils.resolveClassName((String) value, getClassLoader());
+		}
 		else if (value instanceof Class[] && type == String[].class) {
-			Class<?>[] classes = (Class[]) value;
+			Class<?>[] classes = (Class<?>[]) value;
 			String[] names = new String[classes.length];
 			for (int i = 0; i < classes.length; i++) {
 				names[i] = classes[i].getName();
 			}
 			value = names;
+		}
+		else if (value instanceof String[] && type == Class[].class) {
+			String[] names = (String[]) value;
+			Class<?>[] classes = new Class<?>[names.length];
+			for (int i = 0; i < names.length; i++) {
+				classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
+			}
+			value = classes;
 		}
 		else if (value instanceof MergedAnnotation && type.isAnnotation()) {
 			MergedAnnotation<?> annotation = (MergedAnnotation<?>) value;
@@ -456,10 +475,9 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return adaptForAttribute(attribute, array);
 		}
 		if (attributeType.isAnnotation()) {
-			return adaptToMergedAnnotation(value,(Class<? extends Annotation>) attributeType);
+			return adaptToMergedAnnotation(value, (Class<? extends Annotation>) attributeType);
 		}
-		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation() &&
-				value.getClass().isArray()) {
+		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation()) {
 			MergedAnnotation<?>[] result = new MergedAnnotation<?>[Array.getLength(value)];
 			for (int i = 0; i < result.length; i++) {
 				result[i] = adaptToMergedAnnotation(Array.get(value, i),
@@ -468,8 +486,13 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			return result;
 		}
 		if ((attributeType == Class.class && value instanceof String) ||
-				(attributeType == Class[].class && value instanceof String[])) {
+				(attributeType == Class[].class && value instanceof String[]) ||
+				(attributeType == String.class && value instanceof Class) ||
+				(attributeType == String[].class && value instanceof Class[])) {
 			return value;
+		}
+		if (attributeType.isArray() && isEmptyObjectArray(value)) {
+			return emptyArray(attributeType.getComponentType());
 		}
 		if (!attributeType.isInstance(value)) {
 			throw new IllegalStateException("Attribute '" + attribute.getName() +
@@ -480,12 +503,28 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return value;
 	}
 
-	private MergedAnnotation<?> adaptToMergedAnnotation(Object value, Class<? extends Annotation> annotationType) {
-		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
-		return new TypeMappedAnnotation<>(mapping, this.source, value, getValueExtractor(value), this.aggregateIndex);
+	private boolean isEmptyObjectArray(Object value) {
+		return (value instanceof Object[] && ((Object[]) value).length == 0);
 	}
 
-	private BiFunction<Method, Object, Object> getValueExtractor(Object value) {
+	private Object emptyArray(Class<?> componentType) {
+		Object result = EMPTY_ARRAYS.get(componentType);
+		if (result == null) {
+			result = Array.newInstance(componentType, 0);
+		}
+		return result;
+	}
+
+	private MergedAnnotation<?> adaptToMergedAnnotation(Object value, Class<? extends Annotation> annotationType) {
+		if (value instanceof MergedAnnotation) {
+			return (MergedAnnotation<?>) value;
+		}
+		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+		return new TypeMappedAnnotation<>(
+				mapping, null, this.source, value, getValueExtractor(value), this.aggregateIndex);
+	}
+
+	private ValueExtractor getValueExtractor(Object value) {
 		if (value instanceof Annotation) {
 			return ReflectionUtils::invokeMethod;
 		}
@@ -495,21 +534,24 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return this.valueExtractor;
 	}
 
-	private Class<?> getDefaultAdaptType(Method attribute) {
+	@SuppressWarnings("unchecked")
+	private <T> Class<T> getAdaptType(Method attribute, Class<T> type) {
+		if (type != Object.class) {
+			return type;
+		}
 		Class<?> attributeType = attribute.getReturnType();
 		if (attributeType.isAnnotation()) {
-			return MergedAnnotation.class;
+			return (Class<T>) MergedAnnotation.class;
 		}
 		if (attributeType.isArray() && attributeType.getComponentType().isAnnotation()) {
-			return MergedAnnotation[].class;
+			return (Class<T>) MergedAnnotation[].class;
 		}
-		return ClassUtils.resolvePrimitiveIfNecessary(attributeType);
+		return (Class<T>) ClassUtils.resolvePrimitiveIfNecessary(attributeType);
 	}
 
 	private int getAttributeIndex(String attributeName, boolean required) {
 		Assert.hasText(attributeName, "Attribute name must not be null");
-		int attributeIndex = (isFiltered(attributeName) ? -1 :
-				this.mapping.getAttributes().indexOf(attributeName));
+		int attributeIndex = (isFiltered(attributeName) ? -1 : this.mapping.getAttributes().indexOf(attributeName));
 		if (attributeIndex == -1 && required) {
 			throw new NoSuchElementException("No attribute named '" + attributeName +
 					"' present in merged annotation " + getType().getName());
@@ -524,20 +566,52 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		return false;
 	}
 
+	@Nullable
+	private ClassLoader getClassLoader() {
+		if (this.classLoader != null) {
+			return this.classLoader;
+		}
+		if (this.source != null) {
+			if (this.source instanceof Class) {
+				return ((Class<?>) source).getClassLoader();
+			}
+			if (this.source instanceof Member) {
+				((Member) this.source).getDeclaringClass().getClassLoader();
+			}
+		}
+		return null;
+	}
+
 
 	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source, A annotation) {
 		Assert.notNull(annotation, "Annotation must not be null");
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotation.annotationType());
-		return new TypeMappedAnnotation<>(mappings.get(0), source, annotation, ReflectionUtils::invokeMethod, 0);
+		return new TypeMappedAnnotation<>(mappings.get(0), null, source, annotation, ReflectionUtils::invokeMethod, 0);
 	}
 
-	static <A extends Annotation> MergedAnnotation<A> from(@Nullable Object source,
+	static <A extends Annotation> MergedAnnotation<A> of(
+			@Nullable ClassLoader classLoader, @Nullable Object source,
 			Class<A> annotationType, @Nullable Map<String, ?> attributes) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotationType);
 		return new TypeMappedAnnotation<>(
-				mappings.get(0), source, attributes, TypeMappedAnnotation::extractFromMap, 0);
+				mappings.get(0), classLoader, source, attributes, TypeMappedAnnotation::extractFromMap, 0);
+	}
+
+	@Nullable
+	static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
+			AnnotationTypeMapping mapping, MergedAnnotation<?> annotation, IntrospectionFailureLogger logger) {
+
+		if (annotation instanceof TypeMappedAnnotation) {
+			TypeMappedAnnotation<?> typeMappedAnnotation = (TypeMappedAnnotation<?>) annotation;
+			return createIfPossible(mapping, typeMappedAnnotation.source,
+					typeMappedAnnotation.rootAttributes,
+					typeMappedAnnotation.valueExtractor,
+					typeMappedAnnotation.aggregateIndex, logger);
+		}
+		return createIfPossible(mapping, annotation.getSource(), annotation.synthesize(),
+				annotation.getAggregateIndex(), logger);
 	}
 
 	@Nullable
@@ -545,17 +619,24 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			AnnotationTypeMapping mapping, @Nullable Object source, Annotation annotation,
 			int aggregateIndex, IntrospectionFailureLogger logger) {
 
+		return createIfPossible(mapping, source, annotation,
+				ReflectionUtils::invokeMethod, aggregateIndex, logger);
+	}
+
+	@Nullable
+	private static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
+			AnnotationTypeMapping mapping, @Nullable Object source, @Nullable Object rootAttribute,
+			ValueExtractor valueExtractor, int aggregateIndex, IntrospectionFailureLogger logger) {
+
 		try {
-			return new TypeMappedAnnotation<>(mapping, source, annotation,
-					ReflectionUtils::invokeMethod, aggregateIndex);
+			return new TypeMappedAnnotation<>(mapping, null, source, rootAttribute,
+					valueExtractor, aggregateIndex);
 		}
 		catch (Exception ex) {
-			if (ex instanceof AnnotationConfigurationException) {
-				throw (AnnotationConfigurationException) ex;
-			}
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			if (logger.isEnabled()) {
 				String type = mapping.getAnnotationType().getName();
-				String item = (mapping.getDepth() == 0 ? "annotation " + type :
+				String item = (mapping.getDistance() == 0 ? "annotation " + type :
 						"meta-annotation " + type + " from " + mapping.getRoot().getAnnotationType().getName());
 				logger.log("Failed to introspect " + item, source, ex);
 			}
@@ -565,7 +646,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static Object extractFromMap(Method attribute, @Nullable Object map) {
+	static Object extractFromMap(Method attribute, @Nullable Object map) {
 		return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
 	}
 

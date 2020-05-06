@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -155,7 +156,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 		Callable<WebSocketSession> connectTask = () -> {
 			Future<Session> future = this.client.connect(listener, uri, request);
-			future.get();
+			future.get(this.client.getConnectTimeout() + 2000, TimeUnit.MILLISECONDS);
 			return wsSession;
 		};
 

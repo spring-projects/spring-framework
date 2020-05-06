@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
-		Collections.sort(this.expressions);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 		this.contentTypeResolver = resolver != null ? resolver : DEFAULT_CONTENT_TYPE_RESOLVER;
 	}
 
@@ -188,8 +190,11 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (isEmpty() || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
 			return EMPTY_CONDITION;
+		}
+		if (isEmpty()) {
+			return this;
 		}
 		List<ProduceMediaTypeExpression> result = getMatchingExpressions(exchange);
 		if (!CollectionUtils.isEmpty(result)) {
@@ -314,6 +319,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
 		return (this.expressions.isEmpty() ? this.mediaTypeAllList  : this.expressions);
+	}
+
+
+	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 * @param exchange the current exchange
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(MEDIA_TYPES_ATTRIBUTE);
 	}
 
 

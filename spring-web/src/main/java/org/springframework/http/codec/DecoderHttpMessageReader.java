@@ -69,8 +69,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	private static void initLogger(Decoder<?> decoder) {
 		if (decoder instanceof AbstractDecoder &&
 				decoder.getClass().getName().startsWith("org.springframework.core.codec")) {
-			Log logger = HttpLogging.forLog(((AbstractDecoder) decoder).getLogger());
-			((AbstractDecoder) decoder).setLogger(logger);
+			Log logger = HttpLogging.forLog(((AbstractDecoder<?>) decoder).getLogger());
+			((AbstractDecoder<?>) decoder).setLogger(logger);
 		}
 	}
 

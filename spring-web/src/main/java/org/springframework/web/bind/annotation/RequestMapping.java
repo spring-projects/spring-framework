@@ -70,7 +70,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @see org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping

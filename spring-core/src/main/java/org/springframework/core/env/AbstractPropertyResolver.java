@@ -16,6 +16,7 @@
 
 package org.springframework.core.env;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -136,9 +137,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	@Override
 	public void setRequiredProperties(String... requiredProperties) {
-		for (String key : requiredProperties) {
-			this.requiredProperties.add(key);
-		}
+		Collections.addAll(this.requiredProperties, requiredProperties);
 	}
 
 	@Override

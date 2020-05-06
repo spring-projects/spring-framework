@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -31,9 +32,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.*;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
 
 /**
  * Integration tests which verify that {@code @BeforeEach} and {@code @AfterEach} methods
@@ -54,6 +55,7 @@ class ParallelExecutionSpringExtensionTests {
 		launcher.registerTestExecutionListeners(listener);
 
 		LauncherDiscoveryRequest request = request()//
+				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
 				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
 				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
 				.selectors(selectClass(TestCase.class))//
@@ -61,11 +63,12 @@ class ParallelExecutionSpringExtensionTests {
 
 		launcher.execute(request);
 
-		assertEquals(NUM_TESTS, listener.getSummary().getTestsSucceededCount(),
-				"number of tests executed successfully");
+		assertThat(listener.getSummary().getTestsSucceededCount()).as(
+			"number of tests executed successfully").isEqualTo(NUM_TESTS);
 	}
 
 	@SpringJUnitConfig
+	@Disabled
 	static class TestCase {
 
 		@BeforeEach

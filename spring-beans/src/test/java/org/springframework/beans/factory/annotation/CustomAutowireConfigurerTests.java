@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -24,8 +24,8 @@ import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Unit tests for {@link CustomAutowireConfigurer}.
@@ -47,7 +47,7 @@ public class CustomAutowireConfigurerTests {
 		bf.setAutowireCandidateResolver(customResolver);
 		cac.postProcessBeanFactory(bf);
 		TestBean testBean = (TestBean) bf.getBean("testBean");
-		assertEquals("#1!", testBean.getName());
+		assertThat(testBean.getName()).isEqualTo("#1!");
 	}
 
 

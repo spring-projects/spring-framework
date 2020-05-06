@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +34,7 @@ import org.springframework.util.Assert;
 
 /**
  * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
- * objects with different parameters based on a SQL statement and a single
+ * objects with different parameters based on an SQL statement and a single
  * set of parameter declarations.
  *
  * @author Rod Johnson
@@ -268,11 +267,11 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
-				if (in instanceof Collection && declaredParameter.getSqlType() != Types.ARRAY) {
-					Collection<?> entries = (Collection<?>) in;
+				if (in instanceof Iterable && declaredParameter.getSqlType() != Types.ARRAY) {
+					Iterable<?> entries = (Iterable<?>) in;
 					for (Object entry : entries) {
 						if (entry instanceof Object[]) {
-							Object[] valueArray = ((Object[])entry);
+							Object[] valueArray = (Object[]) entry;
 							for (Object argValue : valueArray) {
 								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, argValue);
 							}

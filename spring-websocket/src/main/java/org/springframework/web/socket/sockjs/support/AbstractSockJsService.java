@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -68,11 +69,12 @@ import org.springframework.web.util.WebUtils;
  */
 public abstract class AbstractSockJsService implements SockJsService, CorsConfigurationSource {
 
+	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
+
 	private static final long ONE_YEAR = TimeUnit.DAYS.toSeconds(365);
 
-	private static final Random random = new Random();
 
-	private static final String XFRAME_OPTIONS_HEADER = "X-Frame-Options";
+	private static final Random random = new Random();
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -291,7 +293,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * Return if automatic addition of CORS headers has been disabled.
 	 * @since 4.1.2
-	 * @see #setSuppressCors(boolean)
+	 * @see #setSuppressCors
 	 */
 	public boolean shouldSuppressCors() {
 		return this.suppressCors;
@@ -354,7 +356,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		String requestInfo = (logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
 
 		try {
-			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
+			if (sockJsPath.isEmpty() || sockJsPath.equals("/")) {
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
@@ -470,8 +472,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	private boolean validatePath(ServerHttpRequest request) {
 		String path = request.getURI().getPath();
 		int index = path.lastIndexOf('/') + 1;
-		String filename = path.substring(index);
-		return (filename.indexOf(';') == -1);
+		return (path.indexOf(';', index) == -1);
 	}
 
 	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods)
@@ -569,7 +570,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				sendMethodNotAllowed(response, HttpMethod.GET, HttpMethod.OPTIONS);
 			}
 		}
-	};
+	}
 
 
 	private class IframeHandler implements SockJsRequestHandler {
@@ -620,6 +621,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			response.getHeaders().setETag(etagValue);
 			response.getBody().write(contentBytes);
 		}
-	};
+	}
 
 }

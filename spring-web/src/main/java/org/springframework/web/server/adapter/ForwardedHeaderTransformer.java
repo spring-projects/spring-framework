@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {
-					builder.path(prefix + uri.getPath());
+					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
 				}
 			}

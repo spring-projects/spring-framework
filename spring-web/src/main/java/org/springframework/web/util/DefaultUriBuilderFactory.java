@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +33,6 @@ import org.springframework.util.StringUtils;
  *
  * <p>Provides options to create {@link UriBuilder} instances with a common
  * base URI, alternative encoding mode strategies, among others.
- *
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -195,16 +195,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	// UriTemplateHandler
 
+	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
+	@Override
 	public URI expand(String uriTemplate, Object... uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
 	// UriBuilderFactory
 
+	@Override
 	public UriBuilder uriString(String uriTemplate) {
 		return new DefaultUriBuilder(uriTemplate);
 	}
@@ -222,31 +225,27 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private final UriComponentsBuilder uriComponentsBuilder;
 
-
 		public DefaultUriBuilder(String uriTemplate) {
 			this.uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		}
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 			UriComponentsBuilder result;
-			if (StringUtils.isEmpty(uriTemplate)) {
-				result = baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance();
+			if (!StringUtils.hasLength(uriTemplate)) {
+				result = (baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance());
 			}
 			else if (baseUri != null) {
 				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
 				UriComponents uri = builder.build();
-				result = uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder;
+				result = (uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder);
 			}
 			else {
 				result = UriComponentsBuilder.fromUriString(uriTemplate);
 			}
-
 			if (encodingMode.equals(EncodingMode.TEMPLATE_AND_VALUES)) {
 				result.encode();
 			}
-
 			parsePathIfNecessary(result);
-
 			return result;
 		}
 
@@ -332,7 +331,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder queryParam(String name, @Nullable Collection<?> values) {
+			this.uriComponentsBuilder.queryParam(name, values);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, Object... values) {
+			this.uriComponentsBuilder.replaceQueryParam(name, values);
+			return this;
+		}
+
+		@Override
+		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
 		}

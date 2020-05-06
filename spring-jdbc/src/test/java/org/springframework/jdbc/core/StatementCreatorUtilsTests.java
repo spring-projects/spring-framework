@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.GregorianCalendar;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
@@ -38,7 +41,7 @@ public class StatementCreatorUtilsTests {
 	private PreparedStatement preparedStatement;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		preparedStatement = mock(PreparedStatement.class);
 	}

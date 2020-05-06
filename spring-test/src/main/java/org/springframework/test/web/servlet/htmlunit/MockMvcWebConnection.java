@@ -125,6 +125,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 
+	@Override
 	public WebResponse getResponse(WebRequest webRequest) throws IOException {
 		long startTime = System.currentTimeMillis();
 		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);

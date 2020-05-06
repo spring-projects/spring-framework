@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.cache.ehcache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManagerTests;
 
@@ -36,7 +36,7 @@ public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCache
 	private EhCacheCacheManager transactionalCacheManager;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		nativeCacheManager = new CacheManager(new Configuration().name("EhCacheCacheManagerTests")
 				.defaultCache(new CacheConfiguration("default", 100)));
@@ -51,7 +51,7 @@ public class EhCacheCacheManagerTests extends AbstractTransactionSupportingCache
 		transactionalCacheManager.afterPropertiesSet();
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		nativeCacheManager.shutdown();
 	}

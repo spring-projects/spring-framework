@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +36,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -411,7 +414,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
-		if (hasCorsConfigurationSource(handler)) {
+		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
 			CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(request) : null);
 			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
 			config = (config != null ? config.combine(handlerConfig) : handlerConfig);
@@ -484,7 +487,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.2
 	 */
 	protected boolean hasCorsConfigurationSource(Object handler) {
-		return handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null;
+		if (handler instanceof HandlerExecutionChain) {
+			handler = ((HandlerExecutionChain) handler).getHandler();
+		}
+		return (handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null);
 	}
 
 	/**
@@ -566,6 +572,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		@Override
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 				throws Exception {
+
+			// Consistent with CorsFilter, ignore ASYNC dispatches
+			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+			if (asyncManager.hasConcurrentResult()) {
+				return true;
+			}
 
 			return corsProcessor.processRequest(this.config, request, response);
 		}

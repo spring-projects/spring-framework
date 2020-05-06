@@ -19,6 +19,7 @@ package org.springframework.mail.javamail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 

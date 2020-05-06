@@ -17,6 +17,7 @@
 package org.springframework.jdbc.object;
 
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -28,7 +29,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.support.KeyHolder;
 
 /**
- * Reusable operation object representing a SQL update.
+ * Reusable operation object representing an SQL update.
  *
  * <p>This class provides a number of {@code update} methods,
  * analogous to the {@code execute} methods of query objects.

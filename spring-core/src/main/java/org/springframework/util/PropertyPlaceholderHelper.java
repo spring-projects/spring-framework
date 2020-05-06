@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,20 +121,26 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
-		return parseStringValue(value, placeholderResolver, new HashSet<>());
+		return parseStringValue(value, placeholderResolver, null);
 	}
 
 	protected String parseStringValue(
-			String value, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
-
-		StringBuilder result = new StringBuilder(value);
+			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
 		int startIndex = value.indexOf(this.placeholderPrefix);
+		if (startIndex == -1) {
+			return value;
+		}
+
+		StringBuilder result = new StringBuilder(value);
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
 				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholder = placeholder;
+				if (visitedPlaceholders == null) {
+					visitedPlaceholders = new HashSet<>(4);
+				}
 				if (!visitedPlaceholders.add(originalPlaceholder)) {
 					throw new IllegalArgumentException(
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
@@ -178,7 +184,6 @@ public class PropertyPlaceholderHelper {
 				startIndex = -1;
 			}
 		}
-
 		return result.toString();
 	}
 

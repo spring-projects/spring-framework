@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -189,7 +190,6 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 				}
 				else {
 					position = extractUnquotedLink(position, content, result);
-
 				}
 			}
 		}
@@ -202,7 +202,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		/**
-		 * Invoked after a keyword match, after whitespaces removed, and when
+		 * Invoked after a keyword match, after whitespace has been removed, and when
 		 * the next char is neither a single nor double quote.
 		 */
 		protected abstract int extractUnquotedLink(int position, String content,
@@ -220,8 +220,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		@Override
 		protected int extractUnquotedLink(int position, String content, Set<ContentChunkInfo> result) {
-			if (content.substring(position, position + 4).equals("url(")) {
-				// Ignore, UrlFunctionContentParser will take care
+			if (content.startsWith("url(", position)) {
+				// Ignore: UrlFunctionLinkParser will handle it.
 			}
 			else if (logger.isTraceEnabled()) {
 				logger.trace("Unexpected syntax for @import link at index " + position);
@@ -284,7 +284,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

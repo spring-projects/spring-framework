@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,38 +19,39 @@ package org.springframework.core.codec;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDecoder> {
+class ByteArrayDecoderTests extends AbstractDecoderTests<ByteArrayDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public ByteArrayDecoderTests() {
+	ByteArrayDecoderTests() {
 		super(new ByteArrayDecoder());
 	}
 
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(byte[].class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(byte[].class),
-				MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(byte[].class),
+				MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(byte[].class),
+				MimeTypeUtils.APPLICATION_JSON)).isTrue();
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDeco
 	}
 
 	private Consumer<byte[]> expectBytes(byte[] expected) {
-		return bytes -> assertArrayEquals(expected, bytes);
+		return bytes -> assertThat(bytes).isEqualTo(expected);
 	}
 
 }

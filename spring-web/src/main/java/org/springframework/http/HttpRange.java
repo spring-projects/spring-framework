@@ -65,6 +65,7 @@ public abstract class HttpRange {
 		long contentLength = getLengthFor(resource);
 		long start = getRangeStart(contentLength);
 		long end = getRangeEnd(contentLength);
+		Assert.isTrue(start < contentLength, "'position' exceeds the resource length " + contentLength);
 		return new ResourceRegion(resource, start, end - start + 1);
 	}
 
@@ -267,7 +268,7 @@ public abstract class HttpRange {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}
@@ -330,7 +331,7 @@ public abstract class HttpRange {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

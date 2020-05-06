@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * JUnit 4 based integration test for verifying support for the
@@ -38,7 +38,7 @@ public class BeanOverridingDefaultLocationsInheritedTests extends DefaultLocatio
 	@Test
 	@Override
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee should have been autowired.", this.employee);
-		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
+		assertThat(this.employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).as("The employee bean should have been overridden.").isEqualTo("Yoda");
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Rod Johnson
@@ -41,9 +42,9 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
-		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());
+		assertThat(as.isProxyTargetClass()).as("Not forcible CGLIB").isFalse();
 		Object proxy = as.createAopProxy().getProxy();
-		assertTrue("Should be a JDK proxy: " + proxy.getClass(), AopUtils.isJdkDynamicProxy(proxy));
+		assertThat(AopUtils.isJdkDynamicProxy(proxy)).as("Should be a JDK proxy: " + proxy.getClass()).isTrue();
 		return proxy;
 	}
 
@@ -53,9 +54,10 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testNullConfig() {
-		new JdkDynamicAopProxy(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new JdkDynamicAopProxy(null));
 	}
 
 	@Test
@@ -67,8 +69,10 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
 		Object proxy = aop.getProxy();
-		assertTrue(proxy instanceof ITestBean);
-		assertFalse(proxy instanceof TestBean);
+		boolean condition = proxy instanceof ITestBean;
+		assertThat(condition).isTrue();
+		boolean condition1 = proxy instanceof TestBean;
+		assertThat(condition1).isFalse();
 	}
 
 	@Test
@@ -82,7 +86,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		AopProxy aop = createAopProxy(pc);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
-		assertEquals("correct return value", age, tb.getAge());
+		assertThat(tb.getAge()).as("correct return value").isEqualTo(age);
 	}
 
 	@Test
@@ -90,9 +94,8 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			@Override
 			protected void assertions(MethodInvocation invocation) {
-				assertEquals(this, invocation.getThis());
-				assertEquals("Invocation should be on ITestBean: " + invocation.getMethod(),
-						ITestBean.class, invocation.getMethod().getDeclaringClass());
+				assertThat(invocation.getThis()).isEqualTo(this);
+				assertThat(invocation.getMethod().getDeclaringClass()).as("Invocation should be on ITestBean: " + invocation.getMethod()).isEqualTo(ITestBean.class);
 			}
 		};
 
@@ -102,7 +105,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns
-				assertEquals("Target is correct", expectedTarget, invocation.getThis());
+				assertThat(invocation.getThis()).as("Target is correct").isEqualTo(expectedTarget);
 				return super.invoke(invocation);
 			}
 		};
@@ -122,8 +125,8 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		as.setTarget(bean);
 
 		Foo proxy = (Foo) createProxy(as);
-		assertSame("Target should be returned when return types are incompatible", bean, proxy.getBarThis());
-		assertSame("Proxy should be returned when return types are compatible", proxy, proxy.getFooThis());
+		assertThat(proxy.getBarThis()).as("Target should be returned when return types are incompatible").isSameAs(bean);
+		assertThat(proxy.getFooThis()).as("Proxy should be returned when return types are compatible").isSameAs(proxy);
 	}
 
 	@Test
@@ -133,15 +136,16 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
 		Named proxy = (Named) aopProxy.getProxy();
 		Named named = new Person();
-		assertEquals("equals()", proxy, named);
-		assertEquals("hashCode()", proxy.hashCode(), named.hashCode());
+		assertThat(proxy).isEqualTo(named);
+		assertThat(named.hashCode()).isEqualTo(proxy.hashCode());
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testVarargsWithEnumArray() {
 		ProxyFactory proxyFactory = new ProxyFactory(new VarargTestBean());
 		VarargTestInterface proxy = (VarargTestInterface) proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		assertThat(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C)).isTrue();
 	}
 
 
@@ -210,6 +214,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 	public interface VarargTestInterface {
 
+		@SuppressWarnings("unchecked")
 		<V extends MyInterface> boolean doWithVarargs(V... args);
 	}
 

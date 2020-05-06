@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.jcache;
 
 import java.util.concurrent.Callable;
+
 import javax.cache.Cache;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
@@ -106,8 +107,20 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	public boolean evictIfPresent(Object key) {
+		return this.cache.remove(key);
+	}
+
+	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+	@Override
+	public boolean invalidate() {
+		boolean notEmpty = this.cache.iterator().hasNext();
+		this.cache.removeAll();
+		return notEmpty;
 	}
 
 

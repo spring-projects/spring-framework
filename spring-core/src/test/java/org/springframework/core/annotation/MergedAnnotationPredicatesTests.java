@@ -24,19 +24,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link MergedAnnotationPredicates}.
  *
  * @author Phillip Webb
  */
-public class MergedAnnotationPredicatesTests {
+class MergedAnnotationPredicatesTests {
 
 	@Test
-	public void typeInStringArrayWhenNameMatchesAccepts() {
+	void typeInStringArrayWhenNameMatchesAccepts() {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(
@@ -44,7 +45,7 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void typeInStringArrayWhenNameDoesNotMatchRejects() {
+	void typeInStringArrayWhenNameDoesNotMatchRejects() {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(
@@ -52,21 +53,21 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void typeInClassArrayWhenNameMatchesAccepts() {
+	void typeInClassArrayWhenNameMatchesAccepts() {
 		MergedAnnotation<TestAnnotation> annotation =
 				MergedAnnotations.from(WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(TestAnnotation.class)).accepts(annotation);
 	}
 
 	@Test
-	public void typeInClassArrayWhenNameDoesNotMatchRejects() {
+	void typeInClassArrayWhenNameDoesNotMatchRejects() {
 		MergedAnnotation<TestAnnotation> annotation =
 				MergedAnnotations.from(WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(MissingAnnotation.class)).rejects(annotation);
 	}
 
 	@Test
-	public void typeInCollectionWhenMatchesStringInCollectionAccepts() {
+	void typeInCollectionWhenMatchesStringInCollectionAccepts() {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(
@@ -74,7 +75,7 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void typeInCollectionWhenMatchesClassInCollectionAccepts() {
+	void typeInCollectionWhenMatchesClassInCollectionAccepts() {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(
@@ -82,7 +83,7 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void typeInCollectionWhenDoesNotMatchAnyRejects() {
+	void typeInCollectionWhenDoesNotMatchAnyRejects() {
 		MergedAnnotation<TestAnnotation> annotation = MergedAnnotations.from(
 				WithTestAnnotation.class).get(TestAnnotation.class);
 		assertThat(MergedAnnotationPredicates.typeIn(Arrays.asList(
@@ -90,7 +91,7 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void firstRunOfAcceptsOnlyFirstRun() {
+	void firstRunOfAcceptsOnlyFirstRun() {
 		List<MergedAnnotation<TestAnnotation>> filtered = MergedAnnotations.from(
 				WithMultipleTestAnnotation.class).stream(TestAnnotation.class).filter(
 						MergedAnnotationPredicates.firstRunOf(
@@ -100,13 +101,13 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void firstRunOfWhenValueExtractorIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.firstRunOf(null));
+	void firstRunOfWhenValueExtractorIsNullThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationPredicates.firstRunOf(null));
 	}
 
 	@Test
-	public void uniqueAcceptsUniquely() {
+	void uniqueAcceptsUniquely() {
 		List<MergedAnnotation<TestAnnotation>> filtered = MergedAnnotations.from(
 				WithMultipleTestAnnotation.class).stream(TestAnnotation.class).filter(
 						MergedAnnotationPredicates.unique(
@@ -116,9 +117,9 @@ public class MergedAnnotationPredicatesTests {
 	}
 
 	@Test
-	public void uniqueWhenKeyExtractorIsNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> MergedAnnotationPredicates.unique(null));
+	void uniqueWhenKeyExtractorIsNullThrowsException() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				MergedAnnotationPredicates.unique(null));
 	}
 
 	private char firstCharOfValue(MergedAnnotation<TestAnnotation> annotation) {

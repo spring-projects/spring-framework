@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
@@ -107,12 +109,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Configure a reactive registry. This is needed for cases where the response
-	 * is fully handled within the controller in combination with an async void
-	 * return value.
-	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
-	 * default settings.
-	 * @param registry the registry to use
+	 * Configure a reactive adapter registry. This is needed for async return values.
+	 * <p>By default this is a {@link ReactiveAdapterRegistry} with default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
@@ -123,15 +121,24 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Invoke the method for the given exchange.
 	 * @param message the current message
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return a Mono with the result from the invocation.
+	 * @return a Mono with the result from the invocation
 	 */
+	@SuppressWarnings("KotlinInternalInJava")
 	public Mono<Object> invoke(Message<?> message, Object... providedArgs) {
-
 		return getMethodArgumentValues(message, providedArgs).flatMap(args -> {
 			Object value;
+			boolean isSuspendingFunction = false;
 			try {
-				ReflectionUtils.makeAccessible(getBridgedMethod());
-				value = getBridgedMethod().invoke(getBean(), args);
+				Method method = getBridgedMethod();
+				ReflectionUtils.makeAccessible(method);
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())
+						&& CoroutinesUtils.isSuspendingFunction(method)) {
+					isSuspendingFunction = true;
+					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				}
+				else {
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);
@@ -147,17 +154,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 
 			MethodParameter returnType = getReturnType();
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
-			return isAsyncVoidReturnType(returnType, adapter) ?
-					Mono.from(adapter.toPublisher(value)) : Mono.justOrEmpty(value);
+			Class<?> reactiveType = (isSuspendingFunction ? value.getClass() : returnType.getParameterType());
+			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
+			return (isAsyncVoidReturnType(returnType, adapter) ?
+					Mono.from(adapter.toPublisher(value)) : Mono.justOrEmpty(value));
 		});
 	}
 
 	private Mono<Object[]> getMethodArgumentValues(Message<?> message, Object... providedArgs) {
+		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return EMPTY_ARGS;
 		}
-		MethodParameter[] parameters = getMethodParameters();
+
 		List<Mono<Object>> argMonos = new ArrayList<>(parameters.length);
 		for (MethodParameter parameter : parameters) {
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
@@ -173,7 +182,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				argMonos.add(this.resolvers.resolveArgument(parameter, message)
 						.defaultIfEmpty(NO_ARG_VALUE)
-						.doOnError(cause -> logArgumentErrorIfNecessary(parameter, cause)));
+						.doOnError(ex -> logArgumentErrorIfNecessary(parameter, ex)));
 			}
 			catch (Exception ex) {
 				logArgumentErrorIfNecessary(parameter, ex);
@@ -181,15 +190,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return Mono.zip(argMonos, values ->
-				Stream.of(values).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
+				Stream.of(values).map(value -> value != NO_ARG_VALUE ? value : null).toArray());
 	}
 
-	private void logArgumentErrorIfNecessary(MethodParameter parameter, Throwable cause) {
-		// Leave stack trace for later, if error is not handled..
-		String causeMessage = cause.getMessage();
-		if (!causeMessage.contains(parameter.getExecutable().toGenericString())) {
+	private void logArgumentErrorIfNecessary(MethodParameter parameter, Throwable ex) {
+		// Leave stack trace for later, if error is not handled...
+		String exMsg = ex.getMessage();
+		if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(formatArgumentError(parameter, causeMessage));
+				logger.debug(formatArgumentError(parameter, exMsg));
 			}
 		}
 	}

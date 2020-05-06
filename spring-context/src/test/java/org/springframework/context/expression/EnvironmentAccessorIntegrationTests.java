@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.context.expression;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.mock.env.MockPropertySource;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 /**
  * Integration tests for {@link EnvironmentAccessor}, which is registered with
@@ -38,7 +37,6 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.*;
 public class EnvironmentAccessorIntegrationTests {
 
 	@Test
-	@SuppressWarnings("all")
 	public void braceAccess() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("testBean",
@@ -50,7 +48,8 @@ public class EnvironmentAccessorIntegrationTests {
 		ctx.getEnvironment().getPropertySources().addFirst(new MockPropertySource().withProperty("my.name", "myBean"));
 		ctx.refresh();
 
-		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("myBean"));
+		assertThat(ctx.getBean(TestBean.class).getName()).isEqualTo("myBean");
+		ctx.close();
 	}
 
 }

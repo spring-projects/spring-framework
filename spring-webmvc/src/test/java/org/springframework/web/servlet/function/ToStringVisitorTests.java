@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.function.RequestPredicates.GET;
 import static org.springframework.web.servlet.function.RequestPredicates.accept;
 import static org.springframework.web.servlet.function.RequestPredicates.contentType;
@@ -41,11 +41,11 @@ public class ToStringVisitorTests {
 	public void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
-				.path("/foo", builder -> {
+				.path("/foo", builder ->
 					builder.path("/bar", () -> route()
 							.GET("/baz", handler)
-							.build());
-				})
+							.build())
+				)
 				.build();
 
 		ToStringVisitor visitor = new ToStringVisitor();
@@ -57,7 +57,7 @@ public class ToStringVisitorTests {
 				"  (GET && /baz) -> \n" +
 				" }\n" +
 				"}";
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ToStringVisitorTests {
 		predicate.accept(visitor);
 		String result = visitor.toString();
 
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 

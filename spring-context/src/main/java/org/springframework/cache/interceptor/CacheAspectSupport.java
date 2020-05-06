@@ -485,14 +485,14 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (Cache cache : context.getCaches()) {
 			if (operation.isCacheWide()) {
 				logInvalidating(context, operation, null);
-				doClear(cache);
+				doClear(cache, operation.isBeforeInvocation());
 			}
 			else {
 				if (key == null) {
 					key = generateKey(context, result);
 				}
 				logInvalidating(context, operation, key);
-				doEvict(cache, key);
+				doEvict(cache, key, operation.isBeforeInvocation());
 			}
 		}
 	}
@@ -836,7 +836,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

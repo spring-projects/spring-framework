@@ -16,13 +16,13 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
@@ -38,7 +38,7 @@ public class TopLevelAopTagTests {
 		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
 				qualifiedResource(TopLevelAopTagTests.class, "context.xml"));
 
-		assertTrue(beanFactory.containsBeanDefinition("testPointcut"));
+		assertThat(beanFactory.containsBeanDefinition("testPointcut")).isTrue();
 	}
 
 }

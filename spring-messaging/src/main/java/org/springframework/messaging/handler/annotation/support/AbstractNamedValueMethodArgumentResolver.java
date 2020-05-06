@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.ValueConstants;
@@ -75,7 +76,13 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	protected AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
 			@Nullable ConfigurableBeanFactory beanFactory) {
 
-		this.conversionService = conversionService;
+		// Fallback on shared ConversionService for now for historic reasons.
+		// Possibly remove after discussion in gh-23882.
+
+		//noinspection ConstantConditions
+		this.conversionService = conversionService != null ?
+				conversionService : DefaultConversionService.getSharedInstance();
+
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}

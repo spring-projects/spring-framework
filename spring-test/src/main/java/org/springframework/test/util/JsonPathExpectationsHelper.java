@@ -79,7 +79,7 @@ public class JsonPathExpectationsHelper {
 	 * matching numbers reliably for example coercing an integer into a double.
 	 * @param content the JSON content
 	 * @param matcher the matcher with which to assert the result
-	 * @param targetType a the expected type of the resulting value
+	 * @param targetType the expected type of the resulting value
 	 * @since 4.3.3
 	 */
 	@SuppressWarnings("unchecked")

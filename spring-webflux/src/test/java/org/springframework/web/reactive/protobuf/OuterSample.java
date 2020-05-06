@@ -3,6 +3,7 @@
 
 package org.springframework.web.reactive.protobuf;
 
+@SuppressWarnings("deprecation")
 public class OuterSample {
   private OuterSample() {}
   public static void registerAllExtensions(

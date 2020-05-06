@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
@@ -96,7 +97,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			@Nullable ContentNegotiationManager manager) {
 
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
-		Collections.sort(this.expressions);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 		this.contentNegotiationManager = manager != null ? manager : DEFAULT_CONTENT_NEGOTIATION_MANAGER;
 	}
 
@@ -189,10 +192,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	@Override
 	@Nullable
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (isEmpty() || CorsUtils.isPreFlightRequest(request)) {
+		if (CorsUtils.isPreFlightRequest(request)) {
 			return EMPTY_CONDITION;
 		}
-
+		if (isEmpty()) {
+			return this;
+		}
 		List<MediaType> acceptedMediaTypes;
 		try {
 			acceptedMediaTypes = getAcceptedMediaTypes(request);
@@ -200,7 +205,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		catch (HttpMediaTypeException ex) {
 			return null;
 		}
-
 		List<ProduceMediaTypeExpression> result = getMatchingExpressions(acceptedMediaTypes);
 		if (!CollectionUtils.isEmpty(result)) {
 			return new ProducesRequestCondition(result, this);
@@ -322,6 +326,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
 		return (this.expressions.isEmpty() ? MEDIA_TYPE_ALL_LIST : this.expressions);
+	}
+
+
+	/**
+	 * Use this to clear {@link #MEDIA_TYPES_ATTRIBUTE} that contains the parsed,
+	 * requested media types.
+	 * @param request the current request
+	 * @since 5.2
+	 */
+	public static void clearMediaTypesAttribute(HttpServletRequest request) {
+		request.removeAttribute(MEDIA_TYPES_ATTRIBUTE);
 	}
 
 

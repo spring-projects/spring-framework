@@ -42,12 +42,13 @@ import org.springframework.web.server.ServerWebExchange;
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 
 	/** Per HTTP method cache to return ready instances from getMatchingCondition. */
-	private static final Map<String, RequestMethodsRequestCondition> requestMethodConditionCache;
+	private static final Map<HttpMethod, RequestMethodsRequestCondition> requestMethodConditionCache;
 
 	static {
 		requestMethodConditionCache = new HashMap<>(RequestMethod.values().length);
 		for (RequestMethod method : RequestMethod.values()) {
-			requestMethodConditionCache.put(method.name(), new RequestMethodsRequestCondition(method));
+			requestMethodConditionCache.put(
+					HttpMethod.valueOf(method.name()), new RequestMethodsRequestCondition(method));
 		}
 	}
 
@@ -123,7 +124,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			}
 			return this;
 		}
-		return matchRequestMethod(exchange.getRequest().getMethodValue());
+		return matchRequestMethod(exchange.getRequest().getMethod());
 	}
 
 	/**
@@ -137,20 +138,20 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			return this;
 		}
 		HttpMethod expectedMethod = request.getHeaders().getAccessControlRequestMethod();
-		return expectedMethod != null ? matchRequestMethod(expectedMethod.name()) : null;
+		return expectedMethod != null ? matchRequestMethod(expectedMethod) : null;
 	}
 
 	@Nullable
-	private RequestMethodsRequestCondition matchRequestMethod(@Nullable String httpMethod) {
-		if (httpMethod != null) {
-			for (RequestMethod method : getMethods()) {
-				if (httpMethod.matches(method.name())) {
-					return requestMethodConditionCache.get(method.name());
-				}
-			}
-			if (HttpMethod.HEAD.matches(httpMethod) && getMethods().contains(RequestMethod.GET)) {
-				return requestMethodConditionCache.get(HttpMethod.GET.name());
-			}
+	private RequestMethodsRequestCondition matchRequestMethod(@Nullable HttpMethod httpMethod) {
+		if (httpMethod == null) {
+			return null;
+		}
+		RequestMethod requestMethod = RequestMethod.valueOf(httpMethod.name());
+		if (getMethods().contains(requestMethod)) {
+			return requestMethodConditionCache.get(httpMethod);
+		}
+		if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
+			return requestMethodConditionCache.get(HttpMethod.GET);
 		}
 		return null;
 	}

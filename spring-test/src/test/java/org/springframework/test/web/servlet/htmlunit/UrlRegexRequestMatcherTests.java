@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link UrlRegexRequestMatcher}.

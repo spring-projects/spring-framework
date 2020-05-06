@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -177,6 +178,12 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
+	}
+
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		X509Certificate[] certificates = getX509Certificates();

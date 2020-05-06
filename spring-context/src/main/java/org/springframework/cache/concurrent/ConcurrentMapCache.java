@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	@Override
 	@Nullable
 	public <T> T get(Object key, Callable<T> valueLoader) {
-		return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
+		return (T) fromStoreValue(this.store.computeIfAbsent(key, k -> {
 			try {
 				return toStoreValue(valueLoader.call());
 			}
@@ -169,8 +169,20 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	public boolean evictIfPresent(Object key) {
+		return (this.store.remove(key) != null);
+	}
+
+	@Override
 	public void clear() {
 		this.store.clear();
+	}
+
+	@Override
+	public boolean invalidate() {
+		boolean notEmpty = !this.store.isEmpty();
+		this.store.clear();
+		return notEmpty;
 	}
 
 	@Override
@@ -190,15 +202,10 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 		}
 	}
 
-	private Object serializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
+	private static Object serializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			serialization.serialize(storeValue, out);
-			return out.toByteArray();
-		}
-		finally {
-			out.close();
-		}
+		serialization.serialize(storeValue, out);
+		return out.toByteArray();
 	}
 
 	@Override
@@ -217,14 +224,9 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 
 	}
 
-	private Object deserializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
+	private static Object deserializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
 		ByteArrayInputStream in = new ByteArrayInputStream((byte[]) storeValue);
-		try {
-			return serialization.deserialize(in);
-		}
-		finally {
-			in.close();
-		}
+		return serialization.deserialize(in);
 	}
 
 }

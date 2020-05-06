@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
@@ -142,16 +143,18 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
-		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
-		if (httpMethod != null) {
-			for (RequestMethod method : getMethods()) {
-				if (httpMethod.matches(method.name())) {
-					return requestMethodConditionCache.get(method.name());
-				}
+		RequestMethod requestMethod;
+		try {
+			requestMethod = RequestMethod.valueOf(httpMethodValue);
+			if (getMethods().contains(requestMethod)) {
+				return requestMethodConditionCache.get(httpMethodValue);
 			}
-			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
+			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
 				return requestMethodConditionCache.get(HttpMethod.GET.name());
 			}
+		}
+		catch (IllegalArgumentException ex) {
+			// Custom request method
 		}
 		return null;
 	}

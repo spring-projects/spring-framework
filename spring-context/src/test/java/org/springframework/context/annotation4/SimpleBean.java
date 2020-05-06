@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation4;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Class to test that @FactoryMethods are detected only when inside a class with an @Component

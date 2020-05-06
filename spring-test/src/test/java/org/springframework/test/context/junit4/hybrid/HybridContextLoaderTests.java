@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for hybrid {@link SmartContextLoader} implementations that
@@ -68,14 +68,14 @@ public class HybridContextLoaderTests {
 
 	@Test
 	public void verifyContentsOfHybridApplicationContext() {
-		assertEquals("XML", fooFromXml);
-		assertEquals("Java", fooFromJava);
+		assertThat(fooFromXml).isEqualTo("XML");
+		assertThat(fooFromJava).isEqualTo("Java");
 
 		// Note: the XML bean definition for "enigma" always wins since
 		// ConfigurationClassBeanDefinitionReader.isOverriddenByExistingDefinition()
 		// lets XML bean definitions override those "discovered" later via an
 		// @Bean method.
-		assertEquals("enigma from XML", enigma);
+		assertThat(enigma).isEqualTo("enigma from XML");
 	}
 
 }

@@ -44,7 +44,8 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.0
  * @see HttpAsyncClient
- * @deprecated as of Spring 5.0, with no direct replacement
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.http.client.reactive.HttpComponentsClientHttpConnector}
  */
 @Deprecated
 public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
@@ -161,6 +162,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	private HttpAsyncClient startAsyncClient() {
 		HttpAsyncClient client = getAsyncClient();
 		if (client instanceof CloseableHttpAsyncClient) {
+			@SuppressWarnings("resource")
 			CloseableHttpAsyncClient closeableAsyncClient = (CloseableHttpAsyncClient) client;
 			if (!closeableAsyncClient.isRunning()) {
 				closeableAsyncClient.start();

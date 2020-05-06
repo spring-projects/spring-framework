@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.test.web.reactive.server.samples.bind;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -37,11 +37,11 @@ public class RouterFunctionTests {
 	private WebTestClient testClient;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		RouterFunction<?> route = route(GET("/test"), request ->
-				ServerResponse.ok().syncBody("It works!"));
+				ServerResponse.ok().bodyValue("It works!"));
 
 		this.testClient = WebTestClient.bindToRouterFunction(route).build();
 	}

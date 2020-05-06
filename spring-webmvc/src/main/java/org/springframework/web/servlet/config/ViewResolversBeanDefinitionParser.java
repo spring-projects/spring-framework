@@ -69,6 +69,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));

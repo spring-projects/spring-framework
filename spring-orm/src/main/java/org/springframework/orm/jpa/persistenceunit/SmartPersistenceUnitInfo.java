@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.util.List;
+
 import javax.persistence.spi.PersistenceUnitInfo;
 
 /**

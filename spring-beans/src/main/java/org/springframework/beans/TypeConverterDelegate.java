@@ -522,8 +522,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		int i = 0;
-		for (; it.hasNext(); i++) {
+		for (int i = 0; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,

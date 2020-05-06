@@ -136,7 +136,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	@Nullable
 	private MessageHeaderInitializer headerInitializer;
 
-	private final Stats stats = new Stats();
+	private final DefaultStats stats = new DefaultStats();
 
 	private final Map<String, StompConnectionHandler> connectionHandlers = new ConcurrentHashMap<>();
 
@@ -382,10 +382,20 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Return a String describing internal state and counters.
+	 * Effectively {@code toString()} on {@link #getStats() getStats()}.
 	 */
 	public String getStatsInfo() {
 		return this.stats.toString();
 	}
+
+	/**
+	 * Return a structured object with internal state and counters.
+	 * @since 5.2
+	 */
+	public Stats getStats() {
+		return this.stats;
+	}
+
 
 	/**
 	 * Return the current count of TCP connection to the broker.
@@ -1007,7 +1017,35 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private class Stats {
+	/**
+	 * Contract for access to session counters.
+	 * @since 5.2
+	 */
+	public interface Stats {
+
+		/**
+		 * The number of connection handlers.
+		 */
+		int getTotalHandlers();
+
+		/**
+		 * The number of CONNECT frames processed.
+		 */
+		int getTotalConnect();
+
+		/**
+		 * The number of CONNECTED frames processed.
+		 */
+		int getTotalConnected();
+
+		/**
+		 * The number of DISCONNECT frames processed.
+		 */
+		int getTotalDisconnect();
+	}
+
+
+	private class DefaultStats implements Stats {
 
 		private final AtomicInteger connect = new AtomicInteger();
 
@@ -1027,6 +1065,27 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			this.disconnect.incrementAndGet();
 		}
 
+		@Override
+		public int getTotalHandlers() {
+			return connectionHandlers.size();
+		}
+
+		@Override
+		public int getTotalConnect() {
+			return this.connect.get();
+		}
+
+		@Override
+		public int getTotalConnected() {
+			return this.connected.get();
+		}
+
+		@Override
+		public int getTotalDisconnect() {
+			return this.disconnect.get();
+		}
+
+		@Override
 		public String toString() {
 			return (connectionHandlers.size() + " sessions, " + getTcpClientInfo() +
 					(isBrokerAvailable() ? " (available)" : " (not available)") +

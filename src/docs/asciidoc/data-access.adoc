@@ -154,8 +154,8 @@ The key to the Spring transaction abstraction is the notion of a transaction
 strategy. A transaction strategy is defined by the
 `org.springframework.transaction.PlatformTransactionManager` interface, which the following listing shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface PlatformTransactionManager {
 
@@ -166,6 +166,21 @@ strategy. A transaction strategy is defined by the
 		void rollback(TransactionStatus status) throws TransactionException;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface PlatformTransactionManager {
+
+		@Throws(TransactionException::class)
+		fun getTransaction(definition: TransactionDefinition): TransactionStatus
+
+		@Throws(TransactionException::class)
+		fun commit(status: TransactionStatus)
+
+		@Throws(TransactionException::class)
+		fun rollback(status: TransactionStatus)
+	}
+---- 
 
 This is primarily a service provider interface (SPI), although you can use it
 <<transaction-programmatic-ptm, programmatically>> from your application code. Because
@@ -219,8 +234,8 @@ control transaction execution and query transaction status. The concepts should 
 familiar, as they are common to all transaction APIs. The following listing shows the
 `TransactionStatus` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface TransactionStatus extends SavepointManager {
 
@@ -235,7 +250,24 @@ familiar, as they are common to all transaction APIs. The following listing show
 		void flush();
 
 		boolean isCompleted();
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface TransactionStatus : SavepointManager {
 
+		fun isNewTransaction(): Boolean
+
+		fun hasSavepoint(): Boolean
+
+		fun setRollbackOnly()
+
+		fun isRollbackOnly(): Boolean
+
+		fun flush()
+
+		fun isCompleted(): Boolean
 	}
 ----
 
@@ -250,8 +282,7 @@ with plain JDBC.)
 
 You can define a JDBC `DataSource` by creating a bean similar to the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${jdbc.driverClassName}" />
@@ -264,8 +295,7 @@ You can define a JDBC `DataSource` by creating a bean similar to the following:
 The related `PlatformTransactionManager` bean definition then has a reference to
 the `DataSource` definition. It should resemble the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource"/>
@@ -276,8 +306,7 @@ If you use JTA in a Java EE container, then you use a container `DataSource`, ob
 through JNDI, in conjunction with Spring's `JtaTransactionManager`. The following example shows what the JTA
 and JNDI lookup version would look like:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -322,8 +351,7 @@ same way as the `DataSourceTransactionManager` needs a reference to the `DataSou
 the `HibernateTransactionManager` needs a reference to the `SessionFactory`.
 The following example declares `sessionFactory` and `txManager` beans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"/>
@@ -348,8 +376,7 @@ If you use Hibernate and Java EE container-managed JTA transactions, you
 should use the same `JtaTransactionManager` as in the previous JTA example for
 JDBC, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
@@ -406,8 +433,7 @@ For example, in the case of JDBC, instead of the traditional JDBC approach of ca
 the `getConnection()` method on the `DataSource`, you can instead use Spring's
 `org.springframework.jdbc.datasource.DataSourceUtils` class, as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Connection conn = DataSourceUtils.getConnection(dataSource);
 ----
@@ -537,8 +563,8 @@ instances in the body of each implemented method is good. That behavior lets you
 transactions be created and then rolled back in response to the
 `UnsupportedOperationException` instance. The following listing shows the `FooService` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// the service interface that we want to make transactional
 
@@ -556,32 +582,77 @@ transactions be created and then rolled back in response to the
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// the service interface that we want to make transactional
+
+	package x.y.service
+
+	interface FooService {
+
+		fun getFoo(fooName: String): Foo
+
+		fun getFoo(fooName: String, barName: String): Foo
+
+		fun insertFoo(foo: Foo)
+
+		fun updateFoo(foo: Foo)
+	}
+----
 
 The following example shows an implementation of the preceding interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package x.y.service;
 
 	public class DefaultFooService implements FooService {
 
+		@Override
 		public Foo getFoo(String fooName) {
-			throw new UnsupportedOperationException();
+			// ...
 		}
 
+		@Override
 		public Foo getFoo(String fooName, String barName) {
-			throw new UnsupportedOperationException();
+			// ...
 		}
 
+		@Override
 		public void insertFoo(Foo foo) {
-			throw new UnsupportedOperationException();
+			// ...
 		}
 
+		@Override
 		public void updateFoo(Foo foo) {
-			throw new UnsupportedOperationException();
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package x.y.service
+
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Foo {
+			// ...
 		}
 
+		override fun getFoo(fooName: String, barName: String): Foo {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo) {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo) {
+			// ...
+		}
 	}
 ----
 
@@ -591,8 +662,7 @@ semantics, and that the other methods, `insertFoo(Foo)` and `updateFoo(Foo)`, mu
 execute in the context of a transaction with read-write semantics. The following
 configuration is explained in detail in the next few paragraphs:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<!-- from the file 'context.xml' -->
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -677,8 +747,7 @@ A common requirement is to make an entire service layer transactional. The best 
 do this is to change the pointcut expression to match any operation in your
 service layer. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<aop:config>
 		<aop:pointcut id="fooServiceMethods" expression="execution(* x.y.service.*.*(..))"/>
@@ -699,8 +768,8 @@ a transaction is started, suspended, marked as read-only, and so on, depending o
 transaction configuration associated with that method. Consider the following program
 that test drives the configuration shown earlier:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public final class Boot {
 
@@ -711,13 +780,23 @@ that test drives the configuration shown earlier:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("context.xml")
+		val fooService = ctx.getBean<FooService>("fooService")
+		fooService.insertFoo(Foo())
+	}
+----
 
 The output from running the preceding program should resemble the following (the Log4J
 output and the stack trace from the UnsupportedOperationException thrown by the
 insertFoo(..) method of the DefaultFooService class have been truncated for clarity):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- the Spring container is starting up... -->
 	[AspectJInvocationContextExposingAdvisorAutoProxyCreator] - Creating implicit proxy for bean 'fooService' with 0 common interceptors and 1 specific interceptors
@@ -773,8 +852,7 @@ You can configure exactly which `Exception` types mark a transaction for rollbac
 including checked exceptions. The following XML snippet demonstrates how you configure
 rollback for a checked, application-specific `Exception` type:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<tx:advice id="txAdvice" transaction-manager="txManager">
 		<tx:attributes>
@@ -789,8 +867,7 @@ back when an exception is thrown, you can also specify 'no rollback rules'. The 
 transaction infrastructure to commit the attendant transaction even in the face of an
 unhandled `InstrumentNotFoundException`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
@@ -806,8 +883,7 @@ rollback, the strongest matching rule wins. So, in the case of the following
 configuration, any exception other than an `InstrumentNotFoundException` results in a
 rollback of the attendant transaction:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
@@ -821,13 +897,25 @@ this process is quite invasive and tightly couples your code to the Spring Frame
 transaction infrastructure. The following example shows how to programmatically indicate
 a required rollback:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public void resolvePosition() {
 		try {
 			// some business logic...
 		} catch (NoProductInStockException ex) {
+			// trigger rollback programmatically
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun resolvePosition() {
+		try {
+			// some business logic...
+		} catch (ex: NoProductInStockException) {
 			// trigger rollback programmatically
 			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 		}
@@ -852,8 +940,7 @@ defined in a root `x.y.service` package. To make all beans that are instances of
 defined in that package (or in subpackages) and that have names ending in `Service` have
 the default transactional configuration, you could write the following:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -900,8 +987,7 @@ the default transactional configuration, you could write the following:
 The following example shows how to configure two distinct beans with totally different
 transactional settings:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1008,13 +1094,13 @@ that are nested within `<tx:advice/>` and `<tx:attributes/>` tags:
 | No
 |
 | Comma-delimited list of `Exception` instances that trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 
 | `no-rollback-for`
 | No
 |
 | Comma-delimited list of `Exception` instances that do not trigger rollback. For example,
-  `com.foo.MyBusinessException,ServletException.`
+  `com.foo.MyBusinessException,ServletException`.
 |===
 
 
@@ -1035,20 +1121,52 @@ The ease-of-use afforded by the use of the `@Transactional` annotation is best
 illustrated with an example, which is explained in the text that follows.
 Consider the following class definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// the service class that we want to make transactional
 	@Transactional
 	public class DefaultFooService implements FooService {
 
-		Foo getFoo(String fooName);
+		Foo getFoo(String fooName) {
+			// ...
+		}
 
-		Foo getFoo(String fooName, String barName);
+		Foo getFoo(String fooName, String barName) {
+			// ...
+		}
 
-		void insertFoo(Foo foo);
+		void insertFoo(Foo foo) {
+			// ...
+		}
 
-		void updateFoo(Foo foo);
+		void updateFoo(Foo foo) {
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// the service class that we want to make transactional
+	@Transactional
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Foo {
+			// ...
+		}
+
+		override fun getFoo(fooName: String, barName: String): Foo {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo) {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo) {
+			// ...
+		}
 	}
 ----
 
@@ -1066,8 +1184,7 @@ for full details.
 
 In XML configuration, the `<tx:annotation-driven/>` tag provides similar convenience:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- from the file 'context.xml' -->
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -1197,7 +1314,7 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<aop-proxying>> for a discussion of the
+interface-based proxies are created. (See <<core.adoc#aop-proxying>> for a discussion of the
 different proxy types.)
 
 NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` looks for
@@ -1212,23 +1329,41 @@ annotated at the class level with the settings for a read-only transaction, but 
 `@Transactional` annotation on the `updateFoo(Foo)` method in the same class takes
 precedence over the transactional settings defined at the class level.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Transactional(readOnly = true)
 	public class DefaultFooService implements FooService {
 
 		public Foo getFoo(String fooName) {
-			// do something
+			// ...
 		}
 
 		// these settings have precedence for this method
 		@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
 		public void updateFoo(Foo foo) {
-			// do something
+			// ...
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Transactional(readOnly = true)
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Foo {
+			// ...
+		}
+
+		// these settings have precedence for this method
+		@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
+		override fun updateFoo(foo: Foo) {
+			// ...
+		}
+	}
+----
+
 
 [[transaction-declarative-attransactional-settings]]
 ===== `@Transactional` Settings
@@ -1309,8 +1444,8 @@ This can either be the bean name or the qualifier value of the transaction manag
 For example, using the qualifier notation, you can combine the following Java code with
 the following transaction manager bean declarations in the application context:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class TransactionalService {
 
@@ -1321,11 +1456,26 @@ the following transaction manager bean declarations in the application context:
 		public void doSomething() { ... }
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	class TransactionalService {
+
+		@Transactional("order")
+		fun setSomething(name: String) {
+			// ...
+		}
+
+		@Transactional("account")
+		fun doSomething() {
+			// ...
+		}
+	}
+----
 
 The following listing shows the bean declarations:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<tx:annotation-driven/>
 
@@ -1353,8 +1503,8 @@ methods, <<core.adoc#beans-meta-annotations, Spring's meta-annotation support>> 
 define custom shortcut annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -1368,19 +1518,52 @@ following annotation definitions:
 	public @interface AccountTx {
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
+	@Retention(AnnotationRetention.RUNTIME)
+	@Transactional("order")
+	annotation class OrderTx
+
+	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
+	@Retention(AnnotationRetention.RUNTIME)
+	@Transactional("account")
+	annotation class AccountTx
+----
 
 The preceding annotations lets us write the example from the previous section as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class TransactionalService {
 
 		@OrderTx
-		public void setSomething(String name) { ... }
+		public void setSomething(String name) {
+			// ...
+		}
 
 		@AccountTx
-		public void doSomething() { ... }
+		public void doSomething() {
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	class TransactionalService {
+
+		@OrderTx
+		fun setSomething(name: String) {
+			// ...
+		}
+
+		@AccountTx
+		fun doSomething() {
+			// ...
+		}
 	}
 ----
 
@@ -1480,8 +1663,8 @@ configuration and AOP in general.
 
 The following code shows the simple profiling aspect discussed earlier:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	package x.y;
 
@@ -1517,6 +1700,37 @@ The following code shows the simple profiling aspect discussed earlier:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	class SimpleProfiler : Ordered {
+
+		private var order: Int = 0
+
+		// allows us to control the ordering of advice
+		override fun getOrder(): Int {
+			return this.order
+		}
+
+		fun setOrder(order: Int) {
+			this.order = order
+		}
+
+		// this method is the around advice
+		fun profile(call: ProceedingJoinPoint): Any {
+			var returnValue: Any
+			val clock = StopWatch(javaClass.name)
+			try {
+				clock.start(call.toShortString())
+				returnValue = call.proceed()
+			} finally {
+				clock.stop()
+				println(clock.prettyPrint())
+			}
+			return returnValue
+		}
+	}
+----
 
 The ordering of advice
 is controlled through the `Ordered` interface. For full details on advice ordering, see
@@ -1525,8 +1739,7 @@ is controlled through the `Ordered` interface. For full details on advice orderi
 The following configuration creates a `fooService` bean that has profiling and
 transactional aspects applied to it in the desired order:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1580,8 +1793,7 @@ of additional aspects in similar fashion.
 The following example creates the same setup as the previous two examples but uses the purely XML
 declarative approach:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1663,14 +1875,23 @@ NOTE: Prior to continuing, you may want to read <<transaction-declarative-annota
 The following example shows how to create a transaction manager and configure the
 `AnnotationTransactionAspect` to use it:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// construct an appropriate transaction manager
 	DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
 
 	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
 	AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// construct an appropriate transaction manager
+	val txManager = DataSourceTransactionManager(getDataSource())
+
+	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
+	AnnotationTransactionAspect.aspectOf().transactionManager = txManager
 ----
 
 NOTE: When you use this aspect, you must annotate the implementation class (or the methods
@@ -1726,8 +1947,8 @@ anonymous inner class) that contains the code that you need to execute in the co
 a transaction. You can then pass an instance of your custom `TransactionCallback` to the
 `execute(..)` method exposed on the `TransactionTemplate`. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class SimpleService implements Service {
 
@@ -1750,12 +1971,28 @@ a transaction. You can then pass an instance of your custom `TransactionCallback
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// use constructor-injection to supply the PlatformTransactionManager
+	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
+
+		// single TransactionTemplate shared amongst all methods in this instance
+		private val transactionTemplate = TransactionTemplate(transactionManager)
+
+		fun someServiceMethod() = transactionTemplate.execute<Any?> {
+			updateOperation1()
+			resultOfUpdateOperation2()
+		}
+	}
+----
+
 
 If there is no return value, you can use the convenient `TransactionCallbackWithoutResult` class
 with an anonymous class, as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 		protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -1764,12 +2001,23 @@ with an anonymous class, as follows:
 		}
 	});
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
+		override fun doInTransactionWithoutResult(status: TransactionStatus) {
+			updateOperation1()
+			updateOperation2()
+		}
+	})
+----
+
 
 Code within the callback can roll the transaction back by calling the
 `setRollbackOnly()` method on the supplied `TransactionStatus` object, as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
@@ -1783,6 +2031,21 @@ Code within the callback can roll the transaction back by calling the
 		}
 	});
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
+
+		override fun doInTransactionWithoutResult(status: TransactionStatus) {
+			try {
+				updateOperation1()
+				updateOperation2()
+			} catch (ex: SomeBusinessException) {
+				status.setRollbackOnly()
+			}
+		}
+	})
+----
 
 [[tx-prog-template-settings]]
 ===== Specifying Transaction Settings
@@ -1794,8 +2057,8 @@ configuration. By default, `TransactionTemplate` instances have the
 following example shows the programmatic customization of the transactional settings for
 a specific `TransactionTemplate:`
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class SimpleService implements Service {
 
@@ -1811,18 +2074,30 @@ a specific `TransactionTemplate:`
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
+
+		private val transactionTemplate = TransactionTemplate(transactionManager).apply {
+			// the transaction settings can be set here explicitly if so desired
+			isolationLevel = TransactionDefinition.ISOLATION_READ_UNCOMMITTED
+			timeout = 30 // 30 seconds
+			// and so forth...
+		}
+	}
+----
 
 The following example defines a `TransactionTemplate` with some custom transactional
 settings by using Spring XML configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="sharedTransactionTemplate"
 			class="org.springframework.transaction.support.TransactionTemplate">
 		<property name="isolationLevelName" value="ISOLATION_READ_UNCOMMITTED"/>
 		<property name="timeout" value="30"/>
-	</bean>"
+	</bean>
 ----
 
 You can then inject the `sharedTransactionTemplate`
@@ -1845,8 +2120,8 @@ directly to manage your transaction. To do so, pass the implementation of the
 by using the `TransactionDefinition` and `TransactionStatus` objects, you can initiate
 transactions, roll back, and commit. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -1862,6 +2137,24 @@ transactions, roll back, and commit. The following example shows how to do so:
 		throw ex;
 	}
 	txManager.commit(status);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val def = DefaultTransactionDefinition()
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName")
+	def.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED
+
+	val status = txManager.getTransaction(def)
+	try {
+		// execute your business logic here
+	} catch (ex: MyException) {
+		txManager.rollback(status)
+		throw ex
+	}
+
+	txManager.commit(status)
 ----
 
 
@@ -1902,15 +2195,27 @@ event and that we want to define a listener that should only handle that event o
 transaction in which it has been published has committed successfully. The following
 example sets up such an event listener:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Component
 	public class MyComponent {
 
 		@TransactionalEventListener
 		public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
-			...
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Component
+	class MyComponent {
+
+		@TransactionalEventListener
+		fun handleOrderCreatedEvent(creationEvent: CreationEvent<Order>) {
+			// ...
 		}
 	}
 ----
@@ -2071,11 +2376,21 @@ lets the component scanning support find and configure your DAOs and repositorie
 without having to provide XML configuration entries for them. The following example shows
 how to use the `@Repository` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	@Repository <1>
+	@Repository // <1>
 	public class SomeMovieFinder implements MovieFinder {
+		// ...
+	}
+----
+<1> The `@Repository` annotation.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository // <1>
+	class SomeMovieFinder : MovieFinder {
 		// ...
 	}
 ----
@@ -2089,8 +2404,8 @@ needs access to a JDBC `DataSource`, and a JPA-based repository needs access to 
 injected by using one of the `@Autowired`, `@Inject`, `@Resource` or `@PersistenceContext`
 annotations. The following example works for a JPA repository:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Repository
 	public class JpaMovieFinder implements MovieFinder {
@@ -2099,15 +2414,28 @@ annotations. The following example works for a JPA repository:
 		private EntityManager entityManager;
 
 		// ...
-
 	}
 ----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository
+	class JpaMovieFinder : MovieFinder {
+
+		@PersistenceContext
+		private lateinit var entityManager: EntityManager
+
+		// ...
+	}
+----
+
 
 If you use the classic Hibernate APIs, you can inject `SessionFactory`, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Repository
 	public class HibernateMovieFinder implements MovieFinder {
@@ -2120,17 +2448,24 @@ example shows:
 		}
 
 		// ...
-
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository
+	class HibernateMovieFinder(private val sessionFactory: SessionFactory) : MovieFinder {
+		// ...
 	}
 ----
 
-The last example we  show here is for typical JDBC support. You could have the
-`DataSource` injected into an initialization method, where you would create a
+The last example we show here is for typical JDBC support. You could have the
+`DataSource` injected into an initialization method or a constructor, where you would create a
 `JdbcTemplate` and other data access support classes (such as `SimpleJdbcCall` and others) by using
 this `DataSource`. The following example autowires a `DataSource`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Repository
 	public class JdbcMovieFinder implements MovieFinder {
@@ -2143,7 +2478,17 @@ this `DataSource`. The following example autowires a `DataSource`:
 		}
 
 		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository
+	class JdbcMovieFinder(dataSource: DataSource) : MovieFinder {
+		
+		private val jdbcTemplate = JdbcTemplate(dataSource)
 
+		// ...
 	}
 ----
 
@@ -2336,87 +2681,124 @@ See the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[javadoc] fo
 
 The following query gets the number of rows in a relation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	int rowCount = this.jdbcTemplate.queryForObject("select count(*) from t_actor", Integer.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val rowCount = jdbcTemplate.queryForObject<Int>("select count(*) from t_actor")!!
 ----
 
 The following query uses a bind variable:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	int countOfActorsNamedJoe = this.jdbcTemplate.queryForObject(
 			"select count(*) from t_actor where first_name = ?", Integer.class, "Joe");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val countOfActorsNamedJoe = jdbcTemplate.queryForObject<Int>(
+			"select count(*) from t_actor where first_name = ?", arrayOf("Joe"))!!
+----
+
 
 The following query looks for a `String`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	String lastName = this.jdbcTemplate.queryForObject(
 			"select last_name from t_actor where id = ?",
-			new Object[]{1212L}, String.class);
+			String.class, 1212L);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val lastName = this.jdbcTemplate.queryForObject<String>(
+			"select last_name from t_actor where id = ?",
+			arrayOf(1212L))!!
 ----
 
 The following query finds and populates a single domain object:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	Actor actor = this.jdbcTemplate.queryForObject(
+	Actor actor = jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
-			new Object[]{1212L},
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
-			});
+			(resultSet, rowNum) -> {
+				Actor newActor = new Actor();
+				newActor.setFirstName(resultSet.getString("first_name"));
+				newActor.setLastName(resultSet.getString("last_name"));
+				return newActor;
+			},
+			1212L);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val actor = jdbcTemplate.queryForObject(
+				"select first_name, last_name from t_actor where id = ?",
+				arrayOf(1212L)) { rs, _ -> 
+			Actor(rs.getString("first_name"), rs.getString("last_name")) 
+		}
 ----
 
-The following query finds and populates a number of domain objects:
+The following query finds and populates a list of domain objects:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	List<Actor> actors = this.jdbcTemplate.query(
 			"select first_name, last_name from t_actor",
-			new RowMapper<Actor>() {
-				public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-					Actor actor = new Actor();
-					actor.setFirstName(rs.getString("first_name"));
-					actor.setLastName(rs.getString("last_name"));
-					return actor;
-				}
+			(resultSet, rowNum) -> {
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
 			});
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val actors = jdbcTemplate.query("select first_name, last_name from t_actor") { rs, _ ->
+			Actor(rs.getString("first_name"), rs.getString("last_name"))
 ----
 
 If the last two snippets of code actually existed in the same application, it would make
-sense to remove the duplication present in the two `RowMapper` anonymous inner classes
-and extract them out into a single class (typically a `static` nested class) that could
-then be referenced by DAO methods as needed. For example, it may be better to write the
-preceding code snippet as follows:
+sense to remove the duplication present in the two `RowMapper` lambda expressions and
+extract them out into a single field that could then be referenced by DAO methods as needed.
+For example, it may be better to write the preceding code snippet as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
+	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultSet.getString("first_name"));
+		actor.setLastName(resultSet.getString("last_name"));
+		return actor;
+	};
+
 	public List<Actor> findAllActors() {
-		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", new ActorMapper());
+		return this.jdbcTemplate.query( "select first_name, last_name from t_actor", actorRowMapper);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
+		Actor(rs.getString("first_name"), rs.getString("last_name"))
 	}
 
-	private static final class ActorMapper implements RowMapper<Actor> {
-
-		public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Actor actor = new Actor();
-			actor.setFirstName(rs.getString("first_name"));
-			actor.setLastName(rs.getString("last_name"));
-			return actor;
-		}
+	fun findAllActors(): List<Actor> {
+		return jdbcTemplate.query("select first_name, last_name from t_actor", actorMapper)
 	}
 ----
 
@@ -2428,32 +2810,51 @@ Parameter values are usually provided as variable arguments or, alternatively, a
 
 The following example inserts a new entry:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	this.jdbcTemplate.update(
 			"insert into t_actor (first_name, last_name) values (?, ?)",
 			"Leonor", "Watling");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	jdbcTemplate.update(
+			"insert into t_actor (first_name, last_name) values (?, ?)",
+			"Leonor", "Watling")
+----
 
 The following example updates an existing entry:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	this.jdbcTemplate.update(
 			"update t_actor set last_name = ? where id = ?",
 			"Banjo", 5276L);
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	jdbcTemplate.update(
+			"update t_actor set last_name = ? where id = ?",
+			"Banjo", 5276L)
+----
 
 The following example deletes an entry:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	this.jdbcTemplate.update(
-			"delete from actor where id = ?",
+			"delete from t_actor where id = ?",
 			Long.valueOf(actorId));
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	jdbcTemplate.update("delete from t_actor where id = ?", actorId.toLong())
 ----
 
 [[jdbc-JdbcTemplate-examples-other]]
@@ -2464,21 +2865,34 @@ method is often used for DDL statements. It is heavily overloaded with variants 
 callback interfaces, binding variable arrays, and so on. The following example creates a
 table:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	jdbcTemplate.execute("create table mytable (id integer, name varchar(100))")
 ----
 
 The following example invokes a stored procedure:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	this.jdbcTemplate.update(
 			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
 			Long.valueOf(unionId));
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	jdbcTemplate.update(
+			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
+			unionId.toLong())
+----
+
 
 More sophisticated stored procedure support is <<jdbc-StoredProcedure, covered later>>.
 
@@ -2497,8 +2911,8 @@ configure a `DataSource` in your Spring configuration file and then dependency-i
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
 the setter for the `DataSource`. This leads to DAOs that resemble the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcCorporateEventDao implements CorporateEventDao {
 
@@ -2511,11 +2925,20 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
 
 The following example shows the corresponding XML configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -2548,31 +2971,45 @@ support for dependency injection. In this case, you can annotate the class with 
 (which makes it a candidate for component-scanning) and annotate the `DataSource` setter
 method with `@Autowired`. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	@Repository <1>
+	@Repository // <1>
 	public class JdbcCorporateEventDao implements CorporateEventDao {
 
 		private JdbcTemplate jdbcTemplate;
 
-		@Autowired <2>
+		@Autowired // <2>
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource); <3>
+			this.jdbcTemplate = new JdbcTemplate(dataSource); // <3>
 		}
 
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
 <1> Annotate the class with `@Repository`.
-<2> annotate the `DataSource` setter method with `@Autowired`.
+<2> Annotate the `DataSource` setter method with `@Autowired`.
+<3> Create a new `JdbcTemplate` with the `DataSource`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository // <1>
+	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao { // <2>
+
+		private val jdbcTemplate = JdbcTemplate(dataSource) // <3>
+		
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
+<1> Annotate the class with `@Repository`.
+<2> Constructor injection of the `DataSource`.
 <3> Create a new `JdbcTemplate` with the `DataSource`.
 
 
 The following example shows the corresponding XML configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -2623,8 +3060,8 @@ section describes only those areas of the `NamedParameterJdbcTemplate` class tha
 from the `JdbcTemplate` itself -- namely, programming JDBC statements by using named
 parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -2643,6 +3080,18 @@ parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 	}
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActorsByFirstName(firstName: String): Int {
+		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val namedParameters = MapSqlParameterSource("first_name", firstName)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
+	}
+----
+
 Notice the use of the named parameter notation in the value assigned to the `sql`
 variable and the corresponding value that is plugged into the `namedParameters`
 variable (of type `MapSqlParameterSource`).
@@ -2654,8 +3103,8 @@ methods exposed by the `NamedParameterJdbcOperations` and implemented by the
 
 The following example shows the use of the `Map`-based style:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -2671,6 +3120,18 @@ The following example shows the use of the `Map`-based style:
 		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
 
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// some JDBC-backed DAO class...
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActorsByFirstName(firstName: String): Int {
+		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val namedParameters = mapOf("first_name" to firstName)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
 ----
 
@@ -2690,8 +3151,8 @@ of named parameter values.
 
 The following example shows a typical JavaBean:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class Actor {
 
@@ -2715,12 +3176,17 @@ The following example shows a typical JavaBean:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	data class Actor(val id: Long, val firstName: String, val lastName: String)
+----
 
 The following example uses a `NamedParameterJdbcTemplate` to return the count of the
 members of the class shown in the preceding example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -2737,6 +3203,21 @@ members of the class shown in the preceding example:
 		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
 
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// some JDBC-backed DAO class...
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActors(exampleActor: Actor): Int {
+		// notice how the named parameters match the properties of the above 'Actor' class
+		val sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName"
+		val namedParameters = BeanPropertySqlParameterSource(exampleActor)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
 ----
 
@@ -2790,16 +3271,29 @@ name from the database metadata of the database in use.
 
 You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class CustomSQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
-		protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
-			if (sqlex.getErrorCode() == -12345) {
-				return new DeadlockLoserDataAccessException(task, sqlex);
+		protected DataAccessException customTranslate(String task, String sql, SQLException sqlEx) {
+			if (sqlEx.getErrorCode() == -12345) {
+				return new DeadlockLoserDataAccessException(task, sqlEx);
 			}
 			return null;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class CustomSQLErrorCodesTranslator : SQLErrorCodeSQLExceptionTranslator() {
+
+		override fun customTranslate(task: String, sql: String?, sqlEx: SQLException): DataAccessException? {
+			if (sqlEx.errorCode == -12345) {
+					return DeadlockLoserDataAccessException(task, sqlEx)
+				}
+				return null;
 		}
 	}
 ----
@@ -2811,8 +3305,8 @@ translator, you must pass it to the `JdbcTemplate` through the method
 processing where this translator is needed. The following example shows how you can use this custom
 translator:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	private JdbcTemplate jdbcTemplate;
 
@@ -2836,6 +3330,24 @@ translator:
 			" where id = ?", pct, orderId);
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// create a JdbcTemplate and set data source
+	private val jdbcTemplate = JdbcTemplate(dataSource).apply {
+		// create a custom translator and set the DataSource for the default translation lookup
+		exceptionTranslator = CustomSQLErrorCodesTranslator().apply {
+			this.dataSource = dataSource 
+		}
+	}
+	
+	fun updateShippingCharge(orderId: Long, pct: Long) {
+		// use the prepared JdbcTemplate for this update
+		this.jdbcTemplate!!.update("update orders" +
+				" set shipping_charge = shipping_charge * ? / 100" +
+				" where id = ?", pct, orderId)
+	}
+----
 
 The custom translator is passed a data source in order to look up the error codes in
 `sql-error-codes.xml`.
@@ -2849,8 +3361,8 @@ Running an SQL statement requires very little code. You need a `DataSource` and 
 `JdbcTemplate`. The following example shows what you need to include for a minimal but
 fully functional class that creates a new table:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -2868,6 +3380,21 @@ fully functional class that creates a new table:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.JdbcTemplate
+
+	class ExecuteAStatement(dataSource: DataSource) {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun doExecute() {
+			jdbcTemplate.execute("create table mytable (id integer, name varchar(100))")
+		}
+	}
+----
 
 
 [[jdbc-statements-querying]]
@@ -2879,8 +3406,8 @@ Java class that is passed in as an argument. If the type conversion is invalid, 
 `InvalidDataAccessApiUsageException` is thrown. The following example contains two
 query methods, one for an `int` and one that queries for a `String`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -2902,6 +3429,23 @@ query methods, one for an `int` and one that queries for a `String`:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+import javax.sql.DataSource
+import org.springframework.jdbc.core.JdbcTemplate
+
+class RunAQuery(dataSource: DataSource) {
+
+	private val jdbcTemplate = JdbcTemplate(dataSource)
+
+	val count: Int
+		get() = jdbcTemplate.queryForObject("select count(*) from mytable")!!
+
+	val name: String?
+		get() = jdbcTemplate.queryForObject("select name from mytable")
+}
+----
 
 In addition to the single result query methods, several methods return a list with an
 entry for each row that the query returned. The most generic method is `queryForList(..)`,
@@ -2909,8 +3453,8 @@ which returns a `List` where each element is a `Map` containing one entry for ea
 using the column name as the key. If you add a method to the preceding example to retrieve a
 list of all the rows, it might be as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	private JdbcTemplate jdbcTemplate;
 
@@ -2922,11 +3466,19 @@ list of all the rows, it might be as follows:
 		return this.jdbcTemplate.queryForList("select * from mytable");
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	private val jdbcTemplate = JdbcTemplate(dataSource)
+
+	fun getList(): List<Map<String, Any>> {
+		return jdbcTemplate.queryForList("select * from mytable")
+	}
+----
 
 The returned list would resemble the following:
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 [{name=Bob, id=1}, {name=Mary, id=2}]
 ----
@@ -2937,8 +3489,8 @@ The returned list would resemble the following:
 
 The following example updates a column for a certain primary key:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -2953,6 +3505,21 @@ The following example updates a column for a certain primary key:
 
 		public void setName(int id, String name) {
 			this.jdbcTemplate.update("update mytable set name = ? where id = ?", name, id);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.JdbcTemplate
+
+	class ExecuteAnUpdate(dataSource: DataSource) {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun setName(id: Int, name: String) {
+			jdbcTemplate.update("update mytable set name = ? where id = ?", name, id)
 		}
 	}
 ----
@@ -2975,22 +3542,31 @@ update. There is no standard single way to create an appropriate `PreparedStatem
 (which explains why the method signature is the way it is). The following example works
 on Oracle but may not work on other platforms:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	final String INSERT_SQL = "insert into my_test (name) values(?)";
 	final String name = "Rob";
 
 	KeyHolder keyHolder = new GeneratedKeyHolder();
-	jdbcTemplate.update(
-		new PreparedStatementCreator() {
-			public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-				PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] {"id"});
-				ps.setString(1, name);
-				return ps;
-			}
-		},
-		keyHolder);
+	jdbcTemplate.update(connection -> {
+		PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] { "id" });
+		ps.setString(1, name);
+		return ps;
+	}, keyHolder);
+
+	// keyHolder.getKey() now contains the generated key
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val INSERT_SQL = "insert into my_test (name) values(?)"
+	val name = "Rob"
+
+	val keyHolder = GeneratedKeyHolder()
+	jdbcTemplate.update({ 
+		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) } 
+	}, keyHolder)
 
 	// keyHolder.getKey() now contains the generated key
 ----
@@ -3020,20 +3596,20 @@ part of the JDBC specification and is a generalized connection factory. It lets 
 container or a framework hide connection pooling and transaction management issues
 from the application code. As a developer, you need not know details about how to
 connect to the database. That is the responsibility of the administrator who sets up
-the datasource. You most likely fill both roles as you develop and test code, but you do
-not necessarily have to know how the production data source is configured.
+the datasource. You most likely fill both roles as you develop and test code, but you
+do not necessarily have to know how the production data source is configured.
 
-When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can configure your
-own with a connection pool implementation provided by a third party. Popular
-implementations are Apache Jakarta Commons DBCP and C3P0. Implementations in the Spring
-distribution are meant only for testing purposes and do not provide pooling.
+When you use Spring's JDBC layer, you can obtain a data source from JNDI, or you can
+configure your own with a connection pool implementation provided by a third party.
+Traditional choices are Apache Commons DBCP and C3P0 with bean-style `DataSource` classes;
+for a modern JDBC connection pool, consider HikariCP with its builder-style API instead.
 
-This section uses Spring's `DriverManagerDataSource` implementation, and several
-additional implementations are covered later.
+NOTE: You should use the `DriverManagerDataSource` and `SimpleDriverDataSource` classes
+(as included in the Spring distribution) only for testing purposes! Those variants do not
+provide pooling and perform poorly when multiple requests for a connection are made.
 
-NOTE: You should use the `DriverManagerDataSource` class only for testing purposes,
-since it does not provide pooling and performs poorly when multiple requests for a
-connection are made.
+The following section uses Spring's `DriverManagerDataSource` implementation.
+Several other `DataSource` variants are covered later.
 
 To configure a `DriverManagerDataSource`:
 
@@ -3047,8 +3623,8 @@ To configure a `DriverManagerDataSource`:
 
 The following example shows how to configure a `DriverManagerDataSource` in Java:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
@@ -3056,11 +3632,20 @@ The following example shows how to configure a `DriverManagerDataSource` in Java
 	dataSource.setUsername("sa");
 	dataSource.setPassword("");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val dataSource = DriverManagerDataSource().apply {
+		setDriverClassName("org.hsqldb.jdbcDriver")
+		url = "jdbc:hsqldb:hsql://localhost:"
+		username = "sa"
+		password = ""
+	}
+----
 
 The following example shows the corresponding XML configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="${jdbc.driverClassName}"/>
@@ -3078,8 +3663,7 @@ documentation for the respective connection pooling implementations.
 
 The following example shows DBCP configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${jdbc.driverClassName}"/>
@@ -3093,8 +3677,7 @@ The following example shows DBCP configuration:
 
 The following example shows C3P0 configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
 		<property name="driverClass" value="${jdbc.driverClassName}"/>
@@ -3229,11 +3812,11 @@ interface, `BatchPreparedStatementSetter`, and passing that implementation in as
 in your `batchUpdate` method call. You can use the `getBatchSize` method to provide the size of
 the current batch. You can use the `setValues` method to set the values for the parameters of
 the prepared statement. This method is called the number of times that you
-specified in the `getBatchSize` call. The following example updates the `actor` table
+specified in the `getBatchSize` call. The following example updates the `t_actor` table
 based on entries in a list, and the entire list is used as the batch:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3248,14 +3831,39 @@ based on entries in a list, and the entire list is used as the batch:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					new BatchPreparedStatementSetter() {
 						public void setValues(PreparedStatement ps, int i) throws SQLException {
-							ps.setString(1, actors.get(i).getFirstName());
-							ps.setString(2, actors.get(i).getLastName());
-							ps.setLong(3, actors.get(i).getId().longValue());
+							Actor actor = actors.get(i);
+							ps.setString(1, actor.getFirstName());
+							ps.setString(2, actor.getLastName());
+							ps.setLong(3, actor.getId().longValue());
 						}
 						public int getBatchSize() {
 							return actors.size();
 						}
 					});
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			return jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?",
+					object: BatchPreparedStatementSetter {
+						override fun setValues(ps: PreparedStatement, i: Int) {
+							ps.setString(1, actors[i].firstName)
+							ps.setString(2, actors[i].lastName)
+							ps.setLong(3, actors[i].id)
+						}
+
+						override fun getBatchSize() = actors.size
+					})
 		}
 
 		// ... additional methods
@@ -3284,8 +3892,8 @@ in an array of bean-style objects (with getter methods corresponding to paramete
 
 The following example shows a batch update using named parameters:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3304,6 +3912,22 @@ The following example shows a batch update using named parameters:
 		// ... additional methods
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			return this.namedParameterJdbcTemplate.batchUpdate(
+					"update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
+					SqlParameterSourceUtils.createBatch(actors));
+		}
+
+			// ... additional methods
+	}
+----
 
 For an SQL statement that uses the classic `?` placeholders, you pass in a list
 containing an object array with the update values. This object array must have one entry
@@ -3313,8 +3937,8 @@ defined in the SQL statement.
 The following example is the same as the preceding example, except that it uses classic
 JDBC `?` placeholders:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3334,6 +3958,25 @@ JDBC `?` placeholders:
 			return this.jdbcTemplate.batchUpdate(
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					batch);
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): IntArray {
+			val batch = mutableListOf<Array<Any>>()
+			for (actor in actors) {
+				batch.add(arrayOf(actor.firstName, actor.lastName, actor.id))
+			}
+			return jdbcTemplate.batchUpdate(
+					"update t_actor set first_name = ?, last_name = ? where id = ?", batch)
 		}
 
 		// ... additional methods
@@ -3377,8 +4020,8 @@ update calls into batches of the size specified.
 
 The following example shows a batch update that uses a batch size of 100:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3393,14 +4036,32 @@ The following example shows a batch update that uses a batch size of 100:
 					"update t_actor set first_name = ?, last_name = ? where id = ?",
 					actors,
 					100,
-					new ParameterizedPreparedStatementSetter<Actor>() {
-						public void setValues(PreparedStatement ps, Actor argument) throws SQLException {
-							ps.setString(1, argument.getFirstName());
-							ps.setString(2, argument.getLastName());
-							ps.setLong(3, argument.getId().longValue());
-						}
+					(PreparedStatement ps, Actor actor) -> {
+						ps.setString(1, actor.getFirstName());
+						ps.setString(2, actor.getLastName());
+						ps.setLong(3, actor.getId().longValue());
 					});
 			return updateCounts;
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun batchUpdate(actors: List<Actor>): Array<IntArray> {
+			return jdbcTemplate.batchUpdate(
+						"update t_actor set first_name = ?, last_name = ? where id = ?",
+						actors, 100) { ps, argument ->
+				ps.setString(1, argument.firstName)
+				ps.setString(2, argument.lastName)
+				ps.setLong(3, argument.id)
+			}
 		}
 
 		// ... additional methods
@@ -3439,16 +4100,14 @@ Configuration methods for this class follow the `fluid` style that returns the i
 of the `SimpleJdbcInsert`, which lets you chain all configuration methods. The following
 example uses only one configuration method (we show examples of multiple methods later):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource).withTableName("t_actor");
 		}
 
@@ -3458,6 +4117,24 @@ example uses only one configuration method (we show examples of multiple methods
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
 			insertActor.execute(parameters);
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource).withTableName("t_actor")
+
+		fun add(actor: Actor) {
+			val parameters = mutableMapOf<String, Any>()
+			parameters["id"] = actor.id
+			parameters["first_name"] = actor.firstName
+			parameters["last_name"] = actor.lastName
+			insertActor.execute(parameters)
 		}
 
 		// ... additional methods
@@ -3479,16 +4156,14 @@ the `SimpleJdbcInsert`, in addition to specifying the table name, it specifies t
 of the generated key column with the `usingGeneratedKeyColumns` method. The following
 listing shows how it works:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -3500,6 +4175,25 @@ listing shows how it works:
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);
 			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor").usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = mapOf(
+					"first_name" to actor.firstName,
+					"last_name" to actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters);
+			return actor.copy(id = newId.toLong())
 		}
 
 		// ... additional methods
@@ -3521,16 +4215,14 @@ use a `KeyHolder` that is returned from the `executeAndReturnKeyHolder` method.
 You can limit the columns for an insert by specifying a list of column names with the
 `usingColumns` method, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingColumns("first_name", "last_name")
@@ -3543,6 +4235,27 @@ You can limit the columns for an insert by specifying a list of column names wit
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);
 			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingColumns("first_name", "last_name")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = mapOf(
+					"first_name" to actor.firstName,
+					"last_name" to actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters);
+			return actor.copy(id = newId.toLong())
 		}
 
 		// ... additional methods
@@ -3563,16 +4276,14 @@ which is a very convenient class if you have a JavaBean-compliant class that con
 your values. It uses the corresponding getter method to extract the parameter
 values. The following example shows how to use `BeanPropertySqlParameterSource`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -3587,20 +4298,36 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 		// ... additional methods
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = BeanPropertySqlParameterSource(actor)
+			val newId = insertActor.executeAndReturnKey(parameters)
+			return actor.copy(id = newId.toLong())
+		}
+
+		// ... additional methods
+	}
+----
 
 Another option is the `MapSqlParameterSource` that resembles a `Map` but provides a more
 convenient `addValue` method that can be chained. The following example shows how to use it:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcInsert insertActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.insertActor = new SimpleJdbcInsert(dataSource)
 					.withTableName("t_actor")
 					.usingGeneratedKeyColumns("id");
@@ -3612,6 +4339,26 @@ convenient `addValue` method that can be chained. The following example shows ho
 					.addValue("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);
 			actor.setId(newId.longValue());
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val insertActor = SimpleJdbcInsert(dataSource)
+				.withTableName("t_actor")
+				.usingGeneratedKeyColumns("id")
+
+		fun add(actor: Actor): Actor {
+			val parameters = MapSqlParameterSource()
+						.addValue("first_name", actor.firstName)
+						.addValue("last_name", actor.lastName)
+			val newId = insertActor.executeAndReturnKey(parameters)
+			return actor.copy(id = newId.toLong())
 		}
 
 		// ... additional methods
@@ -3634,8 +4381,7 @@ from a MySQL database. The example procedure reads a specified actor entry and r
 `first_name`, `last_name`, and `birth_date` columns in the form of `out` parameters.
 The following listing shows the first example:
 
-[source,sql,indent=0]
-[subs="verbatim,quotes"]
+[source,sql,indent=0,subs="verbatim,quotes"]
 ----
 	CREATE PROCEDURE read_actor (
 		IN in_id INTEGER,
@@ -3660,16 +4406,14 @@ The following example of a `SimpleJdbcCall` configuration uses the preceding sto
 procedure (the only configuration option, in addition to the `DataSource`, is the name
 of the stored procedure):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
-		private JdbcTemplate jdbcTemplate;
 		private SimpleJdbcCall procReadActor;
 
 		public void setDataSource(DataSource dataSource) {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
 			this.procReadActor = new SimpleJdbcCall(dataSource)
 					.withProcedureName("read_actor");
 		}
@@ -3687,6 +4431,28 @@ of the stored procedure):
 		}
 
 		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val procReadActor = SimpleJdbcCall(dataSource)
+				.withProcedureName("read_actor")
+
+
+		fun readActor(id: Long): Actor {
+			val source = MapSqlParameterSource().addValue("in_id", id)
+			val output = procReadActor.execute(source)
+			return Actor(
+					id,
+					output["out_first_name"] as String,
+					output["out_last_name"] as String,
+					output["out_birth_date"] as Date)
+		}
+
+			// ... additional methods
 	}
 ----
 
@@ -3712,8 +4478,8 @@ To do the latter, you can create your own `JdbcTemplate` and set the `setResults
 property to `true`. Then you can pass this customized `JdbcTemplate` instance into
 the constructor of your `SimpleJdbcCall`. The following example shows this configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3726,6 +4492,18 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 					.withProcedureName("read_actor");
 		}
 
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private var procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+			isResultsMapCaseInsensitive = true
+		}).withProcedureName("read_actor")
+		
 		// ... additional methods
 	}
 ----
@@ -3759,8 +4537,8 @@ of IN parameter names to include for a given signature.
 The following example shows a fully declared procedure call and uses the information from
 the preceding example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3784,6 +4562,26 @@ the preceding example:
 		// ... additional methods
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+			private val procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+				isResultsMapCaseInsensitive = true
+			}).withProcedureName("read_actor")
+					.withoutProcedureColumnMetaDataAccess()
+					.useInParameterNames("in_id")
+					.declareParameters(
+							SqlParameter("in_id", Types.NUMERIC),
+							SqlOutParameter("out_first_name", Types.VARCHAR),
+							SqlOutParameter("out_last_name", Types.VARCHAR),
+							SqlOutParameter("out_birth_date", Types.DATE)
+		)
+
+			// ... additional methods
+	}
+----
 
 The execution and end results of the two examples are the same. The second example specifies all
 details explicitly rather than relying on metadata.
@@ -3798,11 +4596,17 @@ To do so, you typically specify the parameter name and SQL type in the construct
 is specified by using the `java.sql.Types` constants. Earlier in this chapter, we saw declarations
 similar to the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	SqlParameter("in_id", Types.NUMERIC),
+	SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
 
 The first line with the `SqlParameter` declares an IN parameter. You can use IN parameters
@@ -3839,8 +4643,7 @@ not have to retrieve the return value from the results map. A similar convenienc
 parameter. The following example (for MySQL) is based on a stored function named `get_actor_name`
 that returns an actor's full name:
 
-[source,sql,indent=0]
-[subs="verbatim,quotes"]
+[source,sql,indent=0,subs="verbatim,quotes"]
 ----
 	CREATE FUNCTION get_actor_name (in_id INTEGER)
 	RETURNS VARCHAR(200) READS SQL DATA
@@ -3856,8 +4659,8 @@ that returns an actor's full name:
 To call this function, we again create a `SimpleJdbcCall` in the initialization method,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3877,6 +4680,25 @@ as the following example shows:
 					.addValue("in_id", id);
 			String name = funcGetActorName.executeFunction(String.class, in);
 			return name;
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource).apply {
+			isResultsMapCaseInsensitive = true
+		}
+		private val funcGetActorName = SimpleJdbcCall(jdbcTemplate)
+				.withFunctionName("get_actor_name")
+
+		fun getActorName(id: Long): String {
+			val source = MapSqlParameterSource().addValue("in_id", id)
+			return funcGetActorName.executeFunction(String::class.java, source)
 		}
 
 		// ... additional methods
@@ -3904,8 +4726,7 @@ in the results map that is returned from the `execute` statement.
 The next example (for MySQL) uses a stored procedure that takes no IN parameters and returns
 all rows from the `t_actor` table:
 
-[source,sql,indent=0]
-[subs="verbatim,quotes"]
+[source,sql,indent=0,subs="verbatim,quotes"]
 ----
 	CREATE PROCEDURE read_all_actors()
 	BEGIN
@@ -3918,8 +4739,8 @@ to map follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 passing in the required class to map to in the `newInstance` method.
 The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -3937,6 +4758,25 @@ The following example shows how to do so:
 		public List getActorsList() {
 			Map m = procReadAllActors.execute(new HashMap<String, Object>(0));
 			return (List) m.get("actors");
+		}
+
+		// ... additional methods
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class JdbcActorDao(dataSource: DataSource) : ActorDao {
+
+			private val procReadAllActors = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
+				isResultsMapCaseInsensitive = true
+			}).withProcedureName("read_all_actors")
+					.returningResultSet("actors",
+							BeanPropertyRowMapper.newInstance(Actor::class.java))
+
+		fun getActorsList(): List<Actor> {
+			val m = procReadAllActors.execute(mapOf<String, Any>())
+			return m["actors"] as List<Actor>
 		}
 
 		// ... additional methods
@@ -3990,8 +4830,8 @@ abstract `mapRow(..)` method to convert each row of the supplied `ResultSet` int
 object of the type specified. The following example shows a custom query that maps the
 data from the `t_actor` relation to an instance of the `Actor` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ActorMappingQuery extends MappingSqlQuery<Actor> {
 
@@ -4009,8 +4849,25 @@ data from the `t_actor` relation to an instance of the `Actor` class:
 			actor.setLastName(rs.getString("last_name"));
 			return actor;
 		}
-
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ActorMappingQuery(ds: DataSource) : MappingSqlQuery<Actor>(ds, "select id, first_name, last_name from t_actor where id = ?") {
+
+		init {
+			declareParameter(SqlParameter("id", Types.INTEGER))
+			compile()
+		}
+
+		override fun mapRow(rs: ResultSet, rowNumber: Int) = Actor(
+				rs.getLong("id"),
+				rs.getString("first_name"),
+				rs.getString("last_name")
+		)
+	}
+
 ----
 
 The class extends `MappingSqlQuery` parameterized with the `Actor` type. The constructor
@@ -4026,8 +4883,8 @@ thread-safe after it is compiled, so, as long as these instances are created whe
 is initialized, they can be kept as instance variables and be reused. The following
 example shows how to define such a class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	private ActorMappingQuery actorMappingQuery;
 
@@ -4040,6 +4897,13 @@ example shows how to define such a class:
 		return actorMappingQuery.findObject(id);
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	private val actorMappingQuery = ActorMappingQuery(dataSource)
+
+	fun getCustomer(id: Long) = actorMappingQuery.findObject(id)
+----
 
 The method in the preceding example retrieves the customer with the `id` that is passed in as the
 only parameter. Since we want only one object to be returned, we call the `findObject` convenience
@@ -4048,13 +4912,19 @@ list of objects and took additional parameters, we would use one of the `execute
 methods that takes an array of parameter values passed in as varargs. The following
 example shows such a method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public List<Actor> searchForActors(int age, String namePattern) {
 		List<Actor> actors = actorSearchMappingQuery.execute(age, namePattern);
 		return actors;
 	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun searchForActors(age: Int, namePattern: String) =
+				actorSearchMappingQuery.execute(age, namePattern)
 ----
 
 
@@ -4070,8 +4940,8 @@ However, you do not have to subclass the `SqlUpdate`
 class, since it can easily be parameterized by setting SQL and declaring parameters.
 The following example creates a custom update method named `execute`:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.sql.Types;
 	import javax.sql.DataSource;
@@ -4098,6 +4968,34 @@ The following example creates a custom update method named `execute`:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.sql.Types
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.SqlParameter
+	import org.springframework.jdbc.`object`.SqlUpdate
+
+	class UpdateCreditRating(ds: DataSource) : SqlUpdate() {
+
+		init {
+			setDataSource(ds)
+			sql = "update customer set credit_rating = ? where id = ?"
+			declareParameter(SqlParameter("creditRating", Types.NUMERIC))
+			declareParameter(SqlParameter("id", Types.NUMERIC))
+			compile()
+		}
+
+		/**
+		* @param id for the Customer to be updated
+		* @param rating the new value for credit rating
+		* @return number of rows updated
+		*/
+		fun execute(id: Int, rating: Int): Int {
+			return update(rating, id)
+		}
+	}
+----
 
 
 [[jdbc-StoredProcedure]]
@@ -4114,11 +5012,17 @@ To define a parameter for the `StoredProcedure` class, you can use an `SqlParame
 of its subclasses. You must specify the parameter name and SQL type in the constructor,
 as the following code snippet shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	SqlParameter("in_id", Types.NUMERIC),
+	SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
 
 The SQL type is specified using the `java.sql.Types` constants.
@@ -4148,8 +5052,8 @@ returned date from the results `Map`. The results `Map` has an entry for each de
 output parameter (in this case, only one) by using the parameter name as the key.
 The following listing shows our custom StoredProcedure class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -4195,12 +5099,49 @@ The following listing shows our custom StoredProcedure class:
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.sql.Types
+	import java.util.Date
+	import java.util.Map
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.object.StoredProcedure
+
+	class StoredProcedureDao(dataSource: DataSource) {
+
+		private val SQL = "sysdate"
+
+		private val getSysdate = GetSysdateProcedure(dataSource)
+
+		val sysdate: Date
+			get() = getSysdate.execute()
+
+		private inner class GetSysdateProcedure(dataSource: DataSource) : StoredProcedure() {
+
+			init {
+				setDataSource(dataSource)
+				isFunction = true
+				sql = SQL
+				declareParameter(SqlOutParameter("date", Types.DATE))
+				compile()
+			}
+
+			fun execute(): Date {
+				// the 'sysdate' sproc has no input parameters, so an empty Map is supplied...
+				val results = execute(mutableMapOf<String, Any>())
+				return results["date"] as Date
+			}
+		}
+	}
+----
 
 The following example of a `StoredProcedure` has two output parameters (in this case,
 Oracle REF cursors):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.util.HashMap;
 	import java.util.Map;
@@ -4226,6 +5167,33 @@ Oracle REF cursors):
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.util.HashMap
+	import javax.sql.DataSource
+	import oracle.jdbc.OracleTypes
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.`object`.StoredProcedure
+
+	class TitlesAndGenresStoredProcedure(dataSource: DataSource) : StoredProcedure(dataSource, SPROC_NAME) {
+
+		companion object {
+			private const val SPROC_NAME = "AllTitlesAndGenres"
+		}
+
+		init {
+			declareParameter(SqlOutParameter("titles", OracleTypes.CURSOR, TitleMapper()))
+			declareParameter(SqlOutParameter("genres", OracleTypes.CURSOR, GenreMapper()))
+			compile()
+		}
+
+		fun execute(): Map<String, Any> {
+			// again, this sproc has no input parameters, so an empty Map is supplied
+			return super.execute(HashMap<String, Any>())
+		}
+	}
+----
 
 Notice how the overloaded variants of the `declareParameter(..)` method that have been
 used in the `TitlesAndGenresStoredProcedure` constructor are passed `RowMapper`
@@ -4235,8 +5203,8 @@ functionality. The next two examples provide code for the two `RowMapper` implem
 The `TitleMapper` class maps a `ResultSet` to a `Title` domain object for each row in
 the supplied `ResultSet`, as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -4253,12 +5221,25 @@ the supplied `ResultSet`, as follows:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.sql.ResultSet
+	import com.foo.domain.Title
+	import org.springframework.jdbc.core.RowMapper
+
+	class TitleMapper : RowMapper<Title> {
+
+		override fun mapRow(rs: ResultSet, rowNum: Int) =
+				Title(rs.getLong("id"), rs.getString("name"))
+	}
+----
 
 The `GenreMapper` class maps a `ResultSet` to a `Genre` domain object for each row in
 the supplied `ResultSet`, as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -4272,13 +5253,27 @@ the supplied `ResultSet`, as follows:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.sql.ResultSet
+	import com.foo.domain.Genre
+	import org.springframework.jdbc.core.RowMapper
+
+	class GenreMapper : RowMapper<Genre> {
+		
+		override fun mapRow(rs: ResultSet, rowNum: Int): Genre {
+			return Genre(rs.getString("name"))
+		}
+	}
+----
 
 To pass parameters to a stored procedure that has one or more input parameters in its
 definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
 delegate to the untyped `execute(Map)` method in the superclass, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -4307,6 +5302,34 @@ delegate to the untyped `execute(Map)` method in the superclass, as the followin
 			inputs.put(CUTOFF_DATE_PARAM, cutoffDate);
 			return super.execute(inputs);
 		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import java.sql.Types
+	import java.util.Date
+	import javax.sql.DataSource
+	import oracle.jdbc.OracleTypes
+	import org.springframework.jdbc.core.SqlOutParameter
+	import org.springframework.jdbc.core.SqlParameter
+	import org.springframework.jdbc.`object`.StoredProcedure
+
+	class TitlesAfterDateStoredProcedure(dataSource: DataSource) : StoredProcedure(dataSource, SPROC_NAME) {
+
+		companion object {
+			private const val SPROC_NAME = "TitlesAfterDate"
+			private const val CUTOFF_DATE_PARAM = "cutoffDate"
+		}
+
+		init {
+			declareParameter(SqlParameter(CUTOFF_DATE_PARAM, Types.DATE))
+			declareParameter(SqlOutParameter("titles", OracleTypes.CURSOR, TitleMapper()))
+			compile()
+		}
+
+		fun execute(cutoffDate: Date) = super.execute(
+				mapOf<String, Any>(CUTOFF_DATE_PARAM to cutoffDate))
 	}
 ----
 
@@ -4377,8 +5400,8 @@ dependency injection.
 
 The following example shows how to create and insert a BLOB:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	final File blobIn = new File("spring2004.jpg");
 	final InputStream blobIs = new FileInputStream(blobIn);
@@ -4388,11 +5411,11 @@ The following example shows how to create and insert a BLOB:
 
 	jdbcTemplate.execute(
 		"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-		new AbstractLobCreatingPreparedStatementCallback(lobHandler) {  # <1>
+		new AbstractLobCreatingPreparedStatementCallback(lobHandler) {  // <1>
 			protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
 				ps.setLong(1, 1L);
-				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());  # <2>
-				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());  # <3>
+				lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());  // <2>
+				lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());  // <3>
 			}
 		}
 	);
@@ -4400,7 +5423,32 @@ The following example shows how to create and insert a BLOB:
 	blobIs.close();
 	clobReader.close();
 ----
+<1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
+<2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
+<3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val blobIn = File("spring2004.jpg")
+	val blobIs = FileInputStream(blobIn)
+	val clobIn = File("large.txt")
+	val clobIs = FileInputStream(clobIn)
+	val clobReader = InputStreamReader(clobIs)
+
+	jdbcTemplate.execute(
+			"INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
+			object: AbstractLobCreatingPreparedStatementCallback(lobHandler) {  // <1>
+				override fun setValues(ps: PreparedStatement, lobCreator: LobCreator) {
+					ps.setLong(1, 1L)
+					lobCreator.setClobAsCharacterStream(ps, 2, clobReader, clobIn.length().toInt())  // <2>
+					lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, blobIn.length().toInt())  // <3>
+				}
+			}
+	)
+	blobIs.close()
+	clobReader.close()
+----
 <1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
@@ -4423,22 +5471,33 @@ Now it is time to read the LOB data from the database. Again, you use a `JdbcTem
 with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
 		new RowMapper<Map<String, Object>>() {
 			public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
 				Map<String, Object> results = new HashMap<String, Object>();
-				String clobText = lobHandler.getClobAsString(rs, "a_clob");  # <1>
+				String clobText = lobHandler.getClobAsString(rs, "a_clob");  // <1>
 				results.put("CLOB", clobText);
-				byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");  # <2>
+				byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");  // <2>
 				results.put("BLOB", blobBytes);
 				return results;
 			}
 		});
 ----
+<1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
+<2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table") { rs, _ ->
+		val clobText = lobHandler.getClobAsString(rs, "a_clob")  // <1>
+		val blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob")  // <2>
+		mapOf("CLOB" to clobText, "BLOB" to blobBytes)
+	}
+----
 <1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
 <2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
 
@@ -4476,32 +5535,46 @@ database. To accommodate these types, Spring provides a `SqlReturnType` for hand
 them when they are returned from the stored procedure call and `SqlTypeValue` when they
 are passed in as a parameter to the stored procedure.
 
-The `SqlReturnType` interface has a single method (named
-`getTypeValue`) that must be implemented. This interface is used as part of the
-declaration of an `SqlOutParameter`. The following example shows returning the value of an Oracle `STRUCT` object of the user
+The `SqlReturnType` interface has a single method (named `getTypeValue`) that must be
+implemented. This interface is used as part of the declaration of an `SqlOutParameter`.
+The following example shows returning the value of an Oracle `STRUCT` object of the user
 declared type `ITEM_TYPE`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class TestItemStoredProcedure extends StoredProcedure {
 
 		public TestItemStoredProcedure(DataSource dataSource) {
-			...
+			// ...
 			declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
-				new SqlReturnType() {
-					public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) throws SQLException {
-						STRUCT struct = (STRUCT) cs.getObject(colIndx);
-						Object[] attr = struct.getAttributes();
-						TestItem item = new TestItem();
-						item.setId(((Number) attr[0]).longValue());
-						item.setDescription((String) attr[1]);
-						item.setExpirationDate((java.util.Date) attr[2]);
-						return item;
-					}
+				(CallableStatement cs, int colIndx, int sqlType, String typeName) -> {
+					STRUCT struct = (STRUCT) cs.getObject(colIndx);
+					Object[] attr = struct.getAttributes();
+					TestItem item = new TestItem();
+					item.setId(((Number) attr[0]).longValue());
+					item.setDescription((String) attr[1]);
+					item.setExpirationDate((java.util.Date) attr[2]);
+					return item;
 				}));
-			...
+			// ...
 		}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
+
+		init {
+			// ...
+			declareParameter(SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE") { cs, colIndx, sqlType, typeName ->
+				val struct = cs.getObject(colIndx) as STRUCT
+				val attr = struct.getAttributes()
+				TestItem((attr[0] as Long, attr[1] as String, attr[2] as Date)
+			})
+			// ...
+		}
+	}
 ----
 
 You can use `SqlTypeValue` to pass the value of a Java object (such as `TestItem`) to a
@@ -4510,8 +5583,8 @@ stored procedure. The `SqlTypeValue` interface has a single method (named
 can use it to create database-specific objects, such as `StructDescriptor` instances
 or `ArrayDescriptor` instances. The following example creates a `StructDescriptor` instance:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	final TestItem testItem = new TestItem(123L, "A test item",
 			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
@@ -4529,6 +5602,20 @@ or `ArrayDescriptor` instances. The following example creates a `StructDescripto
 		}
 	};
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val (id, description, expirationDate) = TestItem(123L, "A test item",
+			SimpleDateFormat("yyyy-M-d").parse("2010-12-31"))
+
+	val value = object : AbstractSqlTypeValue() {
+		override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
+			val itemDescriptor = StructDescriptor(typeName, conn)
+			return STRUCT(itemDescriptor, conn,
+					arrayOf(id, description, java.sql.Date(expirationDate.time)))
+		}
+	}
+----
 
 You can now add this `SqlTypeValue` to the `Map` that contains the input parameters for the
 `execute` call of the stored procedure.
@@ -4538,8 +5625,8 @@ procedure. Oracle has its own internal `ARRAY` class that must be used in this c
 you can use the `SqlTypeValue` to create an instance of the Oracle `ARRAY` and populate
 it with values from the Java `ARRAY`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	final Long[] ids = new Long[] {1L, 2L};
 
@@ -4550,6 +5637,22 @@ it with values from the Java `ARRAY`, as the following example shows:
 			return idArray;
 		}
 	};
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
+
+		init {
+			val ids = arrayOf(1L, 2L)
+			val value = object : AbstractSqlTypeValue() {
+				override fun createTypeValue(conn: Connection, sqlType: Int, typeName: String?): Any {
+					val arrayDescriptor = ArrayDescriptor(typeName, conn)
+					return ARRAY(arrayDescriptor, conn, ids)
+				}
+			}
+		}
+	}
 ----
 
 
@@ -4578,8 +5681,7 @@ testability, and the ability to rapidly evolve your SQL during development.
 If you want to expose an embedded database instance as a bean in a Spring
 `ApplicationContext`, you can use the `embedded-database` tag in the `spring-jdbc` namespace:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jdbc:embedded-database id="dataSource" generate-name="true">
 		<jdbc:script location="classpath:schema.sql"/>
@@ -4601,21 +5703,37 @@ The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an em
 database programmatically. You can use this when you need to create an embedded database in a
 stand-alone environment or in a stand-alone integration test, as in the following example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
-		.generateUniqueName(true)
-		.setType(H2)
-		.setScriptEncoding("UTF-8")
-		.ignoreFailedDrops(true)
-		.addScript("schema.sql")
-		.addScripts("user_data.sql", "country_data.sql")
-		.build();
+	EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+			.generateUniqueName(true)
+			.setType(H2)
+			.setScriptEncoding("UTF-8")
+			.ignoreFailedDrops(true)
+			.addScript("schema.sql")
+			.addScripts("user_data.sql", "country_data.sql")
+			.build();
 
-// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
+	// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
 
-db.shutdown()
+	db.shutdown()
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val db = EmbeddedDatabaseBuilder()
+			.generateUniqueName(true)
+			.setType(H2)
+			.setScriptEncoding("UTF-8")
+			.ignoreFailedDrops(true)
+			.addScript("schema.sql")
+			.addScripts("user_data.sql", "country_data.sql")
+			.build()
+
+	// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
+
+	db.shutdown()
 ----
 
 See the {api-spring-framework}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
@@ -4624,24 +5742,43 @@ for further details on all supported options.
 You can also use the `EmbeddedDatabaseBuilder` to create an embedded database by using Java
 configuration, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-@Configuration
-public class DataSourceConfig {
+	@Configuration
+	public class DataSourceConfig {
 
-	@Bean
-	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder()
-				.generateUniqueName(true)
-				.setType(H2)
-				.setScriptEncoding("UTF-8")
-				.ignoreFailedDrops(true)
-				.addScript("schema.sql")
-				.addScripts("user_data.sql", "country_data.sql")
-				.build();
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.setType(H2)
+					.setScriptEncoding("UTF-8")
+					.ignoreFailedDrops(true)
+					.addScript("schema.sql")
+					.addScripts("user_data.sql", "country_data.sql")
+					.build();
+		}
 	}
-}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class DataSourceConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.setType(H2)
+					.setScriptEncoding("UTF-8")
+					.ignoreFailedDrops(true)
+					.addScript("schema.sql")
+					.addScripts("user_data.sql", "country_data.sql")
+					.build()
+		}
+	}
 ----
 
 
@@ -4690,14 +5827,14 @@ configuring the embedded database as a bean in the Spring `ApplicationContext` a
 in <<jdbc-embedded-database-xml>> and <<jdbc-embedded-database-java>>. The following listing
 shows the test template:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class DataAccessIntegrationTestTemplate {
 
 		private EmbeddedDatabase db;
 
-		@Before
+		@BeforeEach
 		public void setUp() {
 			// creates an HSQL in-memory database populated from default scripts
 			// classpath:schema.sql and classpath:data.sql
@@ -4713,11 +5850,40 @@ shows the test template:
 			template.query( /* ... */ );
 		}
 
-		@After
+		@AfterEach
 		public void tearDown() {
 			db.shutdown();
 		}
 
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class DataAccessIntegrationTestTemplate {
+
+		private lateinit var db: EmbeddedDatabase
+
+		@BeforeEach
+		fun setUp() {
+			// creates an HSQL in-memory database populated from default scripts
+			// classpath:schema.sql and classpath:data.sql
+			db = EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addDefaultScripts()
+					.build()
+		}
+
+		@Test
+		fun testDataAccess() {
+			val template = JdbcTemplate(db)
+			template.query( /* ... */)
+		}
+
+		@AfterEach
+		fun tearDown() {
+			db.shutdown()
+		}
 	}
 ----
 
@@ -4782,8 +5948,7 @@ an instance that runs on a server somewhere.
 If you want to initialize a database and you can provide a reference to a `DataSource`
 bean, you can use the `initialize-database` tag in the `spring-jdbc` namespace:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jdbc:initialize-database data-source="dataSource">
 		<jdbc:script location="classpath:com/foo/sql/db-schema.sql"/>
@@ -4810,8 +5975,7 @@ namespace provides a few additional options. The first is a flag to switch the
 initialization on and off. You can set this according to the environment (such as pulling a
 boolean value from system properties or from an environment bean). The following example gets a value from a system property:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jdbc:initialize-database data-source="dataSource"
 		enabled="#{systemProperties.INITIALIZE_DATABASE}"> <1>
@@ -4825,8 +5989,7 @@ The second option to control what happens with existing data is to be more toler
 failures. To this end, you can control the ability of the initializer to ignore certain
 errors in the SQL it executes from the scripts, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jdbc:initialize-database data-source="dataSource" ignore-failures="DROPS">
 		<jdbc:script location="..."/>
@@ -4848,8 +6011,7 @@ Each statement should be separated by `;` or a new line if the `;` character is 
 present at all in the script. You can control that globally or script by script, as the
 following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jdbc:initialize-database data-source="dataSource" separator="@@"> <1>
 		<jdbc:script location="classpath:com/myapp/sql/db-schema.sql" separator=";"/> <2>
@@ -5054,8 +6216,8 @@ do not need any special exception treatment (or both). However, Spring lets exce
 translation be applied transparently through the `@Repository` annotation. The following
 examples (one for Java configuration and one for XML configuration) show how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	@Repository
 	public class ProductDaoImpl implements ProductDao {
@@ -5064,9 +6226,16 @@ examples (one for Java configuration and one for XML configuration) show how to 
 
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository
+	class ProductDaoImpl : ProductDao {
+		// class body here...
+	}
+----
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5118,8 +6287,7 @@ definition in the <<orm-hibernate-straight, next section>>.
 The following excerpt from an XML application context definition shows how to set up a
 JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5151,8 +6319,7 @@ Switching from a local Jakarta Commons DBCP `BasicDataSource` to a JNDI-located
 `DataSource` (usually managed by an application server) is only a matter of
 configuration, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<jee:jndi-lookup id="myDataSource" jndi-name="java:comp/env/jdbc/myds"/>
@@ -5189,8 +6356,8 @@ one current `Session` per transaction. This is roughly equivalent to Spring's
 synchronization of one Hibernate `Session` per transaction. A corresponding DAO
 implementation resembles the following example, based on the plain Hibernate API:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -5208,6 +6375,19 @@ implementation resembles the following example, based on the plain Hibernate API
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ProductDaoImpl(private val sessionFactory: SessionFactory) : ProductDao {
+		
+		fun loadProductsByCategory(category: String): Collection<*> {
+			return sessionFactory.currentSession
+					.createQuery("from test.Product product where product.category=?")
+					.setParameter(0, category)
+					.list()
+		}
+	}
+----
 
 This style is similar to that of the Hibernate reference documentation and examples,
 except for holding the `SessionFactory` in an instance variable. We strongly recommend
@@ -5221,8 +6401,7 @@ You can also set up such a DAO in plain Java (for example, in unit tests). To do
 instantiate it and call `setSessionFactory(..)` with the desired factory reference. As a
 Spring bean definition, the DAO would resemble the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5274,8 +6453,8 @@ You can annotate the service layer with `@Transactional` annotations and instruc
 Spring container to find these annotations and provide transactional semantics for
 these annotated methods. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ProductServiceImpl implements ProductService {
 
@@ -5295,7 +6474,21 @@ these annotated methods. The following example shows how to do so:
 		public List<Product> findAllProducts() {
 			return this.productDao.findAllProducts();
 		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ProductServiceImpl(private val productDao: ProductDao) : ProductService {
 
+		@Transactional
+		fun increasePriceOfAllProductsInCategory(category: String) {
+			val productsToChange = productDao.loadProductsByCategory(category)
+			// ...
+		}
+
+		@Transactional(readOnly = true)
+		fun findAllProducts() = productDao.findAllProducts()
 	}
 ----
 
@@ -5303,8 +6496,7 @@ In the container, you need to set up the `PlatformTransactionManager` implementa
 (as a bean) and a `<tx:annotation-driven/>` entry, opting into `@Transactional`
 processing at runtime. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -5348,8 +6540,7 @@ as a bean reference through a `setTransactionManager(..)` method. Also, the
 a transaction manager and a business service definition in a Spring application context
 and an example for a business method implementation:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5365,8 +6556,8 @@ and an example for a business method implementation:
 	</beans>
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ProductServiceImpl implements ProductService {
 
@@ -5388,6 +6579,22 @@ and an example for a business method implementation:
 					// do the price increase...
 				}
 			});
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ProductServiceImpl(transactionManager: PlatformTransactionManager,
+							private val productDao: ProductDao) : ProductService {
+		
+		private val transactionTemplate = TransactionTemplate(transactionManager)
+
+		fun increasePriceOfAllProductsInCategory(category: String) {
+			transactionTemplate.execute {
+				val productsToChange = productDao.loadProductsByCategory(category)
+				// do the price increase...
+			}
 		}
 	}
 ----
@@ -5585,8 +6792,7 @@ factory bean uses the JPA `PersistenceProvider` auto-detection mechanism (accord
 JPA's Java SE bootstrapping) and, in most cases, requires you to specify only the
 persistence unit name. The following XML example configures such a bean:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="myEmf" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
@@ -5612,8 +6818,7 @@ provider than the server's default.
 Obtaining an `EntityManagerFactory` from JNDI (for example in a Java EE environment),
 is a matter of changing the XML configuration, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<jee:jndi-lookup id="myEmf" jndi-name="persistence/myPersistenceUnit"/>
@@ -5660,8 +6865,7 @@ possible to work with custom data sources outside of JNDI and to control the wea
 process. The following example shows a typical bean definition for a
 `LocalContainerEntityManagerFactoryBean`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -5675,8 +6879,7 @@ process. The following example shows a typical bean definition for a
 
 The following example shows a typical `persistence.xml` file:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
 		<persistence-unit name="myUnit" transaction-type="RESOURCE_LOCAL">
@@ -5737,14 +6940,13 @@ generic or customized to various platforms (such as Tomcat, JBoss and WebSphere)
 
 As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
 a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation of the
-`context:load-time-weaver` XML element. Such a global weaver is automatically picked u
+`context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
 shows the preferred way of setting up a load-time weaver, delivering auto-detection
 of the platform (e.g. Tomcat's weaving-capable class loader or Spring's JVM agent)
 and automatic propagation of the weaver to all weaver-aware beans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:load-time-weaver/>
 	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -5755,8 +6957,7 @@ and automatic propagation of the weaver to all weaver-aware beans:
 However, you can, if needed, manually specify a dedicated weaver through the
 `loadTimeWeaver` property, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="loadTimeWeaver">
@@ -5782,8 +6983,7 @@ parsed and later retrieved through the persistence unit name. (By default, the c
 is searched for `META-INF/persistence.xml` files.) The following example configures
 multiple locations:
 
-[source,xml,indent=0]
-[subs="verbatim"]
+[source,xml,indent=0,subs="verbatim"]
 ----
 	<bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
 		<property name="persistenceXmlLocations">
@@ -5822,8 +7022,7 @@ affect all hosted units) or programmatically (through the
 `LocalContainerEntityManagerFactoryBean` supports background bootstrapping through
 the `bootstrapExecutor` property, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="bootstrapExecutor">
@@ -5856,8 +7055,8 @@ using an injected `EntityManagerFactory` or `EntityManager`. Spring can understa
 if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain JPA DAO implementation
 that uses the `@PersistenceUnit` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -5877,13 +7076,32 @@ that uses the `@PersistenceUnit` annotation:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ProductDaoImpl : ProductDao {
+
+		private lateinit var emf: EntityManagerFactory
+
+		@PersistenceUnit
+		fun setEntityManagerFactory(emf: EntityManagerFactory) {
+			this.emf = emf
+		}
+
+		fun loadProductsByCategory(category: String): Collection<*> {
+			val em = this.emf.createEntityManager()
+			val query = em.createQuery("from Product as p where p.category = ?1");
+			query.setParameter(1, category);
+			return query.resultList;
+		}
+	}
+----
 
 The preceding DAO has no dependency on Spring and still fits nicely into a Spring
 application context. Moreover, the DAO takes advantage of annotations to require the
 injection of the default `EntityManagerFactory`, as the following example bean definition shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5903,8 +7121,7 @@ post-processors for annotation-based configuration, including
 
 Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -5921,8 +7138,8 @@ the factory. You can avoid this by requesting a transactional `EntityManager` (a
 called a "`shared EntityManager`" because it is a shared, thread-safe proxy for the actual
 transactional EntityManager) to be injected instead of the factory. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -5933,6 +7150,21 @@ transactional EntityManager) to be injected instead of the factory. The followin
 			Query query = em.createQuery("from Product as p where p.category = :category");
 			query.setParameter("category", category);
 			return query.getResultList();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ProductDaoImpl : ProductDao {
+
+		@PersistenceContext
+		private lateinit var em: EntityManager
+
+		fun loadProductsByCategory(category: String): Collection<*> {
+			val query = em.createQuery("from Product as p where p.category = :category")
+			query.setParameter("category", category)
+			return query.resultList
 		}
 	}
 ----
@@ -6171,8 +7403,8 @@ the two Spring interfaces used for this purpose.
 Spring abstracts all marshalling operations behind the
 `org.springframework.oxm.Marshaller` interface, the main method of which follows:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Marshaller {
 
@@ -6182,6 +7414,22 @@ Spring abstracts all marshalling operations behind the
 		void marshal(Object graph, Result result) throws XmlMappingException, IOException;
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Marshaller {
+
+		/**
+		* Marshal the object graph with the given root into the provided Result.
+		*/
+		@Throws(XmlMappingException::class, IOException::class)
+		fun marshal(
+				graph: Any,
+				result: Result
+		)
+	}
+----
+
 
 The `Marshaller` interface has one main method, which marshals the given object to a
 given `javax.xml.transform.Result`. The result is a tagging interface that basically
@@ -6215,8 +7463,8 @@ to determine how your O-X technology manages this.
 Similar to the `Marshaller`, we have the `org.springframework.oxm.Unmarshaller`
 interface, which the following listing shows:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Unmarshaller {
 
@@ -6224,6 +7472,18 @@ interface, which the following listing shows:
 		 * Unmarshal the given provided Source into an object graph.
 		 */
 		Object unmarshal(Source source) throws XmlMappingException, IOException;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Unmarshaller {
+
+		/**
+		* Unmarshal the given provided Source into an object graph.
+		*/
+		@Throws(XmlMappingException::class, IOException::class)
+		fun unmarshal(source: Source): Any
 	}
 ----
 
@@ -6276,8 +7536,8 @@ You can use Spring's OXM for a wide variety of situations. In the following exam
 use it to marshal the settings of a Spring-managed application as an XML file. In the following example, we
 use a simple JavaBean to represent the settings:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public class Settings {
 
@@ -6292,14 +7552,21 @@ use a simple JavaBean to represent the settings:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class Settings {
+		var isFooEnabled: Boolean = false
+	}
+----
 
 The application class uses this bean to store its settings. Besides a main method, the
 class has two methods: `saveSettings()` saves the settings bean to a file named
 `settings.xml`, and `loadSettings()` loads these settings again. The following `main()` method
 constructs a Spring application context and calls these two methods:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	import java.io.FileInputStream;
 	import java.io.FileOutputStream;
@@ -6347,12 +7614,38 @@ constructs a Spring application context and calls these two methods:
 		}
 	}
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class Application {
+
+		lateinit var marshaller: Marshaller
+
+		lateinit var unmarshaller: Unmarshaller
+
+		fun saveSettings() {
+			FileOutputStream(FILE_NAME).use { outputStream -> marshaller.marshal(settings, StreamResult(outputStream)) }
+		}
+
+		fun loadSettings() {
+			FileInputStream(FILE_NAME).use { inputStream -> settings = unmarshaller.unmarshal(StreamSource(inputStream)) as Settings }
+		}
+	}
+
+	private const val FILE_NAME = "settings.xml"
+
+	fun main(args: Array<String>) {
+		val appContext = ClassPathXmlApplicationContext("applicationContext.xml")
+		val application = appContext.getBean("application") as Application
+		application.saveSettings()
+		application.loadSettings()
+	}
+----
 
 The `Application` requires both a `marshaller` and an `unmarshaller` property to be set. We
 can do so by using the following `applicationContext.xml`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="application" class="Application">
@@ -6372,8 +7665,7 @@ application.
 
 This sample application produces the following `settings.xml` file:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<settings foo-enabled="false"/>
@@ -6411,8 +7703,7 @@ The schema makes the following elements available:
 Each tag is explained in its respective marshaller's section. As an example, though,
 the configuration of a JAXB2 marshaller might resemble the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>
 ----
@@ -6442,8 +7733,7 @@ names that contain schema derived classes. It also offers a `classesToBeBound` p
 which allows you to set an array of classes to be supported by the marshaller. Schema
 validation is performed by specifying one or more schema resources to the bean, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
@@ -6467,8 +7757,7 @@ validation is performed by specifying one or more schema resources to the bean, 
 The `jaxb2-marshaller` element configures a `org.springframework.oxm.jaxb.Jaxb2Marshaller`,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<oxm:jaxb2-marshaller id="marshaller" contextPath="org.springframework.ws.samples.airline.schema"/>
 ----
@@ -6476,8 +7765,7 @@ as the following example shows:
 Alternatively, you can provide the list of classes to bind to the marshaller by using the
 `class-to-be-bound` child element:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<oxm:jaxb2-marshaller id="marshaller">
 		<oxm:class-to-be-bound name="org.springframework.ws.samples.airline.schema.Airport"/>
@@ -6524,8 +7812,7 @@ interface. To operate, it requires the name of the class to marshal in, which yo
 set using the `targetClass` property. Optionally, you can set the binding name by setting the
 `bindingName` property. In the following example, we bind the `Flights` class:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="jibxFlightsMarshaller" class="org.springframework.oxm.jibx.JibxMarshaller">
@@ -6545,8 +7832,7 @@ property values.
 The `jibx-marshaller` tag configures a `org.springframework.oxm.jibx.JibxMarshaller`,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<oxm:jibx-marshaller id="marshaller" target-class="org.springframework.ws.samples.airline.schema.Flight"/>
 ----
@@ -6589,8 +7875,7 @@ The `XStreamMarshaller` does not require any configuration and can be configured
 application context directly. To further customize the XML, you can set an alias map,
 which consists of string aliases mapped to classes, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
@@ -6614,8 +7899,7 @@ result in security vulnerabilities.
 If you choose to use the `XStreamMarshaller` to unmarshal XML from an external source,
 set the `supportedClasses` property on the `XStreamMarshaller`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="xstreamMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
 		<property name="supportedClasses" value="org.springframework.oxm.xstream.Flight"/>

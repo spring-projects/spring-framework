@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContextManager;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
-import static org.testng.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * <p>
@@ -53,11 +53,13 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 
 
 	private void performCommonAssertions() {
-		assertInTransaction(true);
-		assertNotNull(super.applicationContext,
-			"The application context should have been set due to ApplicationContextAware semantics.");
-		assertNotNull(super.jdbcTemplate,
-			"The JdbcTemplate should have been created in setDataSource() via DI for the DataSource.");
+		assertThatTransaction().isActive();
+		assertThat(super.applicationContext)
+			.as("The application context should have been set due to ApplicationContextAware semantics.")
+			.isNotNull();
+		assertThat(super.jdbcTemplate)
+			.as("The JdbcTemplate should have been created in setDataSource() via DI for the DataSource.")
+			.isNotNull();
 	}
 
 	@Test
@@ -70,15 +72,17 @@ public class DirtiesContextTransactionalTestNGSpringContextTests extends Abstrac
 	@Test(dependsOnMethods = { "dirtyContext" })
 	public void verifyContextWasDirtied() {
 		performCommonAssertions();
-		assertNotSame(super.applicationContext, this.dirtiedApplicationContext,
-			"The application context should have been 'dirtied'.");
+		assertThat(super.applicationContext)
+			.as("The application context should have been 'dirtied'.")
+			.isNotSameAs(this.dirtiedApplicationContext);
 		this.dirtiedApplicationContext = super.applicationContext;
 	}
 
 	@Test(dependsOnMethods = { "verifyContextWasDirtied" })
 	public void verifyContextWasNotDirtied() {
-		assertSame(this.applicationContext, this.dirtiedApplicationContext,
-			"The application context should NOT have been 'dirtied'.");
+		assertThat(this.applicationContext)
+			.as("The application context should NOT have been 'dirtied'.")
+			.isSameAs(this.dirtiedApplicationContext);
 	}
 
 }

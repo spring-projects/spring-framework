@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * @since 4.0
  * @see org.springframework.beans.factory.config.BeanDefinition#getDescription()
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Description {

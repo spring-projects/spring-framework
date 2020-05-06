@@ -20,11 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link CorsConfiguration}.
@@ -38,47 +39,49 @@ public class CorsConfigurationTests {
 	public void setNullValues() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(null);
-		assertNull(config.getAllowedOrigins());
+		assertThat(config.getAllowedOrigins()).isNull();
 		config.setAllowedHeaders(null);
-		assertNull(config.getAllowedHeaders());
+		assertThat(config.getAllowedHeaders()).isNull();
 		config.setAllowedMethods(null);
-		assertNull(config.getAllowedMethods());
+		assertThat(config.getAllowedMethods()).isNull();
 		config.setExposedHeaders(null);
-		assertNull(config.getExposedHeaders());
+		assertThat(config.getExposedHeaders()).isNull();
 		config.setAllowCredentials(null);
-		assertNull(config.getAllowCredentials());
+		assertThat(config.getAllowCredentials()).isNull();
 		config.setMaxAge((Long) null);
-		assertNull(config.getMaxAge());
+		assertThat(config.getMaxAge()).isNull();
 	}
 
 	@Test
 	public void setValues() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
 		config.addAllowedHeader("*");
-		assertEquals(Arrays.asList("*"), config.getAllowedHeaders());
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("*"));
 		config.addAllowedMethod("*");
-		assertEquals(Arrays.asList("*"), config.getAllowedMethods());
+		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList("*"));
 		config.addExposedHeader("header1");
 		config.addExposedHeader("header2");
-		assertEquals(Arrays.asList("header1", "header2"), config.getExposedHeaders());
+		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
 		config.setAllowCredentials(true);
-		assertTrue(config.getAllowCredentials());
+		assertThat((boolean) config.getAllowCredentials()).isTrue();
 		config.setMaxAge(123L);
-		assertEquals(new Long(123), config.getMaxAge());
+		assertThat(config.getMaxAge()).isEqualTo(new Long(123));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void asteriskWildCardOnAddExposedHeader() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.addExposedHeader("*");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				config.addExposedHeader("*"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void asteriskWildCardOnSetExposedHeaders() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setExposedHeaders(Arrays.asList("*"));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				config.setExposedHeaders(Arrays.asList("*")));
 	}
 
 	@Test
@@ -86,7 +89,7 @@ public class CorsConfigurationTests {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(Arrays.asList("*"));
 		config.combine(null);
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
 	}
 
 	@Test
@@ -100,12 +103,12 @@ public class CorsConfigurationTests {
 		config.setAllowCredentials(true);
 		CorsConfiguration other = new CorsConfiguration();
 		config = config.combine(other);
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList("header3"), config.getExposedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.GET.name()), config.getAllowedMethods());
-		assertEquals(new Long(123), config.getMaxAge());
-		assertTrue(config.getAllowCredentials());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1"));
+		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3"));
+		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.GET.name()));
+		assertThat(config.getMaxAge()).isEqualTo(new Long(123));
+		assertThat((boolean) config.getAllowCredentials()).isTrue();
 	}
 
 	@Test  // SPR-15772
@@ -117,26 +120,26 @@ public class CorsConfigurationTests {
 		other.addAllowedMethod(HttpMethod.PUT.name());
 
 		CorsConfiguration combinedConfig = config.combine(other);
-		assertEquals(Arrays.asList("https://domain.com"), combinedConfig.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1"), combinedConfig.getAllowedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.PUT.name()), combinedConfig.getAllowedMethods());
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain.com"));
+		assertThat(combinedConfig.getAllowedHeaders()).isEqualTo(Arrays.asList("header1"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.PUT.name()));
 
 		combinedConfig = other.combine(config);
-		assertEquals(Arrays.asList("https://domain.com"), combinedConfig.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1"), combinedConfig.getAllowedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.PUT.name()), combinedConfig.getAllowedMethods());
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain.com"));
+		assertThat(combinedConfig.getAllowedHeaders()).isEqualTo(Arrays.asList("header1"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.PUT.name()));
 
 		combinedConfig = config.combine(new CorsConfiguration());
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("*"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
-				HttpMethod.POST.name()), combinedConfig.getAllowedMethods());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
+				HttpMethod.POST.name()));
 
 		combinedConfig = new CorsConfiguration().combine(config);
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("*"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
-				HttpMethod.POST.name()), combinedConfig.getAllowedMethods());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(),
+				HttpMethod.POST.name()));
 	}
 
 	@Test
@@ -151,13 +154,13 @@ public class CorsConfigurationTests {
 		other.addExposedHeader("header2");
 		other.addAllowedMethod(HttpMethod.PUT.name());
 		CorsConfiguration combinedConfig = config.combine(other);
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedOrigins());
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedHeaders());
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedMethods());
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedHeaders()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList("*"));
 		combinedConfig = other.combine(config);
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedOrigins());
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedHeaders());
-		assertEquals(Arrays.asList("*"), combinedConfig.getAllowedMethods());
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedHeaders()).isEqualTo(Arrays.asList("*"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList("*"));
 	}
 
 	@Test  // SPR-14792
@@ -177,10 +180,10 @@ public class CorsConfigurationTests {
 		other.addExposedHeader("header3");
 		other.addAllowedMethod(HttpMethod.GET.name());
 		CorsConfiguration combinedConfig = config.combine(other);
-		assertEquals(Arrays.asList("https://domain1.com", "https://domain2.com"), combinedConfig.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1", "header2"), combinedConfig.getAllowedHeaders());
-		assertEquals(Arrays.asList("header3", "header4"), combinedConfig.getExposedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.GET.name(), HttpMethod.PUT.name()), combinedConfig.getAllowedMethods());
+		assertThat(combinedConfig.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain1.com", "https://domain2.com"));
+		assertThat(combinedConfig.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
+		assertThat(combinedConfig.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
+		assertThat(combinedConfig.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.GET.name(), HttpMethod.PUT.name()));
 	}
 
 	@Test
@@ -200,83 +203,81 @@ public class CorsConfigurationTests {
 		other.setMaxAge(456L);
 		other.setAllowCredentials(false);
 		config = config.combine(other);
-		assertEquals(Arrays.asList("https://domain1.com", "https://domain2.com"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1", "header2"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList("header3", "header4"), config.getExposedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.GET.name(), HttpMethod.PUT.name()), config.getAllowedMethods());
-		assertEquals(new Long(456), config.getMaxAge());
-		assertFalse(config.getAllowCredentials());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain1.com", "https://domain2.com"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("header1", "header2"));
+		assertThat(config.getExposedHeaders()).isEqualTo(Arrays.asList("header3", "header4"));
+		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList(HttpMethod.GET.name(), HttpMethod.PUT.name()));
+		assertThat(config.getMaxAge()).isEqualTo(new Long(456));
+		assertThat((boolean) config.getAllowCredentials()).isFalse();
 	}
 
 	@Test
 	public void checkOriginAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(Arrays.asList("*"));
-		assertEquals("*", config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("*");
 		config.setAllowCredentials(true);
-		assertEquals("https://domain.com", config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
 		config.setAllowedOrigins(Arrays.asList("https://domain.com"));
-		assertEquals("https://domain.com", config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
 		config.setAllowCredentials(false);
-		assertEquals("https://domain.com", config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isEqualTo("https://domain.com");
 	}
 
 	@Test
 	public void checkOriginNotAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertNull(config.checkOrigin(null));
-		assertNull(config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin(null)).isNull();
+		assertThat(config.checkOrigin("https://domain.com")).isNull();
 		config.addAllowedOrigin("*");
-		assertNull(config.checkOrigin(null));
+		assertThat(config.checkOrigin(null)).isNull();
 		config.setAllowedOrigins(Arrays.asList("https://domain1.com"));
-		assertNull(config.checkOrigin("https://domain2.com"));
+		assertThat(config.checkOrigin("https://domain2.com")).isNull();
 		config.setAllowedOrigins(new ArrayList<>());
-		assertNull(config.checkOrigin("https://domain.com"));
+		assertThat(config.checkOrigin("https://domain.com")).isNull();
 	}
 
 	@Test
 	public void checkMethodAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertEquals(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD), config.checkHttpMethod(HttpMethod.GET));
+		assertThat(config.checkHttpMethod(HttpMethod.GET)).isEqualTo(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
 		config.addAllowedMethod("GET");
-		assertEquals(Arrays.asList(HttpMethod.GET), config.checkHttpMethod(HttpMethod.GET));
+		assertThat(config.checkHttpMethod(HttpMethod.GET)).isEqualTo(Arrays.asList(HttpMethod.GET));
 		config.addAllowedMethod("POST");
-		assertEquals(Arrays.asList(HttpMethod.GET, HttpMethod.POST), config.checkHttpMethod(HttpMethod.GET));
-		assertEquals(Arrays.asList(HttpMethod.GET, HttpMethod.POST), config.checkHttpMethod(HttpMethod.POST));
+		assertThat(config.checkHttpMethod(HttpMethod.GET)).isEqualTo(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
+		assertThat(config.checkHttpMethod(HttpMethod.POST)).isEqualTo(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
 	}
 
 	@Test
 	public void checkMethodNotAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertNull(config.checkHttpMethod(null));
-		assertNull(config.checkHttpMethod(HttpMethod.DELETE));
+		assertThat(config.checkHttpMethod(null)).isNull();
+		assertThat(config.checkHttpMethod(HttpMethod.DELETE)).isNull();
 		config.setAllowedMethods(new ArrayList<>());
-		assertNull(config.checkHttpMethod(HttpMethod.POST));
+		assertThat(config.checkHttpMethod(HttpMethod.POST)).isNull();
 	}
 
 	@Test
 	public void checkHeadersAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertEquals(Collections.emptyList(), config.checkHeaders(Collections.emptyList()));
+		assertThat(config.checkHeaders(Collections.emptyList())).isEqualTo(Collections.emptyList());
 		config.addAllowedHeader("header1");
 		config.addAllowedHeader("header2");
-		assertEquals(Arrays.asList("header1"), config.checkHeaders(Arrays.asList("header1")));
-		assertEquals(Arrays.asList("header1", "header2"),
-				config.checkHeaders(Arrays.asList("header1", "header2")));
-		assertEquals(Arrays.asList("header1", "header2"),
-				config.checkHeaders(Arrays.asList("header1", "header2", "header3")));
+		assertThat(config.checkHeaders(Arrays.asList("header1"))).isEqualTo(Arrays.asList("header1"));
+		assertThat(config.checkHeaders(Arrays.asList("header1", "header2"))).isEqualTo(Arrays.asList("header1", "header2"));
+		assertThat(config.checkHeaders(Arrays.asList("header1", "header2", "header3"))).isEqualTo(Arrays.asList("header1", "header2"));
 	}
 
 	@Test
 	public void checkHeadersNotAllowed() {
 		CorsConfiguration config = new CorsConfiguration();
-		assertNull(config.checkHeaders(null));
-		assertNull(config.checkHeaders(Arrays.asList("header1")));
+		assertThat(config.checkHeaders(null)).isNull();
+		assertThat(config.checkHeaders(Arrays.asList("header1"))).isNull();
 		config.setAllowedHeaders(Collections.emptyList());
-		assertNull(config.checkHeaders(Arrays.asList("header1")));
+		assertThat(config.checkHeaders(Arrays.asList("header1"))).isNull();
 		config.addAllowedHeader("header2");
 		config.addAllowedHeader("header3");
-		assertNull(config.checkHeaders(Arrays.asList("header1")));
+		assertThat(config.checkHeaders(Arrays.asList("header1"))).isNull();
 	}
 
 	@Test  // SPR-15772
@@ -285,9 +286,9 @@ public class CorsConfigurationTests {
 		config.addAllowedOrigin("https://domain.com");
 		config.addAllowedHeader("header1");
 		config.addAllowedMethod("PATCH");
-		assertEquals(Arrays.asList("*", "https://domain.com"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("*", "header1"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList("GET", "HEAD", "POST", "PATCH"), config.getAllowedMethods());
+		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("*", "https://domain.com"));
+		assertThat(config.getAllowedHeaders()).isEqualTo(Arrays.asList("*", "header1"));
+		assertThat(config.getAllowedMethods()).isEqualTo(Arrays.asList("GET", "HEAD", "POST", "PATCH"));
 	}
 
 }

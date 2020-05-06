@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.jndi;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.mock.jndi.SimpleNamingContext;
+import org.springframework.context.testfixture.jndi.SimpleNamingContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link JndiPropertySource}.
@@ -38,7 +37,7 @@ public class JndiPropertySourceTests {
 	@Test
 	public void nonExistentProperty() {
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties");
-		assertThat(ps.getProperty("bogus"), nullValue());
+		assertThat(ps.getProperty("bogus")).isNull();
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class JndiPropertySourceTests {
 		jndiLocator.setJndiTemplate(jndiTemplate);
 
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
-		assertThat(ps.getProperty("p1"), equalTo("v1"));
+		assertThat(ps.getProperty("p1")).isEqualTo("v1");
 	}
 
 	@Test
@@ -76,7 +75,7 @@ public class JndiPropertySourceTests {
 		jndiLocator.setJndiTemplate(jndiTemplate);
 
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
-		assertThat(ps.getProperty("p1"), equalTo("v1"));
+		assertThat(ps.getProperty("p1")).isEqualTo("v1");
 	}
 
 	@Test
@@ -90,7 +89,7 @@ public class JndiPropertySourceTests {
 		jndiLocator.setResourceRef(true);
 
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
-		assertThat(ps.getProperty("propertyKey:defaultValue"), nullValue());
+		assertThat(ps.getProperty("propertyKey:defaultValue")).isNull();
 	}
 
 	@Test
@@ -98,14 +97,14 @@ public class JndiPropertySourceTests {
 		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate() {
 			@Override
 			public Object lookup(String jndiName) throws NamingException {
-				assertEquals("my:key", jndiName);
+				assertThat(jndiName).isEqualTo("my:key");
 				return "my:value";
 			}
 		};
 		jndiLocator.setResourceRef(false);
 
 		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
-		assertThat(ps.getProperty("my:key"), equalTo("my:value"));
+		assertThat(ps.getProperty("my:key")).isEqualTo("my:value");
 	}
 
 }

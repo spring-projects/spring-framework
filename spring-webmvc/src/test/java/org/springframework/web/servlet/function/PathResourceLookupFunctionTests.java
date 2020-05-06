@@ -21,13 +21,13 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -47,10 +47,10 @@ public class PathResourceLookupFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 
 		Optional<Resource> result = function.apply(request);
-		assertTrue(result.isPresent());
+		assertThat(result.isPresent()).isTrue();
 
 		File expected = new ClassPathResource("response.txt", getClass()).getFile();
-		assertEquals(expected, result.get().getFile());
+		assertThat(result.get().getFile()).isEqualTo(expected);
 	}
 
 	@Test
@@ -66,12 +66,12 @@ public class PathResourceLookupFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 
 		Optional<Resource> result = function.apply(request);
-		assertTrue(result.isPresent());
+		assertThat(result.isPresent()).isTrue();
 
 		File expected =
 				new ClassPathResource("org/springframework/web/servlet/function/child/response.txt")
 						.getFile();
-		assertEquals(expected, result.get().getFile());
+		assertThat(result.get().getFile()).isEqualTo(expected);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class PathResourceLookupFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 
 		Optional<Resource> result = function.apply(request);
-		assertFalse(result.isPresent());
+		assertThat(result.isPresent()).isFalse();
 	}
 
 	@Test
@@ -112,9 +112,9 @@ public class PathResourceLookupFunctionTests {
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 
 		Optional<Resource> result = customLookupFunction.apply(request);
-		assertTrue(result.isPresent());
+		assertThat(result.isPresent()).isTrue();
 
-		assertEquals(defaultResource.getFile(), result.get().getFile());
+		assertThat(result.get().getFile()).isEqualTo(defaultResource.getFile());
 	}
 
 }

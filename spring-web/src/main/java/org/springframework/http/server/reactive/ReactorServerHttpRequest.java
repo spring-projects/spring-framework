@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.http.server.reactive;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.atomic.AtomicLong;
+
 import javax.net.ssl.SSLSession;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -45,6 +47,9 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
+
+	private static final AtomicLong logPrefixIndex = new AtomicLong(0);
+
 
 	private final HttpServerRequest request;
 
@@ -151,6 +156,11 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.request.hostAddress();
+	}
+
+	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
 		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);
@@ -175,8 +185,11 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	protected String initId() {
-		return this.request instanceof Connection ?
-				((Connection) this.request).channel().id().asShortText() : null;
+		if (this.request instanceof Connection) {
+			return ((Connection) this.request).channel().id().asShortText() +
+					"-" + logPrefixIndex.incrementAndGet();
+		}
+		return null;
 	}
 
 }

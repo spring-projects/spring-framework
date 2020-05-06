@@ -439,7 +439,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 	private void checkAccess(int arrayLength, int index) throws SpelEvaluationException {
-		if (index > arrayLength) {
+		if (index >= arrayLength) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.ARRAY_INDEX_OUT_OF_BOUNDS,
 					arrayLength, index);
 		}
@@ -636,7 +636,7 @@ public class Indexer extends SpelNodeImpl {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class CollectionIndexingValueRef implements ValueRef {
 
 		private final Collection collection;

@@ -56,7 +56,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
  * @see org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

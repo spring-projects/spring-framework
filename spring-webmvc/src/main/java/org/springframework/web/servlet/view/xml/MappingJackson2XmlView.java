@@ -30,7 +30,7 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
 
 /**
  * Spring MVC {@link View} that renders XML content by serializing the model for the current request
- * using <a href="https://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link XmlMapper}.
+ * using <a href="https://github.com/FasterXML/jackson">Jackson 2's</a> {@link XmlMapper}.
  *
  * <p>The Object to be serialized is supplied as a parameter in the model. The first serializable
  * entry is used. Users can either specify a specific entry in the model via the

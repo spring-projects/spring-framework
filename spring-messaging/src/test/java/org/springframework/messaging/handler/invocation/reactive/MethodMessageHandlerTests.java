@@ -24,10 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -44,8 +42,11 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.RouteMatcher;
+import org.springframework.util.SimpleRouteMatcher;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link AbstractMethodMessageHandler}.
@@ -54,9 +55,10 @@ import static org.junit.Assert.*;
 public class MethodMessageHandlerTests {
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void duplicateMapping() {
-		initMethodMessageHandler(DuplicateMappingsController.class);
+		assertThatIllegalStateException().isThrownBy(() ->
+				initMethodMessageHandler(DuplicateMappingsController.class));
 	}
 
 	@Test
@@ -64,10 +66,10 @@ public class MethodMessageHandlerTests {
 		TestMethodMessageHandler messageHandler = initMethodMessageHandler(TestController.class);
 		Map<String, HandlerMethod> mappings = messageHandler.getHandlerMethods();
 
-		assertEquals(5, mappings.keySet().size());
-		assertThat(mappings.keySet(), Matchers.containsInAnyOrder(
+		assertThat(mappings.keySet().size()).isEqualTo(5);
+		assertThat(mappings).containsOnlyKeys(
 				"/handleMessage", "/handleMessageWithArgument", "/handleMessageWithError",
-				"/handleMessageMatch1", "/handleMessageMatch2"));
+				"/handleMessageMatch1", "/handleMessageMatch2");
 	}
 
 	@Test
@@ -80,7 +82,8 @@ public class MethodMessageHandlerTests {
 		handler.afterPropertiesSet();
 
 		Message<?> message = new GenericMessage<>("body", Collections.singletonMap(
-				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "/bestmatch/bar/path"));
+				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+				new SimpleRouteMatcher(new AntPathMatcher()).parseRoute("/bestmatch/bar/path")));
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
@@ -101,7 +104,8 @@ public class MethodMessageHandlerTests {
 				TestController.class);
 
 		Message<?> message = new GenericMessage<>("body", Collections.singletonMap(
-				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "/handleMessageWithArgument"));
+				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+				new SimpleRouteMatcher(new AntPathMatcher()).parseRoute("/handleMessageWithArgument")));
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
@@ -117,7 +121,8 @@ public class MethodMessageHandlerTests {
 		TestMethodMessageHandler handler = initMethodMessageHandler(TestController.class);
 
 		Message<?> message = new GenericMessage<>("body", Collections.singletonMap(
-				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, "/handleMessageWithError"));
+				DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,
+				new SimpleRouteMatcher(new AntPathMatcher()).parseRoute("/handleMessageWithError")));
 
 		handler.handleMessage(message).block(Duration.ofSeconds(5));
 
@@ -197,6 +202,10 @@ public class MethodMessageHandlerTests {
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 
+		public TestMethodMessageHandler() {
+			setHandlerPredicate(handlerType -> handlerType.getName().endsWith("Controller"));
+		}
+
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 			return Collections.emptyList();
@@ -205,11 +214,6 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
 			return Collections.singletonList(this.returnValueHandler);
-		}
-
-		@Override
-		protected Predicate<Class<?>> initHandlerPredicate() {
-			return handlerType -> handlerType.getName().endsWith("Controller");
 		}
 
 		@Nullable
@@ -237,22 +241,27 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		@Nullable
-		protected String getDestination(Message<?> message) {
-			return (String) message.getHeaders().get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
+		protected RouteMatcher.Route getDestination(Message<?> message) {
+			return (RouteMatcher.Route) message.getHeaders().get(
+					DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);
 		}
 
 		@Override
 		protected String getMatchingMapping(String mapping, Message<?> message) {
-			String destination = getDestination(message);
+			RouteMatcher.Route destination = getDestination(message);
 			Assert.notNull(destination, "No destination");
-			return mapping.equals(destination) || this.pathMatcher.match(mapping, destination) ? mapping : null;
+			return mapping.equals(destination.value()) ||
+					this.pathMatcher.match(mapping, destination.value()) ? mapping : null;
 		}
 
 		@Override
 		protected Comparator<String> getMappingComparator(Message<?> message) {
 			return (info1, info2) -> {
-				DestinationPatternsMessageCondition cond1 = new DestinationPatternsMessageCondition(info1);
-				DestinationPatternsMessageCondition cond2 = new DestinationPatternsMessageCondition(info2);
+				SimpleRouteMatcher routeMatcher = new SimpleRouteMatcher(new AntPathMatcher());
+				DestinationPatternsMessageCondition cond1 =
+						new DestinationPatternsMessageCondition(new String[] { info1 }, routeMatcher);
+				DestinationPatternsMessageCondition cond2 =
+						new DestinationPatternsMessageCondition(new String[] { info2 }, routeMatcher);
 				return cond1.compareTo(cond2, message);
 			};
 		}

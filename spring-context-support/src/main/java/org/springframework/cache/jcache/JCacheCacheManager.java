@@ -18,6 +18,7 @@ package org.springframework.cache.jcache;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 

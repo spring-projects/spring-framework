@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -187,7 +188,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof CompoundComparator &&
 				this.comparators.equals(((CompoundComparator<T>) other).comparators)));
 	}

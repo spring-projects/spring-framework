@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,17 +84,17 @@ public class ReactiveAdapter {
 	}
 
 	/**
-	 * Shortcut for {@code getDescriptor().supportsEmpty()}.
-	 */
-	public boolean supportsEmpty() {
-		return getDescriptor().supportsEmpty();
-	}
-
-	/**
 	 * Shortcut for {@code getDescriptor().isNoValue()}.
 	 */
 	public boolean isNoValue() {
 		return getDescriptor().isNoValue();
+	}
+
+	/**
+	 * Shortcut for {@code getDescriptor().supportsEmpty()}.
+	 */
+	public boolean supportsEmpty() {
+		return getDescriptor().supportsEmpty();
 	}
 
 

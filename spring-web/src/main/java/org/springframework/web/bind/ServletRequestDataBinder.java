@@ -92,7 +92,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * <p>The type of the target property for a multipart file can be MultipartFile,
 	 * byte[], or String. The latter two receive the contents of the uploaded file;
 	 * all metadata like original file name, content type, etc are lost in those cases.
-	 * @param request request with parameters to bind (can be multipart)
+	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartHttpServletRequest
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #bind(org.springframework.beans.PropertyValues)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,13 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.support.PropertyProvider;
+import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -143,25 +144,37 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	/**
 	 * Determine if the value for the {@link Parameter} in the supplied {@link ParameterContext}
 	 * should be autowired from the test's {@link ApplicationContext}.
-	 * <p>Returns {@code true} if the parameter is declared in a {@link Constructor}
-	 * that is annotated with {@link Autowired @Autowired} or if the parameter is
-	 * of type {@link ApplicationContext} (or a sub-type thereof) and otherwise delegates
-	 * to {@link ParameterResolutionDelegate#isAutowirable}.
-	 * <p><strong>WARNING</strong>: If the parameter is declared in a {@code Constructor}
-	 * that is annotated with {@code @Autowired}, Spring will assume the responsibility
-	 * for resolving all parameters in the constructor. Consequently, no other registered
-	 * {@link ParameterResolver} will be able to resolve parameters.
+	 * <p>A parameter is considered to be autowirable if one of the following
+	 * conditions is {@code true}.
+	 * <ol>
+	 * <li>The {@linkplain ParameterContext#getDeclaringExecutable() declaring
+	 * executable} is a {@link Constructor} and
+	 * {@link TestConstructorUtils#isAutowirableConstructor(Constructor, Class, PropertyProvider)}
+	 * returns {@code true}. Note that {@code isAutowirableConstructor()} will be
+	 * invoked with a fallback {@link PropertyProvider} that delegates its lookup
+	 * to {@link ExtensionContext#getConfigurationParameter(String)}.</li>
+	 * <li>The parameter is of type {@link ApplicationContext} or a sub-type thereof.</li>
+	 * <li>{@link ParameterResolutionDelegate#isAutowirable} returns {@code true}.</li>
+	 * </ol>
+	 * <p><strong>WARNING</strong>: If a test class {@code Constructor} is annotated
+	 * with {@code @Autowired} or automatically autowirable (see {@link TestConstructor}),
+	 * Spring will assume the responsibility for resolving all parameters in the
+	 * constructor. Consequently, no other registered {@link ParameterResolver}
+	 * will be able to resolve parameters.
 	 * @see #resolveParameter
+	 * @see TestConstructorUtils#isAutowirableConstructor(Constructor, Class)
 	 * @see ParameterResolutionDelegate#isAutowirable
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
-		int index = parameterContext.getIndex();
-		Executable exec = parameter.getDeclaringExecutable();
-		return ((exec instanceof Constructor && AnnotatedElementUtils.hasAnnotation(exec, Autowired.class)) ||
+		Executable executable = parameter.getDeclaringExecutable();
+		Class<?> testClass = extensionContext.getRequiredTestClass();
+		PropertyProvider junitPropertyProvider = propertyName ->
+				extensionContext.getConfigurationParameter(propertyName).orElse(null);
+		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
-				ParameterResolutionDelegate.isAutowirable(parameter, index));
+				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
 	}
 
 	/**

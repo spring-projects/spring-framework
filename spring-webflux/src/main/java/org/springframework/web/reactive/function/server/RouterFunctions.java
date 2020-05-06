@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
@@ -77,8 +78,6 @@ public abstract class RouterFunctions {
 			RouterFunctions.class.getName() + ".matchingPattern";
 
 
-	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
-			request -> ServerResponse.notFound().build();
 
 
 	/**
@@ -253,42 +252,8 @@ public abstract class RouterFunctions {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
-		return exchange -> {
-			ServerRequest request = new DefaultServerRequest(exchange, strategies.messageReaders());
-			addAttributes(exchange, request);
-			return routerFunction.route(request)
-					.defaultIfEmpty(notFound())
-					.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
-					.flatMap(response -> wrapException(() -> response.writeTo(exchange,
-							new HandlerStrategiesResponseContext(strategies))));
-		};
+		return new RouterFunctionWebHandler(strategies, routerFunction);
 	}
-
-
-	private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
-		try {
-			return supplier.get();
-		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
-	}
-
-	private static void addAttributes(ServerWebExchange exchange, ServerRequest request) {
-		Map<String, Object> attributes = exchange.getAttributes();
-		attributes.put(REQUEST_ATTRIBUTE, request);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends ServerResponse> HandlerFunction<T> notFound() {
-		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
-	}
-
-	@SuppressWarnings("unchecked")
-	static <T extends ServerResponse> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
-		return (HandlerFunction<T>) handlerFunction;
-	}
-
 
 	/**
 	 * Represents a discoverable builder for router functions.
@@ -476,6 +441,17 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder OPTIONS(String pattern, RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
+
+		/**
+		 * Adds a route to the given handler function that handles all requests that match the
+		 * given predicate.
+		 * @param predicate the request predicate to match
+		 * @param handlerFunction the handler function to handle all requests that match the predicate
+		 * @return this builder
+		 * @since 5.2
+		 * @see RequestPredicates
+		 */
+		Builder route(RequestPredicate predicate, HandlerFunction<ServerResponse> handlerFunction);
 
 		/**
 		 * Adds the given route to this builder. Can be used to merge externally defined router
@@ -773,7 +749,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
+	abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
 
 		@Override
 		public String toString() {
@@ -803,8 +779,8 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
-			return this.first.route(request)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next();
 		}
 
 		@Override
@@ -833,9 +809,14 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.first.route(request)
-					.map(RouterFunctions::cast)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request).map(RouterFunctions::cast)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next()
+					.map(this::cast);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T extends ServerResponse> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
+			return (HandlerFunction<T>) handlerFunction;
 		}
 
 		@Override
@@ -1000,4 +981,51 @@ public abstract class RouterFunctions {
 		}
 	}
 
+
+	private static class RouterFunctionWebHandler implements WebHandler {
+
+		private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
+				request -> ServerResponse.notFound().build();
+
+		private final HandlerStrategies strategies;
+
+		private final RouterFunction<?> routerFunction;
+
+		public RouterFunctionWebHandler(HandlerStrategies strategies, RouterFunction<?> routerFunction) {
+			this.strategies = strategies;
+			this.routerFunction = routerFunction;
+		}
+
+		@Override
+		public Mono<Void> handle(ServerWebExchange exchange) {
+			return Mono.defer(() -> {
+				ServerRequest request = new DefaultServerRequest(exchange, this.strategies.messageReaders());
+				addAttributes(exchange, request);
+				return this.routerFunction.route(request)
+						.defaultIfEmpty(notFound())
+						.flatMap(handlerFunction -> wrapException(() -> handlerFunction.handle(request)))
+						.flatMap(response -> wrapException(() -> response.writeTo(exchange,
+								new HandlerStrategiesResponseContext(this.strategies))));
+			});
+		}
+
+		private void addAttributes(ServerWebExchange exchange, ServerRequest request) {
+			Map<String, Object> attributes = exchange.getAttributes();
+			attributes.put(REQUEST_ATTRIBUTE, request);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <T extends ServerResponse> HandlerFunction<T> notFound() {
+			return (HandlerFunction<T>) NOT_FOUND_HANDLER;
+		}
+
+		private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
+			try {
+				return supplier.get();
+			}
+			catch (Throwable ex) {
+				return Mono.error(ex);
+			}
+		}
+	}
 }

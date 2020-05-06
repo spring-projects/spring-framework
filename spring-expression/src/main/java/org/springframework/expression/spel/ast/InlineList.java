@@ -92,8 +92,8 @@ public class InlineList extends SpelNodeImpl {
 			return this.constant;
 		}
 		else {
-			List<Object> returnValue = new ArrayList<>();
 			int childCount = getChildCount();
+			List<Object> returnValue = new ArrayList<>(childCount);
 			for (int c = 0; c < childCount; c++) {
 				returnValue.add(getChild(c).getValue(expressionState));
 			}

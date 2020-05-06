@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Map;
+
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;

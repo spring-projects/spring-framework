@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ package org.springframework.context.annotation
  * @author Sebastien Deleuze
  * @since 5.0
  */
+@Deprecated("Use regular apply method instead.", replaceWith = ReplaceWith("AnnotationConfigApplicationContext().apply(configure)"))
 fun AnnotationConfigApplicationContext(configure: AnnotationConfigApplicationContext.() -> Unit) =
 		AnnotationConfigApplicationContext().apply(configure)

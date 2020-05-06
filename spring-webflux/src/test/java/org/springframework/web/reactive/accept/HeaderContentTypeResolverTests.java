@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.web.reactive.accept;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link HeaderContentTypeResolver}.
@@ -43,18 +44,19 @@ public class HeaderContentTypeResolverTests {
 		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(
 				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
 
-		assertEquals(4, mediaTypes.size());
-		assertEquals("text/html", mediaTypes.get(0).toString());
-		assertEquals("text/x-c", mediaTypes.get(1).toString());
-		assertEquals("text/x-dvi;q=0.8", mediaTypes.get(2).toString());
-		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
+		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
+		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
+		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
+		assertThat(mediaTypes.get(3).toString()).isEqualTo("text/plain;q=0.5");
 	}
 
-	@Test(expected = NotAcceptableStatusException.class)
+	@Test
 	public void resolveMediaTypesParseError() throws Exception {
 		String header = "textplain; q=0.5";
-		this.resolver.resolveMediaTypes(
-				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
+		assertThatExceptionOfType(NotAcceptableStatusException.class).isThrownBy(() ->
+				this.resolver.resolveMediaTypes(
+						MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header))));
 	}
 
 }

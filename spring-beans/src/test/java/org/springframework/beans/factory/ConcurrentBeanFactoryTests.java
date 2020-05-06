@@ -27,20 +27,17 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.PropertyEditorRegistrar;
-import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.core.io.Resource;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Guillaume Poirier
@@ -48,6 +45,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Chris Beams
  * @since 10.03.2004
  */
+@EnabledForTestGroups(TestGroup.PERFORMANCE)
 public class ConcurrentBeanFactoryTests {
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
@@ -74,10 +72,8 @@ public class ConcurrentBeanFactoryTests {
 	private Throwable ex;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml"));
@@ -121,7 +117,7 @@ public class ConcurrentBeanFactoryTests {
 			}
 		}
 		if (ex != null) {
-			fail(ex.getMessage());
+			throw new AssertionError("Unexpected exception", ex);
 		}
 	}
 
@@ -129,8 +125,8 @@ public class ConcurrentBeanFactoryTests {
 		ConcurrentBean b1 = (ConcurrentBean) factory.getBean("bean1");
 		ConcurrentBean b2 = (ConcurrentBean) factory.getBean("bean2");
 
-		assertEquals(DATE_1, b1.getDate());
-		assertEquals(DATE_2, b2.getDate());
+		assertThat(b1.getDate()).isEqualTo(DATE_1);
+		assertThat(b2.getDate()).isEqualTo(DATE_2);
 	}
 
 

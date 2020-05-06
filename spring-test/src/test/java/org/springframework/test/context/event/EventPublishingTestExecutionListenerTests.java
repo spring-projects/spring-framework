@@ -19,40 +19,38 @@ package org.springframework.test.context.event;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.test.context.TestContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willCallRealMethod;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link EventPublishingTestExecutionListener}.
- * 
+ *
  * @author Frank Scheffler
  * @author Sam Brannen
  * @since 5.2
  */
-@RunWith(MockitoJUnitRunner.class)
-public class EventPublishingTestExecutionListenerTests {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class EventPublishingTestExecutionListenerTests {
 
 	private final EventPublishingTestExecutionListener listener = new EventPublishingTestExecutionListener();
-
-	@Rule
-	public final TestName testName = new TestName();
 
 	@Mock
 	private TestContext testContext;
@@ -64,82 +62,82 @@ public class EventPublishingTestExecutionListenerTests {
 	private ArgumentCaptor<Function<TestContext, ? extends ApplicationEvent>> eventFactory;
 
 
-	@Before
-	public void configureMock() {
+	@BeforeEach
+	void configureMock(TestInfo testInfo) {
 		// Force Mockito to invoke the interface default method
-		doCallRealMethod().when(testContext).publishEvent(any());
-		when(testContext.getApplicationContext()).thenReturn(applicationContext);
+		willCallRealMethod().given(testContext).publishEvent(any());
+		given(testContext.getApplicationContext()).willReturn(applicationContext);
 		// Only allow events to be published for test methods named "publish*".
-		when(testContext.hasApplicationContext()).thenReturn(testName.getMethodName().startsWith("publish"));
+		given(testContext.hasApplicationContext()).willReturn(testInfo.getTestMethod().get().getName().startsWith("publish"));
 	}
 
 	@Test
-	public void publishBeforeTestClassEvent() {
+	void publishBeforeTestClassEvent() {
 		assertEvent(BeforeTestClassEvent.class, listener::beforeTestClass);
 	}
 
 	@Test
-	public void publishPrepareTestInstanceEvent() {
+	void publishPrepareTestInstanceEvent() {
 		assertEvent(PrepareTestInstanceEvent.class, listener::prepareTestInstance);
 	}
 
 	@Test
-	public void publishBeforeTestMethodEvent() {
+	void publishBeforeTestMethodEvent() {
 		assertEvent(BeforeTestMethodEvent.class, listener::beforeTestMethod);
 	}
 
 	@Test
-	public void publishBeforeTestExecutionEvent() {
+	void publishBeforeTestExecutionEvent() {
 		assertEvent(BeforeTestExecutionEvent.class, listener::beforeTestExecution);
 	}
 
 	@Test
-	public void publishAfterTestExecutionEvent() {
+	void publishAfterTestExecutionEvent() {
 		assertEvent(AfterTestExecutionEvent.class, listener::afterTestExecution);
 	}
 
 	@Test
-	public void publishAfterTestMethodEvent() {
+	void publishAfterTestMethodEvent() {
 		assertEvent(AfterTestMethodEvent.class, listener::afterTestMethod);
 	}
 
 	@Test
-	public void publishAfterTestClassEvent() {
+	void publishAfterTestClassEvent() {
 		assertEvent(AfterTestClassEvent.class, listener::afterTestClass);
 	}
 
 	@Test
-	public void doesNotPublishBeforeTestClassEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishBeforeTestClassEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(BeforeTestClassEvent.class, listener::beforeTestClass);
 	}
 
 	@Test
-	public void doesNotPublishPrepareTestInstanceEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishPrepareTestInstanceEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(PrepareTestInstanceEvent.class, listener::prepareTestInstance);
 	}
 
 	@Test
-	public void doesNotPublishBeforeTestMethodEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishBeforeTestMethodEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(BeforeTestMethodEvent.class, listener::beforeTestMethod);
 	}
 
 	@Test
-	public void doesNotPublishBeforeTestExecutionEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishBeforeTestExecutionEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(BeforeTestExecutionEvent.class, listener::beforeTestExecution);
 	}
 
 	@Test
-	public void doesNotPublishAfterTestExecutionEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishAfterTestExecutionEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(AfterTestExecutionEvent.class, listener::afterTestExecution);
 	}
 
 	@Test
-	public void doesNotPublishAfterTestMethodEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishAfterTestMethodEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(AfterTestMethodEvent.class, listener::afterTestMethod);
 	}
 
 	@Test
-	public void doesNotPublishAfterTestClassEventIfApplicationContextHasNotBeenLoaded() {
+	void doesNotPublishAfterTestClassEventIfApplicationContextHasNotBeenLoaded() {
 		assertNoEvent(AfterTestClassEvent.class, listener::afterTestClass);
 	}
 
@@ -154,8 +152,8 @@ public class EventPublishingTestExecutionListenerTests {
 
 		// Verify the type of event that was published.
 		ApplicationEvent event = eventFactory.getValue().apply(testContext);
-		assertThat(event, instanceOf(eventClass));
-		assertThat(event.getSource(), equalTo(testContext));
+		assertThat(event).isInstanceOf(eventClass);
+		assertThat(event.getSource()).isEqualTo(testContext);
 	}
 
 	private void assertNoEvent(Class<? extends TestContextEvent> eventClass, Consumer<TestContext> callback) {
@@ -171,8 +169,8 @@ public class EventPublishingTestExecutionListenerTests {
 		// In any case, we can still verify the type of event that would have
 		// been published.
 		ApplicationEvent event = eventFactory.getValue().apply(testContext);
-		assertThat(event, instanceOf(eventClass));
-		assertThat(event.getSource(), equalTo(testContext));
+		assertThat(event).isInstanceOf(eventClass);
+		assertThat(event.getSource()).isEqualTo(testContext);
 	}
 
 }

@@ -21,8 +21,8 @@ import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -230,9 +230,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 */
 	public int[] getRowsAffected() {
 		int[] result = new int[this.rowsAffected.size()];
-		int i = 0;
-		for (Iterator<Integer> it = this.rowsAffected.iterator(); it.hasNext(); i++) {
-			result[i] = it.next();
+		for (int i = 0; i < this.rowsAffected.size(); i++) {
+			result[i] = this.rowsAffected.get(i);
 		}
 		return result;
 	}

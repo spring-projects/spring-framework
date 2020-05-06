@@ -426,7 +426,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			proxyTargetClass = (Boolean) attributeValue;
 		}
 		else if (attributeValue instanceof String) {
-			proxyTargetClass = Boolean.valueOf((String) attributeValue);
+			proxyTargetClass = Boolean.parseBoolean((String) attributeValue);
 		}
 		else if (attributeValue != null) {
 			throw new BeanDefinitionStoreException("Invalid proxy target class attribute [" +

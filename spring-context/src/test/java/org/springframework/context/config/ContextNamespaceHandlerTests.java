@@ -16,12 +16,11 @@
 
 package org.springframework.context.config;
 
-import java.io.FileNotFoundException;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
@@ -30,7 +29,8 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Arjen Poutsma
@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  */
 public class ContextNamespaceHandlerTests {
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		System.getProperties().remove("foo");
 	}
@@ -51,8 +51,8 @@ public class ContextNamespaceHandlerTests {
 	public void propertyPlaceholder() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace.xml", getClass());
-		assertEquals("bar", applicationContext.getBean("string"));
-		assertEquals("null", applicationContext.getBean("nullString"));
+		assertThat(applicationContext.getBean("string")).isEqualTo("bar");
+		assertThat(applicationContext.getBean("nullString")).isEqualTo("null");
 	}
 
 	@Test
@@ -61,8 +61,8 @@ public class ContextNamespaceHandlerTests {
 		try {
 			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 					"contextNamespaceHandlerTests-system.xml", getClass());
-			assertEquals("spam", applicationContext.getBean("string"));
-			assertEquals("none", applicationContext.getBean("fallback"));
+			assertThat(applicationContext.getBean("string")).isEqualTo("spam");
+			assertThat(applicationContext.getBean("fallback")).isEqualTo("none");
 		}
 		finally {
 			if (value != null) {
@@ -78,17 +78,17 @@ public class ContextNamespaceHandlerTests {
 		applicationContext.setEnvironment(env);
 		applicationContext.load(new ClassPathResource("contextNamespaceHandlerTests-simple.xml", getClass()));
 		applicationContext.refresh();
-		assertEquals("spam", applicationContext.getBean("string"));
-		assertEquals("none", applicationContext.getBean("fallback"));
+		assertThat(applicationContext.getBean("string")).isEqualTo("spam");
+		assertThat(applicationContext.getBean("fallback")).isEqualTo("none");
 	}
 
 	@Test
 	public void propertyPlaceholderLocation() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-location.xml", getClass());
-		assertEquals("bar", applicationContext.getBean("foo"));
-		assertEquals("foo", applicationContext.getBean("bar"));
-		assertEquals("maps", applicationContext.getBean("spam"));
+		assertThat(applicationContext.getBean("foo")).isEqualTo("bar");
+		assertThat(applicationContext.getBean("bar")).isEqualTo("foo");
+		assertThat(applicationContext.getBean("spam")).isEqualTo("maps");
 	}
 
 	@Test
@@ -98,9 +98,9 @@ public class ContextNamespaceHandlerTests {
 		try {
 			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
-			assertEquals("bar", applicationContext.getBean("foo"));
-			assertEquals("foo", applicationContext.getBean("bar"));
-			assertEquals("maps", applicationContext.getBean("spam"));
+			assertThat(applicationContext.getBean("foo")).isEqualTo("bar");
+			assertThat(applicationContext.getBean("bar")).isEqualTo("foo");
+			assertThat(applicationContext.getBean("spam")).isEqualTo("maps");
 		}
 		finally {
 			System.clearProperty("properties");
@@ -116,9 +116,9 @@ public class ContextNamespaceHandlerTests {
 		try {
 			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
-			assertEquals("bar", applicationContext.getBean("foo"));
-			assertEquals("foo", applicationContext.getBean("bar"));
-			assertEquals("maps", applicationContext.getBean("spam"));
+			assertThat(applicationContext.getBean("foo")).isEqualTo("bar");
+			assertThat(applicationContext.getBean("bar")).isEqualTo("foo");
+			assertThat(applicationContext.getBean("spam")).isEqualTo("maps");
 		}
 		finally {
 			System.clearProperty("properties");
@@ -127,24 +127,19 @@ public class ContextNamespaceHandlerTests {
 
 	@Test
 	public void propertyPlaceholderLocationWithSystemPropertyMissing() {
-		try {
-			ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-					"contextNamespaceHandlerTests-location-placeholder.xml", getClass());
-			assertEquals("bar", applicationContext.getBean("foo"));
-			assertEquals("foo", applicationContext.getBean("bar"));
-			assertEquals("maps", applicationContext.getBean("spam"));
-		}
-		catch (FatalBeanException ex) {
-			assertTrue(ex.getRootCause() instanceof FileNotFoundException);
-		}
+		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext("contextNamespaceHandlerTests-location-placeholder.xml", getClass()))
+			.satisfies(ex -> assertThat(ex.getRootCause())
+					.isInstanceOf(IllegalArgumentException.class)
+					.hasMessage("Could not resolve placeholder 'foo' in value \"${foo}\""));
 	}
 
 	@Test
 	public void propertyPlaceholderIgnored() {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace-ignore.xml", getClass());
-		assertEquals("${bar}", applicationContext.getBean("string"));
-		assertEquals("null", applicationContext.getBean("nullString"));
+		assertThat(applicationContext.getBean("string")).isEqualTo("${bar}");
+		assertThat(applicationContext.getBean("nullString")).isEqualTo("null");
 	}
 
 	@Test
@@ -154,7 +149,7 @@ public class ContextNamespaceHandlerTests {
 		Date date = (Date) applicationContext.getBean("date");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		assertEquals(42, calendar.get(Calendar.MINUTE));
+		assertThat(calendar.get(Calendar.MINUTE)).isEqualTo(42);
 	}
 
 }

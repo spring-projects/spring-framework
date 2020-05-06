@@ -3,6 +3,7 @@
 
 package org.springframework.protobuf;
 
+@SuppressWarnings("deprecation")
 public class OuterSample {
   private OuterSample() {}
   public static void registerAllExtensions(

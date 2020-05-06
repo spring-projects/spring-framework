@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Timed integration tests for
@@ -36,13 +36,13 @@ public class TimedTransactionalTestNGSpringContextTests extends AbstractTransact
 
 	@Test
 	public void testWithoutTimeout() {
-		assertInTransaction(true);
+		assertThatTransaction().isActive();
 	}
 
 	// TODO Enable TestNG test with timeout once we have a solution.
 	@Test(timeOut = 10000, enabled = false)
 	public void testWithTimeout() {
-		assertInTransaction(true);
+		assertThatTransaction().isActive();
 	}
 
 }

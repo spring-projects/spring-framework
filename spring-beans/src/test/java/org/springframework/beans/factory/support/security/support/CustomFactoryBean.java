@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.support.security.support;
 
 import java.util.Properties;
@@ -22,15 +23,15 @@ import org.springframework.beans.factory.FactoryBean;
 /**
  * @author Costin Leau
  */
-public class CustomFactoryBean implements FactoryBean<Object> {
+public class CustomFactoryBean implements FactoryBean<Properties> {
 
 	@Override
-	public Object getObject() throws Exception {
+	public Properties getObject() throws Exception {
 		return System.getProperties();
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<Properties> getObjectType() {
 		System.setProperty("factory.object.type", "true");
 		return Properties.class;
 	}
@@ -39,4 +40,5 @@ public class CustomFactoryBean implements FactoryBean<Object> {
 	public boolean isSingleton() {
 		return true;
 	}
+
 }

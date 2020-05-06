@@ -41,12 +41,12 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 
 	@Override
 	public boolean isDirectlyPresent() {
-		return isPresent() && getDepth() == 0;
+		return isPresent() && getDistance() == 0;
 	}
 
 	@Override
 	public boolean isMetaPresent() {
-		return isPresent() && getDepth() > 0;
+		return isPresent() && getDistance() > 0;
 	}
 
 	@Override
@@ -54,91 +54,113 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		return !hasDefaultValue(attributeName);
 	}
 
+	@Override
 	public byte getByte(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Byte.class);
 	}
 
+	@Override
 	public byte[] getByteArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, byte[].class);
 	}
 
+	@Override
 	public boolean getBoolean(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Boolean.class);
 	}
 
+	@Override
 	public boolean[] getBooleanArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, boolean[].class);
 	}
 
+	@Override
 	public char getChar(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Character.class);
 	}
 
+	@Override
 	public char[] getCharArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, char[].class);
 	}
 
+	@Override
 	public short getShort(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Short.class);
 	}
 
+	@Override
 	public short[] getShortArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, short[].class);
 	}
 
+	@Override
 	public int getInt(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Integer.class);
 	}
 
+	@Override
 	public int[] getIntArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, int[].class);
 	}
 
+	@Override
 	public long getLong(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Long.class);
 	}
 
+	@Override
 	public long[] getLongArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, long[].class);
 	}
 
+	@Override
 	public double getDouble(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Double.class);
 	}
 
+	@Override
 	public double[] getDoubleArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, double[].class);
 	}
 
+	@Override
 	public float getFloat(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Float.class);
 	}
 
+	@Override
 	public float[] getFloatArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, float[].class);
 	}
 
+	@Override
 	public String getString(String attributeName) {
 		return getRequiredAttributeValue(attributeName, String.class);
 	}
 
+	@Override
 	public String[] getStringArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, String[].class);
 	}
 
+	@Override
 	public Class<?> getClass(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Class.class);
 	}
 
+	@Override
 	public Class<?>[] getClassArray(String attributeName) {
 		return getRequiredAttributeValue(attributeName, Class[].class);
 	}
 
+	@Override
 	public <E extends Enum<E>> E getEnum(String attributeName, Class<E> type) {
 		Assert.notNull(type, "Type must not be null");
 		return getRequiredAttributeValue(attributeName, type);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) {
 		Assert.notNull(type, "Type must not be null");

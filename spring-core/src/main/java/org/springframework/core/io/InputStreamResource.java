@@ -115,7 +115,7 @@ public class InputStreamResource extends AbstractResource {
 	 * This implementation compares the underlying InputStream.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof InputStreamResource &&
 				((InputStreamResource) other).inputStream.equals(this.inputStream)));
 	}

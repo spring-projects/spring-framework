@@ -36,7 +36,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
@@ -106,7 +105,7 @@ abstract class ConfigurationClassUtils {
 					EventListenerFactory.class.isAssignableFrom(beanClass)) {
 				return false;
 			}
-			metadata = new StandardAnnotationMetadata(beanClass, true);
+			metadata = AnnotationMetadata.introspect(beanClass);
 		}
 		else {
 			try {

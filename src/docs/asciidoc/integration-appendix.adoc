@@ -176,10 +176,10 @@ different properties with `jee`:
 [[xsd-schemas-jee-local-slsb]]
 ==== `<jee:local-slsb/>` (Simple)
 
-The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless SessionBean.
+The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean without `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -191,8 +191,8 @@ SessionBean without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean with `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -206,10 +206,10 @@ SessionBean with `jee`:
 [[xsd-schemas-jee-local-slsb-complex]]
 ==== `<jee:local-slsb/>` (Complex)
 
-The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless SessionBean.
+The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean and a number of properties without `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+and a number of properties without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -224,8 +224,8 @@ SessionBean and a number of properties without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean and a number of properties with `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+and a number of properties with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -242,11 +242,10 @@ SessionBean and a number of properties with `jee`:
 [[xsd-schemas-jee-remote-slsb]]
 ==== <jee:remote-slsb/>
 
-The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless
-SessionBean.
+The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a remote EJB Stateless
-SessionBean without `jee`:
+The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -263,8 +262,8 @@ SessionBean without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a remote EJB Stateless
-SessionBean with `jee`:
+The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]

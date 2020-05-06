@@ -23,6 +23,7 @@ import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.core.env.Profiles
 import java.util.function.Supplier
 
 /**
@@ -75,7 +76,7 @@ fun beans(init: BeanDefinitionDsl.() -> Unit) = BeanDefinitionDsl(init)
  * @author Sebastien Deleuze
  * @since 5.0
  */
-open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
+open class BeanDefinitionDsl internal constructor (private val init: BeanDefinitionDsl.() -> Unit,
 							 private val condition: (ConfigurableEnvironment) -> Boolean = { true })
 	: ApplicationContextInitializer<GenericApplicationContext> {
 
@@ -233,6 +234,42 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 
 		val beanName = name ?: BeanDefinitionReaderUtils.uniqueBeanName(T::class.java.name, context);
 		context.registerBean(beanName, T::class.java, Supplier { function.invoke(BeanSupplierContext(context)) }, customizer)
+	}
+
+	/**
+	 * Declare a bean definition using the given callable reference with no parameter
+	 * for obtaining a new instance.
+	 *
+	 * @param f the callable reference
+	 * @param name the name of the bean
+	 * @param scope Override the target scope of this bean, specifying a new scope name.
+	 * @param isLazyInit Set whether this bean should be lazily initialized.
+	 * @param isPrimary Set whether this bean is a primary autowire candidate.
+	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
+	 * autowired into some other bean.
+	 * @param initMethodName Set the name of the initializer method
+	 * @param destroyMethodName Set the name of the destroy method
+	 * @param description Set a human-readable description of this bean definition
+	 * @param role Set the role hint for this bean definition
+	 * @see GenericApplicationContext.registerBean
+	 * @see org.springframework.beans.factory.config.BeanDefinition
+	 * @since 5.2.3
+	 */
+	inline fun <reified T: Any>
+			bean(crossinline f: () -> T,
+				 name: String? = null,
+				 scope: BeanDefinitionDsl.Scope? = null,
+				 isLazyInit: Boolean? = null,
+				 isPrimary: Boolean? = null,
+				 isAutowireCandidate: Boolean? = null,
+				 initMethodName: String? = null,
+				 destroyMethodName: String? = null,
+				 description: String? = null,
+				 role: BeanDefinitionDsl.Role? = null) {
+
+		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role) {
+			f.invoke()
+		}
 	}
 
 	/**
@@ -1082,11 +1119,12 @@ open class BeanDefinitionDsl(private val init: BeanDefinitionDsl.() -> Unit,
 	}
 
 	/**
-	 * Take in account bean definitions enclosed in the provided lambda only when the
-	 * specified profile is active.
+	 * Take in account bean definitions enclosed in the provided lambda when the
+	 * profile is accepted.
+	 * @see org.springframework.core.env.Profiles.of
 	 */
 	fun profile(profile: String, init: BeanDefinitionDsl.() -> Unit) {
-		val beans = BeanDefinitionDsl(init, { it.activeProfiles.contains(profile) })
+		val beans = BeanDefinitionDsl(init, { it.acceptsProfiles(Profiles.of(profile)) })
 		children.add(beans)
 	}
 

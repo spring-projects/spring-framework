@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.feed;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

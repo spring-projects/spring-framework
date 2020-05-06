@@ -372,7 +372,7 @@ public class CronSequenceGenerator {
 			return result;
 		}
 		if (!field.contains("-")) {
-			result[0] = result[1] = Integer.valueOf(field);
+			result[0] = result[1] = Integer.parseInt(field);
 		}
 		else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
@@ -380,8 +380,8 @@ public class CronSequenceGenerator {
 				throw new IllegalArgumentException("Range has more than two fields: '" +
 						field + "' in expression \"" + this.expression + "\"");
 			}
-			result[0] = Integer.valueOf(split[0]);
-			result[1] = Integer.valueOf(split[1]);
+			result[0] = Integer.parseInt(split[0]);
+			result[1] = Integer.parseInt(split[1]);
 		}
 		if (result[0] >= max || result[1] >= max) {
 			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): '" +
@@ -428,7 +428,7 @@ public class CronSequenceGenerator {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

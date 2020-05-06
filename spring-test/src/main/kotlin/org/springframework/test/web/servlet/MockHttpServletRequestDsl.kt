@@ -40,7 +40,7 @@ import javax.servlet.http.Cookie
  * @author Sebastien Deleuze
  * @since 5.2
  */
-open class MockHttpServletRequestDsl(private val builder: MockHttpServletRequestBuilder) {
+open class MockHttpServletRequestDsl internal constructor (private val builder: MockHttpServletRequestBuilder) {
 
 	/**
 	 * @see [MockHttpServletRequestBuilder.contextPath]
@@ -185,25 +185,25 @@ open class MockHttpServletRequestDsl(private val builder: MockHttpServletRequest
 	}
 
 	internal fun perform(mockMvc: MockMvc): ResultActionsDsl {
-		contextPath?.also { builder.contextPath(contextPath!!) }
-		servletPath?.also { builder.servletPath(servletPath!!) }
-		pathInfo?.also { builder.pathInfo(pathInfo) }
-		secure?.also { builder.secure(secure!!) }
-		characterEncoding?.also { builder.characterEncoding(characterEncoding!!) }
+		contextPath?.also { builder.contextPath(it) }
+		servletPath?.also { builder.servletPath(it) }
+		pathInfo?.also { builder.pathInfo(it) }
+		secure?.also { builder.secure(it) }
+		characterEncoding?.also { builder.characterEncoding(it) }
 		content?.also {
-			when (content) {
-				is String -> builder.content(content as String)
-				is ByteArray -> builder.content(content as ByteArray)
-				else -> builder.content(content.toString())
+			when (it) {
+				is String -> builder.content(it)
+				is ByteArray -> builder.content(it)
+				else -> builder.content(it.toString())
 			}
 		}
-		accept?.also { builder.accept(accept!!) }
-		contentType?.also { builder.contentType(contentType!!) }
-		params?.also { builder.params(params!!) }
-		sessionAttrs?.also { builder.sessionAttrs(sessionAttrs!!) }
-		flashAttrs?.also { builder.flashAttrs(flashAttrs!!) }
-		session?.also { builder.session(session!!) }
-		principal?.also { builder.principal(principal!!) }
-		return ResultActionsDsl(mockMvc.perform(builder))
+		accept?.also { builder.accept(it) }
+		contentType?.also { builder.contentType(it) }
+		params?.also { builder.params(it) }
+		sessionAttrs?.also { builder.sessionAttrs(it) }
+		flashAttrs?.also { builder.flashAttrs(it) }
+		session?.also { builder.session(it) }
+		principal?.also { builder.principal(it) }
+		return ResultActionsDsl(mockMvc.perform(builder), mockMvc)
 	}
 }

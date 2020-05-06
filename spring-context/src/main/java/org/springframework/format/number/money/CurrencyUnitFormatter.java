@@ -17,6 +17,7 @@
 package org.springframework.format.number.money;
 
 import java.util.Locale;
+
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,24 @@
 
 package org.springframework.web.servlet.view.feed;
 
-import com.rometools.rome.feed.rss.Channel;
-import com.rometools.rome.feed.rss.Description;
-import com.rometools.rome.feed.rss.Item;
-
-import org.junit.Test;
-
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.rometools.rome.feed.rss.Channel;
+import com.rometools.rome.feed.rss.Description;
+import com.rometools.rome.feed.rss.Item;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.core.testfixture.xml.XmlContent;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -54,7 +53,7 @@ public class RssFeedViewTests {
 		model.put("1", "This is entry 1");
 
 		view.render(model, request, response);
-		assertEquals("Invalid content-type", "application/rss+xml", response.getContentType());
+		assertThat(response.getContentType()).as("Invalid content-type").isEqualTo("application/rss+xml");
 		String expected = "<rss version=\"2.0\">" +
 				"<channel><title>Test Feed</title>" +
 				"<link>https://example.com</link>" +
@@ -62,7 +61,7 @@ public class RssFeedViewTests {
 				"<item><title>2</title><description>This is entry 2</description></item>" +
 				"<item><title>1</title><description>This is entry 1</description></item>" +
 				"</channel></rss>";
-		assertThat(response.getContentAsString(), isSimilarTo(expected).ignoreWhitespace());
+		assertThat(XmlContent.of(response.getContentAsString())).isSimilarToIgnoringWhitespace(expected);
 	}
 
 

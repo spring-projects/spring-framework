@@ -135,12 +135,10 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * @see #getAliases()
 	 */
 	public String getShortDescription() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Bean definition with name '").append(this.beanName).append("'");
-		if (this.aliases != null) {
-			sb.append(" and aliases [").append(StringUtils.arrayToCommaDelimitedString(this.aliases)).append("]");
+		if (this.aliases == null) {
+			return "Bean definition with name '" + this.beanName + "'";
 		}
-		return sb.toString();
+		return "Bean definition with name '" + this.beanName + "' and aliases [" + StringUtils.arrayToCommaDelimitedString(this.aliases) + ']';
 	}
 
 	/**
@@ -166,7 +164,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

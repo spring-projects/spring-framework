@@ -15,7 +15,7 @@
  */
 package org.springframework.test.web.reactive.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
@@ -61,7 +61,7 @@ public class ApplicationContextSpecTests {
 					.GET("/sessionClassName", request ->
 							request.session().flatMap(session -> {
 								String className = session.getClass().getSimpleName();
-								return ServerResponse.ok().syncBody(className);
+								return ServerResponse.ok().bodyValue(className);
 							}))
 					.build();
 		}

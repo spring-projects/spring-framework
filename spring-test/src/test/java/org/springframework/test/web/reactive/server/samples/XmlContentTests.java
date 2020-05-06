@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -38,7 +39,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.startsWith;
+
+
 
 /**
  * Samples of tests using {@link WebTestClient} with XML content.
@@ -114,7 +117,7 @@ public class XmlContentTests {
 
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_XML)
-				.syncBody(content)
+				.bodyValue(content)
 				.exchange()
 				.expectStatus().isCreated()
 				.expectHeader().valueEquals(HttpHeaders.LOCATION, "/persons/John")

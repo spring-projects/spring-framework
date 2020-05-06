@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	private final InetSocketAddress remoteAddress;
 
 	@Nullable
+	private final InetSocketAddress localAddress;
+
+	@Nullable
 	private final SslInfo sslInfo;
 
 	private final Flux<DataBuffer> body;
@@ -69,13 +72,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private MockServerHttpRequest(HttpMethod httpMethod, URI uri, @Nullable String contextPath,
 			HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			@Nullable InetSocketAddress remoteAddress, @Nullable SslInfo sslInfo,
-			Publisher<? extends DataBuffer> body) {
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
+			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
 		this.httpMethod = httpMethod;
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
+		this.localAddress = localAddress;
 		this.sslInfo = sslInfo;
 		this.body = Flux.from(body);
 	}
@@ -95,6 +99,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.remoteAddress;
+	}
+
+	@Nullable
+	@Override
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
 	}
 
 	@Nullable
@@ -255,6 +265,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		B remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
+		 * Set the local address to return.
+		 * @since 5.2.3
+		 */
+		B localAddress(InetSocketAddress localAddress);
+
+		/**
 		 * Set SSL session information and certificates.
 		 */
 		void sslInfo(SslInfo sslInfo);
@@ -409,6 +425,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		private InetSocketAddress remoteAddress;
 
 		@Nullable
+		private InetSocketAddress localAddress;
+
+		@Nullable
 		private SslInfo sslInfo;
 
 
@@ -438,6 +457,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Override
 		public BodyBuilder remoteAddress(InetSocketAddress remoteAddress) {
 			this.remoteAddress = remoteAddress;
+			return this;
+		}
+
+		@Override
+		public BodyBuilder localAddress(InetSocketAddress localAddress) {
+			this.localAddress = localAddress;
 			return this;
 		}
 
@@ -545,7 +570,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			applyCookiesIfNecessary();
 			return new MockServerHttpRequest(this.method, getUrlToUse(), this.contextPath,
-					this.headers, this.cookies, this.remoteAddress, this.sslInfo, body);
+					this.headers, this.cookies, this.remoteAddress, this.localAddress, this.sslInfo, body);
 		}
 
 		private void applyCookiesIfNecessary() {
