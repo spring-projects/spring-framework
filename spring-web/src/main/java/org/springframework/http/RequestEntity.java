@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,58 +22,32 @@ import java.nio.charset.Charset;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriTemplateHandler;
 
 /**
- * Extension of {@link HttpEntity} that adds a {@linkplain HttpMethod method} and
- * {@linkplain URI uri} or String based uri template with placeholder. Uri variables can be provided
- * through the builder {@link HeadersBuilder#uriVariables(Object...)}.
+ * Extension of {@link HttpEntity} that also exposes the HTTP method and the
+ * target URL. For use in the {@code RestTemplate} to prepare requests with
+ * and in {@code @Controller} methods to represent request input.
  *
- * Used in {@code RestTemplate} and {@code @Controller} methods.
- *
- * <p>In {@code RestTemplate}, this class is used as parameter in
- * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
+ * <p>Example use with the {@code RestTemplate}:
  * <pre class="code">
  * MyRequest body = ...
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity
- *     .post(new URI(&quot;https://example.com/bar&quot;))
+ *     .post(&quot;https://example.com/{foo}&quot;, &quot;bar&quot;)
  *     .accept(MediaType.APPLICATION_JSON)
  *     .body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
  * </pre>
  *
- * <p>If you would like to provide a URI template with variables, consider using
- * {@link org.springframework.web.util.DefaultUriBuilderFactory DefaultUriBuilderFactory}:
- * <pre class="code">
- * // Create shared factory
- * UriBuilderFactory factory = new DefaultUriBuilderFactory();
- *
- * // Use factory to create URL from template
- * URI uri = factory.uriString(&quot;https://example.com/{foo}&quot;).build(&quot;bar&quot;);
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
- * </pre>
- *
- * <p> if you would like to provide a string base URI template with variable, consider using
- * {@link RequestEntity#method(HttpMethod, String)}}, {@link RequestEntity#get(String)},
- * {@link RequestEntity#post(String)}, {@link RequestEntity#put(String)}, {@link RequestEntity#delete(String)},
- * {@link RequestEntity#patch(String)}, {@link RequestEntity#options(String)}
- *
- * <pre class="code>
- *    RequestEntity  request = RequestEntity
- *    		.post(&quot;https://example.com/{foo}&quot;)
- *    	    .uriVariables(&quot;bar&quot;)
- *          .accept(MediaType.APPLICATION_JSON)
- *          .build();
- * </pre>
- *
- * <p>Can also be used in Spring MVC, as a parameter in a @Controller method:
+ * <p>Example use in an {@code @Controller}:
  * <pre class="code">
  * &#64;RequestMapping("/handle")
  * public void handle(RequestEntity&lt;String&gt; request) {
@@ -93,19 +67,12 @@ import org.springframework.web.util.UriTemplateHandler;
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 
-	private final static UriTemplateHandler DEFAULT_URI_BUILDER_FACTORY = new DefaultUriBuilderFactory();
+	private final static UriTemplateHandler DEFAULT_TEMPLATE_HANDLER = new DefaultUriBuilderFactory();
 
 	@Nullable
 	private final HttpMethod method;
 
-	@Nullable
-	private final URI url;
-
-	@Nullable
-	private String uri;
-
-	@Nullable
-	private Object[] uriVariables;
+	private final Function<UriTemplateHandler, URI> uriFunction;
 
 	@Nullable
 	private final Type type;
@@ -175,30 +142,22 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 */
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
-						 @Nullable HttpMethod method, URI url, @Nullable Type type) {
+			@Nullable HttpMethod method, URI url, @Nullable Type type) {
 
-		super(body, headers);
-		this.method = method;
-		this.url = url;
-		this.type = type;
+		this(body, headers, method, handler -> url, type);
 	}
 
 	/**
-	 * Private Constructor with method, URL, UriTemplate and varargs urivariables but without body nor headers.
-	 * @param method the method
-	 * @param url the URL
-	 * @param uri the UriTemplate
-	 * @param uriVariables the uriVariables
+	 * Private constructor with URI function.
+	 * @since 5.3
 	 */
-	private RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, @Nullable URI url,
-						  @Nullable  String uri, @Nullable Object... uriVariables) {
-		super(null, headers);
-		Assert.isTrue(uri == null || url == null, "Either url or url must be not null");
+	private RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+			@Nullable HttpMethod method, Function<UriTemplateHandler, URI> uriFunction, @Nullable Type type) {
+
+		super(body, headers);
 		this.method = method;
-		this.url = url;
-		this.type = null;
-		this.uri = uri;
-		this.uriVariables = uriVariables;
+		this.uriFunction = uriFunction;
+		this.type = type;
 	}
 
 
@@ -213,27 +172,24 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Return the URL of the request.
-	 * Used  {@link org.springframework.web.util.DefaultUriBuilderFactory} to expand and
-	 * encode {@link DefaultUriBuilderFactory#setEncodingMode} when provided {@link RequestEntity#uri}
+	 * <p>If the URL was provided as a URI template, the returned URI is expanded
+	 * and encoded with {@link DefaultUriBuilderFactory}.
 	 * @return the URL as a {@code URI}
 	 */
 	public URI getUrl() {
-		if (uri == null) {
-			return this.url;
-		}
-		return DEFAULT_URI_BUILDER_FACTORY.expand(uri, uriVariables);
+		return this.uriFunction.apply(DEFAULT_TEMPLATE_HANDLER);
 	}
 
 	/**
 	 * Return the URL of the request.
+	 * <p>If the URL was provided as a URI template, the returned URI is expanded
+	 * with the given {@link DefaultUriBuilderFactory}.
+	 * @param templateHandler the handler to use to expand the URI template with
 	 * @return the URL as a {@code URI}
 	 * @since 5.3
 	 */
-	public URI getUrl(UriTemplateHandler uriTemplateHandler) {
-		if (uri == null) {
-			return this.url;
-		}
-		return uriTemplateHandler.expand(uri, uriVariables);
+	public URI getUrl(UriTemplateHandler templateHandler) {
+		return this.uriFunction.apply(templateHandler);
 	}
 
 
@@ -271,7 +227,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	public int hashCode() {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.method);
-		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(this.url);
+		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getUrl());
 		return hashCode;
 	}
 
@@ -307,15 +263,26 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a builder with the given method and given string base uri template.
+	 * Create a builder with the given HTTP method, URI template, and variables.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param uri the uri
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
-	 * @see RequestEntity
 	 * @since 5.3
 	 */
-	public static BodyBuilder method(HttpMethod method, String uri) {
-		return new DefaultBodyBuilder(method, uri);
+	public static BodyBuilder method(HttpMethod method, String uriTemplate, Object... uriVariables) {
+		return new DefaultBodyBuilder(method, uriTemplate, uriVariables);
+	}
+
+	/**
+	 * Create a builder with the given HTTP method, URI template, and variables.
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param uriTemplate the uri template to use
+	 * @return the created builder
+	 * @since 5.3
+	 */
+	public static BodyBuilder method(HttpMethod method, String uriTemplate, Map<String, ?> uriVariables) {
+		return new DefaultBodyBuilder(method, uriTemplate, uriVariables);
 	}
 
 
@@ -330,12 +297,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP GET builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> get(String uri) {
-		return method(HttpMethod.GET, uri);
+	public static HeadersBuilder<?> get(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.GET, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -349,12 +317,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP HEAD builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> head(String uri) {
-		return method(HttpMethod.HEAD, uri);
+	public static HeadersBuilder<?> head(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.HEAD, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -368,12 +337,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP POST builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder post(String uri) {
-		return method(HttpMethod.POST, uri);
+	public static BodyBuilder post(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.POST, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -387,12 +357,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP PUT builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder put(String uri) {
-		return method(HttpMethod.PUT, uri);
+	public static BodyBuilder put(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.PUT, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -406,12 +377,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP PATCH builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static BodyBuilder patch(String uri) {
-		return method(HttpMethod.PATCH, uri);
+	public static BodyBuilder patch(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.PATCH, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -425,12 +397,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create an HTTP DELETE builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> delete(String uri) {
-		return method(HttpMethod.DELETE, uri);
+	public static HeadersBuilder<?> delete(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.DELETE, uriTemplate, uriVariables);
 	}
 
 	/**
@@ -444,12 +417,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Creates an HTTP OPTIONS builder with the given string base uri template.
-	 * @param uri the uri template
+	 * @param uriTemplate the uri template to use
+	 * @param uriVariables variables to expand the URI template with
 	 * @return the created builder
 	 * @since 5.3
 	 */
-	public static HeadersBuilder<?> options(String uri) {
-		return method(HttpMethod.OPTIONS, uri);
+	public static HeadersBuilder<?> options(String uriTemplate, Object... uriVariables) {
+		return method(HttpMethod.OPTIONS, uriTemplate, uriVariables);
 	}
 
 
@@ -532,13 +506,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		B ifNoneMatch(String... ifNoneMatches);
 
 		/**
-		 * Set the values of the {@code If-None-Match} header.
-		 * @param uriVariables the variables to expand the template
-		 * @since 5.3
-		 */
-		B uriVariables(Object... uriVariables);
-
-		/**
 		 * Builds the request entity with no body.
 		 * @return the request entity
 		 * @see BodyBuilder#body(Object)
@@ -594,28 +561,24 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final HttpMethod method;
 
-		@Nullable
-		private final URI url;
-
-		@Nullable
-		private final String uri;
-
-		@Nullable
-		private  Object[] uriVariables;
-
+		private final Function<UriTemplateHandler, URI> uriFunction;
 
 		private final HttpHeaders headers = new HttpHeaders();
 
+
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
-			this.url = url;
-			this.uri = null;
+			this.uriFunction = handler -> url;
 		}
 
-		public DefaultBodyBuilder(HttpMethod method, String uri) {
+		public DefaultBodyBuilder(HttpMethod method, String uriTemplate, Object... uriVars) {
 			this.method = method;
-			this.uri = uri;
-			this.url = null;
+			this.uriFunction = handler -> handler.expand(uriTemplate, uriVars);
+		}
+
+		public DefaultBodyBuilder(HttpMethod method, String uriTemplate, Map<String, ?> uriVars) {
+			this.method = method;
+			this.uriFunction = handler -> handler.expand(uriTemplate, uriVars);
 		}
 
 		@Override
@@ -689,28 +652,18 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder uriVariables(Object... uriVariables) {
-			this.uriVariables = uriVariables;
-			return this;
-		}
-
-		@Override
 		public RequestEntity<Void> build() {
-			if (this.url != null){
-				new RequestEntity<>(this.headers, this.method, this.url);
-			}
-			return new RequestEntity<>(this.headers, this.method, this.url, uri, uriVariables);
+			return new RequestEntity<>(null, this.headers, this.method, this.uriFunction, null);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body) {
-			return new RequestEntity<>(body, this.headers, this.method, this.url);
+			return new RequestEntity<>(body, this.headers, this.method, this.uriFunction, null);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body, Type type) {
-			return new RequestEntity<>(body, this.headers, this.method, this.url, type);
+			return new RequestEntity<>(body, this.headers, this.method, this.uriFunction, type);
 		}
 	}
-
 }

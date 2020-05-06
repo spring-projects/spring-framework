@@ -29,8 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriTemplateHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -85,29 +83,15 @@ public class RequestEntityTests {
 
 	@Test
 	public void uriExpansion() throws URISyntaxException{
-		String template = "/foo?bar={bar}";
-		String bar = "foo";
-		URI expected = new URI("/foo?bar=foo");
 
-		RequestEntity<Void> entity = RequestEntity.get(template).uriVariables(bar).build();
+		RequestEntity<Void> entity =
+				RequestEntity.get("https://www.{host}.com/{path}", "example", "foo/bar").build();
 
-		assertThat(entity.getUrl()).isEqualTo(expected);
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo%2Fbar"));
 
-		String url = "https://www.{host}.com/{path}";
-		String host = "example";
-		String path = "foo/bar";
-		expected = new URI("https://www.example.com/foo/bar");
-
-		entity = RequestEntity.get(url).uriVariables(host, path).build();
-		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
-		uriTemplateHandler.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
-
-		assertThat(entity.getUrl(uriTemplateHandler)).isEqualTo(expected);
-
-		expected = new URI("https://www.example.com/foo%2Fbar");
-		uriTemplateHandler.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.TEMPLATE_AND_VALUES);
-
-		assertThat(entity.getUrl(uriTemplateHandler)).isEqualTo(expected);
+		factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo/bar"));
 	}
 
 
