@@ -98,6 +98,10 @@ import org.springframework.util.Assert;
  * setup analogous to {@code JtaTransactionManager}, in particular with respect to
  * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
  *
+ * <p><b>NOTE: As of 5.3, {@link org.springframework.jdbc.support.JdbcTransactionManager}
+ * is available as an extended subclass which includes commit/rollback exception
+ * translation, aligned with {@link org.springframework.jdbc.core.JdbcTemplate}.</b>
+ *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see #setNestedTransactionAllowed
@@ -332,7 +336,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			con.commit();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not commit JDBC transaction", ex);
+			throw translateException("JDBC commit", ex);
 		}
 	}
 
@@ -347,7 +351,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			con.rollback();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
+			throw translateException("JDBC rollback", ex);
 		}
 	}
 
@@ -416,6 +420,22 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				stmt.executeUpdate("SET TRANSACTION READ ONLY");
 			}
 		}
+	}
+
+	/**
+	 * Translate the given JDBC commit/rollback exception to a common Spring
+	 * exception to propagate from the {@link #commit}/{@link #rollback} call.
+	 * <p>The default implementation throws a {@link TransactionSystemException}.
+	 * Subclasses may specifically identify concurrency failures etc.
+	 * @param task the task description (commit or rollback)
+	 * @param ex the SQLException thrown from commit/rollback
+	 * @return the translated exception to throw, either a
+	 * {@link org.springframework.dao.DataAccessException} or a
+	 * {@link org.springframework.transaction.TransactionException}
+	 * @since 5.3
+	 */
+	protected RuntimeException translateException(String task, SQLException ex) {
+		return new TransactionSystemException(task + " failed", ex);
 	}
 
 

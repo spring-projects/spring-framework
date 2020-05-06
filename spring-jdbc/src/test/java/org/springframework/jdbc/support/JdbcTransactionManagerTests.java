@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.jdbc.datasource;
+package org.springframework.jdbc.support;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -31,8 +31,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.datasource.ConnectionHolder;
+import org.springframework.jdbc.datasource.ConnectionProxy;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -62,16 +68,16 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
- * @since 04.07.2003
- * @see org.springframework.jdbc.support.JdbcTransactionManagerTests
+ * @since 5.3
+ * @see org.springframework.jdbc.datasource.DataSourceTransactionManagerTests
  */
-public class DataSourceTransactionManagerTests  {
+public class JdbcTransactionManagerTests {
 
 	private DataSource ds;
 
 	private Connection con;
 
-	private DataSourceTransactionManager tm;
+	private JdbcTransactionManager tm;
 
 
 	@BeforeEach
@@ -79,7 +85,7 @@ public class DataSourceTransactionManagerTests  {
 		ds = mock(DataSource.class);
 		con = mock(Connection.class);
 		given(ds.getConnection()).willReturn(con);
-		tm = new DataSourceTransactionManager(ds);
+		tm = new JdbcTransactionManager(ds);
 	}
 
 	@AfterEach
@@ -135,7 +141,7 @@ public class DataSourceTransactionManagerTests  {
 		}
 
 		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
-		tm = new DataSourceTransactionManager(dsToUse);
+		tm = new JdbcTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		boolean condition3 = !TransactionSynchronizationManager.hasResource(dsToUse);
 		assertThat(condition3).as("Hasn't thread connection").isTrue();
@@ -228,7 +234,7 @@ public class DataSourceTransactionManagerTests  {
 		}
 
 		final DataSource dsToUse = (lazyConnection ? new LazyConnectionDataSourceProxy(ds) : ds);
-		tm = new DataSourceTransactionManager(dsToUse);
+		tm = new JdbcTransactionManager(dsToUse);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		boolean condition3 = !TransactionSynchronizationManager.hasResource(dsToUse);
 		assertThat(condition3).as("Hasn't thread connection").isTrue();
@@ -278,7 +284,7 @@ public class DataSourceTransactionManagerTests  {
 
 	@Test
 	public void testTransactionRollbackOnly() throws Exception {
-		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
+		tm.setTransactionSynchronization(JdbcTransactionManager.SYNCHRONIZATION_NEVER);
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		boolean condition2 = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition2).as("Hasn't thread connection").isTrue();
@@ -557,8 +563,8 @@ public class DataSourceTransactionManagerTests  {
 
 	@Test
 	public void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
-		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
-		DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds);
+		tm.setTransactionSynchronization(JdbcTransactionManager.SYNCHRONIZATION_NEVER);
+		JdbcTransactionManager tm2 = new JdbcTransactionManager(ds);
 		// tm has no synch enabled (used at outer level), tm2 has synch enabled (inner level)
 
 		boolean condition2 = !TransactionSynchronizationManager.hasResource(ds);
@@ -658,7 +664,7 @@ public class DataSourceTransactionManagerTests  {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		PlatformTransactionManager tm2 = new DataSourceTransactionManager(ds2);
+		PlatformTransactionManager tm2 = new JdbcTransactionManager(ds2);
 		final TransactionTemplate tt2 = new TransactionTemplate(tm2);
 		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -712,8 +718,8 @@ public class DataSourceTransactionManagerTests  {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		DataSourceTransactionManager tm2 = new DataSourceTransactionManager(ds2);
-		tm2.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
+		JdbcTransactionManager tm2 = new JdbcTransactionManager(ds2);
+		tm2.setTransactionSynchronization(JdbcTransactionManager.SYNCHRONIZATION_NEVER);
 		final TransactionTemplate tt2 = new TransactionTemplate(tm2);
 		tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
@@ -1232,6 +1238,43 @@ public class DataSourceTransactionManagerTests  {
 	}
 
 	@Test
+	public void testTransactionWithDataAccessExceptionOnCommit() throws Exception {
+		willThrow(new SQLException("Cannot commit")).given(con).commit();
+		tm.setExceptionTranslator((task, sql, ex) -> new ConcurrencyFailureException(task));
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThatExceptionOfType(ConcurrencyFailureException.class).isThrownBy(() ->
+				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						// something transactional
+					}
+				}));
+
+		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition).as("Hasn't thread connection").isTrue();
+		verify(con).close();
+	}
+
+	@Test
+	public void testTransactionWithDataAccessExceptionOnCommitFromLazyExceptionTranslator() throws Exception {
+		willThrow(new SQLException("Cannot commit", "40")).given(con).commit();
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThatExceptionOfType(ConcurrencyFailureException.class).isThrownBy(() ->
+				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						// something transactional
+					}
+				}));
+
+		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition).as("Hasn't thread connection").isTrue();
+		verify(con).close();
+	}
+
+	@Test
 	public void testTransactionWithExceptionOnCommitAndRollbackOnCommitFailure() throws Exception {
 		willThrow(new SQLException("Cannot commit")).given(con).commit();
 
@@ -1264,6 +1307,53 @@ public class DataSourceTransactionManagerTests  {
 					status.setRollbackOnly();
 				}
 			}));
+
+		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition).as("Hasn't thread connection").isTrue();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).rollback();
+		ordered.verify(con).setAutoCommit(true);
+		verify(con).close();
+	}
+
+	@Test
+	public void testTransactionWithDataAccessExceptionOnRollback() throws Exception {
+		given(con.getAutoCommit()).willReturn(true);
+		willThrow(new SQLException("Cannot rollback")).given(con).rollback();
+		tm.setExceptionTranslator((task, sql, ex) -> new ConcurrencyFailureException(task));
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThatExceptionOfType(ConcurrencyFailureException.class).isThrownBy(() ->
+				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+						status.setRollbackOnly();
+					}
+				}));
+
+		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
+		assertThat(condition).as("Hasn't thread connection").isTrue();
+		InOrder ordered = inOrder(con);
+		ordered.verify(con).setAutoCommit(false);
+		ordered.verify(con).rollback();
+		ordered.verify(con).setAutoCommit(true);
+		verify(con).close();
+	}
+
+	@Test
+	public void testTransactionWithDataAccessExceptionOnRollbackFromLazyExceptionTranslator() throws Exception {
+		given(con.getAutoCommit()).willReturn(true);
+		willThrow(new SQLException("Cannot rollback", "40")).given(con).rollback();
+
+		TransactionTemplate tt = new TransactionTemplate(tm);
+		assertThatExceptionOfType(ConcurrencyFailureException.class).isThrownBy(() ->
+				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
+						status.setRollbackOnly();
+					}
+				}));
 
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
