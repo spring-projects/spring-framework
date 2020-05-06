@@ -168,8 +168,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * have no impact on content negotiation.
 	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
 	 * extension config options. As there is no replacement for this method,
-	 * in 5.2.x it is necessary to set it to {@code false}. In 5.3 {@code false}
-	 * becomes the default, and use of this property is longer be necessary.
+	 * in 5.2.x it is necessary to set it to {@code false}. In 5.3 the default
+	 * changes to {@code false} and use of this property becomes unnecessary.
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
