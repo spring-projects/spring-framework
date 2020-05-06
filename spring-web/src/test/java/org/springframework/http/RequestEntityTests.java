@@ -27,6 +27,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link org.springframework.http.RequestEntity}.
  *
  * @author Arjen Poutsma
+ * @author Parviz Rozikov
  */
 public class RequestEntityTests {
 
@@ -78,6 +80,20 @@ public class RequestEntityTests {
 		entity = RequestEntity.get(uri).build();
 		assertThat(entity.getUrl()).isEqualTo(expected);
 	}
+
+	@Test
+	public void uriExpansion() throws URISyntaxException{
+
+		RequestEntity<Void> entity =
+				RequestEntity.get("https://www.{host}.com/{path}", "example", "foo/bar").build();
+
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo%2Fbar"));
+
+		factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo/bar"));
+	}
+
 
 	@Test
 	public void get() {
