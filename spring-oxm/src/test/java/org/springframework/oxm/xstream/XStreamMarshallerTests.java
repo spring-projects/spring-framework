@@ -21,10 +21,10 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -185,13 +185,23 @@ class XStreamMarshallerTests {
 	@Test
 	void converters() throws Exception {
 		marshaller.setConverters(new EncodedByteArrayConverter());
-		byte[] buf = new byte[]{0x1, 0x2};
-		Writer writer = new StringWriter();
-		marshaller.marshal(buf, new StreamResult(writer));
-		assertThat(XmlContent.from(writer)).isSimilarTo("<byte-array>AQI=</byte-array>");
-		Reader reader = new StringReader(writer.toString());
-		byte[] bufResult = (byte[]) marshaller.unmarshal(new StreamSource(reader));
-		assertThat(Arrays.equals(buf, bufResult)).as("Invalid result").isTrue();
+		byte[] buf = {0x1, 0x2};
+
+		// Execute multiple times concurrently to ensure there are no concurrency issues.
+		// See https://github.com/spring-projects/spring-framework/issues/25017
+		IntStream.rangeClosed(1, 100).parallel().forEach(n -> {
+			try {
+				Writer writer = new StringWriter();
+				marshaller.marshal(buf, new StreamResult(writer));
+				assertThat(XmlContent.from(writer)).isSimilarTo("<byte-array>AQI=</byte-array>");
+				Reader reader = new StringReader(writer.toString());
+				byte[] bufResult = (byte[]) marshaller.unmarshal(new StreamSource(reader));
+				assertThat(bufResult).as("Invalid result").isEqualTo(buf);
+			}
+			catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		});
 	}
 
 	@Test
