@@ -12,7 +12,7 @@ case "$1" in
 		 echo "https://github.com/AdoptOpenJDK/openjdk14-binaries/releases/download/jdk-14.0.1%2B7/OpenJDK14U-jdk_x64_linux_hotspot_14.0.1_7.tar.gz"
 	;;
   java15)
-		 echo "https://download.java.net/java/early_access/jdk15/20/GPL/openjdk-15-ea+20_linux-x64_bin.tar.gz"
+		 echo "https://download.java.net/java/early_access/jdk15/21/GPL/openjdk-15-ea+21_linux-x64_bin.tar.gz"
   ;;
   *)
 		echo $"Unknown java version"
