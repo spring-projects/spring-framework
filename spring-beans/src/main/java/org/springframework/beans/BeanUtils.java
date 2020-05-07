@@ -581,6 +581,8 @@ public abstract class BeanUtils {
 	 * <p>Note: The source and target classes do not have to match or even be derived
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
@@ -588,8 +590,8 @@ public abstract class BeanUtils {
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
-	private static void copyProperties(Object source, Object target, Class<?> editable, String... ignoreProperties)
-			throws BeansException {
+	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable,
+			@Nullable String... ignoreProperties) throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
@@ -611,22 +613,25 @@ public abstract class BeanUtils {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
-					if (readMethod != null &&
-							ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType())) {
-						try {
-							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-								readMethod.setAccessible(true);
+					if (readMethod != null) {
+						ResolvableType sourceResolvableType = ResolvableType.forMethodReturnType(readMethod);
+						ResolvableType targetResolvableType = ResolvableType.forMethodParameter(writeMethod, 0);
+						if (targetResolvableType.isAssignableFrom(sourceResolvableType)) {
+							try {
+								if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+									readMethod.setAccessible(true);
+								}
+								Object value = readMethod.invoke(source);
+								if(value==null)continue;
+								if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+									writeMethod.setAccessible(true);
+								}
+								writeMethod.invoke(target, value);
 							}
-							Object value = readMethod.invoke(source);
-							if(value==null)continue;
-							if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-								writeMethod.setAccessible(true);
+							catch (Throwable ex) {
+								throw new FatalBeanException(
+										"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 							}
-							writeMethod.invoke(target, value);
-						}
-						catch (Throwable ex) {
-							throw new FatalBeanException(
-									"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 						}
 					}
 				}
