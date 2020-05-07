@@ -1519,7 +1519,7 @@ following annotation definitions:
 
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional("account", label = "retryable")
+	@Transactional(value = "account", label = "retryable")
 	public @interface AccountTx {
 	}
 ----
