@@ -1443,11 +1443,12 @@ name of the transaction would be: `com.example.BusinessService.handlePayment`.
 
 Most Spring applications need only a single transaction manager, but there may be
 situations where you want multiple independent transaction managers in a single
-application. You can use the `value` attribute of the `@Transactional` annotation to
-optionally specify the identity of the `PlatformTransactionManager` to be used.
-This can either be the bean name or the qualifier value of the transaction manager bean.
-For example, using the qualifier notation, you can combine the following Java code with
-the following transaction manager bean declarations in the application context:
+application. You can use the `value` or `transactionManager` attribute of the
+`@Transactional` annotation to optionally specify the identity of the
+`PlatformTransactionManager` to be used. This can either be the bean name or the
+qualifier value of the transaction manager bean. For example, using the qualifier
+notation, you can combine the following Java code with the following transaction manager
+bean declarations in the application context:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1501,11 +1502,11 @@ managers, differentiated by the `order` and `account` qualifiers. The default
 specifically qualified `PlatformTransactionManager` bean is found.
 
 [[tx-custom-attributes]]
-===== Custom Shortcut Annotations
+===== Custom Composed Annotations
 
 If you find you repeatedly use the same attributes with `@Transactional` on many different
 methods, <<core.adoc#beans-meta-annotations, Spring's meta-annotation support>> lets you
-define custom shortcut annotations for your specific use cases. For example, consider the
+define custom composed annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1513,13 +1514,13 @@ following annotation definitions:
 ----
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional(value = "order", label = "causal-consistency")
+	@Transactional(transactionManager = "order", label = "causal-consistency")
 	public @interface OrderTx {
 	}
 
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional(value = "account", label = "retryable")
+	@Transactional(transactionManager = "account", label = "retryable")
 	public @interface AccountTx {
 	}
 ----
@@ -1528,16 +1529,16 @@ following annotation definitions:
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
-	@Transactional(value = "order", label = ["causal-consistency"])
+	@Transactional(transactionManager = "order", label = ["causal-consistency"])
 	annotation class OrderTx
 
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
-	@Transactional(value = "account", label = ["retryable"])
+	@Transactional(transactionManager = "account", label = ["retryable"])
 	annotation class AccountTx
 ----
 
-The preceding annotations lets us write the example from the previous section as follows:
+The preceding annotations let us write the example from the previous section as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
