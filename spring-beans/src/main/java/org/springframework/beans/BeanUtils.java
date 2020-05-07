@@ -727,6 +727,7 @@ public abstract class BeanUtils {
 									readMethod.setAccessible(true);
 								}
 								Object value = readMethod.invoke(source);
+								if(value==null)continue;
 								if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
 									writeMethod.setAccessible(true);
 								}
