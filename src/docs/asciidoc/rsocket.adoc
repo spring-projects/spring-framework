@@ -454,27 +454,31 @@ decoupled from handling. For example:
 			.subscribe(bar -> { // <1>
 				// ...
 			});
-		return ... // <2>
+		// ... <2>
+		return null; // <3>
 	}
 ----
 <1> Start the request asynchronously, independent from handling.
-<2> Perform handling and return completion `Mono<Void>`.
+<2> Perform handling.
+<3> Return null. Any other return value results in connection failure with RejectedSetupException.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@ConnectMapping
-	suspend fun handle(requester: RSocketRequester) {
+	suspend fun handle(requester: RSocketRequester): Mono<Void>? {
 		GlobalScope.launch {
 			requester.route("status").data("5").retrieveFlow<StatusReport>().collect { // <1>
 				// ...
 			}
 		}
-		/// ... <2>
+		// ... <2>
+		return null <3>
 	}
 ----
 <1> Start the request asynchronously, independent from handling.
 <2> Perform handling in the suspending function.
+<3> Return null. Any other return value results in connection failure with RejectedSetupException.
 
 
 
