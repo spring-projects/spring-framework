@@ -175,7 +175,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 		if (shouldWrap) {
 			if (comment != null) {
-				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
+				sseBuilder.comment(comment.substring(0, comment.length() - 1));
 			}
 			if (decodedData != null) {
 				sseBuilder.data(decodedData);
