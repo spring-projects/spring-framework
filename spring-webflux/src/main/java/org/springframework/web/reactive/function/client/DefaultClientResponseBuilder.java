@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.web.reactive.function.client;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -69,9 +69,9 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private int statusCode = 200;
 
-	private final HttpHeaders headers = new HttpHeaders();
+	private final HttpHeaders headers;
 
-	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, ResponseCookie> cookies;
 
 	private Flux<DataBuffer> body = Flux.empty();
 
@@ -81,21 +81,26 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
+		this.headers = new HttpHeaders();
+		this.cookies = new LinkedMultiValueMap<>();
 		this.request = EMPTY_REQUEST;
 	}
 
-	public DefaultClientResponseBuilder(ClientResponse other) {
+	public DefaultClientResponseBuilder(ClientResponse other, boolean mutate) {
 		Assert.notNull(other, "ClientResponse must not be null");
 		this.strategies = other.strategies();
 		this.statusCode = other.rawStatusCode();
-		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
-		cookies(cookies -> cookies.addAll(other.cookies()));
-		if (other instanceof DefaultClientResponse) {
-			this.request = ((DefaultClientResponse) other).request();
+		if (mutate) {
+			this.headers = HttpHeaders.writableHttpHeaders(other.headers().asHttpHeaders());
+			this.body = other.bodyToFlux(DataBuffer.class);
 		}
 		else {
-			this.request = EMPTY_REQUEST;
+			this.headers = new HttpHeaders();
+			headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		}
+		this.cookies = new LinkedMultiValueMap<>(other.cookies());
+		this.request = (other instanceof DefaultClientResponse ?
+				((DefaultClientResponse) other).request() : EMPTY_REQUEST);
 	}
 
 
@@ -140,6 +145,12 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	}
 
 	@Override
+	public ClientResponse.Builder body(Function<Flux<DataBuffer>, Flux<DataBuffer>> transformer) {
+		this.body = transformer.apply(this.body);
+		return this;
+	}
+
+	@Override
 	public ClientResponse.Builder body(Flux<DataBuffer> body) {
 		Assert.notNull(body, "Body must not be null");
 		releaseBody();
@@ -151,11 +162,10 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	public ClientResponse.Builder body(String body) {
 		Assert.notNull(body, "Body must not be null");
 		releaseBody();
-		DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 		this.body = Flux.just(body).
 				map(s -> {
 					byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-					return dataBufferFactory.wrap(bytes);
+					return new DefaultDataBufferFactory().wrap(bytes);
 				});
 		return this;
 	}
@@ -173,12 +183,12 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	@Override
 	public ClientResponse build() {
+
 		ClientHttpResponse httpResponse =
 				new BuiltClientHttpResponse(this.statusCode, this.headers, this.cookies, this.body);
 
-		// When building ClientResponse manually, the ClientRequest.logPrefix() has to be passed,
-		// e.g. via ClientResponse.Builder, but this (builder) is not used currently.
-		return new DefaultClientResponse(httpResponse, this.strategies, "", "", () -> this.request);
+		return new DefaultClientResponse(
+				httpResponse, this.strategies, "", "", () -> this.request);
 	}
 
 

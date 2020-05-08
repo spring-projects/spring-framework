@@ -260,7 +260,7 @@ class DefaultServerRequest implements ServerRequest {
 
 
 	private class DefaultHeaders implements Headers {
-		
+
 		private final HttpHeaders httpHeaders =
 				HttpHeaders.readOnlyHttpHeaders(request().getHeaders());
 
