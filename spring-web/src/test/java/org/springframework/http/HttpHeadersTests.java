@@ -703,4 +703,12 @@ public class HttpHeadersTests {
 		assertThat(readOnlyHttpHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 	}
 
+	@Test // gh-25034
+	public void equalsUnwrapsHttpHeaders() {
+		HttpHeaders headers1 = new HttpHeaders();
+		HttpHeaders headers2 = new HttpHeaders(new HttpHeaders(headers1));
+
+		assertThat(headers1).isEqualTo(headers2);
+		assertThat(headers2).isEqualTo(headers1);
+	}
 }
