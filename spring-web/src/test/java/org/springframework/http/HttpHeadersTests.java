@@ -678,4 +678,12 @@ public class HttpHeadersTests {
 		assertArrayEquals(expectedKeys, readOnlyHttpHeaders.entrySet().stream().map(Entry::getKey).toArray());
 	}
 
+	@Test // gh-25034
+	public void equalsUnwrapsHttpHeaders() {
+		HttpHeaders headers1 = new HttpHeaders();
+		HttpHeaders headers2 = new HttpHeaders(new HttpHeaders(headers1));
+
+		assertEquals(headers1, headers2);
+		assertEquals(headers2, headers1);
+	}
 }
