@@ -36,6 +36,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
@@ -195,8 +196,10 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
-		Flux<T> flux = body(BodyExtractors.toFlux(elementClass));
+		Flux<T> flux = (elementClass.equals(DataBuffer.class) ?
+				(Flux<T>) request().getBody() : body(BodyExtractors.toFlux(elementClass)));
 		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
 				.onErrorMap(DecodingException.class, DECODING_MAPPER);
 	}
