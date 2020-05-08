@@ -1769,7 +1769,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers
+	 * that also caches the parsed representations of the "Accept" and
+	 * "Content-Type" headers.
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");

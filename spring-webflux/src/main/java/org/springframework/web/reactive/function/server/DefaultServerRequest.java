@@ -260,61 +260,60 @@ class DefaultServerRequest implements ServerRequest {
 
 
 	private class DefaultHeaders implements Headers {
-
-		private HttpHeaders delegate() {
-			return request().getHeaders();
-		}
+		
+		private final HttpHeaders httpHeaders =
+				HttpHeaders.readOnlyHttpHeaders(request().getHeaders());
 
 		@Override
 		public List<MediaType> accept() {
-			return delegate().getAccept();
+			return this.httpHeaders.getAccept();
 		}
 
 		@Override
 		public List<Charset> acceptCharset() {
-			return delegate().getAcceptCharset();
+			return this.httpHeaders.getAcceptCharset();
 		}
 
 		@Override
 		public List<Locale.LanguageRange> acceptLanguage() {
-			return delegate().getAcceptLanguage();
+			return this.httpHeaders.getAcceptLanguage();
 		}
 
 		@Override
 		public OptionalLong contentLength() {
-			long value = delegate().getContentLength();
+			long value = this.httpHeaders.getContentLength();
 			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 
 		@Override
 		public Optional<MediaType> contentType() {
-			return Optional.ofNullable(delegate().getContentType());
+			return Optional.ofNullable(this.httpHeaders.getContentType());
 		}
 
 		@Override
 		public InetSocketAddress host() {
-			return delegate().getHost();
+			return this.httpHeaders.getHost();
 		}
 
 		@Override
 		public List<HttpRange> range() {
-			return delegate().getRange();
+			return this.httpHeaders.getRange();
 		}
 
 		@Override
 		public List<String> header(String headerName) {
-			List<String> headerValues = delegate().get(headerName);
+			List<String> headerValues = this.httpHeaders.get(headerName);
 			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
-			return HttpHeaders.readOnlyHttpHeaders(delegate());
+			return this.httpHeaders;
 		}
 
 		@Override
 		public String toString() {
-			return delegate().toString();
+			return this.httpHeaders.toString();
 		}
 	}
 

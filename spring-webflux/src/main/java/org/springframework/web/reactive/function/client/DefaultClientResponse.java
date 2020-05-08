@@ -234,29 +234,28 @@ class DefaultClientResponse implements ClientResponse {
 
 	private class DefaultHeaders implements Headers {
 
-		private HttpHeaders delegate() {
-			return response.getHeaders();
-		}
+		private final HttpHeaders httpHeaders =
+				HttpHeaders.readOnlyHttpHeaders(response.getHeaders());
 
 		@Override
 		public OptionalLong contentLength() {
-			return toOptionalLong(delegate().getContentLength());
+			return toOptionalLong(this.httpHeaders.getContentLength());
 		}
 
 		@Override
 		public Optional<MediaType> contentType() {
-			return Optional.ofNullable(delegate().getContentType());
+			return Optional.ofNullable(this.httpHeaders.getContentType());
 		}
 
 		@Override
 		public List<String> header(String headerName) {
-			List<String> headerValues = delegate().get(headerName);
+			List<String> headerValues = this.httpHeaders.get(headerName);
 			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
-			return HttpHeaders.readOnlyHttpHeaders(delegate());
+			return this.httpHeaders;
 		}
 
 		private OptionalLong toOptionalLong(long value) {
