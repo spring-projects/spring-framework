@@ -151,13 +151,14 @@ configuration file need to change (rather than your code).
 === Understanding the Spring Framework Transaction Abstraction
 
 The key to the Spring transaction abstraction is the notion of a transaction
-strategy. A transaction strategy is defined by the
-`org.springframework.transaction.PlatformTransactionManager` interface, which the following listing shows:
+strategy. A transaction strategy is defined by a `TransactionManager`, specifically
+the `org.springframework.transaction.PlatformTransactionManager` interface for
+imperative transaction management which the following listing shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public interface PlatformTransactionManager {
+	public interface PlatformTransactionManager extends TransactionManager {
 
 		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
 
@@ -169,7 +170,7 @@ strategy. A transaction strategy is defined by the
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	interface PlatformTransactionManager {
+	interface PlatformTransactionManager : TransactionManager {
 
 		@Throws(TransactionException::class)
 		fun getTransaction(definition: TransactionDefinition): TransactionStatus
@@ -206,6 +207,44 @@ exists in the current call stack. The implication in this latter case is that, a
 Java EE transaction contexts, a `TransactionStatus` is associated with a thread of
 execution.
 
+Spring Framework provides a transaction management abstraction for reactive applications
+that make use of reactive types or Kotlin Coroutines. The following listing
+shows the transaction strategy defined by 
+`org.springframework.transaction.ReactiveTransactionManager`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface ReactiveTransactionManager extends TransactionManager {
+
+		Mono<ReactiveTransaction> getReactiveTransaction(TransactionDefinition definition) throws TransactionException;
+
+		Mono<Void> commit(ReactiveTransaction status) throws TransactionException;
+
+		Mono<Void> rollback(ReactiveTransaction status) throws TransactionException;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface ReactiveTransactionManager : TransactionManager {
+
+		@Throws(TransactionException::class)
+		fun getReactiveTransaction(definition: TransactionDefinition): Mono<ReactiveTransaction>
+
+		@Throws(TransactionException::class)
+		fun commit(status: ReactiveTransaction): Mono<Void>
+
+		@Throws(TransactionException::class)
+		fun rollback(status: ReactiveTransaction): Mono<Void>
+	}
+---- 
+
+The reactive transaction manager is primarily a service provider interface (SPI), 
+although you can use it <<transaction-programmatic-rtm, programmatically>> from your 
+application code. Because `ReactiveTransactionManager` is an interface, it can 
+be easily mocked or stubbed as necessary. 
+
 The `TransactionDefinition` interface specifies:
 
 * Propagation: Typically, all code executed within a transaction scope runs in
@@ -237,45 +276,49 @@ familiar, as they are common to all transaction APIs. The following listing show
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public interface TransactionStatus extends SavepointManager {
+	public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
 
+		@Override
 		boolean isNewTransaction();
 
 		boolean hasSavepoint();
 
+		@Override
 		void setRollbackOnly();
 
+		@Override
 		boolean isRollbackOnly();
 
 		void flush();
 
+		@Override
 		boolean isCompleted();
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	interface TransactionStatus : SavepointManager {
+	interface TransactionStatus : TransactionExecution, SavepointManager, Flushable {
 
-		fun isNewTransaction(): Boolean
+		override fun isNewTransaction(): Boolean
 
 		fun hasSavepoint(): Boolean
 
-		fun setRollbackOnly()
+		override fun setRollbackOnly()
 
-		fun isRollbackOnly(): Boolean
+		override fun isRollbackOnly(): Boolean
 
 		fun flush()
 
-		fun isCompleted(): Boolean
+		override fun isCompleted(): Boolean
 	}
 ----
 
 Regardless of whether you opt for declarative or programmatic transaction management in
-Spring, defining the correct `PlatformTransactionManager` implementation is absolutely
+Spring, defining the correct `TransactionManager` implementation is absolutely
 essential. You typically define this implementation through dependency injection.
 
-`PlatformTransactionManager` implementations normally require knowledge of the
+`TransactionManager` implementations normally require knowledge of the
 environment in which they work: JDBC, JTA, Hibernate, and so on. The following examples
 show how you can define a local `PlatformTransactionManager` implementation (in this case,
 with plain JDBC.)
@@ -402,7 +445,7 @@ and so forth) should now be clear. This section describes how the application co
 (directly or indirectly, by using a persistence API such as JDBC, Hibernate, or JPA)
 ensures that these resources are created, reused, and cleaned up properly. The section
 also discusses how transaction synchronization is (optionally) triggered through the
-relevant `PlatformTransactionManager`.
+relevant `TransactionManager`.
 
 
 [[tx-resource-synchronization-high]]
@@ -542,10 +585,21 @@ transaction support are that this support is enabled
 <<core.adoc#aop-understanding-aop-proxies, via AOP proxies>> and that the transactional
 advice is driven by metadata (currently XML- or annotation-based). The combination of
 AOP with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor`
-in conjunction with an appropriate `PlatformTransactionManager` implementation to drive
+in conjunction with an appropriate `TransactionManager` implementation to drive
 transactions around method invocations.
 
 NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
+
+Spring Frameworks's `TransactionInterceptor` provides transaction management for imperative
+and reactive programming models. The interceptor detects the desired flavor of transaction  
+management by inspecting the method return type. Methods returning a reactive type such
+as `Publisher` or Kotlin `Flow` (or a subtype of those) qualify for reactive transaction
+management. All other return types including `void` use the code path for imperative 
+transaction management.
+
+Transaction management flavors impacts which transaction manager required.
+Imperative transactions require a `PlatformTransactionManager` while reactive transactions
+use `ReactiveTransactionManager` implementations.
 
 The following images shows a Conceptual view of calling a method on a transactional proxy:
 
@@ -707,7 +761,7 @@ configuration is explained in detail in the next few paragraphs:
 			<property name="password" value="tiger"/>
 		</bean>
 
-		<!-- similarly, don't forget the PlatformTransactionManager -->
+		<!-- similarly, don't forget the TransactionManager -->
 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			<property name="dataSource" ref="dataSource"/>
 		</bean>
@@ -723,12 +777,12 @@ bean, transactional. The transaction semantics to apply are encapsulated in the
 starting with `get`, are to execute in the context of a read-only transaction, and all
 other methods are to execute with the default transaction semantics`". The
 `transaction-manager` attribute of the `<tx:advice/>` tag is set to the name of the
-`PlatformTransactionManager` bean that is going to drive the transactions (in this
+`TransactionManager` bean that is going to drive the transactions (in this
 case, the `txManager` bean).
 
 TIP: You can omit the `transaction-manager` attribute in the transactional advice
-(`<tx:advice/>`) if the bean name of the `PlatformTransactionManager` that you want to
-wire in has the name `transactionManager`. If the `PlatformTransactionManager` bean that
+(`<tx:advice/>`) if the bean name of the `TransactionManager` that you want to
+wire in has the name `transactionManager`. If the `TransactionManager` bean that
 you want to wire in has any other name, you must use the `transaction-manager`
 attribute explicitly, as in the preceding example.
 
@@ -825,6 +879,128 @@ insertFoo(..) method of the DefaultFooService class have been truncated for clar
 	at $Proxy0.insertFoo(Unknown Source)
 	at Boot.main(Boot.java:11)
 ----
+
+To use reactive transaction management the code has to use reactive types.
+
+NOTES: Spring Framework uses `ReactiveAdapterRegistry` to determine whether a
+method return type is reactive.
+
+The following listing shows the previously used `FooService` but this time the code is using reactive types:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// the reactive service interface that we want to make transactional
+
+	package x.y.service;
+
+	public interface FooService {
+
+		Flux<Foo> getFoo(String fooName);
+
+		Publisher<Foo> getFoo(String fooName, String barName);
+
+		Mono<Void> insertFoo(Foo foo);
+
+		Mono<Void> updateFoo(Foo foo);
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// the reactive service interface that we want to make transactional
+
+	package x.y.service
+
+	interface FooService {
+
+		fun getFoo(fooName: String): Flow<Foo>
+
+		fun getFoo(fooName: String, barName: String): Publisher<Foo>
+
+		fun insertFoo(foo: Foo) : Mono<Void>
+
+		fun updateFoo(foo: Foo)
+	}
+----
+
+The following example shows an implementation of the preceding interface:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package x.y.service;
+
+	public class DefaultFooService implements FooService {
+
+		@Override
+		public Flux<Foo> getFoo(String fooName) {
+			// ...
+		}
+
+		@Override
+		public Publisher<Foo> getFoo(String fooName, String barName) {
+			// ...
+		}
+
+		@Override
+		public Mono<Void> insertFoo(Foo foo) {
+			// ...
+		}
+
+		@Override
+		public Mono<Void> updateFoo(Foo foo) {
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package x.y.service
+
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Flow<Foo> {
+			// ...
+		}
+
+		override fun getFoo(fooName: String, barName: String): Publisher<Foo> {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+	}
+----
+
+Imperative and reactive transaction management shares the same semantics for
+transaction boundary and transaction attribute definitions. The main difference
+to imperative transactions is the deferred nature. `TransactionInterceptor`
+decorates the returned reactive type with a transactional operator
+to begin and cleanup the transaction. Therefore, calling a transactional
+reactive method defers the actual transaction management to subscription
+type that activates processing of the reactive type.
+
+Another aspect of reactive transaction management relates to data escaping
+which is a natural consequence of the programming model.
+
+Method return values of imperative transactions are returned from transactional methods
+upon successful termination of a method so that partially computed results
+do not escape the method closure.
+
+Reactive transaction methods return a reactive wrapper type which represent a
+computation sequence along with a promise to begin and complete computation.
+
+A `Publisher` can emit data while an transaction is ongoing but not necessarily
+completed. Therefore, methods that depend upon successful completion of an entire
+transaction need to ensure completion and buffer results in the calling code.
 
 
 [[transaction-declarative-rolling-back]]
@@ -1220,9 +1396,61 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 
 TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>` tag
 if the bean name of the `PlatformTransactionManager` that you want to wire in has the name,
-`transactionManager`. If the `PlatformTransactionManager` bean that you want to
+`transactionManager`. If the `TransactionManager` bean that you want to
 dependency-inject has any other name, you have to use the `transaction-manager` attribute,
 as in the preceding example.
+
+Reactive transactional methods use reactive return types in contrast to imperative programming
+arrangements as the following listing shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// the reactive service class that we want to make transactional
+	@Transactional
+	public class DefaultFooService implements FooService {
+
+		Publisher<Foo> getFoo(String fooName) {
+			// ...
+		}
+
+		Mono<Foo> getFoo(String fooName, String barName) {
+			// ...
+		}
+
+		Mono<Void> insertFoo(Foo foo) {
+			// ...
+		}
+
+		Mono<Void> updateFoo(Foo foo) {
+			// ...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// the reactive service class that we want to make transactional
+	@Transactional
+	class DefaultFooService : FooService {
+
+		override fun getFoo(fooName: String): Flow<Foo> {
+			// ...
+		}
+
+		override fun getFoo(fooName: String, barName: String): Mono<Foo> {
+			// ...
+		}
+
+		override fun insertFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+
+		override fun updateFoo(foo: Foo): Mono<Void> {
+			// ...
+		}
+	}
+----
 
 .Method visibility and `@Transactional`
 ****
@@ -1445,7 +1673,7 @@ Most Spring applications need only a single transaction manager, but there may b
 situations where you want multiple independent transaction managers in a single
 application. You can use the `value` or `transactionManager` attribute of the
 `@Transactional` annotation to optionally specify the identity of the
-`PlatformTransactionManager` to be used. This can either be the bean name or the
+`TransactionManager` to be used. This can either be the bean name or the
 qualifier value of the transaction manager bean. For example, using the qualifier
 notation, you can combine the following Java code with the following transaction manager
 bean declarations in the application context:
@@ -1460,6 +1688,9 @@ bean declarations in the application context:
 
 		@Transactional("account")
 		public void doSomething() { ... }
+		
+		@Transactional("reactive-account")
+		public Mono<Void> doSomethingReactive() { ... }
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -1474,6 +1705,11 @@ bean declarations in the application context:
 
 		@Transactional("account")
 		fun doSomething() {
+			// ...
+		}
+
+		@Transactional("reactive-account")
+		fun doSomethingReactive(): Mono<Void> {
 			// ...
 		}
 	}
@@ -1494,12 +1730,17 @@ The following listing shows the bean declarations:
 			...
 			<qualifier value="account"/>
 		</bean>
+
+		<bean id="transactionManager3" class="org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager">
+			...
+			<qualifier value="reactive-account"/>
+		</bean>
 ----
 
-In this case, the two methods on `TransactionalService` run under separate transaction
-managers, differentiated by the `order` and `account` qualifiers. The default
+In this case, the individual methods on `TransactionalService` run under separate transaction
+managers, differentiated by the `order`, `account`, and `reactive-account` qualifiers. The default
 `<tx:annotation-driven>` target bean name, `transactionManager`, is still used if no
-specifically qualified `PlatformTransactionManager` bean is found.
+specifically qualified `TransactionManager` bean is found.
 
 [[tx-custom-attributes]]
 ===== Custom Composed Annotations
@@ -1845,7 +2086,7 @@ declarative approach:
 			</tx:attributes>
 		</tx:advice>
 
-		<!-- other <bean/> definitions such as a DataSource and a PlatformTransactionManager here -->
+		<!-- other <bean/> definitions such as a DataSource and a TransactionManager here -->
 
 	</beans>
 ----
@@ -1925,11 +2166,12 @@ AspectJ in the Spring Framework>> for a discussion of load-time weaving with Asp
 
 The Spring Framework provides two means of programmatic transaction management, by using:
 
-* The `TransactionTemplate`.
-* A `PlatformTransactionManager` implementation directly.
+* The `TransactionTemplate` or `TransactionalOperator`.
+* A `TransactionManager` implementation directly.
 
 The Spring team generally recommends the `TransactionTemplate` for programmatic
-transaction management. The second approach is similar to using the JTA
+transaction management in imperative flows and `TransactionalOperator` for reactive code.
+The second approach is similar to using the JTA
 `UserTransaction` API, although exception handling is less cumbersome.
 
 
@@ -2117,11 +2359,147 @@ of a `TransactionTemplate`, if a class needs to use a `TransactionTemplate` with
 different settings (for example, a different isolation level), you need to create
 two distinct `TransactionTemplate` instances.
 
+[[tx-prog-operator]]
+==== Using the `TransactionOperator`
+
+The `TransactionOperator` follows an operator design that is similar to other reactive
+operators. It uses a callback approach (to free application code from having to
+do the boilerplate acquisition and release transactional resources) and results in
+code that is intention driven, in that your code focuses solely on what
+you want to do.
+
+NOTE: As the examples that follow show, using the `TransactionOperator` absolutely
+couples you to Spring's transaction infrastructure and APIs. Whether or not programmatic
+transaction management is suitable for your development needs is a decision that you
+have to make yourself.
+
+Application code that must execute in a transactional context and that explicitly uses the
+`TransactionOperator` resembles the next example: 
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class SimpleService implements Service {
+
+		// single TransactionOperator shared amongst all methods in this instance
+		private final TransactionalOperator transactionalOperator;
+
+		// use constructor-injection to supply the ReactiveTransactionManager
+		public SimpleService(ReactiveTransactionManager transactionManager) {
+			this.transactionOperator = TransactionalOperator.create(transactionManager);
+		}
+
+		public Mono<Object> someServiceMethod() {
+			
+			// the code in this method executes in a transactional context
+			
+            Mono<Object> update = updateOperation1();
+			
+			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// use constructor-injection to supply the ReactiveTransactionManager
+	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
+
+		// single TransactionalOperator shared amongst all methods in this instance
+		private val transactionalOperator = TransactionalOperator.create(transactionManager)
+
+		suspend fun someServiceMethod() = transactionalOperator.executeAndAwait<Any?> {
+			updateOperation1()
+			resultOfUpdateOperation2()
+		}
+	}
+----
+
+`TransactionalOperator` can be used in two ways:
+
+* Operator-style using Project Reactor types (`mono.as(transactionalOperator::transactional)`)
+* Callback-style for every other case (`transactionalOperator.execute(TransactionCallback<T>)`)
+
+Code within the callback can roll the transaction back by calling the
+`setRollbackOnly()` method on the supplied `TransactionStatus` object, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	transactionalOperator.execute(new TransactionCallback<>() {
+
+		public Mono<Object> doInTransaction(ReactiveTransaction status) {
+			return updateOperation1().then(updateOperation2)
+						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly());
+			}
+		}
+	});
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	transactionalOperator.execute(object : TransactionCallback() {
+
+		override fun doInTransactionWithoutResult(status: ReactiveTransaction) {
+			updateOperation1().then(updateOperation2)
+						.doOnError(SomeBusinessException.class, e -> status.setRollbackOnly())
+		}
+	})
+----
+
+[[tx-prog-operator-settings]]
+===== Specifying Transaction Settings
+
+You can specify transaction settings (such as the propagation mode, the isolation level,
+the timeout, and so forth) for the `TransactionalOperator`.
+By default, `TransactionalOperator` instances have the
+<<transaction-declarative-txadvice-settings,default transactional settings>>. The
+following example shows customization of the transactional settings for
+a specific `TransactionalOperator:`
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class SimpleService implements Service {
+
+		private final TransactionalOperator transactionalOperator;
+
+		public SimpleService(ReactiveTransactionManager transactionManager) {
+			DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+			
+			// the transaction settings can be set here explicitly if so desired
+			definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+			definition.setTimeout(30); // 30 seconds
+			// and so forth...
+
+			this.transactionalOperator = TransactionalOperator.create(transactionManager, definition);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
+
+		private val definition = DefaultTransactionDefinition().apply {
+			// the transaction settings can be set here explicitly if so desired
+			isolationLevel = TransactionDefinition.ISOLATION_READ_UNCOMMITTED
+			timeout = 30 // 30 seconds
+			// and so forth...
+		}
+		private val transactionalOperator = TransactionalOperator(transactionManager, definition)
+	}
+----
+
+[[transaction-programmatic-tm]]
+==== Using the `TransactionManager`
+
+The following section explains programmatic usage of imperative and reactive transaction managers.
 
 [[transaction-programmatic-ptm]]
-==== Using the `PlatformTransactionManager`
+===== Using the `PlatformTransactionManager`
 
-You can also use the `org.springframework.transaction.PlatformTransactionManager`
+For imperative transactions, you can use the `org.springframework.transaction.PlatformTransactionManager`
 directly to manage your transaction. To do so, pass the implementation of the
 `PlatformTransactionManager` you use to your bean through a bean reference. Then,
 by using the `TransactionDefinition` and `TransactionStatus` objects, you can initiate
@@ -2164,6 +2542,52 @@ transactions, roll back, and commit. The following example shows how to do so:
 	txManager.commit(status)
 ----
 
+
+[[transaction-programmatic-rtm]]
+===== Using the `ReactiveTransactionManager`
+
+When working with reactive transactions, you can use 
+`org.springframework.transaction.ReactiveTransactionManager`
+directly to manage your transaction. To do so, pass the implementation of the
+`ReactiveTransactionManager` you use to your bean through a bean reference. Then,
+by using the `TransactionDefinition` and `ReactiveTransaction` objects, you can initiate
+transactions, roll back, and commit. The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName");
+	def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+	Mono<ReactiveTransaction> reactiveTx = txManager.getReactiveTransaction(def);
+	
+	reactiveTx.flatMap(status -> {
+		
+		Mono<Object> tx = ...; // execute your business logic here
+
+		return tx.then(txManager.commit(status))
+				.onErrorResume(ex -> txManager.rollback(status).then(Mono.error(ex)));
+	});
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val def = DefaultTransactionDefinition()
+	// explicitly setting the transaction name is something that can be done only programmatically
+	def.setName("SomeTxName")
+	def.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRED
+
+	val reactiveTx = txManager.getReactiveTransaction(def)
+	reactiveTx.flatMap { status ->
+
+		val tx = ... // execute your business logic here
+
+		tx.then(txManager.commit(status))
+				.onErrorResume { ex -> txManager.rollback(status).then(Mono.error(ex)) }
+	}
+----
 
 
 [[tx-decl-vs-prog]]
