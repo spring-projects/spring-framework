@@ -1160,7 +1160,7 @@ the default transactional configuration, you could write the following:
 			</tx:attributes>
 		</tx:advice>
 
-		<!-- other transaction infrastructure beans such as a PlatformTransactionManager omitted... -->
+		<!-- other transaction infrastructure beans such as a TransactionManager omitted... -->
 
 	</beans>
 ----
@@ -1216,7 +1216,7 @@ transactional settings:
 			</tx:attributes>
 		</tx:advice>
 
-		<!-- other transaction infrastructure beans such as a PlatformTransactionManager omitted... -->
+		<!-- other transaction infrastructure beans such as a TransactionManager omitted... -->
 
 	</beans>
 ----
@@ -1385,7 +1385,7 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 		<bean id="fooService" class="x.y.service.DefaultFooService"/>
 
 		<!-- enable the configuration of transactional behavior based on annotations -->
-		<tx:annotation-driven transaction-manager="txManager"/><!-- a PlatformTransactionManager is still required --> <1>
+		<tx:annotation-driven transaction-manager="txManager"/><!-- a TransactionManager is still required --> <1>
 
 		<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 			<!-- (this dependency is defined somewhere else) -->
