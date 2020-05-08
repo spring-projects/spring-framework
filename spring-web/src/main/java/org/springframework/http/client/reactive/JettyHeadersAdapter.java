@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.client.reactive;
 
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -36,10 +36,10 @@ import org.springframework.util.MultiValueMap;
 /**
  * {@code MultiValueMap} implementation for wrapping Jetty HTTP headers.
  *
- * <p>There is a duplicate of this class in the client package!
+ * <p>There is a duplicate of this class in the server package!
  *
- * @author Brian Clozel
- * @since 5.1.1
+ * @author Rossen Stoyanchev
+ * @since 5.3
  */
 class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
