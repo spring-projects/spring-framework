@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,12 +72,14 @@ public @interface Transactional {
 
 	/**
 	 * A <em>qualifier</em> value for the specified transaction.
-	 * <p>May be used to determine the target transaction manager,
-	 * matching the qualifier value (or the bean name) of a specific
-	 * {@link org.springframework.transaction.PlatformTransactionManager}
+	 * <p>May be used to determine the target transaction manager, matching the
+	 * qualifier value (or the bean name) of a specific
+	 * {@link org.springframework.transaction.TransactionManager TransactionManager}
 	 * bean definition.
 	 * @since 4.2
 	 * @see #value
+	 * @see org.springframework.transaction.PlatformTransactionManager
+	 * @see org.springframework.transaction.ReactiveTransactionManager
 	 */
 	@AliasFor("value")
 	String transactionManager() default "";
