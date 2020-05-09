@@ -31,6 +31,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -69,11 +70,16 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 	private int statusCode = 200;
 
-	private final HttpHeaders headers;
+	@Nullable
+	private HttpHeaders headers;
 
-	private final MultiValueMap<String, ResponseCookie> cookies;
+	@Nullable
+	private MultiValueMap<String, ResponseCookie> cookies;
 
 	private Flux<DataBuffer> body = Flux.empty();
+
+	@Nullable
+	private ClientResponse originalResponse;
 
 	private HttpRequest request;
 
@@ -91,14 +97,13 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		this.strategies = other.strategies();
 		this.statusCode = other.rawStatusCode();
 		if (mutate) {
-			this.headers = HttpHeaders.writableHttpHeaders(other.headers().asHttpHeaders());
 			this.body = other.bodyToFlux(DataBuffer.class);
 		}
 		else {
 			this.headers = new HttpHeaders();
-			headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
+			this.headers.addAll(other.headers().asHttpHeaders());
 		}
-		this.cookies = new LinkedMultiValueMap<>(other.cookies());
+		this.originalResponse = other;
 		this.request = (other instanceof DefaultClientResponse ?
 				((DefaultClientResponse) other).request() : EMPTY_REQUEST);
 	}
@@ -119,29 +124,45 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@Override
 	public ClientResponse.Builder header(String headerName, String... headerValues) {
 		for (String headerValue : headerValues) {
-			this.headers.add(headerName, headerValue);
+			getHeaders().add(headerName, headerValue);
 		}
 		return this;
 	}
 
 	@Override
 	public ClientResponse.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		headersConsumer.accept(this.headers);
+		headersConsumer.accept(getHeaders());
 		return this;
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private HttpHeaders getHeaders() {
+		if (this.headers == null) {
+			this.headers = HttpHeaders.writableHttpHeaders(this.originalResponse.headers().asHttpHeaders());
+		}
+		return this.headers;
 	}
 
 	@Override
 	public DefaultClientResponseBuilder cookie(String name, String... values) {
 		for (String value : values) {
-			this.cookies.add(name, ResponseCookie.from(name, value).build());
+			getCookies().add(name, ResponseCookie.from(name, value).build());
 		}
 		return this;
 	}
 
 	@Override
 	public ClientResponse.Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer) {
-		cookiesConsumer.accept(this.cookies);
+		cookiesConsumer.accept(getCookies());
 		return this;
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private MultiValueMap<String, ResponseCookie> getCookies() {
+		if (this.cookies == null) {
+			this.cookies = new LinkedMultiValueMap<>(this.originalResponse.cookies());
+		}
+		return this.cookies;
 	}
 
 	@Override
@@ -184,8 +205,8 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	@Override
 	public ClientResponse build() {
 
-		ClientHttpResponse httpResponse =
-				new BuiltClientHttpResponse(this.statusCode, this.headers, this.cookies, this.body);
+		ClientHttpResponse httpResponse = new BuiltClientHttpResponse(
+				this.statusCode, this.headers, this.cookies, this.body, this.originalResponse);
 
 		return new DefaultClientResponse(
 				httpResponse, this.strategies, "", "", () -> this.request);
@@ -196,19 +217,33 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		private final int statusCode;
 
+		@Nullable
 		private final HttpHeaders headers;
 
+		@Nullable
 		private final MultiValueMap<String, ResponseCookie> cookies;
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltClientHttpResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
+		@Nullable
+		private final ClientResponse originalResponse;
+
+
+		public BuiltClientHttpResponse(int statusCode, @Nullable HttpHeaders headers,
+				@Nullable MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body,
+				@Nullable ClientResponse originalResponse) {
+
+			Assert.isTrue(headers != null || originalResponse != null,
+					"Expected either headers or an original response with headers.");
+
+			Assert.isTrue(cookies != null || originalResponse != null,
+					"Expected either cookies or an original response with cookies.");
 
 			this.statusCode = statusCode;
-			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-			this.cookies = CollectionUtils.unmodifiableMultiValueMap(cookies);
+			this.headers = (headers != null ? HttpHeaders.readOnlyHttpHeaders(headers) : null);
+			this.cookies = (cookies != null ? CollectionUtils.unmodifiableMultiValueMap(cookies) : null);
 			this.body = body;
+			this.originalResponse = originalResponse;
 		}
 
 		@Override
@@ -222,13 +257,15 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		}
 
 		@Override
+		@SuppressWarnings("ConstantConditions")
 		public HttpHeaders getHeaders() {
-			return this.headers;
+			return (this.headers != null ? this.headers : this.originalResponse.headers().asHttpHeaders());
 		}
 
 		@Override
+		@SuppressWarnings("ConstantConditions")
 		public MultiValueMap<String, ResponseCookie> getCookies() {
-			return this.cookies;
+			return (this.cookies != null ? this.cookies : this.originalResponse.cookies());
 		}
 
 		@Override
