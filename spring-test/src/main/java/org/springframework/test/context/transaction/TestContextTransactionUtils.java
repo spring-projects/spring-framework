@@ -145,9 +145,9 @@ public abstract class TestContextTransactionUtils {
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
 	 * <li>Attempt to look up the single transaction manager by type.
-	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
@@ -190,14 +190,6 @@ public abstract class TestContextTransactionUtils {
 					return txMgrs.values().iterator().next();
 				}
 
-				try {
-					// Look up single bean by type, with support for 'primary' beans
-					return bf.getBean(PlatformTransactionManager.class);
-				}
-				catch (BeansException ex) {
-					logBeansException(testContext, ex, PlatformTransactionManager.class);
-				}
-
 				// Look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
@@ -209,6 +201,14 @@ public abstract class TestContextTransactionUtils {
 						"Transaction manager specified via TransactionManagementConfigurer " +
 						"is not a PlatformTransactionManager: " + tm);
 					return (PlatformTransactionManager) tm;
+				}
+
+				try {
+					// Look up single bean by type, with support for 'primary' beans
+					return bf.getBean(PlatformTransactionManager.class);
+				}
+				catch (BeansException ex) {
+					logBeansException(testContext, ex, PlatformTransactionManager.class);
 				}
 			}
 
