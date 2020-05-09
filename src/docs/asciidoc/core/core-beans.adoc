@@ -2125,7 +2125,7 @@ startup, because it must satisfy the singleton's dependencies. The lazy-initiali
 is injected into a singleton bean elsewhere that is not lazy-initialized.
 
 You can also control lazy-initialization at the container level by using the
-`default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
