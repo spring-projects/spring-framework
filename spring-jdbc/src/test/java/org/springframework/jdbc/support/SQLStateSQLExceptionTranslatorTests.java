@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.UncategorizedSQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -46,39 +45,39 @@ public class SQLStateSQLExceptionTranslatorTests {
 
 
 	@Test
-	public void testTranslateNullException() throws Exception {
+	public void testTranslateNullException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SQLStateSQLExceptionTranslator().translate("", "", null));
 	}
 
 	@Test
-	public void testTranslateBadSqlGrammar() throws Exception {
+	public void testTranslateBadSqlGrammar() {
 		doTest("07", BadSqlGrammarException.class);
 	}
 
 	@Test
-	public void testTranslateDataIntegrityViolation() throws Exception {
+	public void testTranslateDataIntegrityViolation() {
 		doTest("23", DataIntegrityViolationException.class);
 	}
 
 	@Test
-	public void testTranslateDataAccessResourceFailure() throws Exception {
+	public void testTranslateDataAccessResourceFailure() {
 		doTest("53", DataAccessResourceFailureException.class);
 	}
 
 	@Test
-	public void testTranslateTransientDataAccessResourceFailure() throws Exception {
+	public void testTranslateTransientDataAccessResourceFailure() {
 		doTest("S1", TransientDataAccessResourceException.class);
 	}
 
 	@Test
-	public void testTranslateConcurrencyFailure() throws Exception {
+	public void testTranslateConcurrencyFailure() {
 		doTest("40", ConcurrencyFailureException.class);
 	}
 
 	@Test
-	public void testTranslateUncategorized() throws Exception {
-		doTest("00000000", UncategorizedSQLException.class);
+	public void testTranslateUncategorized() {
+		assertThat(new SQLStateSQLExceptionTranslator().translate("", "", new SQLException(REASON, "00000000"))).isNull();
 	}
 
 
@@ -86,7 +85,7 @@ public class SQLStateSQLExceptionTranslatorTests {
 		SQLException ex = new SQLException(REASON, sqlState);
 		SQLExceptionTranslator translator = new SQLStateSQLExceptionTranslator();
 		DataAccessException dax = translator.translate(TASK, SQL, ex);
-		assertThat(dax).as("Translation must *never* result in a null DataAccessException being returned.").isNotNull();
+		assertThat(dax).as("Specific translation must not result in a null DataAccessException being returned.").isNotNull();
 		assertThat(dax.getClass()).as("Wrong DataAccessException type returned as the result of the translation").isEqualTo(dataAccessExceptionType);
 		assertThat(dax.getCause()).as("The original SQLException must be preserved in the translated DataAccessException").isNotNull();
 		assertThat(dax.getCause()).as("The exact same original SQLException must be preserved in the translated DataAccessException").isSameAs(ex);

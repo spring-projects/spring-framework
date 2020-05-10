@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
 
@@ -148,8 +149,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * <ol>
 	 * <li>The {@linkplain ParameterContext#getDeclaringExecutable() declaring
 	 * executable} is a {@link Constructor} and
-	 * {@link TestConstructorUtils#isAutowirableConstructor(Constructor, Class)}
-	 * returns {@code true}.</li>
+	 * {@link TestConstructorUtils#isAutowirableConstructor(Constructor, Class, PropertyProvider)}
+	 * returns {@code true}. Note that {@code isAutowirableConstructor()} will be
+	 * invoked with a fallback {@link PropertyProvider} that delegates its lookup
+	 * to {@link ExtensionContext#getConfigurationParameter(String)}.</li>
 	 * <li>The parameter is of type {@link ApplicationContext} or a sub-type thereof.</li>
 	 * <li>{@link ParameterResolutionDelegate#isAutowirable} returns {@code true}.</li>
 	 * </ol>
@@ -167,7 +170,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Parameter parameter = parameterContext.getParameter();
 		Executable executable = parameter.getDeclaringExecutable();
 		Class<?> testClass = extensionContext.getRequiredTestClass();
-		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass) ||
+		PropertyProvider junitPropertyProvider = propertyName ->
+				extensionContext.getConfigurationParameter(propertyName).orElse(null);
+		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
 				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
 	}

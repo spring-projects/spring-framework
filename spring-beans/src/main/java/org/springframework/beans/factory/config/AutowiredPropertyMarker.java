@@ -34,6 +34,7 @@ import org.springframework.lang.Nullable;
  * @see BeanDefinition#getPropertyValues()
  * @see org.springframework.beans.factory.support.BeanDefinitionBuilder#addAutowiredProperty
  */
+@SuppressWarnings("serial")
 public final class AutowiredPropertyMarker implements Serializable {
 
 	/**

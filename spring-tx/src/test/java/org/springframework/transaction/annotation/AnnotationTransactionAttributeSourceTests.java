@@ -31,13 +31,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Paluch
  */
 public class AnnotationTransactionAttributeSourceTests {
 
@@ -181,6 +182,21 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 		assertThat(actual.rollbackOn(new Exception())).isTrue();
 		assertThat(actual.rollbackOn(new IOException())).isFalse();
+	}
+
+	@Test
+	public void labelsAreApplied() throws Exception {
+		Method method = TestBean11.class.getMethod("getAge");
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean11.class);
+
+		assertThat(actual.getLabels()).containsOnly("retryable", "long-running");
+
+		method = TestBean11.class.getMethod("setAge", Integer.TYPE);
+		actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
+
+		assertThat(actual.getLabels()).containsOnly("short-running");
 	}
 
 	/**
@@ -690,6 +706,21 @@ public class AnnotationTransactionAttributeSourceTests {
 		@Override
 		public int getAge() {
 			return 10;
+		}
+	}
+
+	@Transactional(label = {"retryable", "long-running"})
+	static class TestBean11 {
+
+		private int age = 10;
+
+		@Transactional(label = "short-running")
+		public void setAge(int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
 		}
 	}
 

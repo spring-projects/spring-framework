@@ -149,6 +149,7 @@ class GenericTypeResolverTests {
 	}
 
 	@Test  // SPR-11044
+	@SuppressWarnings("deprecation")
 	void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
 		MethodParameter methodParameter = MethodParameter.forExecutable(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);

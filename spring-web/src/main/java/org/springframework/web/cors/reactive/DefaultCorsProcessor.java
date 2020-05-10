@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,13 +59,25 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		response.getHeaders().addAll(HttpHeaders.VARY, VARY_HEADERS);
+		HttpHeaders responseHeaders = response.getHeaders();
+
+		List<String> varyHeaders = responseHeaders.get(HttpHeaders.VARY);
+		if (varyHeaders == null) {
+			responseHeaders.addAll(HttpHeaders.VARY, VARY_HEADERS);
+		}
+		else {
+			for (String header : VARY_HEADERS) {
+				if (!varyHeaders.contains(header)) {
+					responseHeaders.add(HttpHeaders.VARY, header);
+				}
+			}
+		}
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;
 		}
 
-		if (response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
+		if (responseHeaders.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
 			logger.trace("Skip: response already contains \"Access-Control-Allow-Origin\"");
 			return true;
 		}
@@ -163,7 +175,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	/**
 	 * Check the HTTP method and determine the methods for the response of a
 	 * pre-flight request. The default implementation simply delegates to
-	 * {@link CorsConfiguration#checkOrigin(String)}.
+	 * {@link CorsConfiguration#checkHttpMethod(HttpMethod)}.
 	 */
 	@Nullable
 	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {

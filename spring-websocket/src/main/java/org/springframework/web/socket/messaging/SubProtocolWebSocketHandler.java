@@ -370,6 +370,9 @@ public class SubProtocolWebSocketHandler
 				if (logger.isDebugEnabled()) {
 					logger.debug("Terminating '" + session + "'", ex);
 				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("Terminating '" + session + "': " + ex.getMessage());
+				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
 				session.close(ex.getStatus());
@@ -592,6 +595,7 @@ public class SubProtocolWebSocketHandler
 		int getTransportErrorSessions();
 	}
 
+
 	private class DefaultStats implements Stats {
 
 		private final AtomicInteger total = new AtomicInteger();
@@ -607,7 +611,6 @@ public class SubProtocolWebSocketHandler
 		private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
 		private final AtomicInteger transportError = new AtomicInteger();
-
 
 		@Override
 		public int getTotalSessions() {

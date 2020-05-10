@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,9 +145,9 @@ public abstract class TestContextTransactionUtils {
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
 	 * <li>Attempt to look up the single transaction manager by type.
-	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
@@ -190,14 +190,6 @@ public abstract class TestContextTransactionUtils {
 					return txMgrs.values().iterator().next();
 				}
 
-				try {
-					// Look up single bean by type, with support for 'primary' beans
-					return bf.getBean(PlatformTransactionManager.class);
-				}
-				catch (BeansException ex) {
-					logBeansException(testContext, ex, PlatformTransactionManager.class);
-				}
-
 				// Look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
@@ -205,13 +197,18 @@ public abstract class TestContextTransactionUtils {
 						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
 				if (configurers.size() == 1) {
 					TransactionManager tm = configurers.values().iterator().next().annotationDrivenTransactionManager();
-					if (tm instanceof PlatformTransactionManager) {
-						return (PlatformTransactionManager) tm;
-					}
-					else {
-						throw new IllegalStateException(
-								"Specified transaction manager is not a PlatformTransactionManager: " + tm);
-					}
+					Assert.state(tm instanceof PlatformTransactionManager, () ->
+						"Transaction manager specified via TransactionManagementConfigurer " +
+						"is not a PlatformTransactionManager: " + tm);
+					return (PlatformTransactionManager) tm;
+				}
+
+				try {
+					// Look up single bean by type, with support for 'primary' beans
+					return bf.getBean(PlatformTransactionManager.class);
+				}
+				catch (BeansException ex) {
+					logBeansException(testContext, ex, PlatformTransactionManager.class);
 				}
 			}
 

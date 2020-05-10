@@ -30,9 +30,9 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
- * visitOuterClass} ] ( {@code visitAnnotation} | {@code visitTypeAnnotation} | {@code
- * visitAttribute} )* ( {@code visitNestMember} | {@code visitInnerClass} | {@code visitField} |
- * {@code visitMethod} )* {@code visitEnd}.
+ * visitPermittedSubtype} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
+ * visitTypeAnnotation} | {@code visitAttribute} )* ( {@code visitNestMember} | {@code
+ * visitInnerClass} | {@code visitField} | {@code visitMethod} )* {@code visitEnd}.
  *
  * @author Eric Bruneton
  */
@@ -65,10 +65,16 @@ public abstract class ClassVisitor {
    * @param classVisitor the class visitor to which this visitor must delegate method calls. May be
    *     null.
    */
+  @SuppressWarnings("deprecation")
   public ClassVisitor(final int api, final ClassVisitor classVisitor) {
-    if (api != Opcodes.ASM7 && api != Opcodes.ASM6 && api != Opcodes.ASM5 && api != Opcodes.ASM4) {
+    if (api != Opcodes.ASM7
+        && api != Opcodes.ASM6
+        && api != Opcodes.ASM5
+        && api != Opcodes.ASM4
+        && api != Opcodes.ASM8_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
+    // SPRING PATCH: no preview mode check for ASM 8 experimental
     this.api = api;
     this.cv = classVisitor;
   }
@@ -241,6 +247,24 @@ public abstract class ClassVisitor {
   }
 
   /**
+   * <b>Experimental, use at your own risk. This method will be renamed when it becomes stable, this
+   * will break existing code using it</b>. Visits a permitted subtypes. A permitted subtypes is one
+   * of the allowed subtypes of the current class.
+   *
+   * @param permittedSubtype the internal name of a permitted subtype.
+   * @deprecated this API is experimental.
+   */
+  @Deprecated
+  public void visitPermittedSubtypeExperimental(final String permittedSubtype) {
+    if (api != Opcodes.ASM8_EXPERIMENTAL) {
+      throw new UnsupportedOperationException("This feature requires ASM8_EXPERIMENTAL");
+    }
+    if (cv != null) {
+      cv.visitPermittedSubtypeExperimental(permittedSubtype);
+    }
+  }
+
+  /**
    * Visits information about an inner class. This inner class is not necessarily a member of the
    * class being visited.
    *
@@ -257,6 +281,31 @@ public abstract class ClassVisitor {
     if (cv != null) {
       cv.visitInnerClass(name, outerName, innerName, access);
     }
+  }
+
+  /**
+   * Visits a record component of the class.
+   *
+   * @param access the record component access flags, the only possible value is {@link
+   *     Opcodes#ACC_DEPRECATED}.
+   * @param name the record component name.
+   * @param descriptor the record component descriptor (see {@link Type}).
+   * @param signature the record component signature. May be {@literal null} if the record component
+   *     type does not use generic types.
+   * @return a visitor to visit this record component annotations and attributes, or {@literal null}
+   *     if this class visitor is not interested in visiting these annotations and attributes.
+   * @deprecated this API is experimental.
+   */
+  @Deprecated
+  public RecordComponentVisitor visitRecordComponentExperimental(
+      final int access, final String name, final String descriptor, final String signature) {
+    if (api < Opcodes.ASM8_EXPERIMENTAL) {
+      throw new UnsupportedOperationException("This feature requires ASM8_EXPERIMENTAL");
+    }
+    if (cv != null) {
+      return cv.visitRecordComponentExperimental(access, name, descriptor, signature);
+    }
+    return null;
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +207,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * configured interfaces and is public, otherwise {@code false}.
 	 */
 	private boolean isPublicInInterface(Method method, String beanKey) {
-		return ((method.getModifiers() & Modifier.PUBLIC) > 0) && isDeclaredInInterface(method, beanKey);
+		return Modifier.isPublic(method.getModifiers()) && isDeclaredInInterface(method, beanKey);
 	}
 
 	/**
@@ -231,6 +231,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		for (Class<?> ifc : ifaces) {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (ifcMethod.getName().equals(method.getName()) &&
+						ifcMethod.getParameterCount() == method.getParameterCount() &&
 						Arrays.equals(ifcMethod.getParameterTypes(), method.getParameterTypes())) {
 					return true;
 				}

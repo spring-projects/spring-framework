@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,8 @@ abstract class ParserStrategyUtils {
 	 * @since 5.2
 	 */
 	@SuppressWarnings("unchecked")
-	static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo,
-			Environment environment, ResourceLoader resourceLoader,
-			BeanDefinitionRegistry registry) {
+	static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo, Environment environment,
+			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
 
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isAssignable(assignableTo, clazz);
@@ -99,6 +98,7 @@ abstract class ParserStrategyUtils {
 			return parameters;
 	}
 
+	@Nullable
 	private static Object resolveParameter(Class<?> parameterType,
 			Environment environment, ResourceLoader resourceLoader,
 			BeanDefinitionRegistry registry, @Nullable ClassLoader classLoader) {
@@ -110,17 +110,16 @@ abstract class ParserStrategyUtils {
 			return resourceLoader;
 		}
 		if (parameterType == BeanFactory.class) {
-			return (registry instanceof BeanFactory) ? registry : null;
+			return (registry instanceof BeanFactory ? registry : null);
 		}
 		if (parameterType == ClassLoader.class) {
 			return classLoader;
 		}
-		throw new IllegalStateException(
-				"Illegal method parameter type " + parameterType.getName());
+		throw new IllegalStateException("Illegal method parameter type: " + parameterType.getName());
 	}
 
 	private static void invokeAwareMethods(Object parserStrategyBean, Environment environment,
-			ResourceLoader resourceLoader, BeanDefinitionRegistry registry, ClassLoader classLoader) {
+			ResourceLoader resourceLoader, BeanDefinitionRegistry registry, @Nullable ClassLoader classLoader) {
 
 		if (parserStrategyBean instanceof Aware) {
 			if (parserStrategyBean instanceof BeanClassLoaderAware && classLoader != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link MergedAnnotations} implementation backed by a {@link Collection}
+ * {@link MergedAnnotations} implementation backed by a {@link Collection} of
  * {@link MergedAnnotation} instances that represent direct annotations.
  *
  * @author Phillip Webb
@@ -173,9 +173,8 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 				if (!isMappingForType(mapping, requiredType)) {
 					continue;
 				}
-				MergedAnnotation<A> candidate = (mappingIndex == 0
-						? (MergedAnnotation<A>) root
-						: TypeMappedAnnotation.createIfPossible(mapping, root, IntrospectionFailureLogger.INFO));
+				MergedAnnotation<A> candidate = (mappingIndex == 0 ? (MergedAnnotation<A>) root :
+						TypeMappedAnnotation.createIfPossible(mapping, root, IntrospectionFailureLogger.INFO));
 				if (candidate != null && (predicate == null || predicate.test(candidate))) {
 					if (selector.isBestCandidate(candidate)) {
 						return candidate;

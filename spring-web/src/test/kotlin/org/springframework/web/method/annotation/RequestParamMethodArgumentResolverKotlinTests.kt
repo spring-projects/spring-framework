@@ -26,10 +26,10 @@ import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.mock.web.test.MockHttpServletRequest
-import org.springframework.mock.web.test.MockHttpServletResponse
-import org.springframework.mock.web.test.MockMultipartFile
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse
+import org.springframework.web.testfixture.servlet.MockMultipartFile
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.RequestParam

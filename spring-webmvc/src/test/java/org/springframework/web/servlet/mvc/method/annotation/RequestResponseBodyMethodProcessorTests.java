@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
@@ -68,6 +66,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -690,6 +690,27 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
+		assertThat(processor.supportsParameter(methodParameter)).isTrue();
+		String value = (String) processor.readWithMessageConverters(
+				this.request, methodParameter, methodParameter.getGenericParameterType());
+		assertThat(value).isEqualTo("foo");
+	}
+
+	@Test  // gh-24127
+	public void resolveArgumentTypeVariableWithGenericInterfaceAndSubclass() throws Exception {
+		this.servletRequest.setContent("\"foo\"".getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		Method method = SubControllerImplementingInterface.class.getMethod("handle", Object.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new SubControllerImplementingInterface(), method);
+		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		assertThat(processor.supportsParameter(methodParameter)).isTrue();
 		String value = (String) processor.readWithMessageConverters(
 				this.request, methodParameter, methodParameter.getGenericParameterType());
 		assertThat(value).isEqualTo("foo");
@@ -1039,6 +1060,15 @@ public class RequestResponseBodyMethodProcessorTests {
 
 
 	static class MyControllerImplementingInterface implements MappingInterface<String> {
+	}
+
+
+	static class SubControllerImplementingInterface extends MyControllerImplementingInterface {
+
+		@Override
+		public String handle(String arg) {
+			return arg;
+		}
 	}
 
 }

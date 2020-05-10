@@ -1,7 +1,6 @@
 package org.springframework.transaction.reactive
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -15,7 +14,6 @@ import org.springframework.transaction.ReactiveTransaction
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator): Flow<T> =
 		operator.transactional(asFlux()).asFlow()
 

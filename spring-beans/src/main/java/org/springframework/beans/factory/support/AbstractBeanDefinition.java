@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,8 +181,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private MutablePropertyValues propertyValues;
 
-	@Nullable
-	private MethodOverrides methodOverrides;
+	private MethodOverrides methodOverrides = new MethodOverrides();
 
 	@Nullable
 	private String initMethodName;
@@ -404,16 +403,29 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify the class for this bean.
+	 * @see #setBeanClassName(String)
 	 */
 	public void setBeanClass(@Nullable Class<?> beanClass) {
 		this.beanClass = beanClass;
 	}
 
 	/**
-	 * Return the class of the wrapped bean (assuming it is resolved already).
-	 * @return the bean class (never {@code null})
+	 * Return the specified class of the bean definition (assuming it is resolved already).
+	 * <p><b>NOTE:</b> This is an initial class reference as declared in the bean metadata
+	 * definition, potentially combined with a declared factory method or a
+	 * {@link org.springframework.beans.factory.FactoryBean} which may lead to a different
+	 * runtime type of the bean, or not being set at all in case of an instance-level
+	 * factory method (which is resolved via {@link #getFactoryBeanName()} instead).
+	 * <b>Do not use this for runtime type introspection of arbitrary bean definitions.</b>
+	 * The recommended way to find out about the actual runtime type of a particular bean
+	 * is a {@link org.springframework.beans.factory.BeanFactory#getType} call for the
+	 * specified bean name; this takes all of the above cases into account and returns the
+	 * type of object that a {@link org.springframework.beans.factory.BeanFactory#getBean}
+	 * call is going to return for the same bean name.
+	 * @return the resolved bean class (never {@code null})
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class yet
+	 * @see #getBeanClassName()
 	 * @see #hasBeanClass()
 	 * @see #setBeanClass(Class)
 	 * @see #resolveBeanClass(ClassLoader)
@@ -903,9 +915,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * <p>Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
-		if (this.methodOverrides == null) {
-			this.methodOverrides = new MethodOverrides();
-		}
 		return this.methodOverrides;
 	}
 
@@ -914,7 +923,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @since 5.0.2
 	 */
 	public boolean hasMethodOverrides() {
-		return (this.methodOverrides != null && !this.methodOverrides.isEmpty());
+		return !this.methodOverrides.isEmpty();
 	}
 
 	/**
@@ -1098,10 +1107,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public void validate() throws BeanDefinitionValidationException {
 		if (hasMethodOverrides() && getFactoryMethodName() != null) {
 			throw new BeanDefinitionValidationException(
-					"Cannot combine static factory method with method overrides: " +
-					"the static factory method must create the instance");
+					"Cannot combine factory method with container-generated method overrides: " +
+					"the factory method must create the concrete bean instance.");
 		}
-
 		if (hasBeanClass()) {
 			prepareMethodOverrides();
 		}
@@ -1113,14 +1121,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @throws BeanDefinitionValidationException in case of validation failure
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
-		// Check that lookup methods exists.
+		// Check that lookup methods exist and determine their overloaded status.
 		if (hasMethodOverrides()) {
-			Set<MethodOverride> overrides = getMethodOverrides().getOverrides();
-			synchronized (overrides) {
-				for (MethodOverride mo : overrides) {
-					prepareMethodOverride(mo);
-				}
-			}
+			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}
 
@@ -1171,30 +1174,30 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			return false;
 		}
 		AbstractBeanDefinition that = (AbstractBeanDefinition) other;
-		boolean rtn = ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName());
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.scope, that.scope);
-		rtn = rtn &= this.abstractFlag == that.abstractFlag;
-		rtn = rtn &= this.lazyInit == that.lazyInit;
-		rtn = rtn &= this.autowireMode == that.autowireMode;
-		rtn = rtn &= this.dependencyCheck == that.dependencyCheck;
-		rtn = rtn &= Arrays.equals(this.dependsOn, that.dependsOn);
-		rtn = rtn &= this.autowireCandidate == that.autowireCandidate;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers);
-		rtn = rtn &= this.primary == that.primary;
-		rtn = rtn &= this.nonPublicAccessAllowed == that.nonPublicAccessAllowed;
-		rtn = rtn &= this.lenientConstructorResolution == that.lenientConstructorResolution;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName);
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName);
-		rtn = rtn &= this.enforceInitMethod == that.enforceInitMethod;
-		rtn = rtn &= ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName);
-		rtn = rtn &= this.enforceDestroyMethod == that.enforceDestroyMethod;
-		rtn = rtn &= this.synthetic == that.synthetic;
-		rtn = rtn &= this.role == that.role;
-		return rtn && super.equals(other);
+		return (ObjectUtils.nullSafeEquals(getBeanClassName(), that.getBeanClassName()) &&
+				ObjectUtils.nullSafeEquals(this.scope, that.scope) &&
+				this.abstractFlag == that.abstractFlag &&
+				this.lazyInit == that.lazyInit &&
+				this.autowireMode == that.autowireMode &&
+				this.dependencyCheck == that.dependencyCheck &&
+				Arrays.equals(this.dependsOn, that.dependsOn) &&
+				this.autowireCandidate == that.autowireCandidate &&
+				ObjectUtils.nullSafeEquals(this.qualifiers, that.qualifiers) &&
+				this.primary == that.primary &&
+				this.nonPublicAccessAllowed == that.nonPublicAccessAllowed &&
+				this.lenientConstructorResolution == that.lenientConstructorResolution &&
+				ObjectUtils.nullSafeEquals(this.constructorArgumentValues, that.constructorArgumentValues) &&
+				ObjectUtils.nullSafeEquals(this.propertyValues, that.propertyValues) &&
+				ObjectUtils.nullSafeEquals(this.methodOverrides, that.methodOverrides) &&
+				ObjectUtils.nullSafeEquals(this.factoryBeanName, that.factoryBeanName) &&
+				ObjectUtils.nullSafeEquals(this.factoryMethodName, that.factoryMethodName) &&
+				ObjectUtils.nullSafeEquals(this.initMethodName, that.initMethodName) &&
+				this.enforceInitMethod == that.enforceInitMethod &&
+				ObjectUtils.nullSafeEquals(this.destroyMethodName, that.destroyMethodName) &&
+				this.enforceDestroyMethod == that.enforceDestroyMethod &&
+				this.synthetic == that.synthetic &&
+				this.role == that.role &&
+				super.equals(other));
 	}
 
 	@Override

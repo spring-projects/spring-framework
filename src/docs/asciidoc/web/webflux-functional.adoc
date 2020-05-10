@@ -1,5 +1,6 @@
 [[webflux-fn]]
 = Functional Endpoints
+[.small]#<<web.adoc#webmvc-fn, Web MVC>>#
 
 Spring WebFlux includes WebFlux.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
@@ -11,10 +12,11 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 [[webflux-fn-overview]]
 == Overview
+[.small]#<<web.adoc#webmvc-fn-overview, Web MVC>>#
 
 In WebFlux.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a delayed `ServerResponse` (i.e. `Mono<ServerResponse>`).
-Both the request as the response object have immutable contracts that offer JDK 8-friendly
+Both the request and the response object have immutable contracts that offer JDK 8-friendly
 access to the HTTP request and response.
 `HandlerFunction` is the equivalent of the body of a `@RequestMapping` method in the
 annotation-based programming model.
@@ -110,6 +112,7 @@ Most applications can run through the WebFlux Java configuration, see <<webflux-
 
 [[webflux-fn-handler-functions]]
 == HandlerFunction
+[.small]#<<web.adoc#webmvc-fn-handler-functions, Web MVC>>#
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response.
@@ -437,6 +440,7 @@ See <<core.adoc#validation-beanvalidation, Spring Validation>>.
 
 [[webflux-fn-router-functions]]
 == `RouterFunction`
+[.small]#<<web.adoc#webmvc-fn-router-functions, Web MVC>>#
 
 Router functions are used to route the requests to the corresponding `HandlerFunction`.
 Typically, you do not write router functions yourself, but rather use a method on the
@@ -470,15 +474,15 @@ header:
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
-			request -> ServerResponse.ok().bodyValue("Hello World"));
+			request -> ServerResponse.ok().bodyValue("Hello World")).build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val route = coRouter {
-		(GET("/hello-world") and accept(MediaType.TEXT_PLAIN)).invoke {
-			ServerResponse.ok().bodyValueAndAwait("Hello World")
-		}
+		GET("/hello-world", accept(TEXT_PLAIN)) {
+            ServerResponse.ok().bodyValueAndAwait("Hello World")
+        }
 	}
 ----
 
@@ -534,7 +538,7 @@ RouterFunction<ServerResponse> route = route()
 	.add(otherRoute) // <4>
 	.build();
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -553,12 +557,12 @@ RouterFunction<ServerResponse> route = route()
 	val otherRoute: RouterFunction<ServerResponse> = coRouter {  }
 
 	val route = coRouter {
-		(GET("/person/{id}") and accept(APPLICATION_JSON)).invoke(handler::getPerson) // <1>
-		(GET("/person") and accept(APPLICATION_JSON)).invoke(handler::listPeople) // <2>
-		POST("/person").invoke(handler::createPerson) // <3>
+		GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson) // <1>
+		GET("/person", accept(APPLICATION_JSON), handler::listPeople) // <2>
+		POST("/person", handler::createPerson) // <3>
 	}.and(otherRoute) // <4>
 ----
-<1> `GET /person/{id}` with an `Accept` header that matches JSON is routed to
+<1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
 `PersonHandler.listPeople`
@@ -595,9 +599,9 @@ RouterFunction<ServerResponse> route = route()
 ----
 	val route = coRouter {
 		"/person".nest {
-			(GET("/{id}") and accept(APPLICATION_JSON)).invoke(handler::getPerson)
-			(GET("") and accept(APPLICATION_JSON)).invoke(handler::listPeople)
-			POST("/person").invoke(handler::createPerson)
+			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
+			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			POST("/person", handler::createPerson)
 		}
 	}
 ----
@@ -622,7 +626,7 @@ We can further improve by using the `nest` method together with `accept`:
 .Kotlin
 ----
 	val route = coRouter {
-		"/person".nest{
+		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
 				GET("", handler::listPeople)
@@ -635,6 +639,7 @@ We can further improve by using the `nest` method together with `accept`:
 
 [[webflux-fn-running]]
 == Running a Server
+[.small]#<<web.adoc#webmvc-fn-running, Web MVC>>#
 
 How do you run a router function in an HTTP server? A simple option is to convert a router
 function to an `HttpHandler` by using one of the following:
@@ -740,6 +745,7 @@ The following example shows a WebFlux Java configuration (see
 
 [[webflux-fn-handler-filter-function]]
 == Filtering Handler Functions
+[.small]#<<web.adoc#webmvc-fn-handler-filter-function, Web MVC>>#
 
 You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
 function builder.
@@ -751,17 +757,17 @@ For instance, consider the following example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-RouterFunction<ServerResponse> route = route()
-	.path("/person", b1 -> b1
-		.nest(accept(APPLICATION_JSON), b2 -> b2
-			.GET("/{id}", handler::getPerson)
-			.GET("", handler::listPeople)
-			.before(request -> ServerRequest.from(request) // <1>
-				.header("X-RequestHeader", "Value")
-				.build()))
-		.POST("/person", handler::createPerson))
-	.after((request, response) -> logResponse(response)) // <2>
-	.build();
+	RouterFunction<ServerResponse> route = route()
+		.path("/person", b1 -> b1
+			.nest(accept(APPLICATION_JSON), b2 -> b2
+				.GET("/{id}", handler::getPerson)
+				.GET("", handler::listPeople)
+				.before(request -> ServerRequest.from(request) // <1>
+					.header("X-RequestHeader", "Value")
+					.build()))
+			.POST("/person", handler::createPerson))
+		.after((request, response) -> logResponse(response)) // <2>
+		.build();
 ----
 <1> The `before` filter that adds a custom request header is only applied to the two GET routes.
 <2> The `after` filter that logs the response is applied to all routes, including the nested ones.
@@ -769,8 +775,23 @@ RouterFunction<ServerResponse> route = route()
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// TODO when https://github.com/spring-projects/spring-framework/issues/23526 will be fixed
+	val route = router {
+		"/person".nest {
+			GET("/{id}", handler::getPerson)
+			GET("", handler::listPeople)
+			before { // <1>
+				ServerRequest.from(it)
+						.header("X-RequestHeader", "Value").build()
+			}
+			POST("/person", handler::createPerson)
+			after { _, response -> // <2>
+				logResponse(response)
+			}
+		}
+	}
 ----
+<1> The `before` filter that adds a custom request header is only applied to the two GET routes.
+<2> The `after` filter that logs the response is applied to all routes, including the nested ones.
 
 
 The `filter` method on the router builder takes a `HandlerFilterFunction`: a
@@ -807,7 +828,23 @@ The following example shows how to do so:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// TODO when https://github.com/spring-projects/spring-framework/issues/23526 will be fixed
+	val securityManager: SecurityManager = ...
+
+	val route = router {
+			("/person" and accept(APPLICATION_JSON)).nest {
+				GET("/{id}", handler::getPerson)
+				GET("", handler::listPeople)
+				POST("/person", handler::createPerson)
+				filter { request, next ->
+					if (securityManager.allowAccessTo(request.path())) {
+						next(request)
+					}
+					else {
+						status(UNAUTHORIZED).build();
+					}
+				}
+			}
+		}
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
@@ -817,4 +854,4 @@ Besides using the `filter` method on the router function builder, it is possible
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
 
 NOTE: CORS support for functional endpoints is provided through a dedicated
-<<webflux-cors-webfilter, `CorsWebFilter`>>.
+<<webflux-cors.adoc#webflux-cors-webfilter, `CorsWebFilter`>>.

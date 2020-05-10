@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.tests.EnabledForTestGroups;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -58,11 +58,12 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
  * @since 04.07.2003
+ * @see org.springframework.jdbc.support.JdbcTransactionManagerTests
  */
 public class DataSourceTransactionManagerTests  {
 
@@ -284,8 +285,7 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition1 = !TransactionSynchronizationManager.isSynchronizationActive();
 		assertThat(condition1).as("Synchronization not active").isTrue();
 
-		ConnectionHolder conHolder = new ConnectionHolder(con);
-		conHolder.setTransactionActive(true);
+		ConnectionHolder conHolder = new ConnectionHolder(con, true);
 		TransactionSynchronizationManager.bindResource(ds, conHolder);
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
@@ -921,11 +921,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
 		ordered.verify(con).setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+		ordered.verify(con).setReadOnly(false);
 		verify(con).close();
 	}
 
@@ -954,11 +956,13 @@ public class DataSourceTransactionManagerTests  {
 		boolean condition = !TransactionSynchronizationManager.hasResource(ds);
 		assertThat(condition).as("Hasn't thread connection").isTrue();
 		InOrder ordered = inOrder(con, stmt);
+		ordered.verify(con).setReadOnly(true);
 		ordered.verify(con).setAutoCommit(false);
 		ordered.verify(stmt).executeUpdate("SET TRANSACTION READ ONLY");
 		ordered.verify(stmt).close();
 		ordered.verify(con).commit();
 		ordered.verify(con).setAutoCommit(true);
+		ordered.verify(con).setReadOnly(false);
 		ordered.verify(con).close();
 	}
 
@@ -1437,7 +1441,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1498,7 +1501,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 
@@ -1559,7 +1561,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).rollback(sp);
 		verify(con).releaseSavepoint(sp);
 		verify(con).commit();
-		verify(con).isReadOnly();
 		verify(con).close();
 	}
 

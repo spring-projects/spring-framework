@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -44,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -255,7 +255,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.hints(hints -> hints.putAll(this.hints))
 				.build()
-				.map(entityResponse -> entityResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -278,7 +278,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(modelAttributes)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 	@Override
@@ -289,7 +289,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.cookies(cookies -> cookies.addAll(this.cookies))
 				.modelAttributes(model)
 				.build()
-				.map(renderingResponse -> renderingResponse);
+				.map(Function.identity());
 	}
 
 
@@ -353,17 +353,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		private void writeStatusAndHeaders(ServerHttpResponse response) {
-			if (response instanceof AbstractServerHttpResponse) {
-				((AbstractServerHttpResponse) response).setStatusCodeValue(this.statusCode);
-			}
-			else {
-				HttpStatus status = HttpStatus.resolve(this.statusCode);
-				if (status == null) {
-					throw new IllegalStateException(
-							"Unresolvable HttpStatus for general ServerHttpResponse: " + this.statusCode);
-				}
-				response.setStatusCode(status);
-			}
+			response.setRawStatusCode(this.statusCode);
 			copy(this.headers, response.getHeaders());
 			copy(this.cookies, response.getCookies());
 		}

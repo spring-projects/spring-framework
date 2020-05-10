@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.core.type;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import example.type.AnnotatedComponent;
+import example.type.EnclosingAnnotation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotation;
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.entry;
  * Base class for {@link MethodMetadata} tests.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public abstract class AbstractMethodMetadataTests {
 
@@ -136,6 +139,12 @@ public abstract class AbstractMethodMetadataTests {
 		assertThat(attributes).containsOnlyKeys("name", "size");
 		assertThat(attributes.get("name")).containsExactlyInAnyOrder("m1", "m2");
 		assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
+	}
+
+	@Test // gh-24375
+	public void metadataLoadsForNestedAnnotations() {
+		AnnotationMetadata annotationMetadata = get(AnnotatedComponent.class);
+		assertThat(annotationMetadata.getAnnotationTypes()).containsExactly(EnclosingAnnotation.class.getName());
 	}
 
 	protected MethodMetadata getTagged(Class<?> source) {

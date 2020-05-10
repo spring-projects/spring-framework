@@ -408,7 +408,7 @@ public class ConstructorArgumentValues {
 		for (Map.Entry<Integer, ValueHolder> entry : this.indexedArgumentValues.entrySet()) {
 			ValueHolder vh1 = entry.getValue();
 			ValueHolder vh2 = that.indexedArgumentValues.get(entry.getKey());
-			if (!vh1.contentEquals(vh2)) {
+			if (vh2 == null || !vh1.contentEquals(vh2)) {
 				return false;
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -66,6 +68,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 5.0
  */
 public interface WebClient {
@@ -161,44 +164,20 @@ public interface WebClient {
 	interface Builder {
 
 		/**
-		 * Configure a base URL for requests performed through the client.
-		 *
-		 * <p>For example given base URL "https://abc.go.com/v1":
-		 * <p><pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("/accounts/{id}", 43)
-		 *         .retrieve()
-		 *         .bodyToMono(Account.class);
-		 *
-		 * // Result: https://abc.go.com/v1/accounts/43
-		 *
-		 * Flux&#060;Account&#062; result = client.get()
-		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
-		 *         .retrieve()
-		 *         .bodyToFlux(Account.class);
-		 *
-		 * // Result: https://abc.go.com/v1/accounts?q=12
-		 * </pre>
-		 *
-		 * <p>The base URL can be overridden with an absolute URI:
+		 * Configure a base URL for requests. Effectively a shortcut for:
+		 * <p>
 		 * <pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("https://xyz.com/path")
-		 *         .retrieve()
-		 *         .bodyToMono(Account.class);
-		 *
-		 * // Result: https://xyz.com/path
+		 * String baseUrl = "https://abc.go.com/v1";
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+		 * WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 		 * </pre>
-		 *
-		 * <p>Or partially overridden with a {@code UriBuilder}:
-		 * <pre class="code">
-		 * Flux&#060;Account&#062; result = client.get()
-		 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
-		 *         .retrieve()
-		 *         .bodyToFlux(Account.class);
-		 *
-		 * // Result: https://abc.com/v2/accounts?q=12
-		 * </pre>
-		 *
-		 * @see #defaultUriVariables(Map)
+		 * <p>The {@code DefaultUriBuilderFactory} is used to prepare the URL
+		 * for every request with the given base URL, unless the URL request
+		 * for a given URL is absolute in which case the base URL is ignored.
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * baseUrl value provided here will be ignored.
+		 * @see DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
 		Builder baseUrl(String baseUrl);
@@ -210,11 +189,28 @@ public interface WebClient {
 		 * @see #baseUrl(String)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
+		/**
+		 * Configure default URL variable values to use when expanding URI
+		 * templates with a {@link Map}. Effectively a shortcut for:
+		 * <p>
+		 * <pre class="code">
+		 * Map&lt;String, ?&gt; defaultVars = ...;
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		 * factory.setDefaultVariables(defaultVars);
+		 * WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+		 * </pre>
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * defaultUriVariables value provided here will be ignored.
+		 * @see DefaultUriBuilderFactory#setDefaultUriVariables(Map)
+		 * @see #uriBuilderFactory(UriBuilderFactory)
+		 */
 		Builder defaultUriVariables(Map<String, ?> defaultUriVariables);
 
 		/**
 		 * Provide a pre-configured {@link UriBuilderFactory} instance. This is
-		 * an alternative to and effectively overrides the following:
+		 * an alternative to, and effectively overrides the following shortcut
+		 * properties:
 		 * <ul>
 		 * <li>{@link #baseUrl(String)}
 		 * <li>{@link #defaultUriVariables(Map)}.
@@ -264,7 +260,7 @@ public interface WebClient {
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
 		/**
-		 * Add the given filter to the filter chain.
+		 * Add the given filter to the end of the filter chain.
 		 * @param filter the filter to be added to the chain
 		 */
 		Builder filter(ExchangeFilterFunction filter);
@@ -290,17 +286,41 @@ public interface WebClient {
 		Builder clientConnector(ClientHttpConnector connector);
 
 		/**
+		 * Configure the codecs for the {@code WebClient} in the
+		 * {@link #exchangeStrategies(ExchangeStrategies) underlying}
+		 * {@code ExchangeStrategies}.
+		 * @param configurer the configurer to apply
+		 * @since 5.1.13
+		 */
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+
+		/**
 		 * Configure the {@link ExchangeStrategies} to use.
-		 * <p>By default this is obtained from {@link ExchangeStrategies#withDefaults()}.
+		 * <p>For most cases, prefer using {@link #codecs(Consumer)} which allows
+		 * customizing the codecs in the {@code ExchangeStrategies} rather than
+		 * replace them. That ensures multiple parties can contribute to codecs
+		 * configuration.
+		 * <p>By default this is set to {@link ExchangeStrategies#withDefaults()}.
 		 * @param strategies the strategies to use
 		 */
 		Builder exchangeStrategies(ExchangeStrategies strategies);
 
 		/**
+		 * Customize the strategies configured via
+		 * {@link #exchangeStrategies(ExchangeStrategies)}. This method is
+		 * designed for use in scenarios where multiple parties wish to update
+		 * the {@code ExchangeStrategies}.
+		 * @deprecated as of 5.1.13 in favor of {@link #codecs(Consumer)}
+		 */
+		@Deprecated
+		Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer);
+
+		/**
 		 * Provide an {@link ExchangeFunction} pre-configured with
 		 * {@link ClientHttpConnector} and {@link ExchangeStrategies}.
 		 * <p>This is an alternative to, and effectively overrides
-		 * {@link #clientConnector}, and {@link #exchangeStrategies}.
+		 * {@link #clientConnector}, and
+		 * {@link #exchangeStrategies(ExchangeStrategies)}.
 		 * @param exchangeFunction the exchange function to use
 		 */
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
@@ -483,9 +503,15 @@ public interface WebClient {
 		 *     .exchange()
 		 *     .flatMapMany(response -&gt; response.bodyToFlux(Person.class));
 		 * </pre>
-		 * <p><strong>NOTE:</strong> You must always use one of the body or
-		 * entity methods of the response to ensure resources are released.
-		 * See {@link ClientResponse} for more details.
+		 * <p><strong>NOTE:</strong> Unlike {@link #retrieve()}, when using
+		 * {@code exchange()}, it is the responsibility of the application to
+		 * consume any response content regardless of the scenario (success,
+		 * error, unexpected data, etc). Not doing so can cause a memory leak.
+		 * See {@link ClientResponse} for a list of all the available options
+		 * for consuming the body. Generally prefer using {@link #retrieve()}
+		 * unless you have a good reason to use {@code exchange()} which does
+		 * allow to check the response status and headers before deciding how or
+		 * if to consume the response.
 		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
 		 */
@@ -624,20 +650,28 @@ public interface WebClient {
 	interface ResponseSpec {
 
 		/**
-		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
-		 * predicate applies. Whatever exception is returned from the function (possibly using
-		 * {@link ClientResponse#createException()}) will also be returned as error signal
-		 * from {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is registered that returns a
-		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
-		 * To override this default (and return a non-error response from {@code bodyOn*}), register
-		 * an exception function that returns an {@linkplain Mono#empty() empty} mono.
-		 * <p><strong>NOTE:</strong> if the response is expected to have content,
-		 * the exceptionFunction should consume it. If not, the content will be
-		 * automatically drained to ensure resources are released.
-		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
-		 * applies
-		 * @param exceptionFunction the function that returns the exception
+		 * Provide a function to map specific error status codes to an error
+		 * signal to be propagated downstream instead of the response.
+		 * <p>By default, if there are no matching status handlers, responses
+		 * with status codes >= 400 are mapped to
+		 * {@link WebClientResponseException} which is created with
+		 * {@link ClientResponse#createException()}.
+		 * <p>To suppress the treatment of a status code as an error and process
+		 * it as a normal response, return {@code Mono.empty()} from the function.
+		 * The response will then propagate downstream to be processed.
+		 * <p>To ignore an error response completely, and propagate neither
+		 * response nor error, use a {@link ExchangeFilterFunction filter}, or
+		 * add {@code onErrorResume} downstream, for example:
+		 * <pre class="code">
+		 * webClient.get()
+		 *     .uri("https://abc.com/account/123")
+		 *     .retrieve()
+		 *     .bodyToMono(Account.class)
+		 *     .onErrorResume(WebClientResponseException.class,
+		 *          ex -> ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 * </pre>
+		 * @param statusPredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
 		 * @see ClientResponse#createException()
 		 */
@@ -645,17 +679,10 @@ public interface WebClient {
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
-		 * Register a custom error function that gets invoked when the given raw status code
-		 * predicate applies. The exception returned from the function will be returned from
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is registered that throws a
-		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
-		 * @param statusCodePredicate a predicate of the raw status code that indicates
-		 * whether {@code exceptionFunction} applies.
-		 * <p><strong>NOTE:</strong> if the response is expected to have content,
-		 * the exceptionFunction should consume it. If not, the content will be
-		 * automatically drained to ensure resources are released.
-		 * @param exceptionFunction the function that returns the exception
+		 * Variant of {@link #onStatus(Predicate, Function)} that works with
+		 * raw status code values. This is useful for custom status codes.
+		 * @param statusCodePredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
 		 * @since 5.1.9
 		 */

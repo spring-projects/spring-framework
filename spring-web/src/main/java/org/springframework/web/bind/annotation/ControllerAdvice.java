@@ -42,10 +42,12 @@ import org.springframework.stereotype.Component;
  * Note, however, that {@code @ControllerAdvice} beans that implement
  * {@link org.springframework.core.PriorityOrdered PriorityOrdered} are <em>not</em>
  * given priority over {@code @ControllerAdvice} beans that implement {@code Ordered}.
- * For handling exceptions, an {@code @ExceptionHandler} will be picked on the
- * first advice with a matching exception handler method. For model attributes
- * and {@code InitBinder} initialization, {@code @ModelAttribute} and
- * {@code @InitBinder} methods will also follow {@code @ControllerAdvice} order.
+ * In addition, {@code Ordered} is not honored for scoped {@code @ControllerAdvice}
+ * beans &mdash; for example if such a bean has been configured as a request-scoped
+ * or session-scoped bean.  For handling exceptions, an {@code @ExceptionHandler}
+ * will be picked on the first advice with a matching exception handler method. For
+ * model attributes and data binding initialization, {@code @ModelAttribute} and
+ * {@code @InitBinder} methods will follow {@code @ControllerAdvice} order.
  *
  * <p>Note: For {@code @ExceptionHandler} methods, a root exception match will be
  * preferred to just matching a cause of the current exception, among the handler

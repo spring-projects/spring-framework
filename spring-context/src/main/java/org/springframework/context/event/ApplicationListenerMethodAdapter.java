@@ -295,6 +295,11 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	protected Object doInvoke(Object... args) {
 		Object bean = getTargetBean();
+		// Detect package-protected NullBean instance through equals(null) check
+		if (bean.equals(null)) {
+			return null;
+		}
+
 		ReflectionUtils.makeAccessible(this.method);
 		try {
 			return this.method.invoke(bean, args);

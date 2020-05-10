@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.io.IOException;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletContext;
@@ -95,7 +94,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		synchronized (this.lifecycleMonitor) {
 			ServletContext servletContext = this.servletContext;
 			if (!isRunning() && servletContext != null) {
-				this.running = true;
 				try {
 					this.factory = (this.webSocketPolicy != null ?
 							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
@@ -109,6 +107,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 						return container.getAdapter();
 					});
 					this.factory.start();
+					this.running = true;
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to start WebSocketServerFactory", ex);
@@ -121,10 +120,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				this.running = false;
 				if (this.factory != null) {
 					try {
 						this.factory.stop();
+						this.running = false;
 					}
 					catch (Throwable ex) {
 						throw new IllegalStateException("Failed to stop WebSocketServerFactory", ex);
@@ -162,18 +161,18 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		boolean isUpgrade = this.factory.isUpgradeRequest(servletRequest, servletResponse);
 		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
-		try {
-			adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
-			this.factory.acceptWebSocket(servletRequest, servletResponse);
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
-		finally {
-			adapterHolder.remove();
-		}
-
-		return Mono.empty();
+		// Trigger WebFlux preCommit actions and upgrade
+		return exchange.getResponse().setComplete()
+				.then(Mono.fromCallable(() -> {
+					try {
+						adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
+						this.factory.acceptWebSocket(servletRequest, servletResponse);
+					}
+					finally {
+						adapterHolder.remove();
+					}
+					return null;
+				}));
 	}
 
 	private static HttpServletRequest getNativeRequest(ServerHttpRequest request) {
@@ -203,11 +202,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private void startLazily(HttpServletRequest request) {
-		if (this.servletContext != null) {
+		if (isRunning()) {
 			return;
 		}
 		synchronized (this.lifecycleMonitor) {
-			if (this.servletContext == null) {
+			if (!isRunning()) {
 				this.servletContext = request.getServletContext();
 				start();
 			}

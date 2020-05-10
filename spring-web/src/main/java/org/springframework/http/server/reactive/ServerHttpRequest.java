@@ -73,6 +73,15 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	}
 
 	/**
+	 * Return the local address the request was accepted on, if available.
+	 * 5.2.3
+	 */
+	@Nullable
+	default InetSocketAddress getLocalAddress() {
+		return null;
+	}
+
+	/**
 	 * Return the SSL session information if the request has been transmitted
 	 * over a secure protocol including SSL certificates, if available.
 	 * @return the session information, or {@code null} if none available

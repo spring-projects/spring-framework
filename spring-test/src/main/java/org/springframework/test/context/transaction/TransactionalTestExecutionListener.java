@@ -109,7 +109,7 @@ import org.springframework.util.StringUtils;
  * instances of {@code PlatformTransactionManager} within the test's
  * {@code ApplicationContext}, a <em>qualifier</em> may be declared via
  * {@link Transactional @Transactional} (e.g., {@code @Transactional("myTxMgr")}
- * or {@code @Transactional(transactionManger = "myTxMgr")}, or
+ * or {@code @Transactional(transactionManager = "myTxMgr")}, or
  * {@link org.springframework.transaction.annotation.TransactionManagementConfigurer
  * TransactionManagementConfigurer} can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,14 +39,18 @@ import org.synchronoss.cloud.nio.multipart.NioMultipartParser;
 import org.synchronoss.cloud.nio.multipart.NioMultipartParserListener;
 import org.synchronoss.cloud.nio.multipart.PartBodyStreamStorageFactory;
 import org.synchronoss.cloud.nio.stream.storage.StreamStorage;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.log.LogFormatUtils;
@@ -69,32 +72,107 @@ import org.springframework.util.Assert;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  * @see <a href="https://github.com/synchronoss/nio-multipart">Synchronoss NIO Multipart</a>
  * @see MultipartHttpMessageReader
  */
 public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	// Static DataBufferFactory to copy from FileInputStream or wrap bytes[].
+	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
-	private final PartBodyStreamStorageFactory streamStorageFactory = new DefaultPartBodyStreamStorageFactory();
+
+	private int maxInMemorySize = 256 * 1024;
+
+	private long maxDiskUsagePerPart = -1;
+
+	private int maxParts = -1;
+
+
+	/**
+	 * Configure the maximum amount of memory that is allowed to use per part.
+	 * When the limit is exceeded:
+	 * <ul>
+	 * <li>file parts are written to a temporary file.
+	 * <li>non-file parts are rejected with {@link DataBufferLimitException}.
+	 * </ul>
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the in-memory limit in bytes; if set to -1 this limit is
+	 * not enforced, and all parts may be written to disk and are limited only
+	 * by the {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart} property.
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Get the {@link #setMaxInMemorySize configured} maximum in-memory size.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
+	}
+
+	/**
+	 * Configure the maximum amount of disk space allowed for file parts.
+	 * <p>By default this is set to -1.
+	 * @param maxDiskUsagePerPart the disk limit in bytes, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxDiskUsagePerPart(long maxDiskUsagePerPart) {
+		this.maxDiskUsagePerPart = maxDiskUsagePerPart;
+	}
+
+	/**
+	 * Get the {@link #setMaxDiskUsagePerPart configured} maximum disk usage.
+	 * @since 5.1.11
+	 */
+	public long getMaxDiskUsagePerPart() {
+		return this.maxDiskUsagePerPart;
+	}
+
+	/**
+	 * Specify the maximum number of parts allowed in a given multipart request.
+	 * @since 5.1.11
+	 */
+	public void setMaxParts(int maxParts) {
+		this.maxParts = maxParts;
+	}
+
+	/**
+	 * Return the {@link #setMaxParts configured} limit on the number of parts.
+	 * @since 5.1.11
+	 */
+	public int getMaxParts() {
+		return this.maxParts;
+	}
 
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MultipartHttpMessageReader.MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		if (Part.class.equals(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getReadableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
-
 
 	@Override
 	public Flux<Part> read(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
-		return Flux.create(new SynchronossPartGenerator(message, this.bufferFactory, this.streamStorageFactory))
+		return Flux.create(new SynchronossPartGenerator(message))
 				.doOnNext(part -> {
 					if (!Hints.isLoggingSuppressed(hints)) {
 						LogFormatUtils.traceDebug(logger, traceOn -> Hints.getLogPrefix(hints) + "Parsed " +
@@ -105,7 +183,6 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 				});
 	}
 
-
 	@Override
 	public Mono<Part> readMono(ResolvableType elementType, ReactiveHttpInputMessage message, Map<String, Object> hints) {
 		return Mono.error(new UnsupportedOperationException("Cannot read multipart request body into single Part"));
@@ -113,27 +190,27 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 
 	/**
-	 * Consume and feed input to the Synchronoss parser, then listen for parser
-	 * output events and adapt to {@code Flux<Sink<Part>>}.
+	 * Subscribe to the input stream and feed the Synchronoss parser. Then listen
+	 * for parser output, creating parts, and pushing them into the FluxSink.
 	 */
-	private static class SynchronossPartGenerator implements Consumer<FluxSink<Part>> {
+	private class SynchronossPartGenerator extends BaseSubscriber<DataBuffer> implements Consumer<FluxSink<Part>> {
 
 		private final ReactiveHttpInputMessage inputMessage;
 
-		private final DataBufferFactory bufferFactory;
+		private final LimitedPartBodyStreamStorageFactory storageFactory = new LimitedPartBodyStreamStorageFactory();
 
-		private final PartBodyStreamStorageFactory streamStorageFactory;
+		@Nullable
+		private NioMultipartParserListener listener;
 
-		SynchronossPartGenerator(ReactiveHttpInputMessage inputMessage, DataBufferFactory bufferFactory,
-				PartBodyStreamStorageFactory streamStorageFactory) {
+		@Nullable
+		private NioMultipartParser parser;
 
+		public SynchronossPartGenerator(ReactiveHttpInputMessage inputMessage) {
 			this.inputMessage = inputMessage;
-			this.bufferFactory = bufferFactory;
-			this.streamStorageFactory = streamStorageFactory;
 		}
 
 		@Override
-		public void accept(FluxSink<Part> emitter) {
+		public void accept(FluxSink<Part> sink) {
 			HttpHeaders headers = this.inputMessage.getHeaders();
 			MediaType mediaType = headers.getContentType();
 			Assert.state(mediaType != null, "No content type set");
@@ -142,46 +219,116 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 			Charset charset = Optional.ofNullable(mediaType.getCharset()).orElse(StandardCharsets.UTF_8);
 			MultipartContext context = new MultipartContext(mediaType.toString(), length, charset.name());
 
-			NioMultipartParserListener listener = new FluxSinkAdapterListener(emitter, this.bufferFactory, context);
-			NioMultipartParser parser = Multipart
-					.multipart(context)
-					.usePartBodyStreamStorageFactory(this.streamStorageFactory)
-					.forNIO(listener);
+			this.listener = new FluxSinkAdapterListener(sink, context, this.storageFactory);
 
-			this.inputMessage.getBody().subscribe(buffer -> {
-				byte[] resultBytes = new byte[buffer.readableByteCount()];
-				buffer.read(resultBytes);
-				try {
-					parser.write(resultBytes);
+			this.parser = Multipart
+					.multipart(context)
+					.usePartBodyStreamStorageFactory(this.storageFactory)
+					.forNIO(this.listener);
+
+			this.inputMessage.getBody().subscribe(this);
+		}
+
+		@Override
+		protected void hookOnNext(DataBuffer buffer) {
+			Assert.state(this.parser != null && this.listener != null, "Not initialized yet");
+
+			int size = buffer.readableByteCount();
+			this.storageFactory.increaseByteCount(size);
+			byte[] resultBytes = new byte[size];
+			buffer.read(resultBytes);
+
+			try {
+				this.parser.write(resultBytes);
+			}
+			catch (IOException ex) {
+				cancel();
+				int index = this.storageFactory.getCurrentPartIndex();
+				this.listener.onError("Parser error for part [" + index + "]", ex);
+			}
+			finally {
+				DataBufferUtils.release(buffer);
+			}
+		}
+
+		@Override
+		protected void hookOnError(Throwable ex) {
+			if (this.listener != null) {
+				int index = this.storageFactory.getCurrentPartIndex();
+				this.listener.onError("Failure while parsing part[" + index + "]", ex);
+			}
+		}
+
+		@Override
+		protected void hookOnComplete() {
+			if (this.listener != null) {
+				this.listener.onAllPartsFinished();
+			}
+		}
+
+		@Override
+		protected void hookFinally(SignalType type) {
+			try {
+				if (this.parser != null) {
+					this.parser.close();
 				}
-				catch (IOException ex) {
-					listener.onError("Exception thrown providing input to the parser", ex);
-				}
-				finally {
-					DataBufferUtils.release(buffer);
-				}
-			}, ex -> {
-				try {
-					listener.onError("Request body input error", ex);
-					parser.close();
-				}
-				catch (IOException ex2) {
-					listener.onError("Exception thrown while closing the parser", ex2);
-				}
-			}, () -> {
-				try {
-					parser.close();
-				}
-				catch (IOException ex) {
-					listener.onError("Exception thrown while closing the parser", ex);
-				}
-			});
+			}
+			catch (IOException ex) {
+				// ignore
+			}
 		}
 
 		private int getContentLength(HttpHeaders headers) {
 			// Until this is fixed https://github.com/synchronoss/nio-multipart/issues/10
 			long length = headers.getContentLength();
 			return (int) length == length ? (int) length : -1;
+		}
+	}
+
+
+	private class LimitedPartBodyStreamStorageFactory implements PartBodyStreamStorageFactory {
+
+		private final PartBodyStreamStorageFactory storageFactory = (maxInMemorySize > 0 ?
+				new DefaultPartBodyStreamStorageFactory(maxInMemorySize) :
+				new DefaultPartBodyStreamStorageFactory());
+
+		private int index = 1;
+
+		private boolean isFilePart;
+
+		private long partSize;
+
+		public int getCurrentPartIndex() {
+			return this.index;
+		}
+
+		@Override
+		public StreamStorage newStreamStorageForPartBody(Map<String, List<String>> headers, int index) {
+			this.index = index;
+			this.isFilePart = (MultipartUtils.getFileName(headers) != null);
+			this.partSize = 0;
+			if (maxParts > 0 && index > maxParts) {
+				throw new DecodingException("Too many parts (" + index + " allowed)");
+			}
+			return this.storageFactory.newStreamStorageForPartBody(headers, index);
+		}
+
+		public void increaseByteCount(long byteCount) {
+			this.partSize += byteCount;
+			if (maxInMemorySize > 0 && !this.isFilePart && this.partSize >= maxInMemorySize) {
+				throw new DataBufferLimitException("Part[" + this.index + "] " +
+						"exceeded the in-memory limit of " + maxInMemorySize + " bytes");
+			}
+			if (maxDiskUsagePerPart > 0 && this.isFilePart && this.partSize > maxDiskUsagePerPart) {
+				throw new DecodingException("Part[" + this.index + "] " +
+						"exceeded the disk usage limit of " + maxDiskUsagePerPart + " bytes");
+			}
+		}
+
+		public void partFinished() {
+			this.index++;
+			this.isFilePart = false;
+			this.partSize = 0;
 		}
 	}
 
@@ -193,43 +340,46 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final FluxSink<Part> sink;
 
-		private final DataBufferFactory bufferFactory;
-
 		private final MultipartContext context;
+
+		private final LimitedPartBodyStreamStorageFactory storageFactory;
 
 		private final AtomicInteger terminated = new AtomicInteger(0);
 
-		FluxSinkAdapterListener(FluxSink<Part> sink, DataBufferFactory factory, MultipartContext context) {
+		FluxSinkAdapterListener(
+				FluxSink<Part> sink, MultipartContext context, LimitedPartBodyStreamStorageFactory factory) {
+
 			this.sink = sink;
-			this.bufferFactory = factory;
 			this.context = context;
+			this.storageFactory = factory;
 		}
 
 		@Override
 		public void onPartFinished(StreamStorage storage, Map<String, List<String>> headers) {
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.putAll(headers);
+			this.storageFactory.partFinished();
 			this.sink.next(createPart(storage, httpHeaders));
 		}
 
 		private Part createPart(StreamStorage storage, HttpHeaders httpHeaders) {
 			String filename = MultipartUtils.getFileName(httpHeaders);
 			if (filename != null) {
-				return new SynchronossFilePart(httpHeaders, filename, storage, this.bufferFactory);
+				return new SynchronossFilePart(httpHeaders, filename, storage);
 			}
 			else if (MultipartUtils.isFormField(httpHeaders, this.context)) {
 				String value = MultipartUtils.readFormParameterValue(storage, httpHeaders);
-				return new SynchronossFormFieldPart(httpHeaders, this.bufferFactory, value);
+				return new SynchronossFormFieldPart(httpHeaders, value);
 			}
 			else {
-				return new SynchronossPart(httpHeaders, storage, this.bufferFactory);
+				return new SynchronossPart(httpHeaders, storage);
 			}
 		}
 
 		@Override
 		public void onError(String message, Throwable cause) {
 			if (this.terminated.getAndIncrement() == 0) {
-				this.sink.error(new RuntimeException(message, cause));
+				this.sink.error(new DecodingException(message, cause));
 			}
 		}
 
@@ -256,14 +406,10 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final HttpHeaders headers;
 
-		private final DataBufferFactory bufferFactory;
-
-		AbstractSynchronossPart(HttpHeaders headers, DataBufferFactory bufferFactory) {
+		AbstractSynchronossPart(HttpHeaders headers) {
 			Assert.notNull(headers, "HttpHeaders is required");
-			Assert.notNull(bufferFactory, "DataBufferFactory is required");
 			this.name = MultipartUtils.getFieldName(headers);
 			this.headers = headers;
-			this.bufferFactory = bufferFactory;
 		}
 
 		@Override
@@ -274,10 +420,6 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		@Override
 		public HttpHeaders headers() {
 			return this.headers;
-		}
-
-		DataBufferFactory getBufferFactory() {
-			return this.bufferFactory;
 		}
 
 		@Override
@@ -291,15 +433,15 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final StreamStorage storage;
 
-		SynchronossPart(HttpHeaders headers, StreamStorage storage, DataBufferFactory factory) {
-			super(headers, factory);
+		SynchronossPart(HttpHeaders headers, StreamStorage storage) {
+			super(headers);
 			Assert.notNull(storage, "StreamStorage is required");
 			this.storage = storage;
 		}
 
 		@Override
 		public Flux<DataBuffer> content() {
-			return DataBufferUtils.readInputStream(getStorage()::getInputStream, getBufferFactory(), 4096);
+			return DataBufferUtils.readInputStream(getStorage()::getInputStream, bufferFactory, 4096);
 		}
 
 		protected StreamStorage getStorage() {
@@ -315,8 +457,8 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final String filename;
 
-		SynchronossFilePart(HttpHeaders headers, String filename, StreamStorage storage, DataBufferFactory factory) {
-			super(headers, storage, factory);
+		SynchronossFilePart(HttpHeaders headers, String filename, StreamStorage storage) {
+			super(headers, storage);
 			this.filename = filename;
 		}
 
@@ -375,8 +517,8 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final String content;
 
-		SynchronossFormFieldPart(HttpHeaders headers, DataBufferFactory bufferFactory, String content) {
-			super(headers, bufferFactory);
+		SynchronossFormFieldPart(HttpHeaders headers, String content) {
+			super(headers);
 			this.content = content;
 		}
 
@@ -388,9 +530,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		@Override
 		public Flux<DataBuffer> content() {
 			byte[] bytes = this.content.getBytes(getCharset());
-			DataBuffer buffer = getBufferFactory().allocateBuffer(bytes.length);
-			buffer.write(bytes);
-			return Flux.just(buffer);
+			return Flux.just(bufferFactory.wrap(bytes));
 		}
 
 		private Charset getCharset() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.messaging.rsocket.annotation.support;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
@@ -28,6 +31,8 @@ import io.rsocket.metadata.WellKnownMimeType;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.codec.Decoder;
@@ -37,10 +42,12 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
+import org.springframework.messaging.handler.HandlerMethod;
+import org.springframework.messaging.handler.MessageCondition;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler;
+import org.springframework.messaging.handler.annotation.reactive.PayloadMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.reactive.HandlerMethodReturnValueHandler;
-import org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer;
 import org.springframework.messaging.rsocket.MetadataExtractor;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
@@ -55,12 +62,27 @@ import org.springframework.util.StringUtils;
  * Extension of {@link MessageMappingMessageHandler} for handling RSocket
  * requests with {@link ConnectMapping @ConnectMapping} and
  * {@link MessageMapping @MessageMapping} methods.
- * <p>Use {@link #responder()} to obtain a {@link SocketAcceptor} adapter to
- * plug in as responder into an {@link io.rsocket.RSocketFactory}.
- * <p>Use {@link #clientResponder(RSocketStrategies, Object...)} to obtain a
- * client responder configurer
- * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory
- * RSocketRequester}.
+ *
+ * <p>For server scenarios this class can be declared as a bean in Spring
+ * configuration and that would detect {@code @MessageMapping} methods in
+ * {@code @Controller} beans. What beans are checked can be changed through a
+ * {@link #setHandlerPredicate(Predicate) handlerPredicate}. Given an instance
+ * of this class, you can then use {@link #responder()} to obtain a
+ * {@link SocketAcceptor} adapter to register with the
+ * {@link io.rsocket.core.RSocketServer}.
+ *
+ * <p>For a client, possibly in the same process as a server, consider
+ * consider using the static factory method
+ * {@link #responder(RSocketStrategies, Object...)} to obtain a client
+ * responder to be registered via
+ * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketConnector
+ * RSocketRequester.Builder}.
+ *
+ * <p>For {@code @MessageMapping} methods, this class automatically determines
+ * the RSocket interaction type based on the input and output cardinality of the
+ * method. See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web-reactive.html#rsocket-annot-responders">
+ * "Annotated Responders"</a> section of the Spring Framework reference for more details.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -263,6 +285,17 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		getArgumentResolverConfigurer().addCustomResolver(new RSocketRequesterMethodArgumentResolver());
 
 		super.afterPropertiesSet();
+
+		getHandlerMethods().forEach((composite, handler) -> {
+			if (composite.getMessageConditions().contains(RSocketFrameTypeMessageCondition.CONNECT_CONDITION)) {
+				MethodParameter returnType = handler.getReturnType();
+				if (getCardinality(returnType) > 0) {
+					throw new IllegalStateException(
+							"Invalid @ConnectMapping method. " +
+									"Return type must be void or a void async type: " + handler);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -279,10 +312,9 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	protected CompositeMessageCondition getCondition(AnnotatedElement element) {
 		MessageMapping ann1 = AnnotatedElementUtils.findMergedAnnotation(element, MessageMapping.class);
 		if (ann1 != null && ann1.value().length > 0) {
-			String[] patterns = processDestinations(ann1.value());
 			return new CompositeMessageCondition(
-					RSocketFrameTypeMessageCondition.REQUEST_CONDITION,
-					new DestinationPatternsMessageCondition(patterns, obtainRouteMatcher()));
+					RSocketFrameTypeMessageCondition.EMPTY_CONDITION,
+					new DestinationPatternsMessageCondition(processDestinations(ann1.value()), obtainRouteMatcher()));
 		}
 		ConnectMapping ann2 = AnnotatedElementUtils.findMergedAnnotation(element, ConnectMapping.class);
 		if (ann2 != null) {
@@ -294,6 +326,45 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		return null;
 	}
 
+	@Override
+	protected CompositeMessageCondition extendMapping(CompositeMessageCondition composite, HandlerMethod handler) {
+
+		List<MessageCondition<?>> conditions = composite.getMessageConditions();
+		Assert.isTrue(conditions.size() == 2 &&
+				conditions.get(0) instanceof RSocketFrameTypeMessageCondition &&
+				conditions.get(1) instanceof DestinationPatternsMessageCondition,
+				"Unexpected message condition types");
+
+		if (conditions.get(0) != RSocketFrameTypeMessageCondition.EMPTY_CONDITION) {
+			return composite;
+		}
+
+		int responseCardinality = getCardinality(handler.getReturnType());
+		int requestCardinality = 0;
+		for (MethodParameter parameter : handler.getMethodParameters()) {
+			if (getArgumentResolvers().getArgumentResolver(parameter) instanceof PayloadMethodArgumentResolver) {
+				requestCardinality = getCardinality(parameter);
+			}
+		}
+
+		return new CompositeMessageCondition(
+				RSocketFrameTypeMessageCondition.getCondition(requestCardinality, responseCardinality),
+				conditions.get(1));
+	}
+
+	private int getCardinality(MethodParameter parameter) {
+		Class<?> clazz = parameter.getParameterType();
+		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapter(clazz);
+		if (adapter == null) {
+			return clazz.equals(void.class) ? 0 : 1;
+		}
+		else if (parameter.nested().getNestedParameterType().equals(Void.class)) {
+			return 0;
+		}
+		else {
+			return adapter.isMultiValue() ? 2 : 1;
+		}
+	}
 
 	@Override
 	protected void handleNoMatch(@Nullable RouteMatcher.Route destination, Message<?> message) {
@@ -306,17 +377,28 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 			logger.warn("No handler for fireAndForget to '" + destination + "'");
 			return;
 		}
-		throw new MessageDeliveryException("No handler for destination '" + destination + "'");
+
+		Set<FrameType> frameTypes = getHandlerMethods().keySet().stream()
+				.map(CompositeMessageCondition::getMessageConditions)
+				.filter(conditions -> conditions.get(1).getMatchingCondition(message) != null)
+				.map(conditions -> (RSocketFrameTypeMessageCondition) conditions.get(0))
+				.flatMap(condition -> condition.getFrameTypes().stream())
+				.collect(Collectors.toSet());
+
+		throw new MessageDeliveryException(frameTypes.isEmpty() ?
+				"No handler for destination '" + destination + "'" :
+				"Destination '" + destination + "' does not support " + frameType + ". " +
+						"Supported interaction(s): " + frameTypes);
 	}
 
 	/**
-	 * Return an adapter for a {@link SocketAcceptor} that delegates to this
-	 * {@code RSocketMessageHandler} instance. The adapter can be plugged in as a
-	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#acceptor(SocketAcceptor) client} or
- 	 * {@link io.rsocket.RSocketFactory.ServerRSocketFactory#acceptor(SocketAcceptor) server}
-	 * side responder.
-	 * <p>The initial {@link ConnectionSetupPayload} can be handled with a
-	 * {@link ConnectMapping @ConnectionMapping} method which can be asynchronous
+	 * Return an RSocket {@link SocketAcceptor} backed by this
+	 * {@code RSocketMessageHandler} instance that can be plugged in as a
+	 * {@link io.rsocket.core.RSocketConnector#acceptor(SocketAcceptor) client} or
+ 	 * {@link io.rsocket.core.RSocketServer#acceptor(SocketAcceptor) server}
+	 * RSocket responder.
+	 * <p>The initial {@link ConnectionSetupPayload} is handled through
+	 * {@link ConnectMapping @ConnectionMapping} methods that can be asynchronous
 	 * and return {@code Mono<Void>} with an error signal preventing the
 	 * connection. Such a method can also start requests to the client but that
 	 * must be done decoupled from handling and from the current thread.
@@ -363,9 +445,60 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	}
 
 	/**
+	 * Static factory method to create an RSocket {@link SocketAcceptor}
+	 * backed by handlers with annotated methods. Effectively a shortcut for:
+	 * <pre class="code">
+	 * RSocketMessageHandler handler = new RSocketMessageHandler();
+	 * handler.setHandlers(handlers);
+	 * handler.setRSocketStrategies(strategies);
+	 * handler.afterPropertiesSet();
+	 *
+	 * SocketAcceptor acceptor = handler.responder();
+	 * </pre>
+	 * <p>This is intended for programmatic creation and registration of a
+	 * client-side responder. For example:
+	 * <pre class="code">
+	 * SocketAcceptor responder =
+	 *         RSocketMessageHandler.responder(strategies, new ClientHandler());
+	 *
+	 * RSocketRequester.builder()
+	 *         .rsocketConnector(connector -> connector.acceptor(responder))
+	 *         .connectTcp("localhost", server.address().getPort());
+	 * </pre>
+	 *
+	 * <p>Note that the given handlers do not need to have any stereotype
+	 * annotations such as {@code @Controller} which helps to avoid overlap with
+	 * server side handlers that may be used in the same application. However,
+	 * for more advanced scenarios, e.g. discovering handlers through a custom
+	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
+	 * as a bean, and then obtain the responder from it.
+	 *
+	 * @param strategies the strategies to set on the created
+	 * {@code RSocketMessageHandler}
+	 * @param candidateHandlers a list of Objects and/or Classes with annotated
+	 * handler methods; used to call {@link #setHandlers(List)} with
+	 * on the created {@code RSocketMessageHandler}
+	 * @return a configurer that may be passed into
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketConnector}
+	 * @since 5.2.6
+	 */
+	public static SocketAcceptor responder(RSocketStrategies strategies, Object... candidateHandlers) {
+		Assert.notEmpty(candidateHandlers, "No handlers");
+		List<Object> handlers = new ArrayList<>(candidateHandlers.length);
+		for (Object obj : candidateHandlers) {
+			handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
+		}
+		RSocketMessageHandler handler = new RSocketMessageHandler();
+		handler.setHandlers(handlers);
+		handler.setRSocketStrategies(strategies);
+		handler.afterPropertiesSet();
+		return handler.responder();
+	}
+
+	/**
 	 * Static factory method for a configurer of a client side responder with
 	 * annotated handler methods. This is intended to be passed into
-	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}.
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory}.
 	 * <p>In effect a shortcut to create and initialize
 	 * {@code RSocketMessageHandler} with the given strategies and handlers,
 	 * use {@link #responder()} to obtain the responder, and plug that into
@@ -379,9 +512,13 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * handler methods; used to call {@link #setHandlers(List)} with
 	 * on the created {@code RSocketMessageHandler}
 	 * @return a configurer that may be passed into
-	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory(ClientRSocketFactoryConfigurer)}
+	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory}
+	 * @deprecated as of 5.2.6  following the deprecation of
+	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
+	 * in RSocket 1.0 RC7.
 	 */
-	public static ClientRSocketFactoryConfigurer clientResponder(
+	@Deprecated
+	public static org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer clientResponder(
 			RSocketStrategies strategies, Object... candidateHandlers) {
 
 		Assert.notEmpty(candidateHandlers, "No handlers");
@@ -390,12 +527,14 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 			handlers.add(obj instanceof Class ? BeanUtils.instantiateClass((Class<?>) obj) : obj);
 		}
 
-		return rsocketFactory -> {
+		return factory -> {
 			RSocketMessageHandler handler = new RSocketMessageHandler();
 			handler.setHandlers(handlers);
 			handler.setRSocketStrategies(strategies);
 			handler.afterPropertiesSet();
-			rsocketFactory.acceptor(handler.responder());
+			factory.acceptor(handler.responder());
 		};
 	}
 }
+
+

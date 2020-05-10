@@ -112,6 +112,7 @@ public abstract class ReflectionTestUtils {
 	 * the provided {@code targetClass} to the supplied {@code value}.
 	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
 	 * supplying {@code null} for the {@code targetObject} and {@code type} arguments.
+	 * <p>This method does not support setting {@code static final} fields.
 	 * @param targetClass the target class on which to set the static field;
 	 * never {@code null}
 	 * @param name the name of the field to set; never {@code null}
@@ -128,6 +129,7 @@ public abstract class ReflectionTestUtils {
 	 * the supplied {@code value}.
 	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
 	 * supplying {@code null} for the {@code targetObject} argument.
+	 * <p>This method does not support setting {@code static final} fields.
 	 * @param targetClass the target class on which to set the static field;
 	 * never {@code null}
 	 * @param name the name of the field to set; may be {@code null} if
@@ -154,6 +156,7 @@ public abstract class ReflectionTestUtils {
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to set {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
+	 * <p>This method does not support setting {@code static final} fields.
 	 * @param targetObject the target object on which to set the field; may be
 	 * {@code null} if the field is static
 	 * @param targetClass the target class on which to set the field; may

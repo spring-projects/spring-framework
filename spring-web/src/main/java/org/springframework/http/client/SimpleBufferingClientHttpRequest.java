@@ -91,6 +91,14 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	 * @param headers the headers to add
 	 */
 	static void addHeaders(HttpURLConnection connection, HttpHeaders headers) {
+		String method = connection.getRequestMethod();
+		if (method.equals("PUT") || method.equals("DELETE")) {
+			if (!StringUtils.hasText(headers.getFirst(HttpHeaders.ACCEPT))) {
+				// Avoid "text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2"
+				// from HttpUrlConnection which prevents JSON error response details.
+				headers.set(HttpHeaders.ACCEPT, "*/*");
+			}
+		}
 		headers.forEach((headerName, headerValues) -> {
 			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
 				String headerValue = StringUtils.collectionToDelimitedString(headerValues, "; ");

@@ -194,8 +194,7 @@ public class ConfigurationWithFactoryBeanBeanEarlyDeductionTests {
 	static class AttributeClassRegistrar implements ImportBeanDefinitionRegistrar {
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-				BeanDefinitionRegistry registry) {
+		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 			BeanDefinition definition = BeanDefinitionBuilder.genericBeanDefinition(
 					RawWithAbstractObjectTypeFactoryBean.class).getBeanDefinition();
 			definition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, MyBean.class);

@@ -148,17 +148,14 @@ public interface PathContainer {
 		 */
 		public final static Options MESSAGE_ROUTE = Options.create('.', false);
 
-
 		private final char separator;
 
 		private final boolean decodeAndParseSegments;
-
 
 		private Options(char separator, boolean decodeAndParseSegments) {
 			this.separator = separator;
 			this.decodeAndParseSegments = decodeAndParseSegments;
 		}
-
 
 		public char separator() {
 			return this.separator;
@@ -167,7 +164,6 @@ public interface PathContainer {
 		public boolean shouldDecodeAndParseSegments() {
 			return this.decodeAndParseSegments;
 		}
-
 
 		/**
 		 * Create an {@link Options} instance with the given settings.

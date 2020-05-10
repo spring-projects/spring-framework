@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.server
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitSingle
 import org.reactivestreams.Publisher
@@ -42,7 +41,7 @@ inline fun <reified T : Any> ServerResponse.BodyBuilder.body(publisher: Publishe
  * @param producer the producer to write to the response. This must be a
  * [Publisher] or another producer adaptable to a
  * [Publisher] via [org.springframework.core.ReactiveAdapterRegistry]
- * @param <T> the type of the elements contained in the producer
+ * @param T the type of the elements contained in the producer
  * @author Sebastien Deleuze
  * @since 5.2
  */
@@ -71,7 +70,6 @@ suspend fun ServerResponse.BodyBuilder.bodyValueAndAwait(body: Any): ServerRespo
  * @author Sebastien Deleuze
  * @since 5.2
  */
-@ExperimentalCoroutinesApi
 suspend inline fun <reified T : Any> ServerResponse.BodyBuilder.bodyAndAwait(flow: Flow<T>): ServerResponse =
 		body(flow, object : ParameterizedTypeReference<T>() {}).awaitSingle()
 

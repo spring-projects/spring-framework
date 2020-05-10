@@ -253,7 +253,7 @@
 	Specify the amount of time, in milliseconds, before asynchronous request handling times out.
 	In Servlet 3, the timeout begins after the main request processing thread has exited and ends when the request
 	is dispatched again for further processing of the concurrently produced result. If this value is not set,
-	the default timeout of the underlying implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	the default timeout of the underlying implementation is used.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

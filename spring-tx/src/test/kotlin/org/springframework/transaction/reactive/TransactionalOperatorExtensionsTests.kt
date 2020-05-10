@@ -16,7 +16,6 @@
 
 package org.springframework.transaction.reactive
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
@@ -62,7 +61,6 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun commitWithFlow() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		val flow = flow {
@@ -80,7 +78,6 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun rollbackWithFlow() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		val flow = flow<Int> {

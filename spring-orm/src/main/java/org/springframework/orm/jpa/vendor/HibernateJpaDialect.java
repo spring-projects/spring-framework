@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 				session.setDefaultReadOnly(true);
 			}
 		}
-		return new SessionTransactionData(session, previousFlushMode, preparedCon, previousIsolationLevel);
+		return new SessionTransactionData(
+				session, previousFlushMode, preparedCon, previousIsolationLevel, definition.isReadOnly());
 	}
 
 	@Override
@@ -203,7 +204,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		Session session = getSession(entityManager);
 		FlushMode previousFlushMode = prepareFlushMode(session, readOnly);
-		return new SessionTransactionData(session, previousFlushMode, null, null);
+		return new SessionTransactionData(session, previousFlushMode, null, null, readOnly);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -370,13 +371,16 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		@Nullable
 		private final Integer previousIsolationLevel;
 
+		private final boolean readOnly;
+
 		public SessionTransactionData(Session session, @Nullable FlushMode previousFlushMode,
-				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel) {
+				@Nullable Connection preparedCon, @Nullable Integer previousIsolationLevel, boolean readOnly) {
 
 			this.session = session;
 			this.previousFlushMode = previousFlushMode;
 			this.preparedCon = preparedCon;
 			this.previousIsolationLevel = previousIsolationLevel;
+			this.readOnly = readOnly;
 		}
 
 		@SuppressWarnings("deprecation")
@@ -392,7 +396,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 							"make sure to use connection release mode ON_CLOSE (the default) and to run against " +
 							"Hibernate 4.2+ (or switch HibernateJpaDialect's prepareConnection flag to false");
 				}
-				DataSourceUtils.resetConnectionAfterTransaction(conToReset, this.previousIsolationLevel);
+				DataSourceUtils.resetConnectionAfterTransaction(
+						conToReset, this.previousIsolationLevel, this.readOnly);
 			}
 		}
 	}

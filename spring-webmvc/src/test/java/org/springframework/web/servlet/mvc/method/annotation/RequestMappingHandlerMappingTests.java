@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,6 +48,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -71,7 +71,7 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useRegisteredSuffixPatternMatch() {
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
+		assertThat(this.handlerMapping.useSuffixPatternMatch()).isFalse();
 		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isFalse();
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
@@ -84,7 +84,7 @@ public class RequestMappingHandlerMappingTests {
 
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
 		assertThat(this.handlerMapping.useRegisteredSuffixPatternMatch()).isTrue();
-		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Arrays.asList("json"));
+		assertThat(this.handlerMapping.getFileExtensions()).isEqualTo(Collections.singletonList("json"));
 	}
 
 	@Test
@@ -116,16 +116,15 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useSuffixPatternMatch() {
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).isTrue();
-
-		this.handlerMapping.setUseSuffixPatternMatch(false);
 		assertThat(this.handlerMapping.useSuffixPatternMatch()).isFalse();
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(false);
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch").isFalse();
+		assertThat(this.handlerMapping.useSuffixPatternMatch())
+				.as("'false' registeredSuffixPatternMatch shouldn't impact suffixPatternMatch").isFalse();
 
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
-		assertThat(this.handlerMapping.useSuffixPatternMatch()).as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch").isTrue();
+		assertThat(this.handlerMapping.useSuffixPatternMatch())
+				.as("'true' registeredSuffixPatternMatch should enable suffixPatternMatch").isTrue();
 	}
 
 	@Test
@@ -153,12 +152,32 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton("/api/user/{id}"));
 	}
 
+	@Test // gh-23907
+	public void pathPrefixPreservesPathMatchingSettings() throws NoSuchMethodException {
+		this.handlerMapping.setUseSuffixPatternMatch(false);
+		this.handlerMapping.setPathPrefixes(Collections.singletonMap("/api", HandlerTypePredicate.forAnyHandlerType()));
+		this.handlerMapping.afterPropertiesSet();
+
+		Method method = ComposedAnnotationController.class.getMethod("get");
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, ComposedAnnotationController.class);
+
+		assertThat(info).isNotNull();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/get");
+		assertThat(info.getPatternsCondition().getMatchingCondition(request)).isNotNull();
+
+		request = new MockHttpServletRequest("GET", "/api/get.pdf");
+		assertThat(info.getPatternsCondition().getMatchingCondition(request)).isNull();
+	}
+
 	@Test
 	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
-		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
-		assertThat(info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString())
+				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
+		assertThat(info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString())
+				.isEqualTo(MediaType.APPLICATION_JSON_VALUE);
 	}
 
 	@Test // SPR-14988

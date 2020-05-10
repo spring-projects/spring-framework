@@ -472,8 +472,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	private boolean validatePath(ServerHttpRequest request) {
 		String path = request.getURI().getPath();
 		int index = path.lastIndexOf('/') + 1;
-		String filename = path.substring(index);
-		return (filename.indexOf(';') == -1);
+		return (path.indexOf(';', index) == -1);
 	}
 
 	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods)
@@ -571,7 +570,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				sendMethodNotAllowed(response, HttpMethod.GET, HttpMethod.OPTIONS);
 			}
 		}
-	};
+	}
 
 
 	private class IframeHandler implements SockJsRequestHandler {
@@ -622,6 +621,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			response.getHeaders().setETag(etagValue);
 			response.getBody().write(contentBytes);
 		}
-	};
+	}
 
 }

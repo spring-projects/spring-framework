@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,11 +76,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final String HOST_IPV4_PATTERN = "[^\\[/?#:]*";
 
-	private static final String HOST_IPV6_PATTERN = "\\[[\\p{XDigit}\\:\\.]*[%\\p{Alnum}]*\\]";
+	private static final String HOST_IPV6_PATTERN = "\\[[\\p{XDigit}:.]*[%\\p{Alnum}]*]";
 
 	private static final String HOST_PATTERN = "(" + HOST_IPV6_PATTERN + "|" + HOST_IPV4_PATTERN + ")";
 
-	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?\\})?)";
+	private static final String PORT_PATTERN = "(\\d*(?:\\{[^/]+?})?)";
 
 	private static final String PATH_PATTERN = "([^?#]*)";
 
@@ -155,6 +155,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.host = other.host;
 		this.port = other.port;
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
+		this.uriVariables.putAll(other.uriVariables);
 		this.queryParams.putAll(other.queryParams);
 		this.fragment = other.fragment;
 		this.encodeTemplate = other.encodeTemplate;
@@ -521,12 +522,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the URI scheme. The given scheme may contain URI template variables,
-	 * and may also be {@code null} to clear the scheme of this builder.
-	 * @param scheme the URI scheme
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder scheme(@Nullable String scheme) {
 		this.scheme = scheme;
@@ -547,12 +542,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the URI user info. The given user info may contain URI template variables,
-	 * and may also be {@code null} to clear the user info of this builder.
-	 * @param userInfo the URI user info
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder userInfo(@Nullable String userInfo) {
 		this.userInfo = userInfo;
@@ -560,52 +549,34 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the URI host. The given host may contain URI template variables,
-	 * and may also be {@code null} to clear the host of this builder.
-	 * @param host the URI host
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder host(@Nullable String host) {
 		this.host = host;
-		resetSchemeSpecificPart();
+		if (host != null) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
-	/**
-	 * Set the URI port. Passing {@code -1} will clear the port of this builder.
-	 * @param port the URI port
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder port(int port) {
 		Assert.isTrue(port >= -1, "Port must be >= -1");
 		this.port = String.valueOf(port);
-		resetSchemeSpecificPart();
+		if (port > -1) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
-	/**
-	 * Set the URI port. Use this method only when the port needs to be
-	 * parameterized with a URI variable. Otherwise use {@link #port(int)}.
-	 * Passing {@code null} will clear the port of this builder.
-	 * @param port the URI port
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder port(@Nullable String port) {
 		this.port = port;
-		resetSchemeSpecificPart();
+		if (port != null) {
+			resetSchemeSpecificPart();
+		}
 		return this;
 	}
 
-	/**
-	 * Append the given path to the existing path of this builder.
-	 * The given path may contain URI template variables.
-	 * @param path the URI path
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder path(String path) {
 		this.pathBuilder.addPath(path);
@@ -613,13 +584,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Append path segments to the existing path. Each path segment may contain
-	 * URI template variables and should not contain any slashes.
-	 * Use {@code path("/")} subsequently to ensure a trailing slash.
-	 * @param pathSegments the URI path segments
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		this.pathBuilder.addPathSegments(pathSegments);
@@ -627,11 +591,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the path of this builder overriding all existing path and path segment values.
-	 * @param path the URI path (a {@code null} value results in an empty path)
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder replacePath(@Nullable String path) {
 		this.pathBuilder = new CompositePathComponentBuilder();
@@ -642,22 +601,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Append the given query to the existing query of this builder.
-	 * The given query may contain URI template variables.
-	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
-	 * correct parsing of the URI string. For example if a query parameter
-	 * contains {@code '='} or {@code '&'} characters, the query string cannot
-	 * be parsed unambiguously. Such values should be substituted for URI
-	 * variables to enable correct parsing:
-	 * <pre class="code">
-	 * UriComponentsBuilder.fromUriString(&quot;/hotels/42&quot;)
-	 * 	.query(&quot;filter={value}&quot;)
-	 * 	.buildAndExpand(&quot;hot&amp;cold&quot;);
-	 * </pre>
-	 * @param query the query string
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder query(@Nullable String query) {
 		if (query != null) {
@@ -668,39 +611,24 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				String value = matcher.group(3);
 				queryParam(name, (value != null ? value : (StringUtils.hasLength(eq) ? "" : null)));
 			}
+			resetSchemeSpecificPart();
 		}
 		else {
 			this.queryParams.clear();
 		}
-		resetSchemeSpecificPart();
 		return this;
 	}
 
-	/**
-	 * Set the query of this builder overriding all existing query parameters.
-	 * @param query the query string; a {@code null} value removes all query parameters.
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder replaceQuery(@Nullable String query) {
 		this.queryParams.clear();
 		if (query != null) {
 			query(query);
+			resetSchemeSpecificPart();
 		}
-		resetSchemeSpecificPart();
 		return this;
 	}
 
-	/**
-	 * Append the given query parameter to the existing query parameters. The
-	 * given name or any of the values may contain URI template variables. If no
-	 * values are given, the resulting URI will contain the query parameter name
-	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
-	 * @param name the query parameter name
-	 * @param values the query parameter values
-	 * @return this UriComponentsBuilder
-	 * @see #queryParam(String, Collection)
-	 */
 	@Override
 	public UriComponentsBuilder queryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
@@ -717,44 +645,24 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Append the given query parameter to the existing query parameters. The
-	 * given name or any of the values may contain URI template variables. If no
-	 * values are given, the resulting URI will contain the query parameter name
-	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}).
-	 * @param name the query parameter name
-	 * @param values the query parameter values
-	 * @return this UriComponentsBuilder
-	 * @since 5.2.0
-	 * @see #queryParam(String, Object...)
-	 */
 	@Override
 	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
 		return queryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**
-	 * Add the given query parameters.
-	 * @param params the params
-	 * @return this UriComponentsBuilder
+	 * {@inheritDoc}
 	 * @since 4.0
 	 */
 	@Override
 	public UriComponentsBuilder queryParams(@Nullable MultiValueMap<String, String> params) {
 		if (params != null) {
 			this.queryParams.addAll(params);
+			resetSchemeSpecificPart();
 		}
 		return this;
 	}
 
-	/**
-	 * Set the query parameter values overriding all existing query values for
-	 * the same parameter. If no values are given, the query parameter is removed.
-	 * @param name the query parameter name
-	 * @param values the query parameter values
-	 * @return this UriComponentsBuilder
-	 * @see #replaceQueryParam(String, Collection)
-	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
@@ -766,24 +674,13 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the query parameter values overriding all existing query values for
-	 * the same parameter. If no values are given, the query parameter is removed.
-	 * @param name the query parameter name
-	 * @param values the query parameter values
-	 * @return this UriComponentsBuilder
-	 * @see #replaceQueryParam(String, Object...)
-	 * @since 5.2.0
-	 */
 	@Override
 	public UriComponentsBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 		return replaceQueryParam(name, values != null ? values.toArray() : EMPTY_VALUES);
 	}
 
 	/**
-	 * Set the query parameter values overriding all existing query values.
-	 * @param params the query parameter name
-	 * @return this UriComponentsBuilder
+	 * {@inheritDoc}
 	 * @since 4.2
 	 */
 	@Override
@@ -795,12 +692,6 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	/**
-	 * Set the URI fragment. The given fragment may contain URI template variables,
-	 * and may also be {@code null} to clear the fragment of this builder.
-	 * @param fragment the URI fragment
-	 * @return this UriComponentsBuilder
-	 */
 	@Override
 	public UriComponentsBuilder fragment(@Nullable String fragment) {
 		if (fragment != null) {

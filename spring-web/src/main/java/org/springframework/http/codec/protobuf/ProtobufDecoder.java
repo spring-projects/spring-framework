@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -73,7 +74,7 @@ import org.springframework.util.MimeType;
 public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Message> {
 
 	/** The default max size for aggregating messages. */
-	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 64 * 1024;
+	protected static final int DEFAULT_MESSAGE_MAX_SIZE = 256 * 1024;
 
 	private static final ConcurrentMap<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();
 
@@ -101,8 +102,21 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	}
 
 
+	/**
+	 * The max size allowed per message.
+	 * <p>By default, this is set to 256K.
+	 * @param maxMessageSize the max size per message, or -1 for unlimited
+	 */
 	public void setMaxMessageSize(int maxMessageSize) {
 		this.maxMessageSize = maxMessageSize;
+	}
+
+	/**
+	 * Return the {@link #setMaxMessageSize configured} message size limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxMessageSize() {
+		return this.maxMessageSize;
 	}
 
 
@@ -127,7 +141,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	public Mono<Message> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(inputStream)
+		return DataBufferUtils.join(inputStream, this.maxMessageSize)
 				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
 	}
 
@@ -204,17 +218,16 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						if (!readMessageSize(input)) {
 							return messages;
 						}
-						if (this.messageBytesToRead > this.maxMessageSize) {
-							throw new DecodingException(
-									"The number of bytes to read from the incoming stream " +
+						if (this.maxMessageSize > 0 && this.messageBytesToRead > this.maxMessageSize) {
+							throw new DataBufferLimitException(
+									"The number of bytes to read for message " +
 											"(" + this.messageBytesToRead + ") exceeds " +
 											"the configured limit (" + this.maxMessageSize + ")");
 						}
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}
 
-					chunkBytesToRead = this.messageBytesToRead >= input.readableByteCount() ?
-							input.readableByteCount() : this.messageBytesToRead;
+					chunkBytesToRead = Math.min(this.messageBytesToRead, input.readableByteCount());
 					remainingBytesToRead = input.readableByteCount() - chunkBytesToRead;
 
 					byte[] bytesToWrite = new byte[chunkBytesToRead];

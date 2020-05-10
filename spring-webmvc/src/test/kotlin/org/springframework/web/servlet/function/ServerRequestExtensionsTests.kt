@@ -40,7 +40,7 @@ class ServerRequestExtensionsTests {
 
 	@Test
 	fun `remoteAddressOrNull with value`() {
-		val remoteAddress = mockk<InetSocketAddress>()
+		val remoteAddress = InetSocketAddress(1234)
 		every { request.remoteAddress() } returns Optional.of(remoteAddress)
 		assertThat(remoteAddress).isEqualTo(request.remoteAddressOrNull())
 		verify { request.remoteAddress() }

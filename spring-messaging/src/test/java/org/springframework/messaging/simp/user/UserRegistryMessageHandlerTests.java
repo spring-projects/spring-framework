@@ -89,8 +89,8 @@ public class UserRegistryMessageHandlerTests {
 		assertThat(runnable).isNotNull();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void brokerUnavailableEvent() throws Exception {
 
 		ScheduledFuture future = mock(ScheduledFuture.class);
@@ -106,6 +106,7 @@ public class UserRegistryMessageHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void broadcastRegistry() throws Exception {
 		given(this.brokerChannel.send(any())).willReturn(true);
 

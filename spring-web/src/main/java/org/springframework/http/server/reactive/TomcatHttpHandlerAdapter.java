@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -131,13 +132,17 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
+			ServletInputStream inputStream = ((ServletRequest) getNativeRequest()).getInputStream();
+			if (!(inputStream instanceof CoyoteInputStream)) {
+				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
+				return super.readFromInputStream();
+			}
 			boolean release = true;
 			int capacity = this.bufferSize;
 			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-				ServletRequest request = getNativeRequest();
-				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
+				int read = ((CoyoteInputStream) inputStream).read(byteBuffer);
 				logBytesRead(read);
 				if (read > 0) {
 					dataBuffer.writePosition(read);
@@ -216,6 +221,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
 			Charset charset = (contentType != null ? contentType.getCharset() : null);
 			if (response.getCharacterEncoding() == null && charset != null) {
 				response.setCharacterEncoding(charset.name());
@@ -224,6 +230,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
 		}
 
 		@Override

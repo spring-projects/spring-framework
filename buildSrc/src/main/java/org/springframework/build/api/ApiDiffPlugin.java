@@ -29,6 +29,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
@@ -90,8 +91,7 @@ public class ApiDiffPlugin implements Plugin<Project> {
 
 	private boolean isProjectEligible(Project project) {
 		return project.getPlugins().hasPlugin(JavaPlugin.class)
-				&& !project.getName().equals("spring-core-coroutines")
-				&& !project.getName().equals("spring-framework-bom");
+				&& project.getPlugins().hasPlugin(MavenPublishPlugin.class);
 	}
 
 	private Configuration createBaselineConfiguration(String baselineVersion, Project project) {

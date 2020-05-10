@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,18 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		return (long) str.getBytes(charset).length;
 	}
 
+
+	@Override
+	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType type) throws IOException {
+		if (headers.getContentType() == null ) {
+			if (type != null && type.isConcrete() && type.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+				// Prevent charset parameter for JSON..
+				headers.setContentType(type);
+			}
+		}
+		super.addDefaultHeaders(headers, s, type);
+	}
+
 	@Override
 	protected void writeInternal(String str, HttpOutputMessage outputMessage) throws IOException {
 		HttpHeaders headers = outputMessage.getHeaders();
@@ -129,6 +141,10 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	private Charset getContentTypeCharset(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
+		}
+		else if (contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+			// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
+			return StandardCharsets.UTF_8;
 		}
 		else {
 			Charset charset = getDefaultCharset();

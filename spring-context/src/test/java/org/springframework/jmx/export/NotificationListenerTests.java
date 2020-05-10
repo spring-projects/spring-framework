@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		String ageAttribute = "Age";
 
 		server.setAttribute(objectName, new Attribute(nameAttribute, "Rob Harrop"));
-		server.setAttribute(objectName, new Attribute(ageAttribute, new Integer(90)));
+		server.setAttribute(objectName, new Attribute(ageAttribute, 90));
 
 		assertThat(listener.getCount(nameAttribute)).as("Listener not notified for Name").isEqualTo(1);
 		assertThat(listener.getCount(ageAttribute)).as("Listener incorrectly notified for Age").isEqualTo(0);
@@ -231,7 +231,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified").isEqualTo(1);
 	}
 
@@ -262,7 +262,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified").isEqualTo(1);
 	}
 
@@ -294,7 +294,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener should have been notified exactly once").isEqualTo(1);
 	}
 
@@ -326,7 +326,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		start(exporter);
 		assertIsRegistered("Should have registered MBean", objectName);
 
-		server.setAttribute(objectName, new Attribute("Age", new Integer(77)));
+		server.setAttribute(objectName, new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener should have been notified exactly once").isEqualTo(1);
 	}
 
@@ -367,10 +367,10 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		assertIsRegistered("Should have registered MBean", objectName1);
 		assertIsRegistered("Should have registered MBean", objectName2);
 
-		server.setAttribute(ObjectNameManager.getInstance(objectName1), new Attribute("Age", new Integer(77)));
+		server.setAttribute(ObjectNameManager.getInstance(objectName1), new Attribute("Age", 77));
 		assertThat(listener.getCount("Age")).as("Listener not notified for testBean1").isEqualTo(1);
 
-		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", new Integer(33)));
+		server.setAttribute(ObjectNameManager.getInstance(objectName2), new Attribute("Age", 33));
 		assertThat(listener.getCount("Age")).as("Listener not notified for testBean2").isEqualTo(2);
 	}
 
@@ -462,10 +462,10 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 				if (currentCount != null) {
 					int count = currentCount.intValue() + 1;
-					this.attributeCounts.put(attributeName, new Integer(count));
+					this.attributeCounts.put(attributeName, count);
 				}
 				else {
-					this.attributeCounts.put(attributeName, new Integer(1));
+					this.attributeCounts.put(attributeName, 1);
 				}
 
 				this.attributeHandbacks.put(attributeName, handback);

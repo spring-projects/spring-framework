@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,10 +100,11 @@ public class MessagingMessageListenerAdapterTests {
 		javax.jms.Message message = new StubTextMessage("foo");
 		Session session = mock(Session.class);
 		MessagingMessageListenerAdapter listener = getSimpleInstance("fail", String.class);
-		assertThatExceptionOfType(ListenerExecutionFailedException.class).isThrownBy(() ->
-				listener.onMessage(message, session))
-			.withCauseExactlyInstanceOf(IllegalArgumentException.class)
-			.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo("Expected test exception"));
+		assertThatExceptionOfType(ListenerExecutionFailedException.class)
+			.isThrownBy(() -> listener.onMessage(message, session))
+			.havingCause()
+			.isExactlyInstanceOf(IllegalArgumentException.class)
+			.withMessage("Expected test exception");
 	}
 
 	@Test

@@ -55,6 +55,11 @@ public class StatusAssertionTests {
 				assertions.isEqualTo(408));
 	}
 
+	@Test // gh-23630
+	public void isEqualToWithCustomStatus() {
+		statusAssertions(600).isEqualTo(600);
+	}
+
 	@Test
 	public void reasonEquals() {
 		StatusAssertions assertions = statusAssertions(HttpStatus.CONFLICT);
@@ -143,6 +148,10 @@ public class StatusAssertionTests {
 
 
 	private StatusAssertions statusAssertions(HttpStatus status) {
+		return statusAssertions(status.value());
+	}
+
+	private StatusAssertions statusAssertions(int status) {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 

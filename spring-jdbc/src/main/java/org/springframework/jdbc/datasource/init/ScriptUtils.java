@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public abstract class ScriptUtils {
 	 * Default prefixes for single-line comments within SQL scripts: {@code ["--"]}.
 	 * @since 5.2
 	 */
-	public static final String[] DEFAULT_COMMENT_PREFIXES = { DEFAULT_COMMENT_PREFIX };
+	public static final String[] DEFAULT_COMMENT_PREFIXES = {DEFAULT_COMMENT_PREFIX};
 
 	/**
 	 * Default start delimiter for block comments within SQL scripts: {@code "/*"}.
@@ -214,8 +214,8 @@ public abstract class ScriptUtils {
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
 		Assert.notEmpty(commentPrefixes, "'commentPrefixes' must not be null or empty");
-		for (int i = 0; i < commentPrefixes.length; i++) {
-			Assert.hasText(commentPrefixes[i], "'commentPrefixes' must not contain null or empty elements");
+		for (String commentPrefix : commentPrefixes) {
+			Assert.hasText(commentPrefix, "'commentPrefixes' must not contain null or empty elements");
 		}
 		Assert.hasText(blockCommentStartDelimiter, "'blockCommentStartDelimiter' must not be null or empty");
 		Assert.hasText(blockCommentEndDelimiter, "'blockCommentEndDelimiter' must not be null or empty");
@@ -325,12 +325,8 @@ public abstract class ScriptUtils {
 	private static String readScript(EncodedResource resource, @Nullable String[] commentPrefixes,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
 
-		LineNumberReader lnr = new LineNumberReader(resource.getReader());
-		try {
+		try (LineNumberReader lnr = new LineNumberReader(resource.getReader())) {
 			return readScript(lnr, commentPrefixes, separator, blockCommentEndDelimiter);
-		}
-		finally {
-			lnr.close();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.util.StreamUtils;
 
 /**
  * Mock implementation of {@link HttpOutputMessage}.
@@ -75,8 +76,7 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	 * @param charset the charset to use to turn the body content to a String
 	 */
 	public String getBodyAsString(Charset charset) {
-		byte[] bytes = getBodyAsBytes();
-		return new String(bytes, charset);
+		return StreamUtils.copyToString(this.body, charset);
 	}
 
 }

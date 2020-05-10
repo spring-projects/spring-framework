@@ -25,7 +25,11 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
 /**
- * Simple cacheable service.
+ * Copy of the shared {@code DefaultCacheableService}: necessary
+ * due to issues with Gradle test fixtures and AspectJ configuration
+ * in the Gradle build.
+ *
+ * <p>Simple cacheable service.
  *
  * @author Costin Leau
  * @author Phillip Webb

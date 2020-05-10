@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -50,7 +49,6 @@ class ClientResponseExtensionsTests {
 	}
 
 	@Test
-	@ExperimentalCoroutinesApi
 	fun `bodyToFlow with reified type parameters`() {
 		response.bodyToFlow<List<Foo>>()
 		verify { response.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }

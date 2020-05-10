@@ -16,6 +16,10 @@ dependencies {
 	testCompile(project(":spring-beans"))
 	testCompile(project(":spring-context"))
 	testCompile(project(":spring-core"))
+	testCompile(testFixtures(project(":spring-aop")))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
 	testCompile(project(":spring-expression"))
 	testCompile(project(":spring-jdbc"))
 	testCompile(project(":spring-orm"))
@@ -29,4 +33,10 @@ dependencies {
 	testCompile("org.aspectj:aspectjweaver")
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.hibernate:hibernate-core")
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
 }

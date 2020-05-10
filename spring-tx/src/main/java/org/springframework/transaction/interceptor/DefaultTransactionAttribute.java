@@ -16,6 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.StringUtils;
@@ -26,6 +29,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Mark Paluch
  * @since 16.03.2003
  */
 @SuppressWarnings("serial")
@@ -36,6 +40,8 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	@Nullable
 	private String descriptor;
+
+	private Collection<String> labels = Collections.emptyList();
 
 
 	/**
@@ -98,6 +104,21 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
+	 * Associate one or more labels with this transaction attribute.
+	 * <p>This may be used for applying specific transactional behavior
+	 * or follow a purely descriptive nature.
+	 * @since 5.3
+	 */
+	public void setLabels(Collection<String> labels) {
+		this.labels = labels;
+	}
+
+	@Override
+	public Collection<String> getLabels() {
+		return this.labels;
+	}
+
+	/**
 	 * Set a descriptor for this transaction attribute,
 	 * e.g. indicating where the attribute is applying.
 	 * @since 4.3.4
@@ -144,6 +165,9 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 		StringBuilder result = getDefinitionDescription();
 		if (StringUtils.hasText(this.qualifier)) {
 			result.append("; '").append(this.qualifier).append("'");
+		}
+		if (!this.labels.isEmpty()) {
+			result.append("; ").append(this.labels);
 		}
 		return result;
 	}

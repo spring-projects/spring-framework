@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.HasMap;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.HasMap;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -201,16 +201,16 @@ public class XmlBeanCollectionTests {
 	public void testMapWithLiteralsAndReferences() throws Exception {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("mixedMap");
 		assertThat(hasMap.getMap().size() == 5).isTrue();
-		assertThat(hasMap.getMap().get("foo").equals(new Integer(10))).isTrue();
+		assertThat(hasMap.getMap().get("foo").equals(10)).isTrue();
 		TestBean jenny = (TestBean) this.beanFactory.getBean("jenny");
 		assertThat(hasMap.getMap().get("jenny") == jenny).isTrue();
-		assertThat(hasMap.getMap().get(new Integer(5)).equals("david")).isTrue();
+		assertThat(hasMap.getMap().get(5).equals("david")).isTrue();
 		boolean condition1 = hasMap.getMap().get("bar") instanceof Long;
 		assertThat(condition1).isTrue();
-		assertThat(hasMap.getMap().get("bar").equals(new Long(100))).isTrue();
+		assertThat(hasMap.getMap().get("bar").equals(100L)).isTrue();
 		boolean condition = hasMap.getMap().get("baz") instanceof Integer;
 		assertThat(condition).isTrue();
-		assertThat(hasMap.getMap().get("baz").equals(new Integer(200))).isTrue();
+		assertThat(hasMap.getMap().get("baz").equals(200)).isTrue();
 	}
 
 	@Test

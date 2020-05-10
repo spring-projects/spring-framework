@@ -35,14 +35,15 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 
-	private Class<?> clazz;
+	private final Class<?> clazz;
 
 	@Nullable
-	private String methodName;
+	private final String methodName;
 
 	private final AtomicInteger evaluations = new AtomicInteger(0);
 
@@ -141,6 +142,11 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 			code = 37 * code + this.methodName.hashCode();
 		}
 		return code;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodName = " + methodName;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,22 +25,28 @@ import org.springframework.util.StringUtils;
  * {@link CommandLinePropertySource} implementation backed by a simple String array.
  *
  * <h3>Purpose</h3>
- * This {@code CommandLinePropertySource} implementation aims to provide the simplest
- * possible approach to parsing command line arguments.  As with all {@code
+ * <p>This {@code CommandLinePropertySource} implementation aims to provide the simplest
+ * possible approach to parsing command line arguments. As with all {@code
  * CommandLinePropertySource} implementations, command line arguments are broken into two
  * distinct groups: <em>option arguments</em> and <em>non-option arguments</em>, as
- * described below <em>(some sections copied from Javadoc for {@link SimpleCommandLineArgsParser})</em>:
+ * described below <em>(some sections copied from Javadoc for
+ * {@link SimpleCommandLineArgsParser})</em>:
  *
  * <h3>Working with option arguments</h3>
- * Option arguments must adhere to the exact syntax:
+ * <p>Option arguments must adhere to the exact syntax:
+ *
  * <pre class="code">--optName[=optValue]</pre>
- * That is, options must be prefixed with "{@code --}", and may or may not specify a value.
- * If a value is specified, the name and value must be separated <em>without spaces</em>
- * by an equals sign ("=").
+ *
+ * <p>That is, options must be prefixed with "{@code --}" and may or may not
+ * specify a value. If a value is specified, the name and value must be separated
+ * <em>without spaces</em> by an equals sign ("="). The value may optionally be
+ * an empty string.
  *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
  * --foo
+ * --foo=
+ * --foo=""
  * --foo=bar
  * --foo="bar then baz"
  * --foo=bar,baz,biz</pre>
@@ -53,11 +59,11 @@ import org.springframework.util.StringUtils;
  * --foo=bar --foo=baz --foo=biz</pre>
  *
  * <h3>Working with non-option arguments</h3>
- * Any and all arguments specified at the command line without the "{@code --}" option
- * prefix will be considered as "non-option arguments" and made available through the
- * {@link #getNonOptionArgs()} method.
+ * <p>Any and all arguments specified at the command line without the "{@code --}"
+ * option prefix will be considered as "non-option arguments" and made available
+ * through the {@link CommandLineArgs#getNonOptionArgs()} method.
  *
- * <h2>Typical usage</h2>
+ * <h3>Typical usage</h3>
  * <pre class="code">
  * public static void main(String[] args) {
  *     PropertySource<?> ps = new SimpleCommandLinePropertySource(args);
@@ -71,7 +77,7 @@ import org.springframework.util.StringUtils;
  * <p>When more fully-featured command line parsing is necessary, consider using
  * the provided {@link JOptCommandLinePropertySource}, or implement your own
  * {@code CommandLinePropertySource} against the command line parsing library of your
- * choice!
+ * choice.
  *
  * @author Chris Beams
  * @since 3.1

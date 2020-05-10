@@ -1,6 +1,5 @@
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
-apply plugin: 'org.springframework.build.test-sources'
 apply from: "$rootDir/gradle/publications.gradle"
 
 jar {
@@ -15,6 +14,12 @@ jar {
 		include "notice.txt"
 		into "META-INF"
 		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
 	}
 }
 
@@ -56,3 +61,7 @@ publishing {
 		}
 	}
 }
+
+// Disable publication of test fixture artifacts.
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

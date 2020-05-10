@@ -114,7 +114,7 @@ public interface HandlerInterceptor {
 	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler handler (or {@link HandlerMethod}) that started asynchronous
+	 * @param handler the handler (or {@link HandlerMethod}) that started asynchronous
 	 * execution, for type and/or instance examination
 	 * @param modelAndView the {@code ModelAndView} that the handler returned
 	 * (can also be {@code null})
@@ -139,7 +139,7 @@ public interface HandlerInterceptor {
 	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler handler (or {@link HandlerMethod}) that started asynchronous
+	 * @param handler the handler (or {@link HandlerMethod}) that started asynchronous
 	 * execution, for type and/or instance examination
 	 * @param ex any exception thrown on handler execution, if any; this does not
 	 * include exceptions that have been handled through an exception resolver

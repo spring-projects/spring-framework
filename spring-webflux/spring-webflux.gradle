@@ -30,6 +30,10 @@ dependencies {
 	optional("com.google.protobuf:protobuf-java-util")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile(project(":kotlin-coroutines"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-web")))
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml:aalto-xml")
 	testCompile("org.hibernate:hibernate-validator")
@@ -42,8 +46,9 @@ dependencies {
 	testCompile("org.eclipse.jetty:jetty-server")
 	testCompile("org.eclipse.jetty:jetty-servlet")
 	testCompile("org.eclipse.jetty:jetty-reactive-httpclient")
+	testCompile('org.apache.httpcomponents.client5:httpclient5:5.0')
+	testCompile('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	testCompile("com.squareup.okhttp3:mockwebserver")
-	testCompile(project(":kotlin-coroutines"))
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
 	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
 	testRuntime("org.jruby:jruby")
@@ -54,4 +59,8 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core")
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 	testRuntime("com.sun.activation:javax.activation")
+}
+
+test {
+	maxParallelForks = 4
 }

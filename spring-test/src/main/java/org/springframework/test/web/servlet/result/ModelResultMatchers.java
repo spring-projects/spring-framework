@@ -28,7 +28,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertFalse;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
@@ -91,7 +93,7 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (String name : names) {
-				assertTrue("Model attribute '" + name + "' exists", mav.getModel().get(name) == null);
+				assertNull("Model attribute '" + name + "' exists", mav.getModel().get(name));
 			}
 		};
 	}
@@ -103,7 +105,7 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			Errors errors = getBindingResult(mav, name);
-			assertEquals("Binding/validation error count for attribute '" + name + "', ",
+			assertEquals("Binding/validation error count for attribute '" + name + "',",
 					expectedCount, errors.getErrorCount());
 		};
 	}
@@ -129,8 +131,8 @@ public class ModelResultMatchers {
 			ModelAndView mav = getModelAndView(mvcResult);
 			for (String name : names) {
 				BindingResult result = getBindingResult(mav, name);
-				assertTrue("Unexpected errors for attribute '" + name + "': " + result.getAllErrors(),
-						!result.hasErrors());
+				assertFalse("Unexpected errors for attribute '" + name + "': " + result.getAllErrors(),
+						result.hasErrors());
 			}
 		};
 	}
@@ -170,7 +172,7 @@ public class ModelResultMatchers {
 	 * Assert a field error code for a model attribute using a {@link org.hamcrest.Matcher}.
 	 * @since 4.1
 	 */
-	public <T> ResultMatcher attributeHasFieldErrorCode(String name, String fieldName,
+	public ResultMatcher attributeHasFieldErrorCode(String name, String fieldName,
 			Matcher<? super String> matcher) {
 
 		return mvcResult -> {
@@ -187,7 +189,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the total number of errors in the model.
 	 */
-	public <T> ResultMatcher errorCount(int expectedCount) {
+	public ResultMatcher errorCount(int expectedCount) {
 		return result -> {
 			int actualCount = getErrorCount(getModelAndView(result).getModelMap());
 			assertEquals("Binding/validation error count", expectedCount, actualCount);
@@ -197,7 +199,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the model has errors.
 	 */
-	public <T> ResultMatcher hasErrors() {
+	public ResultMatcher hasErrors() {
 		return result -> {
 			int count = getErrorCount(getModelAndView(result).getModelMap());
 			assertTrue("Expected binding/validation errors", count != 0);
@@ -207,12 +209,12 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the model has no errors.
 	 */
-	public <T> ResultMatcher hasNoErrors() {
+	public ResultMatcher hasNoErrors() {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (Object value : mav.getModel().values()) {
 				if (value instanceof Errors) {
-					assertTrue("Unexpected binding/validation errors: " + value, !((Errors) value).hasErrors());
+					assertFalse("Unexpected binding/validation errors: " + value, ((Errors) value).hasErrors());
 				}
 			}
 		};
@@ -221,7 +223,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the number of model attributes.
 	 */
-	public <T> ResultMatcher size(int size) {
+	public ResultMatcher size(int size) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			int actual = 0;

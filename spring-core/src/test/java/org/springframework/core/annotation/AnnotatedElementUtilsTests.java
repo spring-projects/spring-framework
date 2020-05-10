@@ -42,10 +42,10 @@ import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClass
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
+import org.springframework.core.testfixture.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Indexed;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;
@@ -517,6 +517,20 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	void getMergedAnnotationWithImplicitAliasesWithDefaultsInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ImplicitAliasesWithDefaultsClass.class;
+		String name = AliasesWithDefaults.class.getName();
+		AliasesWithDefaults annotation = getMergedAnnotation(element, AliasesWithDefaults.class);
+
+		assertThat(annotation).as("Should find @AliasesWithDefaults on " + element.getSimpleName()).isNotNull();
+		assertThat(annotation.a1()).as("a1").isEqualTo("ImplicitAliasesWithDefaults");
+		assertThat(annotation.a2()).as("a2").isEqualTo("ImplicitAliasesWithDefaults");
+
+		// Verify contracts between utility methods:
+		assertThat(isAnnotated(element, name)).isTrue();
+	}
+
+	@Test
 	void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
@@ -671,6 +685,62 @@ class AnnotatedElementUtilsTests {
 	@Test
 	void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
 		assertComponentScanAttributes(ComponentScanWithBasePackagesAndValueAliasClass.class, "com.example.app.test");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationAttributesOnMethodWithComposedMetaTransactionalAnnotation() throws Exception {
+		Method method = getClass().getDeclaredMethod("composedTransactionalMethod");
+
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(method, AliasedTransactional.class);
+		assertThat(attributes).as("Should find @AliasedTransactional on " + method).isNotNull();
+		assertThat(attributes.getString("value")).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+		assertThat(attributes.getString("qualifier")).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationOnMethodWithComposedMetaTransactionalAnnotation() throws Exception {
+		Method method = getClass().getDeclaredMethod("composedTransactionalMethod");
+
+		AliasedTransactional annotation = findMergedAnnotation(method, AliasedTransactional.class);
+		assertThat(annotation).as("Should find @AliasedTransactional on " + method).isNotNull();
+		assertThat(annotation.value()).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+		assertThat(annotation.qualifier()).as("TX qualifier for " + method).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationAttributesOnClassWithComposedMetaTransactionalAnnotation() throws Exception {
+		Class<?> clazz = ComposedTransactionalClass.class;
+
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(clazz, AliasedTransactional.class);
+		assertThat(attributes).as("Should find @AliasedTransactional on " + clazz).isNotNull();
+		assertThat(attributes.getString("value")).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+		assertThat(attributes.getString("qualifier")).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+	}
+
+	/**
+	 * @since 5.2.1
+	 * @see <a href="https://github.com/spring-projects/spring-framework/issues/23767">#23767</a>
+	 */
+	@Test
+	void findMergedAnnotationOnClassWithComposedMetaTransactionalAnnotation() throws Exception {
+		Class<?> clazz = ComposedTransactionalClass.class;
+
+		AliasedTransactional annotation = findMergedAnnotation(clazz, AliasedTransactional.class);
+		assertThat(annotation).as("Should find @AliasedTransactional on " + clazz).isNotNull();
+		assertThat(annotation.value()).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
+		assertThat(annotation.qualifier()).as("TX qualifier for " + clazz).isEqualTo("anotherTransactionManager");
 	}
 
 	@Test
@@ -875,11 +945,26 @@ class AnnotatedElementUtilsTests {
 	@Inherited
 	@interface AliasedTransactional {
 
-		@AliasFor(attribute = "qualifier")
+		@AliasFor("qualifier")
 		String value() default "";
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String qualifier() default "";
+	}
+
+	@AliasedTransactional
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@interface MyAliasedTransactional {
+
+		@AliasFor(annotation = AliasedTransactional.class, attribute = "value")
+		String value() default "defaultTransactionManager";
+	}
+
+	@MyAliasedTransactional("anotherTransactionManager")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@interface ComposedMyAliasedTransactional {
 	}
 
 	@Transactional(qualifier = "composed1")
@@ -956,10 +1041,10 @@ class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextConfig {
 
-		@AliasFor(attribute = "locations")
+		@AliasFor("locations")
 		String[] value() default {};
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String[] locations() default {};
 
 		Class<?>[] classes() default {};
@@ -992,7 +1077,6 @@ class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles() default {};
 	}
-
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
@@ -1032,6 +1116,27 @@ class AnnotatedElementUtilsTests {
 	@ImplicitAliasesContextConfig(xmlFiles = {"A.xml", "B.xml"})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedImplicitAliasesContextConfig {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasesWithDefaults {
+
+		@AliasFor("a2")
+		String a1() default "AliasesWithDefaults";
+
+		@AliasFor("a1")
+		String a2() default "AliasesWithDefaults";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@AliasesWithDefaults
+	@interface ImplicitAliasesWithDefaults {
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a1")
+		String b1() default "ImplicitAliasesWithDefaults";
+
+		@AliasFor(annotation = AliasesWithDefaults.class, attribute = "a2")
+		String b2() default "ImplicitAliasesWithDefaults";
 	}
 
 	@ImplicitAliasesContextConfig
@@ -1129,7 +1234,7 @@ class AnnotatedElementUtilsTests {
 		@AliasFor("basePackages")
 		String[] value() default {};
 
-		@AliasFor("value")
+		// Intentionally no alias declaration for "value"
 		String[] basePackages() default {};
 
 		Filter[] excludeFilters() default {};
@@ -1183,6 +1288,14 @@ class AnnotatedElementUtilsTests {
 
 	@AliasedTransactionalComponent
 	static class AliasedTransactionalComponentClass {
+	}
+
+	@ComposedMyAliasedTransactional
+	void composedTransactionalMethod() {
+	}
+
+	@ComposedMyAliasedTransactional
+	static class ComposedTransactionalClass {
 	}
 
 	@Transactional
@@ -1331,6 +1444,10 @@ class AnnotatedElementUtilsTests {
 	static class ImplicitAliasesContextConfigClass3 {
 	}
 
+	@ImplicitAliasesWithDefaults
+	static class ImplicitAliasesWithDefaultsClass {
+	}
+
 	@TransitiveImplicitAliasesContextConfig(groovy = "test.groovy")
 	static class TransitiveImplicitAliasesContextConfigClass {
 	}
@@ -1406,7 +1523,7 @@ class AnnotatedElementUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface ValueAttribute {
+	@interface ValueAttribute {
 
 		String[] value();
 
@@ -1414,7 +1531,7 @@ class AnnotatedElementUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ValueAttribute("FromValueAttributeMeta")
-	static @interface ValueAttributeMeta {
+	@interface ValueAttributeMeta {
 
 		@AliasFor("alias")
 		String[] value() default {};
@@ -1426,7 +1543,7 @@ class AnnotatedElementUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@ValueAttributeMeta("FromValueAttributeMetaMeta")
-	static @interface ValueAttributeMetaMeta {
+	@interface ValueAttributeMetaMeta {
 	}
 
 	@ValueAttributeMetaMeta

@@ -41,7 +41,7 @@ public abstract class MergedAnnotationPredicates {
 
 
 	/**
-	 * Create a new {@link Predicate} that evaluates to {@code true} if the
+	 * Create a new {@link Predicate} that evaluates to {@code true} if the name of the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
 	 * the specified array.
 	 * @param <A> the annotation type
@@ -67,7 +67,7 @@ public abstract class MergedAnnotationPredicates {
 	/**
 	 * Create a new {@link Predicate} that evaluates to {@code true} if the
 	 * {@linkplain MergedAnnotation#getType() merged annotation type} is contained in
-	 * the collection.
+	 * the specified collection.
 	 * @param <A> the annotation type
 	 * @param types the type names or classes that should be matched
 	 * @return a {@link Predicate} to test the annotation type
@@ -82,12 +82,12 @@ public abstract class MergedAnnotationPredicates {
 	 * Create a new stateful, single use {@link Predicate} that matches only
 	 * the first run of an extracted value. For example,
 	 * {@code MergedAnnotationPredicates.firstRunOf(MergedAnnotation::distance)}
-	 * will match the first annotation, and any subsequent run that have the
+	 * will match the first annotation, and any subsequent runs that have the
 	 * same distance.
 	 * <p>NOTE: This predicate only matches the first run. Once the extracted
-	 * value changes, the predicate always returns {@code false}. I.e. if you
-	 * have a set of annotations with distances {@code [1, 1, 2, 1]} then only
-	 * the first two will match.
+	 * value changes, the predicate always returns {@code false}. For example,
+	 * if you have a set of annotations with distances {@code [1, 1, 2, 1]} then
+	 * only the first two will match.
 	 * @param valueExtractor function used to extract the value to check
 	 * @return a {@link Predicate} that matches the first run of the extracted
 	 * values

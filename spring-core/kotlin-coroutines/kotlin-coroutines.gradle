@@ -2,6 +2,17 @@ description = "Spring Core Coroutines support"
 
 apply plugin: "kotlin"
 
+configurations {
+	classesOnlyElements {
+		canBeConsumed = true
+		canBeResolved = false
+	}
+}
+
+artifacts {
+	classesOnlyElements(compileKotlin.destinationDir)
+}
+
 dependencies {
 	compile("org.jetbrains.kotlin:kotlin-reflect")
 	compile("org.jetbrains.kotlin:kotlin-stdlib")

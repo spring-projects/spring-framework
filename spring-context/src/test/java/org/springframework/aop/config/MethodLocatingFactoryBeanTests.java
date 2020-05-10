@@ -95,7 +95,7 @@ public class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSunnyDayPath() throws Exception {
 		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);
@@ -110,7 +110,7 @@ public class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhereMethodCannotBeResolved() {
 		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);

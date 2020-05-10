@@ -25,11 +25,11 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.codec.Pojo;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

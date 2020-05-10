@@ -21,8 +21,8 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.CustomEnum;
-import org.springframework.tests.sample.beans.GenericBean;
+import org.springframework.beans.testfixture.beans.CustomEnum;
+import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.web.servlet.support.BindStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;

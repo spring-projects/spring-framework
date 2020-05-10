@@ -20,8 +20,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.cache.Cache;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

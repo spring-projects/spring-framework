@@ -413,7 +413,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 				return doWithAnnotations(type, aggregateIndex, source, repeatedAnnotations);
 			}
 			AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
-					annotation.annotationType(), annotationFilter);
+					annotation.annotationType(), repeatableContainers, annotationFilter);
 			for (int i = 0; i < mappings.size(); i++) {
 				AnnotationTypeMapping mapping = mappings.get(i);
 				if (isMappingForType(mapping, annotationFilter, this.requiredType)) {

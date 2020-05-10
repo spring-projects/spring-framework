@@ -336,7 +336,15 @@ public class ReflectUtils {
 	public static Constructor getConstructor(Class type, Class[] parameterTypes) {
 		try {
 			Constructor constructor = type.getDeclaredConstructor(parameterTypes);
-			constructor.setAccessible(true);
+			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+					constructor.setAccessible(true);
+					return null;
+				});
+			}
+			else {
+				constructor.setAccessible(true);
+			}
 			return constructor;
 		}
 		catch (NoSuchMethodException e) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -419,21 +419,28 @@ class DefaultWebClient implements WebClient {
 
 		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
 
+		private static final StatusHandler DEFAULT_STATUS_HANDLER =
+				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
+
+
 		private final Mono<ClientResponse> responseMono;
 
 		private final Supplier<HttpRequest> requestSupplier;
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
-			this.statusHandlers.add(new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException));
+			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
+
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
 			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
 		}
 
@@ -450,7 +457,8 @@ class DefaultWebClient implements WebClient {
 
 			Assert.notNull(statusCodePredicate, "IntPredicate must not be null");
 			Assert.notNull(exceptionFunction, "Function must not be null");
-			this.statusHandlers.add(0, new StatusHandler(statusCodePredicate, exceptionFunction));
+			int index = this.statusHandlers.size() - 1;  // Default handler always last
+			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
 			return this;
 		}
 
@@ -524,7 +532,7 @@ class DefaultWebClient implements WebClient {
 		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
 			// Ensure the body is drained, even if the StatusHandler didn't consume it,
 			// but ignore exception, in case the handler did consume.
-			return (Mono<T>) response.bodyToMono(Void.class)
+			return (Mono<T>) response.releaseBody()
 					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 
@@ -538,35 +546,36 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response, handleBodyMono(response, response.bodyToMono(bodyClass))));
+					WebClientUtils.mapToEntity(response,
+							handleBodyMono(response, response.bodyToMono(bodyClass))));
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeRef) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response,
-							handleBodyMono(response, response.bodyToMono(bodyTypeReference))));
+					WebClientUtils.mapToEntity(response,
+							handleBodyMono(response, response.bodyToMono(bodyTypeRef))));
 		}
 
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntityList(response,
+					WebClientUtils.mapToEntityList(response,
 							handleBodyFlux(response, response.bodyToFlux(elementClass))));
 		}
 
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntityList(response,
+					WebClientUtils.mapToEntityList(response,
 							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
 		}
 
 		@Override
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response, handleBodyMono(response, Mono.<Void>empty()))
-							.doOnNext(entity -> response.releaseBody()) // body is drained in other cases
+					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
+							.flatMap(entity -> response.releaseBody().thenReturn(entity))
 			);
 		}
 

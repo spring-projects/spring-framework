@@ -1,4 +1,4 @@
-# Spring Framework build
+# Spring Framework Build
 
 This folder contains the custom plugins and conventions for the Spring Framework build.
 They are declared in the `build.gradle` file in this folder.
@@ -7,8 +7,8 @@ They are declared in the `build.gradle` file in this folder.
 
 ### Compiler conventions
 
-The `org.springframework.build.compile` applies the Java compiler conventions to the build.
-By default, the build is compiling sources with the `1.8` source and target compatibility.
+The `org.springframework.build.compile` plugin applies the Java compiler conventions to the build.
+By default, the build compiles sources with Java `1.8` source and target compatibility.
 You can test a different source compatibility version on the CLI with a project property like:
 
 ```
@@ -25,17 +25,11 @@ but doesn't affect the classpath of dependent projects.
 This plugin does not provide a `provided` configuration, as the native `compileOnly` and `testCompileOnly`
 configurations are preferred.
 
-## Test sources
-
-The `org.springframework.build.test-sources` updates `testCompile` dependencies to include
-the test source sets of `project()` dependencies. This plugin is used in the Spring Framework build 
-to share test utilities and fixtures amongst modules.
-
 ## API Diff
 
 This plugin uses the [Gradle JApiCmp](https://github.com/melix/japicmp-gradle-plugin) plugin
 to generate API Diff reports for each Spring Framework module. This plugin is applied once on the root
-project and create tasks in each framework module. Unlike previous versions of this part of the build,
+project and creates tasks in each framework module. Unlike previous versions of this part of the build,
 there is no need for checking out a specific tag. The plugin will fetch the JARs we want to compare the
 current working version with. You can generate the reports for all modules or a single module:
 

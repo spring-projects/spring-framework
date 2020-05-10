@@ -74,7 +74,7 @@ In most application scenarios, explicit user code is not required to instantiate
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
 of the application typically suffices (see <<context-create>>). If you use the
-https://spring.io/tools/sts[Spring Tool Suite] (an Eclipse-powered development
+https://spring.io/tools[Spring Tools for Eclipse] (an Eclipse-powered development
 environment), you can easily create this boilerplate configuration with a few mouse clicks or
 keystrokes.
 
@@ -346,8 +346,8 @@ bean definition files through an `importBeans` directive.
 === Using the Container
 
 The `ApplicationContext` is the interface for an advanced factory capable of maintaining
-a registry of different beans and their dependencies. By using the method `T getBean(String
-name, Class<T> requiredType)`, you can retrieve instances of your beans.
+a registry of different beans and their dependencies. By using the method
+`T getBean(String name, Class<T> requiredType)`, you can retrieve instances of your beans.
 
 The `ApplicationContext` lets you read bean definitions and access them, as the following
 example shows:
@@ -543,7 +543,7 @@ enforced by the container, though no longer by XML parsers.
 You are not required to supply a `name` or an `id` for a bean. If you do not supply a
 `name` or `id` explicitly, the container generates a unique name for that bean. However,
 if you want to refer to that bean by name, through the use of the `ref` element or a
-<<beans-servicelocator,Service Locator>> style lookup, you must provide a name.
+Service Locator style lookup, you must provide a name.
 Motivations for not supplying a name are related to using <<beans-inner-beans,inner
 beans>> and <<beans-factory-autowire,autowiring collaborators>>.
 
@@ -849,12 +849,29 @@ This approach shows that the factory bean itself can be managed and configured t
 dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
 Configuration in Detail>>.
 
-NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in the
-Spring container and that creates objects through an
+NOTE: In Spring documentation, "`factory bean`" refers to a bean that is configured in
+the Spring container and that creates objects through an
 <<beans-factory-class-instance-factory-method,instance>> or
 <<beans-factory-class-static-factory-method,static>> factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean` >>.
+<<beans-factory-extension-factorybean, `FactoryBean` >> implementation class.
+
+
+[[beans-factory-type-determination]]
+==== Determining a Bean's Runtime Type
+
+The runtime type of a specific bean is non-trivial to determine. A specified class in
+the bean metadata definition is just an initial class reference, potentially combined
+with a declared factory method or being a `FactoryBean` class which may lead to a
+different runtime type of the bean, or not being set at all in case of an instance-level
+factory method (which is resolved via the specified `factory-bean` name instead).
+Additionally, AOP proxying may wrap a bean instance with an interface-based proxy with
+limited exposure of the target bean's actual type (just its implemented interfaces).
+
+The recommended way to find out about the actual runtime type of a particular bean is
+a `BeanFactory.getType` call for the specified bean name. This takes all of the above
+cases into account and returns the type of object that a `BeanFactory.getBean` call is
+going to return for the same bean name.
 
 
 
@@ -874,9 +891,9 @@ application where objects collaborate to achieve a goal.
 === Dependency Injection
 
 Dependency injection (DI) is a process whereby objects define their dependencies
-(that is, the other objects with which they work) only through constructor arguments, arguments
-to a factory method, or properties that are set on the object instance after it is
-constructed or returned from a factory method. The container then injects those
+(that is, the other objects with which they work) only through constructor arguments,
+arguments to a factory method, or properties that are set on the object instance after
+it is constructed or returned from a factory method. The container then injects those
 dependencies when it creates the bean. This process is fundamentally the inverse (hence
 the name, Inversion of Control) of the bean itself controlling the instantiation
 or location of its dependencies on its own by using direct construction of classes or
@@ -1481,7 +1498,7 @@ XML configuration:
 
 The preceding XML is more succinct. However, typos are discovered at runtime rather than
 design time, unless you use an IDE (such as https://www.jetbrains.com/idea/[IntelliJ
-IDEA] or the https://spring.io/tools/sts[Spring Tool Suite])
+IDEA] or the https://spring.io/tools[Spring Tools for Eclipse])
 that supports automatic property completion when you create bean definitions. Such IDE
 assistance is highly recommended.
 
@@ -1565,7 +1582,7 @@ is a dependency of the bean whose property is to be set, and it is initialized o
 as needed before the property is set. (If the collaborator is a singleton bean, it may
 already be initialized by the container.) All references are ultimately a reference to
 another object. Scoping and validation depend on whether you specify the ID or name of the
-other object through the `bean`, `local,` or `parent` attributes.
+other object through the `bean` or `parent` attribute.
 
 Specifying the target bean through the `bean` attribute of the `<ref/>` tag is the most
 general form and allows creation of a reference to any bean in the same container or
@@ -2108,7 +2125,7 @@ startup, because it must satisfy the singleton's dependencies. The lazy-initiali
 is injected into a singleton bean elsewhere that is not lazy-initialized.
 
 You can also control lazy-initialization at the container level by using the
-`default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -4482,7 +4499,7 @@ with placeholder values is defined:
 The example shows properties configured from an external `Properties` file. At runtime,
 a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
 properties of the DataSource. The values to replace are specified as placeholders of the
-form `${property-name}`, which follows the Ant and log4j and JSP EL style.
+form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
 
 The actual values come from another file in the standard Java `Properties` format:
 
@@ -4649,7 +4666,7 @@ No matter the choice, Spring can accommodate both styles and even mix them toget
 It is worth pointing out that through its <<beans-java, JavaConfig>> option, Spring lets
 annotations be used in a non-invasive way, without touching the target components
 source code and that, in terms of tooling, all configuration styles are supported by the
-https://spring.io/tools/sts[Spring Tool Suite].
+https://spring.io/tools[Spring Tools for Eclipse].
 ****
 
 An alternative to XML setup is provided by annotation-based configuration, which relies on
@@ -4799,10 +4816,12 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 
 [NOTE]
 ====
-As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is
-no longer necessary if the target bean defines only one constructor to begin with.
-However, if several constructors are available, at least one must be annotated 
-with `@Autowired` in order to instruct the container which one to use.
+As of Spring Framework 4.3, an `@Autowired` annotation on such a constructor is no longer
+necessary if the target bean defines only one constructor to begin with. However, if
+several constructors are available and there is no primary/default constructor, at least
+one of the constructors must be annotated with `@Autowired` in order to instruct the
+container which one to use. See the discussion on
+<<beans-autowired-annotation-constructor-resolution, constructor resolution>> for details.
 ====
 
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,
@@ -5069,7 +5088,9 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 
 A non-required method will not be called at all if its dependency (or one of its
 dependencies, in case of multiple arguments) is not available. A non-required field will
-not get populated at all in such case, leaving its default value in place.
+not get populated at all in such cases, leaving its default value in place.
+
+[[beans-autowired-annotation-constructor-resolution]]
 
 Injected constructor and factory method arguments are a special case since the `required`
 attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
@@ -5085,21 +5106,24 @@ without an `@Autowired` annotation.
 ====
 Only one constructor of any given bean class may declare `@Autowired` with the `required`
 attribute set to `true`, indicating _the_ constructor to autowire when used as a Spring
-bean. Furthermore, if the `required` attribute is set to `true`, only a single
-constructor may be annotated with `@Autowired`. If multiple _non-required_ constructors
-declare the annotation, they will be considered as candidates for autowiring. The
-constructor with the greatest number of dependencies that can be satisfied by matching
+bean. As a consequence, if the `required` attribute is left at its default value `true`,
+only a single constructor may be annotated with `@Autowired`. If multiple constructors
+declare the annotation, they will all have to declare `required=false` in order to be
+considered as candidates for autowiring (analogous to `autowire=constructor` in XML).
+The constructor with the greatest number of dependencies that can be satisfied by matching
 beans in the Spring container will be chosen. If none of the candidates can be satisfied,
-then a primary/default constructor (if present) will be used. If a class only declares a
-single constructor to begin with, it will always be used, even if not annotated. An
+then a primary/default constructor (if present) will be used. Similarly, if a class
+declares multiple constructors but none of them is annotated with `@Autowired`, then a
+primary/default constructor (if present) will be used. If a class only declares a single
+constructor to begin with, it will always be used, even if not annotated. Note that an
 annotated constructor does not have to be public.
 
 The `required` attribute of `@Autowired` is recommended over the deprecated `@Required`
 annotation on setter methods. Setting the `required` attribute to `false` indicates that
 the property is not required for autowiring purposes, and the property is ignored if it
 cannot be autowired. `@Required`, on the other hand, is stronger in that it enforces the
-property to be set by any means supported by the container, and if no value is defined, a
-corresponding exception is raised.
+property to be set by any means supported by the container, and if no value is defined,
+a corresponding exception is raised.
 ====
 
 Alternatively, you can express the non-required nature of a particular dependency
@@ -5400,7 +5424,6 @@ The following example shows corresponding bean definitions.
 is qualified with the same value.
 <2> The bean with the `action` qualifier value is wired with the constructor argument that
 is qualified with the same value.
-====
 
 For a fallback match, the bean name is considered a default qualifier value. Thus, you
 can define the bean with an `id` of `main` instead of the nested qualifier element, leading
@@ -5428,6 +5451,7 @@ If there is no other resolution indicator (such as a qualifier or a primary mark
 for a non-unique dependency situation, Spring matches the injection point name
 (that is, the field name or parameter name) against the target bean names and choose the
 same-named candidate, if any.
+====
 
 That said, if you intend to express annotation-driven injection by name, do not
 primarily use `@Autowired`, even if it is capable of selecting by bean name among
@@ -5451,16 +5475,28 @@ back to the bean that is currently injected). Note that self injection is a fall
 Regular dependencies on other components always have precedence. In that sense, self
 references do not participate in regular candidate selection and are therefore in
 particular never primary. On the contrary, they always end up as lowest precedence.
-In practice, you should use self references as a last resort only (for example, for calling other methods
-on the same instance through the bean's transactional proxy). Consider factoring out
-the effected methods to a separate delegate bean in such a scenario. Alternatively, you
-can use `@Resource`, which may obtain a proxy back to the current bean by its unique name.
+In practice, you should use self references as a last resort only (for example, for
+calling other methods on the same instance through the bean's transactional proxy).
+Consider factoring out the affected methods to a separate delegate bean in such a scenario.
+Alternatively, you can use `@Resource`, which may obtain a proxy back to the current bean
+by its unique name.
+
+[NOTE]
+====
+Trying to inject the results from `@Bean` methods on the same configuration class is
+effectively a self-reference scenario as well. Either lazily resolve such references
+in the method signature where it is actually needed (as opposed to an autowired field
+in the configuration class) or declare the affected `@Bean` methods as `static`,
+decoupling them from the containing configuration class instance and its lifecycle.
+Otherwise, such beans are only considered in the fallback phase, with matching beans
+on other configuration classes selected as primary candidates instead (if available).
+====
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
 narrowing through qualifier annotations at the parameter level. In contrast, `@Resource`
 is supported only for fields and bean property setter methods with a single argument.
-As a consequence, you should stick with qualifiers if your injection target is a constructor or a
-multi-argument method.
+As a consequence, you should stick with qualifiers if your injection target is a
+constructor or a multi-argument method.
 
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
@@ -6806,7 +6842,7 @@ beans of prototype scope. For other scopes, the factory method only ever sees th
 injection point that triggered the creation of a new bean instance in the given scope
 (for example, the dependency that triggered the creation of a lazy singleton bean).
 You can use the provided injection point metadata with semantic care in such scenarios.
-The following example shows how to do use `InjectionPoint`:
+The following example shows how to use `InjectionPoint`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6849,12 +6885,12 @@ constraints applying.
 ====
 You may declare `@Bean` methods as `static`, allowing for them to be called without
 creating their containing configuration class as an instance. This makes particular
-sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor` or
-`BeanPostProcessor`), since such beans get initialized early in the container
+sense when defining post-processor beans (for example, of type `BeanFactoryPostProcessor`
+or `BeanPostProcessor`), since such beans get initialized early in the container
 lifecycle and should avoid triggering other parts of the configuration at that point.
 
-Calls to static `@Bean` methods never get intercepted by the container,
-not even within `@Configuration` classes (as described earlier in this section), due to technical
+Calls to static `@Bean` methods never get intercepted by the container, not even within
+`@Configuration` classes (as described earlier in this section), due to technical
 limitations: CGLIB subclassing can override only non-static methods. As a consequence,
 a direct call to another `@Bean` method has standard Java semantics, resulting
 in an independent instance being returned straight from the factory method itself.
@@ -6929,12 +6965,19 @@ classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 	}
 ----
 
-NOTE: If you do not want to rely on the default bean-naming strategy, you can provide a
-custom bean-naming strategy. First, implement the
+If you do not want to rely on the default bean-naming strategy, you can provide a custom
+bean-naming strategy. First, implement the
 {api-spring-framework}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the fully
 qualified class name when configuring the scanner, as the following example annotation
-and bean definition show:
+and bean definition show.
+
+TIP: If you run into naming conflicts due to multiple autodetected components having the
+same non-qualified class name (i.e., classes with identical names but residing in
+different packages), you may need to configure a `BeanNameGenerator` that defaults to the
+fully qualified class name for the generated bean name. As of Spring Framework 5.2.3, the
+`FullyQualifiedAnnotationBeanNameGenerator` located in package
+`org.springframework.context.annotation` can be used for such purposes.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -8743,7 +8786,7 @@ This approach simplifies container instantiation, as only one class needs to be 
 with, rather than requiring you to remember a potentially large number of
 `@Configuration` classes during construction.
 
-TIP: As of Spring Framework 4.2, `@Import` also supports references regular component
+TIP: As of Spring Framework 4.2, `@Import` also supports references to regular component
 classes, analogous to the `AnnotationConfigApplicationContext.register` method.
 This is particularly useful if you want to avoid component scanning, by using a few
 configuration classes as entry points to explicitly define all your components.
@@ -8857,8 +8900,9 @@ parameter-based injection, as in the preceding example.
 
 Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
 through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
-instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` do not
-work on the configuration class itself, since it is being created as a bean instance too early.
+instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` may not
+work on the configuration class itself, since it is possible to create it as a bean instance earlier than
+{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
 ====
 
 The following example shows how one bean can be autowired to another bean:
@@ -8965,7 +9009,7 @@ modularity, but determining exactly where the autowired bean definitions are dec
 still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
 you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
 explicit in the code, and this may be just fine. Remember that the
-https://spring.io/tools/sts[Spring Tool Suite] provides tooling that
+https://spring.io/tools[Spring Tools for Eclipse] provides tooling that
 can render graphs showing how everything is wired, which may be all you need. Also,
 your Java IDE can easily find all declarations and uses of the `AccountRepository` type
 and quickly show you the location of `@Bean` methods that return that type.
@@ -9524,7 +9568,7 @@ now looks like the following listing:
 The problem is how to switch between using these two variations based on the
 current environment. Over time, Spring users have devised a number of ways to
 get this done, usually relying on a combination of system environment variables
-and XML `<import/>` statements containing `${placeholder}` tokens that resolve
+and XML `<import/>` statements containing pass:q[`${placeholder}`] tokens that resolve
 to the correct configuration file path depending on the value of an environment
 variable. Bean definition profiles is a core container feature that provides a
 solution to this problem.
@@ -10402,7 +10446,7 @@ resolved is specified manually:
 [literal,subs="verbatim,quotes"]
 ----
 # in exceptions_en_GB.properties
-argument.required=Ebagum lad, the {0} argument is required, I say, required.
+argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 ----
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -11055,7 +11099,7 @@ file extension).
 .Add a
 `META-INF/ra.xml` deployment descriptor (as shown in the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[javadoc for `SpringContextResourceAdapter`])
 and the corresponding Spring XML bean definition file(s) (typically
-`META-INF/applicationContext.xml).
+`META-INF/applicationContext.xml`).
 . Drop the resulting RAR file into your
 application server's deployment directory.
 

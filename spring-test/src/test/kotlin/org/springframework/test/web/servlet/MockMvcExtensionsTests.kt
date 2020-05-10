@@ -25,6 +25,7 @@ import org.springframework.http.MediaType.*
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 import java.security.Principal
 import java.util.*
 
@@ -130,7 +131,7 @@ class MockMvcExtensionsTests {
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { content { json("""{"name":"wrong"}""") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name") { value("wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { cookie { value("name", "wrong") } }
-			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { flash { attribute<String>("name", "wrong") } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { flash { attribute("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { header { stringValues("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { model { attributeExists("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrl("wrong/Url") }
@@ -153,6 +154,13 @@ class MockMvcExtensionsTests {
 		}
 	}
 
+	@Test
+	fun asyncDispatch() {
+		mockMvc.get("/async").asyncDispatch().andExpect {
+			status { isOk }
+		}
+	}
+
 
 	@RestController
 	private class PersonController {
@@ -166,5 +174,10 @@ class MockMvcExtensionsTests {
 		@PostMapping("/person")
 		@ResponseStatus(HttpStatus.CREATED)
 		fun post(@RequestBody person: Person) {}
+
+		@GetMapping("/async")
+		fun getAsync(): Mono<Person> {
+			return Mono.just(Person("foo"))
+		}
 	}
 }

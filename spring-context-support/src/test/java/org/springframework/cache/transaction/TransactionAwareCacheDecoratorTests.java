@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -79,7 +79,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			cache.put(key, "123");
 			assertThat(target.get(key)).isNull();
 		});
@@ -106,7 +106,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Cache cache = new TransactionAwareCacheDecorator(target);
 		Object key = new Object();
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			assertThat(cache.putIfAbsent(key, "123")).isNull();
 			assertThat(target.get(key, String.class)).isEqualTo("123");
 			assertThat(cache.putIfAbsent(key, "456").get()).isEqualTo("123");
@@ -135,7 +135,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Object key = new Object();
 		cache.put(key, "123");
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			cache.evict(key);
 			assertThat(target.get(key, String.class)).isEqualTo("123");
 		});
@@ -161,7 +161,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Object key = new Object();
 		cache.put(key, "123");
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			cache.evictIfPresent(key);
 			assertThat(target.get(key)).isNull();
 		});
@@ -187,7 +187,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Object key = new Object();
 		cache.put(key, "123");
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			cache.clear();
 			assertThat(target.get(key, String.class)).isEqualTo("123");
 		});
@@ -213,7 +213,7 @@ public class TransactionAwareCacheDecoratorTests {
 		Object key = new Object();
 		cache.put(key, "123");
 
-		txTemplate.execute(() -> {
+		txTemplate.executeWithoutResult(s -> {
 			cache.invalidate();
 			assertThat(target.get(key)).isNull();
 		});

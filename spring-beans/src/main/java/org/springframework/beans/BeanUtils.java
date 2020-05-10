@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,14 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -55,8 +57,11 @@ import org.springframework.util.StringUtils;
  * Static convenience methods for JavaBeans: for instantiating beans,
  * checking bean property types, copying bean properties, etc.
  *
- * <p>Mainly for use within the framework, but to some degree also
- * useful for application classes.
+ * <p>Mainly for internal use within the framework, but to some degree also
+ * useful for application classes. Consider
+ * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
+ * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
+ * or similar third-party frameworks for more comprehensive bean utilities.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -523,7 +528,8 @@ public abstract class BeanUtils {
 				return null;
 			}
 		}
-		String editorName = targetType.getName() + "Editor";
+		String targetTypeName = targetType.getName();
+		String editorName = targetTypeName + "Editor";
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
 			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
@@ -539,7 +545,7 @@ public abstract class BeanUtils {
 		catch (ClassNotFoundException ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("No property editor [" + editorName + "] found for type " +
-						targetType.getName() + " according to 'Editor' suffix convention");
+						targetTypeName + " according to 'Editor' suffix convention");
 			}
 			unknownEditorTypes.add(targetType);
 			return null;
@@ -680,6 +686,8 @@ public abstract class BeanUtils {
 	 * <p>Note: The source and target classes do not have to match or even be derived
 	 * from each other, as long as the properties match. Any bean properties that the
 	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects.
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
@@ -710,21 +718,24 @@ public abstract class BeanUtils {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
-					if (readMethod != null &&
-							ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType())) {
-						try {
-							if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
-								readMethod.setAccessible(true);
+					if (readMethod != null) {
+						ResolvableType sourceResolvableType = ResolvableType.forMethodReturnType(readMethod);
+						ResolvableType targetResolvableType = ResolvableType.forMethodParameter(writeMethod, 0);
+						if (targetResolvableType.isAssignableFrom(sourceResolvableType)) {
+							try {
+								if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers())) {
+									readMethod.setAccessible(true);
+								}
+								Object value = readMethod.invoke(source);
+								if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+									writeMethod.setAccessible(true);
+								}
+								writeMethod.invoke(target, value);
 							}
-							Object value = readMethod.invoke(source);
-							if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-								writeMethod.setAccessible(true);
+							catch (Throwable ex) {
+								throw new FatalBeanException(
+										"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 							}
-							writeMethod.invoke(target, value);
-						}
-						catch (Throwable ex) {
-							throw new FatalBeanException(
-									"Could not copy property '" + targetPd.getName() + "' from source to target", ex);
 						}
 					}
 				}
@@ -776,6 +787,11 @@ public abstract class BeanUtils {
 			if (kotlinConstructor == null) {
 				return ctor.newInstance(args);
 			}
+
+			if ((!Modifier.isPublic(ctor.getModifiers()) || !Modifier.isPublic(ctor.getDeclaringClass().getModifiers()))) {
+				KCallablesJvm.setAccessible(kotlinConstructor, true);
+			}
+
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
 			Assert.isTrue(args.length <= parameters.size(),

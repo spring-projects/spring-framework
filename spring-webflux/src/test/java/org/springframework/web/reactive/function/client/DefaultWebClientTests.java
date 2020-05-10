@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,9 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ClientCodecConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -41,8 +45,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 /**
  * Unit tests for {@link DefaultWebClient}.
@@ -230,6 +234,23 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
+	void cloneBuilder() {
+		Consumer<ClientCodecConfigurer> codecsConfig = c -> {};
+		ExchangeFunction exchangeFunction = request -> Mono.empty();
+		WebClient.Builder builder = WebClient.builder().baseUrl("https://example.org")
+				.exchangeFunction(exchangeFunction)
+				.filter((request, next) -> Mono.empty())
+				.codecs(codecsConfig);
+
+		WebClient.Builder clonedBuilder = builder.clone();
+
+		assertThat(clonedBuilder).extracting("baseUrl").isEqualTo("https://example.org");
+		assertThat(clonedBuilder).extracting("filters").isNotNull();
+		assertThat(clonedBuilder).extracting("strategiesConfigurers").isNotNull();
+		assertThat(clonedBuilder).extracting("exchangeFunction").isEqualTo(exchangeFunction);
+	}
+
+	@Test
 	public void withStringAttribute() {
 		Map<String, Object> actual = new HashMap<>();
 		ExchangeFilterFunction filter = (request, next) -> {
@@ -303,10 +324,52 @@ public class DefaultWebClientTests {
 				)
 				.build();
 		Mono<ClientResponse> exchange = client.get().uri("/path").exchange();
-		verifyZeroInteractions(this.exchangeFunction);
+		verifyNoInteractions(this.exchangeFunction);
 		exchange.block(Duration.ofSeconds(10));
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Custom")).isEqualTo("value");
+	}
+
+	@Test // gh-23880
+	public void onStatusHandlersOrderIsPreserved() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Mono<Void> result = this.builder.build().get()
+				.uri("/path")
+				.retrieve()
+				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("1")))
+				.onStatus(HttpStatus::is4xxClientError, resp -> Mono.error(new IllegalStateException("2")))
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectErrorMessage("1").verify();
+	}
+
+	@Test // gh-23880
+	@SuppressWarnings("unchecked")
+	public void onStatusHandlersDefaultHandlerIsLast() {
+
+		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
+		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
+
+		Predicate<HttpStatus> predicate1 = mock(Predicate.class);
+		Predicate<HttpStatus> predicate2 = mock(Predicate.class);
+
+		given(predicate1.test(HttpStatus.BAD_REQUEST)).willReturn(false);
+		given(predicate2.test(HttpStatus.BAD_REQUEST)).willReturn(false);
+
+		Mono<Void> result = this.builder.build().get()
+				.uri("/path")
+				.retrieve()
+				.onStatus(predicate1, resp -> Mono.error(new IllegalStateException()))
+				.onStatus(predicate2, resp -> Mono.error(new IllegalStateException()))
+				.bodyToMono(Void.class);
+
+		StepVerifier.create(result).expectError(WebClientResponseException.class).verify();
+
+		verify(predicate1).test(HttpStatus.BAD_REQUEST);
+		verify(predicate2).test(HttpStatus.BAD_REQUEST);
 	}
 
 	private ClientRequest verifyAndGetRequest() {

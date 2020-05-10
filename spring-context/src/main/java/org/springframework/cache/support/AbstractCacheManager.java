@@ -87,25 +87,26 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
+		// Quick check for existing cache...
 		Cache cache = this.cacheMap.get(name);
 		if (cache != null) {
 			return cache;
 		}
-		else {
-			// Fully synchronize now for missing cache creation...
+
+		// The provider may support on-demand cache creation...
+		Cache missingCache = getMissingCache(name);
+		if (missingCache != null) {
+			// Fully synchronize now for missing cache registration
 			synchronized (this.cacheMap) {
 				cache = this.cacheMap.get(name);
 				if (cache == null) {
-					cache = getMissingCache(name);
-					if (cache != null) {
-						cache = decorateCache(cache);
-						this.cacheMap.put(name, cache);
-						updateCacheNames(name);
-					}
+					cache = decorateCache(missingCache);
+					this.cacheMap.put(name, cache);
+					updateCacheNames(name);
 				}
-				return cache;
 			}
 		}
+		return cache;
 	}
 
 	@Override
