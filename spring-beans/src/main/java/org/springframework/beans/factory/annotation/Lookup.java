@@ -42,9 +42,7 @@ import java.lang.annotation.Target;
  * from factory methods where we cannot dynamically provide a subclass for them.
  *
  * <p><b>Concrete limitations in typical Spring configuration scenarios:</b>
- * When used with component scanning or any other mechanism that filters out abstract
- * beans, provide stub implementations of your lookup methods to be able to declare
- * them as concrete classes. And please remember that lookup methods won't work on
+ * Please remember that lookup methods won't work on
  * beans returned from {@code @Bean} methods in configuration classes; you'll have
  * to resort to {@code @Inject Provider<TargetBean>} or the like instead.
  *
