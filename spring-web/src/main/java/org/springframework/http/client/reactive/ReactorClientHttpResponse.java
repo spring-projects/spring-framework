@@ -42,11 +42,13 @@ import org.springframework.util.MultiValueMap;
  */
 class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final NettyDataBufferFactory bufferFactory;
-
 	private final HttpClientResponse response;
 
 	private final NettyInbound inbound;
+
+	private final NettyDataBufferFactory bufferFactory;
+
+	private final HttpHeaders headers;
 
 	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
 
@@ -55,6 +57,9 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.response = response;
 		this.inbound = inbound;
 		this.bufferFactory = new NettyDataBufferFactory(alloc);
+
+		MultiValueMap<String, String> adapter = new NettyHeadersAdapter(response.responseHeaders());
+		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 	}
 
 
@@ -81,9 +86,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		this.response.responseHeaders().entries().forEach(e -> headers.add(e.getKey(), e.getValue()));
-		return headers;
+		return this.headers;
 	}
 
 	@Override

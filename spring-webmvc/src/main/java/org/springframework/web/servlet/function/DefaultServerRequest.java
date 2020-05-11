@@ -305,62 +305,62 @@ class DefaultServerRequest implements ServerRequest {
 	 */
 	static class DefaultRequestHeaders implements Headers {
 
-		private final HttpHeaders delegate;
+		private final HttpHeaders httpHeaders;
 
-		public DefaultRequestHeaders(HttpHeaders delegate) {
-			this.delegate = delegate;
+		public DefaultRequestHeaders(HttpHeaders httpHeaders) {
+			this.httpHeaders = HttpHeaders.readOnlyHttpHeaders(httpHeaders);
 		}
 
 		@Override
 		public List<MediaType> accept() {
-			return this.delegate.getAccept();
+			return this.httpHeaders.getAccept();
 		}
 
 		@Override
 		public List<Charset> acceptCharset() {
-			return this.delegate.getAcceptCharset();
+			return this.httpHeaders.getAcceptCharset();
 		}
 
 		@Override
 		public List<Locale.LanguageRange> acceptLanguage() {
-			return this.delegate.getAcceptLanguage();
+			return this.httpHeaders.getAcceptLanguage();
 		}
 
 		@Override
 		public OptionalLong contentLength() {
-			long value = this.delegate.getContentLength();
+			long value = this.httpHeaders.getContentLength();
 			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 
 		@Override
 		public Optional<MediaType> contentType() {
-			return Optional.ofNullable(this.delegate.getContentType());
+			return Optional.ofNullable(this.httpHeaders.getContentType());
 		}
 
 		@Override
 		public InetSocketAddress host() {
-			return this.delegate.getHost();
+			return this.httpHeaders.getHost();
 		}
 
 		@Override
 		public List<HttpRange> range() {
-			return this.delegate.getRange();
+			return this.httpHeaders.getRange();
 		}
 
 		@Override
 		public List<String> header(String headerName) {
-			List<String> headerValues = this.delegate.get(headerName);
+			List<String> headerValues = this.httpHeaders.get(headerName);
 			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
-			return HttpHeaders.readOnlyHttpHeaders(this.delegate);
+			return this.httpHeaders;
 		}
 
 		@Override
 		public String toString() {
-			return this.delegate.toString();
+			return this.httpHeaders.toString();
 		}
 	}
 

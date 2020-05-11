@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -215,16 +216,32 @@ public interface ClientResponse {
 	 */
 	String logPrefix();
 
+	/**
+	 * Return a builder to mutate the this response, for example to change
+	 * the status, headers, cookies, and replace or transform the body.
+	 * @return a builder to mutate the request with
+	 * @since 5.3
+	 */
+	default Builder mutate() {
+		return new DefaultClientResponseBuilder(this, true);
+	}
+
 
 	// Static builder methods
 
 	/**
 	 * Create a builder with the status, headers, and cookies of the given response.
+	 * <p><strong>Note:</strong> Note that the body in the returned builder is
+	 * {@link Flux#empty()} by default. To carry over the one from the original
+	 * response, use {@code otherResponse.bodyToFlux(DataBuffer.class)} or
+	 * simply use the instance based {@link #mutate()} method.
 	 * @param other the response to copy the status, headers, and cookies from
 	 * @return the created builder
+	 * @deprecated as of 5.3 in favor of the instance based {@link #mutate()}.
 	 */
+	@Deprecated
 	static Builder from(ClientResponse other) {
-		return new DefaultClientResponseBuilder(other);
+		return new DefaultClientResponseBuilder(other, false);
 	}
 
 	/**
@@ -371,19 +388,26 @@ public interface ClientResponse {
 		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
-		 * Set the body of the response. Calling this methods will
-		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
-		 * the existing body of the builder.
-		 * @param body the new body.
+		 * Transform the response body, if set in the builder.
+		 * @param transformer the transformation function to use
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder body(Function<Flux<DataBuffer>, Flux<DataBuffer>> transformer);
+
+		/**
+		 * Set the body of the response.
+		 * <p><strong>Note:</strong> This methods will drain the existing body,
+		 * if set in the builder.
+		 * @param body the new body to use
 		 * @return this builder
 		 */
 		Builder body(Flux<DataBuffer> body);
 
 		/**
 		 * Set the body of the response to the UTF-8 encoded bytes of the given string.
-		 * Calling this methods will
-		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
-		 * the existing body of the builder.
+		 * <p><strong>Note:</strong> This methods will drain the existing body,
+		 * if set in the builder.
 		 * @param body the new body.
 		 * @return this builder
 		 */

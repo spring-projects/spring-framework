@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,42 +64,38 @@ public class DefaultClientResponseBuilderTests {
 	}
 
 	@Test
-	public void from() {
-		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
-				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+	public void mutate() {
 
-		ClientResponse other = ClientResponse.create(HttpStatus.BAD_REQUEST, ExchangeStrategies.withDefaults())
+		ClientResponse originalResponse = ClientResponse
+				.create(HttpStatus.BAD_REQUEST, ExchangeStrategies.withDefaults())
 				.header("foo", "bar")
+				.header("bar", "baz")
 				.cookie("baz", "qux")
-				.body(otherBody)
+				.body(Flux.just("foobar".getBytes(StandardCharsets.UTF_8)).map(dataBufferFactory::wrap))
 				.build();
 
-		Flux<DataBuffer> body = Flux.just("baz")
-				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
-
-		ClientResponse result = ClientResponse.from(other)
-				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
+		ClientResponse result = originalResponse.mutate()
+				.statusCode(HttpStatus.OK)
+				.headers(headers -> headers.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", ResponseCookie.from("baz", "quux").build()))
-				.body(body)
 				.build();
 
-		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(1);
+		assertThat(result.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(2);
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
+		assertThat(result.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
 		assertThat(result.cookies().size()).isEqualTo(1);
 		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
-				.expectNext("baz")
+				.expectNext("foobar")
 				.verifyComplete();
 	}
 
 	@Test
-	public void fromCustomStatus() {
+	public void mutateWithCustomStatus() {
 		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
-		ClientResponse result = ClientResponse.from(other).build();
+		ClientResponse result = other.mutate().build();
 
 		assertThat(result.rawStatusCode()).isEqualTo(499);
 		assertThatIllegalArgumentException().isThrownBy(result::statusCode);

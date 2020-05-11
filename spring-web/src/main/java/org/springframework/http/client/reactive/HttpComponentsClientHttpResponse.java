@@ -17,7 +17,6 @@
 package org.springframework.http.client.reactive;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.hc.client5.http.cookie.Cookie;
@@ -49,6 +48,8 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private final Message<HttpResponse, Publisher<ByteBuffer>> message;
 
+	private final HttpHeaders headers;
+
 	private final HttpClientContext context;
 
 	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
@@ -61,6 +62,9 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 		this.dataBufferFactory = dataBufferFactory;
 		this.message = message;
 		this.context = context;
+
+		MultiValueMap<String, String> adapter = new HttpComponentsHeadersAdapter(message.getHead());
+		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 	}
 
 
@@ -107,9 +111,6 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return Arrays.stream(this.message.getHead().getHeaders())
-				.collect(HttpHeaders::new,
-						(httpHeaders, header) -> httpHeaders.add(header.getName(), header.getValue()),
-						HttpHeaders::putAll);
+		return this.headers;
 	}
 }

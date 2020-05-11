@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,9 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final List<Supplier<? extends Publisher<Void>>> commitActions = new ArrayList<>(4);
 
+	@Nullable
+	private HttpHeaders readOnlyHeaders;
+
 
 	public AbstractClientHttpRequest() {
 		this(new HttpHeaders());
@@ -74,10 +77,16 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (State.COMMITTED.equals(this.state.get())) {
-			return HttpHeaders.readOnlyHttpHeaders(this.headers);
+		if (this.readOnlyHeaders != null) {
+			return this.readOnlyHeaders;
 		}
-		return this.headers;
+		else if (State.COMMITTED.equals(this.state.get())) {
+			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			return this.readOnlyHeaders;
+		}
+		else {
+			return this.headers;
+		}
 	}
 
 	@Override
