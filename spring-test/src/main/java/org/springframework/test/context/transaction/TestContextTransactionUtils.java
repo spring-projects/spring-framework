@@ -183,13 +183,6 @@ public abstract class TestContextTransactionUtils {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
-				// Look up single bean by type
-				Map<String, PlatformTransactionManager> txMgrs =
-						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
-				if (txMgrs.size() == 1) {
-					return txMgrs.values().iterator().next();
-				}
-
 				// Look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
@@ -201,6 +194,13 @@ public abstract class TestContextTransactionUtils {
 						"Transaction manager specified via TransactionManagementConfigurer " +
 						"is not a PlatformTransactionManager: " + tm);
 					return (PlatformTransactionManager) tm;
+				}
+
+				// Look up single bean by type
+				Map<String, PlatformTransactionManager> txMgrs =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
+				if (txMgrs.size() == 1) {
+					return txMgrs.values().iterator().next();
 				}
 
 				try {

@@ -168,6 +168,29 @@ public class EnableTransactionManagementTests {
 		ctx.close();
 	}
 
+	@Test
+	public void txManagerIsResolvedCorrectlyWithSingleTxManagerBeanAndTxMgmtConfigurer() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				EnableTxConfig.class, SingleTxManagerBeanAndTxMgmtConfigurerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(1);
+		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
+		CallCountingTransactionManager txManager = ctx.getBean(CallCountingTransactionManager.class);
+		SingleTxManagerBeanAndTxMgmtConfigurerConfig config = ctx.getBean(SingleTxManagerBeanAndTxMgmtConfigurerConfig.class);
+		CallCountingTransactionManager annotationDriven = config.annotationDriven;
+
+		// invoke a transactional method, causing the PlatformTransactionManager bean to be resolved.
+		bean.findAllFoos();
+
+		assertThat(txManager.begun).isEqualTo(0);
+		assertThat(txManager.commits).isEqualTo(0);
+		assertThat(txManager.rollbacks).isEqualTo(0);
+		assertThat(annotationDriven.begun).isEqualTo(1);
+		assertThat(annotationDriven.commits).isEqualTo(1);
+		assertThat(annotationDriven.rollbacks).isEqualTo(0);
+
+		ctx.close();
+	}
+
 	/**
 	 * A cheap test just to prove that in ASPECTJ mode, the AnnotationTransactionAspect does indeed
 	 * get loaded -- or in this case, attempted to be loaded at which point the test fails.
@@ -380,6 +403,30 @@ public class EnableTransactionManagementTests {
 		@Override
 		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return new CallCountingTransactionManager();
+		}
+	}
+
+
+	@Configuration
+	static class SingleTxManagerBeanAndTxMgmtConfigurerConfig implements TransactionManagementConfigurer {
+
+		final CallCountingTransactionManager annotationDriven = new CallCountingTransactionManager();
+
+		@Bean
+		public TransactionalTestBean testBean() {
+			return new TransactionalTestBean();
+		}
+
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+
+		// The transaction manager returned from this method is intentionally not
+		// registered as a bean in the ApplicationContext.
+		@Override
+		public PlatformTransactionManager annotationDrivenTransactionManager() {
+			return annotationDriven;
 		}
 	}
 
