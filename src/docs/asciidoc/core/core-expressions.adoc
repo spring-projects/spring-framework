@@ -1675,7 +1675,7 @@ The following example shows how to use the Elvis operator:
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1683,7 +1683,7 @@ The following example shows how to use the Elvis operator:
 ----
 	val parser = SpelExpressionParser()
 
-	val name = parser.parseExpression("name?:'Unknown'").getValue(String::class.java)
+	val name = parser.parseExpression("name?:'Unknown'").getValue(Inventor(), String::class.java)
 	println(name)  // 'Unknown'
 ----
 
