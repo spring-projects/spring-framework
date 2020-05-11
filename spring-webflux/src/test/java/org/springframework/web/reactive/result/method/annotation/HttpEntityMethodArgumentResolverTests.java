@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Observable;
-import rx.RxReactiveStreams;
-import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -80,12 +79,10 @@ public class HttpEntityMethodArgumentResolverTests {
 		testSupports(this.testMethod.arg(httpEntityType(String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Mono.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Single.class, String.class)));
-		testSupports(this.testMethod.arg(httpEntityType(io.reactivex.Single.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Maybe.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(CompletableFuture.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Flux.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Observable.class, String.class)));
-		testSupports(this.testMethod.arg(httpEntityType(io.reactivex.Observable.class, String.class)));
 		testSupports(this.testMethod.arg(httpEntityType(Flowable.class, String.class)));
 		testSupports(this.testMethod.arg(forClassWithGenerics(RequestEntity.class, String.class)));
 	}
@@ -132,17 +129,6 @@ public class HttpEntityMethodArgumentResolverTests {
 		ResolvableType type = httpEntityType(Single.class, String.class);
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		StepVerifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
-				.expectNextCount(0)
-				.expectError(ServerWebInputException.class)
-				.verify();
-	}
-
-	@Test
-	public void emptyBodyWithRxJava2Single() {
-		ResolvableType type = httpEntityType(io.reactivex.Single.class, String.class);
-		HttpEntity<io.reactivex.Single<String>> entity = resolveValueWithEmptyBody(type);
-
 		StepVerifier.create(entity.getBody().toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
@@ -150,7 +136,7 @@ public class HttpEntityMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void emptyBodyWithRxJava2Maybe() {
+	public void emptyBodyWithMaybe() {
 		ResolvableType type = httpEntityType(Maybe.class, String.class);
 		HttpEntity<Maybe<String>> entity = resolveValueWithEmptyBody(type);
 
@@ -164,17 +150,6 @@ public class HttpEntityMethodArgumentResolverTests {
 	public void emptyBodyWithObservable() {
 		ResolvableType type = httpEntityType(Observable.class, String.class);
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
-
-		StepVerifier.create(RxReactiveStreams.toPublisher(entity.getBody()))
-				.expectNextCount(0)
-				.expectComplete()
-				.verify();
-	}
-
-	@Test
-	public void emptyBodyWithRxJava2Observable() {
-		ResolvableType type = httpEntityType(io.reactivex.Observable.class, String.class);
-		HttpEntity<io.reactivex.Observable<String>> entity = resolveValueWithEmptyBody(type);
 
 		StepVerifier.create(entity.getBody().toFlowable(BackpressureStrategy.BUFFER))
 				.expectNextCount(0)
@@ -231,21 +206,11 @@ public class HttpEntityMethodArgumentResolverTests {
 		HttpEntity<Single<String>> httpEntity = resolveValue(exchange, type);
 
 		assertThat(httpEntity.getHeaders()).isEqualTo(exchange.getRequest().getHeaders());
-		assertThat(httpEntity.getBody().toBlocking().value()).isEqualTo("line1");
-	}
-
-	@Test
-	public void httpEntityWithRxJava2SingleBody() {
-		ServerWebExchange exchange = postExchange("line1");
-		ResolvableType type = httpEntityType(io.reactivex.Single.class, String.class);
-		HttpEntity<io.reactivex.Single<String>> httpEntity = resolveValue(exchange, type);
-
-		assertThat(httpEntity.getHeaders()).isEqualTo(exchange.getRequest().getHeaders());
 		assertThat(httpEntity.getBody().blockingGet()).isEqualTo("line1");
 	}
 
 	@Test
-	public void httpEntityWithRxJava2MaybeBody() {
+	public void httpEntityWithMaybeBody() {
 		ServerWebExchange exchange = postExchange("line1");
 		ResolvableType type = httpEntityType(Maybe.class, String.class);
 		HttpEntity<Maybe<String>> httpEntity = resolveValue(exchange, type);
@@ -335,10 +300,8 @@ public class HttpEntityMethodArgumentResolverTests {
 			HttpEntity<Mono<String>> monoBody,
 			HttpEntity<Flux<String>> fluxBody,
 			HttpEntity<Single<String>> singleBody,
-			HttpEntity<io.reactivex.Single<String>> rxJava2SingleBody,
-			HttpEntity<Maybe<String>> rxJava2MaybeBody,
+			HttpEntity<Maybe<String>> maybeBody,
 			HttpEntity<Observable<String>> observableBody,
-			HttpEntity<io.reactivex.Observable<String>> rxJava2ObservableBody,
 			HttpEntity<Flowable<String>> flowableBody,
 			HttpEntity<CompletableFuture<String>> completableFutureBody,
 			RequestEntity<String> requestEntity,

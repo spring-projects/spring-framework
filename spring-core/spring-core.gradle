@@ -52,6 +52,7 @@ dependencies {
 	optional("io.reactivex:rxjava")
 	optional("io.reactivex:rxjava-reactive-streams")
 	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("javax.annotation:javax.annotation-api")

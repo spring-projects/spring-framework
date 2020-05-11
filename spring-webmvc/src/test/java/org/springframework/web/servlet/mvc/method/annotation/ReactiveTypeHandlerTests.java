@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleEmitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import rx.Single;
-import rx.SingleEmitter;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -98,7 +98,6 @@ public class ReactiveTypeHandlerTests {
 	public void supportsType() throws Exception {
 		assertThat(this.handler.isReactiveType(Mono.class)).isTrue();
 		assertThat(this.handler.isReactiveType(Single.class)).isTrue();
-		assertThat(this.handler.isReactiveType(io.reactivex.Single.class)).isTrue();
 	}
 
 	@Test
@@ -117,16 +116,10 @@ public class ReactiveTypeHandlerTests {
 		MonoProcessor<String> monoEmpty = MonoProcessor.create();
 		testDeferredResultSubscriber(monoEmpty, Mono.class, forClass(String.class), monoEmpty::onComplete, null);
 
-		// RxJava 1 Single
-		AtomicReference<SingleEmitter<String>> ref = new AtomicReference<>();
-		Single<String> single = Single.fromEmitter(ref::set);
-		testDeferredResultSubscriber(single, Single.class, forClass(String.class),
-				() -> ref.get().onSuccess("foo"), "foo");
-
-		// RxJava 2 Single
-		AtomicReference<io.reactivex.SingleEmitter<String>> ref2 = new AtomicReference<>();
-		io.reactivex.Single<String> single2 = io.reactivex.Single.create(ref2::set);
-		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class),
+		// RxJava Single
+		AtomicReference<SingleEmitter<String>> ref2 = new AtomicReference<>();
+		Single<String> single2 = Single.create(ref2::set);
+		testDeferredResultSubscriber(single2, Single.class, forClass(String.class),
 				() -> ref2.get().onSuccess("foo"), "foo");
 	}
 
@@ -162,15 +155,10 @@ public class ReactiveTypeHandlerTests {
 		MonoProcessor<String> mono = MonoProcessor.create();
 		testDeferredResultSubscriber(mono, Mono.class, forClass(String.class), () -> mono.onError(ex), ex);
 
-		// RxJava 1 Single
-		AtomicReference<SingleEmitter<String>> ref = new AtomicReference<>();
-		Single<String> single = Single.fromEmitter(ref::set);
-		testDeferredResultSubscriber(single, Single.class, forClass(String.class), () -> ref.get().onError(ex), ex);
-
-		// RxJava 2 Single
-		AtomicReference<io.reactivex.SingleEmitter<String>> ref2 = new AtomicReference<>();
-		io.reactivex.Single<String> single2 = io.reactivex.Single.create(ref2::set);
-		testDeferredResultSubscriber(single2, io.reactivex.Single.class, forClass(String.class),
+		// RxJava Single
+		AtomicReference<SingleEmitter<String>> ref2 = new AtomicReference<>();
+		Single<String> single2 = Single.create(ref2::set);
+		testDeferredResultSubscriber(single2, Single.class, forClass(String.class),
 				() -> ref2.get().onError(ex), ex);
 	}
 
@@ -342,8 +330,6 @@ public class ReactiveTypeHandlerTests {
 		Mono<String> handleMono() { return null; }
 
 		Single<String> handleSingle() { return null; }
-
-		io.reactivex.Single<String> handleSingleRxJava2() { return null; }
 
 		Flux<Bar> handleFlux() { return null; }
 

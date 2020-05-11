@@ -26,11 +26,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+import io.reactivex.rxjava3.core.Completable;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Completable;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodParameter;
