@@ -24,6 +24,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelNode;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -33,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @author Sam Brannen
  * @author Harry Yang
+ * @author Semyon Danilov
  * @since 4.1
  */
 public class InlineMap extends SpelNodeImpl {
@@ -69,13 +71,16 @@ public class InlineMap extends SpelNodeImpl {
 					}
 				}
 				else if (!(c % 2 == 0 && child instanceof PropertyOrFieldReference)) {
-					return null;
+					if (!(child instanceof OpMinus) || !((OpMinus) child).isNegativeNumber()) {
+						return null;
+					}
 				}
 			}
 		}
 
 		Map<Object, Object> constantMap = new LinkedHashMap<>();
 		int childCount = getChildCount();
+		ExpressionState expressionState = new ExpressionState(new StandardEvaluationContext());
 		for (int c = 0; c < childCount; c++) {
 			SpelNode keyChild = getChild(c++);
 			Object key;
@@ -84,6 +89,9 @@ public class InlineMap extends SpelNodeImpl {
 			}
 			else if (keyChild instanceof PropertyOrFieldReference propertyOrFieldReference) {
 				key = propertyOrFieldReference.getName();
+			}
+			else if (keyChild instanceof OpMinus) {
+				key = keyChild.getValue(expressionState);
 			}
 			else {
 				return null;
@@ -99,6 +107,9 @@ public class InlineMap extends SpelNodeImpl {
 			}
 			else if (valueChild instanceof InlineMap inlineMap) {
 				value = inlineMap.getConstantValue();
+			}
+			else if (valueChild instanceof OpMinus) {
+				value = valueChild.getValue(expressionState);
 			}
 			constantMap.put(key, value);
 		}
