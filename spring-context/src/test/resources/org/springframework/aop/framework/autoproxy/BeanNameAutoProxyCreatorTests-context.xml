@@ -104,4 +104,28 @@
 		<property name="name" value="noproxy" />
 	</bean>
 
+	<bean id="lazy1" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
+		<property name="name" value="lazy1" />
+	</bean>
+	
+	<alias name="lazy1" alias="lazy1alias"/>
+
+	<bean id="lazy2" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
+		<property name="name" value="lazy2" />
+	</bean>
+
+	<bean id="lazyBeanNameAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="lazy1" />
+		<property name="customTargetSourceCreators">
+			<bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator" />
+		</property>
+	</bean>
+
+	<bean id="lazyAliasBeanNameAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="lazy1alias" />
+		<property name="customTargetSourceCreators">
+			<bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator" />
+		</property>
+	</bean>
+
 </beans>

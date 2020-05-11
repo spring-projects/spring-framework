@@ -155,6 +155,16 @@ class BeanNameAutoProxyCreatorTests {
 		assertThat(((Advised)testBean).isFrozen()).isTrue();
 	}
 
+	@Test
+	void customTargetSourceCreatorsApplyOnlyToConfiguredBeanNames() {
+		ITestBean lazy1 = beanFactory.getBean("lazy1", ITestBean.class);
+		ITestBean alias1 = beanFactory.getBean("lazy1alias", ITestBean.class);
+		ITestBean lazy2 = beanFactory.getBean("lazy2", ITestBean.class);
+		assertThat(AopUtils.isAopProxy(lazy1)).isTrue();
+		assertThat(AopUtils.isAopProxy(alias1)).isTrue();
+		assertThat(AopUtils.isAopProxy(lazy2)).isFalse();
+	}
+
 
 	private void jdkAssertions(ITestBean tb, int nopInterceptorCount)  {
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("nopInterceptor");
