@@ -43,6 +43,7 @@ import org.springframework.util.NumberUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Semyon Danilov
  * @since 3.0
  */
 public class OpMinus extends Operator {
@@ -225,6 +226,17 @@ public class OpMinus extends Operator {
 			}
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
+	}
+
+	/**
+	 * Check whether this operator is an unary minus and it's child is a number.
+	 * @return true if it is a negative number
+	 */
+	public boolean isNegativeNumber() {
+		if (children.length == 1 && children[0] instanceof Literal) {
+			return ((Literal) children[0]).isNumberLiteral();
+		}
+		return false;
 	}
 
 }
