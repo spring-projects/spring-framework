@@ -85,14 +85,14 @@ import org.springframework.core.Ordered;
  * In both of the scenarios above, {@code @EnableTransactionManagement} and {@code
  * <tx:annotation-driven/>} are responsible for registering the necessary Spring
  * components that power annotation-driven transaction management, such as the
- * TransactionInterceptor and the proxy- or AspectJ-based advice that weave the
+ * TransactionInterceptor and the proxy- or AspectJ-based advice that weaves the
  * interceptor into the call stack when {@code JdbcFooRepository}'s {@code @Transactional}
  * methods are invoked.
  *
  * <p>A minor difference between the two examples lies in the naming of the {@code
  * TransactionManager} bean: In the {@code @Bean} case, the name is
  * <em>"txManager"</em> (per the name of the method); in the XML case, the name is
- * <em>"transactionManager"</em>. The {@code <tx:annotation-driven/>} is hard-wired to
+ * <em>"transactionManager"</em>. {@code <tx:annotation-driven/>} is hard-wired to
  * look for a bean named "transactionManager" by default, however
  * {@code @EnableTransactionManagement} is more flexible; it will fall back to a by-type
  * lookup for any {@code TransactionManager} bean in the container. Thus the name

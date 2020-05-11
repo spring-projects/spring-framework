@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Specify the name of the default transaction manager bean.
-	 * This can either point to a traditional {@link PlatformTransactionManager} or a
+	 * <p>This can either point to a traditional {@link PlatformTransactionManager} or a
 	 * {@link ReactiveTransactionManager} for reactive transaction management.
 	 */
 	public void setTransactionManagerBeanName(@Nullable String transactionManagerBeanName) {
@@ -209,7 +209,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Specify the <em>default</em> transaction manager to use to drive transactions.
-	 * This can either be a traditional {@link PlatformTransactionManager} or a
+	 * <p>This can either be a traditional {@link PlatformTransactionManager} or a
 	 * {@link ReactiveTransactionManager} for reactive transaction management.
 	 * <p>The default transaction manager will be used if a <em>qualifier</em>
 	 * has not been declared for a given transaction or if an explicit name for the
@@ -222,7 +222,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	/**
 	 * Return the default transaction manager, or {@code null} if unknown.
-	 * This can either be a traditional {@link PlatformTransactionManager} or a
+	 * <p>This can either be a traditional {@link PlatformTransactionManager} or a
 	 * {@link ReactiveTransactionManager} for reactive transaction management.
 	 */
 	@Nullable

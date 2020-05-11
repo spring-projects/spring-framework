@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
@@ -106,6 +107,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWhenMultipleManagersArePresent() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, MultiTxManagerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager txManager = ctx.getBean("txManager", CallCountingTransactionManager.class);
 		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
@@ -126,6 +128,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWhenMultipleManagersArePresentAndOneIsPrimary() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, PrimaryMultiTxManagerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager primary = ctx.getBean("primary", CallCountingTransactionManager.class);
 		CallCountingTransactionManager txManager2 = ctx.getBean("txManager2", CallCountingTransactionManager.class);
@@ -147,6 +150,7 @@ public class EnableTransactionManagementTests {
 	public void txManagerIsResolvedCorrectlyWithTxMgmtConfigurerAndPrimaryPresent() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				EnableTxConfig.class, PrimaryTxManagerAndTxMgmtConfigurerConfig.class);
+		assertThat(ctx.getBeansOfType(TransactionManager.class)).hasSize(2);
 		TransactionalTestBean bean = ctx.getBean(TransactionalTestBean.class);
 		CallCountingTransactionManager primary = ctx.getBean("primary", CallCountingTransactionManager.class);
 		CallCountingTransactionManager annotationDriven = ctx.getBean("annotationDrivenTransactionManager", CallCountingTransactionManager.class);
