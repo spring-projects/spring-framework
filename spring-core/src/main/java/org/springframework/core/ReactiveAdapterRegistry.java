@@ -48,6 +48,9 @@ import org.springframework.util.ReflectionUtils;
  * {@link CompletableFuture}, Java 9+ {@code Flow.Publisher}, and Kotlin
  * Coroutines' {@code Deferred} and {@code Flow}.
  *
+ * <p><strong>Note:</strong> As of Spring Framework 5.3, support for RxJava 1.x
+ * is deprecated in favor of RxJava 2 and 3.
+ *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 5.0
@@ -77,7 +80,7 @@ public class ReactiveAdapterRegistry {
 		}
 		this.reactorPresent = reactorRegistered;
 
-		// RxJava1
+		// RxJava1 (deprecated)
 		if (ClassUtils.isPresent("rx.Observable", classLoader) &&
 				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader)) {
 			new RxJava1Registrar().registerAdapters(this);

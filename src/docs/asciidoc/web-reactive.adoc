@@ -57,7 +57,14 @@ For annotated controllers, WebFlux transparently adapts to the reactive library 
 the application. This is done with the help of the
 {api-spring-framework}/core/ReactiveAdapterRegistry.html[`ReactiveAdapterRegistry`], which
 provides pluggable support for reactive library and other asynchronous types. The registry
-has built-in support for RxJava and `CompletableFuture`, but you can register others, too.
+has built-in support for RxJava 2/3, RxJava 1 (via RxJava Reactive Streams bridge), and
+`CompletableFuture`, but you can register others, too.
+
+[NOTE]
+====
+As of Spring Framework 5.3, support for RxJava 1 is deprecated.
+====
+
 
 For functional APIs (such as <<webflux-fn>>, the `WebClient`, and others), the general rules
 for WebFlux APIs apply -- `Flux` and `Mono` as return values and a Reactive Streams
