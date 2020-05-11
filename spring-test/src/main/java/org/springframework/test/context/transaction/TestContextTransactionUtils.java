@@ -144,9 +144,9 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Look up the transaction manager by type and explicit name, if the supplied
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
-	 * <li>Attempt to look up the single transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the single transaction manager by type.
 	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
