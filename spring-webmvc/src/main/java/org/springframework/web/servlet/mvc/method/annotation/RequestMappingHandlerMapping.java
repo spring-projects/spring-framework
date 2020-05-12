@@ -63,7 +63,8 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * {@link #setUseRegisteredSuffixPatternMatch(boolean) useRegisteredSuffixPatternMatch}
  * were deprecated in order to discourage use of path extensions for request
  * mapping and for content negotiation (with similar deprecations in
- * {@link ContentNegotiationManager}). For further context, please read issue
+ * {@link org.springframework.web.accept.ContentNegotiationManagerFactoryBean
+ * ContentNegotiationManagerFactoryBean}). For further context, please read issue
  * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
  *
  * @author Arjen Poutsma
