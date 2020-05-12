@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  * @since 3.2
  * @see EnableMBeanExport
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, BeanFactoryAware {
 
