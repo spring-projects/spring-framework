@@ -39,6 +39,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sergey Tsypanov
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  */
@@ -436,7 +437,11 @@ public final class ContentDisposition {
 		boolean escaped = false;
 		StringBuilder sb = new StringBuilder();
 		for (char c : filename.toCharArray()) {
-			sb.append((c == '"' && !escaped) ? "\\\"" : c);
+			if (!escaped && c == '"') {
+				sb.append("\\\"");
+			} else {
+				sb.append(c);
+			}
 			escaped = (!escaped && c == '\\');
 		}
 		// Remove backslash at the end..
