@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketSession;
-import org.springframework.web.reactive.socket.adapter.NettyWebSocketSessionSupport;
 import org.springframework.web.reactive.socket.adapter.ReactorNettyWebSocketSession;
 
 /**
@@ -53,7 +52,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	private final Supplier<WebsocketClientSpec.Builder> specBuilderSupplier;
 
 	@Nullable
-	private Integer maxFramePayloadLength = NettyWebSocketSessionSupport.DEFAULT_FRAME_MAX_SIZE;
+	private Integer maxFramePayloadLength;
 
 	@Nullable
 	private Boolean handlePing;
@@ -67,7 +66,8 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * Constructor that accepts an existing {@link HttpClient}.
+	 * Constructor that accepts an existing {@link HttpClient} builder
+	 * with a default {@link WebsocketClientSpec.Builder}.
 	 * @since 5.1
 	 */
 	public ReactorNettyWebSocketClient(HttpClient httpClient) {
@@ -75,8 +75,8 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	}
 
 	/**
-	 * Constructor with an {@link HttpClient} and a supplier for the
-	 * {@link WebsocketClientSpec.Builder} to use.
+	 * Constructor that accepts an existing {@link HttpClient} builder
+	 * and a pre-configured {@link WebsocketClientSpec.Builder}.
 	 * @since 5.3
 	 */
 	public ReactorNettyWebSocketClient(
@@ -131,7 +131,10 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * <p>By default set to 65536 (64K).
 	 * @param maxFramePayloadLength the max length for frames.
 	 * @since 5.2
+	 * @deprecated as of 5.3 in favor of providing a supplier of
+	 * {@link WebsocketClientSpec.Builder} with a constructor argument.
 	 */
+	@Deprecated
 	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
 		this.maxFramePayloadLength = maxFramePayloadLength;
 	}
@@ -139,7 +142,9 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	/**
 	 * Return the configured {@link #setMaxFramePayloadLength(int) maxFramePayloadLength}.
 	 * @since 5.2
+	 * @deprecated as of 5.3 in favor of {@link #getWebsocketClientSpec()}
 	 */
+	@Deprecated
 	public int getMaxFramePayloadLength() {
 		return getWebsocketClientSpec().maxFramePayloadLength();
 	}
@@ -154,7 +159,10 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * frames will be passed through to the {@link WebSocketHandler}.
 	 * @param handlePing whether to let Ping frames through for handling
 	 * @since 5.2.4
+	 * @deprecated as of 5.3 in favor of providing a supplier of
+	 * {@link WebsocketClientSpec.Builder} with a constructor argument.
 	 */
+	@Deprecated
 	public void setHandlePing(boolean handlePing) {
 		this.handlePing = handlePing;
 	}
@@ -162,7 +170,9 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	/**
 	 * Return the configured {@link #setHandlePing(boolean)}.
 	 * @since 5.2.4
+	 * @deprecated as of 5.3 in favor of {@link #getWebsocketClientSpec()}
 	 */
+	@Deprecated
 	public boolean getHandlePing() {
 		return getWebsocketClientSpec().handlePing();
 	}
