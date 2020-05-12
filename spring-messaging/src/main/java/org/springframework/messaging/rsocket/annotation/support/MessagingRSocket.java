@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import io.rsocket.AbstractRSocket;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -59,7 +58,7 @@ import org.springframework.util.RouteMatcher;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-class MessagingRSocket extends AbstractRSocket {
+class MessagingRSocket implements RSocket {
 
 	private final MimeType dataMimeType;
 
