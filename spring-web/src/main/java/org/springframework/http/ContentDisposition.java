@@ -439,7 +439,8 @@ public final class ContentDisposition {
 		for (char c : filename.toCharArray()) {
 			if (!escaped && c == '"') {
 				sb.append("\\\"");
-			} else {
+			}
+			else {
 				sb.append(c);
 			}
 			escaped = (!escaped && c == '\\');
