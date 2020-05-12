@@ -18,6 +18,7 @@ package org.springframework.transaction.annotation;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,13 +32,16 @@ import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.event.TransactionalEventListenerFactory;
+import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,6 +103,9 @@ public class EnableTransactionManagementTests {
 		assertThat(txManager.begun).isEqualTo(1);
 		assertThat(txManager.commits).isEqualTo(1);
 		assertThat(txManager.rollbacks).isEqualTo(0);
+		assertThat(txManager.lastDefinition.isReadOnly()).isTrue();
+		assertThat(txManager.lastDefinition.getTimeout()).isEqualTo(5);
+		assertThat(((TransactionAttribute) txManager.lastDefinition).getLabels()).contains("LABEL");
 
 		ctx.close();
 	}
@@ -266,7 +273,7 @@ public class EnableTransactionManagementTests {
 	@Service
 	public static class TransactionalTestBean {
 
-		@Transactional(readOnly = true)
+		@Transactional(label = "${myLabel}", timeoutString = "${myTimeout}", readOnly = true)
 		public Collection<?> findAllFoos() {
 			return null;
 		}
@@ -275,14 +282,31 @@ public class EnableTransactionManagementTests {
 		public void saveQualifiedFoo() {
 		}
 
-		@Transactional(transactionManager = "qualifiedTransactionManager")
+		@Transactional(transactionManager = "${myTransactionManager}")
 		public void saveQualifiedFooWithAttributeAlias() {
 		}
 	}
 
 
 	@Configuration
+	static class PlaceholderConfig {
+
+		@Bean
+		public PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+			PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+			Properties props = new Properties();
+			props.setProperty("myLabel", "LABEL");
+			props.setProperty("myTimeout", "5");
+			props.setProperty("myTransactionManager", "qualifiedTransactionManager");
+			pspc.setProperties(props);
+			return pspc;
+		}
+	}
+
+
+	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	static class EnableTxConfig {
 	}
 
@@ -294,6 +318,7 @@ public class EnableTransactionManagementTests {
 
 	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	@Conditional(NeverCondition.class)
 	static class ParentEnableTxConfig {
 
@@ -433,6 +458,7 @@ public class EnableTransactionManagementTests {
 
 	@Configuration
 	@EnableTransactionManagement
+	@Import(PlaceholderConfig.class)
 	static class Spr11915Config {
 
 		@Autowired

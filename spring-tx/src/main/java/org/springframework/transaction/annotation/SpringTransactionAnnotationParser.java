@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Strategy implementation for parsing Spring's {@link Transactional} annotation.
@@ -70,7 +72,13 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		rbta.setPropagationBehavior(propagation.value());
 		Isolation isolation = attributes.getEnum("isolation");
 		rbta.setIsolationLevel(isolation.value());
+
 		rbta.setTimeout(attributes.getNumber("timeout").intValue());
+		String timeoutString = attributes.getString("timeoutString");
+		Assert.isTrue(!StringUtils.hasText(timeoutString) || rbta.getTimeout() < 0,
+				"Specify 'timeout' or 'timeoutString', not both");
+		rbta.setTimeoutString(timeoutString);
+
 		rbta.setReadOnly(attributes.getBoolean("readOnly"));
 		rbta.setQualifier(attributes.getString("value"));
 		rbta.setLabels(Arrays.asList(attributes.getStringArray("label")));

@@ -85,6 +85,18 @@ public @interface Transactional {
 	String transactionManager() default "";
 
 	/**
+	 * Defines zero (0) or more transaction labels. Labels may be used to
+	 * describe a transaction and they can be evaluated by individual transaction
+	 * manager. Labels may serve a solely descriptive purpose or map to
+	 * pre-defined transaction manager-specific options.
+	 * <p>See the description of the actual transaction manager implementation
+	 * how it evaluates transaction labels.
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#getLabels()
+	 */
+	String[] label() default {};
+
+	/**
 	 * The transaction propagation type.
 	 * <p>Defaults to {@link Propagation#REQUIRED}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
@@ -111,9 +123,22 @@ public @interface Transactional {
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
 	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
 	 * transactions.
+	 * @return the timeout in seconds
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
+
+	/**
+	 * The timeout for this transaction (in seconds).
+	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
+	 * @return the timeout in seconds as a String value, e.g. a placeholder
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
+	 */
+	String timeoutString() default "";
 
 	/**
 	 * A boolean flag that can be set to {@code true} if the transaction is
@@ -189,18 +214,5 @@ public @interface Transactional {
 	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)
 	 */
 	String[] noRollbackForClassName() default {};
-
-	/**
-	 * Defines zero (0) or more transaction labels. Labels may be used to
-	 * describe a transaction and they can be evaluated by individual transaction
-	 * manager. Labels may serve a solely descriptive purpose or map to
-	 * pre-defined transaction manager-specific options.
-	 * <p>See the description of the actual transaction manager implementation
-	 * how it evaluates transaction labels.
-	 *
-	 * @since 5.3
-	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#getLabels()
-	 */
-	String[] label() default {};
 
 }

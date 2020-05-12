@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,13 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Simple {@link TransactionAttributeSource} implementation that
@@ -41,7 +44,8 @@ import org.springframework.util.PatternMatchUtils;
  * @see MethodMapTransactionAttributeSource
  */
 @SuppressWarnings("serial")
-public class NameMatchTransactionAttributeSource implements TransactionAttributeSource, Serializable {
+public class NameMatchTransactionAttributeSource
+		implements TransactionAttributeSource, EmbeddedValueResolverAware, InitializingBean, Serializable {
 
 	/**
 	 * Logger available to subclasses.
@@ -50,7 +54,10 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	protected static final Log logger = LogFactory.getLog(NameMatchTransactionAttributeSource.class);
 
 	/** Keys are method names; values are TransactionAttributes. */
-	private Map<String, TransactionAttribute> nameMap = new HashMap<>();
+	private final Map<String, TransactionAttribute> nameMap = new HashMap<>();
+
+	@Nullable
+	private StringValueResolver embeddedValueResolver;
 
 
 	/**
@@ -94,7 +101,24 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding transactional method [" + methodName + "] with attribute [" + attr + "]");
 		}
+		if (this.embeddedValueResolver != null && attr instanceof DefaultTransactionAttribute) {
+			((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
+		}
 		this.nameMap.put(methodName, attr);
+	}
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
+	@Override
+	public void afterPropertiesSet()  {
+		for (TransactionAttribute attr : this.nameMap.values()) {
+			if (attr instanceof DefaultTransactionAttribute) {
+				((DefaultTransactionAttribute) attr).resolveAttributeStrings(this.embeddedValueResolver);
+			}
+		}
 	}
 
 

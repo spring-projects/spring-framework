@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,12 +116,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				attribute.setIsolationLevelName(RuleBasedTransactionAttribute.PREFIX_ISOLATION + isolation);
 			}
 			if (StringUtils.hasText(timeout)) {
-				try {
-					attribute.setTimeout(Integer.parseInt(timeout));
-				}
-				catch (NumberFormatException ex) {
-					parserContext.getReaderContext().error("Timeout must be an integer value: [" + timeout + "]", methodEle);
-				}
+				attribute.setTimeoutString(timeout);
 			}
 			if (StringUtils.hasText(readOnly)) {
 				attribute.setReadOnly(Boolean.parseBoolean(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));

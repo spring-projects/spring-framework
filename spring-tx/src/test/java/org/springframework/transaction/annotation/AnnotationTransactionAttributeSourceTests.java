@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,22 +140,31 @@ public class AnnotationTransactionAttributeSourceTests {
 	@Test
 	public void transactionAttributeOnTargetClassMethodOverridesAttributeOnInterfaceMethod() throws Exception {
 		Method interfaceMethod = ITestBean3.class.getMethod("getAge");
-		Method interfaceMethod2 = ITestBean3.class.getMethod("getName");
+		Method interfaceMethod2 = ITestBean3.class.getMethod("setAge", int.class);
+		Method interfaceMethod3 = ITestBean3.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		atas.setEmbeddedValueResolver(strVal -> ("${myTimeout}".equals(strVal) ? "5" : strVal));
+
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean3.class);
 		assertThat(actual.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRES_NEW);
 		assertThat(actual.getIsolationLevel()).isEqualTo(TransactionAttribute.ISOLATION_REPEATABLE_READ);
 		assertThat(actual.getTimeout()).isEqualTo(5);
 		assertThat(actual.isReadOnly()).isTrue();
 
+		TransactionAttribute actual2 = atas.getTransactionAttribute(interfaceMethod2, TestBean3.class);
+		assertThat(actual2.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRES_NEW);
+		assertThat(actual2.getIsolationLevel()).isEqualTo(TransactionAttribute.ISOLATION_REPEATABLE_READ);
+		assertThat(actual2.getTimeout()).isEqualTo(5);
+		assertThat(actual2.isReadOnly()).isTrue();
+
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
 		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		TransactionAttribute actual2 = atas.getTransactionAttribute(interfaceMethod2, TestBean3.class);
-		assertThat(actual2.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
+		TransactionAttribute actual3 = atas.getTransactionAttribute(interfaceMethod3, TestBean3.class);
+		assertThat(actual3.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 	}
 
 	@Test
@@ -585,6 +594,9 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
+		@Transactional(propagation = Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ,
+				timeoutString = "${myTimeout}", readOnly = true, rollbackFor = Exception.class,
+				noRollbackFor = IOException.class)
 		public void setAge(int age) {
 			this.age = age;
 		}
