@@ -183,8 +183,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 
 	/**
-	 * Return a ResourceBundle for the given basename and code,
-	 * fetching already generated MessageFormats from the cache.
+	 * Return a ResourceBundle for the given basename and Locale,
+	 * fetching already generated ResourceBundle from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
 	 * @return the resulting ResourceBundle, or {@code null} if none
@@ -209,11 +209,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 			try {
 				ResourceBundle bundle = doGetBundle(basename, locale);
 				if (localeMap == null) {
-					localeMap = new ConcurrentHashMap<>();
-					Map<Locale, ResourceBundle> existing = this.cachedResourceBundles.putIfAbsent(basename, localeMap);
-					if (existing != null) {
-						localeMap = existing;
-					}
+					localeMap = this.cachedResourceBundles.computeIfAbsent(basename, bn -> new ConcurrentHashMap<>());
 				}
 				localeMap.put(locale, bundle);
 				return bundle;
