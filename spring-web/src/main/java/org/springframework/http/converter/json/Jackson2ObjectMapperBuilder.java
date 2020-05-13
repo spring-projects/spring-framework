@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -168,6 +169,9 @@ public class Jackson2ObjectMapperBuilder {
 
 	@Nullable
 	private Boolean defaultUseWrapper;
+
+	@Nullable
+	private Consumer<ObjectMapper> configurer;
 
 
 	/**
@@ -639,6 +643,19 @@ public class Jackson2ObjectMapperBuilder {
 		return this;
 	}
 
+	/**
+	 * An option to apply additional customizations directly to the
+	 * {@code ObjectMapper} instances at the end, after all other config
+	 * properties of the builder have been applied.
+	 * @param configurer a configurer to apply; if invoked multiple times, all
+	 * configurers are applied in the same order.
+	 * @since 5.3
+	 */
+	public Jackson2ObjectMapperBuilder postConfigurer(Consumer<ObjectMapper> configurer) {
+		this.configurer = (this.configurer != null ? this.configurer.andThen(configurer) : configurer);
+		return this;
+	}
+
 
 	/**
 	 * Build a new {@link ObjectMapper} instance.
@@ -739,6 +756,10 @@ public class Jackson2ObjectMapperBuilder {
 		else if (this.applicationContext != null) {
 			objectMapper.setHandlerInstantiator(
 					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+		}
+
+		if (this.configurer != null) {
+			this.configurer.accept(objectMapper);
 		}
 	}
 
