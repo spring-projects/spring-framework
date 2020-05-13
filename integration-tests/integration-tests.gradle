@@ -11,6 +11,7 @@ dependencies {
 	testCompile(testFixtures(project(":spring-tx")))
 	testCompile(project(":spring-expression"))
 	testCompile(project(":spring-jdbc"))
+	testCompile(project(":spring-r2dbc"))
 	testCompile(project(":spring-orm"))
 	testCompile(project(":spring-test"))
 	testCompile(project(":spring-tx"))
