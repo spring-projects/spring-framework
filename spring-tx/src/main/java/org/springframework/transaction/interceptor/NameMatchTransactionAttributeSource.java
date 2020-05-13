@@ -62,19 +62,19 @@ public class NameMatchTransactionAttributeSource
 
 	/**
 	 * Set a name/attribute map, consisting of method names
-	 * (e.g. "myMethod") and TransactionAttribute instances
-	 * (or Strings to be converted to TransactionAttribute instances).
+	 * (e.g. "myMethod") and {@link TransactionAttribute} instances.
+	 * @see #setProperties
 	 * @see TransactionAttribute
-	 * @see TransactionAttributeEditor
 	 */
 	public void setNameMap(Map<String, TransactionAttribute> nameMap) {
 		nameMap.forEach(this::addTransactionalMethod);
 	}
 
 	/**
-	 * Parses the given properties into a name/attribute map.
-	 * Expects method names as keys and String attributes definitions as values,
-	 * parsable into TransactionAttribute instances via TransactionAttributeEditor.
+	 * Parse the given properties into a name/attribute map.
+	 * <p>Expects method names as keys and String attributes definitions as values,
+	 * parsable into {@link TransactionAttribute} instances via a
+	 * {@link TransactionAttributeEditor}.
 	 * @see #setNameMap
 	 * @see TransactionAttributeEditor
 	 */
@@ -93,7 +93,7 @@ public class NameMatchTransactionAttributeSource
 	/**
 	 * Add an attribute for a transactional method.
 	 * <p>Method names can be exact matches, or of the pattern "xxx*",
-	 * "*xxx" or "*xxx*" for matching multiple methods.
+	 * "*xxx", or "*xxx*" for matching multiple methods.
 	 * @param methodName the name of the method
 	 * @param attr attribute associated with the method
 	 */
@@ -149,12 +149,12 @@ public class NameMatchTransactionAttributeSource
 	}
 
 	/**
-	 * Return if the given method name matches the mapped name.
-	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
+	 * Determine if the given method name matches the mapped name.
+	 * <p>The default implementation checks for "xxx*", "*xxx", and "*xxx*" matches,
 	 * as well as direct equality. Can be overridden in subclasses.
 	 * @param methodName the method name of the class
 	 * @param mappedName the name in the descriptor
-	 * @return if the names match
+	 * @return {@code true} if the names match
 	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
 	 */
 	protected boolean isMatch(String methodName, String mappedName) {
