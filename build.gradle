@@ -26,8 +26,8 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.3"
-			mavenBom "io.netty:netty-bom:4.1.49.Final"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.4"
+			mavenBom "io.netty:netty-bom:4.1.50.Final"
 			mavenBom "io.projectreactor:reactor-bom:Dysprosium-SR7"
 			mavenBom "io.rsocket:rsocket-bom:1.0.0"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.28.v20200408"
@@ -115,19 +115,19 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.14.Final"
-			dependency "org.hibernate:hibernate-validator:6.1.4.Final"
+			dependency "org.hibernate:hibernate-core:5.4.15.Final"
+			dependency "org.hibernate:hibernate-validator:6.1.5.Final"
 			dependency "org.webjars:webjars-locator-core:0.44"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.34') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.35') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.34') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.35') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -325,7 +325,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.31"
+		toolVersion = "8.32"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
