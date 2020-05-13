@@ -16,7 +16,7 @@ Validation, Data Binding, Type Conversion, SpEL, AOP.
 <<testing.adoc#testing, Testing>> :: Mock Objects, TestContext Framework,
 Spring MVC Test, WebTestClient.
 <<data-access.adoc#spring-data-tier, Data Access>> :: Transactions, DAO Support,
-JDBC, O/R Mapping, XML Marshalling.
+JDBC, R2DBC, O/R Mapping, XML Marshalling.
 <<web.adoc#spring-web, Web Servlet>> :: Spring MVC, WebSocket, SockJS,
 STOMP Messaging.
 <<web-reactive.adoc#spring-webflux, Web Reactive>> :: Spring WebFlux, WebClient,
