@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,14 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 	static {
-		ERROR_CODES.setBadSqlGrammarCodes(new String[] { "1", "2" });
-		ERROR_CODES.setInvalidResultSetAccessCodes(new String[] { "3", "4" });
-		ERROR_CODES.setDuplicateKeyCodes(new String[] {"10"});
-		ERROR_CODES.setDataAccessResourceFailureCodes(new String[] { "5" });
-		ERROR_CODES.setDataIntegrityViolationCodes(new String[] { "6" });
-		ERROR_CODES.setCannotAcquireLockCodes(new String[] { "7" });
-		ERROR_CODES.setDeadlockLoserCodes(new String[] { "8" });
-		ERROR_CODES.setCannotSerializeTransactionCodes(new String[] { "9" });
+		ERROR_CODES.setBadSqlGrammarCodes("1", "2");
+		ERROR_CODES.setInvalidResultSetAccessCodes("3", "4");
+		ERROR_CODES.setDuplicateKeyCodes("10");
+		ERROR_CODES.setDataAccessResourceFailureCodes("5");
+		ERROR_CODES.setDataIntegrityViolationCodes("6");
+		ERROR_CODES.setCannotAcquireLockCodes("7");
+		ERROR_CODES.setDeadlockLoserCodes("8");
+		ERROR_CODES.setCannotSerializeTransactionCodes("9");
 	}
 
 
