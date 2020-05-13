@@ -2050,8 +2050,17 @@ public class DataBinderTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				binder.setMessageCodesResolver(new DefaultMessageCodesResolver()))
 			.withMessageContaining("DataBinder is already initialized with MessageCodesResolver");
-
 	}
+
+	@Test // gh-24347
+	public void overrideBindingResultType() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.initDirectFieldAccess();
+		binder.initBeanPropertyAccess();
+		assertThat(binder.getBindingResult()).isInstanceOf(BeanPropertyBindingResult.class);
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class BeanWithIntegerList {
