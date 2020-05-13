@@ -894,20 +894,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMapMany(it -> {
 						try {
 							// Need re-wrapping until we get hold of the exception through usingWhen.
-							return Flux
-									.usingWhen(
-											Mono.just(it),
-											txInfo -> {
-												try {
-													return this.adapter.toPublisher(invocation.proceedWithInvocation());
-												}
-												catch (Throwable ex) {
-													return Mono.error(ex);
-												}
-											},
-											this::commitTransactionAfterReturning,
-											(txInfo, ex) -> Mono.empty(),
-											this::commitTransactionAfterReturning)
+							return Flux.usingWhen(
+									Mono.just(it),
+									txInfo -> {
+										try {
+											return this.adapter.toPublisher(invocation.proceedWithInvocation());
+										}
+										catch (Throwable ex) {
+											return Mono.error(ex);
+										}
+									},
+									this::commitTransactionAfterReturning,
+									(txInfo, err) -> Mono.empty(),
+									this::commitTransactionAfterReturning)
 									.onErrorResume(ex ->
 											completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
 						}
