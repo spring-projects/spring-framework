@@ -479,6 +479,11 @@ public class MediaType extends MimeType implements Serializable {
 		super(type, subtype, parameters);
 	}
 
+	public MediaType(MimeType mimeType) {
+		super(mimeType);
+		this.getParameters().forEach(this::checkParameters);
+	}
+
 
 	@Override
 	protected void checkParameters(String attribute, String value) {
@@ -587,7 +592,8 @@ public class MediaType extends MimeType implements Serializable {
 			throw new InvalidMediaTypeException(ex);
 		}
 		try {
-			return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
+			//return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
+			return new MediaType(type);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new InvalidMediaTypeException(mediaType, ex.getMessage());
