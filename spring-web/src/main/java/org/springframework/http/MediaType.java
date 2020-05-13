@@ -370,7 +370,6 @@ public class MediaType extends MimeType implements Serializable {
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
-
 	static {
 		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
@@ -400,7 +399,6 @@ public class MediaType extends MimeType implements Serializable {
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
 	}
-
 
 	/**
 	 * Create a new {@code MediaType} for the given primary type.
@@ -479,6 +477,14 @@ public class MediaType extends MimeType implements Serializable {
 		super(type, subtype, parameters);
 	}
 
+	/**
+	 * Create a new {@code MediaType} for the given {@link MimeType}.
+	 * The type, subtype and parameters information is copied and {@code MediaType}-specific
+	 * checks on parameters are performed.
+	 * @param mimeType the MIME type
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @since 5.3.0
+	 */
 	public MediaType(MimeType mimeType) {
 		super(mimeType);
 		this.getParameters().forEach(this::checkParameters);
@@ -653,7 +659,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
 		List<MediaType> mediaTypes = new ArrayList<>(mimeTypes.size());
-		for(MimeType mimeType : mimeTypes) {
+		for (MimeType mimeType : mimeTypes) {
 			mediaTypes.add(MediaType.asMediaType(mimeType));
 		}
 		return mediaTypes;
