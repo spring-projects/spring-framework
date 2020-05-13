@@ -143,7 +143,7 @@ public class Jackson2ObjectMapperBuilder {
 	private TypeResolverBuilder<?> defaultTyping;
 
 	@Nullable
-	private JsonInclude.Include serializationInclusion;
+	private JsonInclude.Value serializationInclusion;
 
 	@Nullable
 	private FilterProvider filters;
@@ -301,7 +301,16 @@ public class Jackson2ObjectMapperBuilder {
 	 * Set a custom inclusion strategy for serialization.
 	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
 	 */
-	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Include serializationInclusion) {
+	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Include inclusion) {
+		return serializationInclusion(JsonInclude.Value.construct(inclusion, inclusion));
+	}
+
+	/**
+	 * Set a custom inclusion strategy for serialization.
+	 * @since 5.3
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Value
+	 */
+	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Value serializationInclusion) {
 		this.serializationInclusion = serializationInclusion;
 		return this;
 	}
@@ -703,7 +712,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setDefaultTyping(this.defaultTyping);
 		}
 		if (this.serializationInclusion != null) {
-			objectMapper.setSerializationInclusion(this.serializationInclusion);
+			objectMapper.setDefaultPropertyInclusion(this.serializationInclusion);
 		}
 
 		if (this.filters != null) {
