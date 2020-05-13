@@ -375,7 +375,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				cleanupTransactionInfo(txInfo);
 			}
 
-			if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+			if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
 				// Set rollback-only in case of Vavr failure matching our rollback rules...
 				TransactionStatus status = txInfo.getTransactionStatus();
 				if (status != null && txAttr != null) {
@@ -396,7 +396,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr, joinpointIdentification, status);
 					try {
 						Object retVal = invocation.proceedWithInvocation();
-						if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+						if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
 							// Set rollback-only in case of Vavr failure matching our rollback rules...
 							retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
 						}
@@ -780,6 +780,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	@FunctionalInterface
 	protected interface InvocationCallback {
 
+		@Nullable
 		Object proceedWithInvocation() throws Throwable;
 	}
 

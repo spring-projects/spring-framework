@@ -361,6 +361,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * @return the result of the invocation
 	 * @see CacheOperationInvoker#invoke()
 	 */
+	@Nullable
 	protected Object invokeOperation(CacheOperationInvoker invoker) {
 		return invoker.invoke();
 	}
@@ -445,7 +446,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	@Nullable
-	private Object unwrapReturnValue(Object returnValue) {
+	private Object unwrapReturnValue(@Nullable Object returnValue) {
 		return ObjectUtils.unwrapOptional(returnValue);
 	}
 
