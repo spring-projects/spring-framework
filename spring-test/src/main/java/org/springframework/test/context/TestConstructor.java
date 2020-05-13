@@ -133,12 +133,9 @@ public @interface TestConstructor {
 		ANNOTATED;
 
 
-		private static final Log logger = LogFactory.getLog(AutowireMode.class);
-
 		/**
 		 * Get the {@code AutowireMode} enum constant with the supplied name,
 		 * ignoring case.
-		 *
 		 * @param name the name of the enum constant to retrieve
 		 * @return the corresponding enum constant or {@code null} if not found
 		 * @since 5.3
@@ -146,16 +143,19 @@ public @interface TestConstructor {
 		 */
 		@Nullable
 		public static AutowireMode from(@Nullable String name) {
+			if (name == null) {
+				return null;
+			}
 			try {
 				return AutowireMode.valueOf(name.trim().toUpperCase());
 			}
-			catch (Exception ex) {
+			catch (IllegalArgumentException ex) {
+				Log logger = LogFactory.getLog(AutowireMode.class);
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Failed to parse autowire mode from '%s': %s", name,
-						ex.getMessage()));
+					logger.debug(String.format("Failed to parse autowire mode from '%s': %s", name, ex.getMessage()));
 				}
+				return null;
 			}
-			return null;
 		}
 	}
 
