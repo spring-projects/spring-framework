@@ -7,6 +7,7 @@ plugins {
 	id 'de.undercouch.download' version '4.0.4'
 	id "io.freefair.aspectj" version '5.0.0' apply false
 	id "com.github.ben-manes.versions" version '0.28.0'
+	id "me.champeau.gradle.jmh" version "0.5.0" apply false
 }
 
 ext {
