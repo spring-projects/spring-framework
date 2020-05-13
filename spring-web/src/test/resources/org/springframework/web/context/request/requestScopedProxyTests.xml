@@ -24,6 +24,10 @@
 		<aop:scoped-proxy/>
 	</bean>
 
+	<bean id="requestScopedUniqueBean" class="org.springframework.beans.testfixture.beans.CountingTestBean" scope="request">
+		<aop:scoped-proxy/>
+	</bean>
+
 	<bean id="requestScopedObjectCircle1" class="org.springframework.beans.testfixture.beans.TestBean" scope="request">
 		<aop:scoped-proxy/>
 		<property name="spouse" ref="requestScopedObjectCircle2"/>
