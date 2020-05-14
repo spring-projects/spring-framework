@@ -598,7 +598,6 @@ public class MediaType extends MimeType implements Serializable {
 			throw new InvalidMediaTypeException(ex);
 		}
 		try {
-			//return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
 			return new MediaType(type);
 		}
 		catch (IllegalArgumentException ex) {
