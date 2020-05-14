@@ -52,7 +52,7 @@ dependencies {
 	testCompile("commons-io:commons-io")
 	testCompile("joda-time:joda-time")
 	testCompile("org.mozilla:rhino")
-	testCompile("dom4j:dom4j")
+	testCompile("org.dom4j:dom4j")
 	testCompile("jaxen:jaxen")
 	testCompile("org.xmlunit:xmlunit-assertj")
 	testCompile("org.xmlunit:xmlunit-matchers")
