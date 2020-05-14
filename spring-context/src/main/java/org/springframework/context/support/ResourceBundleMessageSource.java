@@ -71,6 +71,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Qimiao Chen
  * @see #setBasenames
  * @see ReloadableResourceBundleMessageSource
  * @see java.util.ResourceBundle
@@ -331,19 +332,10 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		String msg = getStringOrNull(bundle, code);
 		if (msg != null) {
 			if (codeMap == null) {
-				codeMap = new ConcurrentHashMap<>();
-				Map<String, Map<Locale, MessageFormat>> existing =
-						this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
-				if (existing != null) {
-					codeMap = existing;
-				}
+				codeMap = this.cachedBundleMessageFormats.computeIfAbsent(bundle, b -> new ConcurrentHashMap<>());
 			}
 			if (localeMap == null) {
-				localeMap = new ConcurrentHashMap<>();
-				Map<Locale, MessageFormat> existing = codeMap.putIfAbsent(code, localeMap);
-				if (existing != null) {
-					localeMap = existing;
-				}
+				localeMap = codeMap.computeIfAbsent(code, c -> new ConcurrentHashMap<>());
 			}
 			MessageFormat result = createMessageFormat(msg, locale);
 			localeMap.put(locale, result);
