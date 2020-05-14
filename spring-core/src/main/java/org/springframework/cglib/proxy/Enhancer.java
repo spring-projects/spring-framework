@@ -1254,11 +1254,11 @@ public class Enhancer extends AbstractClassGenerator {
 			}
 
 			public int getOriginalModifiers(MethodInfo method) {
-				return ((Integer) originalModifiers.get(method)).intValue();
+				return (Integer) originalModifiers.get(method);
 			}
 
 			public int getIndex(MethodInfo method) {
-				return ((Integer) indexes.get(method)).intValue();
+				return (Integer) indexes.get(method);
 			}
 
 			public void emitCallback(CodeEmitter e, int index) {
