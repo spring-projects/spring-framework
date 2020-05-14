@@ -185,9 +185,9 @@ public class XsltViewTests {
 	}
 
 	private void assertRowElement(Element elem, String id, String name, String price) {
-		Element idElem = (Element) elem.elements().get(0);
-		Element nameElem = (Element) elem.elements().get(1);
-		Element priceElem = (Element) elem.elements().get(2);
+		Element idElem = elem.elements().get(0);
+		Element nameElem = elem.elements().get(1);
+		Element priceElem = elem.elements().get(2);
 
 		assertThat(idElem.getText()).as("ID incorrect.").isEqualTo(id);
 		assertThat(nameElem.getText()).as("Name incorrect.").isEqualTo(name);
