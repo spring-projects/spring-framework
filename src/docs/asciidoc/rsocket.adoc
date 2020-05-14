@@ -582,6 +582,8 @@ values are supported by a registered `Encoder`. For example:
 For `Fire-and-Forget` use the `send()` method that returns `Mono<Void>`. Note that the `Mono`
 indicates only that the message was successfully sent, and not that it was handled.
 
+For `Metadata-Push` use the `sendMetadata()` method with a `Mono<Void>` return value.
+
 
 
 [[rsocket-annot-responders]]

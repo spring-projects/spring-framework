@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,6 +246,11 @@ final class DefaultRSocketRequester implements RSocketRequester {
 					.map(tuple -> PayloadUtils.createPayload(tuple.getT1(), tuple.getT2()))
 					.doOnDiscard(DataBuffer.class, DataBufferUtils::release)
 					.doOnDiscard(Payload.class, Payload::release);
+		}
+
+		@Override
+		public Mono<Void> sendMetadata() {
+			return getPayloadMono().flatMap(rsocket::metadataPush);
 		}
 
 		@Override
