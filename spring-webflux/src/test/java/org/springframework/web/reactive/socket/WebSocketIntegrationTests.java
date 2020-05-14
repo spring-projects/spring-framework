@@ -147,9 +147,11 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
+		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.create();
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
+					session.closeStatus().subscribe(statusProcessor);
 					return session.receive()
 							.doOnNext(s -> logger.debug("inbound " + s))
 							.then()
@@ -158,6 +160,8 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 							);
 				})
 				.block(TIMEOUT);
+
+		assertThat(statusProcessor.block()).isEqualTo(CloseStatus.GOING_AWAY);
 	}
 
 	@ParameterizedWebSocketTest
