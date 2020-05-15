@@ -1258,7 +1258,7 @@ public class Enhancer extends AbstractClassGenerator {
 			}
 
 			public int getIndex(MethodInfo method) {
-				return (Integer) indexes.get(method);
+				return ((Integer) indexes.get(method)).intValue();
 			}
 
 			public void emitCallback(CodeEmitter e, int index) {
