@@ -1254,7 +1254,7 @@ public class Enhancer extends AbstractClassGenerator {
 			}
 
 			public int getOriginalModifiers(MethodInfo method) {
-				return (Integer) originalModifiers.get(method);
+				return ((Integer) originalModifiers.get(method)).intValue();
 			}
 
 			public int getIndex(MethodInfo method) {
