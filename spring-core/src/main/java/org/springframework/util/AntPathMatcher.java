@@ -80,7 +80,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?}");
 
-	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
+	private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
 
 
 	private String pathSeparator;
@@ -646,19 +646,14 @@ public class AntPathMatcher implements PathMatcher {
 
 		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
+		private final String rawPattern;
+
+		private final boolean caseSensitive;
+
+		private final boolean exactMatch;
+
+		@Nullable
 		private final Pattern pattern;
-
-		private final String originalPattern;
-
-		/**
-		 * True if this matcher accepts any value (e.g. regex <code>.*</code>)
-		 */
-		private final boolean acceptAny;
-
-		/**
-		 * True if given pattern is a literal pattern, thus candidate string may be tested by strings comparison for better perf.
-		 */
-		private final boolean allowStringComparison;
 
 		private final List<String> variableNames = new LinkedList<>();
 
@@ -667,6 +662,8 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		public AntPathStringMatcher(String pattern, boolean caseSensitive) {
+			this.rawPattern = pattern;
+			this.caseSensitive = caseSensitive;
 			StringBuilder patternBuilder = new StringBuilder();
 			Matcher matcher = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
@@ -696,13 +693,17 @@ public class AntPathMatcher implements PathMatcher {
 				}
 				end = matcher.end();
 			}
-			patternBuilder.append(quote(pattern, end, pattern.length()));
-			this.pattern = (caseSensitive ? Pattern.compile(patternBuilder.toString()) :
-					Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
-
-			this.originalPattern = pattern;
-			this.acceptAny = this.pattern.pattern().equals(DEFAULT_VARIABLE_PATTERN);
-			this.allowStringComparison = end == 0;
+			// No glob pattern was found, this is an exact String match
+			if (end == 0) {
+				this.exactMatch = true;
+				this.pattern = null;
+			}
+			else {
+				this.exactMatch = false;
+				patternBuilder.append(quote(pattern, end, pattern.length()));
+				this.pattern = (this.caseSensitive ? Pattern.compile(patternBuilder.toString()) :
+						Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+			}
 		}
 
 		private String quote(String s, int start, int end) {
@@ -717,43 +718,29 @@ public class AntPathMatcher implements PathMatcher {
 		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
 		public boolean matchStrings(String str, @Nullable Map<String, String> uriTemplateVariables) {
-			// Check whether current pattern accepts any value or given string is exact match
-			if (this.acceptAny) {
-				if (uriTemplateVariables != null) {
-					assertUrlVariablesCount(1);
-					uriTemplateVariables.put(this.variableNames.get(0), str);
-				}
-				return true;
+			if (this.exactMatch) {
+				return this.caseSensitive ? this.rawPattern.equals(str) : this.rawPattern.equalsIgnoreCase(str);
 			}
-			else if (this.allowStringComparison && str.equals(this.originalPattern)) {
-				return true;
-			}
-
-			Matcher matcher = this.pattern.matcher(str);
-			if (matcher.matches()) {
-				if (uriTemplateVariables != null) {
-					assertUrlVariablesCount(matcher.groupCount());
-					for (int i = 1; i <= matcher.groupCount(); i++) {
-						String name = this.variableNames.get(i - 1);
-						String value = matcher.group(i);
-						uriTemplateVariables.put(name, value);
+			else if (this.pattern != null) {
+				Matcher matcher = this.pattern.matcher(str);
+				if (matcher.matches()) {
+					if (uriTemplateVariables != null) {
+						if (this.variableNames.size() != matcher.groupCount()) {
+							throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+									this.pattern + " does not match the number of URI template variables it defines, " +
+									"which can occur if capturing groups are used in a URI template regex. " +
+									"Use non-capturing groups instead.");
+						}
+						for (int i = 1; i <= matcher.groupCount(); i++) {
+							String name = this.variableNames.get(i - 1);
+							String value = matcher.group(i);
+							uriTemplateVariables.put(name, value);
+						}
 					}
+					return true;
 				}
-				return true;
 			}
-			else {
-				return false;
-			}
-		}
-
-		// SPR-8455
-		private void assertUrlVariablesCount(int expected) {
-			if (this.variableNames.size() != expected) {
-				throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
-						this.pattern + " does not match the number of URI template variables it defines, " +
-						"which can occur if capturing groups are used in a URI template regex. " +
-						"Use non-capturing groups instead.");
-			}
+			return false;
 		}
 
 	}

@@ -130,9 +130,6 @@ class AntPathMatcherTests {
 		assertThat(pathMatcher.match("", "")).isTrue();
 
 		assertThat(pathMatcher.match("/{bla}.*", "/testing.html")).isTrue();
-
-		// Test that sending the same pattern will not match (gh #24887)
-		assertThat(pathMatcher.match("/bla/{foo:[0-9]}", "/bla/{foo:[0-9]}")).isFalse();
 	}
 
 	@Test

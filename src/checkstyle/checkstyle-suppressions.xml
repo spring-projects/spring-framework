@@ -8,7 +8,7 @@
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
 
 	<!-- JMH benchmarks -->
-	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle" />
+	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast" />
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
