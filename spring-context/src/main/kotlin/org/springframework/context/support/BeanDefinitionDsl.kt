@@ -23,6 +23,7 @@ import org.springframework.beans.factory.getBeanProvider
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.core.env.Environment
 import org.springframework.core.env.Profiles
 import java.util.function.Supplier
 
@@ -1107,6 +1108,19 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 		inline fun <reified T : Any> ref(name: String? = null) : T = when (name) {
 			null -> context.getBean(T::class.java)
 			else -> context.getBean(name, T::class.java)
+		}
+
+		/**
+		 * Get environment property by key
+		 * `prop<Foo>()` or `prop<Foo>("foo.key")`. When leveraging Kotlin type inference
+		 * it could be as short as `prop()` or `prop("foo.key")`.
+		 * @param key the name of the property key in the current environment
+		 * @param T type of the property value associated with the given key, converted to the given
+		 * @throws IllegalStateException if the key cannot be resolved
+		 */
+		inline fun <reified T : Any> prop(key: String) : T {
+			val environment = ref<Environment>()
+			return environment.getRequiredProperty(key, T::class.java)
 		}
 
 		/**

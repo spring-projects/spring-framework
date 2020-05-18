@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.getBean
 import org.springframework.context.support.BeanDefinitionDsl.*
+import org.springframework.core.env.MapPropertySource
 import org.springframework.core.env.SimpleCommandLinePropertySource
 import org.springframework.core.env.get
 import org.springframework.core.testfixture.env.MockPropertySource
@@ -43,11 +44,29 @@ class BeanDefinitionDslTests {
 			beans.initialize(this)
 			refresh()
 		}
-		
+
 		context.getBean<Foo>()
 		context.getBean<Bar>("bar")
 		assertThat(context.isPrototype("bar")).isTrue()
 		context.getBean<Baz>()
+	}
+
+	@Test
+	fun `Retrieve environment property with the functional Kotlin DSL`() {
+		val propertyKey = "prop.key"
+		val beans = beans {
+			bean { FooFoo(prop(propertyKey)) }
+		}
+
+		val context = GenericApplicationContext().apply {
+			environment.propertySources.addFirst(
+					MapPropertySource("source", mapOf(propertyKey to "foofoo"))
+			)
+			beans.initialize(this)
+			refresh()
+		}
+
+		assertThat(context.getBean<FooFoo>().name).isEqualTo("foofoo")
 	}
 
 	@Test
@@ -164,7 +183,7 @@ class BeanDefinitionDslTests {
 		}
 		context.getBean<Baz>()
 	}
-	
+
 
 	@Test
 	fun `Declare beans with accepted profiles`() {
