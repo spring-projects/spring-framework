@@ -47,17 +47,15 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
 
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
+
+	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@Nullable
 	private final Decoder<?> decoder;
 
 	private final StringDecoder lineDecoder = StringDecoder.textPlainOnly();
-
-
 
 
 	/**
@@ -171,11 +169,11 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			}
 		}
 
-		Object decodedData = (data != null ? decodeData(data.toString(), valueType, hints) : null);
+		Object decodedData = (data != null ? decodeData(data, valueType, hints) : null);
 
 		if (shouldWrap) {
 			if (comment != null) {
-				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
+				sseBuilder.comment(comment.substring(0, comment.length() - 1));
 			}
 			if (decodedData != null) {
 				sseBuilder.data(decodedData);
@@ -183,19 +181,19 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			return sseBuilder.build();
 		}
 		else {
-			return (decodedData);
+			return decodedData;
 		}
 	}
 
 	@Nullable
-	private Object decodeData(String data, ResolvableType dataType, Map<String, Object> hints) {
+	private Object decodeData(StringBuilder data, ResolvableType dataType, Map<String, Object> hints) {
 		if (String.class == dataType.resolve()) {
 			return data.substring(0, data.length() - 1);
 		}
 		if (this.decoder == null) {
 			throw new CodecException("No SSE decoder configured and the data is not String.");
 		}
-		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+		byte[] bytes = data.toString().getBytes(StandardCharsets.UTF_8);
 		DataBuffer buffer = bufferFactory.wrap(bytes);  // wrapping only, no allocation
 		return this.decoder.decode(buffer, dataType, MediaType.TEXT_EVENT_STREAM, hints);
 	}
@@ -221,7 +219,6 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 		private int accumulated = 0;
 
-
 		public void afterLineParsed(String line) {
 			if (getMaxInMemorySize() < 0) {
 				return;
@@ -242,8 +239,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 		private void raiseLimitException() {
 			// Do not release here, it's likely down via doOnDiscard..
-			throw new DataBufferLimitException(
-					"Exceeded limit on max bytes to buffer : " + getMaxInMemorySize());
+			throw new DataBufferLimitException("Exceeded limit on max bytes to buffer : " + getMaxInMemorySize());
 		}
 	}
 
