@@ -153,7 +153,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 				result = Flux.just(encodeText(sb + (String) data + "\n\n", mediaType, factory));
 			}
 			else {
-				result = encodeEvent(sb.toString(), data, dataType, mediaType, factory, hints);
+				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
 			}
 
 			return result.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
@@ -161,7 +161,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> encodeEvent(String eventContent, T data, ResolvableType dataType,
+	private <T> Flux<DataBuffer> encodeEvent(StringBuilder eventContent, T data, ResolvableType dataType,
 			MediaType mediaType, DataBufferFactory factory, Map<String, Object> hints) {
 
 		if (this.encoder == null) {
@@ -174,16 +174,13 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	private void writeField(String fieldName, Object fieldValue, StringBuilder sb) {
-		sb.append(fieldName);
-		sb.append(':');
-		sb.append(fieldValue.toString());
-		sb.append("\n");
+		sb.append(fieldName).append(':').append(fieldValue).append("\n");
 	}
 
 	private DataBuffer encodeText(CharSequence text, MediaType mediaType, DataBufferFactory bufferFactory) {
 		Assert.notNull(mediaType.getCharset(), "Expected MediaType with charset");
 		byte[] bytes = text.toString().getBytes(mediaType.getCharset());
-		return bufferFactory.wrap(bytes); // wrapping, not allocating
+		return bufferFactory.wrap(bytes);  // wrapping, not allocating
 	}
 
 	@Override
