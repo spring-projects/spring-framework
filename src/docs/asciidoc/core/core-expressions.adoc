@@ -436,8 +436,12 @@ example shows:
 ----
 ====
 
-The `systemProperties` variable is predefined, so you can use it in your expressions, as
-the following example shows:
+All beans in the application context are available as predefined variables with their
+common bean name. This includes standard context beans such as `environment` (of type
+`org.springframework.core.env.Environment`) as well as `systemProperties` and
+`systemEnvironment` (of type `Map<String, Object>`) for access to the runtime environment.
+
+The following example shows access to the `systemProperties` bean as a SpEL variable:
 
 ====
 [source,xml,indent=0]
@@ -451,8 +455,7 @@ the following example shows:
 ----
 ====
 
-Note that you do not have to prefix the predefined variable with the `#`
-symbol in this context.
+Note that you do not have to prefix the predefined variable with the `#` symbol here.
 
 You can also refer to other bean properties by name, as the following example shows:
 
@@ -479,8 +482,8 @@ You can also refer to other bean properties by name, as the following example sh
 [[expressions-beandef-annotation-based]]
 === Annotation Configuration
 
-To specify a default value, you can place the `@Value` annotation on fields, methods, and method or constructor
-parameters.
+To specify a default value, you can place the `@Value` annotation on fields, methods,
+and method or constructor parameters.
 
 The following example sets the default value of a field variable:
 
@@ -1265,7 +1268,7 @@ The following example shows how to use the Elvis operator:
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
 ====

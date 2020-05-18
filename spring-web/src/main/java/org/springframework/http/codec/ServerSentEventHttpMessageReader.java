@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ import org.springframework.lang.Nullable;
  */
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
 
+	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
+
 	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private static final StringDecoder stringDecoder = StringDecoder.textPlainOnly();
-
-	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
 
 
 	@Nullable
@@ -129,7 +129,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 					sseBuilder.event(line.substring(6).trim());
 				}
 				else if (line.startsWith("retry:")) {
-					sseBuilder.retry(Duration.ofMillis(Long.valueOf(line.substring(6).trim())));
+					sseBuilder.retry(Duration.ofMillis(Long.parseLong(line.substring(6).trim())));
 				}
 				else if (line.startsWith(":")) {
 					comment = (comment != null ? comment : new StringBuilder());
@@ -142,7 +142,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 
 		if (shouldWrap) {
 			if (comment != null) {
-				sseBuilder.comment(comment.toString().substring(0, comment.length() - 1));
+				sseBuilder.comment(comment.substring(0, comment.length() - 1));
 			}
 			return decodedData.map(o -> {
 				sseBuilder.data(o);
