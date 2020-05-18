@@ -182,6 +182,9 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishError(publisher, ex);
+				}
 			}
 		},
 
@@ -200,6 +203,9 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishError(publisher, ex);
+				}
 			}
 		},
 
