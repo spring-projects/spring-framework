@@ -1141,6 +1141,15 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	}
 
 	/**
+	 * Take in account pre-defined bean definitions.
+	 * @param beans bean definitions
+	 * @since 5.3
+	 */
+	fun beans(beans: BeanDefinitionDsl) {
+		children.add(beans)
+	}
+
+	/**
 	 * Register the bean defined via the DSL on the provided application context.
 	 * @param context The `ApplicationContext` to use for registering the beans
 	 */

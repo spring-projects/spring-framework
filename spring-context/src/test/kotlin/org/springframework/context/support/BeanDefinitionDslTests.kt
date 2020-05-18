@@ -37,17 +37,21 @@ class BeanDefinitionDslTests {
 			bean<Foo>()
 			bean<Bar>("bar", scope = Scope.PROTOTYPE)
 			bean { Baz(ref("bar")) }
+			beans(beans {
+				bean { FooFoo("f") }
+			})
 		}
 
 		val context = GenericApplicationContext().apply {
 			beans.initialize(this)
 			refresh()
 		}
-		
+
 		context.getBean<Foo>()
 		context.getBean<Bar>("bar")
 		assertThat(context.isPrototype("bar")).isTrue()
 		context.getBean<Baz>()
+		context.getBean<FooFoo>()
 	}
 
 	@Test
@@ -164,7 +168,7 @@ class BeanDefinitionDslTests {
 		}
 		context.getBean<Baz>()
 	}
-	
+
 
 	@Test
 	fun `Declare beans with accepted profiles`() {
