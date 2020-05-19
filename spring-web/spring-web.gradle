@@ -8,7 +8,7 @@ dependencies {
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api") // Servlet 4 for mapping type
 	optional("javax.servlet.jsp:javax.servlet.jsp-api")
 	optional("javax.el:javax.el-api")
 	optional("javax.faces:javax.faces-api")
