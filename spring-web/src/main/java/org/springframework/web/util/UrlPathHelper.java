@@ -652,7 +652,7 @@ public class UrlPathHelper {
 	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
 	 * </ul>
 	 */
-	public final static UrlPathHelper defaultInstance = new UrlPathHelper() {
+	public static final UrlPathHelper defaultInstance = new UrlPathHelper() {
 
 		@Override
 		public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
