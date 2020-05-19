@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,12 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
@@ -94,7 +99,7 @@ public class ExceptionHandlerExceptionResolverTests {
 
 
 	@Test
-	public void nullHandler() {
+	void nullHandler() {
 		Object handler = null;
 		this.resolver.afterPropertiesSet();
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handler, null);
@@ -102,7 +107,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setCustomArgumentResolvers() {
+	void setCustomArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
@@ -112,7 +117,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setArgumentResolvers() {
+	void setArgumentResolvers() {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 		this.resolver.setArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
@@ -121,7 +126,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setCustomReturnValueHandlers() {
+	void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
 		this.resolver.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
@@ -131,7 +136,15 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void setReturnValueHandlers() {
+	void setResponseBodyAdvice() {
+		this.resolver.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
+		assertThat(this.resolver).extracting("responseBodyAdvice").asList().hasSize(1);
+		this.resolver.setResponseBodyAdvice(Collections.singletonList(new CustomResponseBodyAdvice()));
+		assertThat(this.resolver).extracting("responseBodyAdvice").asList().hasSize(2);
+	}
+
+	@Test
+	void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
 		this.resolver.setReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
@@ -140,7 +153,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveNoExceptionHandlerForException() throws NoSuchMethodException {
+	void resolveNoExceptionHandlerForException() throws NoSuchMethodException {
 		Exception npe = new NullPointerException();
 		HandlerMethod handlerMethod = new HandlerMethod(new IoExceptionController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -150,7 +163,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionModelAndView() throws NoSuchMethodException {
+	void resolveExceptionModelAndView() throws NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException("Bad argument");
 		HandlerMethod handlerMethod = new HandlerMethod(new ModelAndViewController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -163,7 +176,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionResponseBody() throws UnsupportedEncodingException, NoSuchMethodException {
+	void resolveExceptionResponseBody() throws UnsupportedEncodingException, NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -175,7 +188,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionResponseWriter() throws Exception {
+	void resolveExceptionResponseWriter() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseWriterController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -187,7 +200,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-13546
-	public void resolveExceptionModelAtArgument() throws Exception {
+	void resolveExceptionModelAtArgument() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ModelArgumentController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -199,7 +212,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-14651
-	public void resolveRedirectAttributesAtArgument() throws Exception {
+	void resolveRedirectAttributesAtArgument() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new RedirectAttributesController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -213,7 +226,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionGlobalHandler() throws Exception {
+	void resolveExceptionGlobalHandler() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -228,7 +241,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionGlobalHandlerOrdered() throws Exception {
+	void resolveExceptionGlobalHandlerOrdered() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -243,7 +256,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-12605
-	public void resolveExceptionWithHandlerMethodArg() throws Exception {
+	void resolveExceptionWithHandlerMethodArg() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -258,7 +271,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionWithAssertionError() throws Exception {
+	void resolveExceptionWithAssertionError() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -274,7 +287,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
+	void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -290,7 +303,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionControllerAdviceHandler() throws Exception {
+	void resolveExceptionControllerAdviceHandler() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -305,7 +318,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionControllerAdviceNoHandler() throws Exception {
+	void resolveExceptionControllerAdviceNoHandler() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -319,7 +332,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-16496
-	public void resolveExceptionControllerAdviceAgainstProxy() throws Exception {
+	void resolveExceptionControllerAdviceAgainstProxy() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
@@ -520,6 +533,20 @@ public class ExceptionHandlerExceptionResolverTests {
 		@Bean
 		public DefaultTestExceptionResolver defaultTestExceptionResolver() {
 			return new DefaultTestExceptionResolver();
+		}
+	}
+
+	static class CustomResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+
+		@Override
+		public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+			return false;
+		}
+
+		@Override
+		public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
+				Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+			return null;
 		}
 	}
 
