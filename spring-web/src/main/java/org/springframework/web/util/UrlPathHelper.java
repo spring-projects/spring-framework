@@ -675,10 +675,4 @@ public class UrlPathHelper {
 		}
 	};
 
-
-	private static class HttpServletMappingHelper {
-
-
-
-	}
 }
