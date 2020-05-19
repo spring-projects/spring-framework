@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -626,4 +626,36 @@ public class UrlPathHelper {
 		return !flagToUse;
 	}
 
+
+	/**
+	 * Shared, read-only instance of {@code UrlPathHelper}. Uses default settings:
+	 * <ul>
+	 * <li>{@code alwaysUseFullPath=false}
+	 * <li>{@code urlDecode=true}
+	 * <li>{@code removeSemicolon=true}
+	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
+	 * </ul>
+	 */
+	public final static UrlPathHelper defaultInstance = new UrlPathHelper() {
+
+		@Override
+		public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setUrlDecode(boolean urlDecode) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setDefaultEncoding(String defaultEncoding) {
+			throw new UnsupportedOperationException();
+		}
+	};
 }

@@ -91,7 +91,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
 
 
-	private static final UrlPathHelper decodingUrlPathHelper = new UrlPathHelper();
+	private static final UrlPathHelper decodingUrlPathHelper = UrlPathHelper.defaultInstance;
 
 	private static final UrlPathHelper rawUrlPathHelper = new UrlPathHelper();
 

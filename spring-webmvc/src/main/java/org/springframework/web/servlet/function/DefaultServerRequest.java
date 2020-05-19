@@ -132,8 +132,7 @@ class DefaultServerRequest implements ServerRequest {
 	public String path() {
 		String path = (String) servletRequest().getAttribute(HandlerMapping.LOOKUP_PATH);
 		if (path == null) {
-			UrlPathHelper helper = new UrlPathHelper();
-			path = helper.getLookupPathForRequest(servletRequest());
+			path = UrlPathHelper.defaultInstance.getLookupPathForRequest(servletRequest());
 		}
 		return path;
 	}
