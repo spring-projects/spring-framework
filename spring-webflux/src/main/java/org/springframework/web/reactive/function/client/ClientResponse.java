@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public interface ClientResponse {
 	Headers headers();
 
 	/**
-	 * Return cookies of this response.
+	 * Return the cookies of this response.
 	 */
 	MultiValueMap<String, ResponseCookie> cookies();
 
@@ -253,7 +253,7 @@ public interface ClientResponse {
 		List<String> header(String headerName);
 
 		/**
-		 * Return the headers as a {@link HttpHeaders} instance.
+		 * Return the headers as an {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
 	}
@@ -266,14 +266,14 @@ public interface ClientResponse {
 
 		/**
 		 * Set the status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 */
 		Builder statusCode(HttpStatus statusCode);
 
 		/**
 		 * Set the raw status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 * @since 5.1.9
 		 */
@@ -281,7 +281,7 @@ public interface ClientResponse {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -289,11 +289,11 @@ public interface ClientResponse {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate this response's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
+		 * Manipulate this response's headers with the given consumer.
+		 * <p>The headers provided to the consumer are "live", so that the consumer
+		 * can be used to {@linkplain HttpHeaders#set(String, String) overwrite}
+		 * existing header values, {@linkplain HttpHeaders#remove(Object) remove}
+		 * values, or use any of the other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
@@ -308,9 +308,9 @@ public interface ClientResponse {
 		Builder cookie(String name, String... values);
 
 		/**
-		 * Manipulate this response's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * Manipulate this response's cookies with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookie values,
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
@@ -319,20 +319,21 @@ public interface ClientResponse {
 		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
-		 * Set the body of the response. Calling this methods will
+		 * Set the body of the response.
+		 * <p>Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
-		 * @param body the new body.
+		 * @param body the new body
 		 * @return this builder
 		 */
 		Builder body(Flux<DataBuffer> body);
 
 		/**
 		 * Set the body of the response to the UTF-8 encoded bytes of the given string.
-		 * Calling this methods will
+		 * <p>Calling this methods will
 		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
 		 * the existing body of the builder.
-		 * @param body the new body.
+		 * @param body the new body
 		 * @return this builder
 		 */
 		Builder body(String body);

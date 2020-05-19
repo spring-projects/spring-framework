@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +53,17 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	private Flux<DataBuffer> body = Flux.empty();
 
 
-	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
+	DefaultClientResponseBuilder(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
 	}
 
-	public DefaultClientResponseBuilder(ClientResponse other) {
+	DefaultClientResponseBuilder(ClientResponse other) {
 		Assert.notNull(other, "ClientResponse must not be null");
 		this.strategies = other.strategies();
 		this.statusCode = other.rawStatusCode();
-		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
-		cookies(cookies -> cookies.addAll(other.cookies()));
+		this.headers.addAll(other.headers().asHttpHeaders());
+		this.cookies.addAll(other.cookies());
 	}
 
 
@@ -153,7 +153,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 
 		private final Flux<DataBuffer> body;
 
-		public BuiltClientHttpResponse(int statusCode, HttpHeaders headers,
+		BuiltClientHttpResponse(int statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body) {
 
 			this.statusCode = statusCode;

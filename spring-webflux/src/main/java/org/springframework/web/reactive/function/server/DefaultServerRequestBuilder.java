@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.web.util.UriUtils;
  * Default {@link ServerRequest.Builder} implementation.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.1
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
@@ -84,15 +85,15 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	private Flux<DataBuffer> body = Flux.empty();
 
 
-	public DefaultServerRequestBuilder(ServerRequest other) {
+	DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.messageReaders = other.messageReaders();
 		this.exchange = other.exchange();
 		this.methodName = other.methodName();
 		this.uri = other.uri();
-		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
-		cookies(cookies -> cookies.addAll(other.cookies()));
-		attributes(attributes -> attributes.putAll(other.attributes()));
+		this.headers.addAll(other.headers().asHttpHeaders());
+		this.cookies.addAll(other.cookies());
+		this.attributes.putAll(other.attributes());
 	}
 
 
@@ -180,7 +181,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		ServerHttpRequest serverHttpRequest = new BuiltServerHttpRequest(this.exchange.getRequest().getId(),
 				this.methodName, this.uri, this.headers, this.cookies, this.body);
 		ServerWebExchange exchange = new DelegatingServerWebExchange(
-				serverHttpRequest, this.exchange, this.messageReaders);
+				serverHttpRequest, this.attributes, this.exchange, this.messageReaders);
 		return new DefaultServerRequest(exchange, this.messageReaders);
 	}
 
@@ -301,16 +302,19 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final ServerHttpRequest request;
 
+		private final Map<String, Object> attributes;
+
 		private final ServerWebExchange delegate;
 
 		private final Mono<MultiValueMap<String, String>> formDataMono;
 
 		private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
-		public DelegatingServerWebExchange(
-				ServerHttpRequest request, ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
+		DelegatingServerWebExchange(ServerHttpRequest request, Map<String, Object> attributes,
+				ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
 
 			this.request = request;
+			this.attributes = attributes;
 			this.delegate = delegate;
 			this.formDataMono = initFormData(request, messageReaders);
 			this.multipartDataMono = initMultipartData(request, messageReaders);
@@ -359,9 +363,15 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			}
 			return EMPTY_MULTIPART_DATA;
 		}
+
 		@Override
 		public ServerHttpRequest getRequest() {
 			return this.request;
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			return this.attributes;
 		}
 
 		@Override
@@ -379,11 +389,6 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public ServerHttpResponse getResponse() {
 			return this.delegate.getResponse();
-		}
-
-		@Override
-		public Map<String, Object> getAttributes() {
-			return this.delegate.getAttributes();
 		}
 
 		@Override
@@ -442,4 +447,5 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			return this.delegate.getLogPrefix();
 		}
 	}
+
 }

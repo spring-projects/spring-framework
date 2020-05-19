@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -296,8 +296,10 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Create a builder with the status, headers, and cookies of the given request.
-	 * @param other the response to copy the status, headers, and cookies from
+	 * Create a builder with the {@linkplain HttpMessageReader message readers},
+	 * method name, URI, headers, cookies, and attributes of the given request.
+	 * @param other the request to copy the message readers, method name, URI,
+	 * headers, and attributes from
 	 * @return the created builder
 	 * @since 5.1
 	 */
@@ -359,7 +361,7 @@ public interface ServerRequest {
 		List<HttpRange> range();
 
 		/**
-		 * Get the header value(s), if any, for the header of the given name.
+		 * Get the header value(s), if any, for the header with the given name.
 		 * <p>Returns an empty list if no header values are found.
 		 * @param headerName the header name
 		 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.server;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -29,11 +31,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseCookie;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link DefaultServerRequestBuilder}.
+ *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
 public class DefaultServerRequestBuilderTests {
 
@@ -49,6 +55,7 @@ public class DefaultServerRequestBuilderTests {
 
 		ServerRequest other =
 				ServerRequest.create(exchange, HandlerStrategies.withDefaults().messageReaders());
+		other.attributes().put("attr1", "value1");
 
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
@@ -58,6 +65,8 @@ public class DefaultServerRequestBuilderTests {
 				.method(HttpMethod.HEAD)
 				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", ResponseCookie.from("baz", "quux").build()))
+				.attribute("attr2", "value2")
+				.attributes(attributes -> attributes.put("attr3", "value3"))
 				.body(body)
 				.build();
 
@@ -66,6 +75,13 @@ public class DefaultServerRequestBuilderTests {
 		assertEquals("baar", result.headers().asHttpHeaders().getFirst("foo"));
 		assertEquals(1, result.cookies().size());
 		assertEquals("quux", result.cookies().getFirst("baz").getValue());
+
+		assertEquals(4, result.attributes().size());
+		assertEquals(new HashSet<>(Arrays.asList(ServerWebExchange.LOG_ID_ATTRIBUTE, "attr1", "attr2", "attr3")),
+				result.attributes().keySet());
+		assertEquals("value1", result.attributes().get("attr1"));
+		assertEquals("value2", result.attributes().get("attr2"));
+		assertEquals("value3", result.attributes().get("attr3"));
 
 		StepVerifier.create(result.bodyToFlux(String.class))
 				.expectNext("baz")
