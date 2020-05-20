@@ -84,7 +84,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 	private HttpRequest request;
 
 
-	public DefaultClientResponseBuilder(ExchangeStrategies strategies) {
+	DefaultClientResponseBuilder(ExchangeStrategies strategies) {
 		Assert.notNull(strategies, "ExchangeStrategies must not be null");
 		this.strategies = strategies;
 		this.headers = new HttpHeaders();
@@ -92,7 +92,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		this.request = EMPTY_REQUEST;
 	}
 
-	public DefaultClientResponseBuilder(ClientResponse other, boolean mutate) {
+	DefaultClientResponseBuilder(ClientResponse other, boolean mutate) {
 		Assert.notNull(other, "ClientResponse must not be null");
 		this.strategies = other.strategies();
 		this.statusCode = other.rawStatusCode();
@@ -229,7 +229,7 @@ final class DefaultClientResponseBuilder implements ClientResponse.Builder {
 		private final ClientResponse originalResponse;
 
 
-		public BuiltClientHttpResponse(int statusCode, @Nullable HttpHeaders headers,
+		BuiltClientHttpResponse(int statusCode, @Nullable HttpHeaders headers,
 				@Nullable MultiValueMap<String, ResponseCookie> cookies, Flux<DataBuffer> body,
 				@Nullable ClientResponse originalResponse) {
 

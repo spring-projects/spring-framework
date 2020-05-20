@@ -99,7 +99,7 @@ public interface ClientResponse {
 	Headers headers();
 
 	/**
-	 * Return cookies of this response.
+	 * Return the cookies of this response.
 	 */
 	MultiValueMap<String, ResponseCookie> cookies();
 
@@ -149,7 +149,7 @@ public interface ClientResponse {
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
-	 * Releases the body of this response.
+	 * Release the body of this response.
 	 * @return a completion signal
 	 * @since 5.2
 	 * @see org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)
@@ -207,11 +207,11 @@ public interface ClientResponse {
 
 	/**
 	 * Return a log message prefix to use to correlate messages for this exchange.
-	 * The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
+	 * <p>The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
 	 * itself is based on the value of the {@link ClientRequest#LOG_ID_ATTRIBUTE
 	 * LOG_ID_ATTRIBUTE} request attribute, further surrounded with "[" and "]".
 	 * @return the log message prefix or an empty String if the
-	 * {@link ClientRequest#LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
+	 * {@link ClientRequest#LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set
 	 * @since 5.2.3
 	 */
 	String logPrefix();
@@ -322,7 +322,7 @@ public interface ClientResponse {
 		List<String> header(String headerName);
 
 		/**
-		 * Return the headers as a {@link HttpHeaders} instance.
+		 * Return the headers as an {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
 	}
@@ -335,14 +335,14 @@ public interface ClientResponse {
 
 		/**
 		 * Set the status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 */
 		Builder statusCode(HttpStatus statusCode);
 
 		/**
 		 * Set the raw status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 * @since 5.1.9
 		 */
@@ -350,7 +350,7 @@ public interface ClientResponse {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -358,11 +358,11 @@ public interface ClientResponse {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate this response's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
+		 * Manipulate this response's headers with the given consumer.
+		 * <p>The headers provided to the consumer are "live", so that the consumer
+		 * can be used to {@linkplain HttpHeaders#set(String, String) overwrite}
+		 * existing header values, {@linkplain HttpHeaders#remove(Object) remove}
+		 * values, or use any of the other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
@@ -377,9 +377,9 @@ public interface ClientResponse {
 		Builder cookie(String name, String... values);
 
 		/**
-		 * Manipulate this response's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * Manipulate this response's cookies with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookie values,
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
@@ -397,7 +397,7 @@ public interface ClientResponse {
 
 		/**
 		 * Set the body of the response.
-		 * <p><strong>Note:</strong> This methods will drain the existing body,
+		 * <p><strong>Note:</strong> This method will drain the existing body,
 		 * if set in the builder.
 		 * @param body the new body to use
 		 * @return this builder
@@ -406,7 +406,7 @@ public interface ClientResponse {
 
 		/**
 		 * Set the body of the response to the UTF-8 encoded bytes of the given string.
-		 * <p><strong>Note:</strong> This methods will drain the existing body,
+		 * <p><strong>Note:</strong> This method will drain the existing body,
 		 * if set in the builder.
 		 * @param body the new body.
 		 * @return this builder
