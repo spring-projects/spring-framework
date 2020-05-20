@@ -382,9 +382,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					return wrapCacheValue(method, cache.get(key, () -> unwrapReturnValue(invokeOperation(invoker))));
 				}
 				catch (Cache.ValueRetrievalException ex) {
-					// The invoker wraps any Throwable in a ThrowableWrapper instance so we
-					// can just make sure that one bubbles up the stack.
-					throw (CacheOperationInvoker.ThrowableWrapper) ex.getCause();
+					// Wraps any Throwable in a ThrowableWrapper instance
+					Throwable cause = ex.getCause();
+					throw cause instanceof CacheOperationInvoker.ThrowableWrapper ?
+							(CacheOperationInvoker.ThrowableWrapper) cause :
+							new CacheOperationInvoker.ThrowableWrapper(cause);
 				}
 			}
 			else {
