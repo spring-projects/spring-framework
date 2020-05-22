@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	}
 
 	private Object serializeValue(SerializationDelegate serialization, Object storeValue) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 		try {
 			serialization.serialize(storeValue, out);
 			return out.toByteArray();
