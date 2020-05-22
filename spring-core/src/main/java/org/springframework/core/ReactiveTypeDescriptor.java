@@ -105,7 +105,7 @@ public final class ReactiveTypeDescriptor {
 	 * Whether the underlying operation is deferred and needs to be started
 	 * explicitly, e.g. via subscribing (or similar), or whether it is triggered
 	 * without the consumer having any control.
-	 * @since 5.1.16
+	 * @since 5.2.7
 	 */
 	public boolean isDeferred() {
 		return this.deferred;
@@ -169,7 +169,7 @@ public final class ReactiveTypeDescriptor {
 	 * non-deferred, async type such as {@link java.util.concurrent.CompletableFuture}.
 	 * @param type the reactive type
 	 * @param emptySupplier a supplier of an empty-value instance of the reactive type
-	 * @since 5.1.16
+	 * @since 5.2.7
 	 */
 	public static ReactiveTypeDescriptor nonDeferredAsyncValue(Class<?> type, Supplier<?> emptySupplier) {
 		return new ReactiveTypeDescriptor(type, false, false, emptySupplier, false);
