@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.util.function.SupplierUtils;
@@ -381,9 +382,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					return wrapCacheValue(method, cache.get(key, () -> unwrapReturnValue(invokeOperation(invoker))));
 				}
 				catch (Cache.ValueRetrievalException ex) {
-					// The invoker wraps any Throwable in a ThrowableWrapper instance so we
-					// can just make sure that one bubbles up the stack.
-					throw (CacheOperationInvoker.ThrowableWrapper) ex.getCause();
+					// Directly propagate ThrowableWrapper from the invoker,
+					// or potentially also an IllegalArgumentException etc.
+					ReflectionUtils.rethrowRuntimeException(ex.getCause());
 				}
 			}
 			else {
