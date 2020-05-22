@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,12 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -69,11 +73,16 @@ public class DefaultClientResponseBuilderTests {
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
 				.map(dataBufferFactory::wrap);
 
-		ClientResponse other = ClientResponse.create(HttpStatus.BAD_REQUEST, ExchangeStrategies.withDefaults())
-				.header("foo", "bar")
-				.cookie("baz", "qux")
-				.body(otherBody)
-				.build();
+		HttpRequest mockClientHttpRequest = new MockClientHttpRequest(HttpMethod.GET, "/path");
+
+		MockClientHttpResponse httpResponse = new MockClientHttpResponse(HttpStatus.BAD_REQUEST);
+		httpResponse.getHeaders().add("foo", "bar");
+		httpResponse.getCookies().add("baz", ResponseCookie.from("baz", "qux").build());
+		httpResponse.setBody(otherBody);
+
+
+		DefaultClientResponse other = new DefaultClientResponse(
+				httpResponse, ExchangeStrategies.withDefaults(), "my-prefix", "", () -> mockClientHttpRequest);
 
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
@@ -86,10 +95,11 @@ public class DefaultClientResponseBuilderTests {
 				.build();
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(1);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(2);
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.cookies().size()).isEqualTo(1);
 		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
+		assertThat(result.logPrefix()).isEqualTo("my-prefix");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
 				.expectNext("baz")
@@ -104,5 +114,4 @@ public class DefaultClientResponseBuilderTests {
 		assertThat(result.rawStatusCode()).isEqualTo(499);
 		assertThatIllegalArgumentException().isThrownBy(result::statusCode);
 	}
-
 }

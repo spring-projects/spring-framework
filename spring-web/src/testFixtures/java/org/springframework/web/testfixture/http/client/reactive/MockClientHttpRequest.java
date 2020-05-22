@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.client.reactive.AbstractClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
@@ -46,7 +47,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class MockClientHttpRequest extends AbstractClientHttpRequest {
+public class MockClientHttpRequest extends AbstractClientHttpRequest implements HttpRequest {
 
 	private final HttpMethod httpMethod;
 
@@ -94,6 +95,11 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return this.httpMethod;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.httpMethod.name();
 	}
 
 	@Override
