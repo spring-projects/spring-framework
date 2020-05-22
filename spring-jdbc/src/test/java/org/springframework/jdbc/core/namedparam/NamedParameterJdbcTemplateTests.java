@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,6 +237,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -259,6 +260,7 @@ public class NamedParameterJdbcTemplateTests {
 		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -285,6 +287,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -307,6 +310,7 @@ public class NamedParameterJdbcTemplateTests {
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -326,12 +330,14 @@ public class NamedParameterJdbcTemplateTests {
 					cust.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust;
 				});
+
 		assertThat(customers.size()).isEqualTo(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -349,10 +355,12 @@ public class NamedParameterJdbcTemplateTests {
 					cust.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust;
 				});
+
 		assertThat(customers.size()).isEqualTo(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -365,6 +373,7 @@ public class NamedParameterJdbcTemplateTests {
 
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
+
 		Customer cust = namedParameterTemplate.queryForObject(SELECT_NAMED_PARAMETERS, params,
 				(rs, rownum) -> {
 					Customer cust1 = new Customer();
@@ -372,11 +381,13 @@ public class NamedParameterJdbcTemplateTests {
 					cust1.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust1;
 				});
+
 		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
