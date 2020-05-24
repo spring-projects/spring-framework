@@ -83,7 +83,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		if (!getCookies().isEmpty() && this.headers.get(HttpHeaders.SET_COOKIE) == null) {
 			getCookies().values().stream().flatMap(Collection::stream)
-					.forEach(cookie -> getHeaders().add(HttpHeaders.SET_COOKIE, cookie.toString()));
+					.forEach(cookie -> this.headers.add(HttpHeaders.SET_COOKIE, cookie.toString()));
 		}
 		return this.headers;
 	}
