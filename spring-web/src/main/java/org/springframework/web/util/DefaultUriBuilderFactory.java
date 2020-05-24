@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,14 @@ import org.springframework.util.StringUtils;
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	/**
-	 * Enum to represent multiple URI encoding strategies.
+	 * Enum to represent multiple URI encoding strategies. The following are
+	 * available:
+	 * <ul>
+	 * <li>{@link #TEMPLATE_AND_VALUES}
+	 * <li>{@link #VALUES_ONLY}
+	 * <li>{@link #URI_COMPONENT}
+	 * <li>{@link #NONE}
+	 * </ul>
 	 * @see #setEncodingMode
 	 */
 	public enum EncodingMode {
@@ -130,16 +137,13 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
-	 * Set the encoding mode to use.
+	 * Set the {@link EncodingMode encoding mode} to use.
 	 * <p>By default this is set to {@link EncodingMode#TEMPLATE_AND_VALUES
 	 * EncodingMode.TEMPLATE_AND_VALUES}.
-	 * <p><strong>Note:</strong> In 5.1 the default was changed from
-	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
-	 * Consequently the {@code WebClient}, which relies on the built-in default
-	 * has also been switched to the new default. The {@code RestTemplate}
-	 * however sets this explicitly to {@link EncodingMode#URI_COMPONENT
-	 * EncodingMode.URI_COMPONENT} explicitly for historic and backwards
-	 * compatibility reasons.
+	 * <p><strong>Note:</strong> Prior to 5.1 the default was
+	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}
+	 * therefore the {@code WebClient} {@code RestTemplate} have switched their
+	 * default behavior.
 	 * @param encodingMode the encoding mode to use
 	 */
 	public void setEncodingMode(EncodingMode encodingMode) {
