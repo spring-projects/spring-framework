@@ -207,6 +207,7 @@ configure(allprojects) { project ->
 			}
 			dependency "org.skyscreamer:jsonassert:1.5.0"
 			dependency "com.jayway.jsonpath:json-path:2.4.0"
+			dependency "org.bouncycastle:bcpkix-jdk15on:1.65"
 
 			dependencySet(group: 'org.apache.tiles', version: '3.0.8') {
 				entry 'tiles-api'

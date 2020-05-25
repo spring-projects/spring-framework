@@ -83,4 +83,7 @@ dependencies {
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.apache.taglibs:taglibs-standard-jstlel")
 	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.bouncycastle:bcpkix-jdk15on") {
+		because("needed by Netty's SelfSignedCertificate on JDK 15+")
+	}
 }
