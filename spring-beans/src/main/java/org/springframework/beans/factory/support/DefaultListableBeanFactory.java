@@ -46,7 +46,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Provider;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
@@ -156,7 +155,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private Comparator<Object> dependencyComparator;
 
 	/** Resolver to use for checking if a bean definition is an autowire candidate. */
-	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
+	private AutowireCandidateResolver autowireCandidateResolver = SimpleAutowireCandidateResolver.INSTANCE;
 
 	/** Map from dependency type to corresponding autowired value. */
 	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
@@ -327,8 +326,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
 			this.dependencyComparator = otherListableFactory.dependencyComparator;
 			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware...
-			setAutowireCandidateResolver(
-					BeanUtils.instantiateClass(otherListableFactory.getAutowireCandidateResolver().getClass()));
+			setAutowireCandidateResolver(otherListableFactory.getAutowireCandidateResolver().cloneIfNecessary());
 			// Make resolvable dependencies (e.g. ResourceLoader) available here as well...
 			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}

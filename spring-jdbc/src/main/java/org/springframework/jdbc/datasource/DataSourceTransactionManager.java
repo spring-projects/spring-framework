@@ -254,9 +254,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		return (txObject.hasConnectionHolder() && txObject.getConnectionHolder().isTransactionActive());
 	}
 
-	/**
-	 * This implementation sets the isolation level but ignores the timeout.
-	 */
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
