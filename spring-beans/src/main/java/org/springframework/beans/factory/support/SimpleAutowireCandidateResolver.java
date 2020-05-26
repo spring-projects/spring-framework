@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,11 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	@Override
 	public boolean isRequired(DependencyDescriptor descriptor) {
 		return descriptor.isRequired();
+	}
+
+	@Override
+	public boolean hasQualifier(DependencyDescriptor descriptor) {
+		return false;
 	}
 
 	@Override
