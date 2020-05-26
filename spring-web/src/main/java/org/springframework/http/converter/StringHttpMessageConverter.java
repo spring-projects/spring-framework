@@ -139,18 +139,19 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	private Charset getContentTypeCharset(@Nullable MediaType contentType) {
-		if (contentType != null && contentType.getCharset() != null) {
-			return contentType.getCharset();
+		if (contentType != null) {
+			Charset charset = contentType.getCharset();
+			if (charset != null) {
+				return charset;
+			}
+			else if (contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+				// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
+				return StandardCharsets.UTF_8;
+			}
 		}
-		else if (contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON)) {
-			// Matching to AbstractJackson2HttpMessageConverter#DEFAULT_CHARSET
-			return StandardCharsets.UTF_8;
-		}
-		else {
-			Charset charset = getDefaultCharset();
-			Assert.state(charset != null, "No default charset");
-			return charset;
-		}
+		Charset charset = getDefaultCharset();
+		Assert.state(charset != null, "No default charset");
+		return charset;
 	}
 
 }
