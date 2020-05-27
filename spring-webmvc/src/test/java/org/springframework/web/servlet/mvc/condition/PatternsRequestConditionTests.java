@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,8 +48,10 @@ public class PatternsRequestConditionTests {
 	public void combineEmptySets() {
 		PatternsRequestCondition c1 = new PatternsRequestCondition();
 		PatternsRequestCondition c2 = new PatternsRequestCondition();
+		PatternsRequestCondition c3 = c1.combine(c2);
 
-		assertThat(c1.combine(c2)).isEqualTo(new PatternsRequestCondition(""));
+		assertThat(c3).isSameAs(c1);
+		assertThat(c1.getPatterns()).isSameAs(c2.getPatterns()).containsExactly("");
 	}
 
 	@Test
@@ -118,9 +120,8 @@ public class PatternsRequestConditionTests {
 
 	@Test // SPR-8410
 	public void matchSuffixPatternUsingFileExtensions() {
-		String[] patterns = new String[] {"/jobs/{jobName}"};
-		List<String> extensions = Arrays.asList("json");
-		PatternsRequestCondition condition = new PatternsRequestCondition(patterns, null, null, true, false, extensions);
+		PatternsRequestCondition condition = new PatternsRequestCondition(
+				new String[] {"/jobs/{jobName}"}, null, null, true, false, Collections.singletonList("json"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/jobs/my.job");
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
@@ -165,9 +166,11 @@ public class PatternsRequestConditionTests {
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNotNull();
-		assertThat(match.getPatterns().iterator().next()).as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)").isEqualTo("/foo/");
+		assertThat(match.getPatterns().iterator().next())
+				.as("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)")
+				.isEqualTo("/foo/");
 
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, false, false);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, false);
 		match = condition.getMatchingCondition(request);
 
 		assertThat(match).isNull();
@@ -175,8 +178,8 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchPatternContainsExtension() {
-		PatternsRequestCondition condition = new PatternsRequestCondition("/foo.jpg");
-		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo.html"));
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.html");
+		PatternsRequestCondition match = new PatternsRequestCondition("/foo.jpg").getMatchingCondition(request);
 
 		assertThat(match).isNull();
 	}
@@ -184,12 +187,10 @@ public class PatternsRequestConditionTests {
 	@Test // gh-22543
 	public void matchWithEmptyPatterns() {
 		PatternsRequestCondition condition = new PatternsRequestCondition();
-		assertThat(condition).isEqualTo(new PatternsRequestCondition(""));
 		assertThat(condition.getMatchingCondition(new MockHttpServletRequest("GET", ""))).isNotNull();
 		assertThat(condition.getMatchingCondition(new MockHttpServletRequest("GET", "/anything"))).isNull();
 
 		condition = condition.combine(new PatternsRequestCondition());
-		assertThat(condition).isEqualTo(new PatternsRequestCondition(""));
 		assertThat(condition.getMatchingCondition(new MockHttpServletRequest("GET", ""))).isNotNull();
 		assertThat(condition.getMatchingCondition(new MockHttpServletRequest("GET", "/anything"))).isNull();
 	}
@@ -211,7 +212,7 @@ public class PatternsRequestConditionTests {
 	}
 
 	@Test
-	public void compareNumberOfMatchingPatterns() throws Exception {
+	public void compareNumberOfMatchingPatterns() {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/foo.html");
 
 		PatternsRequestCondition c1 = new PatternsRequestCondition("/foo", "*.jpeg");
