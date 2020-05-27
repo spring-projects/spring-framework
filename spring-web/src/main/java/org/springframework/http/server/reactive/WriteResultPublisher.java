@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,6 +182,9 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishError(publisher, ex);
+				}
 			}
 		},
 
@@ -200,6 +203,9 @@ class WriteResultPublisher implements Publisher<Void> {
 			@Override
 			void publishError(WriteResultPublisher publisher, Throwable ex) {
 				publisher.errorBeforeSubscribed = ex;
+				if(State.SUBSCRIBED.equals(publisher.state.get())) {
+					publisher.state.get().publishError(publisher, ex);
+				}
 			}
 		},
 
