@@ -232,6 +232,8 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @return the created builder
 	 */
 	public static BodyBuilder method(HttpMethod method, String urlTemplate, Object... vars) {
+		Assert.notNull(method, "HttpMethod is required. If testing a custom HTTP method, " +
+				"please use the variant that accepts a String based HTTP method.");
 		URI url = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri();
 		return new DefaultBodyBuilder(method, url);
 	}
