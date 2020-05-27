@@ -44,16 +44,33 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void createEmpty() {
+
 		RequestMappingInfo info = paths().build();
 
 		// gh-22543
 		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton(""));
 		assertThat(info.getMethodsCondition().getMethods().size()).isEqualTo(0);
-		assertThat(info.getConsumesCondition().isEmpty()).isEqualTo(true);
-		assertThat(info.getProducesCondition().isEmpty()).isEqualTo(true);
 		assertThat(info.getParamsCondition()).isNotNull();
 		assertThat(info.getHeadersCondition()).isNotNull();
+		assertThat(info.getConsumesCondition().isEmpty()).isEqualTo(true);
+		assertThat(info.getProducesCondition().isEmpty()).isEqualTo(true);
 		assertThat(info.getCustomCondition()).isNull();
+
+		RequestMappingInfo anotherInfo = paths().build();
+		assertThat(info.getPatternsCondition()).isSameAs(anotherInfo.getPatternsCondition());
+		assertThat(info.getMethodsCondition()).isSameAs(anotherInfo.getMethodsCondition());
+		assertThat(info.getParamsCondition()).isSameAs(anotherInfo.getParamsCondition());
+		assertThat(info.getHeadersCondition()).isSameAs(anotherInfo.getHeadersCondition());
+		assertThat(info.getConsumesCondition()).isSameAs(anotherInfo.getConsumesCondition());
+		assertThat(info.getProducesCondition()).isSameAs(anotherInfo.getProducesCondition());
+
+		RequestMappingInfo result = info.combine(anotherInfo);
+		assertThat(info.getPatternsCondition()).isSameAs(result.getPatternsCondition());
+		assertThat(info.getMethodsCondition()).isSameAs(result.getMethodsCondition());
+		assertThat(info.getParamsCondition()).isSameAs(result.getParamsCondition());
+		assertThat(info.getHeadersCondition()).isSameAs(result.getHeadersCondition());
+		assertThat(info.getConsumesCondition()).isSameAs(result.getConsumesCondition());
+		assertThat(info.getProducesCondition()).isSameAs(result.getProducesCondition());
 	}
 
 	@Test
