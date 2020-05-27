@@ -1409,10 +1409,7 @@ You can map requests by using glob patterns and wildcards:
 
 | `+?+`
 | Matches one character
-| `+"/pages/t?st.html"+`
-
-matches `+"/pages/test.html"+`
-and `+"/pages/t3st.html"+`
+| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
 
 | `+*+`
 | Matches zero or more characters within a path segment
@@ -1436,7 +1433,7 @@ and `+"/pages/t3st.html"+`
 
 | `+{*path}+`
 | Matches zero or more path segments until the end of the path and captures it as a variable named "path"
-| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=resources/file.png+`
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=images/file.png+`
 
 |===
 
@@ -1503,8 +1500,8 @@ URI variables can be named explicitly (for example, `@PathVariable("customId")`)
 leave that detail out if the names are the same and you compile your code with debugging
 information or with the `-parameters` compiler flag on Java 8.
 
-The syntax `{*varName}` declares a URI variable that matches zero or more remaining
-path segments. For example `/resources/{*path}` matches all files `/resources/` and the
+The syntax `{*varName}` declares a URI variable that matches zero or more remaining path
+segments. For example `/resources/{*path}` matches all files under `/resources/`, and the
 `"path"` variable captures the complete relative path.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
