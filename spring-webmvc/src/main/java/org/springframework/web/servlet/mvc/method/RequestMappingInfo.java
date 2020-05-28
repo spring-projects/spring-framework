@@ -69,6 +69,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final ProducesRequestCondition EMPTY_PRODUCES = new ProducesRequestCondition();
 
+	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
+
+
 
 	@Nullable
 	private final String name;
@@ -100,7 +103,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		this.headersCondition = (headers != null ? headers : EMPTY_HEADERS);
 		this.consumesCondition = (consumes != null ? consumes : EMPTY_CONSUMES);
 		this.producesCondition = (produces != null ? produces : EMPTY_PRODUCES);
-		this.customConditionHolder = new RequestConditionHolder(custom);
+		this.customConditionHolder = (custom != null ? new RequestConditionHolder(custom) : EMPTY_CUSTOM);
 	}
 
 	/**
