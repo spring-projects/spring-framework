@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,6 +209,31 @@ class CollectionUtilsTests {
 
 		list = new LinkedList<>();
 		assertThat(CollectionUtils.hasUniqueObject(list)).isFalse();
+	}
+
+	@Test
+	void conversionOfEmptyMap() {
+		MultiValueMap<String,  List<String>> asMultiValueMap = CollectionUtils.toMultiValueMap(new HashMap<>());
+		assertThat(asMultiValueMap.isEmpty()).isTrue();
+		assertThat(asMultiValueMap).isEmpty();
+	}
+
+	@Test
+	void conversionOfNonEmptyMap() {
+		Map<String, List<String>> wrapped = new HashMap<>();
+		wrapped.put("key", Arrays.asList("first", "second"));
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(wrapped);
+		assertThat(asMultiValueMap).containsAllEntriesOf(wrapped);
+	}
+
+	@Test
+	void changesValueByReference() {
+		Map<String, List<String>> wrapped = new HashMap<>();
+		MultiValueMap<String, String> asMultiValueMap = CollectionUtils.toMultiValueMap(wrapped);
+		assertThat(asMultiValueMap).doesNotContainKeys("key");
+		wrapped.put("key", new ArrayList<>());
+
+		assertThat(asMultiValueMap).containsKey("key");
 	}
 
 
