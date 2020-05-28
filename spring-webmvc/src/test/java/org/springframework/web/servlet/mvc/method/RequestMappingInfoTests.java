@@ -63,6 +63,7 @@ public class RequestMappingInfoTests {
 		assertThat(info.getHeadersCondition()).isSameAs(anotherInfo.getHeadersCondition());
 		assertThat(info.getConsumesCondition()).isSameAs(anotherInfo.getConsumesCondition());
 		assertThat(info.getProducesCondition()).isSameAs(anotherInfo.getProducesCondition());
+		assertThat(info.getCustomCondition()).isSameAs(anotherInfo.getCustomCondition());
 
 		RequestMappingInfo result = info.combine(anotherInfo);
 		assertThat(info.getPatternsCondition()).isSameAs(result.getPatternsCondition());
@@ -71,6 +72,7 @@ public class RequestMappingInfoTests {
 		assertThat(info.getHeadersCondition()).isSameAs(result.getHeadersCondition());
 		assertThat(info.getConsumesCondition()).isSameAs(result.getConsumesCondition());
 		assertThat(info.getProducesCondition()).isSameAs(result.getProducesCondition());
+		assertThat(info.getCustomCondition()).isSameAs(result.getCustomCondition());
 	}
 
 	@Test
