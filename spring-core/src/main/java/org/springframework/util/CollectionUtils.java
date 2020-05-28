@@ -482,9 +482,8 @@ public abstract class CollectionUtils {
 
 		@Override
 		@Nullable
-		public V getFirst(K key) {
-			List<V> values = this.map.get(key);
-			return (values != null ? values.get(0) : null);
+		public V getFirst(@Nullable K key) {
+			return firstElement(this.map.get(key));
 		}
 
 		@Override
@@ -521,7 +520,7 @@ public abstract class CollectionUtils {
 		@Override
 		public Map<K, V> toSingleValueMap() {
 			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.map.size());
-			this.map.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
+			this.map.forEach((key, value) -> singleValueMap.put(key, firstElement(value)));
 			return singleValueMap;
 		}
 
@@ -603,5 +602,4 @@ public abstract class CollectionUtils {
 			return this.map.toString();
 		}
 	}
-
 }
