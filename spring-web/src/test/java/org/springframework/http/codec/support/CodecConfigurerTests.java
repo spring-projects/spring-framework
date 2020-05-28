@@ -279,7 +279,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneCustomCodecs() {
+	public void cloneEmptyCustomCodecs() {
 		this.configurer.registerDefaults(false);
 		CodecConfigurer clone = this.configurer.clone();
 
@@ -290,6 +290,22 @@ public class CodecConfigurerTests {
 
 		assertThat(this.configurer.getReaders().size()).isEqualTo(0);
 		assertThat(this.configurer.getWriters().size()).isEqualTo(0);
+		assertThat(clone.getReaders().size()).isEqualTo(2);
+		assertThat(clone.getWriters().size()).isEqualTo(2);
+	}
+
+	@Test
+	public void cloneCustomCodecs() {
+		CodecConfigurer from = new TestCodecConfigurer();
+		from.registerDefaults(false);
+		from.customCodecs().register(new Jackson2JsonEncoder());
+		from.customCodecs().register(new Jackson2JsonDecoder());
+		from.customCodecs().register(new ServerSentEventHttpMessageReader());
+		from.customCodecs().register(new ServerSentEventHttpMessageWriter());
+
+		CodecConfigurer clone = from.clone();
+		assertThat(from.getReaders().size()).isEqualTo(2);
+		assertThat(from.getWriters().size()).isEqualTo(2);
 		assertThat(clone.getReaders().size()).isEqualTo(2);
 		assertThat(clone.getWriters().size()).isEqualTo(2);
 	}
