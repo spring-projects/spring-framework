@@ -142,10 +142,10 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 		 * @since 5.1.12
 		 */
 		DefaultCustomCodecs(DefaultCustomCodecs other) {
-			other.typedReaders.putAll(this.typedReaders);
-			other.typedWriters.putAll(this.typedWriters);
-			other.objectReaders.putAll(this.objectReaders);
-			other.objectWriters.putAll(this.objectWriters);
+			this.typedReaders.putAll(other.typedReaders);
+			this.typedWriters.putAll(other.typedWriters);
+			this.objectReaders.putAll(other.objectReaders);
+			this.objectWriters.putAll(other.objectWriters);
 		}
 
 		@Override
