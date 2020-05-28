@@ -560,7 +560,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 
-	private class CorsInterceptor extends HandlerInterceptorAdapter implements CorsConfigurationSource {
+	private class CorsInterceptor implements HandlerInterceptor, CorsConfigurationSource {
 
 		@Nullable
 		private final CorsConfiguration config;
