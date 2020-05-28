@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.SSLSession;
 
@@ -34,9 +33,6 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.DataBufferWrapper;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -172,7 +168,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		protected DataBuffer read() throws IOException {
 			PooledByteBuffer pooledByteBuffer = this.byteBufferPool.allocate();
-			boolean release = true;
 			try {
 				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
 				int read = this.channel.read(byteBuffer);
@@ -183,9 +178,9 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 				if (read > 0) {
 					byteBuffer.flip();
-					DataBuffer dataBuffer = this.bufferFactory.wrap(byteBuffer);
-					release = false;
-					return new UndertowDataBuffer(dataBuffer, pooledByteBuffer);
+					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
+					dataBuffer.write(byteBuffer);
+					return dataBuffer;
 				}
 				else if (read == -1) {
 					onAllDataRead();
@@ -193,9 +188,7 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				return null;
 			}
 			finally {
-				if (release && pooledByteBuffer.isOpen()) {
-					pooledByteBuffer.close();
-				}
+				pooledByteBuffer.close();
 			}
 		}
 
@@ -203,61 +196,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		protected void discardData() {
 			// Nothing to discard since we pass data buffers on immediately..
 		}
-	}
-
-
-	private static class UndertowDataBuffer extends DataBufferWrapper implements PooledDataBuffer {
-
-		private final PooledByteBuffer pooledByteBuffer;
-
-		private final AtomicInteger refCount;
-
-
-		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
-			super(dataBuffer);
-			this.pooledByteBuffer = pooledByteBuffer;
-			this.refCount = new AtomicInteger(1);
-		}
-
-		private UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer,
-				AtomicInteger refCount) {
-			super(dataBuffer);
-			this.refCount = refCount;
-			this.pooledByteBuffer = pooledByteBuffer;
-		}
-
-		@Override
-		public boolean isAllocated() {
-			return this.refCount.get() > 0;
-		}
-
-		@Override
-		public PooledDataBuffer retain() {
-			this.refCount.incrementAndGet();
-			DataBufferUtils.retain(dataBuffer());
-			return this;
-		}
-
-		@Override
-		public boolean release() {
-			int refCount = this.refCount.decrementAndGet();
-			if (refCount == 0) {
-				try {
-					return DataBufferUtils.release(dataBuffer());
-				}
-				finally {
-					this.pooledByteBuffer.close();
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			DataBuffer slice = dataBuffer().slice(index, length);
-			return new UndertowDataBuffer(slice, this.pooledByteBuffer, this.refCount);
-		}
-
 	}
 
 }
