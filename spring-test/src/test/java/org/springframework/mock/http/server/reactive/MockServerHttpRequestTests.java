@@ -17,11 +17,18 @@
 package org.springframework.mock.http.server.reactive;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,4 +63,22 @@ class MockServerHttpRequestTests {
 		assertThat(request.getURI().toString()).isEqualTo("/foo%20bar?a=b&name%20A=value%20A1&name%20A=value%20A2&name%20B=value%20B1");
 	}
 
+	@ParameterizedTest
+	@MethodSource("invalidMockServerHttpRequestBuilds")
+	void httpMethodNotNullOrEmpty(Executable executable) {
+		IllegalArgumentException expectedIllegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class,
+				executable);
+		assertThat(expectedIllegalArgumentException.getMessage()).contains("HttpMethod is required.");
+	}
+
+	static Stream<Executable> invalidMockServerHttpRequestBuilds() {
+		String uriTemplate = "/foo bar?a=b";
+		return Stream.of(
+				() -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build(),
+				() -> MockServerHttpRequest.method((HttpMethod) null, uriTemplate).build(),
+				() -> MockServerHttpRequest.method((String) null, uriTemplate).build(),
+				() -> MockServerHttpRequest.method("", uriTemplate).build(),
+				() -> MockServerHttpRequest.method("   ", uriTemplate).build()
+		);
+	}
 }

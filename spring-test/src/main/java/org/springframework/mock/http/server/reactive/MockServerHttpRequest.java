@@ -452,7 +452,8 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		protected DefaultBodyBuilder(String methodValue, URI url) {
 			Assert.isTrue(StringUtils.hasLength(methodValue) &&
-					StringUtils.hasLength(methodValue.trim()), "HTTP methodValue must not be empty");
+					StringUtils.hasLength(methodValue.trim()), "HttpMethod is required. " +
+					"Please initialize it to non empty value");
 			this.methodValue = methodValue.trim();
 			this.url = url;
 		}
