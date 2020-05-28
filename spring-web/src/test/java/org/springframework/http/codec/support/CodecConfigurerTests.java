@@ -67,7 +67,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class CodecConfigurerTests {
+class CodecConfigurerTests {
 
 	private final CodecConfigurer configurer = new TestCodecConfigurer();
 
@@ -75,7 +75,7 @@ public class CodecConfigurerTests {
 
 
 	@Test
-	public void defaultReaders() {
+	void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
 		assertThat(readers.size()).isEqualTo(11);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
@@ -92,7 +92,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultWriters() {
+	void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
 		assertThat(writers.size()).isEqualTo(10);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
@@ -108,7 +108,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultAndCustomReaders() {
+	void defaultAndCustomReaders() {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
@@ -148,7 +148,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultAndCustomWriters() {
+	void defaultAndCustomWriters() {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
@@ -187,7 +187,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultsOffCustomReaders() {
+	void defaultsOffCustomReaders() {
 		Decoder<?> customDecoder1 = mock(Decoder.class);
 		Decoder<?> customDecoder2 = mock(Decoder.class);
 
@@ -218,7 +218,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void defaultsOffWithCustomWriters() {
+	void defaultsOffWithCustomWriters() {
 		Encoder<?> customEncoder1 = mock(Encoder.class);
 		Encoder<?> customEncoder2 = mock(Encoder.class);
 
@@ -249,7 +249,7 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void encoderDecoderOverrides() {
+	void encoderDecoderOverrides() {
 		Jackson2JsonDecoder jacksonDecoder = new Jackson2JsonDecoder();
 		Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
 		Jackson2SmileDecoder smileDecoder = new Jackson2SmileDecoder();
@@ -279,39 +279,45 @@ public class CodecConfigurerTests {
 	}
 
 	@Test
-	public void cloneEmptyCustomCodecs() {
+	void cloneEmptyCustomCodecs() {
 		this.configurer.registerDefaults(false);
-		CodecConfigurer clone = this.configurer.clone();
+		assertThat(this.configurer.getReaders()).isEmpty();
+		assertThat(this.configurer.getWriters()).isEmpty();
 
+		CodecConfigurer clone = this.configurer.clone();
 		clone.customCodecs().register(new Jackson2JsonEncoder());
 		clone.customCodecs().register(new Jackson2JsonDecoder());
 		clone.customCodecs().register(new ServerSentEventHttpMessageReader());
 		clone.customCodecs().register(new ServerSentEventHttpMessageWriter());
 
-		assertThat(this.configurer.getReaders().size()).isEqualTo(0);
-		assertThat(this.configurer.getWriters().size()).isEqualTo(0);
-		assertThat(clone.getReaders().size()).isEqualTo(2);
-		assertThat(clone.getWriters().size()).isEqualTo(2);
+		assertThat(this.configurer.getReaders()).isEmpty();
+		assertThat(this.configurer.getWriters()).isEmpty();
+		assertThat(clone.getReaders()).hasSize(2);
+		assertThat(clone.getWriters()).hasSize(2);
 	}
 
 	@Test
-	public void cloneCustomCodecs() {
-		CodecConfigurer from = new TestCodecConfigurer();
-		from.registerDefaults(false);
-		from.customCodecs().register(new Jackson2JsonEncoder());
-		from.customCodecs().register(new Jackson2JsonDecoder());
-		from.customCodecs().register(new ServerSentEventHttpMessageReader());
-		from.customCodecs().register(new ServerSentEventHttpMessageWriter());
+	void cloneCustomCodecs() {
+		this.configurer.registerDefaults(false);
+		assertThat(this.configurer.getReaders()).isEmpty();
+		assertThat(this.configurer.getWriters()).isEmpty();
 
-		CodecConfigurer clone = from.clone();
-		assertThat(from.getReaders().size()).isEqualTo(2);
-		assertThat(from.getWriters().size()).isEqualTo(2);
-		assertThat(clone.getReaders().size()).isEqualTo(2);
-		assertThat(clone.getWriters().size()).isEqualTo(2);
+		this.configurer.customCodecs().register(new Jackson2JsonEncoder());
+		this.configurer.customCodecs().register(new Jackson2JsonDecoder());
+		this.configurer.customCodecs().register(new ServerSentEventHttpMessageReader());
+		this.configurer.customCodecs().register(new ServerSentEventHttpMessageWriter());
+		assertThat(this.configurer.getReaders()).hasSize(2);
+		assertThat(this.configurer.getWriters()).hasSize(2);
+
+		CodecConfigurer clone = this.configurer.clone();
+		assertThat(this.configurer.getReaders()).hasSize(2);
+		assertThat(this.configurer.getWriters()).hasSize(2);
+		assertThat(clone.getReaders()).hasSize(2);
+		assertThat(clone.getWriters()).hasSize(2);
 	}
 
 	@Test
-	public void cloneDefaultCodecs() {
+	void cloneDefaultCodecs() {
 		CodecConfigurer clone = this.configurer.clone();
 
 		Jackson2JsonDecoder jacksonDecoder = new Jackson2JsonDecoder();
