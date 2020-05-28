@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,8 +275,10 @@ public class CodecConfigurerTests {
 	@Test
 	public void cloneEmptyCustomCodecs() {
 		this.configurer.registerDefaults(false);
-		CodecConfigurer clone = this.configurer.clone();
+		assertEquals(0, this.configurer.getReaders().size());
+		assertEquals(0, this.configurer.getWriters().size());
 
+		CodecConfigurer clone = this.configurer.clone();
 		clone.customCodecs().register(new Jackson2JsonEncoder());
 		clone.customCodecs().register(new Jackson2JsonDecoder());
 		clone.customCodecs().register(new ServerSentEventHttpMessageReader());
@@ -290,16 +292,20 @@ public class CodecConfigurerTests {
 
 	@Test
 	public void cloneCustomCodecs() {
-		CodecConfigurer from = new TestCodecConfigurer();
-		from.registerDefaults(false);
-		from.customCodecs().register(new Jackson2JsonEncoder());
-		from.customCodecs().register(new Jackson2JsonDecoder());
-		from.customCodecs().register(new ServerSentEventHttpMessageReader());
-		from.customCodecs().register(new ServerSentEventHttpMessageWriter());
+		this.configurer.registerDefaults(false);
+		assertEquals(0, this.configurer.getReaders().size());
+		assertEquals(0, this.configurer.getWriters().size());
 
-		CodecConfigurer clone = from.clone();
-		assertEquals(2, from.getReaders().size());
-		assertEquals(2, from.getWriters().size());
+		this.configurer.customCodecs().register(new Jackson2JsonEncoder());
+		this.configurer.customCodecs().register(new Jackson2JsonDecoder());
+		this.configurer.customCodecs().register(new ServerSentEventHttpMessageReader());
+		this.configurer.customCodecs().register(new ServerSentEventHttpMessageWriter());
+		assertEquals(2, this.configurer.getReaders().size());
+		assertEquals(2, this.configurer.getWriters().size());
+
+		CodecConfigurer clone = this.configurer.clone();
+		assertEquals(2, this.configurer.getReaders().size());
+		assertEquals(2, this.configurer.getWriters().size());
 		assertEquals(2, clone.getReaders().size());
 		assertEquals(2, clone.getWriters().size());
 	}
