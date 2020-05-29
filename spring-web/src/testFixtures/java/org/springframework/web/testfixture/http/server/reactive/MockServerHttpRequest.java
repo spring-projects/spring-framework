@@ -59,7 +59,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	/**
 	 * String representation of one of {@link HttpMethod} or not empty custom method (e.g. <i>CONNECT</i>).
 	 */
-	private final String httpMethodValue;
+	private final String httpMethod;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
@@ -74,13 +74,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final Flux<DataBuffer> body;
 
-	private MockServerHttpRequest(String httpMethodValue,
-								  URI uri, @Nullable String contextPath, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-								  @Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
-								  @Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
+	private MockServerHttpRequest(String httpMethod,
+			URI uri, @Nullable String contextPath, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
+			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
-		this.httpMethodValue = httpMethodValue;
+		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
+		this.httpMethod = httpMethod;
 		this.cookies = cookies;
 		this.remoteAddress = remoteAddress;
 		this.localAddress = localAddress;
@@ -92,13 +93,12 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	public HttpMethod getMethod() {
-		return HttpMethod.resolve(httpMethodValue);
+		return HttpMethod.resolve(this.httpMethod);
 	}
 
 	@Override
-	@SuppressWarnings("ConstantConditions")
 	public String getMethodValue() {
-		return httpMethodValue;
+		return this.httpMethod;
 	}
 
 	@Override
@@ -217,7 +217,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @return the created builder
 	 */
 	public static BodyBuilder method(HttpMethod method, URI url) {
-		return new DefaultBodyBuilder(method, url);
+		Assert.notNull(method, "HTTP method is required. " +
+				"For a custom HTTP method, please provide a String HTTP method value.");
+		return new DefaultBodyBuilder(method.name(), url);
 	}
 
 	/**
@@ -225,28 +227,29 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * The given URI may contain query parameters, or those may be added later via
 	 * {@link BaseBuilder#queryParam queryParam} builder methods.
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param urlTemplate the URL template
+	 * @param uri the URI template for the target URL
 	 * @param vars variables to expand into the template
 	 * @return the created builder
 	 */
-	public static BodyBuilder method(HttpMethod method, String urlTemplate, Object... vars) {
-		URI url = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri();
-		return new DefaultBodyBuilder(method, url);
+	public static BodyBuilder method(HttpMethod method, String uri, Object... vars) {
+		return method(method, toUri(uri, vars));
 	}
 
 	/**
-	 * Create a builder with a raw HTTP methodValue value that is outside the range
-	 * of {@link HttpMethod} enum values.
-	 * @param methodValue the HTTP methodValue value
-	 * @param urlTemplate the URL template
+	 * Create a builder with a raw HTTP method value value that is outside the
+	 * range of {@link HttpMethod} enum values.
+	 * @param httpMethod the HTTP methodValue value
+	 * @param uri the URI template for target the URL
 	 * @param vars variables to expand into the template
 	 * @return the created builder
-	 * @throws IllegalArgumentException if methodValue is null, empty String or contains only white characters
 	 * @since 5.2.7
 	 */
-	public static BodyBuilder method(String methodValue, String urlTemplate, Object... vars) {
-		URI url = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri();
-		return new DefaultBodyBuilder(methodValue, url);
+	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
+		return new DefaultBodyBuilder(httpMethod, toUri(uri, vars));
+	}
+
+	private static URI toUri(String uri, Object[] vars) {
+		return UriComponentsBuilder.fromUriString(uri).buildAndExpand(vars).encode().toUri();
 	}
 
 
@@ -450,18 +453,13 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		private SslInfo sslInfo;
 
-		protected DefaultBodyBuilder(String methodValue, URI url) {
-			Assert.isTrue(StringUtils.hasLength(methodValue) &&
-					StringUtils.hasLength(methodValue.trim()), "HttpMethod is required. " +
-					"Please initialize it to non empty value");
-			this.methodValue = methodValue.trim();
+		DefaultBodyBuilder(String method, URI url) {
+			this.methodValue = method;
 			this.url = url;
 		}
 
-		protected DefaultBodyBuilder(HttpMethod method, URI url) {
-			Assert.notNull(method, "HttpMethod is required. If testing a custom HTTP method, " +
-					"please use the variant that accepts a String based HTTP method.");
-			this.methodValue = method.name();
+		DefaultBodyBuilder(HttpMethod httpMethod, URI url) {
+			this.methodValue = httpMethod.name();
 			this.url = url;
 		}
 

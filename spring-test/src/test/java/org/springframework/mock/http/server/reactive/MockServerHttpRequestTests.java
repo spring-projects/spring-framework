@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MockServerHttpRequestTests {
 
 	@Test
-	void cookieHeaderSet() throws Exception {
+	void cookieHeaderSet() {
 		HttpCookie foo11 = new HttpCookie("foo1", "bar1");
 		HttpCookie foo12 = new HttpCookie("foo1", "bar2");
 		HttpCookie foo21 = new HttpCookie("foo2", "baz1");
@@ -54,7 +54,7 @@ class MockServerHttpRequestTests {
 	}
 
 	@Test
-	void queryParams() throws Exception {
+	void queryParams() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/foo bar?a=b")
 				.queryParam("name A", "value A1", "value A2")
 				.queryParam("name B", "value B1")
@@ -64,14 +64,13 @@ class MockServerHttpRequestTests {
 	}
 
 	@ParameterizedTest
-	@MethodSource("invalidMockServerHttpRequestBuilds")
+	@MethodSource
 	void httpMethodNotNullOrEmpty(Executable executable) {
-		IllegalArgumentException expectedIllegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class,
-				executable);
-		assertThat(expectedIllegalArgumentException.getMessage()).contains("HttpMethod is required.");
+		Exception ex = Assertions.assertThrows(IllegalArgumentException.class, executable);
+		assertThat(ex.getMessage()).contains("HTTP method is required.");
 	}
 
-	static Stream<Executable> invalidMockServerHttpRequestBuilds() {
+	static Stream<Executable> httpMethodNotNullOrEmpty() {
 		String uriTemplate = "/foo bar?a=b";
 		return Stream.of(
 				() -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build(),
