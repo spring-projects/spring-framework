@@ -228,8 +228,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {
 			this.strategiesConfigurers = new ArrayList<>(4);
