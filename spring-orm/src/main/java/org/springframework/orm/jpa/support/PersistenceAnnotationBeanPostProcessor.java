@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -343,16 +343,6 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		return null;
-	}
-
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass(), pvs);
 		try {
@@ -370,16 +360,6 @@ public class PersistenceAnnotationBeanPostProcessor
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
 		return postProcessProperties(pvs, bean, beanName);
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		return bean;
 	}
 
 	@Override

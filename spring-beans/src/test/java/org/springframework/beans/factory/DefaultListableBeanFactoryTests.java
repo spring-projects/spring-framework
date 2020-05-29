@@ -63,7 +63,7 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -2747,7 +2747,7 @@ class DefaultListableBeanFactoryTests {
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("age", ageSetByPropertyValue));
 		lbf.registerBeanDefinition("test", bd);
 		final String nameSetOnField = "nameSetOnField";
-		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessorAdapter() {
+		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
 			@Override
 			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 				TestBean tb = (TestBean) bean;
