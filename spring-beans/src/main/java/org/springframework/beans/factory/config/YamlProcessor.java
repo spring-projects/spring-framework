@@ -432,15 +432,13 @@ public abstract class YamlProcessor {
 	/**
 	 * {@link Constructor} that supports filtering of unsupported types.
 	 * <p>If an unsupported type is encountered in a YAML document, an
-	 * {@link IllegalStateException} will be thrown from {@link #getClassForName(String)}.
-	 * @since 5.1.16
+	 * {@link IllegalStateException} will be thrown from {@link #getClassForName}.
 	 */
 	private class FilteringConstructor extends Constructor {
 
 		FilteringConstructor(LoaderOptions loaderOptions) {
 			super(loaderOptions);
 		}
-
 
 		@Override
 		protected Class<?> getClassForName(String name) throws ClassNotFoundException {
