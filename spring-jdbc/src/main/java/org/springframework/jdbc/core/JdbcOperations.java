@@ -965,6 +965,8 @@ public interface JdbcOperations {
 	 * @param pss object to set parameters on the PreparedStatement
 	 * created by this method
 	 * @return an array of the number of rows affected by each statement
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
@@ -974,6 +976,8 @@ public interface JdbcOperations {
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
@@ -985,20 +989,24 @@ public interface JdbcOperations {
 	 * @param argTypes the SQL types of the arguments
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
-	 * The arguments' values will be set using the ParameterizedPreparedStatementSetter.
+	 * Execute multiple batches using the supplied SQL statement with the collect of supplied
+	 * arguments. The arguments' values will be set using the ParameterizedPreparedStatementSetter.
 	 * Each batch should be of size indicated in 'batchSize'.
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @param batchSize batch size
 	 * @param pss the ParameterizedPreparedStatementSetter to use
-	 * @return an array containing for each batch another array containing the numbers of rows affected
-	 * by each update in the batch
+	 * @return an array containing for each batch another array containing the numbers of
+	 * rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 3.1
 	 */
