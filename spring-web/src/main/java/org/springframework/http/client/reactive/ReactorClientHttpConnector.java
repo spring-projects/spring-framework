@@ -82,7 +82,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		LoopResources resources = resourceFactory.getLoopResources();
 		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
 		Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
+		return HttpClient.create(provider).runOn(resources);
 	}
 
 	/**

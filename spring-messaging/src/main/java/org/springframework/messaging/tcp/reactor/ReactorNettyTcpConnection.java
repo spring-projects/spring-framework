@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,11 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
 		this.inbound.withConnection(conn -> conn.onReadIdle(inactivityDuration, runnable));
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
 		this.inbound.withConnection(conn -> conn.onWriteIdle(inactivityDuration, runnable));
 	}

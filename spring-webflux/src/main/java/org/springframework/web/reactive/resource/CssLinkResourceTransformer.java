@@ -70,8 +70,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
 			ResourceTransformerChain transformerChain) {
 
