@@ -719,16 +719,12 @@ public class MvcUriComponentsBuilder {
 		@Override
 		@Nullable
 		public Object intercept(Object obj, Method method, Object[] args, @Nullable MethodProxy proxy) {
-			if (method.getName().equals("getControllerType")) {
-				return this.controllerType;
+			switch (method.getName()) {
+				case "getControllerType": return this.controllerType;
+				case "getControllerMethod": return this.controllerMethod;
+				case "getArgumentValues": return this.argumentValues;
 			}
-			else if (method.getName().equals("getControllerMethod")) {
-				return this.controllerMethod;
-			}
-			else if (method.getName().equals("getArgumentValues")) {
-				return this.argumentValues;
-			}
-			else if (ReflectionUtils.isObjectMethod(method)) {
+			if (ReflectionUtils.isObjectMethod(method)) {
 				return ReflectionUtils.invokeMethod(method, obj, args);
 			}
 			else {

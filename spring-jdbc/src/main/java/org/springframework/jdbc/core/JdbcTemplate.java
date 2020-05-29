@@ -1581,34 +1581,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of PersistenceManager proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("unwrap")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return proxy;
-				}
-			}
-			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return true;
-				}
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: suppress, not valid.
-				return null;
-			}
-			else if (method.getName().equals("isClosed")) {
-				return false;
-			}
-			else if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying Connection.
-				return this.target;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of PersistenceManager proxy.
+					return System.identityHashCode(proxy);
+				case "close":
+					// Handle close method: suppress, not valid.
+					return null;
+				case "isClosed":
+					return false;
+				case "getTargetConnection":
+					// Handle getTargetConnection method: return underlying Connection.
+					return this.target;
+				case "unwrap":
+					return (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor":
+					return (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 			}
 
 			// Invoke method on target Connection.
