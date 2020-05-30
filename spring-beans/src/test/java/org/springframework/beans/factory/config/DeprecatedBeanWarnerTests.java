@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -43,8 +43,8 @@ public class DeprecatedBeanWarnerTests {
 
 		DeprecatedBeanWarner warner = new MyDeprecatedBeanWarner();
 		warner.postProcessBeanFactory(beanFactory);
-		assertEquals(beanName, this.beanName);
-		assertEquals(def, this.beanDefinition);
+		assertThat(this.beanName).isEqualTo(beanName);
+		assertThat(this.beanDefinition).isEqualTo(def);
 	}
 
 

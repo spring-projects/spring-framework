@@ -19,19 +19,18 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.security.Principal;
 
 import io.reactivex.Single;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link PrincipalMethodArgumentResolver}.
@@ -43,37 +42,35 @@ public class PrincipalMethodArgumentResolverTests {
 	private final PrincipalMethodArgumentResolver resolver =
 			new PrincipalMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Principal.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, Principal.class)));
-		assertTrue(this.resolver.supportsParameter(this.testMethod.arg(Single.class, Principal.class)));
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Principal.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Mono.class, Principal.class))).isTrue();
+		assertThat(this.resolver.supportsParameter(this.testMethod.arg(Single.class, Principal.class))).isTrue();
 	}
 
 
 	@Test
 	public void resolverArgument() {
-		BindingContext context = new BindingContext();
 		Principal user = () -> "Joe";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();
 
+		BindingContext context = new BindingContext();
 		MethodParameter param = this.testMethod.arg(Principal.class);
 		Object actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertSame(user, actual);
+		assertThat(actual).isSameAs(user);
 
 		param = this.testMethod.arg(Mono.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertTrue(Mono.class.isAssignableFrom(actual.getClass()));
-		assertSame(user, ((Mono<?>) actual).block());
+		assertThat(actual).isInstanceOf(Mono.class).extracting(o -> ((Mono<?>) o).block()).isSameAs(user);
 
 		param = this.testMethod.arg(Single.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertTrue(Single.class.isAssignableFrom(actual.getClass()));
-		assertSame(user, ((Single<?>) actual).blockingGet());
+		assertThat(actual).isInstanceOf(Single.class).extracting(o -> ((Single<?>) o).blockingGet()).isSameAs(user);
 	}
 
 

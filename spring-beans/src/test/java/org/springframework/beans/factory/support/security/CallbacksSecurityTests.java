@@ -29,11 +29,12 @@ import java.security.ProtectionDomain;
 import java.util.PropertyPermission;
 import java.util.Set;
 import java.util.function.Consumer;
+
 import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -44,7 +45,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SecurityContextProvider;
@@ -54,12 +55,10 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Security test case. Checks whether the container uses its privileges for its
@@ -115,7 +114,7 @@ public class CallbacksSecurityTests {
 		}
 
 		private void checkCurrentContext() {
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 		}
 	}
 
@@ -160,7 +159,7 @@ public class CallbacksSecurityTests {
 		}
 
 		private void checkCurrentContext() {
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 		}
 	}
 
@@ -204,7 +203,7 @@ public class CallbacksSecurityTests {
 		}
 
 		private void checkCurrentContext() {
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 		}
 	}
 
@@ -215,16 +214,16 @@ public class CallbacksSecurityTests {
 
 		public NonPrivilegedFactory(String expected) {
 			this.expectedName = expected;
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 		}
 
 		public static Object makeStaticInstance(String expectedName) {
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 			return new Object();
 		}
 
 		public Object makeInstance() {
-			assertEquals(expectedName, getCurrentSubjectName());
+			assertThat(getCurrentSubjectName()).isEqualTo(expectedName);
 			return new Object();
 		}
 	}
@@ -254,37 +253,6 @@ public class CallbacksSecurityTests {
 		});
 	}
 
-	private static class TestPrincipal implements Principal {
-
-		private String name;
-
-		public TestPrincipal(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if (!(obj instanceof TestPrincipal)) {
-				return false;
-			}
-			TestPrincipal p = (TestPrincipal) obj;
-			return this.name.equals(p.name);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-	}
-
 	public CallbacksSecurityTests() {
 		// setup security
 		if (System.getSecurityManager() == null) {
@@ -300,7 +268,7 @@ public class CallbacksSecurityTests {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		final ProtectionDomain empty = new ProtectionDomain(null,
@@ -365,14 +333,14 @@ public class CallbacksSecurityTests {
 	public void testSpringDestroyBean() throws Exception {
 		beanFactory.getBean("spring-destroy");
 		beanFactory.destroySingletons();
-		assertNull(System.getProperty("security.destroy"));
+		assertThat(System.getProperty("security.destroy")).isNull();
 	}
 
 	@Test
 	public void testCustomDestroyBean() throws Exception {
 		beanFactory.getBean("custom-destroy");
 		beanFactory.destroySingletons();
-		assertNull(System.getProperty("security.destroy"));
+		assertThat(System.getProperty("security.destroy")).isNull();
 	}
 
 	@Test
@@ -384,8 +352,8 @@ public class CallbacksSecurityTests {
 
 	@Test
 	public void testCustomFactoryType() throws Exception {
-		assertNull(beanFactory.getType("spring-factory"));
-		assertNull(System.getProperty("factory.object.type"));
+		assertThat(beanFactory.getType("spring-factory")).isNull();
+		assertThat(System.getProperty("factory.object.type")).isNull();
 	}
 
 	@Test
@@ -444,7 +412,7 @@ public class CallbacksSecurityTests {
 		final DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder
 				.genericBeanDefinition(NonPrivilegedBean.class).setScope(
-						ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+						BeanDefinition.SCOPE_PROTOTYPE)
 				.setInitMethodName("init").setDestroyMethodName("destroy")
 				.addConstructorArgValue("user1");
 		lbf.registerBeanDefinition("test", bdb.getBeanDefinition());
@@ -458,7 +426,7 @@ public class CallbacksSecurityTests {
 						return lbf.getBean("test", NonPrivilegedBean.class);
 					}
 				}, null);
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 	}
 
 	@Test
@@ -480,8 +448,8 @@ public class CallbacksSecurityTests {
 			@Override
 			public Object run() {
 				// sanity check
-				assertEquals("user1", getCurrentSubjectName());
-				assertEquals(false, NonPrivilegedBean.destroyed);
+				assertThat(getCurrentSubjectName()).isEqualTo("user1");
+				assertThat(NonPrivilegedBean.destroyed).isEqualTo(false);
 
 				beanFactory.getBean("trusted-spring-callbacks");
 				beanFactory.getBean("trusted-custom-init-destroy");
@@ -497,7 +465,7 @@ public class CallbacksSecurityTests {
 				beanFactory.getBean("trusted-working-property-injection");
 
 				beanFactory.destroySingletons();
-				assertEquals(true, NonPrivilegedBean.destroyed);
+				assertThat(NonPrivilegedBean.destroyed).isEqualTo(true);
 				return null;
 			}
 		}, provider.getAccessControlContext());

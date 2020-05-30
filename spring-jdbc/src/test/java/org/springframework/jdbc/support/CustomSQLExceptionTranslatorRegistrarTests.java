@@ -18,16 +18,14 @@ package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for custom {@link SQLExceptionTranslator}.
@@ -47,17 +45,15 @@ public class CustomSQLExceptionTranslatorRegistrarTests {
 		sext.setSqlErrorCodes(codes);
 
 		DataAccessException exFor4200 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 42000));
-		assertNotNull("Should have been translated", exFor4200);
-		assertTrue("Should have been instance of BadSqlGrammarException",
-			BadSqlGrammarException.class.isAssignableFrom(exFor4200.getClass()));
+		assertThat(exFor4200).as("Should have been translated").isNotNull();
+		assertThat(BadSqlGrammarException.class.isAssignableFrom(exFor4200.getClass())).as("Should have been instance of BadSqlGrammarException").isTrue();
 
 		DataAccessException exFor2 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 2));
-		assertNotNull("Should have been translated", exFor2);
-		assertTrue("Should have been instance of TransientDataAccessResourceException",
-			TransientDataAccessResourceException.class.isAssignableFrom(exFor2.getClass()));
+		assertThat(exFor2).as("Should have been translated").isNotNull();
+		assertThat(TransientDataAccessResourceException.class.isAssignableFrom(exFor2.getClass())).as("Should have been instance of TransientDataAccessResourceException").isTrue();
 
 		DataAccessException exFor3 = sext.doTranslate("", "", new SQLException("Ouch", "42000", 3));
-		assertNull("Should not have been translated", exFor3);
+		assertThat(exFor3).as("Should not have been translated").isNull();
 	}
 
 }

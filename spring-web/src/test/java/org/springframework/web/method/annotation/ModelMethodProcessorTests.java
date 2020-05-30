@@ -18,20 +18,18 @@ package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.ModelMethodProcessor}.
@@ -50,7 +48,7 @@ public class ModelMethodProcessorTests {
 
 	private NativeWebRequest webRequest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		processor = new ModelMethodProcessor();
 		mavContainer = new ModelAndViewContainer();
@@ -64,17 +62,17 @@ public class ModelMethodProcessorTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(processor.supportsParameter(paramModel));
+		assertThat(processor.supportsParameter(paramModel)).isTrue();
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue(processor.supportsReturnType(returnParamModel));
+		assertThat(processor.supportsReturnType(returnParamModel)).isTrue();
 	}
 
 	@Test
 	public void resolveArgumentValue() throws Exception {
-		assertSame(mavContainer.getModel(), processor.resolveArgument(paramModel, mavContainer, webRequest, null));
+		assertThat(processor.resolveArgument(paramModel, mavContainer, webRequest, null)).isSameAs(mavContainer.getModel());
 	}
 
 	@Test
@@ -85,8 +83,8 @@ public class ModelMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue , returnParamModel, mavContainer, webRequest);
 
-		assertEquals("value1", mavContainer.getModel().get("attr1"));
-		assertEquals("value2", mavContainer.getModel().get("attr2"));
+		assertThat(mavContainer.getModel().get("attr1")).isEqualTo("value1");
+		assertThat(mavContainer.getModel().get("attr2")).isEqualTo("value2");
 	}
 
 	@SuppressWarnings("unused")

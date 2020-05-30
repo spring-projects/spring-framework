@@ -34,17 +34,15 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.junit.Test;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.core.CollectionFactory.createApproximateCollection;
 import static org.springframework.core.CollectionFactory.createApproximateMap;
 import static org.springframework.core.CollectionFactory.createCollection;
@@ -57,7 +55,7 @@ import static org.springframework.core.CollectionFactory.createMap;
  * @author Sam Brannen
  * @since 4.1.4
  */
-public class CollectionFactoryTests {
+class CollectionFactoryTests {
 
 	/**
 	 * The test demonstrates that the generics-based API for
@@ -71,7 +69,7 @@ public class CollectionFactoryTests {
 	 * actually contains elements of type {@code E}.
 	 */
 	@Test
-	public void createApproximateCollectionIsNotTypeSafeForEnumSet() {
+	void createApproximateCollectionIsNotTypeSafeForEnumSet() {
 		Collection<Integer> ints = createApproximateCollection(EnumSet.of(Color.BLUE), 3);
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
@@ -86,7 +84,7 @@ public class CollectionFactoryTests {
 	}
 
 	@Test
-	public void createCollectionIsNotTypeSafeForEnumSet() {
+	void createCollectionIsNotTypeSafeForEnumSet() {
 		Collection<Integer> ints = createCollection(EnumSet.class, Color.class, 3);
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
@@ -108,7 +106,7 @@ public class CollectionFactoryTests {
 	 * {@link #createApproximateCollectionIsNotTypeSafeForEnumSet}.
 	 */
 	@Test
-	public void createApproximateMapIsNotTypeSafeForEnumMap() {
+	void createApproximateMapIsNotTypeSafeForEnumMap() {
 		EnumMap<Color, Integer> enumMap = new EnumMap<>(Color.class);
 		enumMap.put(Color.RED, 1);
 		enumMap.put(Color.BLUE, 2);
@@ -126,7 +124,7 @@ public class CollectionFactoryTests {
 	}
 
 	@Test
-	public void createMapIsNotTypeSafeForEnumMap() {
+	void createMapIsNotTypeSafeForEnumMap() {
 		Map<String, Integer> map = createMap(EnumMap.class, Color.class, 3);
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
@@ -141,7 +139,7 @@ public class CollectionFactoryTests {
 	}
 
 	@Test
-	public void createMapIsNotTypeSafeForLinkedMultiValueMap() {
+	void createMapIsNotTypeSafeForLinkedMultiValueMap() {
 		Map<String, Integer> map = createMap(MultiValueMap.class, null, 3);
 
 		// Use a try-catch block to ensure that the exception is thrown as a result of the
@@ -156,146 +154,146 @@ public class CollectionFactoryTests {
 	}
 
 	@Test
-	public void createApproximateCollectionFromEmptyHashSet() {
+	void createApproximateCollectionFromEmptyHashSet() {
 		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
-		assertThat(set, is(empty()));
+		Assertions.assertThat(set).isEmpty();
 	}
 
 	@Test
-	public void createApproximateCollectionFromNonEmptyHashSet() {
+	void createApproximateCollectionFromNonEmptyHashSet() {
 		HashSet<String> hashSet = new HashSet<>();
 		hashSet.add("foo");
 		Collection<String> set = createApproximateCollection(hashSet, 2);
-		assertThat(set, is(empty()));
+		assertThat(set).isEmpty();
 	}
 
 	@Test
-	public void createApproximateCollectionFromEmptyEnumSet() {
+	void createApproximateCollectionFromEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.noneOf(Color.class), 2);
-		assertThat(colors, is(empty()));
+		assertThat(colors).isEmpty();
 	}
 
 	@Test
-	public void createApproximateCollectionFromNonEmptyEnumSet() {
+	void createApproximateCollectionFromNonEmptyEnumSet() {
 		Collection<Color> colors = createApproximateCollection(EnumSet.of(Color.BLUE), 2);
-		assertThat(colors, is(empty()));
+		assertThat(colors).isEmpty();
 	}
 
 	@Test
-	public void createApproximateMapFromEmptyHashMap() {
+	void createApproximateMapFromEmptyHashMap() {
 		Map<String, String> map = createApproximateMap(new HashMap<String, String>(), 2);
-		assertThat(map.size(), is(0));
+		assertThat(map).isEmpty();
 	}
 
 	@Test
-	public void createApproximateMapFromNonEmptyHashMap() {
+	void createApproximateMapFromNonEmptyHashMap() {
 		Map<String, String> hashMap = new HashMap<>();
 		hashMap.put("foo", "bar");
 		Map<String, String> map = createApproximateMap(hashMap, 2);
-		assertThat(map.size(), is(0));
+		assertThat(map).isEmpty();
 	}
 
 	@Test
-	public void createApproximateMapFromEmptyEnumMap() {
+	void createApproximateMapFromEmptyEnumMap() {
 		Map<Color, String> colors = createApproximateMap(new EnumMap<Color, String>(Color.class), 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors).isEmpty();
 	}
 
 	@Test
-	public void createApproximateMapFromNonEmptyEnumMap() {
+	void createApproximateMapFromNonEmptyEnumMap() {
 		EnumMap<Color, String> enumMap = new EnumMap<>(Color.class);
 		enumMap.put(Color.BLUE, "blue");
 		Map<Color, String> colors = createApproximateMap(enumMap, 2);
-		assertThat(colors.size(), is(0));
+		assertThat(colors).isEmpty();
 	}
 
 	@Test
-	public void createsCollectionsCorrectly() {
+	void createsCollectionsCorrectly() {
 		// interfaces
-		assertThat(createCollection(List.class, 0), is(instanceOf(ArrayList.class)));
-		assertThat(createCollection(Set.class, 0), is(instanceOf(LinkedHashSet.class)));
-		assertThat(createCollection(Collection.class, 0), is(instanceOf(LinkedHashSet.class)));
-		assertThat(createCollection(SortedSet.class, 0), is(instanceOf(TreeSet.class)));
-		assertThat(createCollection(NavigableSet.class, 0), is(instanceOf(TreeSet.class)));
+		assertThat(createCollection(List.class, 0)).isInstanceOf(ArrayList.class);
+		assertThat(createCollection(Set.class, 0)).isInstanceOf(LinkedHashSet.class);
+		assertThat(createCollection(Collection.class, 0)).isInstanceOf(LinkedHashSet.class);
+		assertThat(createCollection(SortedSet.class, 0)).isInstanceOf(TreeSet.class);
+		assertThat(createCollection(NavigableSet.class, 0)).isInstanceOf(TreeSet.class);
 
-		assertThat(createCollection(List.class, String.class, 0), is(instanceOf(ArrayList.class)));
-		assertThat(createCollection(Set.class, String.class, 0), is(instanceOf(LinkedHashSet.class)));
-		assertThat(createCollection(Collection.class, String.class, 0), is(instanceOf(LinkedHashSet.class)));
-		assertThat(createCollection(SortedSet.class, String.class, 0), is(instanceOf(TreeSet.class)));
-		assertThat(createCollection(NavigableSet.class, String.class, 0), is(instanceOf(TreeSet.class)));
+		assertThat(createCollection(List.class, String.class, 0)).isInstanceOf(ArrayList.class);
+		assertThat(createCollection(Set.class, String.class, 0)).isInstanceOf(LinkedHashSet.class);
+		assertThat(createCollection(Collection.class, String.class, 0)).isInstanceOf(LinkedHashSet.class);
+		assertThat(createCollection(SortedSet.class, String.class, 0)).isInstanceOf(TreeSet.class);
+		assertThat(createCollection(NavigableSet.class, String.class, 0)).isInstanceOf(TreeSet.class);
 
 		// concrete types
-		assertThat(createCollection(HashSet.class, 0), is(instanceOf(HashSet.class)));
-		assertThat(createCollection(HashSet.class, String.class, 0), is(instanceOf(HashSet.class)));
+		assertThat(createCollection(HashSet.class, 0)).isInstanceOf(HashSet.class);
+		assertThat(createCollection(HashSet.class, String.class, 0)).isInstanceOf(HashSet.class);
 	}
 
 	@Test
-	public void createsEnumSet() {
-		assertThat(createCollection(EnumSet.class, Color.class, 0), is(instanceOf(EnumSet.class)));
+	void createsEnumSet() {
+		assertThat(createCollection(EnumSet.class, Color.class, 0)).isInstanceOf(EnumSet.class);
 	}
 
 	@Test  // SPR-17619
-	public void createsEnumSetSubclass() {
+	void createsEnumSetSubclass() {
 		EnumSet<Color> enumSet = EnumSet.noneOf(Color.class);
-		assertThat(createCollection(enumSet.getClass(), Color.class, 0), is(instanceOf(enumSet.getClass())));
+		assertThat(createCollection(enumSet.getClass(), Color.class, 0)).isInstanceOf(enumSet.getClass());
 	}
 
 	@Test
-	public void rejectsInvalidElementTypeForEnumSet() {
+	void rejectsInvalidElementTypeForEnumSet() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createCollection(EnumSet.class, Object.class, 0));
 	}
 
 	@Test
-	public void rejectsNullElementTypeForEnumSet() {
+	void rejectsNullElementTypeForEnumSet() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createCollection(EnumSet.class, null, 0));
 	}
 
 	@Test
-	public void rejectsNullCollectionType() {
+	void rejectsNullCollectionType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createCollection(null, Object.class, 0));
 	}
 
 	@Test
-	public void createsMapsCorrectly() {
+	void createsMapsCorrectly() {
 		// interfaces
-		assertThat(createMap(Map.class, 0), is(instanceOf(LinkedHashMap.class)));
-		assertThat(createMap(SortedMap.class, 0), is(instanceOf(TreeMap.class)));
-		assertThat(createMap(NavigableMap.class, 0), is(instanceOf(TreeMap.class)));
-		assertThat(createMap(MultiValueMap.class, 0), is(instanceOf(LinkedMultiValueMap.class)));
+		assertThat(createMap(Map.class, 0)).isInstanceOf(LinkedHashMap.class);
+		assertThat(createMap(SortedMap.class, 0)).isInstanceOf(TreeMap.class);
+		assertThat(createMap(NavigableMap.class, 0)).isInstanceOf(TreeMap.class);
+		assertThat(createMap(MultiValueMap.class, 0)).isInstanceOf(LinkedMultiValueMap.class);
 
-		assertThat(createMap(Map.class, String.class, 0), is(instanceOf(LinkedHashMap.class)));
-		assertThat(createMap(SortedMap.class, String.class, 0), is(instanceOf(TreeMap.class)));
-		assertThat(createMap(NavigableMap.class, String.class, 0), is(instanceOf(TreeMap.class)));
-		assertThat(createMap(MultiValueMap.class, String.class, 0), is(instanceOf(LinkedMultiValueMap.class)));
+		assertThat(createMap(Map.class, String.class, 0)).isInstanceOf(LinkedHashMap.class);
+		assertThat(createMap(SortedMap.class, String.class, 0)).isInstanceOf(TreeMap.class);
+		assertThat(createMap(NavigableMap.class, String.class, 0)).isInstanceOf(TreeMap.class);
+		assertThat(createMap(MultiValueMap.class, String.class, 0)).isInstanceOf(LinkedMultiValueMap.class);
 
 		// concrete types
-		assertThat(createMap(HashMap.class, 0), is(instanceOf(HashMap.class)));
+		assertThat(createMap(HashMap.class, 0)).isInstanceOf(HashMap.class);
 
-		assertThat(createMap(HashMap.class, String.class, 0), is(instanceOf(HashMap.class)));
+		assertThat(createMap(HashMap.class, String.class, 0)).isInstanceOf(HashMap.class);
 	}
 
 	@Test
-	public void createsEnumMap() {
-		assertThat(createMap(EnumMap.class, Color.class, 0), is(instanceOf(EnumMap.class)));
+	void createsEnumMap() {
+		assertThat(createMap(EnumMap.class, Color.class, 0)).isInstanceOf(EnumMap.class);
 	}
 
 	@Test
-	public void rejectsInvalidKeyTypeForEnumMap() {
+	void rejectsInvalidKeyTypeForEnumMap() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createMap(EnumMap.class, Object.class, 0));
 	}
 
 	@Test
-	public void rejectsNullKeyTypeForEnumMap() {
+	void rejectsNullKeyTypeForEnumMap() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createMap(EnumMap.class, null, 0));
 	}
 
 	@Test
-	public void rejectsNullMapType() {
+	void rejectsNullMapType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createMap(null, Object.class, 0));
 	}

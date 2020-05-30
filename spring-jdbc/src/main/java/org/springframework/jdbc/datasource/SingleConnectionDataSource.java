@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Specifying a custom username and password doesn't make sense
 	 * with a single Connection. Returns the single Connection if given
-	 * the same username and password; throws a SQLException else.
+	 * the same username and password; throws an SQLException else.
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
@@ -322,7 +322,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 				return null;
 			}
 			else if (method.getName().equals("isClosed")) {
-				return false;
+				return this.target.isClosed();
 			}
 			else if (method.getName().equals("getTargetConnection")) {
 				// Handle getTargetConnection method: return underlying Connection.

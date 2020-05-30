@@ -20,21 +20,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.util.Assert;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rob Harrop
@@ -55,7 +52,7 @@ public class FactoryBeanTests {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
 
-		assertEquals("null", factory.getBean("factoryBean").toString());
+		assertThat(factory.getBean("factoryBean").toString()).isEqualTo("null");
 	}
 
 	@Test
@@ -66,17 +63,17 @@ public class FactoryBeanTests {
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
 
-		assertNull(factory.getType("betaFactory"));
+		assertThat(factory.getType("betaFactory")).isNull();
 
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
 		Gamma gamma2 = (Gamma) factory.getBean("gammaFactory");
 
-		assertSame(beta, alpha.getBeta());
-		assertSame(gamma, beta.getGamma());
-		assertSame(gamma2, beta.getGamma());
-		assertEquals("yourName", beta.getName());
+		assertThat(alpha.getBeta()).isSameAs(beta);
+		assertThat(beta.getGamma()).isSameAs(gamma);
+		assertThat(beta.getGamma()).isSameAs(gamma2);
+		assertThat(beta.getName()).isEqualTo("yourName");
 	}
 
 	@Test
@@ -90,8 +87,8 @@ public class FactoryBeanTests {
 		Beta beta = (Beta) factory.getBean("beta");
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
-		assertSame(beta, alpha.getBeta());
-		assertSame(gamma, beta.getGamma());
+		assertThat(alpha.getBeta()).isSameAs(beta);
+		assertThat(beta.getGamma()).isSameAs(gamma);
 	}
 
 	@Test
@@ -117,12 +114,12 @@ public class FactoryBeanTests {
 		factory.addBeanPostProcessor(counter);
 
 		BeanImpl1 impl1 = factory.getBean(BeanImpl1.class);
-		assertNotNull(impl1);
-		assertNotNull(impl1.getImpl2());
-		assertNotNull(impl1.getImpl2());
-		assertSame(impl1, impl1.getImpl2().getImpl1());
-		assertEquals(1, counter.getCount("bean1"));
-		assertEquals(1, counter.getCount("bean2"));
+		assertThat(impl1).isNotNull();
+		assertThat(impl1.getImpl2()).isNotNull();
+		assertThat(impl1.getImpl2()).isNotNull();
+		assertThat(impl1.getImpl2().getImpl1()).isSameAs(impl1);
+		assertThat(counter.getCount("bean1")).isEqualTo(1);
+		assertThat(counter.getCount("bean2")).isEqualTo(1);
 	}
 
 

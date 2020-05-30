@@ -20,11 +20,9 @@ import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -63,8 +61,8 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
-		assertTrue(attr.isReadable());
-		assertFalse(attr.isWritable());
+		assertThat(attr.isReadable()).isTrue();
+		assertThat(attr.isWritable()).isFalse();
 	}
 
 	@Test
@@ -72,7 +70,7 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 
 		MBeanOperationInfo operationSetAge = info.getOperation("setName");
-		assertEquals("name", operationSetAge.getSignature()[0].getName());
+		assertThat(operationSetAge.getSignature()[0].getName()).isEqualTo("name");
 	}
 
 	@Override

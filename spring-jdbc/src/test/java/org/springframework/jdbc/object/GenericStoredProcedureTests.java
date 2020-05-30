@@ -21,16 +21,17 @@ import java.sql.Connection;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -64,7 +65,7 @@ public class GenericStoredProcedureTests {
 		in.put("custid", 3);
 		Map<String, Object> out = adder.execute(in);
 		Integer id = (Integer) out.get("newid");
-		assertEquals(4, id.intValue());
+		assertThat(id.intValue()).isEqualTo(4);
 
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).setObject(2, 3, Types.INTEGER);

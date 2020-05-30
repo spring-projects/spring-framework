@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,9 +180,9 @@ public class DefaultContextCache implements ContextCache {
 		}
 
 		// Remove empty entries from the hierarchy map.
-		for (MergedContextConfiguration currentKey : this.hierarchyMap.keySet()) {
-			if (this.hierarchyMap.get(currentKey).isEmpty()) {
-				this.hierarchyMap.remove(currentKey);
+		for (Map.Entry<MergedContextConfiguration, Set<MergedContextConfiguration>> entry : this.hierarchyMap.entrySet()) {
+			if (entry.getValue().isEmpty()) {
+				this.hierarchyMap.remove(entry.getKey());
 			}
 		}
 	}

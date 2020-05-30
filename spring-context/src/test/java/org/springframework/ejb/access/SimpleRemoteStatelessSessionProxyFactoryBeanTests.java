@@ -18,12 +18,13 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.remoting.RemoteAccessException;
@@ -31,12 +32,10 @@ import org.springframework.remoting.RemoteAccessException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Rod Johnson
@@ -73,7 +72,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -88,8 +87,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		assertEquals("Returns expected value", value, mbm.getValue());
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
+		assertThat(mbm.getValue()).as("Returns expected value").isEqualTo(value);
 		verify(myEjb).remove();
 	}
 
@@ -105,7 +104,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return myEjb;
 			}
 		};
@@ -120,8 +119,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		assertEquals("Returns expected value", value, mbm.getValue());
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
+		assertThat(mbm.getValue()).as("Returns expected value").isEqualTo(value);
 	}
 
 	@Override
@@ -142,7 +141,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) {
 				// parameterize
-				assertTrue(name.equals("java:comp/env/" + jndiName));
+				assertThat(name.equals("java:comp/env/" + jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -157,7 +156,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
 		assertThatExceptionOfType(RemoteException.class).isThrownBy(
 				mbm::getValue)
 			.satisfies(ex -> assertThat(ex).isSameAs(rex));
@@ -176,7 +175,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) {
 				// parameterize
-				assertTrue(name.equals(jndiName));
+				assertThat(name.equals(jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -185,14 +184,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.setJndiName(jndiName);
 		// rely on default setting of resourceRef=false, no auto addition of java:/comp/env prefix
 		fb.setBusinessInterface(MyBusinessMethods.class);
-		assertEquals(fb.getBusinessInterface(), MyBusinessMethods.class);
+		assertThat(MyBusinessMethods.class).isEqualTo(fb.getBusinessInterface());
 		fb.setJndiTemplate(jt);
 
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
 		assertThatExceptionOfType(RemoteException.class).isThrownBy(mbm::getValue);
 	}
 
@@ -208,7 +207,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) {
 				// parameterize
-				assertTrue(name.equals(jndiName));
+				assertThat(name.equals(jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -217,14 +216,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.setJndiName(jndiName);
 		// rely on default setting of resourceRef=false, no auto addition of java:/comp/env prefix
 		fb.setBusinessInterface(MyLocalBusinessMethods.class);
-		assertEquals(fb.getBusinessInterface(), MyLocalBusinessMethods.class);
+		assertThat(MyLocalBusinessMethods.class).isEqualTo(fb.getBusinessInterface());
 		fb.setJndiTemplate(jt);
 
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
 		MyLocalBusinessMethods mbm = (MyLocalBusinessMethods) fb.getObject();
-		assertTrue(Proxy.isProxyClass(mbm.getClass()));
+		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
 		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(
 				mbm::getValue)
 			.withCause(cex);
@@ -242,7 +241,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
-				assertTrue(name.equals(jndiName));
+				assertThat(name.equals(jndiName)).isTrue();
 				return home;
 			}
 		};
@@ -254,14 +253,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		fb.setJndiTemplate(jt);
 
 		// Check it's a singleton
-		assertTrue(fb.isSingleton());
+		assertThat(fb.isSingleton()).isTrue();
 
 		assertThatIllegalArgumentException().isThrownBy(
 				fb::afterPropertiesSet)
 			.withMessageContaining("businessInterface");
 
 		// Expect no methods on home
-		verifyZeroInteractions(home);
+		verifyNoInteractions(home);
 	}
 
 

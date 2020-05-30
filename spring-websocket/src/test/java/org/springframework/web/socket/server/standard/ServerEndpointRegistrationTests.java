@@ -20,7 +20,7 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -28,8 +28,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link ServerEndpointRegistration}.
@@ -50,7 +49,7 @@ public class ServerEndpointRegistrationTests {
 
 		EchoEndpoint endpoint = registration.getConfigurator().getEndpointInstance(EchoEndpoint.class);
 
-		assertNotNull(endpoint);
+		assertThat(endpoint).isNotNull();
 	}
 
 	@Test
@@ -61,7 +60,7 @@ public class ServerEndpointRegistrationTests {
 
 		EchoEndpoint actual = registration.getConfigurator().getEndpointInstance(EchoEndpoint.class);
 
-		assertSame(endpoint, actual);
+		assertThat(actual).isSameAs(endpoint);
 	}
 
 

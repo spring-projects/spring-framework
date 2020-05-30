@@ -17,18 +17,16 @@
 package org.springframework.cache.jcache.interceptor;
 
 import java.io.IOException;
+
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CachePut;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Stephane Nicoll
@@ -47,12 +45,12 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 		CachePutOperation operation = createSimpleOperation();
 
 		CacheInvocationParameter[] allParameters = operation.getAllParameters(2L, sampleInstance);
-		assertEquals(2, allParameters.length);
+		assertThat(allParameters.length).isEqualTo(2);
 		assertCacheInvocationParameter(allParameters[0], Long.class, 2L, 0);
 		assertCacheInvocationParameter(allParameters[1], SampleObject.class, sampleInstance, 1);
 
 		CacheInvocationParameter valueParameter = operation.getValueParameter(2L, sampleInstance);
-		assertNotNull(valueParameter);
+		assertThat(valueParameter).isNotNull();
 		assertCacheInvocationParameter(valueParameter, SampleObject.class, sampleInstance, 1);
 	}
 
@@ -87,10 +85,10 @@ public class CachePutOperationTests extends AbstractCacheOperationTests<CachePut
 		CacheMethodDetails<CachePut> methodDetails = create(CachePut.class,
 				SampleObject.class, "fullPutConfig", Long.class, SampleObject.class);
 		CachePutOperation operation = createDefaultOperation(methodDetails);
-		assertTrue(operation.isEarlyPut());
-		assertNotNull(operation.getExceptionTypeFilter());
-		assertTrue(operation.getExceptionTypeFilter().match(IOException.class));
-		assertFalse(operation.getExceptionTypeFilter().match(NullPointerException.class));
+		assertThat(operation.isEarlyPut()).isTrue();
+		assertThat(operation.getExceptionTypeFilter()).isNotNull();
+		assertThat(operation.getExceptionTypeFilter().match(IOException.class)).isTrue();
+		assertThat(operation.getExceptionTypeFilter().match(NullPointerException.class)).isFalse();
 	}
 
 	private CachePutOperation createDefaultOperation(CacheMethodDetails<CachePut> methodDetails) {

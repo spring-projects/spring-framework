@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.Matchers.containsString;
+
+
 
 /**
  * Samples of tests using {@link WebTestClient} with serialized JSON content.
@@ -80,7 +82,7 @@ public class JsonContentTests {
 	public void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.syncBody("{\"name\":\"John\"}")
+				.bodyValue("{\"name\":\"John\"}")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();

@@ -19,14 +19,15 @@ package org.springframework.jdbc.core.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -48,7 +49,7 @@ public class JdbcBeanDefinitionReaderTests {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(1)).willReturn("one", "one");
 		given(resultSet.getString(2)).willReturn("(class)", "age");
-		given(resultSet.getString(3)).willReturn("org.springframework.tests.sample.beans.TestBean", "53");
+		given(resultSet.getString(3)).willReturn("org.springframework.beans.testfixture.beans.TestBean", "53");
 
 		Statement statement = mock(Statement.class);
 		given(statement.executeQuery(sql)).willReturn(resultSet);
@@ -58,11 +59,12 @@ public class JdbcBeanDefinitionReaderTests {
 		JdbcBeanDefinitionReader reader = new JdbcBeanDefinitionReader(bf);
 		reader.setDataSource(dataSource);
 		reader.loadBeanDefinitions(sql);
-		assertEquals("Incorrect number of bean definitions", 1, bf.getBeanDefinitionCount());
+		assertThat(bf.getBeanDefinitionCount()).as("Incorrect number of bean definitions").isEqualTo(1);
 		TestBean tb = (TestBean) bf.getBean("one");
-		assertEquals("Age in TestBean was wrong.", 53, tb.getAge());
+		assertThat(tb.getAge()).as("Age in TestBean was wrong.").isEqualTo(53);
 
 		verify(resultSet).close();
 		verify(statement).close();
 	}
+
 }

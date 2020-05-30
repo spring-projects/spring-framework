@@ -36,7 +36,14 @@
 								<xsd:documentation><![CDATA[
 	Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
 	a method mapped to "/users" also matches to "/users.*".
-	The default value is true.
+
+	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
+	extensions for request mapping and for content negotiation (see deprecation notes on
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
+	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
+	also see https://github.com/spring-projects/spring-framework/issues/24179.
+
+	The default value is true but in 5.3 it changes to false.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
@@ -56,6 +63,13 @@
 	explicitly registered when you configure content negotiation.
 	This is generally recommended to reduce ambiguity and to
 	avoid issues such as when a "." appears in the path for other reasons.
+
+	In 5.2.4, suffix pattern matching was deprecated in order to discourage use of path
+	extensions for request mapping and for content negotiation (see deprecation notes on
+	org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping and on
+	org.springframework.web.accept.ContentNegotiationManagerFactoryBean and
+	also see https://github.com/spring-projects/spring-framework/issues/24179.
+
 	The default value is false.
 								]]></xsd:documentation>
 							</xsd:annotation>
@@ -253,7 +267,7 @@
 	Specify the amount of time, in milliseconds, before asynchronous request handling times out.
 	In Servlet 3, the timeout begins after the main request processing thread has exited and ends when the request
 	is dispatched again for further processing of the concurrently produced result. If this value is not set,
-	the default timeout of the underlying implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	the default timeout of the underlying implementation is used.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

@@ -24,13 +24,12 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.StubTopic;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -77,8 +76,8 @@ public class DynamicDestinationResolverTests {
 	private static void testResolveDestination(Session session, Destination expectedDestination, boolean isPubSub) throws JMSException {
 		DynamicDestinationResolver resolver = new DynamicDestinationResolver();
 		Destination destination = resolver.resolveDestinationName(session, DESTINATION_NAME, isPubSub);
-		assertNotNull(destination);
-		assertSame(expectedDestination, destination);
+		assertThat(destination).isNotNull();
+		assertThat(destination).isSameAs(expectedDestination);
 	}
 
 }

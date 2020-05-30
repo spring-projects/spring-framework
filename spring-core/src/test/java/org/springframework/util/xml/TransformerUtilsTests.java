@@ -17,6 +17,7 @@
 package org.springframework.util.xml;
 
 import java.util.Properties;
+
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -25,11 +26,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link TransformerUtils}.
@@ -37,62 +37,62 @@ import static org.junit.Assert.assertNotNull;
  * @author Rick Evans
  * @author Arjen Poutsma
  */
-public class TransformerUtilsTests {
+class TransformerUtilsTests {
 
 	@Test
-	public void enableIndentingSunnyDay() throws Exception {
+	void enableIndentingSunnyDay() throws Exception {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT), indentAmount);
+		assertThat(indentAmount).isNotNull();
+		assertThat(indentAmount).isEqualTo(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT));
 	}
 
 	@Test
-	public void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
+	void enableIndentingSunnyDayWithCustomKosherIndentAmount() throws Exception {
 		final String indentAmountProperty = "10";
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer, Integer.valueOf(indentAmountProperty));
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("yes", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertNotNull(indentAmount);
-		assertEquals(indentAmountProperty, indentAmount);
+		assertThat(indentAmount).isNotNull();
+		assertThat(indentAmount).isEqualTo(indentAmountProperty);
 	}
 
 	@Test
-	public void disableIndentingSunnyDay() throws Exception {
+	void disableIndentingSunnyDay() throws Exception {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.disableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertNotNull(indent);
-		assertEquals("no", indent);
+		assertThat(indent).isNotNull();
+		assertThat(indent).isEqualTo("no");
 	}
 
 	@Test
-	public void enableIndentingWithNullTransformer() throws Exception {
+	void enableIndentingWithNullTransformer() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(null));
 	}
 
 	@Test
-	public void disableIndentingWithNullTransformer() throws Exception {
+	void disableIndentingWithNullTransformer() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.disableIndenting(null));
 	}
 
 	@Test
-	public void enableIndentingWithNegativeIndentAmount() throws Exception {
+	void enableIndentingWithNegativeIndentAmount() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				TransformerUtils.enableIndenting(new StubTransformer(), -21938));
 	}
 
 	@Test
-	public void enableIndentingWithZeroIndentAmount() throws Exception {
+	void enableIndentingWithZeroIndentAmount() throws Exception {
 		TransformerUtils.enableIndenting(new StubTransformer(), 0);
 	}
 

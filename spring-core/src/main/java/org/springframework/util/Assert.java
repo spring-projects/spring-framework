@@ -496,6 +496,47 @@ public abstract class Assert {
 	}
 
 	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">Assert.noNullElements(collection, "Collection must contain non-null elements");</pre>
+	 * @param collection the collection to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, String message) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(message);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">
+	 * Assert.noNullElements(collection, () -&gt; "Collection " + collectionName + " must contain non-null elements");
+	 * </pre>
+	 * @param collection the collection to check
+	 * @param messageSupplier a supplier for the exception message to use if the
+	 * assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+				}
+			}
+		}
+	}
+
+	/**
 	 * Assert that a Map contains entries; that is, it must not be {@code null}
 	 * and must contain at least one entry.
 	 * <pre class="code">Assert.notEmpty(map, "Map must contain entries");</pre>

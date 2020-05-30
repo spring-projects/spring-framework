@@ -16,11 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -31,9 +31,9 @@ public class AroundAdviceCircularTests extends AroundAdviceBindingTests {
 	@Test
 	public void testBothBeansAreProxies() {
 		Object tb = ctx.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(tb));
+		assertThat(AopUtils.isAopProxy(tb)).isTrue();
 		Object tb2 = ctx.getBean("testBean2");
-		assertTrue(AopUtils.isAopProxy(tb2));
+		assertThat(AopUtils.isAopProxy(tb2)).isTrue();
 	}
 
 }

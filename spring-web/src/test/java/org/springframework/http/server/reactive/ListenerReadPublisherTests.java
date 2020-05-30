@@ -16,14 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -39,7 +39,7 @@ public class ListenerReadPublisherTests {
 	private final TestSubscriber subscriber = new TestSubscriber();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.publisher.subscribe(this.subscriber);
 	}
@@ -51,7 +51,7 @@ public class ListenerReadPublisherTests {
 		this.subscriber.getSubscription().request(2);
 		this.publisher.onDataAvailable();
 
-		assertEquals(2, this.publisher.getReadCalls());
+		assertThat(this.publisher.getReadCalls()).isEqualTo(2);
 	}
 
 	@Test // SPR-17410
@@ -61,8 +61,8 @@ public class ListenerReadPublisherTests {
 		this.publisher.onDataAvailable();
 		this.publisher.onError(new IllegalStateException());
 
-		assertEquals(2, this.publisher.getReadCalls());
-		assertEquals(1, this.publisher.getDiscardCalls());
+		assertThat(this.publisher.getReadCalls()).isEqualTo(2);
+		assertThat(this.publisher.getDiscardCalls()).isEqualTo(1);
 	}
 
 	@Test // SPR-17410
@@ -72,8 +72,8 @@ public class ListenerReadPublisherTests {
 		this.subscriber.setCancelOnNext(true);
 		this.publisher.onDataAvailable();
 
-		assertEquals(1, this.publisher.getReadCalls());
-		assertEquals(1, this.publisher.getDiscardCalls());
+		assertThat(this.publisher.getReadCalls()).isEqualTo(1);
+		assertThat(this.publisher.getDiscardCalls()).isEqualTo(1);
 	}
 
 

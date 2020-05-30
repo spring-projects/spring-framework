@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for meta-annotation attribute override support, demonstrating
@@ -66,6 +66,6 @@ public class ConfigClassesAndProfilesMetaConfigTests {
 
 	@Test
 	public void foo() {
-		assertEquals("Local Dev Foo", foo);
+		assertThat(foo).isEqualTo("Local Dev Foo");
 	}
 }

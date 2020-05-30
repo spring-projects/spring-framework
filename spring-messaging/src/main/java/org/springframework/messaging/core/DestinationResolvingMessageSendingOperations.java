@@ -59,7 +59,7 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * destination.
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
- 	 * @param headers headers for the message to send
+ 	 * @param headers the headers for the message to send
 	 */
 	<T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers)
 			throws MessagingException;
@@ -85,7 +85,7 @@ public interface DestinationResolvingMessageSendingOperations<D> extends Message
 	 * and send the resulting message to the resolved destination.
 	 * @param destinationName the destination name to resolve
 	 * @param payload the Object to use as payload
-	 * @param headers headers for the message to send
+	 * @param headers the headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 */
 	<T> void convertAndSend(String destinationName, T payload, @Nullable Map<String, Object> headers,

@@ -18,16 +18,16 @@ package org.springframework.web.accept;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test fixture for HeaderContentNegotiationStrategy tests.
@@ -49,11 +49,11 @@ public class HeaderContentNegotiationStrategyTests {
 		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertEquals(4, mediaTypes.size());
-		assertEquals("text/html", mediaTypes.get(0).toString());
-		assertEquals("text/x-c", mediaTypes.get(1).toString());
-		assertEquals("text/x-dvi;q=0.8", mediaTypes.get(2).toString());
-		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
+		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
+		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
+		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
+		assertThat(mediaTypes.get(3).toString()).isEqualTo("text/plain;q=0.5");
 	}
 
 	@Test  // SPR-14506
@@ -62,11 +62,11 @@ public class HeaderContentNegotiationStrategyTests {
 		this.servletRequest.addHeader("Accept", "text/x-dvi; q=0.8, text/x-c");
 		List<MediaType> mediaTypes = this.strategy.resolveMediaTypes(this.webRequest);
 
-		assertEquals(4, mediaTypes.size());
-		assertEquals("text/html", mediaTypes.get(0).toString());
-		assertEquals("text/x-c", mediaTypes.get(1).toString());
-		assertEquals("text/x-dvi;q=0.8", mediaTypes.get(2).toString());
-		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
+		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
+		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
+		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");
+		assertThat(mediaTypes.get(3).toString()).isEqualTo("text/plain;q=0.5");
 	}
 
 	@Test

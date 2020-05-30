@@ -20,15 +20,15 @@ import javax.sql.DataSource;
 
 import org.junit.Before;
 
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.tests.sample.beans.Employee;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
@@ -80,7 +80,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 	@Before
 	public void compareDataSources() throws Exception {
 		// NOTE: the two DataSource instances ARE the same!
-		assertSame(dataSourceFromTxManager, dataSourceViaInjection);
+		assertThat(dataSourceViaInjection).isSameAs(dataSourceFromTxManager);
 	}
 
 }

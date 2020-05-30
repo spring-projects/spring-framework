@@ -17,14 +17,14 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
+
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
@@ -45,8 +45,8 @@ public class ButtonTagTests extends AbstractFormTagTests {
 
 	@Test
 	public void buttonTag() throws Exception {
-		assertEquals(Tag.EVAL_BODY_INCLUDE, this.tag.doStartTag());
-		assertEquals(Tag.EVAL_PAGE, this.tag.doEndTag());
+		assertThat(this.tag.doStartTag()).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(this.tag.doEndTag()).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -79,11 +79,11 @@ public class ButtonTagTests extends AbstractFormTagTests {
 	}
 
 	protected final void assertTagClosed(String output) {
-		assertTrue("Tag not closed properly", output.endsWith("</button>"));
+		assertThat(output.endsWith("</button>")).as("Tag not closed properly").isTrue();
 	}
 
 	protected final void assertTagOpened(String output) {
-		assertTrue("Tag not opened properly", output.startsWith("<button "));
+		assertThat(output.startsWith("<button ")).as("Tag not opened properly").isTrue();
 	}
 
 	@SuppressWarnings("serial")

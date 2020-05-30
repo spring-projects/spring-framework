@@ -20,11 +20,12 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.HashMap;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
@@ -47,7 +48,7 @@ public class SimpleJdbcInsertTests {
 	private DataSource dataSource;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		connection = mock(Connection.class);
 		databaseMetaData = mock(DatabaseMetaData.class);
@@ -56,7 +57,7 @@ public class SimpleJdbcInsertTests {
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
-	@After
+	@AfterEach
 	public void verifyClosed() throws Exception {
 		verify(connection).close();
 	}

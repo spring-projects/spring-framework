@@ -18,13 +18,14 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -39,9 +40,8 @@ import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.validation.annotation.Validated;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public class MethodValidationTests {
 		ProxyFactory proxyFactory = new ProxyFactory(bean);
 		proxyFactory.addAdvice(new MethodValidationInterceptor());
 		proxyFactory.addAdvisor(new AsyncAnnotationAdvisor());
-		doTestProxyValidation((MyValidInterface) proxyFactory.getProxy());
+		doTestProxyValidation((MyValidInterface<?>) proxyFactory.getProxy());
 	}
 
 	@Test
@@ -70,8 +70,9 @@ public class MethodValidationTests {
 		ac.close();
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void doTestProxyValidation(MyValidInterface proxy) {
-		assertNotNull(proxy.myValidMethod("value", 5));
+		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myValidMethod("value", 15));
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
@@ -83,12 +84,13 @@ public class MethodValidationTests {
 				proxy.myValidAsyncMethod("value", 15));
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myValidAsyncMethod(null, 5));
-		assertEquals("myValue", proxy.myGenericMethod("myValue"));
+		assertThat(proxy.myGenericMethod("myValue")).isEqualTo("myValue");
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
 				proxy.myGenericMethod(null));
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testLazyValidatorForMethodValidation() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfig.class, CustomValidatorBean.class,
@@ -97,6 +99,7 @@ public class MethodValidationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,

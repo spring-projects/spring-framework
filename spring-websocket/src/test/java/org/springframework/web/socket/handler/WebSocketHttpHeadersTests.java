@@ -19,14 +19,14 @@ package org.springframework.web.socket.handler;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests for WebSocketHttpHeaders.
@@ -37,7 +37,7 @@ public class WebSocketHttpHeadersTests {
 
 	private WebSocketHttpHeaders headers;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		headers = new WebSocketHttpHeaders();
 	}
@@ -50,7 +50,7 @@ public class WebSocketHttpHeadersTests {
 		this.headers.put(WebSocketHttpHeaders.SEC_WEBSOCKET_EXTENSIONS, extensions);
 
 		List<WebSocketExtension> parsedExtensions = this.headers.getSecWebSocketExtensions();
-		assertThat(parsedExtensions, Matchers.hasSize(3));
+		assertThat(parsedExtensions).hasSize(3);
 	}
 
 }

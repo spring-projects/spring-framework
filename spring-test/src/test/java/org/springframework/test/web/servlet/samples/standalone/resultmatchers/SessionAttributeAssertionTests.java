@@ -18,8 +18,7 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,8 +27,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,30 +41,52 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * Examples of expectations on created session attributes.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class SessionAttributeAssertionTests {
+class SessionAttributeAssertionTests {
 
-	private MockMvc mockMvc;
+	private final MockMvc mockMvc = standaloneSetup(new SimpleController())
+										.defaultRequest(get("/"))
+										.alwaysExpect(status().isOk())
+										.build();
 
-	@Before
-	public void setup() {
-		this.mockMvc = standaloneSetup(new SimpleController())
-				.defaultRequest(get("/"))
-				.alwaysExpect(status().isOk())
-				.build();
+
+	@Test
+	void sessionAttributeEqualTo() throws Exception {
+		this.mockMvc.perform(get("/"))
+			.andExpect(request().sessionAttribute("locale", Locale.UK));
+
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() ->
+				this.mockMvc.perform(get("/"))
+					.andExpect(request().sessionAttribute("locale", Locale.US)))
+			.withMessage("Session attribute 'locale' expected:<en_US> but was:<en_GB>");
 	}
 
 	@Test
-	public void testSessionAttributeEqualTo() throws Exception {
+	void sessionAttributeMatcher() throws Exception {
 		this.mockMvc.perform(get("/"))
-			.andExpect(request().sessionAttribute("locale", Locale.UK))
+			.andExpect(request().sessionAttribute("bogus", is(nullValue())))
+			.andExpect(request().sessionAttribute("locale", is(notNullValue())))
 			.andExpect(request().sessionAttribute("locale", equalTo(Locale.UK)));
+
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() ->
+				this.mockMvc.perform(get("/"))
+					.andExpect(request().sessionAttribute("bogus", is(notNullValue()))))
+			.withMessageContaining("null");
 	}
 
 	@Test
-	public void testSessionAttributeMatcher() throws Exception {
+	void sessionAttributeDoesNotExist() throws Exception {
 		this.mockMvc.perform(get("/"))
-			.andExpect(request().sessionAttribute("locale", notNullValue()));
+			.andExpect(request().sessionAttributeDoesNotExist("bogus", "enigma"));
+
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() ->
+				this.mockMvc.perform(get("/"))
+					.andExpect(request().sessionAttributeDoesNotExist("locale")))
+			.withMessage("Session attribute 'locale' exists");
 	}
 
 
@@ -71,12 +95,12 @@ public class SessionAttributeAssertionTests {
 	private static class SimpleController {
 
 		@ModelAttribute
-		public void populate(Model model) {
+		void populate(Model model) {
 			model.addAttribute("locale", Locale.UK);
 		}
 
 		@RequestMapping("/")
-		public String handle() {
+		String handle() {
 			return "view";
 		}
 	}

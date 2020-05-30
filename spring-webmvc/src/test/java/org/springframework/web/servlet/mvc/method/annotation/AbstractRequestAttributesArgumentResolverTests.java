@@ -18,19 +18,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestAttribute;
@@ -40,14 +38,11 @@ import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -67,7 +62,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	private Method handleMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
@@ -89,8 +84,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
-		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, -1)));
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0))).isTrue();
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, -1))).isFalse();
 	}
 
 	@Test
@@ -102,7 +97,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
-		assertSame(foo, testResolveArgument(param));
+		assertThat(testResolveArgument(param)).isSameAs(foo);
 	}
 
 	@Test
@@ -110,17 +105,17 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("specialFoo", foo, getScope());
-		assertSame(foo, testResolveArgument(param));
+		assertThat(testResolveArgument(param)).isSameAs(foo);
 	}
 
 	@Test
 	public void resolveNotRequired() throws Exception {
 		MethodParameter param = initMethodParameter(2);
-		assertNull(testResolveArgument(param));
+		assertThat(testResolveArgument(param)).isNull();
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
-		assertSame(foo, testResolveArgument(param));
+		assertThat(testResolveArgument(param)).isSameAs(foo);
 	}
 
 	@Test
@@ -132,18 +127,18 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 
 		MethodParameter param = initMethodParameter(3);
 		Object actual = testResolveArgument(param, factory);
-		assertNotNull(actual);
-		assertEquals(Optional.class, actual.getClass());
-		assertFalse(((Optional<?>) actual).isPresent());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getClass()).isEqualTo(Optional.class);
+		assertThat(((Optional<?>) actual).isPresent()).isFalse();
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
 
 		actual = testResolveArgument(param, factory);
-		assertNotNull(actual);
-		assertEquals(Optional.class, actual.getClass());
-		assertTrue(((Optional<?>) actual).isPresent());
-		assertSame(foo, ((Optional<?>) actual).get());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getClass()).isEqualTo(Optional.class);
+		assertThat(((Optional<?>) actual).isPresent()).isTrue();
+		assertThat(((Optional<?>) actual).get()).isSameAs(foo);
 	}
 
 	private Object testResolveArgument(MethodParameter param) throws Exception {
@@ -158,8 +153,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	private MethodParameter initMethodParameter(int parameterIndex) {
 		MethodParameter param = new SynthesizingMethodParameter(this.handleMethod, parameterIndex);
 		param.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(param, this.resolver.getClass());
-		return param;
+		return param.withContainingClass(this.resolver.getClass());
 	}
 
 

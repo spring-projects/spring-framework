@@ -69,7 +69,7 @@ public interface PreparedStatementCallback<T> {
 	 * @param ps active JDBC PreparedStatement
 	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
-	 * to a DataAccessException by a SQLExceptionTranslator
+	 * to a DataAccessException by an SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions
 	 * @see JdbcTemplate#queryForObject(String, Object[], Class)
 	 * @see JdbcTemplate#queryForList(String, Object[])

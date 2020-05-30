@@ -16,19 +16,17 @@
 
 package org.springframework.web.servlet.mvc;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with a ParameterizableViewController.
@@ -42,7 +40,7 @@ public class ParameterizableViewControllerTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.controller = new ParameterizableViewController();
 		this.request = new MockHttpServletRequest("GET", "/");
@@ -53,23 +51,23 @@ public class ParameterizableViewControllerTests {
 		String viewName = "testView";
 		this.controller.setViewName(viewName);
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
-		assertEquals(viewName, mav.getViewName());
-		assertTrue(mav.getModel().isEmpty());
+		assertThat(mav.getViewName()).isEqualTo(viewName);
+		assertThat(mav.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
 	public void handleRequestWithoutViewName() throws Exception {
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
-		assertNull(mav.getViewName());
-		assertTrue(mav.getModel().isEmpty());
+		assertThat(mav.getViewName()).isNull();
+		assertThat(mav.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
 	public void handleRequestWithFlashAttributes() throws Exception {
 		this.request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
-		assertEquals(1, mav.getModel().size());
-		assertEquals("value", mav.getModel().get("name"));
+		assertThat(mav.getModel().size()).isEqualTo(1);
+		assertThat(mav.getModel().get("name")).isEqualTo("value");
 	}
 
 	@Test
@@ -78,8 +76,8 @@ public class ParameterizableViewControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView mav = this.controller.handleRequest(this.request, response);
 
-		assertNull(mav);
-		assertEquals("GET,HEAD,OPTIONS", response.getHeader("Allow"));
+		assertThat(mav).isNull();
+		assertThat(response.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
 	}
 
 }

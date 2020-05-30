@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -35,9 +35,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSockJsSessionTests.TestWebSocketServerSockJsSession;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
@@ -53,7 +51,7 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 	private TestWebSocketSession webSocketSession;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setUp();
 		this.webSocketSession = new TestWebSocketSession();
@@ -68,20 +66,20 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 
 	@Test
 	public void isActive() throws Exception {
-		assertFalse(this.session.isActive());
+		assertThat(this.session.isActive()).isFalse();
 
 		this.session.initializeDelegateSession(this.webSocketSession);
-		assertTrue(this.session.isActive());
+		assertThat(this.session.isActive()).isTrue();
 
 		this.webSocketSession.setOpen(false);
-		assertFalse(this.session.isActive());
+		assertThat(this.session.isActive()).isFalse();
 	}
 
 	@Test
 	public void afterSessionInitialized() throws Exception {
 		this.session.initializeDelegateSession(this.webSocketSession);
-		assertEquals(Collections.singletonList(new TextMessage("o")), this.webSocketSession.getSentMessages());
-		assertEquals(Arrays.asList("schedule"), this.session.heartbeatSchedulingEvents);
+		assertThat(this.webSocketSession.getSentMessages()).isEqualTo(Collections.singletonList(new TextMessage("o")));
+		assertThat(this.session.heartbeatSchedulingEvents).isEqualTo(Arrays.asList("schedule"));
 		verify(this.webSocketHandler).afterConnectionEstablished(this.session);
 		verifyNoMoreInteractions(this.taskScheduler, this.webSocketHandler);
 	}
@@ -98,7 +96,7 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 		TestWebSocketServerSockJsSession session = new TestWebSocketServerSockJsSession(this.sockJsConfig, handler, null);
 		session.initializeDelegateSession(this.webSocketSession);
 		List<TextMessage> expected = Arrays.asList(new TextMessage("o"), new TextMessage("a[\"go go\"]"));
-		assertEquals(expected, this.webSocketSession.getSentMessages());
+		assertThat(this.webSocketSession.getSentMessages()).isEqualTo(expected);
 	}
 
 	@Test
@@ -133,10 +131,9 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 		this.session.initializeDelegateSession(this.webSocketSession);
 		this.session.sendMessageInternal("x");
 
-		assertEquals(Arrays.asList(new TextMessage("o"), new TextMessage("a[\"x\"]")),
-				this.webSocketSession.getSentMessages());
+		assertThat(this.webSocketSession.getSentMessages()).isEqualTo(Arrays.asList(new TextMessage("o"), new TextMessage("a[\"x\"]")));
 
-		assertEquals(Arrays.asList("schedule", "cancel", "schedule"), this.session.heartbeatSchedulingEvents);
+		assertThat(this.session.heartbeatSchedulingEvents).isEqualTo(Arrays.asList("schedule", "cancel", "schedule"));
 	}
 
 	@Test
@@ -145,7 +142,7 @@ public class WebSocketServerSockJsSessionTests extends AbstractSockJsSessionTest
 		this.session.initializeDelegateSession(this.webSocketSession);
 		this.session.close(CloseStatus.NOT_ACCEPTABLE);
 
-		assertEquals(CloseStatus.NOT_ACCEPTABLE, this.webSocketSession.getCloseStatus());
+		assertThat(this.webSocketSession.getCloseStatus()).isEqualTo(CloseStatus.NOT_ACCEPTABLE);
 	}
 
 

@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -39,7 +40,9 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
@@ -88,9 +91,33 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	boolean useAalto = aaltoPresent;
 
+	private int maxInMemorySize = 256 * 1024;
+
 
 	public XmlEventDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
+	}
+
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder. This
+	 * is either the size the entire input when decoding as a whole, or when
+	 * using async parsing via Aalto XML, it is size one top-level XML tree.
+	 * When the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -100,14 +127,14 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		if (this.useAalto) {
-			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent();
+			AaltoDataBufferToXmlEvent mapper = new AaltoDataBufferToXmlEvent(this.maxInMemorySize);
 			return Flux.from(input)
 					.flatMapIterable(mapper)
 					.doFinally(signalType -> mapper.endOfInput());
 		}
 		else {
-			return DataBufferUtils.join(input).
-					flatMapIterable(buffer -> {
+			return DataBufferUtils.join(input, this.maxInMemorySize)
+					.flatMapIterable(buffer -> {
 						try {
 							InputStream is = buffer.asInputStream();
 							Iterator eventReader = inputFactory.createXMLEventReader(is);
@@ -139,10 +166,22 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 		private final XMLEventAllocator eventAllocator = EventAllocatorImpl.getDefaultInstance();
 
+		private final int maxInMemorySize;
+
+		private int byteCount;
+
+		private int elementDepth;
+
+
+		public AaltoDataBufferToXmlEvent(int maxInMemorySize) {
+			this.maxInMemorySize = maxInMemorySize;
+		}
+
 
 		@Override
 		public List<? extends XMLEvent> apply(DataBuffer dataBuffer) {
 			try {
+				increaseByteCount(dataBuffer);
 				this.streamReader.getInputFeeder().feedInput(dataBuffer.asByteBuffer());
 				List<XMLEvent> events = new ArrayList<>();
 				while (true) {
@@ -156,7 +195,11 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						if (event.isEndDocument()) {
 							break;
 						}
+						checkDepthAndResetByteCount(event);
 					}
+				}
+				if (this.maxInMemorySize > 0 && this.byteCount > this.maxInMemorySize) {
+					raiseLimitException();
 				}
 				return events;
 			}
@@ -168,9 +211,40 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			}
 		}
 
+		private void increaseByteCount(DataBuffer dataBuffer) {
+			if (this.maxInMemorySize > 0) {
+				if (dataBuffer.readableByteCount() > Integer.MAX_VALUE - this.byteCount) {
+					raiseLimitException();
+				}
+				else {
+					this.byteCount += dataBuffer.readableByteCount();
+				}
+			}
+		}
+
+		private void checkDepthAndResetByteCount(XMLEvent event) {
+			if (this.maxInMemorySize > 0) {
+				if (event.isStartElement()) {
+					this.byteCount = this.elementDepth == 1 ? 0 : this.byteCount;
+					this.elementDepth++;
+				}
+				else if (event.isEndElement()) {
+					this.elementDepth--;
+					this.byteCount = this.elementDepth == 1 ? 0 : this.byteCount;
+				}
+			}
+		}
+
+		private void raiseLimitException() {
+			throw new DataBufferLimitException(
+					"Exceeded limit on max bytes per XML top-level node: " + this.maxInMemorySize);
+		}
+
 		public void endOfInput() {
 			this.streamReader.getInputFeeder().endOfInput();
 		}
 	}
+
+
 
 }

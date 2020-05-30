@@ -18,19 +18,16 @@ package org.springframework.context.annotation;
 
 import example.scannable.FooService;
 import example.scannable.ScopedProxyTestBean;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.context.testfixture.SimpleMapScope;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mark Fisher
@@ -47,7 +44,7 @@ public class ComponentScanParserScopedProxyTests {
 
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 		context.close();
 	}
 
@@ -59,7 +56,7 @@ public class ComponentScanParserScopedProxyTests {
 
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should not be a proxy
-		assertFalse(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isFalse();
 		context.close();
 	}
 
@@ -72,12 +69,12 @@ public class ComponentScanParserScopedProxyTests {
 		// should cast to the interface
 		FooService bean = (FooService) context.getBean("scopedProxyTestBean");
 		// should be dynamic proxy
-		assertTrue(AopUtils.isJdkDynamicProxy(bean));
+		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
 		// test serializability
-		assertEquals("bar", bean.foo(1));
+		assertThat(bean.foo(1)).isEqualTo("bar");
 		FooService deserialized = (FooService) SerializationTestUtils.serializeAndDeserialize(bean);
-		assertNotNull(deserialized);
-		assertEquals("bar", deserialized.foo(1));
+		assertThat(deserialized).isNotNull();
+		assertThat(deserialized.foo(1)).isEqualTo("bar");
 		context.close();
 	}
 
@@ -89,12 +86,12 @@ public class ComponentScanParserScopedProxyTests {
 
 		ScopedProxyTestBean bean = (ScopedProxyTestBean) context.getBean("scopedProxyTestBean");
 		// should be a class-based proxy
-		assertTrue(AopUtils.isCglibProxy(bean));
+		assertThat(AopUtils.isCglibProxy(bean)).isTrue();
 		// test serializability
-		assertEquals("bar", bean.foo(1));
+		assertThat(bean.foo(1)).isEqualTo("bar");
 		ScopedProxyTestBean deserialized = (ScopedProxyTestBean) SerializationTestUtils.serializeAndDeserialize(bean);
-		assertNotNull(deserialized);
-		assertEquals("bar", deserialized.foo(1));
+		assertThat(deserialized).isNotNull();
+		assertThat(deserialized.foo(1)).isEqualTo("bar");
 		context.close();
 	}
 

@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
  * {@link #cron}, {@link #fixedDelay}, or {@link #fixedRate} attributes must be
@@ -60,8 +62,9 @@ public @interface Scheduled {
 	 * <p>This is primarily meant for use with <code>${...}</code> placeholders,
 	 * allowing for external disabling of corresponding scheduled methods.
 	 * @since 5.1
+	 * @see ScheduledTaskRegistrar#CRON_DISABLED
 	 */
-	String CRON_DISABLED = "-";
+	String CRON_DISABLED = ScheduledTaskRegistrar.CRON_DISABLED;
 
 
 	/**

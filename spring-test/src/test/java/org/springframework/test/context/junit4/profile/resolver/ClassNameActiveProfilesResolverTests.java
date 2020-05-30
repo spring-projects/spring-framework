@@ -28,7 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Michail Nikolaev
@@ -51,8 +51,8 @@ public class ClassNameActiveProfilesResolverTests {
 
 	@Test
 	public void test() {
-		assertTrue(Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()).contains(
-			getClass().getSimpleName().toLowerCase()));
+		assertThat(Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()).contains(
+			getClass().getSimpleName().toLowerCase())).isTrue();
 	}
 
 }

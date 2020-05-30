@@ -18,15 +18,13 @@ package org.springframework.scripting.support;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -43,14 +41,14 @@ public class ResourceScriptSourceTests {
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		long lastModified = scriptSource.retrieveLastModifiedTime();
-		assertEquals(0, lastModified);
+		assertThat(lastModified).isEqualTo(0);
 	}
 
 	@Test
 	public void beginsInModifiedState() throws Exception {
 		Resource resource = mock(Resource.class);
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
-		assertTrue(scriptSource.isModified());
+		assertThat(scriptSource.isModified()).isTrue();
 	}
 
 	@Test
@@ -65,22 +63,22 @@ public class ResourceScriptSourceTests {
 		given(resource.getInputStream()).willReturn(StreamUtils.emptyInput());
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
-		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).").isTrue();
 		scriptSource.getScriptAsString();
-		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.").isFalse();
 		// Must now report back as having been modified
-		assertTrue("ResourceScriptSource must report back as being modified if the underlying File resource is reporting a changed lastModified time.", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must report back as being modified if the underlying File resource is reporting a changed lastModified time.").isTrue();
 	}
 
 	@Test
 	public void lastModifiedWorksWithResourceThatDoesNotSupportFileBasedAccessAtAll() throws Exception {
 		Resource resource = new ByteArrayResource(new byte[0]);
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
-		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).").isTrue();
 		scriptSource.getScriptAsString();
-		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.").isFalse();
 		// Must now continue to report back as not having been modified 'cos the Resource does not support access as a File (and so the lastModified date cannot be determined).
-		assertFalse("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.", scriptSource.isModified());
+		assertThat(scriptSource.isModified()).as("ResourceScriptSource must not report back as being modified if the underlying File resource is not reporting a changed lastModified time.").isFalse();
 	}
 
 }

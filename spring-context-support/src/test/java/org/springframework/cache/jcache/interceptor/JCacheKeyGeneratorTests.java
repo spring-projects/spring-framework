@@ -19,12 +19,13 @@ package org.springframework.cache.jcache.interceptor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -38,9 +39,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -53,7 +52,7 @@ public class JCacheKeyGeneratorTests {
 
 	private Cache cache;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.keyGenerator = context.getBean(TestKeyGenerator.class);
@@ -67,10 +66,10 @@ public class JCacheKeyGeneratorTests {
 		this.keyGenerator.expect(1L);
 		Object first = this.simpleService.get(1L);
 		Object second = this.simpleService.get(1L);
-		assertSame(first, second);
+		assertThat(second).isSameAs(first);
 
 		Object key = new SimpleKey(1L);
-		assertEquals(first, cache.get(key).get());
+		assertThat(cache.get(key).get()).isEqualTo(first);
 	}
 
 	@Test
@@ -78,10 +77,10 @@ public class JCacheKeyGeneratorTests {
 		this.keyGenerator.expect(1L, "foo", "bar");
 		Object first = this.simpleService.get(1L, "foo", "bar");
 		Object second = this.simpleService.get(1L, "foo", "bar");
-		assertSame(first, second);
+		assertThat(second).isSameAs(first);
 
 		Object key = new SimpleKey(1L, "foo", "bar");
-		assertEquals(first, cache.get(key).get());
+		assertThat(cache.get(key).get()).isEqualTo(first);
 	}
 
 	@Test
@@ -89,10 +88,10 @@ public class JCacheKeyGeneratorTests {
 		this.keyGenerator.expect(1L);
 		Object first = this.simpleService.getFiltered(1L, "foo", "bar");
 		Object second = this.simpleService.getFiltered(1L, "foo", "bar");
-		assertSame(first, second);
+		assertThat(second).isSameAs(first);
 
 		Object key = new SimpleKey(1L);
-		assertEquals(first, cache.get(key).get());
+		assertThat(cache.get(key).get()).isEqualTo(first);
 	}
 
 
@@ -151,9 +150,8 @@ public class JCacheKeyGeneratorTests {
 
 		@Override
 		public Object generate(Object target, Method method, Object... params) {
-			assertTrue("Unexpected parameters: expected: "
-							+ Arrays.toString(this.expectedParams) + " but got: " + Arrays.toString(params),
-					Arrays.equals(expectedParams, params));
+			assertThat(Arrays.equals(expectedParams, params)).as("Unexpected parameters: expected: "
+								+ Arrays.toString(this.expectedParams) + " but got: " + Arrays.toString(params)).isTrue();
 			return new SimpleKey(params);
 		}
 	}

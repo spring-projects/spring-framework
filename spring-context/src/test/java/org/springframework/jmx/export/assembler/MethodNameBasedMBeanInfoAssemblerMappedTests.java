@@ -17,15 +17,14 @@
 package org.springframework.jmx.export.assembler;
 
 import java.util.Properties;
+
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -41,8 +40,8 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo attr = info.getAttribute(AGE_ATTRIBUTE);
 
-		assertTrue("Age is not readable", attr.isReadable());
-		assertFalse("Age is not writable", attr.isWritable());
+		assertThat(attr.isReadable()).as("Age is not readable").isTrue();
+		assertThat(attr.isWritable()).as("Age is not writable").isFalse();
 	}
 
 	@Test
@@ -103,9 +102,9 @@ public class MethodNameBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 	}
 
 	private void assertNickName(MBeanAttributeInfo attr) {
-		assertNotNull("Nick Name should not be null", attr);
-		assertTrue("Nick Name should be writable", attr.isWritable());
-		assertTrue("Nick Name should be readable", attr.isReadable());
+		assertThat(attr).as("Nick Name should not be null").isNotNull();
+		assertThat(attr.isWritable()).as("Nick Name should be writable").isTrue();
+		assertThat(attr.isReadable()).as("Nick Name should be readable").isTrue();
 	}
 
 }

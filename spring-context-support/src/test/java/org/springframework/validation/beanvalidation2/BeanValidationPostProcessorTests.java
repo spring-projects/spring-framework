@@ -20,18 +20,17 @@ import javax.annotation.PostConstruct;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.beanvalidation.BeanValidationPostProcessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Juergen Hoeller
@@ -127,7 +126,7 @@ public class BeanValidationPostProcessorTests {
 
 		@PostConstruct
 		public void init() {
-			assertNotNull("Shouldn't be here after constraint checking", this.testBean);
+			assertThat(this.testBean).as("Shouldn't be here after constraint checking").isNotNull();
 		}
 	}
 

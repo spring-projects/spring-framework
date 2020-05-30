@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.hierarchies.meta;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,9 +26,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -36,14 +34,14 @@ import static org.junit.Assert.assertNull;
  */
 @ContextConfiguration
 @ActiveProfiles("prod")
-public class MetaHierarchyLevelTwoTests extends MetaHierarchyLevelOneTests {
+class MetaHierarchyLevelTwoTests extends MetaHierarchyLevelOneTests {
 
 	@Configuration
 	@Profile("prod")
 	static class Config {
 
 		@Bean
-		public String bar() {
+		String bar() {
 			return "Prod Bar";
 		}
 	}
@@ -57,15 +55,15 @@ public class MetaHierarchyLevelTwoTests extends MetaHierarchyLevelOneTests {
 
 
 	@Test
-	public void bar() {
-		assertEquals("Prod Bar", bar);
+	void bar() {
+		assertThat(bar).isEqualTo("Prod Bar");
 	}
 
 	@Test
-	public void contextHierarchy() {
-		assertNotNull("child ApplicationContext", context);
-		assertNotNull("parent ApplicationContext", context.getParent());
-		assertNull("grandparent ApplicationContext", context.getParent().getParent());
+	void contextHierarchy() {
+		assertThat(context).as("child ApplicationContext").isNotNull();
+		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
+		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();
 	}
 
 }

@@ -17,24 +17,24 @@
 package org.springframework.web.context.support;
 
 import java.io.IOException;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletConfig;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletConfig;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Juergen Hoeller
@@ -53,8 +53,8 @@ public class HttpRequestHandlerTests {
 		wac.getBeanFactory().registerSingleton("myHandler", new HttpRequestHandler() {
 			@Override
 			public void handleRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-				assertSame(request, req);
-				assertSame(response, res);
+				assertThat(req).isSameAs(request);
+				assertThat(res).isSameAs(response);
 				String exception = request.getParameter("exception");
 				if ("ServletException".equals(exception)) {
 					throw new ServletException("test");
@@ -73,7 +73,7 @@ public class HttpRequestHandlerTests {
 		servlet.init(new MockServletConfig(servletContext, "myHandler"));
 
 		servlet.service(request, response);
-		assertEquals("myResponse", response.getContentAsString());
+		assertThat(response.getContentAsString()).isEqualTo("myResponse");
 
 		request.setParameter("exception", "ServletException");
 		assertThatExceptionOfType(ServletException.class).isThrownBy(() ->

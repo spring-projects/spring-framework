@@ -20,22 +20,19 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.mock.web.test.server.MockWebSession;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.testfixture.server.MockWebSession;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -64,13 +61,14 @@ public class HandshakeWebSocketServiceTests {
 		service.handleRequest(exchange, mock(WebSocketHandler.class)).block();
 
 		HandshakeInfo info = upgradeStrategy.handshakeInfo;
-		assertNotNull(info);
+		assertThat(info).isNotNull();
 
 		Map<String, Object> attributes = info.getAttributes();
-		assertEquals(3, attributes.size());
-		assertThat(attributes, Matchers.hasEntry("a1", "v1"));
-		assertThat(attributes, Matchers.hasEntry("a3", "v3"));
-		assertThat(attributes, Matchers.hasEntry("a5", "v5"));
+		assertThat(attributes)
+				.hasSize(3)
+				.containsEntry("a1", "v1")
+				.containsEntry("a3", "v3")
+				.containsEntry("a5", "v5");
 	}
 
 	private MockServerHttpRequest initHandshakeRequest() {

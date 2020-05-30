@@ -16,34 +16,33 @@
 
 package org.springframework.test.context.configuration.interfaces;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.tests.sample.beans.Employee;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@RunWith(SpringRunner.class)
-public class ActiveProfilesInterfaceTests implements ActiveProfilesTestInterface {
+@ExtendWith(SpringExtension.class)
+class ActiveProfilesInterfaceTests implements ActiveProfilesTestInterface {
 
 	@Autowired
 	Employee employee;
 
 
 	@Test
-	public void profileFromTestInterface() {
-		assertNotNull(employee);
-		assertEquals("dev", employee.getName());
+	void profileFromTestInterface() {
+		assertThat(employee).isNotNull();
+		assertThat(employee.getName()).isEqualTo("dev");
 	}
 
 

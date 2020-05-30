@@ -17,6 +17,7 @@
 package org.springframework.jms.support.converter;
 
 import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
 

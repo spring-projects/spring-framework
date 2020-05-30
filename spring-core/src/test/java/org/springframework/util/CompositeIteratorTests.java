@@ -21,15 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 
 /**
  * Test case for {@link CompositeIterator}.
@@ -37,47 +34,47 @@ import static org.junit.Assert.assertTrue;
  * @author Erwin Vervaet
  * @author Juergen Hoeller
  */
-public class CompositeIteratorTests {
+class CompositeIteratorTests {
 
 	@Test
-	public void testNoIterators() {
+	void noIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
 
 	@Test
-	public void testSingleIterator() {
+	void singleIterator() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		for (int i = 0; i < 2; i++) {
-			assertTrue(it.hasNext());
-			assertEquals(String.valueOf(i), it.next());
+			assertThat(it.hasNext()).isTrue();
+			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
 
 	@Test
-	public void testMultipleIterators() {
+	void multipleIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		it.add(Arrays.asList("2").iterator());
 		it.add(Arrays.asList("3", "4").iterator());
 		for (int i = 0; i < 5; i++) {
-			assertTrue(it.hasNext());
-			assertEquals(String.valueOf(i), it.next());
+			assertThat(it.hasNext()).isTrue();
+			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertFalse(it.hasNext());
+		assertThat(it.hasNext()).isFalse();
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
 
 	@Test
-	public void testInUse() {
+	void inUse() {
 		List<String> list = Arrays.asList("0", "1");
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(list.iterator());
@@ -92,7 +89,7 @@ public class CompositeIteratorTests {
 	}
 
 	@Test
-	public void testDuplicateIterators() {
+	void duplicateIterators() {
 		List<String> list = Arrays.asList("0", "1");
 		Iterator<String> iterator = list.iterator();
 		CompositeIterator<String> it = new CompositeIterator<>();

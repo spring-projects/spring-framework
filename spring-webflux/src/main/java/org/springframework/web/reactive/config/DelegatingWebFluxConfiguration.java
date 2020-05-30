@@ -37,7 +37,7 @@ import org.springframework.web.reactive.result.method.annotation.ArgumentResolve
  * @author Brian Clozel
  * @since 5.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport {
 
 	private final WebFluxConfigurerComposite configurers = new WebFluxConfigurerComposite();

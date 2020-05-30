@@ -16,10 +16,10 @@
 
 package org.springframework.web.socket;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Test fixture for {@link TextMessage}.
@@ -33,16 +33,16 @@ public class TextMessageTests {
 	public void toStringWithAscii() {
 		String expected = "foo,bar";
 		TextMessage actual = new TextMessage(expected);
-		assertThat(actual.getPayload(), Matchers.is(expected));
-		assertThat(actual.toString(), Matchers.containsString(expected));
+		assertThat(actual.getPayload()).isEqualTo(expected);
+		assertThat(actual.toString()).contains(expected);
 	}
 
 	@Test
 	public void toStringWithMultibyteString() {
 		String expected = "\u3042\u3044\u3046\u3048\u304a";
 		TextMessage actual = new TextMessage(expected);
-		assertThat(actual.getPayload(), Matchers.is(expected));
-		assertThat(actual.toString(), Matchers.containsString(expected));
+		assertThat(actual.getPayload()).isEqualTo(expected);
+		assertThat(actual.toString()).contains(expected);
 	}
 
 }

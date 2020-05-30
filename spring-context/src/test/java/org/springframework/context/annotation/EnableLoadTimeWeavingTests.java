@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import java.lang.instrument.ClassFileTransformer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -27,7 +27,7 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Unit tests for @EnableLoadTimeWeaving
@@ -50,7 +50,7 @@ public class EnableLoadTimeWeavingTests {
 		ctx.register(EnableLTWConfig_withAjWeavingDisabled.class);
 		ctx.refresh();
 		LoadTimeWeaver loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
-		verifyZeroInteractions(loadTimeWeaver);
+		verifyNoInteractions(loadTimeWeaver);
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class EnableLoadTimeWeavingTests {
 		LoadTimeWeaver loadTimeWeaver = ctx.getBean("loadTimeWeaver", LoadTimeWeaver.class);
 		// no expectations -> a class file transformer should NOT be added
 		// because no META-INF/aop.xml is present on the classpath
-		verifyZeroInteractions(loadTimeWeaver);
+		verifyNoInteractions(loadTimeWeaver);
 	}
 
 	@Test

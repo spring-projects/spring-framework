@@ -18,14 +18,14 @@
 	</bean>
 
 
-	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean"
+	<bean id="jenny" class="org.springframework.beans.testfixture.beans.TestBean"
 		scope="singleton">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 	</bean>
 
 	<bean id="factoryMethods"
-		class="org.springframework.beans.factory.xml.FactoryMethods"
+		class="org.springframework.beans.testfixture.beans.FactoryMethods"
 		factory-method="newInstance"
 		scope="prototype">
 		<constructor-arg index="0"><ref bean="jenny"/></constructor-arg>

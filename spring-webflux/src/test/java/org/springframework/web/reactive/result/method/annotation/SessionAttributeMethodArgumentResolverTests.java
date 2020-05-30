@@ -19,20 +19,17 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -40,12 +37,10 @@ import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -64,7 +59,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	private Method handleMethod;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -79,8 +74,8 @@ public class SessionAttributeMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0)));
-		assertFalse(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4)));
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0))).isTrue();
+		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4))).isFalse();
 	}
 
 	@Test
@@ -92,7 +87,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		Foo foo = new Foo();
 		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@Test
@@ -101,19 +96,19 @@ public class SessionAttributeMethodArgumentResolverTests {
 		Foo foo = new Foo();
 		given(this.session.getAttribute("specialFoo")).willReturn(foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@Test
 	public void resolveNotRequired() {
 		MethodParameter param = initMethodParameter(2);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertNull(mono.block());
+		assertThat(mono.block()).isNull();
 
 		Foo foo = new Foo();
 		given(this.session.getAttribute("foo")).willReturn(foo);
 		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
-		assertSame(foo, mono.block());
+		assertThat(mono.block()).isSameAs(foo);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -123,8 +118,8 @@ public class SessionAttributeMethodArgumentResolverTests {
 		Optional<Object> actual = (Optional<Object>) this.resolver
 				.resolveArgument(param, new BindingContext(), this.exchange).block();
 
-		assertNotNull(actual);
-		assertFalse(actual.isPresent());
+		assertThat(actual).isNotNull();
+		assertThat(actual.isPresent()).isFalse();
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());
@@ -134,17 +129,16 @@ public class SessionAttributeMethodArgumentResolverTests {
 		given(this.session.getAttribute("foo")).willReturn(foo);
 		actual = (Optional<Object>) this.resolver.resolveArgument(param, bindingContext, this.exchange).block();
 
-		assertNotNull(actual);
-		assertTrue(actual.isPresent());
-		assertSame(foo, actual.get());
+		assertThat(actual).isNotNull();
+		assertThat(actual.isPresent()).isTrue();
+		assertThat(actual.get()).isSameAs(foo);
 	}
 
 
 	private MethodParameter initMethodParameter(int parameterIndex) {
 		MethodParameter param = new SynthesizingMethodParameter(this.handleMethod, parameterIndex);
 		param.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		GenericTypeResolver.resolveParameterType(param, this.resolver.getClass());
-		return param;
+		return param.withContainingClass(this.resolver.getClass());
 	}
 
 

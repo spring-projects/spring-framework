@@ -23,7 +23,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
@@ -32,12 +32,11 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.util.StopWatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for AspectJ auto proxying. Includes mixing with Spring AOP
@@ -108,8 +107,8 @@ public class BenchmarkTests {
 		sw.start(howmany + " repeated around advice invocations with " + technology);
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 
-		assertTrue(AopUtils.isAopProxy(adrian));
-		assertEquals(68, adrian.getAge());
+		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
+		assertThat(adrian.getAge()).isEqualTo(68);
 
 		for (int i = 0; i < howmany; i++) {
 			adrian.getAge();
@@ -127,10 +126,10 @@ public class BenchmarkTests {
 		sw.start(howmany + " repeated before advice invocations with " + technology);
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 
-		assertTrue(AopUtils.isAopProxy(adrian));
+		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
-		assertTrue(a.getAdvisors().length >= 3);
-		assertEquals("adrian", adrian.getName());
+		assertThat(a.getAdvisors().length >= 3).isTrue();
+		assertThat(adrian.getName()).isEqualTo("adrian");
 
 		for (int i = 0; i < howmany; i++) {
 			adrian.getName();
@@ -148,9 +147,9 @@ public class BenchmarkTests {
 		sw.start(howmany + " repeated after returning advice invocations with " + technology);
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 
-		assertTrue(AopUtils.isAopProxy(adrian));
+		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
-		assertTrue(a.getAdvisors().length >= 3);
+		assertThat(a.getAdvisors().length >= 3).isTrue();
 		// Hits joinpoint
 		adrian.setAge(25);
 
@@ -170,9 +169,9 @@ public class BenchmarkTests {
 		sw.start(howmany + " repeated mixed invocations with " + technology);
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
 
-		assertTrue(AopUtils.isAopProxy(adrian));
+		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
-		assertTrue(a.getAdvisors().length >= 3);
+		assertThat(a.getAdvisors().length >= 3).isTrue();
 
 		for (int i = 0; i < howmany; i++) {
 			// Hit all 3 joinpoints

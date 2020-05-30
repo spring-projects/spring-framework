@@ -25,7 +25,7 @@ import org.junit.runners.JUnit4;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.TimedSpringRunnerTests;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class is an extension of {@link TimedSpringRunnerTests}

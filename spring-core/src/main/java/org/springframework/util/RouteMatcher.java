@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.util;
 
 import java.util.Comparator;
@@ -23,13 +24,14 @@ import org.springframework.lang.Nullable;
 /**
  * Contract for matching routes to patterns.
  *
- * <p>Equivalent to {@link PathMatcher}, but enables use of parsed
- * representations of routes and patterns for efficiency reasons in scenarios
- * where routes from incoming messages are continuously matched against a
- * large number of message handler patterns.
+ * <p>Equivalent to {@link PathMatcher}, but enables use of parsed representations
+ * of routes and patterns for efficiency reasons in scenarios where routes from
+ * incoming messages are continuously matched against a large number of message
+ * handler patterns.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
+ * @see PathMatcher
  */
 public interface RouteMatcher {
 
@@ -39,7 +41,6 @@ public interface RouteMatcher {
 	 * @return the parsed representation of the route
 	 */
 	Route parseRoute(String routeValue);
-
 
 	/**
 	 * Whether the given {@code route} contains pattern syntax which requires

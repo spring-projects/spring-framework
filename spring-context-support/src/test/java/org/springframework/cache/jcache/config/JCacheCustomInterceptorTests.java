@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -37,9 +37,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.contextsupport.testfixture.jcache.JCacheableService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Stephane Nicoll
@@ -53,14 +54,14 @@ public class JCacheCustomInterceptorTests {
 	protected Cache exceptionCache;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ctx = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 		cs = ctx.getBean("service", JCacheableService.class);
 		exceptionCache = ctx.getBean("exceptionCache", Cache.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (ctx != null) {
 			ctx.close();
@@ -71,15 +72,16 @@ public class JCacheCustomInterceptorTests {
 	@Test
 	public void onlyOneInterceptorIsAvailable() {
 		Map<String, JCacheInterceptor> interceptors = ctx.getBeansOfType(JCacheInterceptor.class);
-		assertEquals("Only one interceptor should be defined", 1, interceptors.size());
+		assertThat(interceptors.size()).as("Only one interceptor should be defined").isEqualTo(1);
 		JCacheInterceptor interceptor = interceptors.values().iterator().next();
-		assertEquals("Custom interceptor not defined", TestCacheInterceptor.class, interceptor.getClass());
+		assertThat(interceptor.getClass()).as("Custom interceptor not defined").isEqualTo(TestCacheInterceptor.class);
 	}
 
 	@Test
 	public void customInterceptorAppliesWithRuntimeException() {
 		Object o = cs.cacheWithException("id", true);
-		assertEquals(55L, o); // See TestCacheInterceptor
+		// See TestCacheInterceptor
+		assertThat(o).isEqualTo(55L);
 	}
 
 	@Test

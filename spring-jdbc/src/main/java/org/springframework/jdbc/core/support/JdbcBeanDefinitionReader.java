@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.support;
 
 import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;

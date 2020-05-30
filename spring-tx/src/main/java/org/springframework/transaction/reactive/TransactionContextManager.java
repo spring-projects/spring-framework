@@ -62,7 +62,7 @@ public abstract class TransactionContextManager {
 					return;
 				}
 			}
-			sink.error(new NoTransactionException("No transaction in context"));
+			sink.error(new NoTransactionInContextException());
 		});
 	}
 
@@ -109,6 +109,24 @@ public abstract class TransactionContextManager {
 			}
 			return context;
 		};
+	}
+
+
+	/**
+	 * Stackless variant of {@link NoTransactionException} for reactive flows.
+	 */
+	@SuppressWarnings("serial")
+	private static class NoTransactionInContextException extends NoTransactionException {
+
+		public NoTransactionInContextException() {
+			super("No transaction in context");
+		}
+
+		@Override
+		public synchronized Throwable fillInStackTrace() {
+			// stackless exception
+			return this;
+		}
 	}
 
 }

@@ -18,14 +18,13 @@ package org.springframework.cache.jcache.config;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.cache.config.SomeKeyGenerator;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -43,12 +42,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.testfixture.cache.SomeKeyGenerator;
+import org.springframework.contextsupport.testfixture.jcache.AbstractJCacheAnnotationTests;
+import org.springframework.contextsupport.testfixture.jcache.JCacheableService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Stephane Nicoll
@@ -67,13 +66,11 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(FullCachingConfig.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean(KeyGenerator.class), cos.getKeyGenerator());
-		assertSame(context.getBean("cacheResolver", CacheResolver.class),
-				cos.getCacheResolver());
-		assertSame(context.getBean("exceptionCacheResolver", CacheResolver.class),
-				cos.getExceptionCacheResolver());
+		assertThat(cos.getKeyGenerator()).isSameAs(context.getBean(KeyGenerator.class));
+		assertThat(cos.getCacheResolver()).isSameAs(context.getBean("cacheResolver", CacheResolver.class));
+		assertThat(cos.getExceptionCacheResolver()).isSameAs(context.getBean("exceptionCacheResolver", CacheResolver.class));
 		JCacheInterceptor interceptor = context.getBean(JCacheInterceptor.class);
-		assertSame(context.getBean("errorHandler", CacheErrorHandler.class), interceptor.getErrorHandler());
+		assertThat(interceptor.getErrorHandler()).isSameAs(context.getBean("errorHandler", CacheErrorHandler.class));
 		context.close();
 	}
 
@@ -83,11 +80,10 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(EmptyConfigSupportConfig.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertNotNull(cos.getCacheResolver());
-		assertEquals(SimpleCacheResolver.class, cos.getCacheResolver().getClass());
-		assertSame(context.getBean(CacheManager.class),
-				((SimpleCacheResolver) cos.getCacheResolver()).getCacheManager());
-		assertNull(cos.getExceptionCacheResolver());
+		assertThat(cos.getCacheResolver()).isNotNull();
+		assertThat(cos.getCacheResolver().getClass()).isEqualTo(SimpleCacheResolver.class);
+		assertThat(((SimpleCacheResolver) cos.getCacheResolver()).getCacheManager()).isSameAs(context.getBean(CacheManager.class));
+		assertThat(cos.getExceptionCacheResolver()).isNull();
 		context.close();
 	}
 
@@ -97,9 +93,9 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 				new AnnotationConfigApplicationContext(FullCachingConfigSupport.class);
 
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-		assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
-		assertSame(context.getBean("keyGenerator"), cos.getKeyGenerator());
-		assertSame(context.getBean("exceptionCacheResolver"), cos.getExceptionCacheResolver());
+		assertThat(cos.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
+		assertThat(cos.getKeyGenerator()).isSameAs(context.getBean("keyGenerator"));
+		assertThat(cos.getExceptionCacheResolver()).isSameAs(context.getBean("exceptionCacheResolver"));
 		context.close();
 	}
 
@@ -110,7 +106,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 
 		try {
 			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
-			assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
+			assertThat(cos.getCacheResolver()).isSameAs(context.getBean("cacheResolver"));
 
 			JCacheableService<?> service = context.getBean(JCacheableService.class);
 			service.cache("id");

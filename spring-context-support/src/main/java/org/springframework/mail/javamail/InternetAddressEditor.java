@@ -17,6 +17,7 @@
 package org.springframework.mail.javamail;
 
 import java.beans.PropertyEditorSupport;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 

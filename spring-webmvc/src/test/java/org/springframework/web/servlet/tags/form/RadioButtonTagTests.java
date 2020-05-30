@@ -19,23 +19,22 @@ package org.springframework.web.servlet.tags.form;
 import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.Collections;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.Pet;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.Pet;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -71,7 +70,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -89,7 +88,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setPath("sex");
 		this.tag.setValue("M");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -105,7 +104,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setPath("myFloat");
 		this.tag.setValue(getFloat());
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -127,7 +126,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -144,7 +143,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setPath("myFloat");
 		this.tag.setValue(value);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -160,7 +159,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setPath("sex");
 		this.tag.setValue("F");
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 		assertTagOpened(output);
@@ -177,7 +176,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setValue(new Pet("Rudiger"));
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -187,11 +186,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
-		assertEquals("input", checkboxElement.getName());
-		assertEquals("radio", checkboxElement.attribute("type").getValue());
-		assertEquals("pets", checkboxElement.attribute("name").getValue());
-		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
-		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertThat(checkboxElement.getName()).isEqualTo("input");
+		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
+		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");
+		assertThat(checkboxElement.attribute("value").getValue()).isEqualTo("Rudiger");
+		assertThat(checkboxElement.attribute("checked").getValue()).isEqualTo("checked");
 	}
 
 	@Test
@@ -200,7 +199,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		this.tag.setValue(new Pet("Santa's Little Helper"));
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -210,11 +209,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
-		assertEquals("input", checkboxElement.getName());
-		assertEquals("radio", checkboxElement.attribute("type").getValue());
-		assertEquals("pets", checkboxElement.attribute("name").getValue());
-		assertEquals("Santa's Little Helper", checkboxElement.attribute("value").getValue());
-		assertNull(checkboxElement.attribute("checked"));
+		assertThat(checkboxElement.getName()).isEqualTo("input");
+		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
+		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");
+		assertThat(checkboxElement.attribute("value").getValue()).isEqualTo("Santa's Little Helper");
+		assertThat(checkboxElement.attribute("checked")).isNull();
 	}
 
 	@Test
@@ -228,7 +227,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + COMMAND_NAME, bindingResult);
 
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
 
@@ -238,11 +237,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
-		assertEquals("input", checkboxElement.getName());
-		assertEquals("radio", checkboxElement.attribute("type").getValue());
-		assertEquals("pets", checkboxElement.attribute("name").getValue());
-		assertEquals("Rudiger", checkboxElement.attribute("value").getValue());
-		assertEquals("checked", checkboxElement.attribute("checked").getValue());
+		assertThat(checkboxElement.getName()).isEqualTo("input");
+		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
+		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");
+		assertThat(checkboxElement.attribute("value").getValue()).isEqualTo("Rudiger");
+		assertThat(checkboxElement.attribute("checked").getValue()).isEqualTo("checked");
 	}
 
 	@Test
@@ -253,11 +252,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertTagOpened(String output) {
-		assertTrue(output.contains("<input "));
+		assertThat(output.contains("<input ")).isTrue();
 	}
 
 	private void assertTagClosed(String output) {
-		assertTrue(output.contains("/>"));
+		assertThat(output.contains("/>")).isTrue();
 	}
 
 	private Float getFloat() {

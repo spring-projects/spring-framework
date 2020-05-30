@@ -18,14 +18,13 @@ package org.springframework.test.context.junit4.annotation;
 
 import org.junit.Test;
 
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.DelegatingSmartContextLoader;
-import org.springframework.tests.sample.beans.Employee;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for configuration classes in
@@ -56,8 +55,8 @@ public class DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests exten
 	@Test
 	@Override
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee should have been autowired.", this.employee);
-		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
+		assertThat(this.employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(this.employee.getName()).as("The employee bean should have been overridden.").isEqualTo("Yoda");
 	}
 
 }

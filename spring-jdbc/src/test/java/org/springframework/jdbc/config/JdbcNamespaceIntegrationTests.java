@@ -17,9 +17,10 @@
 package org.springframework.jdbc.config;
 
 import java.util.function.Predicate;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -28,21 +29,16 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory.DEFAULT_DATABASE_NAME;
 
 /**
@@ -54,17 +50,16 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFacto
  */
 public class JdbcNamespaceIntegrationTests {
 
-
 	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void createEmbeddedDatabase() throws Exception {
-		Assume.group(TestGroup.LONG_RUNNING);
 		assertCorrectSetup("jdbc-config.xml", "dataSource", "h2DataSource", "derbyDataSource");
 	}
 
 	@Test
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void createEmbeddedDatabaseAgain() throws Exception {
 		// If Derby isn't cleaned up properly this will fail...
-		Assume.group(TestGroup.LONG_RUNNING);
 		assertCorrectSetup("jdbc-config.xml", "derbyDataSource");
 	}
 
@@ -184,12 +179,12 @@ public class JdbcNamespaceIntegrationTests {
 	private void assertBeanPropertyValueOf(String propertyName, String expected, DefaultListableBeanFactory factory) {
 		BeanDefinition bean = factory.getBeanDefinition(expected);
 		PropertyValue value = bean.getPropertyValues().getPropertyValue(propertyName);
-		assertThat(value, is(notNullValue()));
-		assertThat(value.getValue().toString(), is(expected));
+		assertThat(value).isNotNull();
+		assertThat(value.getValue().toString()).isEqualTo(expected);
 	}
 
 	private void assertNumRowsInTestTable(JdbcTemplate template, int count) {
-		assertEquals(count, template.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
+		assertThat(template.queryForObject("select count(*) from T_TEST", Integer.class).intValue()).isEqualTo(count);
 	}
 
 	private void assertCorrectSetup(String file, String... dataSources) {
@@ -202,9 +197,9 @@ public class JdbcNamespaceIntegrationTests {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
-				assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+				assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
 				AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-				assertThat(adbDataSource.getUrl(), containsString(dataSourceName));
+				assertThat(adbDataSource.getUrl()).contains(dataSourceName);
 			}
 		}
 		finally {
@@ -217,9 +212,9 @@ public class JdbcNamespaceIntegrationTests {
 		try {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
-			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+			assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
-			assertTrue(urlPredicate.test(adbDataSource.getUrl()));
+			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
 		}
 		finally {
 			context.close();

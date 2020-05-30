@@ -19,14 +19,13 @@ package org.springframework.jms.listener.endpoint;
 import javax.jms.Destination;
 import javax.jms.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jca.StubResourceAdapter;
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.support.destination.DestinationResolver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -54,9 +53,9 @@ public class DefaultJmsActivationSpecFactoryTests {
 		StubActiveMQActivationSpec spec = (StubActiveMQActivationSpec) activationSpecFactory.createActivationSpec(
 				new StubActiveMQResourceAdapter(), activationSpecConfig);
 
-		assertEquals(5, spec.getMaxSessions());
-		assertEquals(3, spec.getMaxMessagesPerSessions());
-		assertTrue(spec.isUseRAManagedTransaction());
+		assertThat(spec.getMaxSessions()).isEqualTo(5);
+		assertThat(spec.getMaxMessagesPerSessions()).isEqualTo(3);
+		assertThat(spec.isUseRAManagedTransaction()).isTrue();
 	}
 
 	@Test
@@ -72,9 +71,9 @@ public class DefaultJmsActivationSpecFactoryTests {
 		StubWebSphereActivationSpecImpl spec = (StubWebSphereActivationSpecImpl) activationSpecFactory
 				.createActivationSpec(new StubWebSphereResourceAdapterImpl(), activationSpecConfig);
 
-		assertEquals(destination, spec.getDestination());
-		assertEquals(5, spec.getMaxConcurrency());
-		assertEquals(3, spec.getMaxBatchSize());
+		assertThat(spec.getDestination()).isEqualTo(destination);
+		assertThat(spec.getMaxConcurrency()).isEqualTo(5);
+		assertThat(spec.getMaxBatchSize()).isEqualTo(3);
 	}
 
 

@@ -48,7 +48,7 @@ public class ClientHttpResponseDecorator implements ClientHttpResponse {
 	}
 
 
-	// ServerHttpResponse delegation methods...
+	// ClientHttpResponse delegation methods...
 
 	@Override
 	public HttpStatus getStatusCode() {

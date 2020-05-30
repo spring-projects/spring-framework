@@ -16,13 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Ramnivas Laddad
@@ -35,7 +34,7 @@ public class DeclareParentsDelegateRefTests {
 	protected Counter counter;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -47,13 +46,14 @@ public class DeclareParentsDelegateRefTests {
 
 	@Test
 	public void testIntroductionWasMade() {
-		assertTrue("Introduction must have been made", noMethodsBean instanceof ICounter);
+		boolean condition = noMethodsBean instanceof ICounter;
+		assertThat(condition).as("Introduction must have been made").isTrue();
 	}
 
 	@Test
 	public void testIntroductionDelegation() {
 		((ICounter)noMethodsBean).increment();
-		assertEquals("Delegate's counter should be updated", 1, counter.getCount());
+		assertThat(counter.getCount()).as("Delegate's counter should be updated").isEqualTo(1);
 	}
 
 }

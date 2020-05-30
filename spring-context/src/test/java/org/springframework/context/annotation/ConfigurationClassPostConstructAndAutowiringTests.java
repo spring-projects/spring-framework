@@ -18,13 +18,13 @@ package org.springframework.context.annotation;
 
 import javax.annotation.PostConstruct;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests cornering the issue reported in SPR-8080. If the product of a @Bean method
@@ -56,7 +56,7 @@ public class ConfigurationClassPostConstructAndAutowiringTests {
 		assertions(ctx);
 
 		Config2 config2 = ctx.getBean(Config2.class);
-		assertThat(config2.testBean, is(ctx.getBean(TestBean.class)));
+		assertThat(config2.testBean).isEqualTo(ctx.getBean(TestBean.class));
 	}
 
 	/**
@@ -75,8 +75,8 @@ public class ConfigurationClassPostConstructAndAutowiringTests {
 	private void assertions(AnnotationConfigApplicationContext ctx) {
 		Config1 config1 = ctx.getBean(Config1.class);
 		TestBean testBean = ctx.getBean(TestBean.class);
-		assertThat(config1.beanMethodCallCount, is(1));
-		assertThat(testBean.getAge(), is(2));
+		assertThat(config1.beanMethodCallCount).isEqualTo(1);
+		assertThat(testBean.getAge()).isEqualTo(2);
 	}
 
 

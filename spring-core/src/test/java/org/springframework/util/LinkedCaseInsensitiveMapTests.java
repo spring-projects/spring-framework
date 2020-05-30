@@ -18,11 +18,9 @@ package org.springframework.util;
 
 import java.util.Iterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link LinkedCaseInsensitiveMap}.
@@ -30,188 +28,188 @@ import static org.junit.Assert.assertTrue;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-public class LinkedCaseInsensitiveMapTests {
+class LinkedCaseInsensitiveMapTests {
 
 	private final LinkedCaseInsensitiveMap<String> map = new LinkedCaseInsensitiveMap<>();
 
 
 	@Test
-	public void putAndGet() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("key", "value2"));
-		assertEquals("value2", map.put("key", "value3"));
-		assertEquals(1, map.size());
-		assertEquals("value3", map.get("key"));
-		assertEquals("value3", map.get("KEY"));
-		assertEquals("value3", map.get("Key"));
-		assertTrue(map.containsKey("key"));
-		assertTrue(map.containsKey("KEY"));
-		assertTrue(map.containsKey("Key"));
-		assertTrue(map.keySet().contains("key"));
-		assertTrue(map.keySet().contains("KEY"));
-		assertTrue(map.keySet().contains("Key"));
+	void putAndGet() {
+		assertThat(map.put("key", "value1")).isNull();
+		assertThat(map.put("key", "value2")).isEqualTo("value1");
+		assertThat(map.put("key", "value3")).isEqualTo("value2");
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(map.get("key")).isEqualTo("value3");
+		assertThat(map.get("KEY")).isEqualTo("value3");
+		assertThat(map.get("Key")).isEqualTo("value3");
+		assertThat(map.containsKey("key")).isTrue();
+		assertThat(map.containsKey("KEY")).isTrue();
+		assertThat(map.containsKey("Key")).isTrue();
+		assertThat(map.keySet().contains("key")).isTrue();
+		assertThat(map.keySet().contains("KEY")).isTrue();
+		assertThat(map.keySet().contains("Key")).isTrue();
 	}
 
 	@Test
-	public void putWithOverlappingKeys() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("KEY", "value2"));
-		assertEquals("value2", map.put("Key", "value3"));
-		assertEquals(1, map.size());
-		assertEquals("value3", map.get("key"));
-		assertEquals("value3", map.get("KEY"));
-		assertEquals("value3", map.get("Key"));
-		assertTrue(map.containsKey("key"));
-		assertTrue(map.containsKey("KEY"));
-		assertTrue(map.containsKey("Key"));
-		assertTrue(map.keySet().contains("key"));
-		assertTrue(map.keySet().contains("KEY"));
-		assertTrue(map.keySet().contains("Key"));
+	void putWithOverlappingKeys() {
+		assertThat(map.put("key", "value1")).isNull();
+		assertThat(map.put("KEY", "value2")).isEqualTo("value1");
+		assertThat(map.put("Key", "value3")).isEqualTo("value2");
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(map.get("key")).isEqualTo("value3");
+		assertThat(map.get("KEY")).isEqualTo("value3");
+		assertThat(map.get("Key")).isEqualTo("value3");
+		assertThat(map.containsKey("key")).isTrue();
+		assertThat(map.containsKey("KEY")).isTrue();
+		assertThat(map.containsKey("Key")).isTrue();
+		assertThat(map.keySet().contains("key")).isTrue();
+		assertThat(map.keySet().contains("KEY")).isTrue();
+		assertThat(map.keySet().contains("Key")).isTrue();
 	}
 
 	@Test
-	public void getOrDefault() {
-		assertNull(map.put("key", "value1"));
-		assertEquals("value1", map.put("KEY", "value2"));
-		assertEquals("value2", map.put("Key", "value3"));
-		assertEquals("value3", map.getOrDefault("key", "N"));
-		assertEquals("value3", map.getOrDefault("KEY", "N"));
-		assertEquals("value3", map.getOrDefault("Key", "N"));
-		assertEquals("N", map.getOrDefault("keeeey", "N"));
-		assertEquals("N", map.getOrDefault(new Object(), "N"));
+	void getOrDefault() {
+		assertThat(map.put("key", "value1")).isNull();
+		assertThat(map.put("KEY", "value2")).isEqualTo("value1");
+		assertThat(map.put("Key", "value3")).isEqualTo("value2");
+		assertThat(map.getOrDefault("key", "N")).isEqualTo("value3");
+		assertThat(map.getOrDefault("KEY", "N")).isEqualTo("value3");
+		assertThat(map.getOrDefault("Key", "N")).isEqualTo("value3");
+		assertThat(map.getOrDefault("keeeey", "N")).isEqualTo("N");
+		assertThat(map.getOrDefault(new Object(), "N")).isEqualTo("N");
 	}
 
 	@Test
-	public void getOrDefaultWithNullValue() {
-		assertNull(map.put("key", null));
-		assertNull(map.put("KEY", null));
-		assertNull(map.put("Key", null));
-		assertNull(map.getOrDefault("key", "N"));
-		assertNull(map.getOrDefault("KEY", "N"));
-		assertNull(map.getOrDefault("Key", "N"));
-		assertEquals("N", map.getOrDefault("keeeey", "N"));
-		assertEquals("N", map.getOrDefault(new Object(), "N"));
+	void getOrDefaultWithNullValue() {
+		assertThat(map.put("key", null)).isNull();
+		assertThat(map.put("KEY", null)).isNull();
+		assertThat(map.put("Key", null)).isNull();
+		assertThat(map.getOrDefault("key", "N")).isNull();
+		assertThat(map.getOrDefault("KEY", "N")).isNull();
+		assertThat(map.getOrDefault("Key", "N")).isNull();
+		assertThat(map.getOrDefault("keeeey", "N")).isEqualTo("N");
+		assertThat(map.getOrDefault(new Object(), "N")).isEqualTo("N");
 	}
 
 	@Test
-	public void computeIfAbsentWithExistingValue() {
-		assertNull(map.putIfAbsent("key", "value1"));
-		assertEquals("value1", map.putIfAbsent("KEY", "value2"));
-		assertEquals("value1", map.put("Key", "value3"));
-		assertEquals("value3", map.computeIfAbsent("key", key -> "value1"));
-		assertEquals("value3", map.computeIfAbsent("KEY", key -> "value2"));
-		assertEquals("value3", map.computeIfAbsent("Key", key -> "value3"));
+	void computeIfAbsentWithExistingValue() {
+		assertThat(map.putIfAbsent("key", "value1")).isNull();
+		assertThat(map.putIfAbsent("KEY", "value2")).isEqualTo("value1");
+		assertThat(map.put("Key", "value3")).isEqualTo("value1");
+		assertThat(map.computeIfAbsent("key", key2 -> "value1")).isEqualTo("value3");
+		assertThat(map.computeIfAbsent("KEY", key1 -> "value2")).isEqualTo("value3");
+		assertThat(map.computeIfAbsent("Key", key -> "value3")).isEqualTo("value3");
 	}
 
 	@Test
-	public void computeIfAbsentWithComputedValue() {
-		assertEquals("value1", map.computeIfAbsent("key", key -> "value1"));
-		assertEquals("value1", map.computeIfAbsent("KEY", key -> "value2"));
-		assertEquals("value1", map.computeIfAbsent("Key", key -> "value3"));
+	void computeIfAbsentWithComputedValue() {
+		assertThat(map.computeIfAbsent("key", key2 -> "value1")).isEqualTo("value1");
+		assertThat(map.computeIfAbsent("KEY", key1 -> "value2")).isEqualTo("value1");
+		assertThat(map.computeIfAbsent("Key", key -> "value3")).isEqualTo("value1");
 	}
 
 	@Test
-	public void mapClone() {
-		assertNull(map.put("key", "value1"));
+	void mapClone() {
+		assertThat(map.put("key", "value1")).isNull();
 		LinkedCaseInsensitiveMap<String> copy = map.clone();
 
-		assertEquals(map.getLocale(), copy.getLocale());
-		assertEquals("value1", map.get("key"));
-		assertEquals("value1", map.get("KEY"));
-		assertEquals("value1", map.get("Key"));
-		assertEquals("value1", copy.get("key"));
-		assertEquals("value1", copy.get("KEY"));
-		assertEquals("value1", copy.get("Key"));
+		assertThat(copy.getLocale()).isEqualTo(map.getLocale());
+		assertThat(map.get("key")).isEqualTo("value1");
+		assertThat(map.get("KEY")).isEqualTo("value1");
+		assertThat(map.get("Key")).isEqualTo("value1");
+		assertThat(copy.get("key")).isEqualTo("value1");
+		assertThat(copy.get("KEY")).isEqualTo("value1");
+		assertThat(copy.get("Key")).isEqualTo("value1");
 
 		copy.put("Key", "value2");
-		assertEquals(1, map.size());
-		assertEquals(1, copy.size());
-		assertEquals("value1", map.get("key"));
-		assertEquals("value1", map.get("KEY"));
-		assertEquals("value1", map.get("Key"));
-		assertEquals("value2", copy.get("key"));
-		assertEquals("value2", copy.get("KEY"));
-		assertEquals("value2", copy.get("Key"));
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(copy.size()).isEqualTo(1);
+		assertThat(map.get("key")).isEqualTo("value1");
+		assertThat(map.get("KEY")).isEqualTo("value1");
+		assertThat(map.get("Key")).isEqualTo("value1");
+		assertThat(copy.get("key")).isEqualTo("value2");
+		assertThat(copy.get("KEY")).isEqualTo("value2");
+		assertThat(copy.get("Key")).isEqualTo("value2");
 	}
 
 
 	@Test
-	public void clearFromKeySet() {
+	void clearFromKeySet() {
 		map.put("key", "value");
 		map.keySet().clear();
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromKeySet() {
+	void removeFromKeySet() {
 		map.put("key", "value");
 		map.keySet().remove("key");
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromKeySetViaIterator() {
+	void removeFromKeySetViaIterator() {
 		map.put("key", "value");
 		nextAndRemove(map.keySet().iterator());
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void clearFromValues() {
+	void clearFromValues() {
 		map.put("key", "value");
 		map.values().clear();
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromValues() {
+	void removeFromValues() {
 		map.put("key", "value");
 		map.values().remove("value");
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromValuesViaIterator() {
+	void removeFromValuesViaIterator() {
 		map.put("key", "value");
 		nextAndRemove(map.values().iterator());
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void clearFromEntrySet() {
+	void clearFromEntrySet() {
 		map.put("key", "value");
 		map.entrySet().clear();
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromEntrySet() {
+	void removeFromEntrySet() {
 		map.put("key", "value");
 		map.entrySet().remove(map.entrySet().iterator().next());
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	@Test
-	public void removeFromEntrySetViaIterator() {
+	void removeFromEntrySetViaIterator() {
 		map.put("key", "value");
 		nextAndRemove(map.entrySet().iterator());
-		assertEquals(0, map.size());
+		assertThat(map.size()).isEqualTo(0);
 		map.computeIfAbsent("key", k -> "newvalue");
-		assertEquals("newvalue", map.get("key"));
+		assertThat(map.get("key")).isEqualTo("newvalue");
 	}
 
 	private void nextAndRemove(Iterator<?> iterator) {

@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,10 +47,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -71,14 +68,14 @@ public class PayloadMethodArgumentResolverTests {
 		boolean useDefaultResolution = true;
 		PayloadMethodArgumentResolver resolver = createResolver(null, useDefaultResolution);
 
-		assertTrue(resolver.supportsParameter(this.testMethod.annotPresent(Payload.class).arg()));
-		assertTrue(resolver.supportsParameter(this.testMethod.annotNotPresent(Payload.class).arg(String.class)));
+		assertThat(resolver.supportsParameter(this.testMethod.annotPresent(Payload.class).arg())).isTrue();
+		assertThat(resolver.supportsParameter(this.testMethod.annotNotPresent(Payload.class).arg(String.class))).isTrue();
 
 		useDefaultResolution = false;
 		resolver = createResolver(null, useDefaultResolution);
 
-		assertTrue(resolver.supportsParameter(this.testMethod.annotPresent(Payload.class).arg()));
-		assertFalse(resolver.supportsParameter(this.testMethod.annotNotPresent(Payload.class).arg(String.class)));
+		assertThat(resolver.supportsParameter(this.testMethod.annotPresent(Payload.class).arg())).isTrue();
+		assertThat(resolver.supportsParameter(this.testMethod.annotNotPresent(Payload.class).arg(String.class))).isFalse();
 	}
 
 	@Test
@@ -88,8 +85,8 @@ public class PayloadMethodArgumentResolverTests {
 
 		StepVerifier.create(mono)
 				.consumeErrorWith(ex -> {
-					assertEquals(MethodArgumentResolutionException.class, ex.getClass());
-					assertTrue(ex.getMessage(), ex.getMessage().contains("Payload content is missing"));
+					assertThat(ex.getClass()).isEqualTo(MethodArgumentResolutionException.class);
+					assertThat(ex.getMessage().contains("Payload content is missing")).as(ex.getMessage()).isTrue();
 				})
 				.verify();
 	}
@@ -97,7 +94,7 @@ public class PayloadMethodArgumentResolverTests {
 	@Test
 	public void emptyBodyWhenNotRequired() {
 		MethodParameter param = this.testMethod.annotPresent(Payload.class).arg();
-		assertNull(resolveValue(param, Mono.empty(), null));
+		assertThat(this.<Object>resolveValue(param, Mono.empty(), null)).isNull();
 	}
 
 	@Test
@@ -107,7 +104,7 @@ public class PayloadMethodArgumentResolverTests {
 		Mono<Object> mono = resolveValue(param,
 				Mono.delay(Duration.ofMillis(10)).map(aLong -> toDataBuffer(body)), null);
 
-		assertEquals(body, mono.block());
+		assertThat(mono.block()).isEqualTo(body);
 	}
 
 	@Test
@@ -118,7 +115,7 @@ public class PayloadMethodArgumentResolverTests {
 		Flux<Object> flux = resolveValue(param,
 				Flux.fromIterable(body).delayElements(Duration.ofMillis(10)).map(this::toDataBuffer), null);
 
-		assertEquals(body, flux.collectList().block());
+		assertThat(flux.collectList().block()).isEqualTo(body);
 	}
 
 	@Test
@@ -127,7 +124,7 @@ public class PayloadMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotNotPresent(Payload.class).arg(String.class);
 		Object value = resolveValue(param, Mono.just(toDataBuffer(body)), null);
 
-		assertEquals(body, value);
+		assertThat(value).isEqualTo(body);
 	}
 
 	@Test
@@ -173,7 +170,7 @@ public class PayloadMethodArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 		if (value != null) {
 			Class<?> expectedType = param.getParameterType();
-			assertTrue("Unexpected return value type: " + value, expectedType.isAssignableFrom(value.getClass()));
+			assertThat(expectedType.isAssignableFrom(value.getClass())).as("Unexpected return value type: " + value).isTrue();
 		}
 		return (T) value;
 	}

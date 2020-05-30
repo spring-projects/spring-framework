@@ -22,8 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -32,20 +32,17 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -69,7 +66,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramMono;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -96,9 +93,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueStringHeader));
-		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedValueStringArray));
-		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramNamedValueMap));
+		assertThat(resolver.supportsParameter(paramNamedDefaultValueStringHeader)).as("String parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramNamedValueStringArray)).as("String array parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramNamedValueMap)).as("non-@RequestParam parameter supported").isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.supportsParameter(this.paramMono))
 			.withMessageStartingWith("RequestHeaderMethodArgumentResolver does not support reactive type wrapper");
@@ -113,8 +110,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
 		Object result = mono.block();
-		assertTrue(result instanceof String);
-		assertEquals(expected, result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
@@ -126,8 +124,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 				this.paramNamedValueStringArray, this.bindingContext, exchange);
 
 		Object result = mono.block();
-		assertTrue(result instanceof String[]);
-		assertArrayEquals(new String[] {"foo", "bar"}, (String[]) result);
+		boolean condition = result instanceof String[];
+		assertThat(condition).isTrue();
+		assertThat((String[]) result).isEqualTo(new String[] {"foo", "bar"});
 	}
 
 	@Test
@@ -137,8 +136,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 				this.paramNamedDefaultValueStringHeader, this.bindingContext, exchange);
 
 		Object result = mono.block();
-		assertTrue(result instanceof String);
-		assertEquals("bar", result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test
@@ -150,8 +150,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 					MockServerWebExchange.from(MockServerHttpRequest.get("/")));
 
 			Object result = mono.block();
-			assertTrue(result instanceof String);
-			assertEquals("bar", result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo("bar");
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -170,8 +171,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 					this.paramResolvedNameWithExpression, this.bindingContext, exchange);
 
 			Object result = mono.block();
-			assertTrue(result instanceof String);
-			assertEquals(expected, result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -190,8 +192,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 					this.paramResolvedNameWithPlaceholder, this.bindingContext, exchange);
 
 			Object result = mono.block();
-			assertTrue(result instanceof String);
-			assertEquals(expected, result);
+			boolean condition = result instanceof String;
+			assertThat(condition).isTrue();
+			assertThat(result).isEqualTo(expected);
 		}
 		finally {
 			System.clearProperty("systemProperty");
@@ -220,8 +223,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramDate, this.bindingContext, exchange);
 		Object result = mono.block();
 
-		assertTrue(result instanceof Date);
-		assertEquals(new Date(rfc1123val), result);
+		boolean condition = result instanceof Date;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(new Date(rfc1123val));
 	}
 
 	@Test
@@ -233,8 +237,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramInstant, this.bindingContext, exchange);
 		Object result = mono.block();
 
-		assertTrue(result instanceof Instant);
-		assertEquals(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)), result);
+		boolean condition = result instanceof Instant;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)));
 	}
 
 

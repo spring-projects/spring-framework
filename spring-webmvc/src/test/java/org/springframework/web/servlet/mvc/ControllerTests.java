@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc;
 
 import java.util.Properties;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -26,19 +27,15 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -56,9 +53,9 @@ public class ControllerTests {
 		pvc.setViewName(viewName);
 		// We don't care about the params.
 		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest("GET", "foo.html"), new MockHttpServletResponse());
-		assertTrue("model has no data", mv.getModel().size() == 0);
-		assertTrue("model has correct viewname", mv.getViewName().equals(viewName));
-		assertTrue("getViewName matches", pvc.getViewName().equals(viewName));
+		assertThat(mv.getModel().size() == 0).as("model has no data").isTrue();
+		assertThat(mv.getViewName().equals(viewName)).as("model has correct viewname").isTrue();
+		assertThat(pvc.getViewName().equals(viewName)).as("getViewName matches").isTrue();
 	}
 
 	@Test
@@ -102,7 +99,7 @@ public class ControllerTests {
 		StaticWebApplicationContext sac = new StaticWebApplicationContext();
 		sac.setServletContext(context);
 		sfc.setApplicationContext(sac);
-		assertNull(sfc.handleRequest(request, response));
+		assertThat(sfc.handleRequest(request, response)).isNull();
 
 		if (include) {
 			verify(dispatcher).include(request, response);
@@ -125,19 +122,19 @@ public class ControllerTests {
 		swc.setInitParameters(props);
 
 		swc.afterPropertiesSet();
-		assertNotNull(TestServlet.config);
-		assertEquals("action", TestServlet.config.getServletName());
-		assertEquals("myValue", TestServlet.config.getInitParameter("config"));
-		assertNull(TestServlet.request);
-		assertFalse(TestServlet.destroyed);
+		assertThat(TestServlet.config).isNotNull();
+		assertThat(TestServlet.config.getServletName()).isEqualTo("action");
+		assertThat(TestServlet.config.getInitParameter("config")).isEqualTo("myValue");
+		assertThat(TestServlet.request).isNull();
+		assertThat(TestServlet.destroyed).isFalse();
 
-		assertNull(swc.handleRequest(request, response));
-		assertEquals(request, TestServlet.request);
-		assertEquals(response, TestServlet.response);
-		assertFalse(TestServlet.destroyed);
+		assertThat(swc.handleRequest(request, response)).isNull();
+		assertThat(TestServlet.request).isEqualTo(request);
+		assertThat(TestServlet.response).isEqualTo(response);
+		assertThat(TestServlet.destroyed).isFalse();
 
 		swc.destroy();
-		assertTrue(TestServlet.destroyed);
+		assertThat(TestServlet.destroyed).isTrue();
 	}
 
 	@Test
@@ -150,18 +147,18 @@ public class ControllerTests {
 		swc.setBeanName("action");
 
 		swc.afterPropertiesSet();
-		assertNotNull(TestServlet.config);
-		assertEquals("action", TestServlet.config.getServletName());
-		assertNull(TestServlet.request);
-		assertFalse(TestServlet.destroyed);
+		assertThat(TestServlet.config).isNotNull();
+		assertThat(TestServlet.config.getServletName()).isEqualTo("action");
+		assertThat(TestServlet.request).isNull();
+		assertThat(TestServlet.destroyed).isFalse();
 
-		assertNull(swc.handleRequest(request, response));
-		assertEquals(request, TestServlet.request);
-		assertEquals(response, TestServlet.response);
-		assertFalse(TestServlet.destroyed);
+		assertThat(swc.handleRequest(request, response)).isNull();
+		assertThat(TestServlet.request).isEqualTo(request);
+		assertThat(TestServlet.response).isEqualTo(response);
+		assertThat(TestServlet.destroyed).isFalse();
 
 		swc.destroy();
-		assertTrue(TestServlet.destroyed);
+		assertThat(TestServlet.destroyed).isTrue();
 	}
 
 

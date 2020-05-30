@@ -20,26 +20,24 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("unchecked")
-public class ListenableFutureTaskTests {
+class ListenableFutureTaskTests {
 
 	@Test
-	public void success() throws Exception {
+	void success() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 
@@ -47,7 +45,7 @@ public class ListenableFutureTaskTests {
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
-				assertEquals(s, result);
+				assertThat(result).isEqualTo(s);
 			}
 			@Override
 			public void onFailure(Throwable ex) {
@@ -56,13 +54,13 @@ public class ListenableFutureTaskTests {
 		});
 		task.run();
 
-		assertSame(s, task.get());
-		assertSame(s, task.completable().get());
-		task.completable().thenAccept(v -> assertSame(s, v));
+		assertThat(task.get()).isSameAs(s);
+		assertThat(task.completable().get()).isSameAs(s);
+		task.completable().thenAccept(v -> assertThat(v).isSameAs(s));
 	}
 
 	@Test
-	public void failure() throws Exception {
+	void failure() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> {
 			throw new IOException(s);
@@ -76,7 +74,7 @@ public class ListenableFutureTaskTests {
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				assertEquals(s, ex.getMessage());
+				assertThat(ex.getMessage()).isEqualTo(s);
 			}
 		});
 		task.run();
@@ -90,7 +88,7 @@ public class ListenableFutureTaskTests {
 	}
 
 	@Test
-	public void successWithLambdas() throws Exception {
+	void successWithLambdas() throws Exception {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 
@@ -100,15 +98,15 @@ public class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(successCallback).onSuccess(s);
-		verifyZeroInteractions(failureCallback);
+		verifyNoInteractions(failureCallback);
 
-		assertSame(s, task.get());
-		assertSame(s, task.completable().get());
-		task.completable().thenAccept(v -> assertSame(s, v));
+		assertThat(task.get()).isSameAs(s);
+		assertThat(task.completable().get()).isSameAs(s);
+		task.completable().thenAccept(v -> assertThat(v).isSameAs(s));
 	}
 
 	@Test
-	public void failureWithLambdas() throws Exception {
+	void failureWithLambdas() throws Exception {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);
 		Callable<String> callable = () -> {
@@ -121,7 +119,7 @@ public class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(failureCallback).onFailure(ex);
-		verifyZeroInteractions(successCallback);
+		verifyNoInteractions(successCallback);
 
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
 				task::get)

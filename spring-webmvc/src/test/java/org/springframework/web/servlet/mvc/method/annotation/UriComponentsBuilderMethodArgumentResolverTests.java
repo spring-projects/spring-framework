@@ -18,20 +18,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link UriComponentsBuilderMethodArgumentResolver}.
@@ -51,7 +48,7 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 	private MethodParameter intParam;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.resolver = new UriComponentsBuilderMethodArgumentResolver();
 		this.servletRequest = new MockHttpServletRequest();
@@ -67,9 +64,9 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() throws Exception {
-		assertTrue(this.resolver.supportsParameter(this.builderParam));
-		assertTrue(this.resolver.supportsParameter(this.servletBuilderParam));
-		assertFalse(this.resolver.supportsParameter(this.intParam));
+		assertThat(this.resolver.supportsParameter(this.builderParam)).isTrue();
+		assertThat(this.resolver.supportsParameter(this.servletBuilderParam)).isTrue();
+		assertThat(this.resolver.supportsParameter(this.intParam)).isFalse();
 	}
 
 	@Test
@@ -80,9 +77,9 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 		Object actual = this.resolver.resolveArgument(this.builderParam, new ModelAndViewContainer(), this.webRequest, null);
 
-		assertNotNull(actual);
-		assertEquals(ServletUriComponentsBuilder.class, actual.getClass());
-		assertEquals("http://localhost/myapp/main", ((ServletUriComponentsBuilder) actual).build().toUriString());
+		assertThat(actual).isNotNull();
+		assertThat(actual.getClass()).isEqualTo(ServletUriComponentsBuilder.class);
+		assertThat(((ServletUriComponentsBuilder) actual).build().toUriString()).isEqualTo("http://localhost/myapp/main");
 	}
 
 

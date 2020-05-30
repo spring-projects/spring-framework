@@ -23,17 +23,17 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.metadata.TableMetaDataContext;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -55,7 +55,7 @@ public class TableMetaDataContextTests  {
 	private TableMetaDataContext context = new TableMetaDataContext();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);
@@ -106,13 +106,15 @@ public class TableMetaDataContextTests  {
 
 		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
 
-		assertEquals("wrong number of parameters: ", 4, values.size());
-		assertTrue("id not wrapped with type info", values.get(0) instanceof Number);
-		assertTrue("name not wrapped with type info", values.get(1) instanceof String);
-		assertTrue("date wrapped with type info",
-				values.get(2) instanceof SqlParameterValue);
-		assertTrue("version wrapped with type info",
-				values.get(3) instanceof SqlParameterValue);
+		assertThat(values.size()).as("wrong number of parameters: ").isEqualTo(4);
+		boolean condition3 = values.get(0) instanceof Number;
+		assertThat(condition3).as("id not wrapped with type info").isTrue();
+		boolean condition2 = values.get(1) instanceof String;
+		assertThat(condition2).as("name not wrapped with type info").isTrue();
+		boolean condition1 = values.get(2) instanceof SqlParameterValue;
+		assertThat(condition1).as("date wrapped with type info").isTrue();
+		boolean condition = values.get(3) instanceof SqlParameterValue;
+		assertThat(condition).as("version wrapped with type info").isTrue();
 		verify(metaDataResultSet, atLeastOnce()).next();
 		verify(columnsResultSet, atLeastOnce()).next();
 		verify(metaDataResultSet).close();
@@ -150,8 +152,8 @@ public class TableMetaDataContextTests  {
 		List<Object> values = context.matchInParameterValuesWithInsertColumns(map);
 		String insertString = context.createInsertString(keyCols);
 
-		assertEquals("wrong number of parameters: ", 0, values.size());
-		assertEquals("empty insert not generated correctly", "INSERT INTO customers () VALUES()", insertString);
+		assertThat(values.size()).as("wrong number of parameters: ").isEqualTo(0);
+		assertThat(insertString).as("empty insert not generated correctly").isEqualTo("INSERT INTO customers () VALUES()");
 		verify(metaDataResultSet, atLeastOnce()).next();
 		verify(columnsResultSet, atLeastOnce()).next();
 		verify(metaDataResultSet).close();

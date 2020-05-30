@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket.client;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -108,7 +109,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
 					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
-				.subscribeOn(Schedulers.elastic()) // connectToServer is blocking
+				.subscribeOn(Schedulers.boundedElastic()) // connectToServer is blocking
 				.then(completionMono);
 	}
 

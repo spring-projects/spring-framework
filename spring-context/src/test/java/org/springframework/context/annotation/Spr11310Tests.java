@@ -18,13 +18,13 @@ package org.springframework.context.annotation;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -35,18 +35,18 @@ public class Spr11310Tests {
 	public void orderedList() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		StringHolder holder = context.getBean(StringHolder.class);
-		assertEquals("second", holder.itemsList.get(0));
-		assertEquals("first", holder.itemsList.get(1));
-		assertEquals("unknownOrder", holder.itemsList.get(2));
+		assertThat(holder.itemsList.get(0)).isEqualTo("second");
+		assertThat(holder.itemsList.get(1)).isEqualTo("first");
+		assertThat(holder.itemsList.get(2)).isEqualTo("unknownOrder");
 	}
 
 	@Test
 	public void orderedArray() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		StringHolder holder = context.getBean(StringHolder.class);
-		assertEquals("second", holder.itemsArray[0]);
-		assertEquals("first", holder.itemsArray[1]);
-		assertEquals("unknownOrder", holder.itemsArray[2]);
+		assertThat(holder.itemsArray[0]).isEqualTo("second");
+		assertThat(holder.itemsArray[1]).isEqualTo("first");
+		assertThat(holder.itemsArray[2]).isEqualTo("unknownOrder");
 	}
 
 

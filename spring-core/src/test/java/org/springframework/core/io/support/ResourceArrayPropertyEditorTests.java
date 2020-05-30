@@ -18,33 +18,31 @@ package org.springframework.core.io.support;
 
 import java.beans.PropertyEditor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
  * @author Juergen Hoeller
  */
-public class ResourceArrayPropertyEditorTests {
+class ResourceArrayPropertyEditorTests {
 
 	@Test
-	public void testVanillaResource() {
+	void vanillaResource() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertNotNull(resources);
-		assertTrue(resources[0].exists());
+		assertThat(resources).isNotNull();
+		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
-	public void testPatternResource() {
+	void patternResource() {
 		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.
 		// The result depends on the classpath - if test-classes are segregated from classes
 		// and they come first on the classpath (like in Maven) then it breaks, if classes
@@ -52,18 +50,18 @@ public class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath*:org/springframework/core/io/support/Resource*Editor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertNotNull(resources);
-		assertTrue(resources[0].exists());
+		assertThat(resources).isNotNull();
+		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
-	public void testSystemPropertyReplacement() {
+	void systemPropertyReplacement() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		System.setProperty("test.prop", "foo");
 		try {
 			editor.setAsText("${test.prop}");
 			Resource[] resources = (Resource[]) editor.getValue();
-			assertEquals("foo", resources[0].getFilename());
+			assertThat(resources[0].getFilename()).isEqualTo("foo");
 		}
 		finally {
 			System.getProperties().remove("test.prop");
@@ -71,7 +69,7 @@ public class ResourceArrayPropertyEditorTests {
 	}
 
 	@Test
-	public void testStrictSystemPropertyReplacementWithUnresolvablePlaceholder() {
+	void strictSystemPropertyReplacementWithUnresolvablePlaceholder() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(
 				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
 				false);

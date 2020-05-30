@@ -30,14 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
-import org.jetbrains.annotations.NotNull;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -348,12 +347,12 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@Override
-		public int read(@NotNull byte[] b, int off, int len) throws IOException {
+		public int read(byte[] b, int off, int len) throws IOException {
 			return this.delegate.read(b, off, len);
 		}
 
 		@Override
-		public int read(@NotNull byte[] b) throws IOException {
+		public int read(byte[] b) throws IOException {
 			return this.delegate.read(b);
 		}
 

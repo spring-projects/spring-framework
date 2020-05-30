@@ -27,8 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.TestConfig;
 import org.springframework.test.context.junit.jupiter.comics.Character;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for integration tests that demonstrate support for
@@ -52,15 +51,15 @@ abstract class GenericComicCharactersTests<T extends Character> {
 
 	@Test
 	void autowiredFields() {
-		assertNotNull(this.character, "Character should have been @Autowired by Spring");
-		assertEquals(getExpectedName(), character.getName(), "character's name");
-		assertEquals(getExpectedNumCharacters(), this.characters.size(), "Number of characters in context");
+		assertThat(this.character).as("Character should have been @Autowired by Spring").isNotNull();
+		assertThat(this.character).as("character's name").extracting(Character::getName).isEqualTo(getExpectedName());
+		assertThat(this.characters).as("Number of characters in context").hasSize(getExpectedNumCharacters());
 	}
 
 	@Test
 	void autowiredParameterByTypeForSingleGenericBean(@Autowired T character) {
-		assertNotNull(character, "Character should have been @Autowired by Spring");
-		assertEquals(getExpectedName(), character.getName(), "character's name");
+		assertThat(character).as("Character should have been @Autowired by Spring").isNotNull();
+		assertThat(this.character).as("character's name").extracting(Character::getName).isEqualTo(getExpectedName());
 	}
 
 	abstract int getExpectedNumCharacters();

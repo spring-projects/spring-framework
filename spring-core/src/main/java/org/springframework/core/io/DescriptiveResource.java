@@ -72,7 +72,7 @@ public class DescriptiveResource extends AbstractResource {
 	 * This implementation compares the underlying description String.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof DescriptiveResource &&
 				((DescriptiveResource) other).description.equals(this.description)));
 	}

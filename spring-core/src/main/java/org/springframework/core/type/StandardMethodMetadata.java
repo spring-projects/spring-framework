@@ -21,7 +21,6 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationFilter;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
@@ -75,10 +74,10 @@ public class StandardMethodMetadata implements MethodMetadata {
 		Assert.notNull(introspectedMethod, "Method must not be null");
 		this.introspectedMethod = introspectedMethod;
 		this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
-		this.mergedAnnotations = MergedAnnotations.from(introspectedMethod,
-				SearchStrategy.DIRECT, RepeatableContainers.none(),
-				AnnotationFilter.PLAIN);
+		this.mergedAnnotations = MergedAnnotations.from(
+				introspectedMethod, SearchStrategy.DIRECT, RepeatableContainers.none());
 	}
+
 
 	@Override
 	public MergedAnnotations getAnnotations() {

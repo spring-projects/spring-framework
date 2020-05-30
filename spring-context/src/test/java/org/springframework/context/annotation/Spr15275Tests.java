@@ -16,16 +16,13 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -35,44 +32,44 @@ public class Spr15275Tests {
 	@Test
 	public void testWithFactoryBean() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithFactoryBean.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
-		assertSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
+		assertThat(context.getBean(Bar.class).foo).isSameAs(context.getBean(FooInterface.class));
 	}
 
 	@Test
 	public void testWithAbstractFactoryBean() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAbstractFactoryBean.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
-		assertSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
+		assertThat(context.getBean(Bar.class).foo).isSameAs(context.getBean(FooInterface.class));
 	}
 
 	@Test
 	public void testWithAbstractFactoryBeanForInterface() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAbstractFactoryBeanForInterface.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
-		assertSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
+		assertThat(context.getBean(Bar.class).foo).isSameAs(context.getBean(FooInterface.class));
 	}
 
 	@Test
 	public void testWithAbstractFactoryBeanAsReturnType() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAbstractFactoryBeanAsReturnType.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
-		assertSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
+		assertThat(context.getBean(Bar.class).foo).isSameAs(context.getBean(FooInterface.class));
 	}
 
 	@Test
 	public void testWithFinalFactoryBean() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithFinalFactoryBean.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
-		assertSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
+		assertThat(context.getBean(Bar.class).foo).isSameAs(context.getBean(FooInterface.class));
 	}
 
 	@Test
 	public void testWithFinalFactoryBeanAsReturnType() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithFinalFactoryBeanAsReturnType.class);
-		assertEquals("x", context.getBean(Bar.class).foo.toString());
+		assertThat(context.getBean(Bar.class).foo.toString()).isEqualTo("x");
 		// not same due to fallback to raw FinalFactoryBean instance with repeated getObject() invocations
-		assertNotSame(context.getBean(FooInterface.class), context.getBean(Bar.class).foo);
+		assertThat(context.getBean(Bar.class).foo).isNotSameAs(context.getBean(FooInterface.class));
 	}
 
 
@@ -95,7 +92,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}
@@ -120,7 +117,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}
@@ -145,7 +142,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}
@@ -170,7 +167,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}
@@ -186,7 +183,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}
@@ -202,7 +199,7 @@ public class Spr15275Tests {
 
 		@Bean
 		public Bar bar() throws Exception {
-			assertTrue(foo().isSingleton());
+			assertThat(foo().isSingleton()).isTrue();
 			return new Bar(foo().getObject());
 		}
 	}

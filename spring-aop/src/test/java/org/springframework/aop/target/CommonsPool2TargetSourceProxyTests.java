@@ -16,16 +16,16 @@
 
 package org.springframework.aop.target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertTrue;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Stephane Nicoll
@@ -42,6 +42,6 @@ public class CommonsPool2TargetSourceProxyTests {
 		reader.loadBeanDefinitions(CONTEXT);
 		beanFactory.preInstantiateSingletons();
 		ITestBean bean = (ITestBean)beanFactory.getBean("testBean");
-		assertTrue(AopUtils.isAopProxy(bean));
+		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 	}
 }

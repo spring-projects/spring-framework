@@ -21,12 +21,11 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.simp.SimpMessageType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -66,35 +65,35 @@ public class StompCommandTests {
 			if (simp == null) {
 				simp = SimpMessageType.OTHER;
 			}
-			assertSame(simp, stompCommand.getMessageType());
+			assertThat(stompCommand.getMessageType()).isSameAs(simp);
 		}
 	}
 
 	@Test
 	public void requiresDestination() throws Exception {
 		for (StompCommand stompCommand : StompCommand.values()) {
-			assertEquals(destinationRequired.contains(stompCommand), stompCommand.requiresDestination());
+			assertThat(stompCommand.requiresDestination()).isEqualTo(destinationRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
 	public void requiresSubscriptionId() throws Exception {
 		for (StompCommand stompCommand : StompCommand.values()) {
-			assertEquals(subscriptionIdRequired.contains(stompCommand), stompCommand.requiresSubscriptionId());
+			assertThat(stompCommand.requiresSubscriptionId()).isEqualTo(subscriptionIdRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
 	public void requiresContentLength() throws Exception {
 		for (StompCommand stompCommand : StompCommand.values()) {
-			assertEquals(contentLengthRequired.contains(stompCommand), stompCommand.requiresContentLength());
+			assertThat(stompCommand.requiresContentLength()).isEqualTo(contentLengthRequired.contains(stompCommand));
 		}
 	}
 
 	@Test
 	public void isBodyAllowed() throws Exception {
 		for (StompCommand stompCommand : StompCommand.values()) {
-			assertEquals(bodyAllowed.contains(stompCommand), stompCommand.isBodyAllowed());
+			assertThat(stompCommand.isBodyAllowed()).isEqualTo(bodyAllowed.contains(stompCommand));
 		}
 	}
 

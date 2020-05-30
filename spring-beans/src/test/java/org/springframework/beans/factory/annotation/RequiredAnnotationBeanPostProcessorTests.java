@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop
@@ -92,8 +92,8 @@ public class RequiredAnnotationBeanPostProcessorTests {
 		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		factory.preInstantiateSingletons();
 		RequiredTestBean bean = (RequiredTestBean) factory.getBean("testBean");
-		assertEquals(24, bean.getAge());
-		assertEquals("Blue", bean.getFavouriteColour());
+		assertThat(bean.getAge()).isEqualTo(24);
+		assertThat(bean.getFavouriteColour()).isEqualTo("Blue");
 	}
 
 	@Test
@@ -146,8 +146,8 @@ public class RequiredAnnotationBeanPostProcessorTests {
 		factory.addBeanPostProcessor(new RequiredAnnotationBeanPostProcessor());
 		factory.preInstantiateSingletons();
 		RequiredTestBean bean = (RequiredTestBean) factory.getBean("testBean");
-		assertEquals(24, bean.getAge());
-		assertEquals("Blue", bean.getFavouriteColour());
+		assertThat(bean.getAge()).isEqualTo(24);
+		assertThat(bean.getFavouriteColour()).isEqualTo("Blue");
 	}
 
 	@Test

@@ -18,8 +18,8 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -28,17 +28,15 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpCookie;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link CookieValueMethodArgumentResolver}.
@@ -57,7 +55,7 @@ public class CookieValueMethodArgumentResolverTests {
 	private MethodParameter cookieMonoParameter;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -77,13 +75,13 @@ public class CookieValueMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.cookieParameter));
-		assertTrue(this.resolver.supportsParameter(this.cookieStringParameter));
+		assertThat(this.resolver.supportsParameter(this.cookieParameter)).isTrue();
+		assertThat(this.resolver.supportsParameter(this.cookieStringParameter)).isTrue();
 	}
 
 	@Test
 	public void doesNotSupportParameter() {
-		assertFalse(this.resolver.supportsParameter(this.stringParameter));
+		assertThat(this.resolver.supportsParameter(this.stringParameter)).isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.supportsParameter(this.cookieMonoParameter))
 			.withMessageStartingWith("CookieValueMethodArgumentResolver does not support reactive type wrapper");
@@ -97,7 +95,7 @@ public class CookieValueMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieParameter, this.bindingContext, exchange);
 
-		assertEquals(expected, mono.block());
+		assertThat(mono.block()).isEqualTo(expected);
 	}
 
 	@Test
@@ -108,7 +106,7 @@ public class CookieValueMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.cookieStringParameter, this.bindingContext, exchange);
 
-		assertEquals("Invalid result", cookie.getValue(), mono.block());
+		assertThat(mono.block()).as("Invalid result").isEqualTo(cookie.getValue());
 	}
 
 	@Test
@@ -116,8 +114,9 @@ public class CookieValueMethodArgumentResolverTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		Object result = this.resolver.resolveArgument(this.cookieStringParameter, this.bindingContext, exchange).block();
 
-		assertTrue(result instanceof String);
-		assertEquals("bar", result);
+		boolean condition = result instanceof String;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo("bar");
 	}
 
 	@Test

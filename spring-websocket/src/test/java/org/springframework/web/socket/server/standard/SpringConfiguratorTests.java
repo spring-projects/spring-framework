@@ -18,21 +18,20 @@ package org.springframework.web.socket.server.standard;
 
 import javax.websocket.server.ServerEndpoint;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SpringConfiguratorTests {
 
@@ -45,7 +44,7 @@ public class SpringConfiguratorTests {
 	private SpringConfigurator configurator;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.servletContext = new MockServletContext();
 
@@ -58,7 +57,7 @@ public class SpringConfiguratorTests {
 		this.configurator = new SpringConfigurator();
 	}
 
-	@After
+	@AfterEach
 	public void destroy() {
 		this.contextLoader.closeWebApplicationContext(this.servletContext);
 	}
@@ -67,21 +66,21 @@ public class SpringConfiguratorTests {
 	@Test
 	public void getEndpointPerConnection() throws Exception {
 		PerConnectionEchoEndpoint endpoint = this.configurator.getEndpointInstance(PerConnectionEchoEndpoint.class);
-		assertNotNull(endpoint);
+		assertThat(endpoint).isNotNull();
 	}
 
 	@Test
 	public void getEndpointSingletonByType() throws Exception {
 		EchoEndpoint expected = this.webAppContext.getBean(EchoEndpoint.class);
 		EchoEndpoint actual = this.configurator.getEndpointInstance(EchoEndpoint.class);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
 	public void getEndpointSingletonByComponentName() throws Exception {
 		ComponentEchoEndpoint expected = this.webAppContext.getBean(ComponentEchoEndpoint.class);
 		ComponentEchoEndpoint actual = this.configurator.getEndpointInstance(ComponentEchoEndpoint.class);
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 

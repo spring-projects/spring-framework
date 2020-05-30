@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for combining the expression language and the p namespace. Due to the required EL dependency, this test is in
@@ -39,8 +39,8 @@ public class SimplePropertyNamespaceHandlerWithExpressionLanguageTests {
 						getClass());
 		ITestBean foo = applicationContext.getBean("foo", ITestBean.class);
 		ITestBean bar = applicationContext.getBean("bar", ITestBean.class);
-		assertEquals("Invalid name", "Baz", foo.getName());
-		assertEquals("Invalid name", "Baz", bar.getName());
+		assertThat(foo.getName()).as("Invalid name").isEqualTo("Baz");
+		assertThat(bar.getName()).as("Invalid name").isEqualTo("Baz");
 	}
 
 }

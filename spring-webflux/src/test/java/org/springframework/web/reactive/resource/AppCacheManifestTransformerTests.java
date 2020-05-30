@@ -21,20 +21,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
@@ -51,7 +47,7 @@ public class AppCacheManifestTransformerTests {
 	private ResourceTransformerChain chain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -82,7 +78,7 @@ public class AppCacheManifestTransformerTests {
 		Resource expected = getResource("foo.css");
 		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		assertSame(expected, actual);
+		assertThat(actual).isSameAs(expected);
 	}
 
 	@Test
@@ -91,7 +87,7 @@ public class AppCacheManifestTransformerTests {
 		Resource expected = getResource("error.appcache");
 		Resource actual = this.transformer.transform(exchange, expected, this.chain).block(TIMEOUT);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -100,25 +96,24 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("test.appcache");
 		Resource actual = this.transformer.transform(exchange, resource, this.chain).block(TIMEOUT);
 
-		assertNotNull(actual);
+		assertThat(actual).isNotNull();
 		byte[] bytes = FileCopyUtils.copyToByteArray(actual.getInputStream());
 		String content = new String(bytes, "UTF-8");
 
-		assertThat("should rewrite resource links", content,
-				containsString("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css"));
-		assertThat("should rewrite resource links", content,
-				containsString("/static/bar-11e16cf79faee7ac698c805cf28248d2.css"));
-		assertThat("should rewrite resource links", content,
-				containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
+		assertThat(content).as("rewrite resource links")
+				.contains("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css")
+				.contains("/static/bar-11e16cf79faee7ac698c805cf28248d2.css")
+				.contains("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js");
 
-		assertThat("should not rewrite external resources", content, containsString("//example.org/style.css"));
-		assertThat("should not rewrite external resources", content, containsString("http://example.org/image.png"));
+		assertThat(content).as("not rewrite external resources")
+				.contains("//example.org/style.css")
+				.contains("https://example.org/image.png");
 
 		// Not the same hash as Spring MVC
 		// Hash is computed from links, and not from the linked content
 
-		assertThat("should generate fingerprint", content,
-				containsString("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb"));
+		assertThat(content).as("generate fingerprint")
+				.contains("# Hash: d4437f1d7ae9530ab3ae71d5375b46ff");
 	}
 
 	private Resource getResource(String filePath) {

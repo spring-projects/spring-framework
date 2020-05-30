@@ -24,8 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests to verify claims made in <a
@@ -50,8 +49,8 @@ public class AutowiredQualifierTests {
 
 	@Test
 	public void test() {
-		assertThat(foo, equalTo("normal"));
-		assertThat(customFoo, equalTo("custom"));
+		assertThat(foo).isEqualTo("normal");
+		assertThat(customFoo).isEqualTo("custom");
 	}
 
 }

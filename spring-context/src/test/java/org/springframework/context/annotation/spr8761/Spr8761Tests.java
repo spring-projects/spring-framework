@@ -19,13 +19,13 @@ package org.springframework.context.annotation.spr8761;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests cornering the regression reported in SPR-8761.
@@ -43,7 +43,7 @@ public class Spr8761Tests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.scan(getClass().getPackage().getName());
 		ctx.refresh();
-		assertThat(ctx.containsBean("withNestedAnnotation"), is(true));
+		assertThat(ctx.containsBean("withNestedAnnotation")).isTrue();
 	}
 
 }

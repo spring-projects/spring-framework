@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
  * @author Sam Brannen
  * @since 4.1
  */
-public class SqlScriptsTestExecutionListenerTests {
+class SqlScriptsTestExecutionListenerTests {
 
 	private final SqlScriptsTestExecutionListener listener = new SqlScriptsTestExecutionListener();
 
@@ -46,7 +46,7 @@ public class SqlScriptsTestExecutionListenerTests {
 
 
 	@Test
-	public void missingValueAndScriptsAndStatementsAtClassLevel() throws Exception {
+	void missingValueAndScriptsAndStatementsAtClassLevel() throws Exception {
 		Class<?> clazz = MissingValueAndScriptsAndStatementsAtClassLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
@@ -55,7 +55,7 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
+	void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
 		Class<?> clazz = MissingValueAndScriptsAndStatementsAtMethodLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
@@ -64,7 +64,7 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void valueAndScriptsDeclared() throws Exception {
+	void valueAndScriptsDeclared() throws Exception {
 		Class<?> clazz = ValueAndScriptsDeclared.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
@@ -77,7 +77,7 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void isolatedTxModeDeclaredWithoutTxMgr() throws Exception {
+	void isolatedTxModeDeclaredWithoutTxMgr() throws Exception {
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		given(ctx.getResource(anyString())).willReturn(mock(Resource.class));
 		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock(AutowireCapableBeanFactory.class));
@@ -91,7 +91,7 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void missingDataSourceAndTxMgr() throws Exception {
+	void missingDataSourceAndTxMgr() throws Exception {
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		given(ctx.getResource(anyString())).willReturn(mock(Resource.class));
 		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock(AutowireCapableBeanFactory.class));

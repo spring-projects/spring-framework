@@ -29,10 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This set of tests refutes the claims made in
@@ -78,7 +75,7 @@ public class AnnotatedConfigClassesWithoutAtConfigurationTests {
 			// enigma() method, not a CGLIB proxied version, since these methods
 			// are essentially factory bean methods.
 			LifecycleBean bean = new LifecycleBean(enigma());
-			assertFalse(bean.isInitialized());
+			assertThat(bean.isInitialized()).isFalse();
 			return bean;
 		}
 	}
@@ -93,12 +90,12 @@ public class AnnotatedConfigClassesWithoutAtConfigurationTests {
 
 	@Test
 	public void testSPR_9051() throws Exception {
-		assertNotNull(enigma);
-		assertNotNull(lifecycleBean);
-		assertTrue(lifecycleBean.isInitialized());
+		assertThat(enigma).isNotNull();
+		assertThat(lifecycleBean).isNotNull();
+		assertThat(lifecycleBean.isInitialized()).isTrue();
 		Set<String> names = new HashSet<>();
 		names.add(enigma.toString());
 		names.add(lifecycleBean.getName());
-		assertEquals(names, new HashSet<>(Arrays.asList("enigma #1", "enigma #2")));
+		assertThat(new HashSet<>(Arrays.asList("enigma #1", "enigma #2"))).isEqualTo(names);
 	}
 }

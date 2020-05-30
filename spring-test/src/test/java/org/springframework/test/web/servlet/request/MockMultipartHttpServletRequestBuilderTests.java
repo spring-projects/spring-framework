@@ -16,14 +16,13 @@
 
 package org.springframework.test.web.servlet.request;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
@@ -36,12 +35,12 @@ public class MockMultipartHttpServletRequestBuilderTests {
 		parent.characterEncoding("UTF-8");
 		Object result = new MockMultipartHttpServletRequestBuilder("/fileUpload").merge(parent);
 
-		assertNotNull(result);
-		assertEquals(MockMultipartHttpServletRequestBuilder.class, result.getClass());
+		assertThat(result).isNotNull();
+		assertThat(result.getClass()).isEqualTo(MockMultipartHttpServletRequestBuilder.class);
 
 		MockMultipartHttpServletRequestBuilder builder = (MockMultipartHttpServletRequestBuilder) result;
 		MockHttpServletRequest request = builder.buildRequest(new MockServletContext());
-		assertEquals("UTF-8", request.getCharacterEncoding());
+		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 }

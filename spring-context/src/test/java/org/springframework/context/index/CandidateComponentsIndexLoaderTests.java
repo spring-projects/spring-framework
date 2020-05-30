@@ -19,16 +19,13 @@ package org.springframework.context.index;
 import java.io.IOException;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.io.ClassPathResource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Tests for {@link CandidateComponentsIndexLoader}.
@@ -40,7 +37,7 @@ public class CandidateComponentsIndexLoaderTests {
 	@Test
 	public void validateIndexIsDisabledByDefault() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(null);
-		assertThat("No spring.components should be available at the default location", index, is(nullValue()));
+		assertThat(index).as("No spring.components should be available at the default location").isNull();
 	}
 
 	@Test
@@ -49,9 +46,9 @@ public class CandidateComponentsIndexLoaderTests {
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
 		Set<String> components = index.getCandidateTypes("org.springframework", "foo");
-		assertThat(components, containsInAnyOrder(
+		assertThat(components).contains(
 				"org.springframework.context.index.Sample1",
-				"org.springframework.context.index.Sample2"));
+				"org.springframework.context.index.Sample2");
 	}
 
 	@Test
@@ -60,8 +57,8 @@ public class CandidateComponentsIndexLoaderTests {
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
 		Set<String> components = index.getCandidateTypes("org.springframework", "biz");
-		assertThat(components, containsInAnyOrder(
-				"org.springframework.context.index.Sample3"));
+		assertThat(components).contains(
+				"org.springframework.context.index.Sample3");
 	}
 
 	@Test
@@ -70,7 +67,7 @@ public class CandidateComponentsIndexLoaderTests {
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
 		Set<String> components = index.getCandidateTypes("org.springframework", "none");
-		assertThat(components, hasSize(0));
+		assertThat(components).isEmpty();
 	}
 
 	@Test
@@ -79,26 +76,26 @@ public class CandidateComponentsIndexLoaderTests {
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("spring.components", getClass())));
 		Set<String> components = index.getCandidateTypes("com.example", "foo");
-		assertThat(components, hasSize(0));
+		assertThat(components).isEmpty();
 	}
 
 	@Test
 	public void loadIndexNoSpringComponentsResource() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.disableIndex(getClass().getClassLoader()));
-		assertThat(index, is(nullValue()));
+		assertThat(index).isNull();
 	}
 
 	@Test
-	public void loadIndexNoEntry() throws IOException {
+	public void loadIndexNoEntry() {
 		CandidateComponentsIndex index = CandidateComponentsIndexLoader.loadIndex(
 				CandidateComponentsTestClassLoader.index(getClass().getClassLoader(),
 						new ClassPathResource("empty-spring.components", getClass())));
-		assertThat(index, is(nullValue()));
+		assertThat(index).isNull();
 	}
 
 	@Test
-	public void loadIndexWithException() throws IOException {
+	public void loadIndexWithException() {
 		final IOException cause = new IOException("test exception");
 		assertThatIllegalStateException().isThrownBy(() -> {
 				CandidateComponentsTestClassLoader classLoader = new CandidateComponentsTestClassLoader(getClass().getClassLoader(), cause);

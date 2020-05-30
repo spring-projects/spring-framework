@@ -19,8 +19,8 @@ package org.springframework.test.web.client.match;
 import java.io.IOException;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
@@ -38,7 +38,7 @@ public class XpathRequestMatchersTests {
 	private MockClientHttpRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
 		this.request = new MockClientHttpRequest();
 		this.request.getBody().write(RESPONSE_CONTENT.getBytes());

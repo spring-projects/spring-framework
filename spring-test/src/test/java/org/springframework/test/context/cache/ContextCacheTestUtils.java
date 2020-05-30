@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.cache;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Collection of utility methods for testing scenarios involving the
@@ -60,12 +60,9 @@ public class ContextCacheTestUtils {
 	public static final void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
 			int expectedSize, int expectedHitCount, int expectedMissCount) {
 
-		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
-			contextCache.size());
-		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
-			contextCache.getHitCount());
-		assertEquals("Verifying number of cache misses (" + usageScenario + ").", expectedMissCount,
-			contextCache.getMissCount());
+		assertThat(contextCache.size()).as("Verifying number of contexts in cache (" + usageScenario + ").").isEqualTo(expectedSize);
+		assertThat(contextCache.getHitCount()).as("Verifying number of cache hits (" + usageScenario + ").").isEqualTo(expectedHitCount);
+		assertThat(contextCache.getMissCount()).as("Verifying number of cache misses (" + usageScenario + ").").isEqualTo(expectedMissCount);
 	}
 
 }

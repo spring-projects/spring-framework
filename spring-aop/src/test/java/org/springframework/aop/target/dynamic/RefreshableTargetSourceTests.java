@@ -16,16 +16,12 @@
 
 package org.springframework.aop.target.dynamic;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Rob Harrop
@@ -45,8 +41,8 @@ public class RefreshableTargetSourceTests {
 		Thread.sleep(1);
 		Object b = ts.getTarget();
 
-		assertEquals("Should be one call to freshTarget to get initial target", 1, ts.getCallCount());
-		assertSame("Returned objects should be the same - no refresh should occur", a, b);
+		assertThat(ts.getCallCount()).as("Should be one call to freshTarget to get initial target").isEqualTo(1);
+		assertThat(b).as("Returned objects should be the same - no refresh should occur").isSameAs(a);
 	}
 
 	/**
@@ -61,8 +57,8 @@ public class RefreshableTargetSourceTests {
 		Thread.sleep(100);
 		Object b = ts.getTarget();
 
-		assertEquals("Should have called freshTarget twice", 2, ts.getCallCount());
-		assertNotSame("Should be different objects", a, b);
+		assertThat(ts.getCallCount()).as("Should have called freshTarget twice").isEqualTo(2);
+		assertThat(b).as("Should be different objects").isNotSameAs(a);
 	}
 
 	/**
@@ -76,39 +72,38 @@ public class RefreshableTargetSourceTests {
 		Object a = ts.getTarget();
 		Object b = ts.getTarget();
 
-		assertEquals("Refresh target should only be called once", 1, ts.getCallCount());
-		assertSame("Objects should be the same - refresh check delay not elapsed", a, b);
+		assertThat(ts.getCallCount()).as("Refresh target should only be called once").isEqualTo(1);
+		assertThat(b).as("Objects should be the same - refresh check delay not elapsed").isSameAs(a);
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testRefreshOverTime() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);
 
 		Object a = ts.getTarget();
 		Object b = ts.getTarget();
-		assertEquals("Objects should be same", a, b);
+		assertThat(b).as("Objects should be same").isEqualTo(a);
 
 		Thread.sleep(50);
 
 		Object c = ts.getTarget();
-		assertEquals("A and C should be same", a, c);
+		assertThat(c).as("A and C should be same").isEqualTo(a);
 
 		Thread.sleep(60);
 
 		Object d = ts.getTarget();
-		assertNotNull("D should not be null", d);
-		assertFalse("A and D should not be equal", a.equals(d));
+		assertThat(d).as("D should not be null").isNotNull();
+		assertThat(a.equals(d)).as("A and D should not be equal").isFalse();
 
 		Object e = ts.getTarget();
-		assertEquals("D and E should be equal", d, e);
+		assertThat(e).as("D and E should be equal").isEqualTo(d);
 
 		Thread.sleep(110);
 
 		Object f = ts.getTarget();
-		assertFalse("E and F should be different", e.equals(f));
+		assertThat(e.equals(f)).as("E and F should be different").isFalse();
 	}
 
 

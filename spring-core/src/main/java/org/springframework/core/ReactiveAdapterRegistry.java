@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,16 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
-import kotlinx.coroutines.flow.FlowKt;
-import kotlinx.coroutines.reactive.flow.FlowAsPublisherKt;
-import kotlinx.coroutines.reactive.flow.PublisherAsFlowKt;
 import org.reactivestreams.Publisher;
+import reactor.blockhound.BlockHound;
+import reactor.blockhound.integration.BlockHoundIntegration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.RxReactiveStreams;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -47,7 +47,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>By default, depending on classpath availability, adapters are registered
  * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, Java 9+
- * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred}.
+ * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred} and {@code Flow}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -97,12 +97,8 @@ public class ReactiveAdapterRegistry {
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
 
 		// Coroutines
-		if (ClassUtils.isPresent("kotlinx.coroutines.Deferred", classLoader)) {
+		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
 			new CoroutinesRegistrar().registerAdapters(this);
-		}
-		// TODO Use a single CoroutinesRegistrar when Flow will be not experimental anymore
-		if (ClassUtils.isPresent("kotlinx.coroutines.flow.Flow", classLoader)) {
-			new CoroutinesFlowRegistrar().registerAdapters(this);
 		}
 	}
 
@@ -222,7 +218,7 @@ public class ReactiveAdapterRegistry {
 					source -> source);
 
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(CompletionStage.class, EmptyCompletableFuture::new),
+					ReactiveTypeDescriptor.nonDeferredAsyncValue(CompletionStage.class, EmptyCompletableFuture::new),
 					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
 					source -> Mono.from(source).toFuture()
 			);
@@ -353,18 +349,39 @@ public class ReactiveAdapterRegistry {
 							() -> CompletableDeferredKt.CompletableDeferred(null)),
 					source -> CoroutinesUtils.deferredToMono((Deferred<?>) source),
 					source -> CoroutinesUtils.monoToDeferred(Mono.from(source)));
+
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, kotlinx.coroutines.flow.FlowKt::emptyFlow),
+					source -> kotlinx.coroutines.reactor.ReactorFlowKt.asFlux((kotlinx.coroutines.flow.Flow<?>) source),
+					kotlinx.coroutines.reactive.ReactiveFlowKt::asFlow
+			);
 		}
 	}
 
 
-	private static class CoroutinesFlowRegistrar {
+	/**
+	 * {@code BlockHoundIntegration} for spring-core classes.
+	 * <p>Whitelists the following:
+	 * <ul>
+	 * <li>Reading class info via {@link LocalVariableTableParameterNameDiscoverer}.
+	 * <li>Locking within {@link ConcurrentReferenceHashMap}.
+	 * </ul>
+	 * @since 5.2.4
+	 */
+	public static class SpringCoreBlockHoundIntegration implements BlockHoundIntegration {
 
-		void registerAdapters(ReactiveAdapterRegistry registry) {
-			registry.registerReactiveType(
-					ReactiveTypeDescriptor.multiValue(kotlinx.coroutines.flow.Flow.class, FlowKt::emptyFlow),
-					source -> FlowAsPublisherKt.from((kotlinx.coroutines.flow.Flow<?>) source),
-					PublisherAsFlowKt::from
-			);
+		@Override
+		public void applyTo(BlockHound.Builder builder) {
+
+			// Avoid hard references potentially anywhere in spring-core (no need for structural dependency)
+
+			builder.allowBlockingCallsInside(
+					"org.springframework.core.LocalVariableTableParameterNameDiscoverer", "inspectClass");
+
+			String className = "org.springframework.util.ConcurrentReferenceHashMap$Segment";
+			builder.allowBlockingCallsInside(className, "doTask");
+			builder.allowBlockingCallsInside(className, "clear");
+			builder.allowBlockingCallsInside(className, "restructure");
 		}
 	}
 

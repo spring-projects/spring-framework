@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.StreamUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}),
+ * <p>By default, this converter supports all media types (<code>&#42;/&#42;</code>),
  * and writes with a {@code Content-Type} of {@code text/plain}. This can be overridden
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
@@ -98,6 +98,18 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	protected Long getContentLength(String str, @Nullable MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
 		return (long) str.getBytes(charset).length;
+	}
+
+
+	@Override
+	protected void addDefaultHeaders(HttpHeaders headers, String s, @Nullable MediaType type) throws IOException {
+		if (headers.getContentType() == null ) {
+			if (type != null && type.isConcrete() && type.isCompatibleWith(MediaType.APPLICATION_JSON)) {
+				// Prevent charset parameter for JSON..
+				headers.setContentType(type);
+			}
+		}
+		super.addDefaultHeaders(headers, s, type);
 	}
 
 	@Override

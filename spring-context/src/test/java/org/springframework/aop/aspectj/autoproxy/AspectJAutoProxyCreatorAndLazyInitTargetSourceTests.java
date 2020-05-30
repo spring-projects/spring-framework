@@ -16,14 +16,13 @@
 
 package org.springframework.aop.aspectj.autoproxy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -38,11 +37,11 @@ public class AspectJAutoProxyCreatorAndLazyInitTargetSourceTests {
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 		ITestBean adrian = (ITestBean) ctx.getBean("adrian");
-		assertEquals(0, LazyTestBean.instantiations);
-		assertNotNull(adrian);
+		assertThat(LazyTestBean.instantiations).isEqualTo(0);
+		assertThat(adrian).isNotNull();
 		adrian.getAge();
-		assertEquals(68, adrian.getAge());
-		assertEquals(1, LazyTestBean.instantiations);
+		assertThat(adrian.getAge()).isEqualTo(68);
+		assertThat(LazyTestBean.instantiations).isEqualTo(1);
 	}
 
 }

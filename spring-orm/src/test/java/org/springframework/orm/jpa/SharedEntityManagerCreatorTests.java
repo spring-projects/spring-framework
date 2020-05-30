@@ -23,16 +23,13 @@ import javax.persistence.Query;
 import javax.persistence.StoredProcedureQuery;
 import javax.persistence.TransactionRequiredException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.mock;
@@ -46,7 +43,7 @@ import static org.mockito.Mockito.withSettings;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
+@ExtendWith(MockitoExtension.class)
 public class SharedEntityManagerCreatorTests {
 
 	@Test
@@ -54,7 +51,7 @@ public class SharedEntityManagerCreatorTests {
 		EntityManagerFactory emf = mock(EntityManagerFactory.class,
 				withSettings().extraInterfaces(EntityManagerFactoryInfo.class));
 		// EntityManagerFactoryInfo.getEntityManagerInterface returns null
-		assertThat(SharedEntityManagerCreator.createSharedEntityManager(emf), is(notNullValue()));
+		assertThat(SharedEntityManagerCreator.createSharedEntityManager(emf)).isNotNull();
 	}
 
 	@Test
@@ -186,10 +183,10 @@ public class SharedEntityManagerCreatorTests {
 		spq.registerStoredProcedureParameter(1, Number.class, ParameterMode.IN);
 		spq.registerStoredProcedureParameter(2, Object.class, ParameterMode.INOUT);
 		spq.execute();
-		assertEquals("y", spq.getOutputParameterValue(0));
+		assertThat(spq.getOutputParameterValue(0)).isEqualTo("y");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				spq.getOutputParameterValue(1));
-		assertEquals("z", spq.getOutputParameterValue(2));
+		assertThat(spq.getOutputParameterValue(2)).isEqualTo("z");
 
 		verify(query).registerStoredProcedureParameter(0, String.class, ParameterMode.OUT);
 		verify(query).registerStoredProcedureParameter(1, Number.class, ParameterMode.IN);
@@ -217,10 +214,10 @@ public class SharedEntityManagerCreatorTests {
 		spq.registerStoredProcedureParameter("b", Number.class, ParameterMode.IN);
 		spq.registerStoredProcedureParameter("c", Object.class, ParameterMode.INOUT);
 		spq.execute();
-		assertEquals("y", spq.getOutputParameterValue("a"));
+		assertThat(spq.getOutputParameterValue("a")).isEqualTo("y");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				spq.getOutputParameterValue("b"));
-		assertEquals("z", spq.getOutputParameterValue("c"));
+		assertThat(spq.getOutputParameterValue("c")).isEqualTo("z");
 
 		verify(query).registerStoredProcedureParameter("a", String.class, ParameterMode.OUT);
 		verify(query).registerStoredProcedureParameter("b", Number.class, ParameterMode.IN);

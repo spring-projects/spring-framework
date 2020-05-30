@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import javax.annotation.PreDestroy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator;
@@ -27,9 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ApplicationContextEvent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -44,9 +42,9 @@ public class AutoProxyLazyInitTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithStatic.class);
 		MyBean bean = ctx.getBean("myBean", MyBean.class);
 
-		assertFalse(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isFalse();
 		bean.doIt();
-		assertTrue(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isTrue();
 	}
 
 	@Test
@@ -56,9 +54,9 @@ public class AutoProxyLazyInitTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithStaticAndInterface.class);
 		MyBean bean = ctx.getBean("myBean", MyBean.class);
 
-		assertFalse(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isFalse();
 		bean.doIt();
-		assertTrue(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isTrue();
 	}
 
 	@Test
@@ -68,9 +66,9 @@ public class AutoProxyLazyInitTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNonStatic.class);
 		MyBean bean = ctx.getBean("myBean", MyBean.class);
 
-		assertFalse(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isFalse();
 		bean.doIt();
-		assertTrue(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isTrue();
 	}
 
 	@Test
@@ -80,9 +78,9 @@ public class AutoProxyLazyInitTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNonStaticAndInterface.class);
 		MyBean bean = ctx.getBean("myBean", MyBean.class);
 
-		assertFalse(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isFalse();
 		bean.doIt();
-		assertTrue(MyBeanImpl.initialized);
+		assertThat(MyBeanImpl.initialized).isTrue();
 	}
 
 
@@ -216,7 +214,7 @@ public class AutoProxyLazyInitTests {
 		@Override
 		protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(Class<?> beanClass, String beanName) {
 			if ("myBean".equals(beanName)) {
-				assertEquals(MyBean.class, beanClass);
+				assertThat(beanClass).isEqualTo(MyBean.class);
 			}
 			return super.createBeanFactoryBasedTargetSource(beanClass, beanName);
 		}

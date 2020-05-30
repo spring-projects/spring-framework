@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
 
@@ -60,8 +59,10 @@ public class ReactiveReturnValueHandler extends AbstractAsyncReturnValueHandler 
 	@Override
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
 		ReactiveAdapter adapter = this.adapterRegistry.getAdapter(returnType.getParameterType(), returnValue);
-		Assert.state(adapter != null, () -> "No ReactiveAdapter found for " + returnType.getParameterType());
-		return new MonoToListenableFutureAdapter<>(Mono.from(adapter.toPublisher(returnValue)));
+		if (adapter != null) {
+			return new MonoToListenableFutureAdapter<>(Mono.from(adapter.toPublisher(returnValue)));
+		}
+		return null;
 	}
 
 }

@@ -22,21 +22,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.core.MethodParameter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
@@ -55,7 +56,7 @@ public class MappingJackson2MessageConverterTests {
 	private Session sessionMock;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		sessionMock = mock(Session.class);
 		converter = new MappingJackson2MessageConverter();
@@ -98,7 +99,7 @@ public class MappingJackson2MessageConverterTests {
 				});
 
 		Object result = converter.fromMessage(bytesMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		MyBean result = (MyBean)converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -162,7 +163,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test
@@ -175,7 +176,7 @@ public class MappingJackson2MessageConverterTests {
 		given(textMessageMock.getText()).willReturn(text);
 
 		Object result = converter.fromMessage(textMessageMock);
-		assertEquals("Invalid result", result, unmarshalled);
+		assertThat(unmarshalled).as("Invalid result").isEqualTo(result);
 	}
 
 	@Test

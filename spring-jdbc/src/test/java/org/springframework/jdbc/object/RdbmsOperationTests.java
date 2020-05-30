@@ -19,9 +19,10 @@ package org.springframework.jdbc.object;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,8 +31,8 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Trevor Cook
@@ -132,9 +133,9 @@ public class RdbmsOperationTests {
 		operation.setFetchSize(10);
 		operation.setMaxRows(20);
 		JdbcTemplate jt = operation.getJdbcTemplate();
-		assertEquals(ds, jt.getDataSource());
-		assertEquals(10, jt.getFetchSize());
-		assertEquals(20, jt.getMaxRows());
+		assertThat(jt.getDataSource()).isEqualTo(ds);
+		assertThat(jt.getFetchSize()).isEqualTo(10);
+		assertThat(jt.getMaxRows()).isEqualTo(20);
 	}
 
 	@Test
@@ -156,7 +157,7 @@ public class RdbmsOperationTests {
 				new SqlParameter("two", Types.NUMERIC)});
 		operation.afterPropertiesSet();
 		operation.validateParameters(new Object[] { 1, "2" });
-		assertEquals(2, operation.getDeclaredParameters().size());
+		assertThat(operation.getDeclaredParameters().size()).isEqualTo(2);
 	}
 
 

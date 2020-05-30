@@ -16,14 +16,12 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.support.QosSettings;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Stephane Nicoll
@@ -36,8 +34,8 @@ public class JmsMessageEndpointManagerTests {
 		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
 		config.setPubSubDomain(false);
 		endpoint.setActivationSpecConfig(config);
-		assertEquals(false, endpoint.isPubSubDomain());
-		assertEquals(false, endpoint.isReplyPubSubDomain());
+		assertThat(endpoint.isPubSubDomain()).isEqualTo(false);
+		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(false);
 	}
 
 	@Test
@@ -46,8 +44,8 @@ public class JmsMessageEndpointManagerTests {
 		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
 		config.setPubSubDomain(true);
 		endpoint.setActivationSpecConfig(config);
-		assertEquals(true, endpoint.isPubSubDomain());
-		assertEquals(true, endpoint.isReplyPubSubDomain());
+		assertThat(endpoint.isPubSubDomain()).isEqualTo(true);
+		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(true);
 	}
 
 	@Test
@@ -57,8 +55,8 @@ public class JmsMessageEndpointManagerTests {
 		config.setPubSubDomain(true);
 		config.setReplyPubSubDomain(false);
 		endpoint.setActivationSpecConfig(config);
-		assertEquals(true, endpoint.isPubSubDomain());
-		assertEquals(false, endpoint.isReplyPubSubDomain());
+		assertThat(endpoint.isPubSubDomain()).isEqualTo(true);
+		assertThat(endpoint.isReplyPubSubDomain()).isEqualTo(false);
 	}
 
 	@Test
@@ -68,10 +66,10 @@ public class JmsMessageEndpointManagerTests {
 		QosSettings settings = new QosSettings(1, 3, 5);
 		config.setReplyQosSettings(settings);
 		endpoint.setActivationSpecConfig(config);
-		assertNotNull(endpoint.getReplyQosSettings());
-		assertEquals(1, endpoint.getReplyQosSettings().getDeliveryMode());
-		assertEquals(3, endpoint.getReplyQosSettings().getPriority());
-		assertEquals(5, endpoint.getReplyQosSettings().getTimeToLive());
+		assertThat(endpoint.getReplyQosSettings()).isNotNull();
+		assertThat(endpoint.getReplyQosSettings().getDeliveryMode()).isEqualTo(1);
+		assertThat(endpoint.getReplyQosSettings().getPriority()).isEqualTo(3);
+		assertThat(endpoint.getReplyQosSettings().getTimeToLive()).isEqualTo(5);
 	}
 
 	@Test
@@ -101,12 +99,12 @@ public class JmsMessageEndpointManagerTests {
 	@Test
 	public void getMessageConverterNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
-		assertNull(endpoint.getMessageConverter());
+		assertThat(endpoint.getMessageConverter()).isNull();
 	}
 
 	@Test
 	public void getDestinationResolverNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
-		assertNull(endpoint.getDestinationResolver());
+		assertThat(endpoint.getDestinationResolver()).isNull();
 	}
 }

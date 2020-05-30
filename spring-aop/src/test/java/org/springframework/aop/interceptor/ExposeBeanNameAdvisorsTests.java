@@ -16,16 +16,14 @@
 
 package org.springframework.aop.interceptor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.NamedBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -42,7 +40,7 @@ public class ExposeBeanNameAdvisorsTests {
 
 		@Override
 		public int getAge() {
-			assertEquals(beanName, ExposeBeanNameAdvisors.getBeanName());
+			assertThat(ExposeBeanNameAdvisors.getBeanName()).isEqualTo(beanName);
 			return super.getAge();
 		}
 	}
@@ -56,7 +54,8 @@ public class ExposeBeanNameAdvisorsTests {
 		pf.addAdvisor(ExposeBeanNameAdvisors.createAdvisorWithoutIntroduction(beanName));
 		ITestBean proxy = (ITestBean) pf.getProxy();
 
-		assertFalse("No introduction", proxy instanceof NamedBean);
+		boolean condition = proxy instanceof NamedBean;
+		assertThat(condition).as("No introduction").isFalse();
 		// Requires binding
 		proxy.getAge();
 	}
@@ -70,12 +69,13 @@ public class ExposeBeanNameAdvisorsTests {
 		pf.addAdvisor(ExposeBeanNameAdvisors.createAdvisorIntroducingNamedBean(beanName));
 		ITestBean proxy = (ITestBean) pf.getProxy();
 
-		assertTrue("Introduction was made", proxy instanceof NamedBean);
+		boolean condition = proxy instanceof NamedBean;
+		assertThat(condition).as("Introduction was made").isTrue();
 		// Requires binding
 		proxy.getAge();
 
 		NamedBean nb = (NamedBean) proxy;
-		assertEquals("Name returned correctly", beanName, nb.getBeanName());
+		assertThat(nb.getBeanName()).as("Name returned correctly").isEqualTo(beanName);
 	}
 
 }

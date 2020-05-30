@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,7 +31,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
@@ -41,13 +41,13 @@ public class Spr11202Tests {
 	@Test
 	public void testWithImporter() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Wrapper.class);
-		assertEquals("foo", context.getBean("value"));
+		assertThat(context.getBean("value")).isEqualTo("foo");
 	}
 
 	@Test
 	public void testWithoutImporter() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-		assertEquals("foo", context.getBean("value"));
+		assertThat(context.getBean("value")).isEqualTo("foo");
 	}
 
 

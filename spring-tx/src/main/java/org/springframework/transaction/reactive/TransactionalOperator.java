@@ -38,6 +38,10 @@ import org.springframework.transaction.TransactionException;
  * application services utilizing this class, making calls to the low-level
  * services via an inner-class callback object.
  *
+ * <p>Transactional Publishers should avoid Subscription cancellation.
+ * Cancelling initiates asynchronous transaction cleanup that does not allow for
+ * synchronization on completion.
+ *
  * @author Mark Paluch
  * @author Juergen Hoeller
  * @since 5.2
@@ -64,9 +68,7 @@ public interface TransactionalOperator {
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */
-	default <T> Mono<T> transactional(Mono<T> mono) {
-		return execute(it -> mono).next();
-	}
+	<T> Mono<T> transactional(Mono<T> mono);
 
 	/**
 	 * Execute the action specified by the given callback object within a transaction.

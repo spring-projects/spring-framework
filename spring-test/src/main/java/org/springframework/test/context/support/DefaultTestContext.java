@@ -118,6 +118,7 @@ public class DefaultTestContext implements TestContext {
 	 * loader delegate is not <em>active</em> (i.e., has been closed)
 	 * @see CacheAwareContextLoaderDelegate#loadContext
 	 */
+	@Override
 	public ApplicationContext getApplicationContext() {
 		ApplicationContext context = this.cacheAwareContextLoaderDelegate.loadContext(this.mergedContextConfiguration);
 		if (context instanceof ConfigurableApplicationContext) {
@@ -142,20 +143,24 @@ public class DefaultTestContext implements TestContext {
 	 * that was supplied when this {@code TestContext} was constructed.
 	 * @see CacheAwareContextLoaderDelegate#closeContext
 	 */
+	@Override
 	public void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode) {
 		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedContextConfiguration, hierarchyMode);
 	}
 
+	@Override
 	public final Class<?> getTestClass() {
 		return this.testClass;
 	}
 
+	@Override
 	public final Object getTestInstance() {
 		Object testInstance = this.testInstance;
 		Assert.state(testInstance != null, "No test instance");
 		return testInstance;
 	}
 
+	@Override
 	public final Method getTestMethod() {
 		Method testMethod = this.testMethod;
 		Assert.state(testMethod != null, "No test method");
@@ -168,6 +173,7 @@ public class DefaultTestContext implements TestContext {
 		return this.testException;
 	}
 
+	@Override
 	public void updateState(@Nullable Object testInstance, @Nullable Method testMethod, @Nullable Throwable testException) {
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;

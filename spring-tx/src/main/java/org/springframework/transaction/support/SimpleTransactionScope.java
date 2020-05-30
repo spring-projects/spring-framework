@@ -50,12 +50,7 @@ public class SimpleTransactionScope implements Scope {
 			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
-		Object scopedObject = scopedObjects.scopedInstances.get(name);
-		if (scopedObject == null) {
-			scopedObject = objectFactory.getObject();
-			scopedObjects.scopedInstances.put(name, scopedObject);
-		}
-		return scopedObject;
+		return scopedObjects.scopedInstances.computeIfAbsent(name, k -> objectFactory.getObject());
 	}
 
 	@Override

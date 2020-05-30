@@ -18,23 +18,21 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.reactive.BindingContext;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -52,7 +50,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 	private MethodParameter paramAlsoNotSupported;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
 	public void setup() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
@@ -69,12 +67,12 @@ public class ExpressionValueMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(this.resolver.supportsParameter(this.paramSystemProperty));
+		assertThat(this.resolver.supportsParameter(this.paramSystemProperty)).isTrue();
 	}
 
 	@Test
 	public void doesNotSupport() {
-		assertFalse(this.resolver.supportsParameter(this.paramNotSupported));
+		assertThat(this.resolver.supportsParameter(this.paramNotSupported)).isFalse();
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.supportsParameter(this.paramAlsoNotSupported))
 			.withMessageStartingWith("ExpressionValueMethodArgumentResolver does not support reactive type wrapper");
@@ -88,7 +86,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 					this.paramSystemProperty,  new BindingContext(), this.exchange);
 
 			Object value = mono.block();
-			assertEquals(22, value);
+			assertThat(value).isEqualTo(22);
 		}
 		finally {
 			System.clearProperty("systemProperty");

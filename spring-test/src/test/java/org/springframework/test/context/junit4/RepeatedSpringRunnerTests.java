@@ -33,7 +33,7 @@ import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
@@ -92,7 +92,7 @@ public class RepeatedSpringRunnerTests {
 		runTestsAndAssertCounters(getRunnerClass(), this.testClass, expectedStartedCount, expectedFailureCount,
 			expectedFinishedCount, 0, 0);
 
-		assertEquals("invocations for [" + testClass + "]:", expectedInvocationCount, invocationCount.get());
+		assertThat(invocationCount.get()).as("invocations for [" + testClass + "]:").isEqualTo(expectedInvocationCount);
 	}
 
 

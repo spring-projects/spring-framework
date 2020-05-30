@@ -18,8 +18,8 @@ package org.springframework.web.socket.messaging;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -35,7 +35,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link WebSocketAnnotationMethodMessageHandler}.
@@ -48,7 +48,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 	private StaticApplicationContext applicationContext;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.applicationContext = new StaticApplicationContext();
 		this.applicationContext.registerSingleton("controller", TestController.class);
@@ -73,7 +73,7 @@ public class WebSocketAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		TestControllerAdvice controllerAdvice = this.applicationContext.getBean(TestControllerAdvice.class);
-		assertTrue(controllerAdvice.isExceptionHandled());
+		assertThat(controllerAdvice.isExceptionHandled()).isTrue();
 	}
 
 

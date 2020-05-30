@@ -16,15 +16,16 @@
 
 package org.springframework.orm.jpa.persistenceunit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.context.index.CandidateComponentsTestClassLoader;
+import org.springframework.context.testfixture.index.CandidateComponentsTestClassLoader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.orm.jpa.domain.Person;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
 
 /**
  * Tests for {@link DefaultPersistenceUnitManager}.
@@ -54,9 +55,9 @@ public class DefaultPersistenceUnitManagerTests {
 
 	private void testDefaultDomain() {
 		SpringPersistenceUnitInfo puInfo = buildDefaultPersistenceUnitInfo();
-		assertThat(puInfo.getManagedClassNames(), containsInAnyOrder(
+		assertThat(puInfo.getManagedClassNames()).contains(
 				"org.springframework.orm.jpa.domain.Person",
-				"org.springframework.orm.jpa.domain.DriversLicense"));
+				"org.springframework.orm.jpa.domain.DriversLicense");
 	}
 
 	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {

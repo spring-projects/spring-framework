@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassReader;
@@ -37,12 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class MergedAnnotationMetadataVisitorTests {
+class MergedAnnotationMetadataVisitorTests {
 
 	private MergedAnnotation<?> annotation;
 
 	@Test
-	public void visitWhenHasSimpleTypesCreatesAnnotation() {
+	void visitWhenHasSimpleTypesCreatesAnnotation() {
 		loadFrom(WithSimpleTypesAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(SimpleTypesAnnotation.class);
 		assertThat(this.annotation.getValue("stringValue")).contains("string");
@@ -57,7 +57,7 @@ public class MergedAnnotationMetadataVisitorTests {
 	}
 
 	@Test
-	public void visitWhenHasSimpleArrayTypesCreatesAnnotation() {
+	void visitWhenHasSimpleArrayTypesCreatesAnnotation() {
 		loadFrom(WithSimpleArrayTypesAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(SimpleArrayTypesAnnotation.class);
 		assertThat(this.annotation.getValue("stringValue")).contains(
@@ -75,7 +75,7 @@ public class MergedAnnotationMetadataVisitorTests {
 	}
 
 	@Test
-	public void visitWhenHasEmptySimpleArrayTypesCreatesAnnotation() {
+	void visitWhenHasEmptySimpleArrayTypesCreatesAnnotation() {
 		loadFrom(WithSimpleEmptyArrayTypesAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(SimpleArrayTypesAnnotation.class);
 		assertThat(this.annotation.getValue("stringValue")).contains(new String[] {});
@@ -90,7 +90,7 @@ public class MergedAnnotationMetadataVisitorTests {
 	}
 
 	@Test
-	public void visitWhenHasEnumAttributesCreatesAnnotation() {
+	void visitWhenHasEnumAttributesCreatesAnnotation() {
 		loadFrom(WithEnumAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(EnumAnnotation.class);
 		assertThat(this.annotation.getValue("enumValue")).contains(ExampleEnum.ONE);
@@ -99,7 +99,7 @@ public class MergedAnnotationMetadataVisitorTests {
 	}
 
 	@Test
-	public void visitWhenHasAnnotationAttributesCreatesAnnotation() {
+	void visitWhenHasAnnotationAttributesCreatesAnnotation() {
 		loadFrom(WithAnnotationAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(AnnotationAnnotation.class);
 		MergedAnnotation<NestedAnnotation> value = this.annotation.getAnnotation(
@@ -114,7 +114,7 @@ public class MergedAnnotationMetadataVisitorTests {
 	}
 
 	@Test
-	public void visitWhenHasClassAttributesCreatesAnnotation() {
+	void visitWhenHasClassAttributesCreatesAnnotation() {
 		loadFrom(WithClassAnnotation.class);
 		assertThat(this.annotation.getType()).isEqualTo(ClassAnnotation.class);
 		assertThat(this.annotation.getString("classValue")).isEqualTo(InputStream.class.getName());

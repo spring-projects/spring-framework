@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,6 @@ public interface MergedAnnotation<A extends Annotation> {
 	Class<A> getType();
 
 	/**
-	 * Return a complete type hierarchy from this annotation to the
-	 * {@link #getRoot() root}. Provides a useful way to uniquely identify a
-	 * merged annotation instance.
-	 * @return the type hierarchy for the annotation
-	 * @see MergedAnnotationPredicates#unique(Function)
-	 */
-	List<Class<? extends Annotation>> getTypeHierarchy();
-
-	/**
 	 * Determine if the annotation is present on the source. Considers
 	 * {@linkplain #isDirectlyPresent() directly present} and
 	 * {@linkplain #isMetaPresent() meta-present} annotations within the context
@@ -92,35 +83,37 @@ public interface MergedAnnotation<A extends Annotation> {
 	boolean isPresent();
 
 	/**
-	 * Determine if the annotation is directly present on the source. A directly
-	 * present annotation is one that the user has explicitly declared and not
-	 * one that is {@linkplain #isMetaPresent() meta-present} or
-	 * {@link Inherited @Inherited}.
+	 * Determine if the annotation is directly present on the source.
+	 * <p>A directly present annotation is one that the user has explicitly
+	 * declared and not one that is {@linkplain #isMetaPresent() meta-present}
+	 * or {@link Inherited @Inherited}.
 	 * @return {@code true} if the annotation is directly present
 	 */
 	boolean isDirectlyPresent();
 
 	/**
-	 * Determine if the annotation is meta-present on the source. A meta-present
-	 * annotation is an annotation that the user hasn't explicitly declared, but
-	 * has been used as a meta-annotation somewhere in the annotation hierarchy.
+	 * Determine if the annotation is meta-present on the source.
+	 * <p>A meta-present annotation is an annotation that the user hasn't
+	 * explicitly declared, but has been used as a meta-annotation somewhere in
+	 * the annotation hierarchy.
 	 * @return {@code true} if the annotation is meta-present
 	 */
 	boolean isMetaPresent();
 
 	/**
-	 * Get the depth of this annotation related to its use as a
-	 * meta-annotation. A directly declared annotation has a depth of {@code 0},
-	 * a meta-annotation has a depth of {@code 1}, a meta-annotation on a
-	 * meta-annotation has a depth of {@code 2}, etc. A {@linkplain #missing()
-	 * missing} annotation will always return a depth of {@code -1}.
-	 * @return the annotation depth or {@code -1} if the annotation is missing
+	 * Get the distance of this annotation related to its use as a
+	 * meta-annotation.
+	 * <p>A directly declared annotation has a distance of {@code 0}, a
+	 * meta-annotation has a distance of {@code 1}, a meta-annotation on a
+	 * meta-annotation has a distance of {@code 2}, etc. A {@linkplain #missing()
+	 * missing} annotation will always return a distance of {@code -1}.
+	 * @return the annotation distance or {@code -1} if the annotation is missing
 	 */
-	int getDepth();
+	int getDistance();
 
 	/**
 	 * Get the index of the aggregate collection containing this annotation.
-	 * Can be used to reorder a stream of annotations, for example, to give a
+	 * <p>Can be used to reorder a stream of annotations, for example, to give a
 	 * higher priority to annotations declared on a superclass or interface. A
 	 * {@linkplain #missing() missing} annotation will always return an aggregate
 	 * index of {@code -1}.
@@ -130,32 +123,50 @@ public interface MergedAnnotation<A extends Annotation> {
 	int getAggregateIndex();
 
 	/**
-	 * Get the source that ultimately declared the annotation, or
-	 * {@code null} if the source is not known. If this merged annotation was
-	 * created {@link MergedAnnotations#from(java.lang.reflect.AnnotatedElement)
-	 * from} an {@link AnnotatedElement} then this source will be an element of
-	 * the same type. If the annotation was loaded without using reflection, the
-	 * source can be of any type, but should have a sensible {@code toString()}.
-	 * Meta-annotations will return the same source as the {@link #getParent()}.
+	 * Get the source that ultimately declared the root annotation, or
+	 * {@code null} if the source is not known.
+	 * <p>If this merged annotation was created
+	 * {@link MergedAnnotations#from(AnnotatedElement) from} an
+	 * {@link AnnotatedElement} then this source will be an element of the same
+	 * type. If the annotation was loaded without using reflection, the source
+	 * can be of any type, but should have a sensible {@code toString()}.
+	 * Meta-annotations will always return the same source as the
+	 * {@link #getRoot() root}.
 	 * @return the source, or {@code null}
 	 */
 	@Nullable
 	Object getSource();
 
 	/**
-	 * Get the parent of the meta-annotation, or {@code null} if the
+	 * Get the source of the meta-annotation, or {@code null} if the
 	 * annotation is not {@linkplain #isMetaPresent() meta-present}.
-	 * @return the parent annotation or {@code null}
+	 * <p>The meta-source is the annotation that was meta-annotated with this
+	 * annotation.
+	 * @return the meta-annotation source or {@code null}
+	 * @see #getRoot()
 	 */
 	@Nullable
-	MergedAnnotation<?> getParent();
+	MergedAnnotation<?> getMetaSource();
 
 	/**
-	 * Get the root annotation, i.e. the {@link #getDepth() depth} {@code 0}
+	 * Get the root annotation, i.e. the {@link #getDistance() distance} {@code 0}
 	 * annotation as directly declared on the source.
 	 * @return the root annotation
+	 * @see #getMetaSource()
 	 */
 	MergedAnnotation<?> getRoot();
+
+	/**
+	 * Get the complete list of annotation types within the annotation hierarchy
+	 * from this annotation to the {@link #getRoot() root}.
+	 * <p>Provides a useful way to uniquely identify a merged annotation instance.
+	 * @return the meta types for the annotation
+	 * @see MergedAnnotationPredicates#unique(Function)
+	 * @see #getRoot()
+	 * @see #getMetaSource()
+	 */
+	List<Class<? extends Annotation>> getMetaTypes();
+
 
 	/**
 	 * Determine if the specified attribute name has a non-default value when
@@ -433,7 +444,8 @@ public interface MergedAnnotation<A extends Annotation> {
 	/**
 	 * Create a new view of the annotation that exposes non-merged attribute values.
 	 * <p>Methods from this view will return attribute values with only alias mirroring
-	 * rules applied. Aliases to parent attributes will not be applied.
+	 * rules applied. Aliases to {@link #getMetaSource() meta-source} attributes will
+	 * not be applied.
 	 * @return a non-merged view of the annotation
 	 */
 	MergedAnnotation<A> withNonMergedAttributes();
@@ -443,15 +455,15 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * merged annotation.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values
 	 * are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
 
 	/**
-	 * Return an immutable {@link Map} that contains all the annotation attributes.
+	 * Get an immutable {@link Map} that contains all the annotation attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return an immutable map containing the attributes and values
 	 */
 	Map<String, Object> asMap(Adapt... adaptations);
@@ -461,17 +473,29 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * attributes.
 	 * <p>The {@link Adapt adaptations} may be used to change the way that values are added.
 	 * @param factory a map factory
-	 * @param adaptations adaptations that should be applied to the annotation values
+	 * @param adaptations the adaptations that should be applied to the annotation values
 	 * @return a map containing the attributes and values
 	 */
 	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
 	/**
-	 * Create a type-safe synthesized version of this annotation that can be
-	 * used directly in code.
+	 * Create a type-safe synthesized version of this merged annotation that can
+	 * be used directly in code.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
-	 * @return a synthesized version of the annotation.
+	 * <p>If this merged annotation was created {@linkplain #from(Annotation) from}
+	 * an annotation instance, that annotation will be returned unmodified if it is
+	 * not <em>synthesizable</em>. An annotation is considered synthesizable if
+	 * one of the following is true.
+	 * <ul>
+	 * <li>The annotation declares attributes annotated with {@link AliasFor @AliasFor}.</li>
+	 * <li>The annotation is a composed annotation that relies on convention-based
+	 * annotation attribute overrides in meta-annotations.</li>
+	 * <li>The annotation declares attributes that are annotations or arrays of
+	 * annotations that are themselves synthesizable.</li>
+	 * </ul>
+	 * @return a synthesized version of the annotation or the original annotation
+	 * unmodified
 	 * @throws NoSuchElementException on a missing annotation
 	 */
 	A synthesize() throws NoSuchElementException;
@@ -481,8 +505,10 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * on a condition predicate.
 	 * <p>The result is synthesized using a JDK {@link Proxy} and as a result may
 	 * incur a computational cost when first invoked.
+	 * <p>Consult the documentation for {@link #synthesize()} for an explanation
+	 * of what is considered synthesizable.
 	 * @param condition the test to determine if the annotation can be synthesized
-	 * @return a optional containing the synthesized version of the annotation or
+	 * @return an optional containing the synthesized version of the annotation or
 	 * an empty optional if the condition doesn't match
 	 * @throws NoSuchElementException on a missing annotation
 	 * @see MergedAnnotationPredicates
@@ -535,7 +561,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attributes values supplied by a map.
+	 * annotation type with attribute values supplied by a map.
 	 * @param annotationType the annotation type
 	 * @param attributes the annotation attributes or {@code null} if just default
 	 * values should be used
@@ -550,7 +576,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attributes values supplied by a map.
+	 * annotation type with attribute values supplied by a map.
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
 	 * the specified annotations and it will not be searched.
@@ -567,7 +593,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 	/**
 	 * Create a new {@link MergedAnnotation} instance of the specified
-	 * annotation type with attributes values supplied by a map.
+	 * annotation type with attribute values supplied by a map.
 	 * @param classLoader the class loader used to resolve class attributes
 	 * @param source the source for the annotation. This source is used only for
 	 * information and logging. It does not need to <em>actually</em> contain
@@ -586,7 +612,7 @@ public interface MergedAnnotation<A extends Annotation> {
 
 
 	/**
-	 * Adaptations that can be applied to attributes values when creating
+	 * Adaptations that can be applied to attribute values when creating
 	 * {@linkplain MergedAnnotation#asMap(Adapt...) Maps} or
 	 * {@link MergedAnnotation#asAnnotationAttributes(Adapt...) AnnotationAttributes}.
 	 */
@@ -613,7 +639,7 @@ public interface MergedAnnotation<A extends Annotation> {
 		}
 
 		/**
-		 * Factory method to create a {@link Adapt} array from a set of boolean flags.
+		 * Factory method to create an {@link Adapt} array from a set of boolean flags.
 		 * @param classToString if {@link Adapt#CLASS_TO_STRING} is included
 		 * @param annotationsToMap if {@link Adapt#ANNOTATION_TO_MAP} is included
 		 * @return a new {@link Adapt} array

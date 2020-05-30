@@ -18,8 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,24 +26,25 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private WebClient webClient;
 
 
-	@Before
-	public void setup() throws Exception {
-		super.setup();
+	@Override
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
 		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
@@ -58,8 +57,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	}
 
 
-	@Test
-	public void sseAsString() {
+	@ParameterizedHttpServerTest
+	void sseAsString(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<String> result = this.webClient.get()
 				.uri("/string")
 				.accept(TEXT_EVENT_STREAM)
@@ -73,8 +74,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.verify(Duration.ofSeconds(5L));
 	}
 
-	@Test
-	public void sseAsPerson() {
+	@ParameterizedHttpServerTest
+	void sseAsPerson(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Person> result = this.webClient.get()
 				.uri("/person")
 				.accept(TEXT_EVENT_STREAM)
@@ -88,8 +91,10 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 				.verify(Duration.ofSeconds(5L));
 	}
 
-	@Test
-	public void sseAsEvent() {
+	@ParameterizedHttpServerTest
+	void sseAsEvent(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<ServerSentEvent<String>> result = this.webClient.get()
 				.uri("/event")
 				.accept(TEXT_EVENT_STREAM)
@@ -98,18 +103,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 		StepVerifier.create(result)
 				.consumeNextWith( event -> {
-					assertEquals("0", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("0");
+					assertThat(event.data()).isEqualTo("foo");
+					assertThat(event.comment()).isEqualTo("bar");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.consumeNextWith( event -> {
-					assertEquals("1", event.id());
-					assertEquals("foo", event.data());
-					assertEquals("bar", event.comment());
-					assertNull(event.event());
-					assertNull(event.retry());
+					assertThat(event.id()).isEqualTo("1");
+					assertThat(event.data()).isEqualTo("foo");
+					assertThat(event.comment()).isEqualTo("bar");
+					assertThat(event.event()).isNull();
+					assertThat(event.retry()).isNull();
 				})
 				.expectComplete()
 				.verify(Duration.ofSeconds(5L));

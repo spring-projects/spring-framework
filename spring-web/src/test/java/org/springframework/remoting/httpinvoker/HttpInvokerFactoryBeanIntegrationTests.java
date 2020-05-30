@@ -16,7 +16,7 @@
 
 package org.springframework.remoting.httpinvoker;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -45,7 +45,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	public void testLoadedConfigClass() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
 		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
+		assertThat(myBean.myService).isSameAs(context.getBean("myService"));
 		myBean.myService.handle();
 		myBean.myService.handleAsync();
 	}
@@ -57,7 +57,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
 		context.refresh();
 		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
+		assertThat(myBean.myService).isSameAs(context.getBean("myService"));
 		myBean.myService.handle();
 		myBean.myService.handleAsync();
 	}
@@ -69,7 +69,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		context.register(ConfigWithPlainFactoryBean.class);
 		context.refresh();
 		MyBean myBean = context.getBean("myBean", MyBean.class);
-		assertSame(context.getBean("myService"), myBean.myService);
+		assertThat(myBean.myService).isSameAs(context.getBean("myService"));
 		myBean.myService.handle();
 		myBean.myService.handleAsync();
 	}

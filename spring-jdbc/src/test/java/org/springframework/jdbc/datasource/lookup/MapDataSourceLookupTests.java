@@ -18,13 +18,13 @@ package org.springframework.jdbc.datasource.lookup;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 
 /**
  * @author Rick Evans
@@ -53,8 +53,8 @@ public class MapDataSourceLookupTests {
 		MapDataSourceLookup lookup = new MapDataSourceLookup();
 		lookup.setDataSources(dataSources);
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is", dataSource);
-		assertSame(expectedDataSource, dataSource);
+		assertThat(dataSource).as("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is").isNotNull();
+		assertThat(dataSource).isSameAs(expectedDataSource);
 	}
 
 	@Test
@@ -66,8 +66,8 @@ public class MapDataSourceLookupTests {
 		lookup.setDataSources(dataSources);
 		lookup.setDataSources(null); // must be idempotent (i.e. the following lookup must still work);
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is", dataSource);
-		assertSame(expectedDataSource, dataSource);
+		assertThat(dataSource).as("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is").isNotNull();
+		assertThat(dataSource).isSameAs(expectedDataSource);
 	}
 
 	@Test
@@ -80,8 +80,8 @@ public class MapDataSourceLookupTests {
 		lookup.setDataSources(dataSources);
 		lookup.addDataSource(DATA_SOURCE_NAME, expectedDataSource); // must override existing entry
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
-		assertNotNull("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is", dataSource);
-		assertSame(expectedDataSource, dataSource);
+		assertThat(dataSource).as("A DataSourceLookup implementation must *never* return null from getDataSource(): this one obviously (and incorrectly) is").isNotNull();
+		assertThat(dataSource).isSameAs(expectedDataSource);
 	}
 
 	@Test

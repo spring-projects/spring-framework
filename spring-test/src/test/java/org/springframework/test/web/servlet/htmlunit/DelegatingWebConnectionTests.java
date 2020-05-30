@@ -26,27 +26,23 @@ import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.core.IsNot.not;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit and integration tests for {@link DelegatingWebConnection}.
@@ -54,7 +50,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rob Winch
  * @since 4.2
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DelegatingWebConnectionTests {
 
 	private DelegatingWebConnection webConnection;
@@ -80,7 +76,7 @@ public class DelegatingWebConnectionTests {
 	private WebConnection connection2;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
 		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.emptyList());
@@ -95,7 +91,7 @@ public class DelegatingWebConnectionTests {
 		given(defaultConnection.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
-		assertThat(response, sameInstance(expectedResponse));
+		assertThat(response).isSameAs(expectedResponse);
 		verify(matcher1).matches(request);
 		verify(matcher2).matches(request);
 		verifyNoMoreInteractions(connection1, connection2);
@@ -108,7 +104,7 @@ public class DelegatingWebConnectionTests {
 		given(connection1.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
-		assertThat(response, sameInstance(expectedResponse));
+		assertThat(response).isSameAs(expectedResponse);
 		verify(matcher1).matches(request);
 		verifyNoMoreInteractions(matcher2, connection2, defaultConnection);
 		verify(connection1).getResponse(request);
@@ -120,7 +116,7 @@ public class DelegatingWebConnectionTests {
 		given(connection2.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
-		assertThat(response, sameInstance(expectedResponse));
+		assertThat(response).isSameAs(expectedResponse);
 		verify(matcher1).matches(request);
 		verify(matcher2).matches(request);
 		verifyNoMoreInteractions(connection1, defaultConnection);
@@ -128,9 +124,8 @@ public class DelegatingWebConnectionTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void verifyExampleInClassLevelJavadoc() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup().build();
@@ -142,8 +137,8 @@ public class DelegatingWebConnectionTests {
 				new DelegatingWebConnection(mockConnection, new DelegateWebConnection(cdnMatcher, httpConnection)));
 
 		Page page = webClient.getPage("https://code.jquery.com/jquery-1.11.0.min.js");
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
-		assertThat(page.getWebResponse().getContentAsString(), not(isEmptyString()));
+		assertThat(page.getWebResponse().getStatusCode()).isEqualTo(200);
+		assertThat(page.getWebResponse().getContentAsString()).isNotEmpty();
 	}
 
 

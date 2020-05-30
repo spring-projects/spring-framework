@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,42 @@
 
 package org.springframework.web.bind;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.util.StopWatch;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 06.08.2003
  */
-public class ServletRequestUtilsTests {
+class ServletRequestUtilsTests {
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
 
 	@Test
-	public void testIntParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testIntParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertEquals(ServletRequestUtils.getIntParameter(request, "param1"), new Integer(5));
-		assertEquals(ServletRequestUtils.getIntParameter(request, "param1", 6), 5);
-		assertEquals(ServletRequestUtils.getRequiredIntParameter(request, "param1"), 5);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param1")).isEqualTo(5);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param1", 6)).isEqualTo(5);
+		assertThat(ServletRequestUtils.getRequiredIntParameter(request, "param1")).isEqualTo(5);
 
-		assertEquals(ServletRequestUtils.getIntParameter(request, "param2", 6), 6);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param2", 6)).isEqualTo(6);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredIntParameter(request, "param2"));
 
-		assertEquals(ServletRequestUtils.getIntParameter(request, "param3"), null);
-		assertEquals(ServletRequestUtils.getIntParameter(request, "param3", 6), 6);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param3")).isEqualTo(null);
+		assertThat(ServletRequestUtils.getIntParameter(request, "param3", 6)).isEqualTo(6);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredIntParameter(request, "param3"));
 
@@ -61,8 +60,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testIntParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testIntParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1", "2", "3"});
 
 		request.addParameter("param2", "1");
@@ -71,9 +69,9 @@ public class ServletRequestUtilsTests {
 
 		int[] array = new int[] {1, 2, 3};
 		int[] values = ServletRequestUtils.getRequiredIntParameters(request, "param");
-		assertEquals(3, values.length);
+		assertThat(3).isEqualTo(values.length);
 		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i]);
+			assertThat(array[i]).isEqualTo(values[i]);
 		}
 
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
@@ -81,22 +79,21 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testLongParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testLongParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertEquals(ServletRequestUtils.getLongParameter(request, "param1"), new Long(5L));
-		assertEquals(ServletRequestUtils.getLongParameter(request, "param1", 6L), 5L);
-		assertEquals(ServletRequestUtils.getRequiredIntParameter(request, "param1"), 5L);
+		assertThat(ServletRequestUtils.getLongParameter(request, "param1")).isEqualTo(new Long(5L));
+		assertThat(ServletRequestUtils.getLongParameter(request, "param1", 6L)).isEqualTo(5L);
+		assertThat(ServletRequestUtils.getRequiredIntParameter(request, "param1")).isEqualTo(5L);
 
-		assertEquals(ServletRequestUtils.getLongParameter(request, "param2", 6L), 6L);
+		assertThat(ServletRequestUtils.getLongParameter(request, "param2", 6L)).isEqualTo(6L);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameter(request, "param2"));
 
-		assertEquals(ServletRequestUtils.getLongParameter(request, "param3"), null);
-		assertEquals(ServletRequestUtils.getLongParameter(request, "param3", 6L), 6L);
+		assertThat(ServletRequestUtils.getLongParameter(request, "param3")).isEqualTo(null);
+		assertThat(ServletRequestUtils.getLongParameter(request, "param3", 6L)).isEqualTo(6L);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameter(request, "param3"));
 
@@ -105,8 +102,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testLongParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testLongParameters() throws ServletRequestBindingException {
 		request.setParameter("param", new String[] {"1", "2", "3"});
 
 		request.setParameter("param2", "0");
@@ -114,21 +110,15 @@ public class ServletRequestUtilsTests {
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		long[] array = new long[] {1L, 2L, 3L};
 		long[] values = ServletRequestUtils.getRequiredLongParameters(request, "param");
-		assertEquals(3, values.length);
-		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i]);
-		}
+		assertThat(values).containsExactly(1, 2, 3);
 
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredLongParameters(request, "param2"));
 
 		request.setParameter("param2", new String[] {"1", "2"});
 		values = ServletRequestUtils.getRequiredLongParameters(request, "param2");
-		assertEquals(2, values.length);
-		assertEquals(1, values[0]);
-		assertEquals(2, values[1]);
+		assertThat(values).containsExactly(1, 2);
 
 		request.removeParameter("param2");
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
@@ -136,22 +126,21 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testFloatParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testFloatParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertTrue(ServletRequestUtils.getFloatParameter(request, "param1").equals(new Float(5.5f)));
-		assertTrue(ServletRequestUtils.getFloatParameter(request, "param1", 6.5f) == 5.5f);
-		assertTrue(ServletRequestUtils.getRequiredFloatParameter(request, "param1") == 5.5f);
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param1").equals(new Float(5.5f))).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param1", 6.5f) == 5.5f).isTrue();
+		assertThat(ServletRequestUtils.getRequiredFloatParameter(request, "param1") == 5.5f).isTrue();
 
-		assertTrue(ServletRequestUtils.getFloatParameter(request, "param2", 6.5f) == 6.5f);
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param2", 6.5f) == 6.5f).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param2"));
 
-		assertTrue(ServletRequestUtils.getFloatParameter(request, "param3") == null);
-		assertTrue(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f) == 6.5f);
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f) == 6.5f).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param3"));
 
@@ -160,42 +149,36 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testFloatParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testFloatParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		float[] array = new float[] {1.5F, 2.5F, 3};
 		float[] values = ServletRequestUtils.getRequiredFloatParameters(request, "param");
-		assertEquals(3, values.length);
-		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i], 0);
-		}
+		assertThat(values).containsExactly(1.5F, 2.5F, 3F);
 
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameters(request, "param2"));
 	}
 
 	@Test
-	public void testDoubleParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testDoubleParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param1").equals(new Double(5.5)));
-		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param1", 6.5) == 5.5);
-		assertTrue(ServletRequestUtils.getRequiredDoubleParameter(request, "param1") == 5.5);
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1").equals(new Double(5.5))).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1", 6.5) == 5.5).isTrue();
+		assertThat(ServletRequestUtils.getRequiredDoubleParameter(request, "param1") == 5.5).isTrue();
 
-		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param2", 6.5) == 6.5);
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param2", 6.5) == 6.5).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param2"));
 
-		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param3") == null);
-		assertTrue(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5) == 6.5);
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5) == 6.5).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param3"));
 
@@ -204,57 +187,49 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testDoubleParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testDoubleParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
 		request.addParameter("param2", "2");
 		request.addParameter("param2", "bogus");
 
-		double[] array = new double[] {1.5, 2.5, 3};
 		double[] values = ServletRequestUtils.getRequiredDoubleParameters(request, "param");
-		assertEquals(3, values.length);
-		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i], 0);
-		}
-
+		assertThat(values).containsExactly(1.5, 2.5, 3);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameters(request, "param2"));
 	}
 
 	@Test
-	public void testBooleanParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testBooleanParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "true");
 		request.addParameter("param2", "e");
 		request.addParameter("param4", "yes");
 		request.addParameter("param5", "1");
 		request.addParameter("paramEmpty", "");
 
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param1").equals(Boolean.TRUE));
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param1", false));
-		assertTrue(ServletRequestUtils.getRequiredBooleanParameter(request, "param1"));
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param1").equals(Boolean.TRUE)).isTrue();
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param1", false)).isTrue();
+		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param1")).isTrue();
 
-		assertFalse(ServletRequestUtils.getBooleanParameter(request, "param2", true));
-		assertFalse(ServletRequestUtils.getRequiredBooleanParameter(request, "param2"));
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param2", true)).isFalse();
+		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param2")).isFalse();
 
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param3") == null);
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param3", true));
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param3") == null).isTrue();
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param3", true)).isTrue();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredBooleanParameter(request, "param3"));
 
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param4", false));
-		assertTrue(ServletRequestUtils.getRequiredBooleanParameter(request, "param4"));
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param4", false)).isTrue();
+		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param4")).isTrue();
 
-		assertTrue(ServletRequestUtils.getBooleanParameter(request, "param5", false));
-		assertTrue(ServletRequestUtils.getRequiredBooleanParameter(request, "param5"));
-		assertFalse(ServletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty"));
+		assertThat(ServletRequestUtils.getBooleanParameter(request, "param5", false)).isTrue();
+		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "param5")).isTrue();
+		assertThat(ServletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty")).isFalse();
 	}
 
 	@Test
-	public void testBooleanParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testBooleanParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
 
 		request.addParameter("param2", "false");
@@ -263,43 +238,41 @@ public class ServletRequestUtilsTests {
 
 		boolean[] array = new boolean[] {true, true, false, true, false};
 		boolean[] values = ServletRequestUtils.getRequiredBooleanParameters(request, "param");
-		assertEquals(array.length, values.length);
+		assertThat(array.length).isEqualTo(values.length);
 		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i]);
+			assertThat(array[i]).isEqualTo(values[i]);
 		}
 
 		array = new boolean[] {false, true, false};
 		values = ServletRequestUtils.getRequiredBooleanParameters(request, "param2");
-		assertEquals(array.length, values.length);
+		assertThat(array.length).isEqualTo(values.length);
 		for (int i = 0; i < array.length; i++) {
-			assertEquals(array[i], values[i]);
+			assertThat(array[i]).isEqualTo(values[i]);
 		}
 	}
 
 	@Test
-	public void testStringParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testStringParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "str");
 		request.addParameter("paramEmpty", "");
 
-		assertEquals("str", ServletRequestUtils.getStringParameter(request, "param1"));
-		assertEquals("str", ServletRequestUtils.getStringParameter(request, "param1", "string"));
-		assertEquals("str", ServletRequestUtils.getRequiredStringParameter(request, "param1"));
+		assertThat(ServletRequestUtils.getStringParameter(request, "param1")).isEqualTo("str");
+		assertThat(ServletRequestUtils.getStringParameter(request, "param1", "string")).isEqualTo("str");
+		assertThat(ServletRequestUtils.getRequiredStringParameter(request, "param1")).isEqualTo("str");
 
-		assertEquals(null, ServletRequestUtils.getStringParameter(request, "param3"));
-		assertEquals("string", ServletRequestUtils.getStringParameter(request, "param3", "string"));
-		assertNull(ServletRequestUtils.getStringParameter(request, "param3", null));
+		assertThat(ServletRequestUtils.getStringParameter(request, "param3")).isNull();
+		assertThat(ServletRequestUtils.getStringParameter(request, "param3", "string")).isEqualTo("string");
+		assertThat(ServletRequestUtils.getStringParameter(request, "param3", null)).isNull();
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredStringParameter(request, "param3"));
 
-		assertEquals("", ServletRequestUtils.getStringParameter(request, "paramEmpty"));
-		assertEquals("", ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
+		assertThat(ServletRequestUtils.getStringParameter(request, "paramEmpty")).isEmpty();
+		assertThat(ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty")).isEmpty();
 	}
 
 	@Test
-	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -307,13 +280,12 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
-	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -321,13 +293,12 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
-	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -335,13 +306,12 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
-	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -349,13 +319,12 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
-	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -363,13 +332,12 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 	@Test
-	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	@EnabledForTestGroups(PERFORMANCE)
+	void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
 		StopWatch sw = new StopWatch();
 		sw.start();
 		for (int i = 0; i < 1000000; i++) {
@@ -377,7 +345,7 @@ public class ServletRequestUtilsTests {
 		}
 		sw.stop();
 		System.out.println(sw.getTotalTimeMillis());
-		assertTrue("getStringParameter took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 250);
+		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 }

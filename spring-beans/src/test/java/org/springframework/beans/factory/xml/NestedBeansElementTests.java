@@ -16,7 +16,7 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -24,8 +24,8 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Tests for new nested beans element support in Spring XML
@@ -42,7 +42,7 @@ public class NestedBeansElementTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(XML);
 
 		Object foo = bf.getBean("foo");
-		assertThat(foo, instanceOf(String.class));
+		assertThat(foo).isInstanceOf(String.class);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class NestedBeansElementTests {
 		bf.getBean("devOnlyBean"); // should not throw NSBDE
 
 		Object foo = bf.getBean("foo");
-		assertThat(foo, instanceOf(Integer.class));
+		assertThat(foo).isInstanceOf(Integer.class);
 
 		bf.getBean("devOnlyBean");
 	}

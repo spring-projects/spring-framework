@@ -56,8 +56,7 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 		Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {
 			Method method = entry.getKey();
-			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<>();
-			exceptionTypes.addAll(Arrays.asList(entry.getValue().value()));
+			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<>(Arrays.asList(entry.getValue().value()));
 			if (exceptionTypes.isEmpty()) {
 				exceptionTypes.addAll(getExceptionsFromMethodSignature(method));
 			}

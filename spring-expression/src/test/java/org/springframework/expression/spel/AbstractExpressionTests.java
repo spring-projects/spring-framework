@@ -27,9 +27,6 @@ import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Common superclass for expression tests.
@@ -71,19 +68,18 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 
 		Class<?> resultType = value.getClass();
-		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
-				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
+		assertThat(resultType).as("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
 
 		if (expectedValue instanceof String) {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-					AbstractExpressionTests.stringValueOf(value));
+			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 		else {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 	}
 
@@ -99,13 +95,13 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 
 		Class<?> resultType = value.getClass();
-		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
-				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
-		assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+		assertThat(resultType).as("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
+		assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 	}
 
 	/**
@@ -129,18 +125,17 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 		Class<? extends Object> resultType = value.getClass();
 		if (expectedValue instanceof String) {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-					AbstractExpressionTests.stringValueOf(value));
+			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 		else {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
-		assertTrue("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
-				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType));
+		assertThat(expectedClassOfResult.equals(resultType)).as("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+				"' but result was of type '" + resultType + "'").isTrue();
 
 		assertThat(expr.isWritable(context)).as("isWritable").isEqualTo(shouldBeWritable);
 	}

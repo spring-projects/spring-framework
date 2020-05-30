@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests with error status codes or error conditions.
@@ -64,14 +63,14 @@ public class ErrorTests {
 		EntityExchangeResult<Void> result = this.client.post()
 				.uri("/post")
 				.contentType(MediaType.APPLICATION_JSON)
-				.syncBody(new Person("Dan"))
+				.bodyValue(new Person("Dan"))
 				.exchange()
 				.expectStatus().isBadRequest()
 				.expectBody().isEmpty();
 
 		byte[] content = result.getRequestBodyContent();
-		assertNotNull(content);
-		assertEquals("{\"name\":\"Dan\"}", new String(content, StandardCharsets.UTF_8));
+		assertThat(content).isNotNull();
+		assertThat(new String(content, StandardCharsets.UTF_8)).isEqualTo("{\"name\":\"Dan\"}");
 	}
 
 

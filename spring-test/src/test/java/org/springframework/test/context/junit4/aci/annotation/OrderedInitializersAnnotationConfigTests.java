@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.aci.annotation.OrderedInitializer
 import org.springframework.test.context.junit4.aci.annotation.OrderedInitializersAnnotationConfigTests.OrderedOneInitializer;
 import org.springframework.test.context.junit4.aci.annotation.OrderedInitializersAnnotationConfigTests.OrderedTwoInitializer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify that any {@link ApplicationContextInitializer
@@ -65,9 +65,9 @@ public class OrderedInitializersAnnotationConfigTests {
 
 	@Test
 	public void activeBeans() {
-		assertEquals(PROFILE_GLOBAL, foo);
-		assertEquals(PROFILE_GLOBAL, bar);
-		assertEquals(PROFILE_TWO, baz);
+		assertThat(foo).isEqualTo(PROFILE_GLOBAL);
+		assertThat(bar).isEqualTo(PROFILE_GLOBAL);
+		assertThat(baz).isEqualTo(PROFILE_TWO);
 	}
 
 

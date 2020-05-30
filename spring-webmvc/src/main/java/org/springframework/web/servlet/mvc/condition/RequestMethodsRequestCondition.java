@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsUtils;
 
@@ -62,11 +64,15 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * if, 0 the condition will match to every request
 	 */
 	public RequestMethodsRequestCondition(RequestMethod... requestMethods) {
-		this(Arrays.asList(requestMethods));
+		this.methods = (ObjectUtils.isEmpty(requestMethods) ?
+				Collections.emptySet() : new LinkedHashSet<>(Arrays.asList(requestMethods)));
 	}
 
-	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
-		this.methods = Collections.unmodifiableSet(new LinkedHashSet<>(requestMethods));
+	/**
+	 * Private constructor for internal use when combining conditions.
+	 */
+	private RequestMethodsRequestCondition(Set<RequestMethod> methods) {
+		this.methods = methods;
 	}
 
 
@@ -93,6 +99,15 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
+		if (isEmpty() && other.isEmpty()) {
+			return this;
+		}
+		else if (other.isEmpty()) {
+			return this;
+		}
+		else if (isEmpty()) {
+			return other;
+		}
 		Set<RequestMethod> set = new LinkedHashSet<>(this.methods);
 		set.addAll(other.methods);
 		return new RequestMethodsRequestCondition(set);
@@ -142,16 +157,18 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
-		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
-		if (httpMethod != null) {
-			for (RequestMethod method : getMethods()) {
-				if (httpMethod.matches(method.name())) {
-					return requestMethodConditionCache.get(method.name());
-				}
+		RequestMethod requestMethod;
+		try {
+			requestMethod = RequestMethod.valueOf(httpMethodValue);
+			if (getMethods().contains(requestMethod)) {
+				return requestMethodConditionCache.get(httpMethodValue);
 			}
-			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
+			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
 				return requestMethodConditionCache.get(HttpMethod.GET.name());
 			}
+		}
+		catch (IllegalArgumentException ex) {
+			// Custom request method
 		}
 		return null;
 	}

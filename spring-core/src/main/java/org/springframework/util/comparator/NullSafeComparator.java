@@ -108,7 +108,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

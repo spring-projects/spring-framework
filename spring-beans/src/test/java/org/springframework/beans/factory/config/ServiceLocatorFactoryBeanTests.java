@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.config;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -27,12 +27,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.NestedCheckedException;
 import org.springframework.core.NestedRuntimeException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
@@ -47,7 +44,7 @@ public class ServiceLocatorFactoryBeanTests {
 
 	private DefaultListableBeanFactory bf;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		bf = new DefaultListableBeanFactory();
 	}
@@ -62,7 +59,7 @@ public class ServiceLocatorFactoryBeanTests {
 
 		TestServiceLocator factory = (TestServiceLocator) bf.getBean("factory");
 		TestService testService = factory.getTestService();
-		assertNotNull(testService);
+		assertThat(testService).isNotNull();
 	}
 
 	@Test
@@ -138,7 +135,7 @@ public class ServiceLocatorFactoryBeanTests {
 				factory.getTestService("bogusTestService"));
 	}
 
-	@Ignore @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
+	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
 	public void testCombinedLocatorInterface() {
 		bf.registerBeanDefinition("testService", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerAlias("testService", "1");
@@ -161,17 +158,17 @@ public class ServiceLocatorFactoryBeanTests {
 		TestService testBean2 = factory.getTestService("testService");
 		TestService testBean3 = factory.getTestService(1);
 		TestService testBean4 = factory.someFactoryMethod();
-		assertNotSame(testBean1, testBean2);
-		assertNotSame(testBean1, testBean3);
-		assertNotSame(testBean1, testBean4);
-		assertNotSame(testBean2, testBean3);
-		assertNotSame(testBean2, testBean4);
-		assertNotSame(testBean3, testBean4);
+		assertThat(testBean2).isNotSameAs(testBean1);
+		assertThat(testBean3).isNotSameAs(testBean1);
+		assertThat(testBean4).isNotSameAs(testBean1);
+		assertThat(testBean3).isNotSameAs(testBean2);
+		assertThat(testBean4).isNotSameAs(testBean2);
+		assertThat(testBean4).isNotSameAs(testBean3);
 
-		assertTrue(factory.toString().contains("TestServiceLocator3"));
+		assertThat(factory.toString().contains("TestServiceLocator3")).isTrue();
 	}
 
-	@Ignore @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
+	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory
 	public void testServiceMappings() {
 		bf.registerBeanDefinition("testService1", genericBeanDefinition(TestService.class).getBeanDefinition());
 		bf.registerBeanDefinition("testService2", genericBeanDefinition(ExtendedTestService.class).getBeanDefinition());
@@ -195,16 +192,20 @@ public class ServiceLocatorFactoryBeanTests {
 		TestService testBean2 = factory.getTestService("testService1");
 		TestService testBean3 = factory.getTestService(1);
 		TestService testBean4 = factory.getTestService(2);
-		assertNotSame(testBean1, testBean2);
-		assertNotSame(testBean1, testBean3);
-		assertNotSame(testBean1, testBean4);
-		assertNotSame(testBean2, testBean3);
-		assertNotSame(testBean2, testBean4);
-		assertNotSame(testBean3, testBean4);
-		assertFalse(testBean1 instanceof ExtendedTestService);
-		assertFalse(testBean2 instanceof ExtendedTestService);
-		assertFalse(testBean3 instanceof ExtendedTestService);
-		assertTrue(testBean4 instanceof ExtendedTestService);
+		assertThat(testBean2).isNotSameAs(testBean1);
+		assertThat(testBean3).isNotSameAs(testBean1);
+		assertThat(testBean4).isNotSameAs(testBean1);
+		assertThat(testBean3).isNotSameAs(testBean2);
+		assertThat(testBean4).isNotSameAs(testBean2);
+		assertThat(testBean4).isNotSameAs(testBean3);
+		boolean condition3 = testBean1 instanceof ExtendedTestService;
+		assertThat(condition3).isFalse();
+		boolean condition2 = testBean2 instanceof ExtendedTestService;
+		assertThat(condition2).isFalse();
+		boolean condition1 = testBean3 instanceof ExtendedTestService;
+		assertThat(condition1).isFalse();
+		boolean condition = testBean4 instanceof ExtendedTestService;
+		assertThat(condition).isTrue();
 	}
 
 	@Test

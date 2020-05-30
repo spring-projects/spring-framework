@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -57,6 +58,15 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * {@link RequestMapping @RequestMapping} annotations in
  * {@link Controller @Controller} classes.
  *
+ * <p><strong>Deprecation Note:</strong></p> In 5.2.4,
+ * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch} and
+ * {@link #setUseRegisteredSuffixPatternMatch(boolean) useRegisteredSuffixPatternMatch}
+ * are deprecated in order to discourage use of path extensions for request
+ * mapping and for content negotiation (with similar deprecations in
+ * {@link org.springframework.web.accept.ContentNegotiationManagerFactoryBean
+ * ContentNegotiationManagerFactoryBean}). For further context, please read issue
+ * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -87,7 +97,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * <p>The default value is {@code true}.
 	 * <p>Also see {@link #setUseRegisteredSuffixPatternMatch(boolean)} for
 	 * more fine-grained control over specific suffixes to allow.
+	 * @deprecated as of 5.2.4. See class level comment about deprecation of
+	 * path extension config options. As there is no replacement for this method,
+	 * for the time being it's necessary to set it to {@code false}. In 5.3
+	 * when {@code false} becomes the default, use of this property will no
+	 * longer be necessary.
 	 */
+	@Deprecated
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 	}
@@ -98,7 +114,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * is generally recommended to reduce ambiguity and to avoid issues such as
 	 * when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "false".
+	 * @deprecated as of 5.2.4. See class level comment about deprecation of
+	 * path extension config options.
 	 */
+	@Deprecated
 	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
 		this.useRegisteredSuffixPatternMatch = useRegisteredSuffixPatternMatch;
 		this.useSuffixPatternMatch = (useRegisteredSuffixPatternMatch || this.useSuffixPatternMatch);
@@ -157,13 +176,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void afterPropertiesSet() {
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setUrlPathHelper(getUrlPathHelper());
 		this.config.setPathMatcher(getPathMatcher());
-		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
-		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
-		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
+		this.config.setSuffixPatternMatch(useSuffixPatternMatch());
+		this.config.setTrailingSlashMatch(useTrailingSlashMatch());
+		this.config.setRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch());
 		this.config.setContentNegotiationManager(getContentNegotiationManager());
 
 		super.afterPropertiesSet();
@@ -171,15 +191,21 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 
 	/**
-	 * Whether to use suffix pattern matching.
+	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public boolean useSuffixPatternMatch() {
 		return this.useSuffixPatternMatch;
 	}
 
 	/**
 	 * Whether to use registered suffixes for pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
+	 * extension config options.
 	 */
+	@Deprecated
 	public boolean useRegisteredSuffixPatternMatch() {
 		return this.useRegisteredSuffixPatternMatch;
 	}
@@ -193,8 +219,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Return the file extensions to use for suffix pattern matching.
+	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
+	 * extension config options.
 	 */
 	@Nullable
+	@Deprecated
+	@SuppressWarnings("deprecation")
 	public List<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
@@ -230,7 +260,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 			String prefix = getPathPrefix(handlerType);
 			if (prefix != null) {
-				info = RequestMappingInfo.paths(prefix).build().combine(info);
+				info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
 			}
 		}
 		return info;

@@ -17,100 +17,98 @@
 package org.springframework.transaction.aspectj;
 
 import java.io.IOException;
+
 import javax.transaction.Transactional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Stephane Nicoll
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = JtaTransactionAspectsTests.Config.class)
+@SpringJUnitConfig(JtaTransactionAspectsTests.Config.class)
 public class JtaTransactionAspectsTests {
 
 	@Autowired
 	private CallCountingTransactionManager txManager;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.txManager.clear();
 	}
 
 	@Test
 	public void commitOnAnnotatedPublicMethod() throws Throwable {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new JtaAnnotationPublicAnnotatedMember().echo(null);
-		assertEquals(1, this.txManager.commits);
+		assertThat(this.txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void matchingRollbackOnApplied() throws Throwable {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		InterruptedException test = new InterruptedException();
 		assertThatExceptionOfType(InterruptedException.class).isThrownBy(() ->
 				new JtaAnnotationPublicAnnotatedMember().echo(test))
 			.isSameAs(test);
-		assertEquals(1, this.txManager.rollbacks);
-		assertEquals(0, this.txManager.commits);
+		assertThat(this.txManager.rollbacks).isEqualTo(1);
+		assertThat(this.txManager.commits).isEqualTo(0);
 	}
 
 	@Test
 	public void nonMatchingRollbackOnApplied() throws Throwable {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		IOException test = new IOException();
 		assertThatIOException().isThrownBy(() ->
 				new JtaAnnotationPublicAnnotatedMember().echo(test))
 			.isSameAs(test);
-		assertEquals(1, this.txManager.commits);
-		assertEquals(0, this.txManager.rollbacks);
+		assertThat(this.txManager.commits).isEqualTo(1);
+		assertThat(this.txManager.rollbacks).isEqualTo(0);
 	}
 
 	@Test
 	public void commitOnAnnotatedProtectedMethod() {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new JtaAnnotationProtectedAnnotatedMember().doInTransaction();
-		assertEquals(1, this.txManager.commits);
+		assertThat(this.txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void nonAnnotatedMethodCallingProtectedMethod() {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new JtaAnnotationProtectedAnnotatedMember().doSomething();
-		assertEquals(1, this.txManager.commits);
+		assertThat(this.txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void commitOnAnnotatedPrivateMethod() {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new JtaAnnotationPrivateAnnotatedMember().doInTransaction();
-		assertEquals(1, this.txManager.commits);
+		assertThat(this.txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void nonAnnotatedMethodCallingPrivateMethod() {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new JtaAnnotationPrivateAnnotatedMember().doSomething();
-		assertEquals(1, this.txManager.commits);
+		assertThat(this.txManager.commits).isEqualTo(1);
 	}
 
 	@Test
 	public void notTransactional() {
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 		new TransactionAspectTests.NotTransactional().noop();
-		assertEquals(0, this.txManager.begun);
+		assertThat(this.txManager.begun).isEqualTo(0);
 	}
 
 

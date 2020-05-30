@@ -16,15 +16,14 @@
 
 package org.springframework.web.socket.handler;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
@@ -42,7 +41,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 	private WebSocketHandler delegate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.delegate = mock(WebSocketHandler.class);
@@ -60,7 +59,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 
 		this.decorator.afterConnectionEstablished(this.session);
 
-		assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
+		assertThat(this.session.getCloseStatus()).isEqualTo(CloseStatus.SERVER_ERROR);
 	}
 
 	@Test
@@ -73,7 +72,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 
 		this.decorator.handleMessage(this.session, message);
 
-		assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
+		assertThat(this.session.getCloseStatus()).isEqualTo(CloseStatus.SERVER_ERROR);
 	}
 
 	@Test
@@ -86,7 +85,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 
 		this.decorator.handleTransportError(this.session, exception);
 
-		assertEquals(CloseStatus.SERVER_ERROR, this.session.getCloseStatus());
+		assertThat(this.session.getCloseStatus()).isEqualTo(CloseStatus.SERVER_ERROR);
 	}
 
 	@Test
@@ -99,7 +98,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 
 		this.decorator.afterConnectionClosed(this.session, closeStatus);
 
-		assertNull(this.session.getCloseStatus());
+		assertThat(this.session.getCloseStatus()).isNull();
 	}
 
 }

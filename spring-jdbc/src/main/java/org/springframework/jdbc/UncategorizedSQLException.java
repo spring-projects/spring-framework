@@ -22,7 +22,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
 import org.springframework.lang.Nullable;
 
 /**
- * Exception thrown when we can't classify a SQLException into
+ * Exception thrown when we can't classify an SQLException into
  * one of our generic data access exceptions.
  *
  * @author Rod Johnson

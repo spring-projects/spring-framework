@@ -16,13 +16,14 @@
 
 package org.springframework.beans;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.hasItemInArray;
-import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
+
+
 
 /**
  * Tests for {@link PropertyMatches}.
@@ -34,93 +35,93 @@ public class PropertyMatchesTests {
 	@Test
 	public void simpleBeanPropertyTypo() {
 		PropertyMatches matches = PropertyMatches.forProperty("naem", SampleBeanProperties.class);
-		assertThat(matches.getPossibleMatches(), hasItemInArray("name"));
+		assertThat(matches.getPossibleMatches()).contains("name");
 	}
 
 	@Test
 	public void complexBeanPropertyTypo() {
 		PropertyMatches matches = PropertyMatches.forProperty("desriptn", SampleBeanProperties.class);
-		assertThat(matches.getPossibleMatches(), emptyArray());
+		assertThat(matches.getPossibleMatches()).isEmpty();
 	}
 
 	@Test
 	public void unknownBeanProperty() {
 		PropertyMatches matches = PropertyMatches.forProperty("unknown", SampleBeanProperties.class);
-		assertThat(matches.getPossibleMatches(), emptyArray());
+		assertThat(matches.getPossibleMatches()).isEmpty();
 	}
 
 	@Test
 	public void severalMatchesBeanProperty() {
 		PropertyMatches matches = PropertyMatches.forProperty("counter", SampleBeanProperties.class);
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter1"));
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter2"));
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter3"));
+		assertThat(matches.getPossibleMatches()).contains("counter1");
+		assertThat(matches.getPossibleMatches()).contains("counter2");
+		assertThat(matches.getPossibleMatches()).contains("counter3");
 	}
 
 	@Test
 	public void simpleBeanPropertyErrorMessage() {
 		PropertyMatches matches = PropertyMatches.forProperty("naem", SampleBeanProperties.class);
 		String msg = matches.buildErrorMessage();
-		assertThat(msg, containsString("naem"));
-		assertThat(msg, containsString("name"));
-		assertThat(msg, containsString("setter"));
-		assertThat(msg, not(containsString("field")));
+		assertThat(msg).contains("naem");
+		assertThat(msg).contains("name");
+		assertThat(msg).contains("setter");
+		assertThat(msg).doesNotContain("field");
 	}
 
 	@Test
 	public void complexBeanPropertyErrorMessage() {
 		PropertyMatches matches = PropertyMatches.forProperty("counter", SampleBeanProperties.class);
 		String msg = matches.buildErrorMessage();
-		assertThat(msg, containsString("counter"));
-		assertThat(msg, containsString("counter1"));
-		assertThat(msg, containsString("counter2"));
-		assertThat(msg, containsString("counter3"));
+		assertThat(msg).contains("counter");
+		assertThat(msg).contains("counter1");
+		assertThat(msg).contains("counter2");
+		assertThat(msg).contains("counter3");
 	}
 
 	@Test
 	public void simpleFieldPropertyTypo() {
 		PropertyMatches matches = PropertyMatches.forField("naem", SampleFieldProperties.class);
-		assertThat(matches.getPossibleMatches(), hasItemInArray("name"));
+		assertThat(matches.getPossibleMatches()).contains("name");
 	}
 
 	@Test
 	public void complexFieldPropertyTypo() {
 		PropertyMatches matches = PropertyMatches.forField("desriptn", SampleFieldProperties.class);
-		assertThat(matches.getPossibleMatches(), emptyArray());
+		assertThat(matches.getPossibleMatches()).isEmpty();
 	}
 
 	@Test
 	public void unknownFieldProperty() {
 		PropertyMatches matches = PropertyMatches.forField("unknown", SampleFieldProperties.class);
-		assertThat(matches.getPossibleMatches(), emptyArray());
+		assertThat(matches.getPossibleMatches()).isEmpty();
 	}
 
 	@Test
 	public void severalMatchesFieldProperty() {
 		PropertyMatches matches = PropertyMatches.forField("counter", SampleFieldProperties.class);
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter1"));
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter2"));
-		assertThat(matches.getPossibleMatches(), hasItemInArray("counter3"));
+		assertThat(matches.getPossibleMatches()).contains("counter1");
+		assertThat(matches.getPossibleMatches()).contains("counter2");
+		assertThat(matches.getPossibleMatches()).contains("counter3");
 	}
 
 	@Test
 	public void simpleFieldPropertyErrorMessage() {
 		PropertyMatches matches = PropertyMatches.forField("naem", SampleFieldProperties.class);
 		String msg = matches.buildErrorMessage();
-		assertThat(msg, containsString("naem"));
-		assertThat(msg, containsString("name"));
-		assertThat(msg, containsString("field"));
-		assertThat(msg, not(containsString("setter")));
+		assertThat(msg).contains("naem");
+		assertThat(msg).contains("name");
+		assertThat(msg).contains("field");
+		assertThat(msg).doesNotContain("setter");
 	}
 
 	@Test
 	public void complexFieldPropertyErrorMessage() {
 		PropertyMatches matches = PropertyMatches.forField("counter", SampleFieldProperties.class);
 		String msg = matches.buildErrorMessage();
-		assertThat(msg, containsString("counter"));
-		assertThat(msg, containsString("counter1"));
-		assertThat(msg, containsString("counter2"));
-		assertThat(msg, containsString("counter3"));
+		assertThat(msg).contains("counter");
+		assertThat(msg).contains("counter1");
+		assertThat(msg).contains("counter2");
+		assertThat(msg).contains("counter3");
 	}
 
 

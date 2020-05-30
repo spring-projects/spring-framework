@@ -16,13 +16,11 @@
 
 package org.springframework.http;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.Resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -31,17 +29,17 @@ public class MediaTypeFactoryTests {
 
 	@Test
 	public void getMediaType() {
-		assertEquals(MediaType.APPLICATION_XML, MediaTypeFactory.getMediaType("file.xml").get());
-		assertEquals(MediaType.parseMediaType("application/javascript"), MediaTypeFactory.getMediaType("file.js").get());
-		assertEquals(MediaType.parseMediaType("text/css"), MediaTypeFactory.getMediaType("file.css").get());
-		assertFalse(MediaTypeFactory.getMediaType("file.foobar").isPresent());
+		assertThat(MediaTypeFactory.getMediaType("file.xml").get()).isEqualTo(MediaType.APPLICATION_XML);
+		assertThat(MediaTypeFactory.getMediaType("file.js").get()).isEqualTo(MediaType.parseMediaType("application/javascript"));
+		assertThat(MediaTypeFactory.getMediaType("file.css").get()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(MediaTypeFactory.getMediaType("file.foobar").isPresent()).isFalse();
 	}
 
 	@Test
 	public void nullParameter() {
-		assertFalse(MediaTypeFactory.getMediaType((String) null).isPresent());
-		assertFalse(MediaTypeFactory.getMediaType((Resource) null).isPresent());
-		assertTrue(MediaTypeFactory.getMediaTypes(null).isEmpty());
+		assertThat(MediaTypeFactory.getMediaType((String) null).isPresent()).isFalse();
+		assertThat(MediaTypeFactory.getMediaType((Resource) null).isPresent()).isFalse();
+		assertThat(MediaTypeFactory.getMediaTypes(null).isEmpty()).isTrue();
 	}
 
 }

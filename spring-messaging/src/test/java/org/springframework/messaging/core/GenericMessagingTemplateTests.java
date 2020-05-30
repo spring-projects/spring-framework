@@ -21,8 +21,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -38,12 +38,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,7 +61,7 @@ public class GenericMessagingTemplateTests {
 	private ThreadPoolTaskExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.template = new GenericMessagingTemplate();
@@ -90,9 +85,9 @@ public class GenericMessagingTemplateTests {
 				.build();
 		this.template.send(channel, message);
 		verify(channel).send(any(Message.class), eq(30_000L));
-		assertNotNull(sent.get());
-		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
-		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
+		assertThat(sent.get()).isNotNull();
+		assertThat(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER)).isFalse();
+		assertThat(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER)).isFalse();
 	}
 
 	@Test
@@ -109,9 +104,9 @@ public class GenericMessagingTemplateTests {
 		accessor.setHeader(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER, 30_000L);
 		this.template.send(channel, message);
 		verify(channel).send(any(Message.class), eq(30_000L));
-		assertNotNull(sent.get());
-		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER));
-		assertFalse(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER));
+		assertThat(sent.get()).isNotNull();
+		assertThat(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER)).isFalse();
+		assertThat(sent.get().getHeaders().containsKey(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER)).isFalse();
 	}
 
 	@Test
@@ -126,7 +121,7 @@ public class GenericMessagingTemplateTests {
 		});
 
 		String actual = this.template.convertSendAndReceive(channel, "request", String.class);
-		assertEquals("response", actual);
+		assertThat(actual).isEqualTo("response");
 	}
 
 	@Test
@@ -145,8 +140,8 @@ public class GenericMessagingTemplateTests {
 			return true;
 		}).given(channel).send(any(Message.class), anyLong());
 
-		assertNull(this.template.convertSendAndReceive(channel, "request", String.class));
-		assertTrue(latch.await(10_000, TimeUnit.MILLISECONDS));
+		assertThat(this.template.convertSendAndReceive(channel, "request", String.class)).isNull();
+		assertThat(latch.await(10_000, TimeUnit.MILLISECONDS)).isTrue();
 
 		Throwable ex = failure.get();
 		if (ex != null) {
@@ -175,8 +170,8 @@ public class GenericMessagingTemplateTests {
 				.setHeader(GenericMessagingTemplate.DEFAULT_SEND_TIMEOUT_HEADER, 30_000L)
 				.setHeader(GenericMessagingTemplate.DEFAULT_RECEIVE_TIMEOUT_HEADER, 1L)
 				.build();
-		assertNull(this.template.sendAndReceive(channel, message));
-		assertTrue(latch.await(10_000, TimeUnit.MILLISECONDS));
+		assertThat(this.template.sendAndReceive(channel, message)).isNull();
+		assertThat(latch.await(10_000, TimeUnit.MILLISECONDS)).isTrue();
 
 		Throwable ex = failure.get();
 		if (ex != null) {
@@ -207,8 +202,8 @@ public class GenericMessagingTemplateTests {
 				.setHeader("sto", 30_000L)
 				.setHeader("rto", 1L)
 				.build();
-		assertNull(this.template.sendAndReceive(channel, message));
-		assertTrue(latch.await(10_000, TimeUnit.MILLISECONDS));
+		assertThat(this.template.sendAndReceive(channel, message)).isNull();
+		assertThat(latch.await(10_000, TimeUnit.MILLISECONDS)).isTrue();
 
 		Throwable ex = failure.get();
 		if (ex != null) {
@@ -254,8 +249,8 @@ public class GenericMessagingTemplateTests {
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 		Message<byte[]> message = messages.get(0);
 
-		assertSame(headers, message.getHeaders());
-		assertFalse(accessor.isMutable());
+		assertThat(message.getHeaders()).isSameAs(headers);
+		assertThat(accessor.isMutable()).isFalse();
 	}
 
 

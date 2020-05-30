@@ -22,13 +22,12 @@ import java.util.Map;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import org.springframework.web.socket.handler.TestPrincipal;
+import org.springframework.core.testfixture.security.TestPrincipal;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,7 +48,7 @@ public class JettyWebSocketSessionTests {
 		TestPrincipal user = new TestPrincipal("joe");
 		JettyWebSocketSession session = new JettyWebSocketSession(attributes, user);
 
-		assertSame(user, session.getPrincipal());
+		assertThat(session.getPrincipal()).isSameAs(user);
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public class JettyWebSocketSessionTests {
 
 		reset(nativeSession);
 
-		assertSame(user, session.getPrincipal());
+		assertThat(session.getPrincipal()).isSameAs(user);
 		verifyNoMoreInteractions(nativeSession);
 	}
 
@@ -94,7 +93,7 @@ public class JettyWebSocketSessionTests {
 
 		reset(nativeSession);
 
-		assertNull(session.getPrincipal());
+		assertThat(session.getPrincipal()).isNull();
 		verifyNoMoreInteractions(nativeSession);
 	}
 
@@ -118,7 +117,7 @@ public class JettyWebSocketSessionTests {
 
 		reset(nativeSession);
 
-		assertSame(protocol, session.getAcceptedProtocol());
+		assertThat(session.getAcceptedProtocol()).isSameAs(protocol);
 		verifyNoMoreInteractions(nativeSession);
 	}
 

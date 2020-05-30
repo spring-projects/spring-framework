@@ -18,9 +18,10 @@ package org.springframework.scheduling.quartz;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -33,23 +34,19 @@ import org.quartz.impl.SchedulerRepository;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.TestBean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -87,8 +84,8 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.afterPropertiesSet();
 			schedulerFactoryBean.start();
 			Scheduler returnedScheduler = schedulerFactoryBean.getObject();
-			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
-			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
+			assertThat(returnedScheduler.getContext().get("testBean")).isEqualTo(tb);
+			assertThat(returnedScheduler.getContext().get("appCtx")).isEqualTo(ac);
 		}
 		finally {
 			schedulerFactoryBean.destroy();
@@ -99,9 +96,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithTaskExecutor() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
@@ -126,8 +122,8 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
-		assertEquals(DummyJob.count, taskExecutor.count);
+		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
+		assertThat(taskExecutor.count).isEqualTo(DummyJob.count);
 
 		bean.destroy();
 	}
@@ -141,9 +137,8 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithQuartzJobBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -168,16 +163,15 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertEquals(10, DummyJobBean.param);
-		assertTrue(DummyJobBean.count > 0);
+		assertThat(DummyJobBean.param).isEqualTo(10);
+		assertThat(DummyJobBean.count > 0).isTrue();
 
 		bean.destroy();
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactory() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -204,16 +198,15 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertEquals(10, DummyJob.param);
-		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
+		assertThat(DummyJob.param).isEqualTo(10);
+		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
 
 		bean.destroy();
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -241,15 +234,15 @@ public class QuartzSupportTests {
 		bean.afterPropertiesSet();
 
 		Thread.sleep(500);
-		assertEquals(0, DummyJob.param);
-		assertTrue(DummyJob.count == 0);
+		assertThat(DummyJob.param).isEqualTo(0);
+		assertThat(DummyJob.count == 0).isTrue();
 
 		bean.destroy();
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
@@ -275,15 +268,15 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertEquals(10, DummyJobBean.param);
-		assertTrue(DummyJobBean.count > 0);
+		assertThat(DummyJobBean.param).isEqualTo(10);
+		assertThat(DummyJobBean.count > 0).isTrue();
 
 		bean.destroy();
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -294,8 +287,8 @@ public class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertEquals(10, DummyJob.param);
-		assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
+		assertThat(DummyJob.param).isEqualTo(10);
+		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
 
 		bean.destroy();
 	}
@@ -306,9 +299,9 @@ public class QuartzSupportTests {
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
-			assertNotSame(scheduler1, scheduler2);
-			assertEquals("quartz1", scheduler1.getSchedulerName());
-			assertEquals("quartz2", scheduler2.getSchedulerName());
+			assertThat(scheduler2).isNotSameAs(scheduler1);
+			assertThat(scheduler1.getSchedulerName()).isEqualTo("quartz1");
+			assertThat(scheduler2.getSchedulerName()).isEqualTo("quartz2");
 		}
 		finally {
 			ctx.close();
@@ -321,9 +314,9 @@ public class QuartzSupportTests {
 		try {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
-			assertNotSame(scheduler1, scheduler2);
-			assertEquals("quartz1", scheduler1.getSchedulerName());
-			assertEquals("quartz2", scheduler2.getSchedulerName());
+			assertThat(scheduler2).isNotSameAs(scheduler1);
+			assertThat(scheduler1.getSchedulerName()).isEqualTo("quartz1");
+			assertThat(scheduler2.getSchedulerName()).isEqualTo("quartz2");
 		}
 		finally {
 			ctx.close();
@@ -331,18 +324,18 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
-			assertEquals("doImport called exportService", 0, exportService.getImportCount());
-			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
-			assertEquals("doImport not called on importService", 2, importService.getImportCount());
-			assertEquals("doExport called on importService", 0, importService.getExportCount());
+			assertThat(exportService.getImportCount()).as("doImport called exportService").isEqualTo(0);
+			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
+			assertThat(importService.getImportCount()).as("doImport not called on importService").isEqualTo(2);
+			assertThat(importService.getExportCount()).as("doExport called on importService").isEqualTo(0);
 		}
 		finally {
 			ctx.close();
@@ -350,18 +343,18 @@ public class QuartzSupportTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void schedulerAccessorBean() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml");
 		Thread.sleep(3000);
 		try {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
-			assertEquals("doImport called exportService", 0, exportService.getImportCount());
-			assertEquals("doExport not called on exportService", 2, exportService.getExportCount());
-			assertEquals("doImport not called on importService", 2, importService.getImportCount());
-			assertEquals("doExport called on importService", 0, importService.getExportCount());
+			assertThat(exportService.getImportCount()).as("doImport called exportService").isEqualTo(0);
+			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
+			assertThat(importService.getImportCount()).as("doImport not called on importService").isEqualTo(2);
+			assertThat(importService.getExportCount()).as("doExport called on importService").isEqualTo(0);
 		}
 		finally {
 			ctx.close();
@@ -374,9 +367,9 @@ public class QuartzSupportTests {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerBeanDefinition("scheduler", new RootBeanDefinition(SchedulerFactoryBean.class));
 		Scheduler bean = context.getBean("scheduler", Scheduler.class);
-		assertFalse(bean.isStarted());
+		assertThat(bean.isStarted()).isFalse();
 		context.refresh();
-		assertTrue(bean.isStarted());
+		assertThat(bean.isStarted()).isTrue();
 	}
 
 	@Test
@@ -387,15 +380,15 @@ public class QuartzSupportTests {
 				.addPropertyValue("autoStartup", false).getBeanDefinition();
 		context.registerBeanDefinition("scheduler", beanDefinition);
 		Scheduler bean = context.getBean("scheduler", Scheduler.class);
-		assertFalse(bean.isStarted());
+		assertThat(bean.isStarted()).isFalse();
 		context.refresh();
-		assertFalse(bean.isStarted());
+		assertThat(bean.isStarted()).isFalse();
 	}
 
 	@Test
 	public void schedulerRepositoryExposure() throws Exception {
 		ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml");
-		assertSame(SchedulerRepository.getInstance().lookup("myScheduler"), ctx.getBean("scheduler"));
+		assertThat(ctx.getBean("scheduler")).isSameAs(SchedulerRepository.getInstance().lookup("myScheduler"));
 		ctx.close();
 	}
 
@@ -405,14 +398,12 @@ public class QuartzSupportTests {
 	 */
 	@Test
 	public void schedulerWithHsqlDataSource() throws Exception {
-		// Assume.group(TestGroup.PERFORMANCE);
-
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		ClassPathXmlApplicationContext ctx = context("databasePersistence.xml");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
-		assertFalse("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty());
+		assertThat(jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty()).as("No triggers were persisted").isFalse();
 
 		/*
 		Thread.sleep(3000);

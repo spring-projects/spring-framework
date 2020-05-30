@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket.adapter.standard;
 
 import java.nio.ByteBuffer;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -102,7 +103,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.afterConnectionEstablished(this.wsSession);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -112,7 +113,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.handleMessage(this.wsSession, textMessage);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -122,7 +123,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.handleMessage(this.wsSession, binaryMessage);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -132,7 +133,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.handleMessage(this.wsSession, pongMessage);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}
@@ -143,7 +144,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unhandled on-close exception for " + this.wsSession, ex);
 			}
@@ -155,7 +156,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 		try {
 			this.handler.handleTransportError(this.wsSession, exception);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
 		}
 	}

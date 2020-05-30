@@ -20,14 +20,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -46,13 +44,13 @@ public class DefaultProfileXmlConfigTests {
 
 	@Test
 	public void pet() {
-		assertNotNull(pet);
-		assertEquals("Fido", pet.getName());
+		assertThat(pet).isNotNull();
+		assertThat(pet.getName()).isEqualTo("Fido");
 	}
 
 	@Test
 	public void employee() {
-		assertNull("employee bean should not be created for the default profile", employee);
+		assertThat(employee).as("employee bean should not be created for the default profile").isNull();
 	}
 
 }

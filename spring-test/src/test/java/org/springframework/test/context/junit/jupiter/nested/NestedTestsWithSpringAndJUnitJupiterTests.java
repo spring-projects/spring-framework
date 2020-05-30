@@ -27,7 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithSpringAndJUnitJupiterTests.TopLevelConfig;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for {@code @Nested} test classes
@@ -50,7 +50,7 @@ class NestedTestsWithSpringAndJUnitJupiterTests {
 
 	@Test
 	void topLevelTest() {
-		assertEquals("foo", foo);
+		assertThat(foo).isEqualTo("foo");
 	}
 
 
@@ -67,8 +67,8 @@ class NestedTestsWithSpringAndJUnitJupiterTests {
 			// In contrast to nested test classes running in JUnit 4, the foo
 			// field in the outer instance should have been injected from the
 			// test ApplicationContext for the outer instance.
-			assertEquals("foo", foo);
-			assertEquals("bar", bar);
+			assertThat(foo).isEqualTo("foo");
+			assertThat(bar).isEqualTo("bar");
 		}
 	}
 

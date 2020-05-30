@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -37,7 +37,7 @@ public class PropertiesBeanDefinitionReaderTests {
 	public void withSimpleConstructorArg() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("simpleConstructorArg.properties", getClass()));
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
-		assertEquals("Rob Harrop", bean.getName());
+		assertThat(bean.getName()).isEqualTo("Rob Harrop");
 	}
 
 	@Test
@@ -45,15 +45,15 @@ public class PropertiesBeanDefinitionReaderTests {
 		this.reader.loadBeanDefinitions(new ClassPathResource("refConstructorArg.properties", getClass()));
 		TestBean rob = (TestBean) this.beanFactory.getBean("rob");
 		TestBean sally = (TestBean) this.beanFactory.getBean("sally");
-		assertEquals(sally, rob.getSpouse());
+		assertThat(rob.getSpouse()).isEqualTo(sally);
 	}
 
 	@Test
 	public void withMultipleConstructorsArgs() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("multiConstructorArgs.properties", getClass()));
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
-		assertEquals("Rob Harrop", bean.getName());
-		assertEquals(23, bean.getAge());
+		assertThat(bean.getName()).isEqualTo("Rob Harrop");
+		assertThat(bean.getAge()).isEqualTo(23);
 	}
 
 }

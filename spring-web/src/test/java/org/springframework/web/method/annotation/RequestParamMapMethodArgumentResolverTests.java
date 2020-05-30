@@ -18,28 +18,27 @@ package org.springframework.web.method.annotation;
 
 import java.util.Collections;
 import java.util.Map;
+
 import javax.servlet.http.Part;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockMultipartFile;
-import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
-import org.springframework.mock.web.test.MockPart;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
+import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestParam;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestParam;
 
 /**
  * Test fixture with {@link RequestParamMapMethodArgumentResolver}.
@@ -62,16 +61,16 @@ public class RequestParamMapMethodArgumentResolverTests {
 	@Test
 	public void supportsParameter() {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, String.class);
-		assertTrue(resolver.supportsParameter(param));
+		assertThat(resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class, String.class, String.class);
-		assertTrue(resolver.supportsParameter(param));
+		assertThat(resolver.supportsParameter(param)).isTrue();
 
 		param = this.testMethod.annot(requestParam().name("name")).arg(Map.class, String.class, String.class);
-		assertFalse(resolver.supportsParameter(param));
+		assertThat(resolver.supportsParameter(param)).isFalse();
 
 		param = this.testMethod.annotNotPresent(RequestParam.class).arg(Map.class, String.class, String.class);
-		assertFalse(resolver.supportsParameter(param));
+		assertThat(resolver.supportsParameter(param)).isFalse();
 	}
 
 	@Test
@@ -84,8 +83,9 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof Map);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof Map;
+		assertThat(condition).isTrue();
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
@@ -102,8 +102,9 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultiValueMap.class, String.class, String.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof MultiValueMap);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof MultiValueMap;
+		assertThat(condition).isTrue();
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
@@ -119,11 +120,12 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof Map);
+		boolean condition = result instanceof Map;
+		assertThat(condition).isTrue();
 		Map<String, MultipartFile> resultMap = (Map<String, MultipartFile>) result;
-		assertEquals(2, resultMap.size());
-		assertEquals(expected1, resultMap.get("mfile"));
-		assertEquals(expected2, resultMap.get("other"));
+		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
+		assertThat(resultMap.get("other")).isEqualTo(expected2);
 	}
 
 	@Test
@@ -141,14 +143,15 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(MultiValueMap.class, String.class, MultipartFile.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof MultiValueMap);
+		boolean condition = result instanceof MultiValueMap;
+		assertThat(condition).isTrue();
 		MultiValueMap<String, MultipartFile> resultMap = (MultiValueMap<String, MultipartFile>) result;
-		assertEquals(2, resultMap.size());
-		assertEquals(2, resultMap.get("mfilelist").size());
-		assertEquals(expected1, resultMap.get("mfilelist").get(0));
-		assertEquals(expected2, resultMap.get("mfilelist").get(1));
-		assertEquals(1, resultMap.get("other").size());
-		assertEquals(expected3, resultMap.get("other").get(0));
+		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap.get("mfilelist").size()).isEqualTo(2);
+		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
+		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
+		assertThat(resultMap.get("other").size()).isEqualTo(1);
+		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
 	}
 
 	@Test
@@ -165,11 +168,12 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(Map.class, String.class, Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof Map);
+		boolean condition = result instanceof Map;
+		assertThat(condition).isTrue();
 		Map<String, Part> resultMap = (Map<String, Part>) result;
-		assertEquals(2, resultMap.size());
-		assertEquals(expected1, resultMap.get("mfile"));
-		assertEquals(expected2, resultMap.get("other"));
+		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap.get("mfile")).isEqualTo(expected1);
+		assertThat(resultMap.get("other")).isEqualTo(expected2);
 	}
 
 	@Test
@@ -188,14 +192,15 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().noName()).arg(MultiValueMap.class, String.class, Part.class);
 		Object result = resolver.resolveArgument(param, null, webRequest, null);
 
-		assertTrue(result instanceof MultiValueMap);
+		boolean condition = result instanceof MultiValueMap;
+		assertThat(condition).isTrue();
 		MultiValueMap<String, Part> resultMap = (MultiValueMap<String, Part>) result;
-		assertEquals(2, resultMap.size());
-		assertEquals(2, resultMap.get("mfilelist").size());
-		assertEquals(expected1, resultMap.get("mfilelist").get(0));
-		assertEquals(expected2, resultMap.get("mfilelist").get(1));
-		assertEquals(1, resultMap.get("other").size());
-		assertEquals(expected3, resultMap.get("other").get(0));
+		assertThat(resultMap.size()).isEqualTo(2);
+		assertThat(resultMap.get("mfilelist").size()).isEqualTo(2);
+		assertThat(resultMap.get("mfilelist").get(0)).isEqualTo(expected1);
+		assertThat(resultMap.get("mfilelist").get(1)).isEqualTo(expected2);
+		assertThat(resultMap.get("other").size()).isEqualTo(1);
+		assertThat(resultMap.get("other").get(0)).isEqualTo(expected3);
 	}
 
 

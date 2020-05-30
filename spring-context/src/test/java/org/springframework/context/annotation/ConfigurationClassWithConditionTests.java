@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -31,11 +31,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.stereotype.Component;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link Conditional} beans.
@@ -51,9 +47,9 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanTwoConfiguration.class);
 		ctx.refresh();
-		assertTrue(ctx.containsBean("bean1"));
-		assertFalse(ctx.containsBean("bean2"));
-		assertFalse(ctx.containsBean("configurationClassWithConditionTests.BeanTwoConfiguration"));
+		assertThat(ctx.containsBean("bean1")).isTrue();
+		assertThat(ctx.containsBean("bean2")).isFalse();
+		assertThat(ctx.containsBean("configurationClassWithConditionTests.BeanTwoConfiguration")).isFalse();
 	}
 
 	@Test
@@ -61,9 +57,9 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanTwoConfiguration.class);
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
-		assertTrue(ctx.containsBean("bean2"));
-		assertTrue(ctx.containsBean("configurationClassWithConditionTests.BeanTwoConfiguration"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
+		assertThat(ctx.containsBean("bean2")).isTrue();
+		assertThat(ctx.containsBean("configurationClassWithConditionTests.BeanTwoConfiguration")).isTrue();
 	}
 
 	@Test
@@ -71,8 +67,8 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanOneConfiguration.class, BeanThreeConfiguration.class);
 		ctx.refresh();
-		assertTrue(ctx.containsBean("bean1"));
-		assertTrue(ctx.containsBean("bean3"));
+		assertThat(ctx.containsBean("bean1")).isTrue();
+		assertThat(ctx.containsBean("bean3")).isTrue();
 	}
 
 	@Test
@@ -80,8 +76,8 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(BeanThreeConfiguration.class);
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
-		assertFalse(ctx.containsBean("bean3"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
+		assertThat(ctx.containsBean("bean3")).isFalse();
 	}
 
 	@Test
@@ -89,7 +85,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigurationWithMetaCondition.class);
 		ctx.refresh();
-		assertTrue(ctx.containsBean("bean"));
+		assertThat(ctx.containsBean("bean")).isTrue();
 	}
 
 	@Test
@@ -97,7 +93,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.registerBeanDefinition("config", new RootBeanDefinition(ConfigurationWithMetaCondition.class.getName()));
 		ctx.refresh();
-		assertTrue(ctx.containsBean("bean"));
+		assertThat(ctx.containsBean("bean")).isTrue();
 	}
 
 	@Test
@@ -105,7 +101,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(NonConfigurationClass.class);
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
 	}
 
 	@Test
@@ -113,7 +109,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.registerBeanDefinition("config", new RootBeanDefinition(NonConfigurationClass.class.getName()));
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
 	}
 
 	@Test
@@ -121,7 +117,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConditionOnMethodConfiguration.class);
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
 	}
 
 	@Test
@@ -129,7 +125,7 @@ public class ConfigurationClassWithConditionTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.registerBeanDefinition("config", new RootBeanDefinition(ConditionOnMethodConfiguration.class.getName()));
 		ctx.refresh();
-		assertFalse(ctx.containsBean("bean1"));
+		assertThat(ctx.containsBean("bean1")).isFalse();
 	}
 
 	@Test
@@ -142,23 +138,23 @@ public class ConfigurationClassWithConditionTests {
 	@Test
 	public void conditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
-		assertEquals(0, context.getBeansOfType(ExampleBean.class).size());
+		assertThat(context.getBeansOfType(ExampleBean.class).size()).isEqualTo(0);
 	}
 
 	@Test
 	public void noConditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanReactivated.class);
 		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
-		assertEquals(1, beans.size());
-		assertEquals("baz", beans.keySet().iterator().next());
+		assertThat(beans.size()).isEqualTo(1);
+		assertThat(beans.keySet().iterator().next()).isEqualTo("baz");
 	}
 
 	@Test
 	public void configWithAlternativeBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAlternativeBeans.class);
 		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
-		assertEquals(1, beans.size());
-		assertEquals("baz", beans.keySet().iterator().next());
+		assertThat(beans.size()).isEqualTo(1);
+		assertThat(beans.keySet().iterator().next()).isEqualTo("baz");
 	}
 
 
@@ -248,7 +244,7 @@ public class ConfigurationClassWithConditionTests {
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(MetaConditional.class.getName()));
-			assertThat(attributes.getString("value"), equalTo("test"));
+			assertThat(attributes.getString("value")).isEqualTo("test");
 			return true;
 		}
 	}

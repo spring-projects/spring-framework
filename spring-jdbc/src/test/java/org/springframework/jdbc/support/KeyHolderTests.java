@@ -19,7 +19,7 @@ package org.springframework.jdbc.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -28,8 +28,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link KeyHolder} and {@link GeneratedKeyHolder}.
@@ -48,7 +48,7 @@ public class KeyHolderTests {
 	public void singleKey() {
 		kh.getKeyList().addAll(singletonList(singletonMap("key", 1)));
 
-		assertEquals("single key should be returned", 1, kh.getKey().intValue());
+		assertThat(kh.getKey().intValue()).as("single key should be returned").isEqualTo(1);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class KeyHolderTests {
 		}};
 		kh.getKeyList().addAll(singletonList(m));
 
-		assertEquals("two keys should be in the map", 2, kh.getKeys().size());
+		assertThat(kh.getKeys().size()).as("two keys should be in the map").isEqualTo(2);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				kh.getKey())
 			.withMessageStartingWith("The getKey method should only be used when a single key is returned.");
@@ -91,7 +91,7 @@ public class KeyHolderTests {
 		}};
 		kh.getKeyList().addAll(asList(m, m));
 
-		assertEquals("two rows should be in the list", 2, kh.getKeyList().size());
+		assertThat(kh.getKeyList().size()).as("two rows should be in the list").isEqualTo(2);
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
 				kh.getKeys())
 			.withMessageStartingWith("The getKeys method should only be used when keys for a single row are returned.");

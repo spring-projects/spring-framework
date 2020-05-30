@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MockClientHttpRequest extends AbstractClientHttpRequest {
 
-	private HttpMethod httpMethod;
+	private final HttpMethod httpMethod;
 
-	private URI url;
+	private final URI url;
 
 	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
@@ -149,20 +149,13 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 		Charset charset = Optional.ofNullable(getHeaders().getContentType()).map(MimeType::getCharset)
 				.orElse(StandardCharsets.UTF_8);
 
-		return getBody()
-				.reduce(bufferFactory().allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
+		return DataBufferUtils.join(getBody())
+				.map(buffer -> {
+					String s = buffer.toString(charset);
+					DataBufferUtils.release(buffer);
+					return s;
 				})
-				.map(buffer -> bufferToString(buffer, charset));
-	}
-
-	private static String bufferToString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return new String(bytes, charset);
+				.defaultIfEmpty("");
 	}
 
 }

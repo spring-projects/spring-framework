@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeTypeUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * Test fixture for {@link org.springframework.messaging.converter.DefaultContentTypeResolver}.
@@ -42,7 +41,7 @@ public class DefaultContentTypeResolverTests {
 	private DefaultContentTypeResolver resolver;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.resolver = new DefaultContentTypeResolver();
 	}
@@ -53,7 +52,7 @@ public class DefaultContentTypeResolverTests {
 		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
 		MessageHeaders headers = new MessageHeaders(map);
 
-		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 	@Test
@@ -62,7 +61,7 @@ public class DefaultContentTypeResolverTests {
 		map.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
 		MessageHeaders headers = new MessageHeaders(map);
 
-		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 	@Test
@@ -77,7 +76,7 @@ public class DefaultContentTypeResolverTests {
 	@Test
 	public void resolveUnknownHeaderType() {
 		Map<String, Object> map = new HashMap<>();
-		map.put(MessageHeaders.CONTENT_TYPE, new Integer(1));
+		map.put(MessageHeaders.CONTENT_TYPE, 1);
 		MessageHeaders headers = new MessageHeaders(map);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.resolver.resolve(headers));
@@ -87,7 +86,7 @@ public class DefaultContentTypeResolverTests {
 	public void resolveNoContentTypeHeader() {
 		MessageHeaders headers = new MessageHeaders(Collections.<String, Object>emptyMap());
 
-		assertNull(this.resolver.resolve(headers));
+		assertThat(this.resolver.resolve(headers)).isNull();
 	}
 
 	@Test
@@ -95,7 +94,7 @@ public class DefaultContentTypeResolverTests {
 		this.resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
 		MessageHeaders headers = new MessageHeaders(Collections.<String, Object>emptyMap());
 
-		assertEquals(MimeTypeUtils.APPLICATION_JSON, this.resolver.resolve(headers));
+		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
 }

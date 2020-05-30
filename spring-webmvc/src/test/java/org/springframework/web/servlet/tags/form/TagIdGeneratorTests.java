@@ -17,13 +17,14 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.util.stream.IntStream;
+
 import javax.servlet.jsp.PageContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -40,11 +41,11 @@ public class TagIdGeneratorTests {
 
 	private void assertNextId() {
 		PageContext pageContext = new MockPageContext();
-		assertEquals("foo1", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo2", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo3", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("foo4", TagIdGenerator.nextId("foo", pageContext));
-		assertEquals("bar1", TagIdGenerator.nextId("bar", pageContext));
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo1");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo2");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo3");
+		assertThat(TagIdGenerator.nextId("foo", pageContext)).isEqualTo("foo4");
+		assertThat(TagIdGenerator.nextId("bar", pageContext)).isEqualTo("bar1");
 	}
 
 }

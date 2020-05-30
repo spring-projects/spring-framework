@@ -19,13 +19,13 @@ package org.springframework.beans.factory.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -66,7 +66,8 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
+		boolean condition = factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope;
+		assertThat(condition).isTrue();
 	}
 
 	@Test
@@ -76,7 +77,8 @@ public class CustomScopeConfigurerTests {
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
+		boolean condition = factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope;
+		assertThat(condition).isTrue();
 	}
 
 	@Test

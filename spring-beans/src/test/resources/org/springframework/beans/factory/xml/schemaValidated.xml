@@ -3,16 +3,16 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-	<bean xml:lang="en" id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean xml:lang="en" id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
-	<bean id="fooBean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="fooBean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="spouse">
-			<bean class="org.springframework.tests.sample.beans.TestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 		</property>
 		<property name="friends">
 			<list>
-				<bean class="org.springframework.tests.sample.beans.TestBean"/>
-				<bean class="org.springframework.tests.sample.beans.TestBean"/>
+				<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
+				<bean class="org.springframework.beans.testfixture.beans.TestBean"/>
 			</list>
 		</property>
 	</bean>

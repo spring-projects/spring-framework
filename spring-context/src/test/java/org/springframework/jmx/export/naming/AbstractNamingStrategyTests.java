@@ -18,9 +18,9 @@ package org.springframework.jmx.export.naming;
 
 import javax.management.ObjectName;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -31,7 +31,7 @@ public abstract class AbstractNamingStrategyTests {
 	public void naming() throws Exception {
 		ObjectNamingStrategy strat = getStrategy();
 		ObjectName objectName = strat.getObjectName(getManagedResource(), getKey());
-		assertEquals(objectName.getCanonicalName(), getCorrectObjectName());
+		assertThat(getCorrectObjectName()).isEqualTo(objectName.getCanonicalName());
 	}
 
 	protected abstract ObjectNamingStrategy getStrategy() throws Exception;

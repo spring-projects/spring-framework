@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class demonstrates how to have a JUnit Jupiter extension managed as a
@@ -56,7 +56,7 @@ class SpringManagedJupiterExtensionTests {
 
 	@TestTemplate
 	void testTemplate(String parameter) {
-		assertTrue("foo".equals(parameter) || "bar".equals(parameter));
+		assertThat("foo".equals(parameter) || "bar".equals(parameter)).isTrue();
 	}
 
 

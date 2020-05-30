@@ -16,15 +16,15 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.DebugInterceptor;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests lookup methods wrapped by a CGLIB proxy (see SPR-391).
@@ -42,7 +42,7 @@ public class LookupMethodWrappedByCglibProxyTests {
 
 	private ApplicationContext applicationContext;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.applicationContext = new ClassPathXmlApplicationContext(CONTEXT, CLASS);
 		resetInterceptor();
@@ -52,8 +52,8 @@ public class LookupMethodWrappedByCglibProxyTests {
 	public void testAutoProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("autoProxiedOverload");
 		ITestBean jenny = olup.newTestBean();
-		assertEquals("Jenny", jenny.getName());
-		assertEquals("foo", olup.testMethod());
+		assertThat(jenny.getName()).isEqualTo("Jenny");
+		assertThat(olup.testMethod()).isEqualTo("foo");
 		assertInterceptorCount(2);
 	}
 
@@ -61,14 +61,14 @@ public class LookupMethodWrappedByCglibProxyTests {
 	public void testRegularlyProxiedLookup() {
 		OverloadLookup olup = (OverloadLookup) applicationContext.getBean("regularlyProxiedOverload");
 		ITestBean jenny = olup.newTestBean();
-		assertEquals("Jenny", jenny.getName());
-		assertEquals("foo", olup.testMethod());
+		assertThat(jenny.getName()).isEqualTo("Jenny");
+		assertThat(olup.testMethod()).isEqualTo("foo");
 		assertInterceptorCount(2);
 	}
 
 	private void assertInterceptorCount(int count) {
 		DebugInterceptor interceptor = getInterceptor();
-		assertEquals("Interceptor count is incorrect", count, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Interceptor count is incorrect").isEqualTo(count);
 	}
 
 	private void resetInterceptor() {

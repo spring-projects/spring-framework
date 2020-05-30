@@ -16,19 +16,18 @@
 
 package org.springframework.context.annotation.configuration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * A configuration class that registers a non-static placeholder configurer {@code @Bean}
@@ -71,7 +70,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 
 		TestBean testBean = ctx.getBean(TestBean.class);
 		// Proof that the @Value field did not get set:
-		assertThat(testBean.getName(), nullValue());
+		assertThat(testBean.getName()).isNull();
 	}
 
 	@Test
@@ -84,7 +83,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 		System.clearProperty("test.name");
 
 		TestBean testBean = ctx.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("foo"));
+		assertThat(testBean.getName()).isEqualTo("foo");
 	}
 
 	@Test
@@ -98,7 +97,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 		System.clearProperty("test.name");
 
 		TestBean testBean = ctx.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("foo"));
+		assertThat(testBean.getName()).isEqualTo("foo");
 	}
 
 	@Test
@@ -110,7 +109,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 		ctx.refresh();
 
 		TestBean testBean = ctx.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("bar"));
+		assertThat(testBean.getName()).isEqualTo("bar");
 	}
 
 	@Test
@@ -122,7 +121,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 		ctx.refresh();
 
 		TestBean testBean = ctx.getBean(TestBean.class);
-		assertThat(testBean.getName(), equalTo("bar"));
+		assertThat(testBean.getName()).isEqualTo("bar");
 	}
 
 

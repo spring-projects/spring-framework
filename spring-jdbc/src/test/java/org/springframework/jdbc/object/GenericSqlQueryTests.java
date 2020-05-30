@@ -24,10 +24,11 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -35,7 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -58,7 +59,7 @@ public class GenericSqlQueryTests {
 	private ResultSet resultSet;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -109,10 +110,10 @@ public class GenericSqlQueryTests {
 			Object[] params = new Object[] {1, "UK"};
 			queryResults = query.execute(params);
 		}
-		assertTrue("Customer was returned correctly", queryResults.size() == 1);
+		assertThat(queryResults.size() == 1).as("Customer was returned correctly").isTrue();
 		Customer cust = (Customer) queryResults.get(0);
-		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
-		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
+		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
+		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 
 		verify(resultSet).close();
 		verify(preparedStatement).setObject(1, 1, Types.INTEGER);

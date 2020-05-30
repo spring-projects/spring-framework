@@ -18,11 +18,11 @@ package org.springframework.context.support;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
@@ -34,9 +34,9 @@ public class Spr7816Tests {
 	public void spr7816() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("spr7816.xml", getClass());
 		FilterAdapter adapter = ctx.getBean(FilterAdapter.class);
-		assertEquals(Building.class, adapter.getSupportedTypes().get("Building"));
-		assertEquals(Entrance.class, adapter.getSupportedTypes().get("Entrance"));
-		assertEquals(Dwelling.class, adapter.getSupportedTypes().get("Dwelling"));
+		assertThat(adapter.getSupportedTypes().get("Building")).isEqualTo(Building.class);
+		assertThat(adapter.getSupportedTypes().get("Entrance")).isEqualTo(Entrance.class);
+		assertThat(adapter.getSupportedTypes().get("Dwelling")).isEqualTo(Dwelling.class);
 	}
 
 	public static class FilterAdapter {

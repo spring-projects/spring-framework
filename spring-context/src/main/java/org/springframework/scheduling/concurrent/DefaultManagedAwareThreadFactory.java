@@ -18,6 +18,7 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.Properties;
 import java.util.concurrent.ThreadFactory;
+
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;

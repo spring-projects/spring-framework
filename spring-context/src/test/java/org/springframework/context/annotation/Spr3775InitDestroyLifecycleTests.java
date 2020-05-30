@@ -19,12 +19,13 @@ package org.springframework.context.annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,7 +33,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * <p>
@@ -72,8 +73,7 @@ public class Spr3775InitDestroyLifecycleTests {
 	private void assertMethodOrdering(Class<?> clazz, String category, List<String> expectedMethods,
 			List<String> actualMethods) {
 		debugMethods(clazz, category, actualMethods);
-		assertTrue("Verifying " + category + ": expected<" + expectedMethods + "> but got<" + actualMethods + ">.",
-				ObjectUtils.nullSafeEquals(expectedMethods, actualMethods));
+		assertThat(ObjectUtils.nullSafeEquals(expectedMethods, actualMethods)).as("Verifying " + category + ": expected<" + expectedMethods + "> but got<" + actualMethods + ">.").isTrue();
 	}
 
 	private DefaultListableBeanFactory createBeanFactoryAndRegisterBean(final Class<?> beanClass,

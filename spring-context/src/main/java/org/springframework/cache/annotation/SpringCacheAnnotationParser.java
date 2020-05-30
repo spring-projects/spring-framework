@@ -222,7 +222,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || other instanceof SpringCacheAnnotationParser);
 	}
 

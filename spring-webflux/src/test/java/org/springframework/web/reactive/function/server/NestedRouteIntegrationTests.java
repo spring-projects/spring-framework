@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,10 +26,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.all;
 import static org.springframework.web.reactive.function.server.RequestPredicates.method;
@@ -41,7 +40,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 /**
  * @author Arjen Poutsma
  */
-public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -61,63 +60,75 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 	}
 
 
-	@Test
-	public void bar() {
+	@ParameterizedHttpServerTest
+	void bar(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/bar", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/foo/bar", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/foo/bar");
 	}
 
-	@Test
-	public void baz() {
+	@ParameterizedHttpServerTest
+	void baz(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/foo/baz", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/foo/baz", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/foo/baz");
 	}
 
-	@Test
-	public void variables() {
+	@ParameterizedHttpServerTest
+	void variables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/2/3", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{foo}/{bar}/{baz}\n{foo=1, bar=2, baz=3}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{foo}/{bar}/{baz}\n{foo=1, bar=2, baz=3}");
 	}
 
 	// SPR-16868
-	@Test
-	public void parentVariables() {
+	@ParameterizedHttpServerTest
+	void parentVariables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/1/bar", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{foo}/bar\n{foo=1}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{foo}/bar\n{foo=1}");
 
 	}
 
 	// SPR 16692
-	@Test
-	public void removeFailedNestedPathVariables() {
+	@ParameterizedHttpServerTest
+	void removeFailedNestedPathVariables(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/qux/quux", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("/{qux}/quux\n{qux=qux}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("/{qux}/quux\n{qux=qux}");
 
 	}
 
 	// SPR 17210
-	@Test
-	public void removeFailedPathVariablesAnd() {
+	@ParameterizedHttpServerTest
+	void removeFailedPathVariablesAnd(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.postForEntity("http://localhost:" + port + "/qux/quux", "", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("{}", result.getBody());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody()).isEqualTo("{}");
 
 	}
 
@@ -126,7 +137,7 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 
 		public Mono<ServerResponse> pattern(ServerRequest request) {
 			String pattern = matchingPattern(request).getPatternString();
-			return ServerResponse.ok().syncBody(pattern);
+			return ServerResponse.ok().bodyValue(pattern);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -134,8 +145,8 @@ public class NestedRouteIntegrationTests extends AbstractRouterFunctionIntegrati
 			Map<String, String> pathVariables = request.pathVariables();
 			Map<String, String> attributePathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-			assertTrue( (pathVariables.equals(attributePathVariables))
-					|| (pathVariables.isEmpty() && (attributePathVariables == null)));
+			assertThat((pathVariables.equals(attributePathVariables))
+						|| (pathVariables.isEmpty() && (attributePathVariables == null))).isTrue();
 
 			PathPattern pathPattern = matchingPattern(request);
 			String pattern = pathPattern != null ? pathPattern.getPatternString() : "";

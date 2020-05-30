@@ -18,8 +18,8 @@ package org.springframework.test.web.client.samples;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -34,9 +34,8 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.never;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -58,7 +57,7 @@ public class SampleTests {
 
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.restTemplate = new RestTemplate();
 		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
@@ -178,7 +177,7 @@ public class SampleTests {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
+			assertThat(error.getMessage().contains("2 unsatisfied expectation(s)")).as(error.getMessage()).isTrue();
 		}
 	}
 
@@ -220,7 +219,7 @@ public class SampleTests {
 			ClientHttpResponse response = execution.execute(request, body);
 			byte[] expected = FileCopyUtils.copyToByteArray(this.resource.getInputStream());
 			byte[] actual = FileCopyUtils.copyToByteArray(response.getBody());
-			assertEquals(new String(expected), new String(actual));
+			assertThat(new String(actual)).isEqualTo(new String(expected));
 			return response;
 		}
 	}

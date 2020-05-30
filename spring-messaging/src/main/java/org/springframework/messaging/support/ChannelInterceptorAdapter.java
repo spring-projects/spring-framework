@@ -47,6 +47,7 @@ public abstract class ChannelInterceptorAdapter implements ChannelInterceptor {
 	public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
 	}
 
+	@Override
 	public boolean preReceive(MessageChannel channel) {
 		return true;
 	}

@@ -294,7 +294,7 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || this.bindingResult.equals(other));
 	}
 

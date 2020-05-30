@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,29 +54,41 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
-	 * @param resourceFactory the {@link JettyResourceFactory} to use
-	 * @param customizer the lambda used to customize the {@link HttpClient}
+	 * Constructor with an initialized {@link HttpClient}.
 	 */
-	public JettyClientHttpConnector(
-			JettyResourceFactory resourceFactory, @Nullable Consumer<HttpClient> customizer) {
+	public JettyClientHttpConnector(HttpClient httpClient) {
+		this(httpClient, null);
+	}
 
-		HttpClient httpClient = new HttpClient();
-		httpClient.setExecutor(resourceFactory.getExecutor());
-		httpClient.setByteBufferPool(resourceFactory.getByteBufferPool());
-		httpClient.setScheduler(resourceFactory.getScheduler());
-		if (customizer != null) {
-			customizer.accept(httpClient);
+	/**
+	 * Constructor with an initialized {@link HttpClient} and configures it
+	 * with the given {@link JettyResourceFactory}.
+	 * @param httpClient the {@link HttpClient} to use
+	 * @param resourceFactory the {@link JettyResourceFactory} to use
+	 * @since 5.2
+	 */
+	public JettyClientHttpConnector(HttpClient httpClient, @Nullable JettyResourceFactory resourceFactory) {
+		Assert.notNull(httpClient, "HttpClient is required");
+		if (resourceFactory != null) {
+			httpClient.setExecutor(resourceFactory.getExecutor());
+			httpClient.setByteBufferPool(resourceFactory.getByteBufferPool());
+			httpClient.setScheduler(resourceFactory.getScheduler());
 		}
 		this.httpClient = httpClient;
 	}
 
 	/**
-	 * Constructor with an initialized {@link HttpClient}.
+	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
+	 * @param resourceFactory the {@link JettyResourceFactory} to use
+	 * @param customizer the lambda used to customize the {@link HttpClient}
+	 * @deprecated as of 5.2, in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
 	 */
-	public JettyClientHttpConnector(HttpClient httpClient) {
-		Assert.notNull(httpClient, "HttpClient is required");
-		this.httpClient = httpClient;
+	@Deprecated
+	public JettyClientHttpConnector(JettyResourceFactory resourceFactory, @Nullable Consumer<HttpClient> customizer) {
+		this(new HttpClient(), resourceFactory);
+		if (customizer != null) {
+			customizer.accept(this.httpClient);
+		}
 	}
 
 

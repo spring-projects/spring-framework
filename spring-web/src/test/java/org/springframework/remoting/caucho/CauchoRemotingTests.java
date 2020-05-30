@@ -21,18 +21,17 @@ import java.net.InetSocketAddress;
 
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.sun.net.httpserver.HttpServer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.remoting.RemoteAccessException;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SocketUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
@@ -55,8 +54,9 @@ public class CauchoRemotingTests {
 		factory.setServiceUrl("http://localhosta/testbean");
 		factory.afterPropertiesSet();
 
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
+		assertThat(factory.isSingleton()).as("Correct singleton value").isTrue();
+		boolean condition = factory.getObject() instanceof ITestBean;
+		assertThat(condition).isTrue();
 		ITestBean bean = (ITestBean) factory.getObject();
 
 		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(() ->
@@ -73,8 +73,9 @@ public class CauchoRemotingTests {
 		factory.setOverloadEnabled(true);
 		factory.afterPropertiesSet();
 
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
+		assertThat(factory.isSingleton()).as("Correct singleton value").isTrue();
+		boolean condition = factory.getObject() instanceof ITestBean;
+		assertThat(condition).isTrue();
 		ITestBean bean = (ITestBean) factory.getObject();
 
 		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(() ->
@@ -92,13 +93,14 @@ public class CauchoRemotingTests {
 		factory.setPassword("bean");
 		factory.setOverloadEnabled(true);
 		factory.afterPropertiesSet();
-		assertTrue("Correct singleton value", factory.isSingleton());
-		assertTrue(factory.getObject() instanceof ITestBean);
+		assertThat(factory.isSingleton()).as("Correct singleton value").isTrue();
+		boolean condition = factory.getObject() instanceof ITestBean;
+		assertThat(condition).isTrue();
 		ITestBean bean = (ITestBean) factory.getObject();
 
-		assertEquals("test", proxyFactory.user);
-		assertEquals("bean", proxyFactory.password);
-		assertTrue(proxyFactory.overloadEnabled);
+		assertThat(proxyFactory.user).isEqualTo("test");
+		assertThat(proxyFactory.password).isEqualTo("bean");
+		assertThat(proxyFactory.overloadEnabled).isTrue();
 
 		assertThatExceptionOfType(RemoteAccessException.class).isThrownBy(() ->
 				bean.setName("test"));
@@ -126,9 +128,9 @@ public class CauchoRemotingTests {
 			//client.setHessian2(true);
 			client.prepare();
 			ITestBean proxy = ProxyFactory.getProxy(ITestBean.class, client);
-			assertEquals("tb", proxy.getName());
+			assertThat(proxy.getName()).isEqualTo("tb");
 			proxy.setName("test");
-			assertEquals("test", proxy.getName());
+			assertThat(proxy.getName()).isEqualTo("test");
 		}
 		finally {
 			server.stop(Integer.MAX_VALUE);

@@ -19,14 +19,13 @@ package org.springframework.test.web.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -63,10 +62,10 @@ public class DefaultRequestExpectationTests {
 		expectation.andRespond(withSuccess());
 
 		expectation.incrementAndValidate();
-		assertTrue(expectation.hasRemainingCount());
+		assertThat(expectation.hasRemainingCount()).isTrue();
 
 		expectation.incrementAndValidate();
-		assertFalse(expectation.hasRemainingCount());
+		assertThat(expectation.hasRemainingCount()).isFalse();
 	}
 
 	@Test
@@ -75,10 +74,10 @@ public class DefaultRequestExpectationTests {
 		expectation.andRespond(withSuccess());
 
 		expectation.incrementAndValidate();
-		assertFalse(expectation.isSatisfied());
+		assertThat(expectation.isSatisfied()).isFalse();
 
 		expectation.incrementAndValidate();
-		assertTrue(expectation.isSatisfied());
+		assertThat(expectation.isSatisfied()).isTrue();
 	}
 
 

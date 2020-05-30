@@ -19,32 +19,32 @@ package org.springframework.core.serializer;
 import java.io.NotSerializableException;
 import java.io.Serializable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.serializer.support.DeserializingConverter;
 import org.springframework.core.serializer.support.SerializationFailedException;
 import org.springframework.core.serializer.support.SerializingConverter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
  */
-public class SerializationConverterTests {
+class SerializationConverterTests {
 
 	@Test
-	public void serializeAndDeserializeString() {
+	void serializeAndDeserializeString() {
 		SerializingConverter toBytes = new SerializingConverter();
 		byte[] bytes = toBytes.convert("Testing");
 		DeserializingConverter fromBytes = new DeserializingConverter();
-		assertEquals("Testing", fromBytes.convert(bytes));
+		assertThat(fromBytes.convert(bytes)).isEqualTo("Testing");
 	}
 
 	@Test
-	public void nonSerializableObject() {
+	void nonSerializableObject() {
 		SerializingConverter toBytes = new SerializingConverter();
 		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
 				toBytes.convert(new Object()))
@@ -52,7 +52,7 @@ public class SerializationConverterTests {
 	}
 
 	@Test
-	public void nonSerializableField() {
+	void nonSerializableField() {
 		SerializingConverter toBytes = new SerializingConverter();
 		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
 				toBytes.convert(new UnSerializable()))
@@ -60,7 +60,7 @@ public class SerializationConverterTests {
 	}
 
 	@Test
-	public void deserializationFailure() {
+	void deserializationFailure() {
 		DeserializingConverter fromBytes = new DeserializingConverter();
 		assertThatExceptionOfType(SerializationFailedException.class).isThrownBy(() ->
 				fromBytes.convert("Junk".getBytes()));

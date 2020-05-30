@@ -18,6 +18,7 @@ package org.springframework.cache.jcache.interceptor;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemove;
@@ -25,8 +26,8 @@ import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CacheValue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -39,7 +40,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -59,7 +60,7 @@ public class JCacheErrorHandlerTests {
 	private SimpleService simpleService;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		this.cache = context.getBean("mockCache", Cache.class);
@@ -102,7 +103,7 @@ public class JCacheErrorHandlerTests {
 			this.simpleService.getFail(0L);
 		}
 		catch (IllegalStateException ex) {
-			assertEquals("Test exception", ex.getMessage());
+			assertThat(ex.getMessage()).isEqualTo("Test exception");
 		}
 		verify(this.errorHandler).handleCachePutError(
 				exceptionOnPut, this.errorCache, key, SimpleService.TEST_EXCEPTION);

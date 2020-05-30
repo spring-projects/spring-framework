@@ -19,14 +19,15 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.util.Random;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -44,15 +45,17 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 	}
 
 
-	@Test
-	public void echo() throws Exception {
+	@ParameterizedHttpServerTest
+	public void echo(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
 		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertArrayEquals(body, response.getBody());
+		assertThat(response.getBody()).isEqualTo(body);
 	}
 
 
@@ -72,4 +75,5 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 			return response.writeWith(request.getBody());
 		}
 	}
+
 }

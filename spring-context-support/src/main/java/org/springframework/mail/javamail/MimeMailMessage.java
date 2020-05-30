@@ -17,6 +17,7 @@
 package org.springframework.mail.javamail;
 
 import java.util.Date;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 

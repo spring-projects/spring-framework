@@ -23,23 +23,20 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -57,7 +54,7 @@ public class ScriptTemplateViewTests {
 	private StaticApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.configurer = new ScriptTemplateConfigurer();
 		this.context = new StaticApplicationContext();
@@ -74,7 +71,7 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.configurer.setRenderFunction("render");
 		this.view.setApplicationContext(this.context);
-		assertFalse(this.view.checkResourceExists(Locale.ENGLISH));
+		assertThat(this.view.checkResourceExists(Locale.ENGLISH)).isFalse();
 	}
 
 	@Test
@@ -95,11 +92,11 @@ public class ScriptTemplateViewTests {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
 		this.view.setApplicationContext(this.context);
-		assertEquals(engine, accessor.getPropertyValue("engine"));
-		assertEquals("Template", accessor.getPropertyValue("renderObject"));
-		assertEquals("render", accessor.getPropertyValue("renderFunction"));
-		assertEquals(StandardCharsets.ISO_8859_1, accessor.getPropertyValue("defaultCharset"));
-		assertEquals(true, accessor.getPropertyValue("sharedEngine"));
+		assertThat(accessor.getPropertyValue("engine")).isEqualTo(engine);
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("defaultCharset")).isEqualTo(StandardCharsets.ISO_8859_1);
+		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(true);
 	}
 
 	@Test
@@ -110,11 +107,11 @@ public class ScriptTemplateViewTests {
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
 		this.view.setApplicationContext(this.context);
-		assertEquals("nashorn", accessor.getPropertyValue("engineName"));
-		assertNotNull(accessor.getPropertyValue("engine"));
-		assertEquals("Template", accessor.getPropertyValue("renderObject"));
-		assertEquals("render", accessor.getPropertyValue("renderFunction"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("defaultCharset"));
+		assertThat(accessor.getPropertyValue("engineName")).isEqualTo("nashorn");
+		assertThat(accessor.getPropertyValue("engine")).isNotNull();
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("defaultCharset")).isEqualTo(StandardCharsets.UTF_8);
 	}
 
 	@Test
@@ -125,12 +122,12 @@ public class ScriptTemplateViewTests {
 		this.view.setRenderFunction("render");
 		this.view.setApplicationContext(this.context);
 		engine = this.view.getEngine();
-		assertNotNull(engine);
-		assertEquals("value", engine.get("key"));
+		assertThat(engine).isNotNull();
+		assertThat(engine.get("key")).isEqualTo("value");
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
-		assertNull(accessor.getPropertyValue("renderObject"));
-		assertEquals("render", accessor.getPropertyValue("renderFunction"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("defaultCharset"));
+		assertThat(accessor.getPropertyValue("renderObject")).isNull();
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("defaultCharset")).isEqualTo(StandardCharsets.UTF_8);
 	}
 
 	@Test
@@ -145,9 +142,9 @@ public class ScriptTemplateViewTests {
 		for (int i = 0; i < iterations; i++) {
 			results.add(executor.submit(() -> view.getEngine() != null));
 		}
-		assertEquals(iterations, results.size());
+		assertThat(results.size()).isEqualTo(iterations);
 		for (int i = 0; i < iterations; i++) {
-			assertTrue(results.get(i).get());
+			assertThat((boolean) results.get(i).get()).isTrue();
 		}
 		executor.shutdown();
 	}
@@ -173,7 +170,28 @@ public class ScriptTemplateViewTests {
 		this.view.setRenderFunction("render");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.view.setApplicationContext(this.context))
-			.withMessageContaining("'engine' or 'engineName'");
+			.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
+	}
+
+	@Test  // gh-23258
+	public void engineAndEngineSupplierBothDefined() {
+		ScriptEngine engine = mock(InvocableScriptEngine.class);
+		this.view.setEngineSupplier(() -> engine);
+		this.view.setEngine(engine);
+		this.view.setRenderFunction("render");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.context))
+				.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
+	}
+
+	@Test  // gh-23258
+	public void engineNameAndEngineSupplierBothDefined() {
+		this.view.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.view.setEngineName("test");
+		this.view.setRenderFunction("render");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.view.setApplicationContext(this.context))
+				.withMessageContaining("You should define either 'engine', 'engineSupplier' or 'engineName'.");
 	}
 
 	@Test
@@ -184,6 +202,43 @@ public class ScriptTemplateViewTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.view.setApplicationContext(this.context))
 			.withMessageContaining("sharedEngine");
+	}
+
+	@Test  // gh-23258
+	public void engineSupplierWithSharedEngine() {
+		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.configurer.setRenderObject("Template");
+		this.configurer.setRenderFunction("render");
+		this.configurer.setSharedEngine(true);
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
+		this.view.setApplicationContext(this.context);
+		ScriptEngine engine1 = this.view.getEngine();
+		ScriptEngine engine2 = this.view.getEngine();
+		assertThat(engine1).isNotNull();
+		assertThat(engine2).isNotNull();
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(true);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test  // gh-23258
+	public void engineSupplierWithNonSharedEngine() {
+		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));
+		this.configurer.setRenderObject("Template");
+		this.configurer.setRenderFunction("render");
+		this.configurer.setSharedEngine(false);
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
+		this.view.setApplicationContext(this.context);
+		ScriptEngine engine1 = this.view.getEngine();
+		ScriptEngine engine2 = this.view.getEngine();
+		assertThat(engine1).isNotNull();
+		assertThat(engine2).isNotNull();
+		assertThat(accessor.getPropertyValue("renderObject")).isEqualTo("Template");
+		assertThat(accessor.getPropertyValue("renderFunction")).isEqualTo("render");
+		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(false);
 	}
 
 	private interface InvocableScriptEngine extends ScriptEngine, Invocable {

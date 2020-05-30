@@ -16,28 +16,23 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rod Johnson
@@ -76,19 +71,17 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	public void testNewlineInRequest() throws Exception {
-		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setUrlDecode(false);
 		Object controller = new Object();
-		Map<String, Object> urlMap = new LinkedHashMap<>();
-		urlMap.put("/*/baz", controller);
-		handlerMapping.setUrlMap(urlMap);
+		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping(
+			Collections.singletonMap("/*/baz", controller));
+		handlerMapping.setUrlDecode(false);
 		handlerMapping.setApplicationContext(new StaticApplicationContext());
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo%0a%0dbar/baz");
 
 		HandlerExecutionChain hec = handlerMapping.getHandler(request);
-		assertNotNull(hec);
-		assertSame(controller, hec.getHandler());
+		assertThat(hec).isNotNull();
+		assertThat(hec.getHandler()).isSameAs(controller);
 	}
 
 	@SuppressWarnings("resource")
@@ -105,63 +98,63 @@ public class SimpleUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
 		HandlerExecutionChain hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		assertEquals("/welcome.html", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
-		assertEquals(bean, req.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertThat(req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("/welcome.html");
+		assertThat(req.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(bean);
 
 		req = new MockHttpServletRequest("GET", "/welcome.x");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
-		assertEquals("welcome.x", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
-		assertEquals(otherBean, req.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+		assertThat(hec != null && hec.getHandler() == otherBean).as("Handler is correct bean").isTrue();
+		assertThat(req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("welcome.x");
+		assertThat(req.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(otherBean);
 
 		req = new MockHttpServletRequest("GET", "/welcome/");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
-		assertEquals("welcome", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertThat(hec != null && hec.getHandler() == otherBean).as("Handler is correct bean").isTrue();
+		assertThat(req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("welcome");
 
 		req = new MockHttpServletRequest("GET", "/");
 		req.setServletPath("/welcome.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/welcome.html");
 		req.setContextPath("/app");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/show.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/bookseats.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/original-welcome.html");
 		req.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "/welcome.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/original-show.html");
 		req.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "/show.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/original-bookseats.html");
 		req.setAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE, "/bookseats.html");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
 
 		req = new MockHttpServletRequest("GET", "/");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		assertEquals("/", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertThat(hec != null && hec.getHandler() == bean).as("Handler is correct bean").isTrue();
+		assertThat(req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("/");
 
 		req = new MockHttpServletRequest("GET", "/somePath");
 		hec = getHandler(hm, req);
-		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == defaultBean);
-		assertEquals("/somePath", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+		assertThat(hec != null && hec.getHandler() == defaultBean).as("Handler is correct bean").isTrue();
+		assertThat(req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)).isEqualTo("/somePath");
 	}
 
 	private HandlerExecutionChain getHandler(HandlerMapping hm, MockHttpServletRequest req) throws Exception {

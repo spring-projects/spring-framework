@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,6 +231,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 				(this.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(mediaType)));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void writeInternal(Message message, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -253,7 +254,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		}
 		else if (TEXT_PLAIN.isCompatibleWith(contentType)) {
 			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			TextFormat.print(message, outputStreamWriter);
+			TextFormat.print(message, outputStreamWriter);  // deprecated on Protobuf 3.9
 			outputStreamWriter.flush();
 			outputMessage.getBody().flush();
 		}

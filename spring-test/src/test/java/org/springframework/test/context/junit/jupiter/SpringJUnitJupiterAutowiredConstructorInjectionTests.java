@@ -26,8 +26,7 @@ import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.comics.Dog;
 import org.springframework.test.context.junit.jupiter.comics.Person;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests which demonstrate support for {@link Autowired @Autowired}
@@ -62,23 +61,23 @@ class SpringJUnitJupiterAutowiredConstructorInjectionTests {
 
 	@Test
 	void applicationContextInjected() {
-		assertNotNull(applicationContext, "ApplicationContext should have been injected by Spring");
-		assertEquals(this.dilbert, applicationContext.getBean("dilbert", Person.class));
+		assertThat(applicationContext).as("ApplicationContext should have been injected by Spring").isNotNull();
+		assertThat(applicationContext.getBean("dilbert", Person.class)).isEqualTo(this.dilbert);
 	}
 
 	@Test
 	void beansInjected() {
-		assertNotNull(this.dilbert, "Dilbert should have been @Autowired by Spring");
-		assertEquals("Dilbert", this.dilbert.getName(), "Person's name");
+		assertThat(this.dilbert).as("Dilbert should have been @Autowired by Spring").isNotNull();
+		assertThat(this.dilbert.getName()).as("Person's name").isEqualTo("Dilbert");
 
-		assertNotNull(this.dog, "Dogbert should have been @Autowired by Spring");
-		assertEquals("Dogbert", this.dog.getName(), "Dog's name");
+		assertThat(this.dog).as("Dogbert should have been @Autowired by Spring").isNotNull();
+		assertThat(this.dog.getName()).as("Dog's name").isEqualTo("Dogbert");
 	}
 
 	@Test
 	void propertyPlaceholderInjected() {
-		assertNotNull(this.enigma, "Enigma should have been injected via @Value by Spring");
-		assertEquals(Integer.valueOf(42), this.enigma, "enigma");
+		assertThat(this.enigma).as("Enigma should have been injected via @Value by Spring").isNotNull();
+		assertThat(this.enigma).as("enigma").isEqualTo(42);
 	}
 
 }

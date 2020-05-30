@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.Arrays;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.CannotAcquireLockException;
@@ -87,7 +88,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Create a SQL error code translator for the given DataSource.
+	 * Create an SQL error code translator for the given DataSource.
 	 * Invoking this constructor will cause a Connection to be obtained
 	 * from the DataSource to get the meta-data.
 	 * @param dataSource the DataSource to use to find meta-data and establish
@@ -100,7 +101,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Create a SQL error code translator for the given database product name.
+	 * Create an SQL error code translator for the given database product name.
 	 * Invoking this constructor will avoid obtaining a Connection from the
 	 * DataSource to get the meta-data.
 	 * @param dbName the database product name that identifies the error codes entry
@@ -113,7 +114,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 	/**
-	 * Create a SQLErrorCode translator given these error codes.
+	 * Create an SQLErrorCode translator given these error codes.
 	 * Does not require a database meta-data lookup to be performed using a connection.
 	 * @param sec error codes
 	 */

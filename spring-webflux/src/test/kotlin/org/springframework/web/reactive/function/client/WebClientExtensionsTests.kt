@@ -19,14 +19,14 @@ package org.springframework.web.reactive.function.client
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import reactor.core.publisher.Mono
+import java.util.concurrent.CompletableFuture
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -48,11 +48,17 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun `RequestBodySpec#body with Flow and reified type parameters`() {
 		val body = mockk<Flow<List<Foo>>>()
 		requestBodySpec.body(body)
-		verify { requestBodySpec.body(ofType<Publisher<List<Foo>>>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `RequestBodySpec#body with CompletableFuture and reified type parameters`() {
+		val body = mockk<CompletableFuture<List<Foo>>>()
+		requestBodySpec.body<List<Foo>>(body)
+		verify { requestBodySpec.body(ofType<Any>(), object : ParameterizedTypeReference<List<Foo>>() {}) }
 	}
 
 	@Test
@@ -68,7 +74,6 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
-	@FlowPreview
 	fun `bodyToFlow with reified type parameters`() {
 		responseSpec.bodyToFlow<List<Foo>>()
 		verify { responseSpec.bodyToFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
@@ -79,20 +84,7 @@ class WebClientExtensionsTests {
 		val response = mockk<ClientResponse>()
 		every { requestBodySpec.exchange() } returns Mono.just(response)
 		runBlocking {
-			assertEquals(response, requestBodySpec.awaitExchange())
-		}
-	}
-
-	@Test
-	fun body() {
-		val headerSpec = mockk<WebClient.RequestHeadersSpec<*>>()
-		val supplier: suspend () -> String = mockk()
-		every { requestBodySpec.body(ofType<Mono<String>>()) } returns headerSpec
-		runBlocking {
-			requestBodySpec.body(supplier)
-		}
-		verify {
-			requestBodySpec.body(ofType<Mono<String>>())
+			assertThat(requestBodySpec.awaitExchange()).isEqualTo(response)
 		}
 	}
 
@@ -101,7 +93,7 @@ class WebClientExtensionsTests {
 		val spec = mockk<WebClient.ResponseSpec>()
 		every { spec.bodyToMono<String>() } returns Mono.just("foo")
 		runBlocking {
-			assertEquals("foo", spec.awaitBody<String>())
+			assertThat(spec.awaitBody<String>()).isEqualTo("foo")
 		}
 	}
 

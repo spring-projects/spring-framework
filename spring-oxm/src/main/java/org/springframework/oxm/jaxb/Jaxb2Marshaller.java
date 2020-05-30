@@ -37,6 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.xml.XMLConstants;
@@ -1025,7 +1026,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				return FileCopyUtils.copyToByteArray(dataHandler.getInputStream());
 			}
 			catch (IOException ex) {
-				throw new UnmarshallingFailureException("Couldn't read attachment", ex);
+				throw new UnmarshallingFailureException("Could not read attachment", ex);
 			}
 		}
 

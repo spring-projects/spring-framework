@@ -25,6 +25,7 @@ import java.util.Map;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Provides a quick way to access the attribute methods of an {@link Annotation}
@@ -73,15 +74,11 @@ final class AttributeMethods {
 			if (method.getDefaultValue() != null) {
 				foundDefaultValueMethod = true;
 			}
-			if (type.isAnnotation() ||
-					(type.isArray() && type.getComponentType().isAnnotation())) {
+			if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
 				foundNestedAnnotation = true;
 			}
-			method.setAccessible(true);
-			this.canThrowTypeNotPresentException[i] =
-					type == Class.class ||
-					type == Class[].class ||
-					type.isEnum();
+			ReflectionUtils.makeAccessible(method);
+			this.canThrowTypeNotPresentException[i] = (type == Class.class || type == Class[].class || type.isEnum());
 		}
 		this.hasDefaultValueMethod = foundDefaultValueMethod;
 		this.hasNestedAnnotation = foundNestedAnnotation;
@@ -268,8 +265,7 @@ final class AttributeMethods {
 			return NONE;
 		}
 		Arrays.sort(methods, methodComparator);
-		Method[] attributeMethods = new Method[size];
-		System.arraycopy(methods, 0, attributeMethods, 0, size);
+		Method[] attributeMethods = Arrays.copyOf(methods, size);
 		return new AttributeMethods(annotationType, attributeMethods);
 	}
 

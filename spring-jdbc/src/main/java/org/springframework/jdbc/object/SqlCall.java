@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.CallableStatementCreator;
@@ -28,7 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * RdbmsOperation using a JdbcTemplate and representing a SQL-based
+ * RdbmsOperation using a JdbcTemplate and representing an SQL-based
  * call such as a stored procedure or a stored function.
  *
  * <p>Configures a CallableStatementCreatorFactory based on the declared

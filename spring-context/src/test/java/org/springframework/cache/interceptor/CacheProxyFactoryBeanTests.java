@@ -19,7 +19,7 @@ package org.springframework.cache.interceptor;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -27,10 +27,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link CacheProxyFactoryBean}.
@@ -45,18 +42,18 @@ public class CacheProxyFactoryBeanTests {
 		try (AnnotationConfigApplicationContext applicationContext =
 				new AnnotationConfigApplicationContext(CacheProxyFactoryBeanConfiguration.class)) {
 			Greeter greeter = applicationContext.getBean("greeter", Greeter.class);
-			assertNotNull(greeter);
-			assertFalse(greeter.isCacheMiss());
-			assertEquals("Hello John!", greeter.greet("John"));
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello Jon!", greeter.greet("Jon"));
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello John!", greeter.greet("John"));
-			assertFalse(greeter.isCacheMiss());
-			assertEquals("Hello World!", greeter.greet());
-			assertTrue(greeter.isCacheMiss());
-			assertEquals("Hello World!", greeter.greet());
-			assertFalse(greeter.isCacheMiss());
+			assertThat(greeter).isNotNull();
+			assertThat(greeter.isCacheMiss()).isFalse();
+			assertThat(greeter.greet("John")).isEqualTo("Hello John!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet("Jon")).isEqualTo("Hello Jon!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet("John")).isEqualTo("Hello John!");
+			assertThat(greeter.isCacheMiss()).isFalse();
+			assertThat(greeter.greet()).isEqualTo("Hello World!");
+			assertThat(greeter.isCacheMiss()).isTrue();
+			assertThat(greeter.greet()).isEqualTo("Hello World!");
+			assertThat(greeter.isCacheMiss()).isFalse();
 		}
 	}
 

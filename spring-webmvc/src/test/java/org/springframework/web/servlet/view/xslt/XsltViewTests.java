@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,20 +32,19 @@ import javax.xml.transform.stream.StreamSource;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rob Harrop
@@ -126,8 +126,8 @@ public class XsltViewTests {
 
 		Source source = new StreamSource(getProductDataResource().getInputStream());
 		view.render(singletonMap("someKey", source), this.request, this.response);
-		assertTrue(this.response.getContentType().startsWith("text/html"));
-		assertEquals("UTF-8", this.response.getCharacterEncoding());
+		assertThat(this.response.getContentType().startsWith("text/html")).isTrue();
+		assertThat(this.response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test
@@ -136,7 +136,7 @@ public class XsltViewTests {
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
 		doTestWithModel(model);
-		assertTrue(this.response.getContentAsString().contains("Product List"));
+		assertThat(this.response.getContentAsString().contains("Product List")).isTrue();
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class XsltViewTests {
 
 		view.render(model, this.request, this.response);
 		assertHtmlOutput(this.response.getContentAsString());
-		assertTrue(this.response.getContentAsString().contains("Product List"));
+		assertThat(this.response.getContentAsString().contains("Product List")).isTrue();
 
 	}
 
@@ -189,9 +189,9 @@ public class XsltViewTests {
 		Element nameElem = (Element) elem.elements().get(1);
 		Element priceElem = (Element) elem.elements().get(2);
 
-		assertEquals("ID incorrect.", id, idElem.getText());
-		assertEquals("Name incorrect.", name, nameElem.getText());
-		assertEquals("Price incorrect.", price, priceElem.getText());
+		assertThat(idElem.getText()).as("ID incorrect.").isEqualTo(id);
+		assertThat(nameElem.getText()).as("Name incorrect.").isEqualTo(name);
+		assertThat(priceElem.getText()).as("Price incorrect.").isEqualTo(price);
 	}
 
 	private XsltView getXsltView(String templatePath) {

@@ -23,7 +23,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,25 +33,22 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -60,6 +57,9 @@ import static org.springframework.mock.http.server.reactive.test.MockServerHttpR
  * @author Juergen Hoeller
  */
 public class InvocableHandlerMethodTests {
+
+	private static final Duration TIMEOUT = Duration.ofSeconds(5);
+
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(get("http://localhost:8080/path"));
 
@@ -158,7 +158,7 @@ public class InvocableHandlerMethodTests {
 		Mono<HandlerResult> mono = invoke(new TestController(), method);
 
 		assertHandlerResultValue(mono, "created");
-		assertThat(this.exchange.getResponse().getStatusCode(), is(HttpStatus.CREATED));
+		assertThat(this.exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.CREATED);
 	}
 
 	@Test
@@ -168,8 +168,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(c -> c.response(response)).method();
 		HandlerResult result = invokeForResult(new TestController(), method);
 
-		assertNull("Expected no result (i.e. fully handled)", result);
-		assertEquals("bar", this.exchange.getResponse().getHeaders().getFirst("foo"));
+		assertThat(result).as("Expected no result (i.e. fully handled)").isNull();
+		assertThat(this.exchange.getResponse().getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -179,8 +179,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(c -> c.responseMonoVoid(response)).method();
 		HandlerResult result = invokeForResult(new TestController(), method);
 
-		assertNull("Expected no result (i.e. fully handled)", result);
-		assertEquals("body", this.exchange.getResponse().getBodyAsString().block(Duration.ZERO));
+		assertThat(result).as("Expected no result (i.e. fully handled)").isNull();
+		assertThat(this.exchange.getResponse().getBodyAsString().block(TIMEOUT)).isEqualTo("body");
 	}
 
 	@Test
@@ -189,8 +189,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(c -> c.exchange(exchange)).method();
 		HandlerResult result = invokeForResult(new TestController(), method);
 
-		assertNull("Expected no result (i.e. fully handled)", result);
-		assertEquals("bar", this.exchange.getResponse().getHeaders().getFirst("foo"));
+		assertThat(result).as("Expected no result (i.e. fully handled)").isNull();
+		assertThat(this.exchange.getResponse().getHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
@@ -199,8 +199,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(c -> c.exchangeMonoVoid(exchange)).method();
 		HandlerResult result = invokeForResult(new TestController(), method);
 
-		assertNull("Expected no result (i.e. fully handled)", result);
-		assertEquals("body", this.exchange.getResponse().getBodyAsString().block(Duration.ZERO));
+		assertThat(result).as("Expected no result (i.e. fully handled)").isNull();
+		assertThat(this.exchange.getResponse().getBodyAsString().block(TIMEOUT)).isEqualTo("body");
 	}
 
 	@Test
@@ -211,7 +211,7 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(TestController.class).mockCall(c -> c.notModified(exchange)).method();
 		HandlerResult result = invokeForResult(new TestController(), method);
 
-		assertNull("Expected no result (i.e. fully handled)", result);
+		assertThat(result).as("Expected no result (i.e. fully handled)").isNull();
 	}
 
 
@@ -239,7 +239,7 @@ public class InvocableHandlerMethodTests {
 
 	private void assertHandlerResultValue(Mono<HandlerResult> mono, String expected) {
 		StepVerifier.create(mono)
-				.consumeNextWith(result -> assertEquals(expected, result.getReturnValue()))
+				.consumeNextWith(result -> assertThat(result.getReturnValue()).isEqualTo(expected))
 				.expectComplete()
 				.verify();
 	}

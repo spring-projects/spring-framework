@@ -19,14 +19,14 @@ package org.springframework.scripting.bsh;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.scripting.support.StaticScriptSource;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -37,14 +37,14 @@ public class BshScriptEvaluatorTests {
 	public void testBshScriptFromString() {
 		ScriptEvaluator evaluator = new BshScriptEvaluator();
 		Object result = evaluator.evaluate(new StaticScriptSource("return 3 * 2;"));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
 	public void testBshScriptFromFile() {
 		ScriptEvaluator evaluator = new BshScriptEvaluator();
 		Object result = evaluator.evaluate(new ResourceScriptSource(new ClassPathResource("simple.bsh", getClass())));
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class BshScriptEvaluatorTests {
 		arguments.put("a", 3);
 		arguments.put("b", 2);
 		Object result = evaluator.evaluate(new StaticScriptSource("return a * b;"), arguments);
-		assertEquals(6, result);
+		assertThat(result).isEqualTo(6);
 	}
 
 }

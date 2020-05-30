@@ -23,13 +23,13 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -70,7 +70,7 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 	private void testRequestBodyAllowed(URL uri, String httpMethod, boolean allowed) throws IOException {
 		HttpURLConnection connection = new TestHttpURLConnection(uri);
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, httpMethod);
-		assertEquals(allowed, connection.getDoOutput());
+		assertThat(connection.getDoOutput()).isEqualTo(allowed);
 	}
 
 

@@ -18,13 +18,12 @@ package org.springframework.web.servlet.view.xslt;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -46,7 +45,7 @@ public class XsltViewResolverTests {
 		viewResolver.setApplicationContext(ctx);
 
 		XsltView view = (XsltView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
-		assertNotNull("View should not be null", view);
-		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
+		assertThat(view).as("View should not be null").isNotNull();
+		assertThat(view.getUrl()).as("Incorrect URL").isEqualTo((prefix + viewName + suffix));
 	}
 }

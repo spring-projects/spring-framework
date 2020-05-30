@@ -23,24 +23,24 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.RequiredModelMBean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.support.ObjectNameManager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
+class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 
 	@Test
-	public void testRegisterManagedResourceWithUserSuppliedObjectName() throws Exception {
+	void testRegisterManagedResourceWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 
 		JmxTestBean bean = new JmxTestBean();
@@ -51,11 +51,11 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		exporter.registerManagedResource(bean, objectName);
 
 		String name = (String) getServer().getAttribute(objectName, "Name");
-		assertEquals("Incorrect name on MBean", name, bean.getName());
+		assertThat(bean.getName()).as("Incorrect name on MBean").isEqualTo(name);
 	}
 
 	@Test
-	public void testRegisterExistingMBeanWithUserSuppliedObjectName() throws Exception {
+	void testRegisterExistingMBeanWithUserSuppliedObjectName() throws Exception {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:name=Foo");
 		ModelMBeanInfo info = new ModelMBeanInfoSupport("myClass", "myDescription", null, null, null, null);
 		RequiredModelMBean bean = new RequiredModelMBean(info);
@@ -65,11 +65,11 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		exporter.registerManagedResource(bean, objectName);
 
 		MBeanInfo infoFromServer = getServer().getMBeanInfo(objectName);
-		assertEquals(info, infoFromServer);
+		assertThat(infoFromServer).isEqualTo(info);
 	}
 
 	@Test
-	public void testRegisterManagedResourceWithGeneratedObjectName() throws Exception {
+	void testRegisterManagedResourceWithGeneratedObjectName() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -95,7 +95,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void testRegisterManagedResourceWithGeneratedObjectNameWithoutUniqueness() throws Exception {
+	void testRegisterManagedResourceWithGeneratedObjectNameWithoutUniqueness() throws Exception {
 		final ObjectName objectNameTemplate = ObjectNameManager.getInstance("spring:type=Test");
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -120,7 +120,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 	}
 
 	private void assertObjectNameMatchesTemplate(ObjectName objectNameTemplate, ObjectName registeredName) {
-		assertEquals("Domain is incorrect", objectNameTemplate.getDomain(), registeredName.getDomain());
+		assertThat(registeredName.getDomain()).as("Domain is incorrect").isEqualTo(objectNameTemplate.getDomain());
 	}
 
 }

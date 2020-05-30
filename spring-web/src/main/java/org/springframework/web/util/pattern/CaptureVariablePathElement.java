@@ -150,11 +150,13 @@ class CaptureVariablePathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "CaptureVariable({" + this.variableName +
 				(this.constraintPattern != null ? ":" + this.constraintPattern.pattern() : "") + "})";
 	}
 
+	@Override
 	public char[] getChars() {
 		StringBuilder b = new StringBuilder();
 		b.append("{");

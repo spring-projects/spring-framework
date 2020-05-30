@@ -18,7 +18,7 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
@@ -26,8 +26,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -64,16 +63,15 @@ public class ApplicationListenerMethodTransactionalAdapterTests {
 	}
 
 	private void assertPhase(Method method, TransactionPhase expected) {
-		assertNotNull("Method must not be null", method);
+		assertThat(method).as("Method must not be null").isNotNull();
 		TransactionalEventListener annotation =
 				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
-		assertEquals("Wrong phase for '" + method + "'", expected, annotation.phase());
+		assertThat(annotation.phase()).as("Wrong phase for '" + method + "'").isEqualTo(expected);
 	}
 
 	private void supportsEventType(boolean match, Method method, ResolvableType eventType) {
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
-		assertEquals("Wrong match for event '" + eventType + "' on " + method,
-				match, adapter.supportsEventType(eventType));
+		assertThat(adapter.supportsEventType(eventType)).as("Wrong match for event '" + eventType + "' on " + method).isEqualTo(match);
 	}
 
 	private ApplicationListenerMethodTransactionalAdapter createTestInstance(Method m) {

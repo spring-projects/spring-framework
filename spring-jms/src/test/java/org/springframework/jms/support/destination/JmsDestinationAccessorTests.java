@@ -18,10 +18,10 @@ package org.springframework.jms.support.destination;
 
 import javax.jms.ConnectionFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -43,10 +43,9 @@ public class JmsDestinationAccessorTests {
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
-		assertFalse("The [pubSubDomain] property of JmsDestinationAccessor must default to " +
+		assertThat(accessor.isPubSubDomain()).as("The [pubSubDomain] property of JmsDestinationAccessor must default to " +
 				"false (i.e. Queues are used by default). Change this test (and the " +
-				"attendant Javadoc) if you have changed the default.",
-				accessor.isPubSubDomain());
+				"attendant Javadoc) if you have changed the default.").isFalse();
 	}
 
 

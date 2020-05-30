@@ -31,7 +31,7 @@ public interface HandlerResultHandler {
 
 	/**
 	 * Whether this handler supports the given {@link HandlerResult}.
-	 * @param result result object to check
+	 * @param result the result object to check
 	 * @return whether or not this object can use the given result
 	 */
 	boolean supports(HandlerResult result);

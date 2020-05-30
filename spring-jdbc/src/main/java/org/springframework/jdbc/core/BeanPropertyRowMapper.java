@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -383,9 +383,28 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * Static factory method to create a new {@code BeanPropertyRowMapper}
 	 * (with the mapped class specified only once).
 	 * @param mappedClass the class that each row should be mapped to
+	 * @see #newInstance(Class, ConversionService)
 	 */
 	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
 		return new BeanPropertyRowMapper<>(mappedClass);
+	}
+
+	/**
+	 * Static factory method to create a new {@code BeanPropertyRowMapper}
+	 * (with the required type specified only once).
+	 * @param mappedClass the class that each row should be mapped to
+	 * @param conversionService the {@link ConversionService} for binding
+	 * JDBC values to bean properties, or {@code null} for none
+	 * @since 5.2.3
+	 * @see #newInstance(Class)
+	 * @see #setConversionService
+	 */
+	public static <T> BeanPropertyRowMapper<T> newInstance(
+			Class<T> mappedClass, @Nullable ConversionService conversionService) {
+
+		BeanPropertyRowMapper<T> rowMapper = newInstance(mappedClass);
+		rowMapper.setConversionService(conversionService);
+		return rowMapper;
 	}
 
 }

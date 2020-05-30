@@ -18,11 +18,10 @@ package org.springframework.beans;
 
 import java.beans.IntrospectionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests for {@link ExtendedBeanInfoTests}.
@@ -39,7 +38,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public void setFoo(String s) { }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -48,7 +47,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), notNullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNotNull();
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(int i, String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), notNullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNotNull();
 	}
 
 	@Test
@@ -66,7 +65,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			void setBar(String s) { }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -75,7 +74,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C setBar() { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 	@Test
@@ -84,7 +83,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C set(String s) { return this; }
 		}
-		assertThat(factory.getBeanInfo(C.class), nullValue());
+		assertThat(factory.getBeanInfo(C.class)).isNull();
 	}
 
 }

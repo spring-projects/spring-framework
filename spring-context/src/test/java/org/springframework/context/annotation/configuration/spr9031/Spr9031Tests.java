@@ -19,7 +19,7 @@ package org.springframework.context.annotation.configuration.spr9031;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -29,9 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.configuration.spr9031.scanpackage.Spr9031Component;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Unit tests cornering bug SPR-9031.
@@ -50,7 +49,7 @@ public class Spr9031Tests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(HighLevelConfig.class);
 		ctx.refresh();
-		assertThat(ctx.getBean(LowLevelConfig.class).scanned, not(nullValue()));
+		assertThat(ctx.getBean(LowLevelConfig.class).scanned).isNotNull();
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class Spr9031Tests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(LowLevelConfig.class);
 		ctx.refresh();
-		assertThat(ctx.getBean(LowLevelConfig.class).scanned, not(nullValue()));
+		assertThat(ctx.getBean(LowLevelConfig.class).scanned).isNotNull();
 	}
 
 	@Configuration

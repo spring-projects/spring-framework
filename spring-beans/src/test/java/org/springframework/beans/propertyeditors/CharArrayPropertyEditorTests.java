@@ -18,11 +18,9 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for the {@link CharArrayPropertyEditor} class.
@@ -39,21 +37,20 @@ public class CharArrayPropertyEditorTests {
 		charEditor.setAsText(text);
 
 		Object value = charEditor.getValue();
-		assertNotNull(value);
-		assertTrue(value instanceof char[]);
+		assertThat(value).isNotNull().isInstanceOf(char[].class);
 		char[] chars = (char[]) value;
 		for (int i = 0; i < text.length(); ++i) {
-			assertEquals("char[] differs at index '" + i + "'", text.charAt(i), chars[i]);
+			assertThat(chars[i]).as("char[] differs at index '" + i + "'").isEqualTo(text.charAt(i));
 		}
-		assertEquals(text, charEditor.getAsText());
+		assertThat(charEditor.getAsText()).isEqualTo(text);
 	}
 
 	@Test
 	public void getAsTextReturnsEmptyStringIfValueIsNull() throws Exception {
-		assertEquals("", charEditor.getAsText());
+		assertThat(charEditor.getAsText()).isEqualTo("");
 
 		charEditor.setAsText(null);
-		assertEquals("", charEditor.getAsText());
+		assertThat(charEditor.getAsText()).isEqualTo("");
 	}
 
 }

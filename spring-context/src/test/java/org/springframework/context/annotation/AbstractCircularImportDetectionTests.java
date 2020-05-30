@@ -16,12 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * TCK-style unit tests for handling circular use of the {@link Import} annotation.
@@ -43,13 +43,12 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(A.class), "A");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertTrue("Wrong message. Got: " + ex.getMessage(),
-					ex.getMessage().contains(
-						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
-						"to import class 'AbstractCircularImportDetectionTests.A'"));
+			assertThat(ex.getMessage().contains(
+							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.B' " +
+							"to import class 'AbstractCircularImportDetectionTests.A'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
 			threw = true;
 		}
-		assertTrue(threw);
+		assertThat(threw).isTrue();
 	}
 
 	@Test
@@ -59,13 +58,12 @@ public abstract class AbstractCircularImportDetectionTests {
 			newParser().parse(loadAsConfigurationSource(X.class), "X");
 		}
 		catch (BeanDefinitionParsingException ex) {
-			assertTrue("Wrong message. Got: " + ex.getMessage(),
-					ex.getMessage().contains(
-						"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
-						"to import class 'AbstractCircularImportDetectionTests.Z'"));
+			assertThat(ex.getMessage().contains(
+							"Illegal attempt by @Configuration class 'AbstractCircularImportDetectionTests.Z2' " +
+							"to import class 'AbstractCircularImportDetectionTests.Z'")).as("Wrong message. Got: " + ex.getMessage()).isTrue();
 			threw = true;
 		}
-		assertTrue(threw);
+		assertThat(threw).isTrue();
 	}
 
 

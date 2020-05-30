@@ -16,12 +16,11 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for matching of bean() pointcut designator.
@@ -80,13 +79,11 @@ public class BeanNamePointcutMatchingTests {
 
 
 	private void assertMatch(String beanName, String pcExpression) {
-		assertTrue("Unexpected mismatch for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"",
-				matches(beanName, pcExpression));
+		assertThat(matches(beanName, pcExpression)).as("Unexpected mismatch for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"").isTrue();
 	}
 
 	private void assertMisMatch(String beanName, String pcExpression) {
-		assertFalse("Unexpected match for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"",
-				matches(beanName, pcExpression));
+		assertThat(matches(beanName, pcExpression)).as("Unexpected match for bean \"" + beanName + "\" for pcExpression \"" + pcExpression + "\"").isFalse();
 	}
 
 	private static boolean matches(final String beanName, String pcExpression) {

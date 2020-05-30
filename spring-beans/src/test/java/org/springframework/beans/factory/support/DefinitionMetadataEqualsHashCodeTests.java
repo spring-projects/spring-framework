@@ -16,14 +16,13 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@code equals()} and {@code hashCode()} in bean definitions.
@@ -69,8 +68,8 @@ public class DefinitionMetadataEqualsHashCodeTests {
 		// override in 'master' will not. But... the bean definitions should still be
 		// considered equal.
 
-		assertEquals("Should be equal", master, equal);
-		assertEquals("Hash code for equal instances must match", master.hashCode(), equal.hashCode());
+		assertThat(equal).as("Should be equal").isEqualTo(master);
+		assertThat(equal.hashCode()).as("Hash code for equal instances must match").isEqualTo(master.hashCode());
 	}
 
 	@Test
@@ -123,14 +122,14 @@ public class DefinitionMetadataEqualsHashCodeTests {
 	}
 
 	private void assertEqualsAndHashCodeContracts(Object master, Object equal, Object notEqual, Object subclass) {
-		assertEquals("Should be equal", master, equal);
-		assertEquals("Hash code for equal instances should match", master.hashCode(), equal.hashCode());
+		assertThat(equal).as("Should be equal").isEqualTo(master);
+		assertThat(equal.hashCode()).as("Hash code for equal instances should match").isEqualTo(master.hashCode());
 
-		assertNotEquals("Should not be equal", master, notEqual);
-		assertNotEquals("Hash code for non-equal instances should not match", master.hashCode(), notEqual.hashCode());
+		assertThat(notEqual).as("Should not be equal").isNotEqualTo(master);
+		assertThat(notEqual.hashCode()).as("Hash code for non-equal instances should not match").isNotEqualTo((long) master.hashCode());
 
-		assertEquals("Subclass should be equal", master, subclass);
-		assertEquals("Hash code for subclass should match", master.hashCode(), subclass.hashCode());
+		assertThat(subclass).as("Subclass should be equal").isEqualTo(master);
+		assertThat(subclass.hashCode()).as("Hash code for subclass should match").isEqualTo(master.hashCode());
 	}
 
 }

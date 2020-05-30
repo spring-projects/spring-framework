@@ -15,13 +15,13 @@
  */
 package org.springframework.aop.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Colin Sampaleanu
@@ -39,6 +39,6 @@ public class ClassUtilsTests {
 		pf.setProxyTargetClass(true);
 		TestBean proxy = (TestBean) pf.getProxy();
 		String className = ClassUtils.getShortName(proxy.getClass());
-		assertEquals("Class name did not match", "TestBean", className);
+		assertThat(className).as("Class name did not match").isEqualTo("TestBean");
 	}
 }

@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -28,16 +29,14 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import org.springframework.util.xml.StaxUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -48,7 +47,7 @@ public class XStreamUnmarshallerTests {
 
 	private XStreamMarshaller unmarshaller;
 
-	@Before
+	@BeforeEach
 	public void createUnmarshaller() throws Exception {
 		unmarshaller = new XStreamMarshaller();
 		Map<String, Class<?>> aliases = new HashMap<>();
@@ -57,10 +56,11 @@ public class XStreamUnmarshallerTests {
 	}
 
 	private void testFlight(Object o) {
-		assertTrue("Unmarshalled object is not Flights", o instanceof Flight);
+		boolean condition = o instanceof Flight;
+		assertThat(condition).as("Unmarshalled object is not Flights").isTrue();
 		Flight flight = (Flight) o;
-		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getFlightNumber());
+		assertThat(flight).as("Flight is null").isNotNull();
+		assertThat(flight.getFlightNumber()).as("Number is invalid").isEqualTo(42L);
 	}
 
 	@Test

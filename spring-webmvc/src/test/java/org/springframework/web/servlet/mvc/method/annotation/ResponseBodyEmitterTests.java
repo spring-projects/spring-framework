@@ -18,17 +18,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.http.MediaType;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
@@ -42,19 +42,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Rossen Stoyanchev
  * @author Tomasz Nurkiewicz
  */
+@ExtendWith(MockitoExtension.class)
 public class ResponseBodyEmitterTests {
-
-	private ResponseBodyEmitter emitter;
 
 	@Mock
 	private ResponseBodyEmitter.Handler handler;
 
-
-	@Before
-	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.emitter = new ResponseBodyEmitter();
-	}
+	private final ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 
 
 	@Test
@@ -169,7 +163,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(captor.capture());
 		verify(this.handler).onCompletion(any());
 
-		assertNotNull(captor.getValue());
+		assertThat(captor.getValue()).isNotNull();
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -185,7 +179,7 @@ public class ResponseBodyEmitterTests {
 		Runnable runnable = mock(Runnable.class);
 		this.emitter.onTimeout(runnable);
 
-		assertNotNull(captor.getValue());
+		assertThat(captor.getValue()).isNotNull();
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -200,7 +194,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(any());
 		verify(this.handler).onCompletion(captor.capture());
 
-		assertNotNull(captor.getValue());
+		assertThat(captor.getValue()).isNotNull();
 		captor.getValue().run();
 		verify(runnable).run();
 	}
@@ -216,7 +210,7 @@ public class ResponseBodyEmitterTests {
 		Runnable runnable = mock(Runnable.class);
 		this.emitter.onCompletion(runnable);
 
-		assertNotNull(captor.getValue());
+		assertThat(captor.getValue()).isNotNull();
 		captor.getValue().run();
 		verify(runnable).run();
 	}

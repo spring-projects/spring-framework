@@ -142,7 +142,7 @@ public interface Advised extends TargetClassAware {
 
 	/**
 	 * Remove the advisor at the given index.
-	 * @param index index of advisor to remove
+	 * @param index the index of advisor to remove
 	 * @throws AopConfigException if the index is invalid
 	 */
 	void removeAdvisor(int index) throws AopConfigException;
@@ -177,7 +177,7 @@ public interface Advised extends TargetClassAware {
 	 * <p>Note that the given advice will apply to all invocations on the proxy,
 	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
-	 * @param advice advice to add to the tail of the chain
+	 * @param advice the advice to add to the tail of the chain
 	 * @throws AopConfigException in case of invalid advice
 	 * @see #addAdvice(int, Advice)
 	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
@@ -193,7 +193,7 @@ public interface Advised extends TargetClassAware {
 	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param pos index from 0 (head)
-	 * @param advice advice to add at the specified position in the advice chain
+	 * @param advice the advice to add at the specified position in the advice chain
 	 * @throws AopConfigException in case of invalid advice
 	 */
 	void addAdvice(int pos, Advice advice) throws AopConfigException;

@@ -9,7 +9,7 @@
 
 	<import resource="/resources/../resources/themeSource.xml"/>
 
-	<bean id="lifecyclePostProcessor" class="org.springframework.tests.sample.beans.LifecycleBean$PostProcessor"/>
+	<bean id="lifecyclePostProcessor" class="org.springframework.beans.testfixture.beans.LifecycleBean$PostProcessor"/>
 
 	<!--
 	<bean
@@ -25,14 +25,14 @@
 	</bean>
 	-->
 
-	<bean id="beanThatListens" class="org.springframework.context.BeanThatListens"/>
+	<bean id="beanThatListens" class="org.springframework.context.testfixture.beans.BeanThatListens"/>
 
-	<bean id="parentListener" class="org.springframework.context.TestListener"/>
+	<bean id="parentListener" class="org.springframework.context.testfixture.beans.TestApplicationListener"/>
 
 	<!-- Inherited tests -->
 
 	<!-- name and age values will be overridden by myinit.properties" -->
-	<bean id="rod" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="rod" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name">
 			<value>dummy</value>
 		</property>
@@ -45,7 +45,7 @@
 			Tests of lifecycle callbacks
 		-->
 	<bean id="mustBeInitialized"
-		class="org.springframework.tests.sample.beans.MustBeInitialized">
+		class="org.springframework.beans.testfixture.beans.MustBeInitialized">
 	</bean>
 
 	<bean id="lifecycle"

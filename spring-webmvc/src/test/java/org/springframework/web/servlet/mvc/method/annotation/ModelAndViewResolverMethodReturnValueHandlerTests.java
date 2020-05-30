@@ -20,25 +20,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link ModelAndViewResolverMethodReturnValueHandler}.
@@ -56,7 +52,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private ServletWebRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);
@@ -73,9 +69,9 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 		handler.handleReturnValue(testBean, returnType, mavContainer, request);
 
-		assertEquals("viewName", mavContainer.getViewName());
-		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
-		assertFalse(mavContainer.isRequestHandled());
+		assertThat(mavContainer.getViewName()).isEqualTo("viewName");
+		assertThat(mavContainer.getModel().get("modelAttrName")).isSameAs(testBean);
+		assertThat(mavContainer.isRequestHandled()).isFalse();
 	}
 
 	@Test
@@ -91,9 +87,9 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(null, returnType, mavContainer, request);
 
-		assertNull(mavContainer.getView());
-		assertNull(mavContainer.getViewName());
-		assertTrue(mavContainer.getModel().isEmpty());
+		assertThat(mavContainer.getView()).isNull();
+		assertThat(mavContainer.getViewName()).isNull();
+		assertThat(mavContainer.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
@@ -108,7 +104,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(new TestBean(), returnType, mavContainer, request);
 
-		assertTrue(mavContainer.containsAttribute("testBean"));
+		assertThat(mavContainer.containsAttribute("testBean")).isTrue();
 	}
 
 

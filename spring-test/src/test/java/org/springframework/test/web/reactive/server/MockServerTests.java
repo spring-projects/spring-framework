@@ -17,7 +17,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,8 +30,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test scenarios involving a mock server.
@@ -99,17 +98,17 @@ public class MockServerTests {
 		mutatedBuilder.defaultCookie("baz", "qux");
 		WebTestClient clientFromMutatedBuilder = mutatedBuilder.build();
 
-		client1.mutate().filters(filters -> assertEquals(1, filters.size()));
-		client1.mutate().defaultHeaders(headers -> assertEquals(1, headers.size()));
-		client1.mutate().defaultCookies(cookies -> assertEquals(1, cookies.size()));
+		client1.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(1));
+		client1.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(1));
+		client1.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(1));
 
-		client2.mutate().filters(filters -> assertEquals(2, filters.size()));
-		client2.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
-		client2.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+		client2.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
+		client2.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
+		client2.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
 
-		clientFromMutatedBuilder.mutate().filters(filters -> assertEquals(2, filters.size()));
-		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertEquals(2, headers.size()));
-		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertEquals(2, cookies.size()));
+		clientFromMutatedBuilder.mutate().filters(filters -> assertThat(filters.size()).isEqualTo(2));
+		clientFromMutatedBuilder.mutate().defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
+		clientFromMutatedBuilder.mutate().defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
 	}
 
 	@Test // SPR-16124
@@ -134,8 +133,7 @@ public class MockServerTests {
 				.expectHeader().valueEquals(HttpHeaders.SET_COOKIE, "a=alpha; Path=/pathA", "b=beta; Path=/pathB")
 				.expectBody().isEmpty();
 
-		assertEquals(Arrays.asList("a=alpha", "b=beta"),
-				result.getRequestHeaders().get(HttpHeaders.COOKIE));
+		assertThat(result.getRequestHeaders().get(HttpHeaders.COOKIE)).isEqualTo(Arrays.asList("a=alpha", "b=beta"));
 	}
 
 	@Test
@@ -156,8 +154,8 @@ public class MockServerTests {
 		// Get the raw content without consuming the response body flux..
 		byte[] bytes = result.getResponseBodyContent();
 
-		assertNotNull(bytes);
-		assertEquals("body", new String(bytes, UTF_8));
+		assertThat(bytes).isNotNull();
+		assertThat(new String(bytes, UTF_8)).isEqualTo("body");
 	}
 
 

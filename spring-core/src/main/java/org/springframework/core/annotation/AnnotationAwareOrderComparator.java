@@ -71,7 +71,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	@Nullable
 	private Integer findOrderFromAnnotation(Object obj) {
 		AnnotatedElement element = (obj instanceof AnnotatedElement ? (AnnotatedElement) obj : obj.getClass());
-		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.EXHAUSTIVE);
+		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY);
 		Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
 		if (order == null && obj instanceof DecoratingProxy) {
 			return findOrderFromAnnotation(((DecoratingProxy) obj).getDecoratedClass());
@@ -100,7 +100,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 
 	/**
-	 * Sort the given List with a default AnnotationAwareOrderComparator.
+	 * Sort the given list with a default {@link AnnotationAwareOrderComparator}.
 	 * <p>Optimized to skip sorting for lists with size 0 or 1,
 	 * in order to avoid unnecessary array extraction.
 	 * @param list the List to sort

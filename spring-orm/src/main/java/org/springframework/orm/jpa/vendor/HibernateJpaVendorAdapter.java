@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
@@ -41,7 +42,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager. Developed and tested against Hibernate 5.0, 5.1, 5.2 and 5.3;
+ * EntityManager. Developed and tested against Hibernate 5.0, 5.1, 5.2, 5.3, 5.4;
  * backwards-compatible with Hibernate 4.3 at runtime on a best-effort basis.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
@@ -91,7 +92,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * JDBC Connection.
 	 * <p>See {@link HibernateJpaDialect#setPrepareConnection(boolean)} for details.
 	 * This is just a convenience flag passed through to {@code HibernateJpaDialect}.
-	 * <p>On Hibernate 5.1/5.2, this flag remains {@code true} by default like against
+	 * <p>On Hibernate 5.1+, this flag remains {@code true} by default like against
 	 * previous Hibernate versions. The vendor adapter manually enforces Hibernate's
 	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
 	 * unless a user-specified connection handling mode property indicates otherwise;
@@ -154,9 +155,9 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 
 		if (connectionReleaseOnClose) {
-			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			// Hibernate 5.1+: manually enforce connection release mode ON_CLOSE (the former default)
 			try {
-				// Try Hibernate 5.2
+				// Try Hibernate 5.2+
 				AvailableSettings.class.getField("CONNECTION_HANDLING");
 				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
 			}

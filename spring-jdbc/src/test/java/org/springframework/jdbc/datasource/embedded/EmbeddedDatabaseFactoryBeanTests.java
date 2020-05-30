@@ -18,14 +18,14 @@ package org.springframework.jdbc.datasource.embedded;
 
 import javax.sql.DataSource;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Keith Donald
@@ -48,7 +48,7 @@ public class EmbeddedDatabaseFactoryBeanTests {
 		bean.afterPropertiesSet();
 		DataSource ds = bean.getObject();
 		JdbcTemplate template = new JdbcTemplate(ds);
-		assertEquals("Keith", template.queryForObject("select NAME from T_TEST", String.class));
+		assertThat(template.queryForObject("select NAME from T_TEST", String.class)).isEqualTo("Keith");
 		bean.destroy();
 	}
 

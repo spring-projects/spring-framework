@@ -19,14 +19,13 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockPageContext;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.web.servlet.tags.NestedPathTag;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -68,8 +67,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
-		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
-		assertEquals(Tag.EVAL_PAGE, endResult);
+		assertThat(startResult).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(endResult).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		// we are using a nested path (see extendPageContext(..)), so...
@@ -78,8 +77,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertTrue(output.startsWith("<label "));
-		assertTrue(output.endsWith("</label>"));
+		assertThat(output.startsWith("<label ")).isTrue();
+		assertThat(output.endsWith("</label>")).isTrue();
 	}
 
 	@Test
@@ -94,8 +93,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
-		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
-		assertEquals(Tag.EVAL_PAGE, endResult);
+		assertThat(startResult).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(endResult).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		// we are using a nested path (see extendPageContext(..)), so...
@@ -106,8 +105,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertTrue(output.startsWith("<label "));
-		assertTrue(output.endsWith("</label>"));
+		assertThat(output.startsWith("<label ")).isTrue();
+		assertThat(output.endsWith("</label>")).isTrue();
 	}
 
 	@Test
@@ -116,8 +115,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
-		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
-		assertEquals(Tag.EVAL_PAGE, endResult);
+		assertThat(startResult).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(endResult).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		// we are using a nested path (see extendPageContext(..)), so...
@@ -126,8 +125,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertTrue(output.startsWith("<label "));
-		assertTrue(output.endsWith("</label>"));
+		assertThat(output.startsWith("<label ")).isTrue();
+		assertThat(output.endsWith("</label>")).isTrue();
 	}
 
 	@Test
@@ -137,8 +136,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
-		assertEquals(Tag.EVAL_BODY_INCLUDE, startResult);
-		assertEquals(Tag.EVAL_PAGE, endResult);
+		assertThat(startResult).isEqualTo(Tag.EVAL_BODY_INCLUDE);
+		assertThat(endResult).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertContainsAttribute(output, "for", "myElement");
@@ -146,8 +145,8 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "name");
 		// id attribute is supported, but we don't want it
 		assertAttributeNotPresent(output, "id");
-		assertTrue(output.startsWith("<label "));
-		assertTrue(output.endsWith("</label>"));
+		assertThat(output.startsWith("<label ")).isTrue();
+		assertThat(output.endsWith("</label>")).isTrue();
 	}
 
 

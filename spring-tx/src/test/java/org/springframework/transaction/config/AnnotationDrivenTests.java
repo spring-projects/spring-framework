@@ -20,20 +20,18 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -68,19 +66,19 @@ public class AnnotationDrivenTests {
 		CallCountingTransactionManager tm1 = context.getBean("transactionManager1", CallCountingTransactionManager.class);
 		CallCountingTransactionManager tm2 = context.getBean("transactionManager2", CallCountingTransactionManager.class);
 		TransactionalService service = context.getBean("service", TransactionalService.class);
-		assertTrue(AopUtils.isCglibProxy(service));
+		assertThat(AopUtils.isCglibProxy(service)).isTrue();
 		service.setSomething("someName");
-		assertEquals(1, tm1.commits);
-		assertEquals(0, tm2.commits);
+		assertThat(tm1.commits).isEqualTo(1);
+		assertThat(tm2.commits).isEqualTo(0);
 		service.doSomething();
-		assertEquals(1, tm1.commits);
-		assertEquals(1, tm2.commits);
+		assertThat(tm1.commits).isEqualTo(1);
+		assertThat(tm2.commits).isEqualTo(1);
 		service.setSomething("someName");
-		assertEquals(2, tm1.commits);
-		assertEquals(1, tm2.commits);
+		assertThat(tm1.commits).isEqualTo(2);
+		assertThat(tm2.commits).isEqualTo(1);
 		service.doSomething();
-		assertEquals(2, tm1.commits);
-		assertEquals(2, tm2.commits);
+		assertThat(tm1.commits).isEqualTo(2);
+		assertThat(tm2.commits).isEqualTo(2);
 	}
 
 	@Test
@@ -109,12 +107,12 @@ public class AnnotationDrivenTests {
 		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			if (methodInvocation.getMethod().getName().equals("setSomething")) {
-				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
-				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
+				assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isTrue();
 			}
 			else {
-				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
-				assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+				assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
+				assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 			}
 			return methodInvocation.proceed();
 		}

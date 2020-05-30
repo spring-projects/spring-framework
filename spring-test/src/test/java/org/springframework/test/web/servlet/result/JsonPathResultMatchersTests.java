@@ -16,8 +16,10 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.nio.charset.StandardCharsets;
+
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
@@ -31,11 +33,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Craig Andrews
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class JsonPathResultMatchersTests {
 
 	private static final String RESPONSE_CONTENT = "{" + //
 			"'str':         'foo',           " + //
+			"'utf8Str':     'Příliš',        " + //
 			"'num':         5,               " + //
 			"'bool':        true,            " + //
 			"'arr':         [42],            " + //
@@ -51,7 +55,7 @@ public class JsonPathResultMatchersTests {
 		try {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.addHeader("Content-Type", "application/json");
-			response.getWriter().print(new String(RESPONSE_CONTENT.getBytes("ISO-8859-1")));
+			response.getOutputStream().write(RESPONSE_CONTENT.getBytes(StandardCharsets.UTF_8));
 			stubMvcResult = new StubMvcResult(null, null, null, null, null, null, response);
 		}
 		catch (Exception e) {
@@ -68,6 +72,11 @@ public class JsonPathResultMatchersTests {
 	@Test
 	public void valueWithDirectMatch() throws Exception {
 		new JsonPathResultMatchers("$.str").value("foo").match(stubMvcResult);
+	}
+
+	@Test // gh-23219
+	public void utf8ValueWithDirectMatch() throws Exception {
+		new JsonPathResultMatchers("$.utf8Str").value("Příliš").match(stubMvcResult);
 	}
 
 	@Test // SPR-16587

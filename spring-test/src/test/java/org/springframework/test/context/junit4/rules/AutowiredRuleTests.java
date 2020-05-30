@@ -27,8 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for an issue raised in https://jira.spring.io/browse/SPR-15927.
@@ -50,7 +49,7 @@ public class AutowiredRuleTests {
 
 	@Test
 	public void test() {
-		assertNotNull("TestRule should have been @Autowired", autowiredTestRule);
+		assertThat(autowiredTestRule).as("TestRule should have been @Autowired").isNotNull();
 
 		// Rationale for the following assertion:
 		//
@@ -58,7 +57,7 @@ public class AutowiredRuleTests {
 		// ignores the null value, and at a later point in time Spring injects the rule
 		// from the ApplicationContext and overrides the null field value. But that's too
 		// late: JUnit never sees the rule supplied by Spring via dependency injection.
-		assertFalse("@Autowired TestRule should NOT have been applied", autowiredTestRule.applied);
+		assertThat(autowiredTestRule.applied).as("@Autowired TestRule should NOT have been applied").isFalse();
 	}
 
 	@Configuration

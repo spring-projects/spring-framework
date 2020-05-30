@@ -27,8 +27,8 @@ import org.springframework.test.annotation.ProfileValueSource;
 import org.springframework.test.annotation.ProfileValueSourceConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Verifies proper handling of JUnit's {@link Ignore &#064;Ignore} and Spring's
@@ -64,7 +64,7 @@ public class EnabledAndIgnoredSpringRunnerTests {
 
 	@AfterClass
 	public static void verifyNumTestsExecuted() {
-		assertEquals("Verifying the number of tests executed.", 3, numTestsExecuted);
+		assertThat(numTestsExecuted).as("Verifying the number of tests executed.").isEqualTo(3);
 	}
 
 	@Test

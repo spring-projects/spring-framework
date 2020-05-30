@@ -18,52 +18,48 @@ package org.springframework.core.task;
 
 import java.util.concurrent.ThreadFactory;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ConcurrencyThrottleSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class SimpleAsyncTaskExecutorTests {
+class SimpleAsyncTaskExecutorTests {
 
 	@Test
-	public void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
+	void cannotExecuteWhenConcurrencyIsSwitchedOff() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
 		executor.setConcurrencyLimit(ConcurrencyThrottleSupport.NO_CONCURRENCY);
-		assertTrue(executor.isThrottleActive());
+		assertThat(executor.isThrottleActive()).isTrue();
 		assertThatIllegalStateException().isThrownBy(() ->
 				executor.execute(new NoOpRunnable()));
 	}
 
 	@Test
-	public void throttleIsNotActiveByDefault() throws Exception {
+	void throttleIsNotActiveByDefault() throws Exception {
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-		assertFalse("Concurrency throttle must not default to being active (on)", executor.isThrottleActive());
+		assertThat(executor.isThrottleActive()).as("Concurrency throttle must not default to being active (on)").isFalse();
 	}
 
 	@Test
-	public void threadNameGetsSetCorrectly() throws Exception {
+	void threadNameGetsSetCorrectly() throws Exception {
 		final String customPrefix = "chankPop#";
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(customPrefix);
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
 		executeAndWait(executor, task, monitor);
-		assertThat(task.getThreadName(), startsWith(customPrefix));
+		assertThat(task.getThreadName()).startsWith(customPrefix);
 	}
 
 	@Test
-	public void threadFactoryOverridesDefaults() throws Exception {
+	void threadFactoryOverridesDefaults() throws Exception {
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(new ThreadFactory() {
 			@Override
@@ -73,11 +69,11 @@ public class SimpleAsyncTaskExecutorTests {
 		});
 		ThreadNameHarvester task = new ThreadNameHarvester(monitor);
 		executeAndWait(executor, task, monitor);
-		assertEquals("test", task.getThreadName());
+		assertThat(task.getThreadName()).isEqualTo("test");
 	}
 
 	@Test
-	public void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
+	void throwsExceptionWhenSuppliedWithNullRunnable() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new SimpleAsyncTaskExecutor().execute(null));
 	}

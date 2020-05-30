@@ -19,28 +19,25 @@ package org.springframework.web.servlet.tags.form;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockBodyContent;
-import org.springframework.mock.web.test.MockPageContext;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
+import org.springframework.web.testfixture.servlet.MockBodyContent;
+import org.springframework.web.testfixture.servlet.MockPageContext;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -91,11 +88,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
-		assertEquals(mockContent, getOutput());
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
+		assertThat(getOutput()).isEqualTo(mockContent);
 	}
 
 	@Test
@@ -111,10 +108,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -137,10 +134,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -162,10 +159,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -195,10 +192,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -224,10 +221,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -253,10 +250,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		exposeBindingResult(errors);
 
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -281,10 +278,10 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 
 		this.tag.setElement("div");
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
 		assertElementTagOpened(output);
@@ -301,25 +298,25 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertEquals(0, output.length());
+		assertThat(output.length()).isEqualTo(0);
 	}
 
 	@Test
 	public void withoutErrorsInstance() throws Exception {
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertEquals(0, output.length());
+		assertThat(output.length()).isEqualTo(0);
 	}
 
 	@Test
@@ -329,14 +326,14 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getOutput());
-		assertNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(getOutput()).isEqualTo(bodyContent);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNull();
 	}
 
 	@Test
@@ -348,15 +345,16 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
-		assertTrue(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
+		boolean condition = getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List;
+		assertThat(condition).isTrue();
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getOutput());
-		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(getOutput()).isEqualTo(bodyContent);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isEqualTo(existingAttribute);
 	}
 
 	/**
@@ -371,16 +369,16 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "too.short", "Too Short");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(BodyTag.EVAL_BODY_BUFFERED, result);
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
-		assertTrue(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List);
+		assertThat(result).isEqualTo(BodyTag.EVAL_BODY_BUFFERED);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
+		boolean condition = getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE) instanceof List;
+		assertThat(condition).isTrue();
 		String bodyContent = "Foo";
 		this.tag.setBodyContent(new MockBodyContent(bodyContent, getWriter()));
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		assertEquals(bodyContent, getOutput());
-		assertEquals(existingAttribute,
-				getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE));
+		assertThat(getOutput()).isEqualTo(bodyContent);
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, PageContext.APPLICATION_SCOPE)).isEqualTo(existingAttribute);
 	}
 
 	/**
@@ -426,12 +424,12 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "some.code", "field error");
 		exposeBindingResult(errors);
 		this.tag.doStartTag();
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertTrue(output.contains("id=\"testBean.errors\""));
-		assertTrue(output.contains("object error"));
-		assertFalse(output.contains("field error"));
+		assertThat(output.contains("id=\"testBean.errors\"")).isTrue();
+		assertThat(output.contains("object error")).isTrue();
+		assertThat(output.contains("field error")).isFalse();
 	}
 
 	@Test
@@ -442,12 +440,12 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "some.code", "field error");
 		exposeBindingResult(errors);
 		this.tag.doStartTag();
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertTrue(output.contains("id=\"name.errors\""));
-		assertFalse(output.contains("object error"));
-		assertTrue(output.contains("field error"));
+		assertThat(output.contains("id=\"name.errors\"")).isTrue();
+		assertThat(output.contains("object error")).isFalse();
+		assertThat(output.contains("field error")).isTrue();
 	}
 
 	@Test
@@ -458,12 +456,12 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		errors.rejectValue("name", "some.code", "field error");
 		exposeBindingResult(errors);
 		this.tag.doStartTag();
-		assertNotNull(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE));
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE)).isNotNull();
 		this.tag.doEndTag();
 		String output = getOutput();
-		assertTrue(output.contains("id=\"testBean.errors\""));
-		assertTrue(output.contains("object error"));
-		assertTrue(output.contains("field error"));
+		assertThat(output.contains("id=\"testBean.errors\"")).isTrue();
+		assertThat(output.contains("object error")).isTrue();
+		assertThat(output.contains("field error")).isTrue();
 	}
 
 	@Override
@@ -479,11 +477,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	}
 
 	private void assertElementTagOpened(String output) {
-		assertTrue(output.startsWith("<" + this.tag.getElement() + " "));
+		assertThat(output.startsWith("<" + this.tag.getElement() + " ")).isTrue();
 	}
 
 	private void assertElementTagClosed(String output) {
-		assertTrue(output.endsWith("</" + this.tag.getElement() + ">"));
+		assertThat(output.endsWith("</" + this.tag.getElement() + ">")).isTrue();
 	}
 
 	private void assertWhenNoErrorsExistingMessagesInScopeAreNotClobbered(int scope) throws JspException {
@@ -493,15 +491,15 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		Errors errors = new BeanPropertyBindingResult(new TestBean(), "COMMAND_NAME");
 		exposeBindingResult(errors);
 		int result = this.tag.doStartTag();
-		assertEquals(Tag.SKIP_BODY, result);
+		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		result = this.tag.doEndTag();
-		assertEquals(Tag.EVAL_PAGE, result);
+		assertThat(result).isEqualTo(Tag.EVAL_PAGE);
 
 		String output = getOutput();
-		assertEquals(0, output.length());
+		assertThat(output.length()).isEqualTo(0);
 
-		assertEquals(existingAttribute, getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope));
+		assertThat(getPageContext().getAttribute(ErrorsTag.MESSAGES_ATTRIBUTE, scope)).isEqualTo(existingAttribute);
 	}
 
 }

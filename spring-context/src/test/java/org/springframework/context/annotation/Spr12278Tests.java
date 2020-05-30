@@ -16,14 +16,13 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 
 /**
  * @author Stephane Nicoll
@@ -32,7 +31,7 @@ public class Spr12278Tests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		if (context != null) {
 			context.close();
@@ -43,14 +42,14 @@ public class Spr12278Tests {
 	public void componentSingleConstructor() {
 		this.context = new AnnotationConfigApplicationContext(BaseConfiguration.class,
 				SingleConstructorComponent.class);
-		assertThat(this.context.getBean(SingleConstructorComponent.class).autowiredName, is("foo"));
+		assertThat(this.context.getBean(SingleConstructorComponent.class).autowiredName).isEqualTo("foo");
 	}
 
 	@Test
 	public void componentTwoConstructorsNoHint() {
 		this.context = new AnnotationConfigApplicationContext(BaseConfiguration.class,
 				TwoConstructorsComponent.class);
-		assertThat(this.context.getBean(TwoConstructorsComponent.class).name, is("fallback"));
+		assertThat(this.context.getBean(TwoConstructorsComponent.class).name).isEqualTo("fallback");
 	}
 
 	@Test

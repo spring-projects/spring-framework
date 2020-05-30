@@ -18,22 +18,21 @@ package org.springframework.web.method.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.ResolvableMethod;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for {@link InvocableHandlerMethod}.
@@ -47,7 +46,7 @@ public class InvocableHandlerMethodTests {
 	private final HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.request = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}
@@ -60,11 +59,11 @@ public class InvocableHandlerMethodTests {
 
 		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
 
-		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
-		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
-		assertEquals("99-value", value);
-		assertEquals("intArg", getStubResolver(0).getResolvedParameters().get(0).getParameterName());
-		assertEquals("stringArg", getStubResolver(1).getResolvedParameters().get(0).getParameterName());
+		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(value).isEqualTo("99-value");
+		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("intArg");
+		assertThat(getStubResolver(1).getResolvedParameters().get(0).getParameterName()).isEqualTo("stringArg");
 	}
 
 	@Test
@@ -74,9 +73,9 @@ public class InvocableHandlerMethodTests {
 
 		Object returnValue = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
 
-		assertEquals(1, getStubResolver(0).getResolvedParameters().size());
-		assertEquals(1, getStubResolver(1).getResolvedParameters().size());
-		assertEquals("null-null", returnValue);
+		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(returnValue).isEqualTo("null-null");
 	}
 
 	@Test
@@ -90,9 +89,9 @@ public class InvocableHandlerMethodTests {
 	public void resolveProvidedArg() throws Exception {
 		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null, 99, "value");
 
-		assertNotNull(value);
-		assertEquals(String.class, value.getClass());
-		assertEquals("99-value", value);
+		assertThat(value).isNotNull();
+		assertThat(value.getClass()).isEqualTo(String.class);
+		assertThat(value).isEqualTo("99-value");
 	}
 
 	@Test
@@ -101,7 +100,7 @@ public class InvocableHandlerMethodTests {
 		this.composite.addResolver(new StubArgumentResolver("value1"));
 		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null, 2, "value2");
 
-		assertEquals("2-value2", value);
+		assertThat(value).isEqualTo("2-value2");
 	}
 
 	@Test
