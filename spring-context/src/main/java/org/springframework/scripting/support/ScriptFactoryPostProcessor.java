@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -134,6 +134,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.0
  */
 public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
@@ -188,7 +189,7 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
 	/** Map from bean name String to ScriptSource object. */
-	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
+	private final Map<String, ScriptSource> scriptSourceCache = new ConcurrentHashMap<>();
 
 
 	/**
@@ -460,14 +461,8 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	 * @see #convertToScriptSource
 	 */
 	protected ScriptSource getScriptSource(String beanName, String scriptSourceLocator) {
-		synchronized (this.scriptSourceCache) {
-			ScriptSource scriptSource = this.scriptSourceCache.get(beanName);
-			if (scriptSource == null) {
-				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
-				this.scriptSourceCache.put(beanName, scriptSource);
-			}
-			return scriptSource;
-		}
+		return this.scriptSourceCache.computeIfAbsent(beanName, key ->
+				convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader));
 	}
 
 	/**
