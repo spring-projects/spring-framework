@@ -527,7 +527,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		public RequestMappingInfo build() {
 
 			PathPatternParser parser = (this.options.getPatternParser() != null ?
-					this.options.getPatternParser() : new PathPatternParser());
+					this.options.getPatternParser() : PathPatternParser.defaultInstance);
 
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
