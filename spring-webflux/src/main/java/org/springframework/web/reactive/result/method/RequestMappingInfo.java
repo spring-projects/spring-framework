@@ -87,6 +87,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private final RequestConditionHolder customConditionHolder;
 
+	private final int hashCode;
+
 
 	public RequestMappingInfo(@Nullable String name, @Nullable PatternsRequestCondition patterns,
 			@Nullable RequestMethodsRequestCondition methods, @Nullable ParamsRequestCondition params,
@@ -101,6 +103,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		this.consumesCondition = (consumes != null ? consumes : EMPTY_CONSUMES);
 		this.producesCondition = (produces != null ? produces : EMPTY_PRODUCES);
 		this.customConditionHolder = (custom != null ? new RequestConditionHolder(custom) : EMPTY_CUSTOM);
+
+		this.hashCode = calculateHashCode(
+				this.patternsCondition, this.methodsCondition, this.paramsCondition, this.headersCondition,
+				this.consumesCondition, this.producesCondition, this.customConditionHolder);
 	}
 
 	/**
@@ -323,10 +329,17 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@Override
 	public int hashCode() {
-		return (this.patternsCondition.hashCode() * 31 +  // primary differentiation
-				this.methodsCondition.hashCode() + this.paramsCondition.hashCode() +
-				this.headersCondition.hashCode() + this.consumesCondition.hashCode() +
-				this.producesCondition.hashCode() + this.customConditionHolder.hashCode());
+		return this.hashCode;
+	}
+
+	private static int calculateHashCode(
+			PatternsRequestCondition patterns, RequestMethodsRequestCondition methods,
+			ParamsRequestCondition params, HeadersRequestCondition headers,
+			ConsumesRequestCondition consumes, ProducesRequestCondition produces,
+			RequestConditionHolder custom) {
+
+		return patterns.hashCode() * 31 + methods.hashCode() + params.hashCode() +
+				headers.hashCode() + consumes.hashCode() + produces.hashCode() + custom.hashCode();
 	}
 
 	@Override
@@ -527,7 +540,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		public RequestMappingInfo build() {
 
 			PathPatternParser parser = (this.options.getPatternParser() != null ?
-					this.options.getPatternParser() : new PathPatternParser());
+					this.options.getPatternParser() : PathPatternParser.defaultInstance);
 
 			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
