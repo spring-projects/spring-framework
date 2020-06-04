@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * AspectJ auto-proxy support.
  *
  * @author Sam Brannen
- * @since 5.0.18
+ * @since 5.2.7
  * @see org.springframework.aop.config.AopNamespaceHandlerAdviceOrderIntegrationTests
  */
 class AspectJAutoProxyAdviceOrderIntegrationTests {
