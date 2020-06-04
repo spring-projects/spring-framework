@@ -54,6 +54,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "xml")));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml")));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "soap+xml")));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.UTF_8)));
+		assertFalse(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1)));
 	}
 
 	@Test
@@ -61,6 +63,8 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("text", "xml")));
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "soap+xml")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("text", "xml", StandardCharsets.UTF_8)));
+		assertFalse(converter.canWrite(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1)));
 	}
 
 	@Test
