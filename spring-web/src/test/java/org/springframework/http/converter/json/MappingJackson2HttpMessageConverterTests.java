@@ -64,12 +64,16 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void canRead() {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canRead(Map.class, new MediaType("application", "json"))).isTrue();
+		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Test
 	public void canWrite() {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
+		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Test  // SPR-7905
