@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -509,20 +510,18 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	void afterAdviceTypes() throws Exception {
-		Echo target = new Echo();
-		ExceptionHandling afterReturningAspect = new ExceptionHandling();
+		ExceptionHandling aspect = new ExceptionHandling();
 		List<Advisor> advisors = getFixture().getAdvisors(
-				new SingletonMetadataAwareAspectInstanceFactory(afterReturningAspect, "someBean"));
-		Echo echo = (Echo) createProxy(target, advisors, Echo.class);
-		assertThat(afterReturningAspect.successCount).isEqualTo(0);
-		assertThat(echo.echo("")).isEqualTo("");
-		assertThat(afterReturningAspect.successCount).isEqualTo(1);
-		assertThat(afterReturningAspect.failureCount).isEqualTo(0);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
-			echo.echo(new FileNotFoundException()));
-		assertThat(afterReturningAspect.successCount).isEqualTo(1);
-		assertThat(afterReturningAspect.failureCount).isEqualTo(1);
-		assertThat(afterReturningAspect.afterCount).isEqualTo(afterReturningAspect.failureCount + afterReturningAspect.successCount);
+				new SingletonMetadataAwareAspectInstanceFactory(aspect, "exceptionHandlingAspect"));
+		Echo echo = (Echo) createProxy(new Echo(), advisors, Echo.class);
+
+		assertThat(aspect.invocations).isEmpty();
+		assertThat(echo.echo(42)).isEqualTo(42);
+		assertThat(aspect.invocations).containsExactly("after returning", "after");
+
+		aspect.invocations.clear();
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> echo.echo(new FileNotFoundException()));
+		assertThat(aspect.invocations).containsExactly("after throwing", "after");
 	}
 
 	@Test
@@ -772,25 +771,26 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	@Aspect
 	static class ExceptionHandling {
 
-		public int successCount;
+		List<String> invocations = new ArrayList<>();
 
-		public int failureCount;
 
-		public int afterCount;
-
-		@AfterReturning("execution(* echo(*))")
-		public void succeeded() {
-			++successCount;
+		@Pointcut("execution(* echo(*))")
+		void echo() {
 		}
 
-		@AfterThrowing("execution(* echo(*))")
-		public void failed() {
-			++failureCount;
+		@AfterReturning("echo()")
+		void succeeded() {
+			invocations.add("after returning");
 		}
 
-		@After("execution(* echo(*))")
-		public void invoked() {
-			++afterCount;
+		@AfterThrowing("echo()")
+		void failed() {
+			invocations.add("after throwing");
+		}
+
+		@After("echo()")
+		void after() {
+			invocations.add("after");
 		}
 	}
 
