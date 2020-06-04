@@ -21,7 +21,11 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -67,6 +71,8 @@ import org.springframework.util.TypeUtils;
  * @see MappingJackson2HttpMessageConverter
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
+
+	private static final Map<String, JsonEncoding> ENCODINGS = jsonEncodings();
 
 	/**
 	 * The default charset used by the converter.
@@ -168,6 +174,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
+	protected boolean canRead(@Nullable MediaType mediaType) {
+		if (!super.canRead(mediaType)) {
+			return false;
+		}
+		return checkEncoding(mediaType);
+	}
+
+	@Override
 	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
 		if (!canWrite(mediaType)) {
 			return false;
@@ -178,6 +192,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 		logWarningIfNecessary(clazz, causeRef.get());
 		return false;
+	}
+
+	@Override
+	protected boolean canWrite(@Nullable MediaType mediaType) {
+		if (!super.canWrite(mediaType)) {
+			return false;
+		}
+		return checkEncoding(mediaType);
 	}
 
 	/**
@@ -209,6 +231,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				logger.warn(msg + ": " + cause);
 			}
 		}
+	}
+
+	private boolean checkEncoding(@Nullable MediaType mediaType) {
+		if (mediaType != null && mediaType.getCharset() != null) {
+			Charset charset = mediaType.getCharset();
+			return ENCODINGS.containsKey(charset.name());
+		}
+		return true;
 	}
 
 	@Override
@@ -333,10 +363,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected JsonEncoding getJsonEncoding(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
-			for (JsonEncoding encoding : JsonEncoding.values()) {
-				if (charset.name().equals(encoding.getJavaName())) {
-					return encoding;
-				}
+			JsonEncoding encoding = ENCODINGS.get(charset.name());
+			if (encoding != null) {
+				return encoding;
 			}
 		}
 		return JsonEncoding.UTF8;
@@ -357,6 +386,11 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			object = ((MappingJacksonValue) object).getValue();
 		}
 		return super.getContentLength(object, contentType);
+	}
+
+	private static Map<String, JsonEncoding> jsonEncodings() {
+		return EnumSet.allOf(JsonEncoding.class).stream()
+				.collect(Collectors.toMap(JsonEncoding::getJavaName, Function.identity()));
 	}
 
 }
