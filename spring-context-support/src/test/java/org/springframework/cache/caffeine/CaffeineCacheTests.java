@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,4 +80,29 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 		assertThat(cache.get(key).get()).isEqualTo(value);
 	}
 
+	@Test
+	void testLoadingCacheGet() {
+		Object key = new Object();
+		Object value = new Object();
+
+		CaffeineCache loadingCaffeineCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.build(x -> value));
+
+		ValueWrapper valueFromCache = loadingCaffeineCache.get(key);
+		assertThat(valueFromCache).isNotNull();
+		assertThat(valueFromCache.get()).isEqualTo(value);
+	}
+
+	@Test
+	void testLoadingCacheGetWithType() {
+		String key = "key";
+		String value = "value";
+
+		CaffeineCache loadingCaffeineCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.build(x -> value));
+
+		String valueFromCache = loadingCaffeineCache.get(key, String.class);
+		assertThat(valueFromCache).isNotNull();
+		assertThat(valueFromCache).isEqualTo(value);
+	}
 }

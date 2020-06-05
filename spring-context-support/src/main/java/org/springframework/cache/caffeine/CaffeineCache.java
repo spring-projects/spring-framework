@@ -29,6 +29,10 @@ import org.springframework.util.Assert;
  * Spring {@link org.springframework.cache.Cache} adapter implementation
  * on top of a Caffeine {@link com.github.benmanes.caffeine.cache.Cache} instance.
  *
+ * <p>IMPORTANT!
+ * <p>You can pass also a {@link com.github.benmanes.caffeine.cache.LoadingCache} to CaffeineCache, but
+ * using LoadingCache is incompatible with the @Cacheable pattern!
+ *
  * <p>Requires Caffeine 2.1 or higher.
  *
  * @author Ben Manes
@@ -91,6 +95,17 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 			return toValueWrapper(value);
 		}
 		return super.get(key);
+	}
+
+	@Nullable
+	@SuppressWarnings("unchecked")
+	public <T> T get(Object key, @Nullable Class<T> type) {
+		if (this.cache instanceof LoadingCache) {
+			Object value = this.fromStoreValue(((LoadingCache<Object, Object>) this.cache).get(key));
+			verifyValueType(type, value);
+			return (T) value;
+		}
+		return super.get(key, type);
 	}
 
 	@SuppressWarnings("unchecked")
