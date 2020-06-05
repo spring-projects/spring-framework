@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.json;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,12 +28,12 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
@@ -58,12 +59,18 @@ public class Jackson2SmileDecoderTests extends AbstractDecoderTests<Jackson2Smil
 	@Override
 	@Test
 	public void canDecode() {
-		assertThat(decoder.canDecode(forClass(Pojo.class), SMILE_MIME_TYPE)).isTrue();
-		assertThat(decoder.canDecode(forClass(Pojo.class), STREAM_SMILE_MIME_TYPE)).isTrue();
-		assertThat(decoder.canDecode(forClass(Pojo.class), null)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), SMILE_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), STREAM_SMILE_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
-		assertThat(decoder.canDecode(forClass(String.class), null)).isFalse();
-		assertThat(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isFalse();
+
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8))).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1))).isFalse();
+
 	}
 
 	@Override
