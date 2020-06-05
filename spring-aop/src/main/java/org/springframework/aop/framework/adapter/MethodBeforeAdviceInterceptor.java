@@ -27,9 +27,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Interceptor to wrap am {@link org.springframework.aop.MethodBeforeAdvice}.
- * Used internally by the AOP framework; application developers should not need
- * to use this class directly.
+ * Interceptor to wrap a {@link MethodBeforeAdvice}.
+ * <p>Used internally by the AOP framework; application developers should not
+ * need to use this class directly.
  *
  * @author Rod Johnson
  * @see AfterReturningAdviceInterceptor

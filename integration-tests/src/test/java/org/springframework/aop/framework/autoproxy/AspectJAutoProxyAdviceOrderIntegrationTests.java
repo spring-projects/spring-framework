@@ -19,10 +19,13 @@ package org.springframework.aop.framework.autoproxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,25 +50,39 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class AspectJAutoProxyAdviceOrderIntegrationTests {
 
+	/**
+	 * {@link After @After} advice declared as first <em>after</em> method in source code.
+	 */
 	@Nested
 	@SpringJUnitConfig(AfterAdviceFirstConfig.class)
 	@DirtiesContext
 	class AfterAdviceFirstTests {
 
 		@Test
-		void afterAdviceIsInvokedFirst(@Autowired Echo echo, @Autowired AfterAdviceFirstAspect aspect) throws Exception {
+		void afterAdviceIsNotInvokedLast(@Autowired Echo echo, @Autowired AfterAdviceFirstAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("after", "after returning");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after returning");
 
 			aspect.invocations.clear();
 			assertThatExceptionOfType(Exception.class).isThrownBy(
 					() -> echo.echo(new Exception()));
-			assertThat(aspect.invocations).containsExactly("after", "after throwing");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after throwing");
 		}
 	}
 
 
+	/**
+	 * This test class uses {@link AfterAdviceLastAspect} which declares its
+	 * {@link After @After} advice as the last <em>after advice type</em> method
+	 * in its source code.
+	 *
+	 * <p>On Java versions prior to JDK 7, we would have expected the {@code @After}
+	 * advice method to be invoked after {@code @AfterThrowing} and
+	 * {@code @AfterReturning} advice methods due to the AspectJ precedence
+	 * rules implemented in
+	 * {@link org.springframework.aop.aspectj.autoproxy.AspectJPrecedenceComparator}.
+	 */
 	@Nested
 	@SpringJUnitConfig(AfterAdviceLastConfig.class)
 	@DirtiesContext
@@ -75,14 +92,12 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		void afterAdviceIsNotInvokedLast(@Autowired Echo echo, @Autowired AfterAdviceLastAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			// On Java versions prior to JDK 7, we would expect the @After advice to be invoked last.
-			assertThat(aspect.invocations).containsExactly("after", "after returning");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after returning");
 
 			aspect.invocations.clear();
 			assertThatExceptionOfType(Exception.class).isThrownBy(
 					() -> echo.echo(new Exception()));
-			// On Java versions prior to JDK 7, we would expect the @After advice to be invoked last.
-			assertThat(aspect.invocations).containsExactly("after", "after throwing");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after throwing");
 		}
 	}
 
@@ -145,13 +160,29 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		}
 
 		@AfterReturning("echo()")
-		void succeeded() {
+		void afterReturning() {
 			invocations.add("after returning");
 		}
 
 		@AfterThrowing("echo()")
-		void failed() {
+		void afterThrowing() {
 			invocations.add("after throwing");
+		}
+
+		@Before("echo()")
+		void before() {
+			invocations.add("before");
+		}
+
+		@Around("echo()")
+		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+			invocations.add("around - start");
+			try {
+				return joinPoint.proceed();
+			}
+			finally {
+				invocations.add("around - end");
+			}
 		}
 	}
 
@@ -167,13 +198,29 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		void echo() {
 		}
 
+		@Around("echo()")
+		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+			invocations.add("around - start");
+			try {
+				return joinPoint.proceed();
+			}
+			finally {
+				invocations.add("around - end");
+			}
+		}
+
+		@Before("echo()")
+		void before() {
+			invocations.add("before");
+		}
+
 		@AfterReturning("echo()")
-		void succeeded() {
+		void afterReturning() {
 			invocations.add("after returning");
 		}
 
 		@AfterThrowing("echo()")
-		void failed() {
+		void afterThrowing() {
 			invocations.add("after throwing");
 		}
 
