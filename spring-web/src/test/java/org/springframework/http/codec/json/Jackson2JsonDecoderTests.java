@@ -89,6 +89,11 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 
 		assertFalse(decoder.canDecode(forClass(String.class), null));
 		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_XML));
+		assertTrue(this.decoder.canDecode(forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.UTF_8)));
+		assertFalse(this.decoder.canDecode(forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
+
 	}
 
 	@Test  // SPR-15866

@@ -71,6 +71,11 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2Js
 		assertTrue(this.encoder.canEncode(pojoType, APPLICATION_STREAM_JSON));
 		assertTrue(this.encoder.canEncode(pojoType, null));
 
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.UTF_8)));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
+
 		// SPR-15464
 		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));
 
