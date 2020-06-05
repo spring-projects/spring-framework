@@ -455,7 +455,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		UnsupportedOperationException expectedException = new UnsupportedOperationException();
 		List<Advisor> advisors = getFixture().getAdvisors(
-				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException), "someBean"));
+				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
 		assertThat(advisors.size()).as("One advice method was found").isEqualTo(1);
 		ITestBean itb = (ITestBean) createProxy(target, advisors, ITestBean.class);
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
@@ -469,7 +469,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		TestBean target = new TestBean();
 		RemoteException expectedException = new RemoteException();
 		List<Advisor> advisors = getFixture().getAdvisors(
-				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionAspect(expectedException), "someBean"));
+				new SingletonMetadataAwareAspectInstanceFactory(new ExceptionThrowingAspect(expectedException), "someBean"));
 		assertThat(advisors.size()).as("One advice method was found").isEqualTo(1);
 		ITestBean itb = (ITestBean) createProxy(target, advisors, ITestBean.class);
 		assertThatExceptionOfType(UndeclaredThrowableException.class).isThrownBy(
@@ -510,18 +510,18 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	void afterAdviceTypes() throws Exception {
-		ExceptionHandling aspect = new ExceptionHandling();
+		InvocationTrackingAspect aspect = new InvocationTrackingAspect();
 		List<Advisor> advisors = getFixture().getAdvisors(
 				new SingletonMetadataAwareAspectInstanceFactory(aspect, "exceptionHandlingAspect"));
 		Echo echo = (Echo) createProxy(new Echo(), advisors, Echo.class);
 
 		assertThat(aspect.invocations).isEmpty();
 		assertThat(echo.echo(42)).isEqualTo(42);
-		assertThat(aspect.invocations).containsExactly("after returning", "after");
+		assertThat(aspect.invocations).containsExactly("around - start", "before", "after returning", "after", "around - end");
 
 		aspect.invocations.clear();
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> echo.echo(new FileNotFoundException()));
-		assertThat(aspect.invocations).containsExactly("after throwing", "after");
+		assertThat(aspect.invocations).containsExactly("around - start", "before", "after throwing", "after", "around - end");
 	}
 
 	@Test
@@ -742,11 +742,11 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect
-	static class ExceptionAspect {
+	static class ExceptionThrowingAspect {
 
 		private final Exception ex;
 
-		ExceptionAspect(Exception ex) {
+		ExceptionThrowingAspect(Exception ex) {
 			this.ex = ex;
 		}
 
@@ -769,7 +769,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 
 	@Aspect
-	static class ExceptionHandling {
+	private static class InvocationTrackingAspect {
 
 		List<String> invocations = new ArrayList<>();
 
@@ -778,13 +778,29 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		void echo() {
 		}
 
+		@Around("echo()")
+		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+			invocations.add("around - start");
+			try {
+				return joinPoint.proceed();
+			}
+			finally {
+				invocations.add("around - end");
+			}
+		}
+
+		@Before("echo()")
+		void before() {
+			invocations.add("before");
+		}
+
 		@AfterReturning("echo()")
-		void succeeded() {
+		void afterReturning() {
 			invocations.add("after returning");
 		}
 
 		@AfterThrowing("echo()")
-		void failed() {
+		void afterThrowing() {
 			invocations.add("after throwing");
 		}
 

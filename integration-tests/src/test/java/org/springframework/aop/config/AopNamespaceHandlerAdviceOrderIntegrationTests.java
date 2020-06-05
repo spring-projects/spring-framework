@@ -19,6 +19,7 @@ package org.springframework.aop.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -45,14 +46,14 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 	class AfterAdviceFirstTests {
 
 		@Test
-		void afterAdviceIsInvokedFirst(@Autowired Echo echo, @Autowired EchoAspect aspect) throws Exception {
+		void afterAdviceIsInvokedFirst(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("after", "after returning");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after returning");
 
 			aspect.invocations.clear();
 			assertThatExceptionOfType(Exception.class).isThrownBy(() -> echo.echo(new Exception()));
-			assertThat(aspect.invocations).containsExactly("after", "after throwing");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after", "after throwing");
 		}
 	}
 
@@ -62,14 +63,14 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 	class AfterAdviceLastTests {
 
 		@Test
-		void afterAdviceIsInvokedLast(@Autowired Echo echo, @Autowired EchoAspect aspect) throws Exception {
+		void afterAdviceIsInvokedLast(@Autowired Echo echo, @Autowired InvocationTrackingAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("after returning", "after");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after returning", "after");
 
 			aspect.invocations.clear();
 			assertThatExceptionOfType(Exception.class).isThrownBy(() -> echo.echo(new Exception()));
-			assertThat(aspect.invocations).containsExactly("after throwing", "after");
+			assertThat(aspect.invocations).containsExactly("around - start", "before", "around - end", "after throwing", "after");
 		}
 	}
 
@@ -84,18 +85,29 @@ class AopNamespaceHandlerAdviceOrderIntegrationTests {
 		}
 	}
 
-	static class EchoAspect {
+	static class InvocationTrackingAspect {
 
 		List<String> invocations = new ArrayList<>();
 
-		void echo() {
+		Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+			invocations.add("around - start");
+			try {
+				return joinPoint.proceed();
+			}
+			finally {
+				invocations.add("around - end");
+			}
 		}
 
-		void succeeded() {
+		void before() {
+			invocations.add("before");
+		}
+
+		void afterReturning() {
 			invocations.add("after returning");
 		}
 
-		void failed() {
+		void afterThrowing() {
 			invocations.add("after throwing");
 		}
 
