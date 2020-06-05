@@ -18,6 +18,7 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.codec.AbstractEncoderTests;
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
@@ -67,6 +69,11 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTests<Jackson2Smil
 		assertThat(this.encoder.canEncode(pojoType, SMILE_MIME_TYPE)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, STREAM_SMILE_MIME_TYPE)).isTrue();
 		assertThat(this.encoder.canEncode(pojoType, null)).isTrue();
+
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8))).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1))).isFalse();
 
 		// SPR-15464
 		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isTrue();

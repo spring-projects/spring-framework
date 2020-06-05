@@ -18,13 +18,18 @@ package org.springframework.http.codec.json;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -75,6 +80,9 @@ public abstract class Jackson2CodecSupport {
 					new MimeType("application", "json"),
 					new MimeType("application", "*+json")));
 
+	private static final Map<String, JsonEncoding> ENCODINGS = jsonEncodings();
+
+
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
@@ -107,7 +115,17 @@ public abstract class Jackson2CodecSupport {
 
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
-		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+		if (mimeType == null) {
+			return true;
+		}
+		else if (this.mimeTypes.stream().noneMatch(m -> m.isCompatibleWith(mimeType))) {
+			return false;
+		}
+		else if (mimeType.getCharset() != null) {
+			Charset charset = mimeType.getCharset();
+			return ENCODINGS.containsKey(charset.name());
+		}
+		return true;
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
@@ -144,5 +162,11 @@ public abstract class Jackson2CodecSupport {
 
 	@Nullable
 	protected abstract <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType);
+
+	private static Map<String, JsonEncoding> jsonEncodings() {
+		return EnumSet.allOf(JsonEncoding.class).stream()
+				.collect(Collectors.toMap(JsonEncoding::getJavaName, Function.identity()));
+	}
+
 
 }
