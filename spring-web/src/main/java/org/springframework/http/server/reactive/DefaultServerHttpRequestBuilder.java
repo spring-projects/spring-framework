@@ -195,20 +195,20 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 			return this.originalRequest.getCookies();
 		}
 
-		@Nullable
 		@Override
-		public InetSocketAddress getRemoteAddress() {
-			return this.originalRequest.getRemoteAddress();
-		}
-
 		@Nullable
-		@Override
 		public InetSocketAddress getLocalAddress() {
 			return this.originalRequest.getLocalAddress();
 		}
 
-		@Nullable
 		@Override
+		@Nullable
+		public InetSocketAddress getRemoteAddress() {
+			return this.originalRequest.getRemoteAddress();
+		}
+
+		@Override
+		@Nullable
 		protected SslInfo initSslInfo() {
 			return this.sslInfo;
 		}

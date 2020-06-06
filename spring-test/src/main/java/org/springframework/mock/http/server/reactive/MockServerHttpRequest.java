@@ -64,10 +64,10 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final InetSocketAddress localAddress;
 
 	@Nullable
-	private final InetSocketAddress localAddress;
+	private final InetSocketAddress remoteAddress;
 
 	@Nullable
 	private final SslInfo sslInfo;
@@ -103,18 +103,18 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	@Nullable
-	public InetSocketAddress getRemoteAddress() {
-		return this.remoteAddress;
-	}
-
-	@Nullable
-	@Override
 	public InetSocketAddress getLocalAddress() {
 		return this.localAddress;
 	}
 
-	@Nullable
 	@Override
+	@Nullable
+	public InetSocketAddress getRemoteAddress() {
+		return this.remoteAddress;
+	}
+
+	@Override
+	@Nullable
 	protected SslInfo initSslInfo() {
 		return this.sslInfo;
 	}

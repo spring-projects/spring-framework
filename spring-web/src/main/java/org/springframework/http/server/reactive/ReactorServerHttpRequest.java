@@ -95,6 +95,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		}
 		else {
 			InetSocketAddress localAddress = request.hostAddress();
+			Assert.state(localAddress != null, "No host address available");
 			return new URI(scheme, null, localAddress.getHostString(),
 					localAddress.getPort(), null, null, null);
 		}
@@ -145,13 +146,15 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public InetSocketAddress getRemoteAddress() {
-		return this.request.remoteAddress();
+	@Nullable
+	public InetSocketAddress getLocalAddress() {
+		return this.request.hostAddress();
 	}
 
 	@Override
-	public InetSocketAddress getLocalAddress() {
-		return this.request.hostAddress();
+	@Nullable
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
 	}
 
 	@Override

@@ -114,7 +114,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.16.Final"
+			dependency "org.hibernate:hibernate-core:5.4.17.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.5.Final"
 			dependency "org.webjars:webjars-locator-core:0.45"
 			dependency "org.webjars:underscorejs:1.8.3"
@@ -329,7 +329,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.32"
+		toolVersion = "8.33"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
