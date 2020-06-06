@@ -287,13 +287,12 @@ abstract class AutowireUtils {
 					return System.identityHashCode(proxy);
 				case "toString":
 					return this.objectFactory.toString();
-				default:
-					try {
-						return method.invoke(this.objectFactory.getObject(), args);
-					}
-					catch (InvocationTargetException ex) {
-						throw ex.getTargetException();
-					}
+			}
+			try {
+				return method.invoke(this.objectFactory.getObject(), args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
 			}
 		}
 	}
