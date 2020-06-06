@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -64,10 +65,10 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
-	private final InetSocketAddress remoteAddress;
+	private final InetSocketAddress localAddress;
 
 	@Nullable
-	private final InetSocketAddress localAddress;
+	private final InetSocketAddress remoteAddress;
 
 	@Nullable
 	private final SslInfo sslInfo;
@@ -98,9 +99,14 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@SuppressWarnings("ConstantConditions")
 	public String getMethodValue() {
-		return (this.httpMethod != null ? this.httpMethod.name() : this.customHttpMethod);
+		return (this.httpMethod != null ? this.httpMethod.name() : Objects.requireNonNull(this.customHttpMethod));
+	}
+
+	@Override
+	@Nullable
+	public InetSocketAddress getLocalAddress() {
+		return this.localAddress;
 	}
 
 	@Override
@@ -109,14 +115,8 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.remoteAddress;
 	}
 
-	@Nullable
 	@Override
-	public InetSocketAddress getLocalAddress() {
-		return this.localAddress;
-	}
-
 	@Nullable
-	@Override
 	protected SslInfo initSslInfo() {
 		return this.sslInfo;
 	}
