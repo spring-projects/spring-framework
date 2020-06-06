@@ -130,7 +130,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.1.1.Final') {
+			dependencySet(group: 'io.undertow', version: '2.1.3.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
