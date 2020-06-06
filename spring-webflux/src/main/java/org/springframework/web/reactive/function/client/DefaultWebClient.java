@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,7 +398,7 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
+		private static final IntPredicate STATUS_CODE_ERROR = (value -> value >= 400);
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, DefaultResponseSpec::createResponseException);
@@ -418,6 +418,7 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+
 			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
 		}
 
