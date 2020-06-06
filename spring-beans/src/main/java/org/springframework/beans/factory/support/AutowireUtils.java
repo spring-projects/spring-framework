@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,22 +279,22 @@ abstract class AutowireUtils {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
-			if (methodName.equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (methodName.equals("hashCode")) {
-				// Use hashCode of proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (methodName.equals("toString")) {
-				return this.objectFactory.toString();
-			}
-			try {
-				return method.invoke(this.objectFactory.getObject(), args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of proxy.
+					return System.identityHashCode(proxy);
+				case "toString":
+					return this.objectFactory.toString();
+				default:
+					try {
+						return method.invoke(this.objectFactory.getObject(), args);
+					}
+					catch (InvocationTargetException ex) {
+						throw ex.getTargetException();
+					}
 			}
 		}
 	}
