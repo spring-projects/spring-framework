@@ -17,6 +17,7 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Vladislav Kisel
  * @since 3.1
  */
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
@@ -268,6 +270,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 					}
 				}
 			}
+
+			// Singular web parameters are wrapped with array, extract it so it can be picked up by conversion service later on
+			if (value != null && value.getClass().isArray() && Array.getLength(value) == 1) {
+				value = Array.get(value, 0);
+			}
+
 			try {
 				MethodParameter methodParam = new FieldAwareConstructorParameter(ctor, i, paramName);
 				if (value == null && methodParam.isOptional()) {
