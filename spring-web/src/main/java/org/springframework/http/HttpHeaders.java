@@ -1773,6 +1773,19 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
 	 * @param headers the headers to expose
 	 * @return a read-only variant of the headers, or the original headers as-is
+	 * (in case it happens to be a read-only {@code HttpHeaders} instance already)
+	 * @since 5.3
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
+		return (headers instanceof HttpHeaders ?
+				readOnlyHttpHeaders((HttpHeaders) headers) : new ReadOnlyHttpHeaders(headers));
+	}
+
+	/**
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		Assert.notNull(headers, "HttpHeaders must not be null");

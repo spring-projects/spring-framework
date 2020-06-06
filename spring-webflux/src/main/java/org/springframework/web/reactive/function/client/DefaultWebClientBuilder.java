@@ -229,7 +229,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
+	@Deprecated
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {
 			this.strategiesConfigurers = new ArrayList<>(4);
@@ -266,7 +266,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				.orElse(exchange) : exchange);
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
 				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
-				this.defaultCookies != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultCookies) : null,
+				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
 				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
@@ -290,10 +290,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
 			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
 		}
-
 		ExchangeStrategies.Builder builder =
 				this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder();
-
 		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
 		return builder.build();
 	}
@@ -306,10 +304,6 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory();
 		factory.setDefaultUriVariables(this.defaultUriVariables);
 		return factory;
-	}
-
-	private static <K, V> MultiValueMap<K, V> unmodifiableCopy(MultiValueMap<K, V> map) {
-		return CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(map));
 	}
 
 }
