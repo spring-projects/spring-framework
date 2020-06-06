@@ -101,6 +101,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.defaultUriVariables = (other.defaultUriVariables != null ?
 				new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
+
 		if (other.defaultHeaders != null) {
 			this.defaultHeaders = new HttpHeaders();
 			this.defaultHeaders.putAll(other.defaultHeaders);
@@ -108,13 +109,16 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
+
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
-		this.filters = other.filters != null ? new ArrayList<>(other.filters) : null;
+		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
+
 		this.connector = other.connector;
 		this.strategies = other.strategies;
-		this.strategiesConfigurers = other.strategiesConfigurers != null ? new ArrayList<>(other.strategiesConfigurers) : null;
+		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
+				new ArrayList<>(other.strategiesConfigurers) : null);
 		this.exchangeFunction = other.exchangeFunction;
 	}
 

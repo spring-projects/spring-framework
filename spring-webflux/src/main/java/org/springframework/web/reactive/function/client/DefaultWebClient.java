@@ -417,11 +417,10 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
+		private static final IntPredicate STATUS_CODE_ERROR = (value -> value >= 400);
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
-
 
 		private final Mono<ClientResponse> responseMono;
 
@@ -429,13 +428,11 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
-
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
-
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,

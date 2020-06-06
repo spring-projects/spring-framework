@@ -70,6 +70,10 @@ import org.springframework.util.ObjectUtils;
  * @since 3.0.2
  * @param <T> the body type
  * @see #getStatusCode()
+ * @see org.springframework.web.client.RestOperations#getForEntity(String, Class, Object...)
+ * @see org.springframework.web.client.RestOperations#getForEntity(String, Class, java.util.Map)
+ * @see org.springframework.web.client.RestOperations#getForEntity(URI, Class)
+ * @see RequestEntity
  */
 public class ResponseEntity<T> extends HttpEntity<T> {
 
