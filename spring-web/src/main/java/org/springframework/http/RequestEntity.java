@@ -64,6 +64,8 @@ import org.springframework.web.util.UriTemplateHandler;
  * @param <T> the body type
  * @see #getMethod()
  * @see #getUrl()
+ * @see org.springframework.web.client.RestOperations#exchange(RequestEntity, Class)
+ * @see ResponseEntity
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 

@@ -76,15 +76,15 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private MockServerHttpRequest(String httpMethod,
 			URI uri, @Nullable String contextPath, HttpHeaders headers, MultiValueMap<String, HttpCookie> cookies,
-			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
+			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
 			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
 		super(uri, contextPath, headers);
 		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
 		this.httpMethod = httpMethod;
 		this.cookies = cookies;
-		this.remoteAddress = remoteAddress;
 		this.localAddress = localAddress;
+		this.remoteAddress = remoteAddress;
 		this.sslInfo = sslInfo;
 		this.body = Flux.from(body);
 	}
@@ -382,8 +382,8 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see BodyBuilder#body(String)
 		 */
 		MockServerHttpRequest build();
-
 	}
+
 
 	/**
 	 * A builder that adds a body to the request.
@@ -423,7 +423,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @return the built request entity
 		 */
 		MockServerHttpRequest body(String body);
-
 	}
 
 
@@ -597,7 +596,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		public MockServerHttpRequest body(Publisher<? extends DataBuffer> body) {
 			applyCookiesIfNecessary();
 			return new MockServerHttpRequest(this.methodValue, getUrlToUse(), this.contextPath,
-					this.headers, this.cookies, this.remoteAddress, this.localAddress, this.sslInfo, body);
+					this.headers, this.cookies, this.localAddress, this.remoteAddress, this.sslInfo, body);
 		}
 
 		private void applyCookiesIfNecessary() {
@@ -610,11 +609,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		private URI getUrlToUse() {
 			MultiValueMap<String, String> params =
 					this.queryParamsBuilder.buildAndExpand().encode().getQueryParams();
-
 			if (!params.isEmpty()) {
 				return UriComponentsBuilder.fromUri(this.url).queryParams(params).build(true).toUri();
 			}
-
 			return this.url;
 		}
 	}

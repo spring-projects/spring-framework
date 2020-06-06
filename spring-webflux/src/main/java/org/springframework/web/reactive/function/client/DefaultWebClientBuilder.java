@@ -106,6 +106,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.defaultUriVariables = (other.defaultUriVariables != null ?
 				new LinkedHashMap<>(other.defaultUriVariables) : null);
 		this.uriBuilderFactory = other.uriBuilderFactory;
+
 		if (other.defaultHeaders != null) {
 			this.defaultHeaders = new HttpHeaders();
 			this.defaultHeaders.putAll(other.defaultHeaders);
@@ -113,13 +114,16 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		else {
 			this.defaultHeaders = null;
 		}
+
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
 		this.defaultRequest = other.defaultRequest;
-		this.filters = other.filters != null ? new ArrayList<>(other.filters) : null;
+		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
+
 		this.connector = other.connector;
 		this.strategies = other.strategies;
-		this.strategiesConfigurers = other.strategiesConfigurers != null ? new ArrayList<>(other.strategiesConfigurers) : null;
+		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
+				new ArrayList<>(other.strategiesConfigurers) : null);
 		this.exchangeFunction = other.exchangeFunction;
 	}
 
@@ -288,10 +292,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ExchangeStrategies initExchangeStrategies() {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
-			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
+			return (this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults());
 		}
 		ExchangeStrategies.Builder builder =
-				this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder();
+				(this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder());
 		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
 		return builder.build();
 	}
@@ -300,8 +304,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		if (this.uriBuilderFactory != null) {
 			return this.uriBuilderFactory;
 		}
-		DefaultUriBuilderFactory factory = this.baseUrl != null ?
-				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory();
+		DefaultUriBuilderFactory factory = (this.baseUrl != null ?
+				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory());
 		factory.setDefaultUriVariables(this.defaultUriVariables);
 		return factory;
 	}
