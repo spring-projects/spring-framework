@@ -223,8 +223,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@Deprecated
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {
 			this.strategiesConfigurers = new ArrayList<>(4);
@@ -260,8 +260,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				.map(filter -> filter.apply(exchange))
 				.orElse(exchange) : exchange);
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
-				this.defaultHeaders != null ? unmodifiableCopy(this.defaultHeaders) : null,
-				this.defaultCookies != null ? unmodifiableCopy(this.defaultCookies) : null,
+				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
+				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
 				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
@@ -280,12 +280,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ExchangeStrategies initExchangeStrategies() {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
-			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
+			return (this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults());
 		}
-
 		ExchangeStrategies.Builder builder =
-				this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder();
-
+				(this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder());
 		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
 		return builder.build();
 	}
@@ -294,18 +292,10 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		if (this.uriBuilderFactory != null) {
 			return this.uriBuilderFactory;
 		}
-		DefaultUriBuilderFactory factory = this.baseUrl != null ?
-				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory();
+		DefaultUriBuilderFactory factory = (this.baseUrl != null ?
+				new DefaultUriBuilderFactory(this.baseUrl) : new DefaultUriBuilderFactory());
 		factory.setDefaultUriVariables(this.defaultUriVariables);
 		return factory;
-	}
-
-	private static HttpHeaders unmodifiableCopy(HttpHeaders headers) {
-		return HttpHeaders.readOnlyHttpHeaders(headers);
-	}
-
-	private static <K, V> MultiValueMap<K, V> unmodifiableCopy(MultiValueMap<K, V> map) {
-		return CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(map));
 	}
 
 }
