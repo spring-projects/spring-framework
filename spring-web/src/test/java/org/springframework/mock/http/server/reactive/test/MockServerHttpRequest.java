@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class MockServerHttpRequest extends AbstractServerHttpRequest {
+public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpMethod httpMethod;
 
@@ -97,8 +97,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		return this.remoteAddress;
 	}
 
-	@Nullable
 	@Override
+	@Nullable
 	protected SslInfo initSslInfo() {
 		return this.sslInfo;
 	}
@@ -342,8 +342,8 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @see BodyBuilder#body(String)
 		 */
 		MockServerHttpRequest build();
-
 	}
+
 
 	/**
 	 * A builder that adds a body to the request.
@@ -383,14 +383,12 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		 * @return the built request entity
 		 */
 		MockServerHttpRequest body(String body);
-
 	}
 
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
 		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
-
 
 		private final HttpMethod method;
 
@@ -410,7 +408,6 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Nullable
 		private SslInfo sslInfo;
-
 
 		public DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
@@ -558,11 +555,9 @@ public class MockServerHttpRequest extends AbstractServerHttpRequest {
 		private URI getUrlToUse() {
 			MultiValueMap<String, String> params =
 					this.queryParamsBuilder.buildAndExpand().encode().getQueryParams();
-
 			if (!params.isEmpty()) {
 				return UriComponentsBuilder.fromUri(this.url).queryParams(params).build(true).toUri();
 			}
-
 			return this.url;
 		}
 	}

@@ -223,8 +223,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@Deprecated
 	public WebClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
 		if (this.strategiesConfigurers == null) {
 			this.strategiesConfigurers = new ArrayList<>(4);
@@ -282,10 +282,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
 			return this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults();
 		}
-
 		ExchangeStrategies.Builder builder =
 				this.strategies != null ? this.strategies.mutate() : ExchangeStrategies.builder();
-
 		this.strategiesConfigurers.forEach(configurer -> configurer.accept(builder));
 		return builder.build();
 	}
