@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.AttributesImpl;
@@ -139,9 +140,11 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 			}
 			this.encoding = this.reader.getCharacterEncodingScheme();
 		}
-		if (getContentHandler() != null) {
+
+		ContentHandler contentHandler = getContentHandler();
+		if (contentHandler != null) {
 			final Location location = this.reader.getLocation();
-			getContentHandler().setDocumentLocator(new Locator2() {
+			contentHandler.setDocumentLocator(new Locator2() {
 				@Override
 				public int getColumnNumber() {
 					return (location != null ? location.getColumnNumber() : -1);
@@ -170,7 +173,7 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 					return encoding;
 				}
 			});
-			getContentHandler().startDocument();
+			contentHandler.startDocument();
 			if (this.reader.standaloneSet()) {
 				setStandalone(this.reader.isStandalone());
 			}

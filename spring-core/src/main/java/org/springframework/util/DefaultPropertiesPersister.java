@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,7 +40,7 @@ import java.util.Properties;
  *
  * <p>The persistence code that works with Reader/Writer follows the JDK's parsing
  * strategy but does not implement Unicode conversion, because the Reader/Writer
- * should already apply proper decoding/encoding of characters. If you use prefer
+ * should already apply proper decoding/encoding of characters. If you prefer
  * to escape unicode characters in your properties files, do <i>not</i> specify
  * an encoding for a Reader/Writer (like ReloadableResourceBundleMessageSource's
  * "defaultEncoding" and "fileEncodings" properties).

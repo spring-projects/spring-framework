@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -97,6 +98,10 @@ import org.springframework.util.Assert;
  * setup analogous to {@code JtaTransactionManager}, in particular with respect to
  * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
  *
+ * <p><b>NOTE: As of 5.3, {@link org.springframework.jdbc.support.JdbcTransactionManager}
+ * is available as an extended subclass which includes commit/rollback exception
+ * translation, aligned with {@link org.springframework.jdbc.core.JdbcTemplate}.</b>
+ *
  * @author Juergen Hoeller
  * @since 02.05.2003
  * @see #setNestedTransactionAllowed
@@ -136,6 +141,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		setDataSource(dataSource);
 		afterPropertiesSet();
 	}
+
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
@@ -193,7 +199,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * through an explicit statement on the transactional connection:
 	 * "SET TRANSACTION READ ONLY" as understood by Oracle, MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
-	 * can be customized through through {@link #prepareTransactionalConnection}.
+	 * can be customized through {@link #prepareTransactionalConnection}.
 	 * <p>This mode of read-only handling goes beyond the {@link Connection#setReadOnly}
 	 * hint that Spring applies by default. In contrast to that standard JDBC hint,
 	 * "SET TRANSACTION READ ONLY" enforces an isolation-level-like connection mode
@@ -248,9 +254,6 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		return (txObject.hasConnectionHolder() && txObject.getConnectionHolder().isTransactionActive());
 	}
 
-	/**
-	 * This implementation sets the isolation level but ignores the timeout.
-	 */
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
@@ -271,6 +274,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
+			txObject.setReadOnly(definition.isReadOnly());
 
 			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
 			// so we don't want to do it unnecessarily (for example if we've explicitly
@@ -329,7 +333,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			con.commit();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not commit JDBC transaction", ex);
+			throw translateException("JDBC commit", ex);
 		}
 	}
 
@@ -344,7 +348,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			con.rollback();
 		}
 		catch (SQLException ex) {
-			throw new TransactionSystemException("Could not roll back JDBC transaction", ex);
+			throw translateException("JDBC rollback", ex);
 		}
 	}
 
@@ -373,7 +377,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			if (txObject.isMustRestoreAutoCommit()) {
 				con.setAutoCommit(true);
 			}
-			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
+			DataSourceUtils.resetConnectionAfterTransaction(
+					con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
 		}
 		catch (Throwable ex) {
 			logger.debug("Could not reset JDBC Connection after transaction", ex);
@@ -408,14 +413,26 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			throws SQLException {
 
 		if (isEnforceReadOnly() && definition.isReadOnly()) {
-			Statement stmt = con.createStatement();
-			try {
+			try (Statement stmt = con.createStatement()) {
 				stmt.executeUpdate("SET TRANSACTION READ ONLY");
 			}
-			finally {
-				stmt.close();
-			}
 		}
+	}
+
+	/**
+	 * Translate the given JDBC commit/rollback exception to a common Spring
+	 * exception to propagate from the {@link #commit}/{@link #rollback} call.
+	 * <p>The default implementation throws a {@link TransactionSystemException}.
+	 * Subclasses may specifically identify concurrency failures etc.
+	 * @param task the task description (commit or rollback)
+	 * @param ex the SQLException thrown from commit/rollback
+	 * @return the translated exception to throw, either a
+	 * {@link org.springframework.dao.DataAccessException} or a
+	 * {@link org.springframework.transaction.TransactionException}
+	 * @since 5.3
+	 */
+	protected RuntimeException translateException(String task, SQLException ex) {
+		return new TransactionSystemException(task + " failed", ex);
 	}
 
 

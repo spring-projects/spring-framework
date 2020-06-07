@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,39 +87,34 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 		ByteBuffer byteBuffer = (this.preferDirect ?
 				ByteBuffer.allocateDirect(initialCapacity) :
 				ByteBuffer.allocate(initialCapacity));
-
 		return DefaultDataBuffer.fromEmptyByteBuffer(this, byteBuffer);
 	}
 
 	@Override
 	public DefaultDataBuffer wrap(ByteBuffer byteBuffer) {
-		ByteBuffer sliced = byteBuffer.slice();
-		return DefaultDataBuffer.fromFilledByteBuffer(this, sliced);
+		return DefaultDataBuffer.fromFilledByteBuffer(this, byteBuffer.slice());
 	}
 
 	@Override
 	public DefaultDataBuffer wrap(byte[] bytes) {
-		ByteBuffer wrapper = ByteBuffer.wrap(bytes);
-		return DefaultDataBuffer.fromFilledByteBuffer(this, wrapper);
+		return DefaultDataBuffer.fromFilledByteBuffer(this, ByteBuffer.wrap(bytes));
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation creates a single {@link DefaultDataBuffer} to contain the data
-	 * in {@code dataBuffers}.
+	 * <p>This implementation creates a single {@link DefaultDataBuffer}
+	 * to contain the data in {@code dataBuffers}.
 	 */
 	@Override
 	public DefaultDataBuffer join(List<? extends DataBuffer> dataBuffers) {
-		Assert.notEmpty(dataBuffers, "'dataBuffers' must not be empty");
-
-		int capacity = dataBuffers.stream()
-				.mapToInt(DataBuffer::readableByteCount)
-				.sum();
+		Assert.notEmpty(dataBuffers, "DataBuffer List must not be empty");
+		int capacity = dataBuffers.stream().mapToInt(DataBuffer::readableByteCount).sum();
 		DefaultDataBuffer result = allocateBuffer(capacity);
 		dataBuffers.forEach(result::write);
 		dataBuffers.forEach(DataBufferUtils::release);
 		return result;
 	}
+
 
 	@Override
 	public String toString() {

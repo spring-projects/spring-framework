@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,12 +17,12 @@
 package org.springframework.beans.factory.xml;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
  */
-public class CountingFactory implements FactoryBean {
+public class CountingFactory implements FactoryBean<String> {
 
 	private static int factoryBeanInstanceCount = 0;
 
@@ -51,12 +51,12 @@ public class CountingFactory implements FactoryBean {
 
 
 	@Override
-	public Object getObject() {
+	public String getObject() {
 		return "myString";
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<String> getObjectType() {
 		return String.class;
 	}
 

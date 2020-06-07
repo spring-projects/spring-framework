@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,6 +54,9 @@ final class ProfilesParser {
 	}
 
 	private static Profiles parseTokens(String expression, StringTokenizer tokens) {
+		return parseTokens(expression, tokens, Context.NONE);
+	}
+	private static Profiles parseTokens(String expression, StringTokenizer tokens, Context context) {
 		List<Profiles> elements = new ArrayList<>();
 		Operator operator = null;
 		while (tokens.hasMoreTokens()) {
@@ -63,7 +66,11 @@ final class ProfilesParser {
 			}
 			switch (token) {
 				case "(":
-					elements.add(parseTokens(expression, tokens));
+					Profiles contents = parseTokens(expression, tokens, Context.BRACKET);
+					if (context == Context.INVERT) {
+						return contents;
+					}
+					elements.add(contents);
 					break;
 				case "&":
 					assertWellFormed(expression, operator == null || operator == Operator.AND);
@@ -74,16 +81,23 @@ final class ProfilesParser {
 					operator = Operator.OR;
 					break;
 				case "!":
-					elements.add(not(parseTokens(expression, tokens)));
+					elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
 					break;
 				case ")":
 					Profiles merged = merge(expression, elements, operator);
+					if (context == Context.BRACKET) {
+						return merged;
+					}
 					elements.clear();
 					elements.add(merged);
 					operator = null;
 					break;
 				default:
-					elements.add(equals(token));
+					Profiles value = equals(token);
+					if (context == Context.INVERT) {
+						return value;
+					}
+					elements.add(value);
 			}
 		}
 		return merge(expression, elements, operator);
@@ -124,6 +138,9 @@ final class ProfilesParser {
 
 
 	private enum Operator {AND, OR}
+
+
+	private enum Context {NONE, INVERT, BRACKET}
 
 
 	private static class ParsedProfiles implements Profiles {

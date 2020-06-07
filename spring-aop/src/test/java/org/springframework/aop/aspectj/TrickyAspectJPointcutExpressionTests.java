@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -34,7 +34,8 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Dave Syer
@@ -86,7 +87,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
 
 		// Then try again with a different class loader on the target...
-		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
+		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(TestServiceImpl.class.getClassLoader());
 		// Make sure the interface is loaded from the  parent class loader
 		loader.excludeClass(TestService.class.getName());
 		loader.excludeClass(TestException.class.getName());
@@ -110,15 +111,10 @@ public class TrickyAspectJPointcutExpressionTests {
 		factory.addAdvisor(advisor);
 		TestService bean = (TestService) factory.getProxy();
 
-		assertEquals(0, logAdvice.getCountThrows());
-		try {
-			bean.sayHello();
-			fail("Expected exception");
-		}
-		catch (TestException ex) {
-			assertEquals(message, ex.getMessage());
-		}
-		assertEquals(1, logAdvice.getCountThrows());
+		assertThat(logAdvice.getCountThrows()).isEqualTo(0);
+		assertThatExceptionOfType(TestException.class).isThrownBy(
+				bean::sayHello).withMessageContaining(message);
+		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
 

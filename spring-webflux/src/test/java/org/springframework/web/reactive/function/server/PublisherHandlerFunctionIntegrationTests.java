@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.function.server;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,17 +28,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
-import static org.springframework.web.reactive.function.BodyInserters.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  */
-public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -53,37 +54,43 @@ public class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunc
 	}
 
 
-	@Test
-	public void mono() {
-		ResponseEntity<Person> result =
-				restTemplate.getForEntity("http://localhost:" + port + "/mono", Person.class);
+	@ParameterizedHttpServerTest
+	void mono(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("John", result.getBody().getName());
+		ResponseEntity<Person> result =
+				restTemplate.getForEntity("http://localhost:" + super.port + "/mono", Person.class);
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("John");
 	}
 
-	@Test
-	public void flux() {
+	@ParameterizedHttpServerTest
+	void flux(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ParameterizedTypeReference<List<Person>> reference = new ParameterizedTypeReference<List<Person>>() {};
 		ResponseEntity<List<Person>> result =
-				restTemplate.exchange("http://localhost:" + port + "/flux", HttpMethod.GET, null, reference);
+				restTemplate.exchange("http://localhost:" + super.port + "/flux", HttpMethod.GET, null, reference);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertEquals(2, body.size());
-		assertEquals("John", body.get(0).getName());
-		assertEquals("Jane", body.get(1).getName());
+		assertThat(body.size()).isEqualTo(2);
+		assertThat(body.get(0).getName()).isEqualTo("John");
+		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
 
-	@Test
-	public void postMono() {
-		URI uri = URI.create("http://localhost:" + port + "/mono");
+	@ParameterizedHttpServerTest
+	void postMono(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		URI uri = URI.create("http://localhost:" + super.port + "/mono");
 		Person person = new Person("Jack");
 		RequestEntity<Person> requestEntity = RequestEntity.post(uri).body(person);
 		ResponseEntity<Person> result = restTemplate.exchange(requestEntity, Person.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals("Jack", result.getBody().getName());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(result.getBody().getName()).isEqualTo("Jack");
 	}
 
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -97,7 +97,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 	/**
 	 * Create a new BeanWrapperImpl for the given object.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) {
 		super(object);
@@ -114,7 +114,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -125,7 +125,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param parent the containing BeanWrapper (must not be {@code null})
 	 */
@@ -166,7 +166,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Obtain a lazily initializted CachedIntrospectionResults instance
+	 * Obtain a lazily initialized CachedIntrospectionResults instance
 	 * for the wrapped object.
 	 */
 	private CachedIntrospectionResults getCachedIntrospectionResults() {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
-	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.SideEffectBean" scope="prototype">
+	<bean id="prototypeTest" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
 
@@ -11,7 +11,7 @@
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 	</bean>
 
-	<bean id="debugInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor" />
+	<bean id="debugInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor" />
 
 	<!--
 		We want to invoke the getStatsMixin method on our ThreadLocal invoker
@@ -34,12 +34,12 @@
 
 	<!-- ================ Definitions for second ThreadLocalTargetSource ====== -->
 
-	<bean id="test" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
+	<bean id="test" class="org.springframework.beans.testfixture.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="wife" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 

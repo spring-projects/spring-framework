@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.cors.CorsConfiguration;
@@ -53,6 +54,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	private final PathPatternParser patternParser;
 
+	@Nullable
 	private CorsConfigurationSource corsConfigurationSource;
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
@@ -65,7 +67,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	public AbstractHandlerMapping() {
 		this.patternParser = new PathPatternParser();
-		this.corsConfigurationSource = new UrlBasedCorsConfigurationSource(this.patternParser);
 	}
 
 
@@ -113,8 +114,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 */
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
 		Assert.notNull(corsConfigurations, "corsConfigurations must not be null");
-		this.corsConfigurationSource = new UrlBasedCorsConfigurationSource(this.patternParser);
-		((UrlBasedCorsConfigurationSource) this.corsConfigurationSource).setCorsConfigurations(corsConfigurations);
+		if (!corsConfigurations.isEmpty()) {
+			UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource(this.patternParser);
+			source.setCorsConfigurations(corsConfigurations);
+			this.corsConfigurationSource = source;
+		}
+		else {
+			this.corsConfigurationSource = null;
+		}
 	}
 
 	/**
@@ -175,12 +182,12 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 			if (logger.isDebugEnabled()) {
 				logger.debug(exchange.getLogPrefix() + "Mapped to " + handler);
 			}
-			if (CorsUtils.isCorsRequest(exchange.getRequest())) {
-				CorsConfiguration configA = this.corsConfigurationSource.getCorsConfiguration(exchange);
-				CorsConfiguration configB = getCorsConfiguration(handler, exchange);
-				CorsConfiguration config = (configA != null ? configA.combine(configB) : configB);
-				if (!getCorsProcessor().process(config, exchange) ||
-						CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			ServerHttpRequest request = exchange.getRequest();
+			if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+				CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
+				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
 					return REQUEST_HANDLED_HANDLER;
 				}
 			}
@@ -199,6 +206,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * @return {@code Mono} for the matching handler, if any
 	 */
 	protected abstract Mono<?> getHandlerInternal(ServerWebExchange exchange);
+
+	/**
+	 * Return {@code true} if there is a {@link CorsConfigurationSource} for this handler.
+	 * @since 5.2
+	 */
+	protected boolean hasCorsConfigurationSource(Object handler) {
+		return (handler instanceof CorsConfigurationSource || this.corsConfigurationSource != null);
+	}
 
 	/**
 	 * Retrieve the CORS configuration for the given handler.

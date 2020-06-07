@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,17 @@ package org.springframework.web.reactive.function.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
+import java.util.Collections;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 /**
  * @author Arjen Poutsma
@@ -39,9 +41,8 @@ public class PathResourceLookupFunctionTests {
 
 		PathResourceLookupFunction
 				function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest request = MockServerRequest.builder()
-				.uri(new URI("http://localhost/resources/response.txt"))
-				.build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/resources/response.txt").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<Resource> result = function.apply(request);
 
 		File expected = new ClassPathResource("response.txt", getClass()).getFile();
@@ -63,9 +64,8 @@ public class PathResourceLookupFunctionTests {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/server/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest request = MockServerRequest.builder()
-				.uri(new URI("http://localhost/resources/child/response.txt"))
-				.build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/resources/child/response.txt").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<Resource> result = function.apply(request);
 		String path = "org/springframework/web/reactive/function/server/child/response.txt";
 		File expected = new ClassPathResource(path).getFile();
@@ -87,9 +87,8 @@ public class PathResourceLookupFunctionTests {
 		ClassPathResource location = new ClassPathResource("org/springframework/web/reactive/function/server/");
 
 		PathResourceLookupFunction function = new PathResourceLookupFunction("/resources/**", location);
-		MockServerRequest request = MockServerRequest.builder()
-				.uri(new URI("http://localhost/resources/foo"))
-				.build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<Resource> result = function.apply(request);
 		StepVerifier.create(result)
 				.expectComplete()
@@ -108,9 +107,8 @@ public class PathResourceLookupFunctionTests {
 				lookupFunction.andThen(resourceMono -> resourceMono
 								.switchIfEmpty(Mono.just(defaultResource)));
 
-		MockServerRequest request = MockServerRequest.builder()
-				.uri(new URI("http://localhost/resources/foo"))
-				.build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://localhost/resources/foo").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 
 		Mono<Resource> result = customLookupFunction.apply(request);
 		StepVerifier.create(result)

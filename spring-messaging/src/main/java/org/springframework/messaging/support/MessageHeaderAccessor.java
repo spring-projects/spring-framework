@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -373,12 +374,13 @@ public class MessageHeaderAccessor {
 	}
 
 	private List<String> getMatchingHeaderNames(String pattern, @Nullable Map<String, Object> headers) {
+		if (headers == null) {
+			return Collections.emptyList();
+		}
 		List<String> matchingHeaderNames = new ArrayList<>();
-		if (headers != null) {
-			for (String key : headers.keySet()) {
-				if (PatternMatchUtils.simpleMatch(pattern, key)) {
-					matchingHeaderNames.add(key);
-				}
+		for (String key : headers.keySet()) {
+			if (PatternMatchUtils.simpleMatch(pattern, key)) {
+				matchingHeaderNames.add(key);
 			}
 		}
 		return matchingHeaderNames;

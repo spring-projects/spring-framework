@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,15 +21,19 @@ import java.io.Serializable;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Convenient class for building up pointcuts. All methods return
- * ComposablePointcut, so we can use a concise idiom like:
+ * Convenient class for building up pointcuts.
  *
- * {@code
- * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
- * }
+ * <p>All methods return {@code ComposablePointcut}, so we can use concise idioms
+ * like in the following example.
+ *
+ * <pre class="code">Pointcut pc = new ComposablePointcut()
+ *                      .union(classFilter)
+ *                      .intersection(methodMatcher)
+ *                      .intersection(pointcut);</pre>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -180,7 +184,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -199,7 +203,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 	@Override
 	public String toString() {
-		return "ComposablePointcut: " + this.classFilter + ", " +this.methodMatcher;
+		return getClass().getName() + ": " + this.classFilter + ", " + this.methodMatcher;
 	}
 
 }

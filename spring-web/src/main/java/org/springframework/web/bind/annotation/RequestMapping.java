@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -70,7 +70,7 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @see org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
@@ -88,26 +88,29 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>This is an alias for {@link #path}. For example
+	 * <p>This is an alias for {@link #path}. For example,
 	 * {@code @RequestMapping("/foo")} is equivalent to
 	 * {@code @RequestMapping(path="/foo")}.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
+	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
+	 * explicitly is effectively mapped to an empty path.
 	 */
 	@AliasFor("path")
 	String[] value() default {};
 
 	/**
-	 * The path mapping URIs (e.g. "/myPath.do").
-	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported
+	 * The path mapping URIs (e.g. {@code "/profile"}).
+	 * <p>Ant-style path patterns are also supported (e.g. {@code "/profile/**"}).
+	 * At the method level, relative paths (e.g. {@code "edit"}) are supported
 	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. "/${connect}").
+	 * Path mapping URIs may contain placeholders (e.g. <code>"/${profile_path}"</code>).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
+	 * <p><strong>NOTE</strong>: A handler method that is not mapped to any path
+	 * explicitly is effectively mapped to an empty path.
 	 * @since 4.2
 	 */
 	@AliasFor("value")
@@ -167,41 +170,48 @@ public @interface RequestMapping {
 	String[] headers() default {};
 
 	/**
-	 * The consumable media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a single media type or a sequence of media types,
-	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
-	 * Examples:
+	 * Narrows the primary mapping by media types that can be consumed by the
+	 * mapped handler. Consists of one or more media types one of which must
+	 * match to the request {@code Content-Type} header. Examples:
 	 * <pre class="code">
 	 * consumes = "text/plain"
 	 * consumes = {"text/plain", "application/*"}
+	 * consumes = MediaType.TEXT_PLAIN_VALUE
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
-	 * all requests with a {@code Content-Type} other than "text/plain".
+	 * Expressions can be negated by using the "!" operator, as in
+	 * "!text/plain", which matches all requests with a {@code Content-Type}
+	 * other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings override
-	 * this consumes restriction.
+	 * If specified at both levels, the method level consumes condition overrides
+	 * the type level condition.
 	 * @see org.springframework.http.MediaType
 	 * @see javax.servlet.http.HttpServletRequest#getContentType()
 	 */
 	String[] consumes() default {};
 
 	/**
-	 * The producible media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a single media type or a sequence of media types,
-	 * with a request only mapped if the {@code Accept} matches one of these media types.
-	 * Examples:
+	 * Narrows the primary mapping by media types that can be produced by the
+	 * mapped handler. Consists of one or more media types one of which must
+	 * be chosen via content negotiation against the "acceptable" media types
+	 * of the request. Typically those are extracted from the {@code "Accept"}
+	 * header but may be derived from query parameters, or other. Examples:
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
-	 * produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+	 * produces = MediaType.TEXT_PLAIN_VALUE
+	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
-	 * <p>It affects the actual content type written, for example to produce a JSON response
-	 * with UTF-8 encoding, {@link org.springframework.http.MediaType#APPLICATION_JSON_UTF8_VALUE} should be used.
-	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
-	 * all requests with a {@code Accept} other than "text/plain".
+	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
+	 * "type=feed", type="entry") and if a compatible media type from the request
+	 * has that parameter too, then the parameter values must match. Otherwise
+	 * if the media type from the request does not contain the parameter, it is
+	 * assumed the client accepts any value.
+	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain",
+	 * which matches all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
-	 * When used at the type level, all method-level mappings override
-	 * this produces restriction.
+	 * If specified at both levels, the method level produces condition overrides
+	 * the type level condition.
+	 * @see org.springframework.http.MediaType
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,15 @@ package org.springframework.web.servlet.handler;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,10 +38,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 
 /**
@@ -63,7 +63,7 @@ public class HandlerMappingIntrospectorTests {
 		List<?> expected = Arrays.asList(cxt.getBean("hmA"), cxt.getBean("hmB"), cxt.getBean("hmC"));
 		List<HandlerMapping> actual = getIntrospector(cxt).getHandlerMappings();
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class HandlerMappingIntrospectorTests {
 		List<?> expected = Arrays.asList(cxt.getBean("hmC"), cxt.getBean("hmB"), cxt.getBean("hmA"));
 		List<HandlerMapping> actual = getIntrospector(cxt).getHandlerMappings();
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	public void defaultHandlerMappings() throws Exception {
@@ -88,9 +88,9 @@ public class HandlerMappingIntrospectorTests {
 		cxt.refresh();
 
 		List<HandlerMapping> actual = getIntrospector(cxt).getHandlerMappings();
-		assertEquals(2, actual.size());
-		assertEquals(BeanNameUrlHandlerMapping.class, actual.get(0).getClass());
-		assertEquals(RequestMappingHandlerMapping.class, actual.get(1).getClass());
+		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual.get(0).getClass()).isEqualTo(BeanNameUrlHandlerMapping.class);
+		assertThat(actual.get(1).getClass()).isEqualTo(RequestMappingHandlerMapping.class);
 	}
 
 	@Test
@@ -105,18 +105,19 @@ public class HandlerMappingIntrospectorTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
 		MatchableHandlerMapping hm = getIntrospector(cxt).getMatchableHandlerMapping(request);
 
-		assertEquals(cxt.getBean("hm"), hm);
-		assertNull("Attributes changes not ignored", request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE));
+		assertThat(hm).isEqualTo(cxt.getBean("hm"));
+		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).as("Attributes changes not ignored").isNull();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void getMatchableWhereHandlerMappingDoesNotImplementMatchableInterface() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.registerSingleton("hm1", TestHandlerMapping.class);
 		cxt.refresh();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		getIntrospector(cxt).getMatchableHandlerMapping(request);
+		assertThatIllegalStateException().isThrownBy(() ->
+				getIntrospector(cxt).getMatchableHandlerMapping(request));
 	}
 
 	@Test
@@ -132,9 +133,9 @@ public class HandlerMappingIntrospectorTests {
 		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
 		CorsConfiguration corsConfig = getIntrospector(cxt).getCorsConfiguration(request);
 
-		assertNotNull(corsConfig);
-		assertEquals(Collections.singletonList("http://localhost:9000"), corsConfig.getAllowedOrigins());
-		assertEquals(Collections.singletonList("POST"), corsConfig.getAllowedMethods());
+		assertThat(corsConfig).isNotNull();
+		assertThat(corsConfig.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:9000"));
+		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
 	}
 
 	@Test
@@ -147,9 +148,9 @@ public class HandlerMappingIntrospectorTests {
 		request.addHeader("Origin", "http://localhost:9000");
 		CorsConfiguration corsConfig = getIntrospector(cxt).getCorsConfiguration(request);
 
-		assertNotNull(corsConfig);
-		assertEquals(Collections.singletonList("http://localhost:9000"), corsConfig.getAllowedOrigins());
-		assertEquals(Collections.singletonList("POST"), corsConfig.getAllowedMethods());
+		assertThat(corsConfig).isNotNull();
+		assertThat(corsConfig.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:9000"));
+		assertThat(corsConfig.getAllowedMethods()).isEqualTo(Collections.singletonList("POST"));
 	}
 
 	private HandlerMappingIntrospector getIntrospector(WebApplicationContext cxt) {

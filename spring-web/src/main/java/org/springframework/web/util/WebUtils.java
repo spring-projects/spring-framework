@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -590,7 +591,7 @@ public abstract class WebUtils {
 	 * either via a button (directly with name) or via an image (name + ".x" or
 	 * name + ".y").
 	 * @param request current HTTP request
-	 * @param name name of the parameter
+	 * @param name the name of the parameter
 	 * @return if the parameter was sent
 	 * @see #SUBMIT_IMAGE_SUFFIXES
 	 */
@@ -695,7 +696,7 @@ public abstract class WebUtils {
 		}
 		while (paramNames != null && paramNames.hasMoreElements()) {
 			String paramName = paramNames.nextElement();
-			if ("".equals(prefix) || paramName.startsWith(prefix)) {
+			if (prefix.isEmpty() || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
 				if (values == null || values.length == 0) {

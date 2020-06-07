@@ -1,69 +1,28 @@
 description = "Spring Object/XML Marshalling"
 
 configurations {
-	castor
 	jibx
 	xjc
 }
 
 dependencies {
-	castor "org.codehaus.castor:castor-anttasks:1.4.1"
-	jibx "org.jibx:jibx-bind:1.3.1"
+	jibx "org.jibx:jibx-bind:1.3.3"
 	jibx "org.apache.bcel:bcel:6.0"
-	xjc "javax.xml.bind:jaxb-api:2.3.0"
+	xjc "javax.xml.bind:jaxb-api:2.3.1"
 	xjc "com.sun.xml.bind:jaxb-core:2.3.0.1"
 	xjc "com.sun.xml.bind:jaxb-impl:2.3.0.1"
-	xjc "com.sun.xml.bind:jaxb-xjc:2.2.11"  // 2.3.0 breaks with "xjc failed"
+	xjc "com.sun.xml.bind:jaxb-xjc:2.3.1"
 	xjc "com.sun.activation:javax.activation:1.2.0"
 }
 
 ext.genSourcesDir = "${buildDir}/generated-sources"
 ext.flightSchema = "${projectDir}/src/test/resources/org/springframework/oxm/flight.xsd"
 
-task genCastor {
-	def orderSchema = "${projectDir}/src/test/resources/org/springframework/oxm/order.xsd"
-	def castorBuilderProperties = "${projectDir}/src/test/castor/castorbuilder.properties"
-
-	ext.sourcesDir = "${genSourcesDir}/castor"
-	ext.classesDir = "${buildDir}/classes/castor"
-
-	inputs.files flightSchema, orderSchema, castorBuilderProperties
-	outputs.dir classesDir
-
-	doLast() {
-		project.ant {
-			taskdef name: "castor", classname: "org.castor.anttask.CastorCodeGenTask",
-					classpath: configurations.castor.asPath
-			mkdir(dir: sourcesDir)
-			mkdir(dir: classesDir)
-
-			castor(types: "j2", warnings: false, file: flightSchema, todir: sourcesDir,
-					package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
-
-			castor(types: "j2", warnings: false, file: orderSchema, todir: sourcesDir,
-					package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
-
-			javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
-					debugLevel: "lines,vars,source", classpath: configurations.castor.asPath) {
-				src(path: sourcesDir)
-				include(name: "**/*.java")
-				include(name: "*.java")
-			}
-
-			copy(todir: classesDir) {
-				fileset(dir: sourcesDir, erroronmissingdir: false) {
-					exclude(name: "**/*.java")
-				}
-			}
-		}
-	}
-}
-
 task genJaxb {
 	ext.sourcesDir = "${genSourcesDir}/jaxb"
 	ext.classesDir = "${buildDir}/classes/jaxb"
 
-	inputs.files flightSchema
+	inputs.files(flightSchema).withPathSensitivity(PathSensitivity.RELATIVE)
 	outputs.dir classesDir
 
 	doLast() {
@@ -98,33 +57,26 @@ task genJaxb {
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
-	optional("javax.xml.bind:jaxb-api:2.3.0")
-	optional("javax.activation:javax.activation-api:1.2.0")
-	optional("org.codehaus.castor:castor-xml:1.4.1")  {
-		exclude group: "stax", module: "stax-api"
-		exclude group: "org.springframework", module: "spring-context"
-		exclude group: "commons-logging", module: "commons-logging"
-	}
-	optional("com.thoughtworks.xstream:xstream:1.4.10") {
-		exclude group: "xpp3", module: "xpp3_min"
-		exclude group: "xmlpull", module: "xmlpull"
-	}
-	optional("org.jibx:jibx-run:1.3.1")
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.activation:javax.activation-api")
+	optional("com.thoughtworks.xstream:xstream")
+	optional("org.jibx:jibx-run")
 	testCompile(project(":spring-context"))
-	testCompile("org.ogce:xpp3:1.1.6")
-	testCompile("org.codehaus.jettison:jettison:1.3.8") {
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile("org.ogce:xpp3")
+	testCompile("org.codehaus.jettison:jettison") {
 		exclude group: "stax", module: "stax-api"
 	}
-	testCompile(files(genCastor.classesDir).builtBy(genCastor))
 	testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
-	testCompile("org.xmlunit:xmlunit-matchers:2.6.2")
-	testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
-	testRuntime("com.sun.xml.bind:jaxb-core:2.3.0.1")
-	testRuntime("com.sun.xml.bind:jaxb-impl:2.3.0.1")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
 }
 
-// JiBX compiler is currently not compatible with JDK 9
-if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+// JiBX compiler is currently not compatible with JDK 9+.
+// If customJavaHome has been set, we assume the custom JDK version is 9+.
+if ((JavaVersion.current() == JavaVersion.VERSION_1_8) && !System.getProperty("customJavaSourceVersion")) {
 	compileTestJava {
 		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
 
@@ -134,7 +86,7 @@ if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
 						classname: "org.jibx.binding.ant.CompileTask",
 						classpath: configurations.jibx.asPath)
 
-				jibx(verbose: true, load: true, binding: bindingXml) {
+				jibx(verbose: false, load: true, binding: bindingXml) {
 					classpathset(dir: sourceSets.test.java.outputDir) {
 						include(name: "**/jibx/**/*")
 					}

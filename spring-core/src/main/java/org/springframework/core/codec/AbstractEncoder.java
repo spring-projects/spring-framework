@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,9 +36,9 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	private final List<MimeType> encodableMimeTypes;
+
+	protected Log logger = LogFactory.getLog(getClass());
 
 
 	protected AbstractEncoder(MimeType... supportedMimeTypes) {
@@ -74,7 +74,12 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		return this.encodableMimeTypes.stream().anyMatch(candidate -> candidate.isCompatibleWith(mimeType));
+		for (MimeType candidate : this.encodableMimeTypes) {
+			if (candidate.isCompatibleWith(mimeType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

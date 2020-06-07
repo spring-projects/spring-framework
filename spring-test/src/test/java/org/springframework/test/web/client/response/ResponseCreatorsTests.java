@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,112 +16,122 @@
 
 package org.springframework.test.web.client.response;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
+import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for the {@link MockRestResponseCreators} static factory methods.
  *
  * @author Rossen Stoyanchev
  */
-public class ResponseCreatorsTests {
+class ResponseCreatorsTests {
 
 	@Test
-	public void success() throws Exception {
+	void success() throws Exception {
 		MockClientHttpResponse response = (MockClientHttpResponse) MockRestResponseCreators.withSuccess().createResponse(null);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void successWithContent() throws Exception {
+	void successWithContent() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withSuccess("foo", MediaType.TEXT_PLAIN);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
-		assertArrayEquals("foo".getBytes(), StreamUtils.copyToByteArray(response.getBody()));
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(StreamUtils.copyToByteArray(response.getBody())).isEqualTo("foo".getBytes());
 	}
 
 	@Test
-	public void successWithContentWithoutContentType() throws Exception {
+	void successWithContentWithoutContentType() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withSuccess("foo", null);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertNull(response.getHeaders().getContentType());
-		assertArrayEquals("foo".getBytes(), StreamUtils.copyToByteArray(response.getBody()));
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getHeaders().getContentType()).isNull();
+		assertThat(StreamUtils.copyToByteArray(response.getBody())).isEqualTo("foo".getBytes());
 	}
 
 	@Test
-	public void created() throws Exception {
+	void created() throws Exception {
 		URI location = new URI("/foo");
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withCreatedEntity(location);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.CREATED, response.getStatusCode());
-		assertEquals(location, response.getHeaders().getLocation());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(response.getHeaders().getLocation()).isEqualTo(location);
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void noContent() throws Exception {
+	void noContent() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withNoContent();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void badRequest() throws Exception {
+	void badRequest() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withBadRequest();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void unauthorized() throws Exception {
+	void unauthorized() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withUnauthorizedRequest();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void serverError() throws Exception {
+	void serverError() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withServerError();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
 	}
 
 	@Test
-	public void withStatus() throws Exception {
+	void withStatus() throws Exception {
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withStatus(HttpStatus.FORBIDDEN);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
-		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-		assertTrue(response.getHeaders().isEmpty());
-		assertEquals(0, StreamUtils.copyToByteArray(response.getBody()).length);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getHeaders().isEmpty()).isTrue();
+		assertThat(StreamUtils.copyToByteArray(response.getBody()).length).isEqualTo(0);
+	}
+
+	@Test
+	void withException() {
+		ResponseCreator responseCreator = MockRestResponseCreators.withException(new SocketTimeoutException());
+		assertThatExceptionOfType(SocketTimeoutException.class)
+				.isThrownBy(() -> responseCreator.createResponse(null));
 	}
 
 }

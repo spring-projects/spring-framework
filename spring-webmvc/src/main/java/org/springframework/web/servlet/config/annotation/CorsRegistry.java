@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,17 +42,10 @@ public class CorsRegistry {
 	 *
 	 * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
 	 * well as Ant-style path patterns (such as {@code "/admin/**"}).
-	 * <p>By default, all origins, all headers, credentials and {@code GET},
-	 * {@code HEAD}, and {@code POST} methods are allowed, and the max age
-	 * is set to 30 minutes.
 	 *
-	 * <p>The following defaults are applied to the {@link CorsRegistration}:
-	 * <ul>
-	 *     <li>Allow all origins.</li>
-	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
-	 *     <li>Allow all headers.</li>
-	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
-	 * </ul>
+	 * <p>By default, the {@code CorsConfiguration} for this mapping is
+	 * initialized with default values as described in
+	 * {@link CorsConfiguration#applyPermitDefaultValues()}.
 	 */
 	public CorsRegistration addMapping(String pathPattern) {
 		CorsRegistration registration = new CorsRegistration(pathPattern);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,8 +35,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * {@code @RequestMapping} integration tests with exception handling scenarios.
@@ -45,7 +46,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  */
-public class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -56,56 +57,60 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	}
 
 
-	@Test
-	public void thrownException() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownException(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception", "Recovered from error: State");
 	}
 
-	@Test
-	public void thrownExceptionWithCause() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownExceptionWithCause(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception-with-cause", "Recovered from error: State");
 	}
 
-	@Test
-	public void thrownExceptionWithCauseToHandle() throws Exception {
+	@ParameterizedHttpServerTest
+	void thrownExceptionWithCauseToHandle(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/thrown-exception-with-cause-to-handle", "Recovered from error: IO");
 	}
 
-	@Test
-	public void errorBeforeFirstItem() throws Exception {
+	@ParameterizedHttpServerTest
+	void errorBeforeFirstItem(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		doTest("/mono-error", "Recovered from error: Argument");
 	}
 
-	@Test // SPR-16051
-	public void exceptionAfterSeveralItems() {
-		try {
-			performGet("/SPR-16051", new HttpHeaders(), String.class).getBody();
-			fail();
-		}
-		catch (Throwable ex) {
-			String message = ex.getMessage();
-			assertNotNull(message);
-			assertTrue("Actual: " + message, message.startsWith("Error while extracting response"));
-		}
+	@ParameterizedHttpServerTest  // SPR-16051
+	void exceptionAfterSeveralItems(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
+				performGet("/SPR-16051", new HttpHeaders(), String.class).getBody())
+			.withMessageStartingWith("Error while extracting response");
 	}
 
-	@Test // SPR-16318
-	public void exceptionFromMethodWithProducesCondition() throws Exception {
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("Accept", "text/csv, application/problem+json");
-			performGet("/SPR-16318", headers, String.class).getBody();
-			fail();
-		}
-		catch (HttpStatusCodeException ex) {
-			assertEquals(500, ex.getRawStatusCode());
-			assertEquals("application/problem+json;charset=UTF-8", ex.getResponseHeaders().getContentType().toString());
-			assertEquals("{\"reason\":\"error\"}", ex.getResponseBodyAsString());
-		}
+	@ParameterizedHttpServerTest  // SPR-16318
+	void exceptionFromMethodWithProducesCondition(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Accept", "text/plain, application/problem+json");
+		assertThatExceptionOfType(HttpStatusCodeException.class).isThrownBy(() ->
+				performGet("/SPR-16318", headers, String.class).getBody())
+			.satisfies(ex -> {
+				assertThat(ex.getRawStatusCode()).isEqualTo(500);
+				assertThat(ex.getResponseHeaders().getContentType().toString()).isEqualTo("application/problem+json");
+				assertThat(ex.getResponseBodyAsString()).isEqualTo("{\"reason\":\"error\"}");
+			});
 	}
 
 	private void doTest(String url, String expected) throws Exception {
-		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
+		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 
@@ -152,9 +157,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 					});
 		}
 
-		@GetMapping(path = "/SPR-16318", produces = "text/csv")
-		public String handleCsv() throws Exception {
-			throw new Spr16318Exception();
+		@GetMapping(path = "/SPR-16318", produces = "text/plain")
+		public Mono<String> handleTextPlain() throws Exception {
+			return Mono.error(new Spr16318Exception());
 		}
 
 		@ExceptionHandler
@@ -178,7 +183,9 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class Spr16318Exception extends Exception {}
+	private static class Spr16318Exception extends Exception {
+	}
 
 }

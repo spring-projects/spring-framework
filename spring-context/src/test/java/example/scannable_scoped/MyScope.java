@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,14 @@
 
 package example.scannable_scoped;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.ScopedProxyMode;
 
+@Retention(RetentionPolicy.RUNTIME)
 public @interface MyScope {
-	String value() default BeanDefinition.SCOPE_SINGLETON;
+	String value() default ConfigurableBeanFactory.SCOPE_SINGLETON;
 	ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
 }

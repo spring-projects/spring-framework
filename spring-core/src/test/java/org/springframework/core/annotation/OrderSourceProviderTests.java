@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,23 +21,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class OrderSourceProviderTests {
+class OrderSourceProviderTests {
 
 	private final AnnotationAwareOrderComparator comparator = AnnotationAwareOrderComparator.INSTANCE;
 
 
 	@Test
-	public void plainComparator() {
+	void plainComparator() {
 		List<Object> items = new ArrayList<>();
 		C c = new C(5);
 		C c2 = new C(-5);
@@ -48,7 +48,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listNoFactoryMethod() {
+	void listNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
@@ -59,7 +59,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listFactoryMethod() {
+	void listFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
@@ -78,7 +78,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listFactoryMethodOverridesStaticOrder() {
+	void listFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);
@@ -97,7 +97,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayNoFactoryMethod() {
+	void arrayNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
@@ -108,7 +108,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethod() {
+	void arrayFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
@@ -127,7 +127,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethodOverridesStaticOrder() {
+	void arrayFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);
@@ -148,16 +148,16 @@ public class OrderSourceProviderTests {
 
 	private void assertOrder(List<?> actual, Object... expected) {
 		for (int i = 0; i < actual.size(); i++) {
-			assertSame("Wrong instance at index '" + i + "'", expected[i], actual.get(i));
+			assertThat(actual.get(i)).as("Wrong instance at index '" + i + "'").isSameAs(expected[i]);
 		}
-		assertEquals("Wrong number of items", expected.length, actual.size());
+		assertThat(actual.size()).as("Wrong number of items").isEqualTo(expected.length);
 	}
 
 	private void assertOrder(Object[] actual, Object... expected) {
 		for (int i = 0; i < actual.length; i++) {
-			assertSame("Wrong instance at index '" + i + "'", expected[i], actual[i]);
+			assertThat(actual[i]).as("Wrong instance at index '" + i + "'").isSameAs(expected[i]);
 		}
-		assertEquals("Wrong number of items", expected.length, expected.length);
+		assertThat(expected.length).as("Wrong number of items").isEqualTo(expected.length);
 	}
 
 

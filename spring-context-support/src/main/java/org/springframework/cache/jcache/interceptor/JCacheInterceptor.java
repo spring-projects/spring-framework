@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
@@ -78,8 +79,10 @@ public class JCacheInterceptor extends JCacheAspectSupport implements MethodInte
 			}
 		};
 
+		Object target = invocation.getThis();
+		Assert.state(target != null, "Target must not be null");
 		try {
-			return execute(aopAllianceInvoker, invocation.getThis(), method, invocation.getArguments());
+			return execute(aopAllianceInvoker, target, method, invocation.getArguments());
 		}
 		catch (CacheOperationInvoker.ThrowableWrapper th) {
 			throw th.getOriginal();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
  * <p>As of Spring Framework 5.0, this weaver supports WildFly 8+.
+ * As of Spring Framework 5.1.5, it also supports WildFly 13+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -41,6 +42,9 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
 	private static final String DELEGATING_TRANSFORMER_CLASS_NAME =
 			"org.jboss.as.server.deployment.module.DelegatingClassFileTransformer";
+
+	private static final String WRAPPER_TRANSFORMER_CLASS_NAME =
+			"org.jboss.modules.JLIClassTransformer";
 
 
 	private final ClassLoader classLoader;
@@ -76,12 +80,23 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 			}
 			transformer.setAccessible(true);
 
-			this.delegatingTransformer = transformer.get(classLoader);
-			if (!this.delegatingTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
+			Object suggestedTransformer = transformer.get(classLoader);
+			if (suggestedTransformer.getClass().getName().equals(WRAPPER_TRANSFORMER_CLASS_NAME)) {
+				Field wrappedTransformer = ReflectionUtils.findField(suggestedTransformer.getClass(), "transformer");
+				if (wrappedTransformer == null) {
+					throw new IllegalArgumentException(
+							"Could not find 'transformer' field on JBoss JLIClassTransformer: " +
+							suggestedTransformer.getClass().getName());
+				}
+				wrappedTransformer.setAccessible(true);
+				suggestedTransformer = wrappedTransformer.get(suggestedTransformer);
+			}
+			if (!suggestedTransformer.getClass().getName().equals(DELEGATING_TRANSFORMER_CLASS_NAME)) {
 				throw new IllegalStateException(
 						"Transformer not of the expected type DelegatingClassFileTransformer: " +
-						this.delegatingTransformer.getClass().getName());
+						suggestedTransformer.getClass().getName());
 			}
+			this.delegatingTransformer = suggestedTransformer;
 
 			Method addTransformer = ReflectionUtils.findMethod(this.delegatingTransformer.getClass(),
 					"addTransformer", ClassFileTransformer.class);

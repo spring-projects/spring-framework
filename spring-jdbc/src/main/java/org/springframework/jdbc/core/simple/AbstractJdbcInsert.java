@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -484,12 +485,12 @@ public abstract class AbstractJdbcInsert {
 					//Get the key
 					Statement keyStmt = null;
 					ResultSet rs = null;
-					Map<String, Object> keys = new HashMap<>(2);
 					try {
 						keyStmt = con.createStatement();
 						rs = keyStmt.executeQuery(keyQuery);
 						if (rs.next()) {
 							long key = rs.getLong(1);
+							Map<String, Object> keys = new HashMap<>(2);
 							keys.put(getGeneratedKeyNames()[0], key);
 							keyHolder.getKeyList().add(keys);
 						}

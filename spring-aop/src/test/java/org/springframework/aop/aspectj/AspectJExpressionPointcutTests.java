@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,20 +23,23 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutPrimitive;
 import org.aspectj.weaver.tools.UnsupportedPointcutPrimitiveException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.tests.sample.beans.IOther;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.subpkg.DeepBean;
+import org.springframework.beans.testfixture.beans.IOther;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.subpkg.DeepBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Rob Harrop
@@ -54,7 +57,7 @@ public class AspectJExpressionPointcutTests {
 	private Method setSomeNumber;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		setAge = TestBean.class.getMethod("setAge", int.class);
@@ -64,7 +67,7 @@ public class AspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchExplicit() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -75,9 +78,9 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertFalse("Should not be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.isRuntime()).as("Should not be a runtime match").isFalse();
 		assertMatchesGetAge(methodMatcher);
-		assertFalse("Expression should match setAge() method", methodMatcher.matches(setAge, TestBean.class));
+		assertThat(methodMatcher.matches(setAge, TestBean.class)).as("Expression should match setAge() method").isFalse();
 	}
 
 	@Test
@@ -93,9 +96,9 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertFalse("Should not be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.isRuntime()).as("Should not be a runtime match").isFalse();
 		assertMatchesGetAge(methodMatcher);
-		assertTrue("Expression should match setAge(int) method", methodMatcher.matches(setAge, TestBean.class));
+		assertThat(methodMatcher.matches(setAge, TestBean.class)).as("Expression should match setAge(int) method").isTrue();
 	}
 
 
@@ -114,18 +117,18 @@ public class AspectJExpressionPointcutTests {
 	 * @param which this or target
 	 */
 	private void testThisOrTarget(String which) throws SecurityException, NoSuchMethodException {
-		String matchesTestBean = which + "(org.springframework.tests.sample.beans.TestBean)";
-		String matchesIOther = which + "(org.springframework.tests.sample.beans.IOther)";
+		String matchesTestBean = which + "(org.springframework.beans.testfixture.beans.TestBean)";
+		String matchesIOther = which + "(org.springframework.beans.testfixture.beans.IOther)";
 		AspectJExpressionPointcut testBeanPc = new AspectJExpressionPointcut();
 		testBeanPc.setExpression(matchesTestBean);
 
 		AspectJExpressionPointcut iOtherPc = new AspectJExpressionPointcut();
 		iOtherPc.setExpression(matchesIOther);
 
-		assertTrue(testBeanPc.matches(TestBean.class));
-		assertTrue(testBeanPc.matches(getAge, TestBean.class));
-		assertTrue(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
-		assertFalse(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
+		assertThat(testBeanPc.matches(TestBean.class)).isTrue();
+		assertThat(testBeanPc.matches(getAge, TestBean.class)).isTrue();
+		assertThat(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isTrue();
+		assertThat(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isFalse();
 	}
 
 	@Test
@@ -139,7 +142,7 @@ public class AspectJExpressionPointcutTests {
 	}
 
 	private void testWithinPackage(boolean matchSubpackages) throws SecurityException, NoSuchMethodException {
-		String withinBeansPackage = "within(org.springframework.tests.sample.beans.";
+		String withinBeansPackage = "within(org.springframework.beans.testfixture.beans.";
 		// Subpackages are matched by **
 		if (matchSubpackages) {
 			withinBeansPackage += ".";
@@ -148,55 +151,43 @@ public class AspectJExpressionPointcutTests {
 		AspectJExpressionPointcut withinBeansPc = new AspectJExpressionPointcut();
 		withinBeansPc.setExpression(withinBeansPackage);
 
-		assertTrue(withinBeansPc.matches(TestBean.class));
-		assertTrue(withinBeansPc.matches(getAge, TestBean.class));
-		assertEquals(matchSubpackages, withinBeansPc.matches(DeepBean.class));
-		assertEquals(matchSubpackages, withinBeansPc.matches(
-				DeepBean.class.getMethod("aMethod", String.class), DeepBean.class));
-		assertFalse(withinBeansPc.matches(String.class));
-		assertFalse(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class));
+		assertThat(withinBeansPc.matches(TestBean.class)).isTrue();
+		assertThat(withinBeansPc.matches(getAge, TestBean.class)).isTrue();
+		assertThat(withinBeansPc.matches(DeepBean.class)).isEqualTo(matchSubpackages);
+		assertThat(withinBeansPc.matches(
+				DeepBean.class.getMethod("aMethod", String.class), DeepBean.class)).isEqualTo(matchSubpackages);
+		assertThat(withinBeansPc.matches(String.class)).isFalse();
+		assertThat(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate"), OtherIOther.class)).isFalse();
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class))
+			.withMessageContaining("expression");
 	}
 
 	@Test
 	public void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
-		try {
-			pc.matches(getAge, ITestBean.class, (Object[]) null);
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().contains("expression"));
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				pc.matches(getAge, ITestBean.class, (Object[]) null))
+			.withMessageContaining("expression");
 	}
 
 
 	@Test
 	public void testMatchWithArgs() throws Exception {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 
 		Pointcut pointcut = getPointcut(expression);
 		ClassFilter classFilter = pointcut.getClassFilter();
@@ -207,52 +198,44 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertTrue("Should match with setSomeNumber with Double input",
-				methodMatcher.matches(setSomeNumber, TestBean.class, new Double(12)));
-		assertFalse("Should not match setSomeNumber with Integer input",
-				methodMatcher.matches(setSomeNumber, TestBean.class, new Integer(11)));
-		assertFalse("Should not match getAge", methodMatcher.matches(getAge, TestBean.class));
-		assertTrue("Should be a runtime match", methodMatcher.isRuntime());
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, new Double(12))).as("Should match with setSomeNumber with Double input").isTrue();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, new Integer(11))).as("Should not match setSomeNumber with Integer input").isFalse();
+		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Should not match getAge").isFalse();
+		assertThat(methodMatcher.isRuntime()).as("Should be a runtime match").isTrue();
 	}
 
 	@Test
 	public void testSimpleAdvice() {
-		String expression = "execution(int org.springframework.tests.sample.beans.TestBean.getAge())";
+		String expression = "execution(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
-		assertEquals("Calls should be 0", 0, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 0").isEqualTo(0);
 		testBean.getAge();
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 		testBean.setAge(90);
-		assertEquals("Calls should still be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should still be 1").isEqualTo(1);
 	}
 
 	@Test
 	public void testDynamicMatchingProxy() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number)) && args(Double)";
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number)) && args(Double)";
 		CallCountingInterceptor interceptor = new CallCountingInterceptor();
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
-		assertEquals("Calls should be 0", 0, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 0").isEqualTo(0);
 		testBean.setSomeNumber(new Double(30));
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 
 		testBean.setSomeNumber(new Integer(90));
-		assertEquals("Calls should be 1", 1, interceptor.getCount());
+		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 	}
 
 	@Test
 	public void testInvalidExpression() {
-		String expression = "execution(void org.springframework.tests.sample.beans.TestBean.setSomeNumber(Number) && args(Double)";
-
-		try {
-			getPointcut(expression).getClassFilter();  // call to getClassFilter forces resolution
-			fail("Invalid expression should throw IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(true);
-		}
+		String expression = "execution(void org.springframework.beans.testfixture.beans.TestBean.setSomeNumber(Number) && args(Double)";
+		assertThatIllegalArgumentException().isThrownBy(
+				getPointcut(expression)::getClassFilter);  // call to getClassFilter forces resolution
 	}
 
 	private TestBean getAdvisedProxy(String pointcutExpression, CallCountingInterceptor interceptor) {
@@ -272,38 +255,33 @@ public class AspectJExpressionPointcutTests {
 	}
 
 	private void assertMatchesGetAge(MethodMatcher methodMatcher) {
-		assertTrue("Expression should match getAge() method", methodMatcher.matches(getAge, TestBean.class));
+		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Expression should match getAge() method").isTrue();
 	}
 
 	private void assertMatchesTestBeanClass(ClassFilter classFilter) {
-		assertTrue("Expression should match TestBean class", classFilter.matches(TestBean.class));
+		assertThat(classFilter.matches(TestBean.class)).as("Expression should match TestBean class").isTrue();
 	}
 
 	@Test
 	public void testWithUnsupportedPointcutPrimitive() {
-		String expression = "call(int org.springframework.tests.sample.beans.TestBean.getAge())";
-
-		try {
-			getPointcut(expression).getClassFilter(); // call to getClassFilter forces resolution...
-			fail("Should not support call pointcuts");
-		}
-		catch (UnsupportedPointcutPrimitiveException ex) {
-			assertEquals("Should not support call pointcut", PointcutPrimitive.CALL, ex.getUnsupportedPrimitive());
-		}
+		String expression = "call(int org.springframework.beans.testfixture.beans.TestBean.getAge())";
+		assertThatExceptionOfType(UnsupportedPointcutPrimitiveException.class).isThrownBy(() ->
+				getPointcut(expression).getClassFilter()) // call to getClassFilter forces resolution...
+			.satisfies(ex -> assertThat(ex.getUnsupportedPrimitive()).isEqualTo(PointcutPrimitive.CALL));
 	}
 
 	@Test
 	public void testAndSubstitution() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String)");
 		PointcutExpression expr = ((AspectJExpressionPointcut) pc).getPointcutExpression();
-		assertEquals("execution(* *(..)) && args(String)",expr.getPointcutExpression());
+		assertThat(expr.getPointcutExpression()).isEqualTo("execution(* *(..)) && args(String)");
 	}
 
 	@Test
 	public void testMultipleAndSubstitutions() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String) and this(Object)");
 		PointcutExpression expr = ((AspectJExpressionPointcut) pc).getPointcutExpression();
-		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());
+		assertThat(expr.getPointcutExpression()).isEqualTo("execution(* *(..)) && args(String) && this(Object)");
 	}
 
 	private Pointcut getPointcut(String expression) {

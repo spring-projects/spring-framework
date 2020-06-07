@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,23 +19,23 @@ package org.springframework.web.context.request;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpSession;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpSession;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -48,14 +48,14 @@ public class SessionScopeTests {
 	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.beanFactory.registerScope("session", new SessionScope());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.loadBeanDefinitions(new ClassPathResource("sessionScopeTests.xml", getClass()));
 	}
 
-	@After
+	@AfterEach
 	public void resetRequestAttributes() {
 		RequestContextHolder.setRequestAttributes(null);
 	}
@@ -77,17 +77,17 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertEquals(1, count.intValue());
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
-		assertEquals(1, count.intValue());
+		assertThat(count.intValue()).isEqualTo(1);
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
+		assertThat(count.intValue()).isEqualTo(1);
 
 		// should re-propagate updated attribute
 		requestAttributes.requestCompleted();
-		assertEquals(session.getAttribute(name), bean);
-		assertEquals(2, count.intValue());
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 	@Test
@@ -106,14 +106,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		TestBean bean = (TestBean) this.beanFactory.getBean(name);
-		assertEquals(1, count.intValue());
+		assertThat(count.intValue()).isEqualTo(1);
 
 		// should re-propagate updated attribute
 		requestAttributes.requestCompleted();
-		assertEquals(session.getAttribute(name), bean);
-		assertEquals(2, count.intValue());
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(count.intValue()).isEqualTo(2);
 	}
 
 	@Test
@@ -125,14 +125,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedDisposableObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		session.invalidate();
-		assertTrue(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isTrue();
 	}
 
 	@Test
@@ -162,14 +162,14 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		String name = "sessionScopedDisposableObject";
-		assertNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNull();
 		DerivedTestBean bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		serializedState = session.serializeState();
-		assertFalse(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isFalse();
 
 		serializedState = (Serializable) SerializationTestUtils.serializeAndDeserialize(serializedState);
 
@@ -181,20 +181,20 @@ public class SessionScopeTests {
 
 		RequestContextHolder.setRequestAttributes(requestAttributes);
 		name = "sessionScopedDisposableObject";
-		assertNotNull(session.getAttribute(name));
+		assertThat(session.getAttribute(name)).isNotNull();
 		bean = (DerivedTestBean) this.beanFactory.getBean(name);
-		assertEquals(session.getAttribute(name), bean);
-		assertSame(bean, this.beanFactory.getBean(name));
+		assertThat(bean).isEqualTo(session.getAttribute(name));
+		assertThat(this.beanFactory.getBean(name)).isSameAs(bean);
 
 		requestAttributes.requestCompleted();
 		session.invalidate();
-		assertTrue(bean.wasDestroyed());
+		assertThat(bean.wasDestroyed()).isTrue();
 
 		if (beanNameReset) {
-			assertNull(bean.getBeanName());
+			assertThat(bean.getBeanName()).isNull();
 		}
 		else {
-			assertNotNull(bean.getBeanName());
+			assertThat(bean.getBeanName()).isNotNull();
 		}
 	}
 

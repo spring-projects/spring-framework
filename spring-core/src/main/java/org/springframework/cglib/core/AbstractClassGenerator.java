@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,6 +40,10 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 
 	private static volatile Map<ClassLoader, ClassLoaderData> CACHE = new WeakHashMap<ClassLoader, ClassLoaderData>();
 
+	private static final boolean DEFAULT_USE_CACHE =
+			Boolean.parseBoolean(System.getProperty("cglib.useCache", "true"));
+
+
 	private GeneratorStrategy strategy = DefaultGeneratorStrategy.INSTANCE;
 
 	private NamingPolicy namingPolicy = DefaultNamingPolicy.INSTANCE;
@@ -54,7 +58,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 
 	private Object key;
 
-	private boolean useCache = true;
+	private boolean useCache = DEFAULT_USE_CACHE;
 
 	private String className;
 
@@ -240,7 +244,7 @@ abstract public class AbstractClassGenerator<T> implements ClassGenerator {
 
 	/**
 	 * Set the strategy to use to create the bytecode from this generator.
-	 * By default an instance of {@see DefaultGeneratorStrategy} is used.
+	 * By default an instance of {@link DefaultGeneratorStrategy} is used.
 	 */
 	public void setStrategy(GeneratorStrategy strategy) {
 		if (strategy == null)

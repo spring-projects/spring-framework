@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,25 +22,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link AnnotationAsyncExecutionAspect}.
@@ -48,6 +46,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Stephane Nicoll
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milliseconds
@@ -57,10 +56,8 @@ public class AnnotationAsyncExecutionAspectTests {
 	private CountingExecutor executor;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		executor = new CountingExecutor();
 		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
@@ -71,9 +68,9 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.incrementAsync();
 		executor.waitForCompletion();
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
@@ -81,41 +78,39 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		Future<Integer> future = obj.incrementReturningAFuture();
 		// No need to executor.waitForCompletion() as future.get() will have the same effect
-		assertEquals(5, future.get().intValue());
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(future.get().intValue()).isEqualTo(5);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
 	public void syncMethodGetsRoutedSynchronously() {
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.increment();
-		assertEquals(1, obj.counter);
-		assertEquals(0, executor.submitStartCounter);
-		assertEquals(0, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(0);
+		assertThat(executor.submitCompleteCounter).isEqualTo(0);
 	}
 
 	@Test
 	public void voidMethodInAsyncClassGetsRoutedAsynchronously() {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		obj.increment();
 		executor.waitForCompletion();
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	@Test
 	public void methodReturningFutureInAsyncClassGetsRoutedAsynchronouslyAndReturnsAFuture() throws InterruptedException, ExecutionException {
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		Future<Integer> future = obj.incrementReturningAFuture();
-		assertEquals(5, future.get().intValue());
-		assertEquals(1, obj.counter);
-		assertEquals(1, executor.submitStartCounter);
-		assertEquals(1, executor.submitCompleteCounter);
+		assertThat(future.get().intValue()).isEqualTo(5);
+		assertThat(obj.counter).isEqualTo(1);
+		assertThat(executor.submitStartCounter).isEqualTo(1);
+		assertThat(executor.submitCompleteCounter).isEqualTo(1);
 	}
 
 	/*
@@ -138,14 +133,14 @@ public class AnnotationAsyncExecutionAspectTests {
 		ClassWithQualifiedAsyncMethods obj = new ClassWithQualifiedAsyncMethods();
 
 		Future<Thread> defaultThread = obj.defaultWork();
-		assertThat(defaultThread.get(), not(Thread.currentThread()));
-		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
+		assertThat(defaultThread.get()).isNotEqualTo(Thread.currentThread());
+		assertThat(defaultThread.get().getName()).doesNotStartWith("e1-");
 
 		ListenableFuture<Thread> e1Thread = obj.e1Work();
-		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+		assertThat(e1Thread.get().getName()).startsWith("e1-");
 
 		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
-		assertThat(e1OtherThread.get().getName(), startsWith("e1-"));
+		assertThat(e1OtherThread.get().getName()).startsWith("e1-");
 	}
 
 	@Test
@@ -154,7 +149,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler();
 		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
 		try {
-			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			assertThat(exceptionHandler.isCalled()).as("Handler should not have been called").isFalse();
 			ClassWithException obj = new ClassWithException();
 			obj.failWithVoid();
 			exceptionHandler.await(3000);
@@ -171,20 +166,14 @@ public class AnnotationAsyncExecutionAspectTests {
 		TestableAsyncUncaughtExceptionHandler exceptionHandler = new TestableAsyncUncaughtExceptionHandler(true);
 		AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(exceptionHandler);
 		try {
-			assertFalse("Handler should not have been called", exceptionHandler.isCalled());
+			assertThat(exceptionHandler.isCalled()).as("Handler should not have been called").isFalse();
 			ClassWithException obj = new ClassWithException();
-			try {
-				obj.failWithVoid();
-				exceptionHandler.await(3000);
-				exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
-			}
-			catch (Exception ex) {
-				fail("No unexpected exception should have been received but got " + ex.getMessage());
-			}
+			obj.failWithVoid();
+			exceptionHandler.await(3000);
+			exceptionHandler.assertCalledWith(m, UnsupportedOperationException.class);
 		}
 		finally {
 			AnnotationAsyncExecutionAspect.aspectOf().setExceptionHandler(defaultExceptionHandler);
-
 		}
 	}
 
@@ -212,7 +201,7 @@ public class AnnotationAsyncExecutionAspectTests {
 				wait(WAIT_TIME);
 			}
 			catch (InterruptedException ex) {
-				fail("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
+				throw new AssertionError("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
 			}
 		}
 	}

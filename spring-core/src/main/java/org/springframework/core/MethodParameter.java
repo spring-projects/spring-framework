@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,12 +26,11 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
+import kotlin.Unit;
 import kotlin.reflect.KFunction;
 import kotlin.reflect.KParameter;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -39,6 +38,7 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -54,12 +54,14 @@ import org.springframework.util.ClassUtils;
  * @author Andy Clement
  * @author Sam Brannen
  * @author Sebastien Deleuze
+ * @author Phillip Webb
  * @since 2.0
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
 
 	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
 
 	private final Executable executable;
 
@@ -68,12 +70,13 @@ public class MethodParameter {
 	@Nullable
 	private volatile Parameter parameter;
 
-	private int nestingLevel = 1;
+	private int nestingLevel;
 
 	/** Map from Integer level to Integer type index. */
 	@Nullable
 	Map<Integer, Integer> typeIndexesPerLevel;
 
+	/** The containing class. Could also be supplied by overriding {@link #getContainingClass()} */
 	@Nullable
 	private volatile Class<?> containingClass;
 
@@ -146,6 +149,22 @@ public class MethodParameter {
 		this.executable = constructor;
 		this.parameterIndex = validateIndex(constructor, parameterIndex);
 		this.nestingLevel = nestingLevel;
+	}
+
+	/**
+	 * Internal constructor used to create a {@link MethodParameter} with a
+	 * containing class already set.
+	 * @param executable the Executable to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @param containingClass the containing class
+	 * @since 5.2
+	 */
+	MethodParameter(Executable executable, int parameterIndex, @Nullable Class<?> containingClass) {
+		Assert.notNull(executable, "Executable must not be null");
+		this.executable = executable;
+		this.parameterIndex = validateIndex(executable, parameterIndex);
+		this.nestingLevel = 1;
+		this.containingClass = containingClass;
 	}
 
 	/**
@@ -250,7 +269,9 @@ public class MethodParameter {
 	/**
 	 * Increase this parameter's nesting level.
 	 * @see #getNestingLevel()
+	 * @deprecated since 5.2 in favor of {@link #nested(Integer)}
 	 */
+	@Deprecated
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 	}
@@ -258,7 +279,10 @@ public class MethodParameter {
 	/**
 	 * Decrease this parameter's nesting level.
 	 * @see #getNestingLevel()
+	 * @deprecated since 5.2 in favor of retaining the original MethodParameter and
+	 * using {@link #nested(Integer)} if nesting is required
 	 */
+	@Deprecated
 	public void decreaseNestingLevel() {
 		getTypeIndexesPerLevel().remove(this.nestingLevel);
 		this.nestingLevel--;
@@ -274,11 +298,23 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return a variant of this {@code MethodParameter} with the type
+	 * for the current level set to the specified value.
+	 * @param typeIndex the new type index
+	 * @since 5.2
+	 */
+	public MethodParameter withTypeIndex(int typeIndex) {
+		return nested(this.nestingLevel, typeIndex);
+	}
+
+	/**
 	 * Set the type index for the current nesting level.
 	 * @param typeIndex the corresponding type index
 	 * (or {@code null} for the default type index)
 	 * @see #getNestingLevel()
+	 * @deprecated since 5.2 in favor of {@link #withTypeIndex}
 	 */
+	@Deprecated
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
 		getTypeIndexesPerLevel().put(this.nestingLevel, typeIndex);
 	}
@@ -317,20 +353,43 @@ public class MethodParameter {
 
 	/**
 	 * Return a variant of this {@code MethodParameter} which points to the
-	 * same parameter but one nesting level deeper. This is effectively the
-	 * same as {@link #increaseNestingLevel()}, just with an independent
-	 * {@code MethodParameter} object (e.g. in case of the original being cached).
+	 * same parameter but one nesting level deeper.
 	 * @since 4.3
 	 */
 	public MethodParameter nested() {
+		return nested(null);
+	}
+
+	/**
+	 * Return a variant of this {@code MethodParameter} which points to the
+	 * same parameter but one nesting level deeper.
+	 * @param typeIndex the type index for the new nesting level
+	 * @since 5.2
+	 */
+	public MethodParameter nested(@Nullable Integer typeIndex) {
 		MethodParameter nestedParam = this.nestedMethodParameter;
-		if (nestedParam != null) {
+		if (nestedParam != null && typeIndex == null) {
 			return nestedParam;
 		}
-		nestedParam = clone();
-		nestedParam.nestingLevel = this.nestingLevel + 1;
-		this.nestedMethodParameter = nestedParam;
+		nestedParam = nested(this.nestingLevel + 1, typeIndex);
+		if (typeIndex == null) {
+			this.nestedMethodParameter = nestedParam;
+		}
 		return nestedParam;
+	}
+
+	private MethodParameter nested(int nestingLevel, @Nullable Integer typeIndex) {
+		MethodParameter copy = clone();
+		copy.nestingLevel = nestingLevel;
+		if (this.typeIndexesPerLevel != null) {
+			copy.typeIndexesPerLevel = new HashMap<>(this.typeIndexesPerLevel);
+		}
+		if (typeIndex != null) {
+			copy.getTypeIndexesPerLevel().put(copy.nestingLevel, typeIndex);
+		}
+		copy.parameterType = null;
+		copy.genericParameterType = null;
+		return copy;
 	}
 
 	/**
@@ -338,7 +397,7 @@ public class MethodParameter {
 	 * either in the form of Java 8's {@link java.util.Optional}, any variant
 	 * of a parameter-level {@code Nullable} annotation (such as from JSR-305
 	 * or the FindBugs set of annotations), or a language-level nullable type
-	 * declaration in Kotlin.
+	 * declaration or {@code Continuation} parameter in Kotlin.
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
@@ -375,12 +434,35 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Set a containing class to resolve the parameter type against.
+	 * Return a variant of this {@code MethodParameter} which refers to the
+	 * given containing class.
+	 * @param containingClass a specific containing class (potentially a
+	 * subclass of the declaring class, e.g. substituting a type variable)
+	 * @since 5.2
+	 * @see #getParameterType()
 	 */
-	void setContainingClass(Class<?> containingClass) {
-		this.containingClass = containingClass;
+	public MethodParameter withContainingClass(@Nullable Class<?> containingClass) {
+		MethodParameter result = clone();
+		result.containingClass = containingClass;
+		result.parameterType = null;
+		return result;
 	}
 
+	/**
+	 * Set a containing class to resolve the parameter type against.
+	 */
+	@Deprecated
+	void setContainingClass(Class<?> containingClass) {
+		this.containingClass = containingClass;
+		this.parameterType = null;
+	}
+
+	/**
+	 * Return the containing class for this method parameter.
+	 * @return a specific containing class (potentially a subclass of the
+	 * declaring class), or otherwise simply the declaring class itself
+	 * @see #getDeclaringClass()
+	 */
 	public Class<?> getContainingClass() {
 		Class<?> containingClass = this.containingClass;
 		return (containingClass != null ? containingClass : getDeclaringClass());
@@ -389,6 +471,7 @@ public class MethodParameter {
 	/**
 	 * Set a resolved (generic) parameter type.
 	 */
+	@Deprecated
 	void setParameterType(@Nullable Class<?> parameterType) {
 		this.parameterType = parameterType;
 	}
@@ -399,16 +482,16 @@ public class MethodParameter {
 	 */
 	public Class<?> getParameterType() {
 		Class<?> paramType = this.parameterType;
-		if (paramType == null) {
-			if (this.parameterIndex < 0) {
-				Method method = getMethod();
-				paramType = (method != null ? method.getReturnType() : void.class);
-			}
-			else {
-				paramType = this.executable.getParameterTypes()[this.parameterIndex];
-			}
-			this.parameterType = paramType;
+		if (paramType != null) {
+			return paramType;
 		}
+		if (getContainingClass() != getDeclaringClass()) {
+			paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+		}
+		if (paramType == null) {
+			paramType = computeParameterType();
+		}
+		this.parameterType = paramType;
 		return paramType;
 	}
 
@@ -422,7 +505,9 @@ public class MethodParameter {
 		if (paramType == null) {
 			if (this.parameterIndex < 0) {
 				Method method = getMethod();
-				paramType = (method != null ? method.getGenericReturnType() : void.class);
+				paramType = (method != null ?
+						(KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass()) ?
+						KotlinDelegate.getGenericReturnType(method) : method.getGenericReturnType()) : void.class);
 			}
 			else {
 				Type[] genericParameterTypes = this.executable.getGenericParameterTypes();
@@ -436,11 +521,25 @@ public class MethodParameter {
 					index = this.parameterIndex - 1;
 				}
 				paramType = (index >= 0 && index < genericParameterTypes.length ?
-						genericParameterTypes[index] : getParameterType());
+						genericParameterTypes[index] : computeParameterType());
 			}
 			this.genericParameterType = paramType;
 		}
 		return paramType;
+	}
+
+	private Class<?> computeParameterType() {
+		if (this.parameterIndex < 0) {
+			Method method = getMethod();
+			if (method == null) {
+				return void.class;
+			}
+			if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(getContainingClass())) {
+				return KotlinDelegate.getReturnType(method);
+			}
+			return method.getReturnType();
+		}
+		return this.executable.getParameterTypes()[this.parameterIndex];
 	}
 
 	/**
@@ -650,7 +749,7 @@ public class MethodParameter {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -658,12 +757,16 @@ public class MethodParameter {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
-		return (this.parameterIndex == otherParam.parameterIndex && getExecutable().equals(otherParam.getExecutable()));
+		return (getContainingClass() == otherParam.getContainingClass() &&
+				ObjectUtils.nullSafeEquals(this.typeIndexesPerLevel, otherParam.typeIndexesPerLevel) &&
+				this.nestingLevel == otherParam.nestingLevel &&
+				this.parameterIndex == otherParam.parameterIndex &&
+				this.executable.equals(otherParam.executable));
 	}
 
 	@Override
 	public int hashCode() {
-		return (getExecutable().hashCode() * 31 + this.parameterIndex);
+		return (31 * this.executable.hashCode() + this.parameterIndex);
 	}
 
 	@Override
@@ -677,7 +780,6 @@ public class MethodParameter {
 	public MethodParameter clone() {
 		return new MethodParameter(this);
 	}
-
 
 	/**
 	 * Create a new MethodParameter for the given method or constructor.
@@ -733,8 +835,16 @@ public class MethodParameter {
 	protected static int findParameterIndex(Parameter parameter) {
 		Executable executable = parameter.getDeclaringExecutable();
 		Parameter[] allParams = executable.getParameters();
+		// Try first with identity checks for greater performance.
 		for (int i = 0; i < allParams.length; i++) {
 			if (parameter == allParams[i]) {
+				return i;
+			}
+		}
+		// Potentially try again with object equality checks in order to avoid race
+		// conditions while invoking java.lang.reflect.Executable.getParameters().
+		for (int i = 0; i < allParams.length; i++) {
+			if (parameter.equals(allParams[i])) {
 				return i;
 			}
 		}
@@ -756,40 +866,82 @@ public class MethodParameter {
 	private static class KotlinDelegate {
 
 		/**
-		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type
-		 * or an optional parameter (with a default value in the Kotlin declaration).
+		 * Check whether the specified {@link MethodParameter} represents a nullable Kotlin type,
+		 * an optional parameter (with a default value in the Kotlin declaration) or a
+		 * {@code Continuation} parameter used in suspending functions.
 		 */
 		public static boolean isOptional(MethodParameter param) {
 			Method method = param.getMethod();
-			Constructor<?> ctor = param.getConstructor();
 			int index = param.getParameterIndex();
 			if (method != null && index == -1) {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				return (function != null && function.getReturnType().isMarkedNullable());
 			}
+			KFunction<?> function;
+			Predicate<KParameter> predicate;
+			if (method != null) {
+				if (param.getParameterType().getName().equals("kotlin.coroutines.Continuation")) {
+					return true;
+				}
+				function = ReflectJvmMapping.getKotlinFunction(method);
+				predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
+			}
 			else {
-				KFunction<?> function = null;
-				Predicate<KParameter> predicate = null;
-				if (method != null) {
-					function = ReflectJvmMapping.getKotlinFunction(method);
-					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind());
-				}
-				else if (ctor != null) {
-					function = ReflectJvmMapping.getKotlinFunction(ctor);
-					predicate = p -> KParameter.Kind.VALUE.equals(p.getKind()) ||
-							KParameter.Kind.INSTANCE.equals(p.getKind());
-				}
-				if (function != null) {
-					List<KParameter> parameters = function.getParameters();
-					KParameter parameter = parameters
-							.stream()
-							.filter(predicate)
-							.collect(Collectors.toList())
-							.get(index);
-					return (parameter.getType().isMarkedNullable() || parameter.isOptional());
+				Constructor<?> ctor = param.getConstructor();
+				Assert.state(ctor != null, "Neither method nor constructor found");
+				function = ReflectJvmMapping.getKotlinFunction(ctor);
+				predicate = p -> (KParameter.Kind.VALUE.equals(p.getKind()) ||
+						KParameter.Kind.INSTANCE.equals(p.getKind()));
+			}
+			if (function != null) {
+				int i = 0;
+				for (KParameter kParameter : function.getParameters()) {
+					if (predicate.test(kParameter)) {
+						if (index == i++) {
+							return (kParameter.getType().isMarkedNullable() || kParameter.isOptional());
+						}
+					}
 				}
 			}
 			return false;
+		}
+
+		/**
+		 * Return the generic return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Type getGenericReturnType(Method method) {
+			try {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				if (function != null && function.isSuspend()) {
+					return ReflectJvmMapping.getJavaType(function.getReturnType());
+				}
+			}
+			catch (UnsupportedOperationException ex) {
+				// probably a synthetic class - let's use java reflection instead
+			}
+			return method.getGenericReturnType();
+		}
+
+		/**
+		 * Return the return type of the method, with support of suspending
+		 * functions via Kotlin reflection.
+		 */
+		static private Class<?> getReturnType(Method method) {
+			try {
+				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
+				if (function != null && function.isSuspend()) {
+					Type paramType = ReflectJvmMapping.getJavaType(function.getReturnType());
+					if (paramType == Unit.class) {
+						paramType = void.class;
+					}
+					return ResolvableType.forType(paramType).resolve(method.getReturnType());
+				}
+			}
+			catch (UnsupportedOperationException ex) {
+				// probably a synthetic class - let's use java reflection instead
+			}
+			return method.getReturnType();
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.View;
 /**
  * Simple implementation of the {@link org.springframework.web.servlet.ViewResolver}
  * interface, allowing for direct resolution of symbolic view names to URLs,
- * without explicit mapping definition. This is useful if your symbolic names
+ * without explicit mapping definitions. This is useful if your symbolic names
  * match the names of your view resources in a straightforward manner
  * (i.e. the symbolic name is the unique part of the resource's filename),
  * without the need for a dedicated mapping to be defined for each view.
@@ -65,14 +66,15 @@ import org.springframework.web.servlet.View;
  * a symbolic view name to different resources depending on the current locale.
  *
  * <p><b>Note:</b> When chaining ViewResolvers, a UrlBasedViewResolver will check whether
- * the {@link AbstractUrlBasedView#checkResource specified resource actually exists}.
+ * the {@linkplain AbstractUrlBasedView#checkResource specified resource actually exists}.
  * However, with {@link InternalResourceView}, it is not generally possible to
  * determine the existence of the target resource upfront. In such a scenario,
- * a UrlBasedViewResolver will always return View for any given view name;
+ * a UrlBasedViewResolver will always return a View for any given view name;
  * as a consequence, it should be configured as the last ViewResolver in the chain.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 13.12.2003
  * @see #setViewClass
  * @see #setPrefix
@@ -550,14 +552,17 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
 		view.setUrl(getPrefix() + viewName + getSuffix());
+		view.setAttributesMap(getAttributesMap());
 
 		String contentType = getContentType();
 		if (contentType != null) {
 			view.setContentType(contentType);
 		}
 
-		view.setRequestContextAttribute(getRequestContextAttribute());
-		view.setAttributesMap(getAttributesMap());
+		String requestContextAttribute = getRequestContextAttribute();
+		if (requestContextAttribute != null) {
+			view.setRequestContextAttribute(requestContextAttribute);
+		}
 
 		Boolean exposePathVariables = getExposePathVariables();
 		if (exposePathVariables != null) {

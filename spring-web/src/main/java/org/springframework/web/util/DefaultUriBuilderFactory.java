@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.util;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,6 @@ import org.springframework.util.StringUtils;
  * <p>Provides options to create {@link UriBuilder} instances with a common
  * base URI, alternative encoding mode strategies, among others.
  *
- *
  * @author Rossen Stoyanchev
  * @since 5.0
  * @see UriComponentsBuilder
@@ -41,7 +41,14 @@ import org.springframework.util.StringUtils;
 public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	/**
-	 * Enum to represent multiple URI encoding strategies.
+	 * Enum to represent multiple URI encoding strategies. The following are
+	 * available:
+	 * <ul>
+	 * <li>{@link #TEMPLATE_AND_VALUES}
+	 * <li>{@link #VALUES_ONLY}
+	 * <li>{@link #URI_COMPONENT}
+	 * <li>{@link #NONE}
+	 * </ul>
 	 * @see #setEncodingMode
 	 */
 	public enum EncodingMode {
@@ -130,16 +137,13 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 
 	/**
-	 * Set the encoding mode to use.
+	 * Set the {@link EncodingMode encoding mode} to use.
 	 * <p>By default this is set to {@link EncodingMode#TEMPLATE_AND_VALUES
 	 * EncodingMode.TEMPLATE_AND_VALUES}.
-	 * <p><strong>Note:</strong> In 5.1 the default was changed from
-	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}.
-	 * Consequently the {@code WebClient}, which relies on the built-in default
-	 * has also been switched to the new default. The {@code RestTemplate}
-	 * however sets this explicitly to {@link EncodingMode#URI_COMPONENT
-	 * EncodingMode.URI_COMPONENT} explicitly for historic and backwards
-	 * compatibility reasons.
+	 * <p><strong>Note:</strong> Prior to 5.1 the default was
+	 * {@link EncodingMode#URI_COMPONENT EncodingMode.URI_COMPONENT}
+	 * therefore the {@code WebClient} {@code RestTemplate} have switched their
+	 * default behavior.
 	 * @param encodingMode the encoding mode to use
 	 */
 	public void setEncodingMode(EncodingMode encodingMode) {
@@ -195,16 +199,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 	// UriTemplateHandler
 
+	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
+	@Override
 	public URI expand(String uriTemplate, Object... uriVars) {
 		return uriString(uriTemplate).build(uriVars);
 	}
 
 	// UriBuilderFactory
 
+	@Override
 	public UriBuilder uriString(String uriTemplate) {
 		return new DefaultUriBuilder(uriTemplate);
 	}
@@ -222,31 +229,27 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 
 		private final UriComponentsBuilder uriComponentsBuilder;
 
-
 		public DefaultUriBuilder(String uriTemplate) {
 			this.uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		}
 
 		private UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 			UriComponentsBuilder result;
-			if (StringUtils.isEmpty(uriTemplate)) {
-				result = baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance();
+			if (!StringUtils.hasLength(uriTemplate)) {
+				result = (baseUri != null ? baseUri.cloneBuilder() : UriComponentsBuilder.newInstance());
 			}
 			else if (baseUri != null) {
 				UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
 				UriComponents uri = builder.build();
-				result = uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder;
+				result = (uri.getHost() == null ? baseUri.cloneBuilder().uriComponents(uri) : builder);
 			}
 			else {
 				result = UriComponentsBuilder.fromUriString(uriTemplate);
 			}
-
 			if (encodingMode.equals(EncodingMode.TEMPLATE_AND_VALUES)) {
 				result.encode();
 			}
-
 			parsePathIfNecessary(result);
-
 			return result;
 		}
 
@@ -332,7 +335,19 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder queryParam(String name, @Nullable Collection<?> values) {
+			this.uriComponentsBuilder.queryParam(name, values);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, Object... values) {
+			this.uriComponentsBuilder.replaceQueryParam(name, values);
+			return this;
+		}
+
+		@Override
+		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
 		}

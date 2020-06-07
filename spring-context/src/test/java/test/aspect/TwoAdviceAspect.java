@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,12 +26,12 @@ public class TwoAdviceAspect {
 
 	private int totalCalls;
 
-	@Around("execution(* org.springframework.tests.sample.beans.ITestBean.age())")
+	@Around("execution(* org.springframework.beans.testfixture.beans.ITestBean.age())")
 	public int returnCallCount(ProceedingJoinPoint pjp) throws Exception {
 		return totalCalls;
 	}
 
-	@Before("execution(* org.springframework.tests.sample.beans.ITestBean.setAge(int)) && args(newAge)")
+	@Before("execution(* org.springframework.beans.testfixture.beans.ITestBean.setAge(int)) && args(newAge)")
 	public void countSet(int newAge) throws Exception {
 		++totalCalls;
 	}

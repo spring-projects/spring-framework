@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,128 +16,134 @@
 
 package org.springframework.core.io.buffer;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
+class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
-	@Test
-	public void byteCountsAndPositions() {
+	@ParameterizedDataBufferAllocatingTest
+	void byteCountsAndPositions(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(2);
 
-		assertEquals(0, buffer.readPosition());
-		assertEquals(0, buffer.writePosition());
-		assertEquals(0, buffer.readableByteCount());
-		assertEquals(2, buffer.writableByteCount());
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.readPosition()).isEqualTo(0);
+		assertThat(buffer.writePosition()).isEqualTo(0);
+		assertThat(buffer.readableByteCount()).isEqualTo(0);
+		assertThat(buffer.writableByteCount()).isEqualTo(2);
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		buffer.write((byte) 'a');
-		assertEquals(0, buffer.readPosition());
-		assertEquals(1, buffer.writePosition());
-		assertEquals(1, buffer.readableByteCount());
-		assertEquals(1, buffer.writableByteCount());
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.readPosition()).isEqualTo(0);
+		assertThat(buffer.writePosition()).isEqualTo(1);
+		assertThat(buffer.readableByteCount()).isEqualTo(1);
+		assertThat(buffer.writableByteCount()).isEqualTo(1);
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		buffer.write((byte) 'b');
-		assertEquals(0, buffer.readPosition());
-		assertEquals(2, buffer.writePosition());
-		assertEquals(2, buffer.readableByteCount());
-		assertEquals(0, buffer.writableByteCount());
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.readPosition()).isEqualTo(0);
+		assertThat(buffer.writePosition()).isEqualTo(2);
+		assertThat(buffer.readableByteCount()).isEqualTo(2);
+		assertThat(buffer.writableByteCount()).isEqualTo(0);
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		buffer.read();
-		assertEquals(1, buffer.readPosition());
-		assertEquals(2, buffer.writePosition());
-		assertEquals(1, buffer.readableByteCount());
-		assertEquals(0, buffer.writableByteCount());
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.readPosition()).isEqualTo(1);
+		assertThat(buffer.writePosition()).isEqualTo(2);
+		assertThat(buffer.readableByteCount()).isEqualTo(1);
+		assertThat(buffer.writableByteCount()).isEqualTo(0);
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		buffer.read();
-		assertEquals(2, buffer.readPosition());
-		assertEquals(2, buffer.writePosition());
-		assertEquals(0, buffer.readableByteCount());
-		assertEquals(0, buffer.writableByteCount());
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.readPosition()).isEqualTo(2);
+		assertThat(buffer.writePosition()).isEqualTo(2);
+		assertThat(buffer.readableByteCount()).isEqualTo(0);
+		assertThat(buffer.writableByteCount()).isEqualTo(0);
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		release(buffer);
 	}
 
-	@Test
-	public void readPositionSmallerThanZero() {
+	@ParameterizedDataBufferAllocatingTest
+	void readPositionSmallerThanZero(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.readPosition(-1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.readPosition(-1));
 		}
 		finally {
 			release(buffer);
 		}
 	}
 
-	@Test
-	public void readPositionGreaterThanWritePosition() {
+	@ParameterizedDataBufferAllocatingTest
+	void readPositionGreaterThanWritePosition(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.readPosition(1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.readPosition(1));
 		}
 		finally {
 			release(buffer);
 		}
 	}
 
-	@Test
-	public void writePositionSmallerThanReadPosition() {
+	@ParameterizedDataBufferAllocatingTest
+	void writePositionSmallerThanReadPosition(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(2);
 		try {
 			buffer.write((byte) 'a');
 			buffer.read();
-
-			buffer.writePosition(0);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.writePosition(0));
 		}
 		finally {
 			release(buffer);
 		}
 	}
 
-	@Test
-	public void writePositionGreaterThanCapacity() {
+	@ParameterizedDataBufferAllocatingTest
+	void writePositionGreaterThanCapacity(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.writePosition(2);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
+			assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+					buffer.writePosition(2));
 		}
 		finally {
 			release(buffer);
 		}
 	}
 
-	@Test
-	public void writeAndRead() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeAndRead(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(5);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 
 		int ch = buffer.read();
-		assertEquals('a', ch);
+		assertThat(ch).isEqualTo((byte) 'a');
 
 		buffer.write((byte) 'd');
 		buffer.write((byte) 'e');
@@ -145,45 +151,197 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		byte[] result = new byte[4];
 		buffer.read(result);
 
-		assertArrayEquals(new byte[]{'b', 'c', 'd', 'e'}, result);
+		assertThat(result).isEqualTo(new byte[]{'b', 'c', 'd', 'e'});
 
 		release(buffer);
 	}
 
-	@Test
-	public void inputStream() throws IOException {
+	@ParameterizedDataBufferAllocatingTest
+	void writeNullString(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.write(null, StandardCharsets.UTF_8));
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeNullCharset(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.write("test", null));
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeEmptyString(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(1);
+		buffer.write("", StandardCharsets.UTF_8);
+
+		assertThat(buffer.readableByteCount()).isEqualTo(0);
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeUtf8String(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(6);
+		buffer.write("Spring", StandardCharsets.UTF_8);
+
+		byte[] result = new byte[6];
+		buffer.read(result);
+
+		assertThat(result).isEqualTo("Spring".getBytes(StandardCharsets.UTF_8));
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeUtf8StringOutGrowsCapacity(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(5);
+		buffer.write("Spring €", StandardCharsets.UTF_8);
+
+		byte[] result = new byte[10];
+		buffer.read(result);
+
+		assertThat(result).isEqualTo("Spring €".getBytes(StandardCharsets.UTF_8));
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeIsoString(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(3);
+		buffer.write("\u00A3", StandardCharsets.ISO_8859_1);
+
+		byte[] result = new byte[1];
+		buffer.read(result);
+
+		assertThat(result).isEqualTo("\u00A3".getBytes(StandardCharsets.ISO_8859_1));
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void writeMultipleUtf8String(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(1);
+		buffer.write("abc", StandardCharsets.UTF_8);
+		assertThat(buffer.readableByteCount()).isEqualTo(3);
+
+		buffer.write("def", StandardCharsets.UTF_8);
+		assertThat(buffer.readableByteCount()).isEqualTo(6);
+
+		buffer.write("ghi", StandardCharsets.UTF_8);
+		assertThat(buffer.readableByteCount()).isEqualTo(9);
+
+		byte[] result = new byte[9];
+		buffer.read(result);
+
+		assertThat(result).isEqualTo("abcdefghi".getBytes());
+
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void toStringNullCharset(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(1);
+		try {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.toString(null));
+		}
+		finally {
+			release(buffer);
+		}
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void toStringUtf8(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		String spring = "Spring";
+		byte[] bytes = spring.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = createDataBuffer(bytes.length);
+		buffer.write(bytes);
+
+		String result = buffer.toString(StandardCharsets.UTF_8);
+
+		assertThat(result).isEqualTo(spring);
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void toStringSection(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		String spring = "Spring";
+		byte[] bytes = spring.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = createDataBuffer(bytes.length);
+		buffer.write(bytes);
+
+		String result = buffer.toString(1, 3, StandardCharsets.UTF_8);
+
+		assertThat(result).isEqualTo("pri");
+		release(buffer);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void inputStream(String displayName, DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(4);
 		buffer.write(new byte[]{'a', 'b', 'c', 'd', 'e'});
 		buffer.readPosition(1);
 
 		InputStream inputStream = buffer.asInputStream();
 
-		assertEquals(4, inputStream.available());
+		assertThat(inputStream.available()).isEqualTo(4);
 
 		int result = inputStream.read();
-		assertEquals('b', result);
-		assertEquals(3, inputStream.available());
+		assertThat(result).isEqualTo((byte) 'b');
+		assertThat(inputStream.available()).isEqualTo(3);
 
 		byte[] bytes = new byte[2];
 		int len = inputStream.read(bytes);
-		assertEquals(2, len);
-		assertArrayEquals(new byte[]{'c', 'd'}, bytes);
-		assertEquals(1, inputStream.available());
+		assertThat(len).isEqualTo(2);
+		assertThat(bytes).isEqualTo(new byte[]{'c', 'd'});
+		assertThat(inputStream.available()).isEqualTo(1);
 
 		Arrays.fill(bytes, (byte) 0);
 		len = inputStream.read(bytes);
-		assertEquals(1, len);
-		assertArrayEquals(new byte[]{'e', (byte) 0}, bytes);
-		assertEquals(0, inputStream.available());
+		assertThat(len).isEqualTo(1);
+		assertThat(bytes).isEqualTo(new byte[]{'e', (byte) 0});
+		assertThat(inputStream.available()).isEqualTo(0);
 
-		assertEquals(-1, inputStream.read());
-		assertEquals(-1, inputStream.read(bytes));
+		assertThat(inputStream.read()).isEqualTo(-1);
+		assertThat(inputStream.read(bytes)).isEqualTo(-1);
 
 		release(buffer);
 	}
 
-	@Test
-	public void inputStreamReleaseOnClose() throws IOException {
+	@ParameterizedDataBufferAllocatingTest
+	void inputStreamReleaseOnClose(String displayName, DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(3);
 		byte[] bytes = {'a', 'b', 'c'};
 		buffer.write(bytes);
@@ -193,18 +351,20 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		try {
 			byte[] result = new byte[3];
 			int len = inputStream.read(result);
-			assertEquals(3, len);
-			assertArrayEquals(bytes, result);
-		} finally {
+			assertThat(len).isEqualTo(3);
+			assertThat(result).isEqualTo(bytes);
+		}
+		finally {
 			inputStream.close();
 		}
 
-		// AbstractDataBufferAllocatingTestCase.LeakDetector will verify the buffer's release
-
+		// AbstractDataBufferAllocatingTests.leakDetector will verify the buffer's release
 	}
 
-	@Test
-	public void outputStream() throws IOException {
+	@ParameterizedDataBufferAllocatingTest
+	void outputStream(String displayName, DataBufferFactory bufferFactory) throws Exception {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(4);
 		buffer.write((byte) 'a');
 
@@ -216,71 +376,81 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 		byte[] bytes = new byte[5];
 		buffer.read(bytes);
-		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd', 'e'}, bytes);
+		assertThat(bytes).isEqualTo(new byte[]{'a', 'b', 'c', 'd', 'e'});
 
 		release(buffer);
 	}
 
-	@Test
-	public void expand() {
+	@ParameterizedDataBufferAllocatingTest
+	void expand(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 		buffer.write((byte) 'a');
-		assertEquals(1, buffer.capacity());
+		assertThat(buffer.capacity()).isEqualTo(1);
 		buffer.write((byte) 'b');
 
-		assertTrue(buffer.capacity() > 1);
+		assertThat(buffer.capacity() > 1).isTrue();
 
 		release(buffer);
 	}
 
-	@Test
-	public void increaseCapacity() {
+	@ParameterizedDataBufferAllocatingTest
+	void increaseCapacity(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
-		assertEquals(1, buffer.capacity());
+		assertThat(buffer.capacity()).isEqualTo(1);
 
 		buffer.capacity(2);
-		assertEquals(2, buffer.capacity());
+		assertThat(buffer.capacity()).isEqualTo(2);
 
 		release(buffer);
 	}
 
-	@Test
-	public void decreaseCapacityLowReadPosition() {
+	@ParameterizedDataBufferAllocatingTest
+	void decreaseCapacityLowReadPosition(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(2);
 		buffer.writePosition(2);
 		buffer.capacity(1);
-		assertEquals(1, buffer.capacity());
+		assertThat(buffer.capacity()).isEqualTo(1);
 
 		release(buffer);
 	}
 
-	@Test
-	public void decreaseCapacityHighReadPosition() {
+	@ParameterizedDataBufferAllocatingTest
+	void decreaseCapacityHighReadPosition(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(2);
 		buffer.writePosition(2);
 		buffer.readPosition(2);
 		buffer.capacity(1);
-		assertEquals(1, buffer.capacity());
+		assertThat(buffer.capacity()).isEqualTo(1);
 
 		release(buffer);
 	}
 
-	@Test
-	public void capacityLessThanZero() {
+	@ParameterizedDataBufferAllocatingTest
+	void capacityLessThanZero(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 		try {
-			buffer.capacity(-1);
-			fail("IllegalArgumentException expected");
-		}
-		catch (IllegalArgumentException ignored) {
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					buffer.capacity(-1));
 		}
 		finally {
 			release(buffer);
 		}
 	}
 
-	@Test
-	public void writeByteBuffer() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer1 = createDataBuffer(1);
 		buffer1.write((byte) 'a');
 		ByteBuffer buffer2 = createByteBuffer(2);
@@ -293,11 +463,11 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		buffer1.write(buffer2, buffer3);
 		buffer1.write((byte) 'd'); // make sure the write index is correctly set
 
-		assertEquals(4, buffer1.readableByteCount());
+		assertThat(buffer1.readableByteCount()).isEqualTo(4);
 		byte[] result = new byte[4];
 		buffer1.read(result);
 
-		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd'}, result);
+		assertThat(result).isEqualTo(new byte[]{'a', 'b', 'c', 'd'});
 
 		release(buffer1);
 	}
@@ -306,8 +476,10 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		return ByteBuffer.allocate(capacity);
 	}
 
-	@Test
-	public void writeDataBuffer() {
+	@ParameterizedDataBufferAllocatingTest
+	void writeDataBuffer(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer1 = createDataBuffer(1);
 		buffer1.write((byte) 'a');
 		DataBuffer buffer2 = createDataBuffer(2);
@@ -318,68 +490,76 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		buffer1.write(buffer2, buffer3);
 		buffer1.write((byte) 'd'); // make sure the write index is correctly set
 
-		assertEquals(4, buffer1.readableByteCount());
+		assertThat(buffer1.readableByteCount()).isEqualTo(4);
 		byte[] result = new byte[4];
 		buffer1.read(result);
 
-		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd'}, result);
+		assertThat(result).isEqualTo(new byte[]{'a', 'b', 'c', 'd'});
 
 		release(buffer1, buffer2, buffer3);
 	}
 
-	@Test
-	public void asByteBuffer() {
+	@ParameterizedDataBufferAllocatingTest
+	void asByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(4);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 		buffer.read(); // skip a
 
 		ByteBuffer result = buffer.asByteBuffer();
-		assertEquals(2, result.capacity());
+		assertThat(result.capacity()).isEqualTo(2);
 
 		buffer.write((byte) 'd');
-		assertEquals(2, result.remaining());
+		assertThat(result.remaining()).isEqualTo(2);
 
 		byte[] resultBytes = new byte[2];
 		result.get(resultBytes);
-		assertArrayEquals(new byte[]{'b', 'c'}, resultBytes);
+		assertThat(resultBytes).isEqualTo(new byte[]{'b', 'c'});
 
 		release(buffer);
 	}
 
-	@Test
-	public void asByteBufferIndexLength() {
+	@ParameterizedDataBufferAllocatingTest
+	void asByteBufferIndexLength(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b'});
 
 		ByteBuffer result = buffer.asByteBuffer(1, 2);
-		assertEquals(2, result.capacity());
+		assertThat(result.capacity()).isEqualTo(2);
 
 		buffer.write((byte) 'c');
-		assertEquals(2, result.remaining());
+		assertThat(result.remaining()).isEqualTo(2);
 
 		byte[] resultBytes = new byte[2];
 		result.get(resultBytes);
-		assertArrayEquals(new byte[]{'b', 'c'}, resultBytes);
+		assertThat(resultBytes).isEqualTo(new byte[]{'b', 'c'});
 
 		release(buffer);
 	}
 
-	@Test
-	public void byteBufferContainsDataBufferChanges() {
+	@ParameterizedDataBufferAllocatingTest
+	void byteBufferContainsDataBufferChanges(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer dataBuffer = createDataBuffer(1);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, 1);
 
 		dataBuffer.write((byte) 'a');
 
-		assertEquals(1, byteBuffer.limit());
+		assertThat(byteBuffer.limit()).isEqualTo(1);
 		byte b = byteBuffer.get();
-		assertEquals('a', b);
+		assertThat(b).isEqualTo((byte) 'a');
 
 		release(dataBuffer);
 	}
 
-	@Test
-	public void dataBufferContainsByteBufferChanges() {
+	@ParameterizedDataBufferAllocatingTest
+	void dataBufferContainsByteBufferChanges(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer dataBuffer = createDataBuffer(1);
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, 1);
 
@@ -387,103 +567,138 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		dataBuffer.writePosition(1);
 
 		byte b = dataBuffer.read();
-		assertEquals('a', b);
+		assertThat(b).isEqualTo((byte) 'a');
 
 		release(dataBuffer);
 	}
 
-	@Test
-	public void emptyAsByteBuffer() {
+	@ParameterizedDataBufferAllocatingTest
+	void emptyAsByteBuffer(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(1);
 
 		ByteBuffer result = buffer.asByteBuffer();
-		assertEquals(0, result.capacity());
+		assertThat(result.capacity()).isEqualTo(0);
 
 		release(buffer);
 	}
 
-	@Test
-	public void indexOf() {
+	@ParameterizedDataBufferAllocatingTest
+	void indexOf(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 
 		int result = buffer.indexOf(b -> b == 'c', 0);
-		assertEquals(2, result);
+		assertThat(result).isEqualTo(2);
 
 		result = buffer.indexOf(b -> b == 'c', Integer.MIN_VALUE);
-		assertEquals(2, result);
+		assertThat(result).isEqualTo(2);
 
 		result = buffer.indexOf(b -> b == 'c', Integer.MAX_VALUE);
-		assertEquals(-1, result);
+		assertThat(result).isEqualTo(-1);
 
 		result = buffer.indexOf(b -> b == 'z', 0);
-		assertEquals(-1, result);
+		assertThat(result).isEqualTo(-1);
 
 		release(buffer);
 	}
 
-	@Test
-	public void lastIndexOf() {
+	@ParameterizedDataBufferAllocatingTest
+	void lastIndexOf(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 
 		int result = buffer.lastIndexOf(b -> b == 'b', 2);
-		assertEquals(1, result);
+		assertThat(result).isEqualTo(1);
 
 		result = buffer.lastIndexOf(b -> b == 'c', 2);
-		assertEquals(2, result);
+		assertThat(result).isEqualTo(2);
 
 		result = buffer.lastIndexOf(b -> b == 'b', Integer.MAX_VALUE);
-		assertEquals(1, result);
+		assertThat(result).isEqualTo(1);
 
 		result = buffer.lastIndexOf(b -> b == 'c', Integer.MAX_VALUE);
-		assertEquals(2, result);
+		assertThat(result).isEqualTo(2);
 
 		result = buffer.lastIndexOf(b -> b == 'b', Integer.MIN_VALUE);
-		assertEquals(-1, result);
+		assertThat(result).isEqualTo(-1);
 
 		result = buffer.lastIndexOf(b -> b == 'c', Integer.MIN_VALUE);
-		assertEquals(-1, result);
+		assertThat(result).isEqualTo(-1);
 
 		result = buffer.lastIndexOf(b -> b == 'z', 0);
-		assertEquals(-1, result);
+		assertThat(result).isEqualTo(-1);
 
 		release(buffer);
 	}
 
-	@Test
-	public void slice() {
+	@ParameterizedDataBufferAllocatingTest
+	void slice(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b'});
 
 		DataBuffer slice = buffer.slice(1, 2);
-		assertEquals(2, slice.readableByteCount());
-		try {
-			slice.write((byte) 0);
-			fail("Exception expected");
-		}
-		catch (Exception ignored) {
-		}
+		assertThat(slice.readableByteCount()).isEqualTo(2);
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				slice.write((byte) 0));
 		buffer.write((byte) 'c');
 
-		assertEquals(3, buffer.readableByteCount());
+		assertThat(buffer.readableByteCount()).isEqualTo(3);
 		byte[] result = new byte[3];
 		buffer.read(result);
 
-		assertArrayEquals(new byte[]{'a', 'b', 'c'}, result);
+		assertThat(result).isEqualTo(new byte[]{'a', 'b', 'c'});
 
-		assertEquals(2, slice.readableByteCount());
+		assertThat(slice.readableByteCount()).isEqualTo(2);
 		result = new byte[2];
 		slice.read(result);
 
-		assertArrayEquals(new byte[]{'b', 'c'}, result);
+		assertThat(result).isEqualTo(new byte[]{'b', 'c'});
 
 
 		release(buffer);
 	}
 
-	@Test
-	public void spr16351() {
+	@ParameterizedDataBufferAllocatingTest
+	void retainedSlice(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer buffer = createDataBuffer(3);
+		buffer.write(new byte[]{'a', 'b'});
+
+		DataBuffer slice = buffer.retainedSlice(1, 2);
+		assertThat(slice.readableByteCount()).isEqualTo(2);
+		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
+				slice.write((byte) 0));
+		buffer.write((byte) 'c');
+
+		assertThat(buffer.readableByteCount()).isEqualTo(3);
+		byte[] result = new byte[3];
+		buffer.read(result);
+
+		assertThat(result).isEqualTo(new byte[]{'a', 'b', 'c'});
+
+		assertThat(slice.readableByteCount()).isEqualTo(2);
+		result = new byte[2];
+		slice.read(result);
+
+		assertThat(result).isEqualTo(new byte[]{'b', 'c'});
+
+
+		release(buffer, slice);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void spr16351(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = createDataBuffer(6);
 		byte[] bytes = {'a', 'b', 'c', 'd', 'e', 'f'};
 		buffer.write(bytes);
@@ -491,48 +706,44 @@ public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 		buffer.writePosition(3);
 		buffer.write(slice);
 
-		assertEquals(6, buffer.readableByteCount());
+		assertThat(buffer.readableByteCount()).isEqualTo(6);
 		byte[] result = new byte[6];
 		buffer.read(result);
 
-		assertArrayEquals(bytes, result);
+		assertThat(result).isEqualTo(bytes);
 
 		release(buffer);
 	}
 
-	@Test
-	public void join() {
+	@ParameterizedDataBufferAllocatingTest
+	void join(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer composite = this.bufferFactory.join(Arrays.asList(stringBuffer("a"),
 				stringBuffer("b"), stringBuffer("c")));
-		assertEquals(3, composite.readableByteCount());
+		assertThat(composite.readableByteCount()).isEqualTo(3);
 		byte[] bytes = new byte[3];
 		composite.read(bytes);
 
-		assertArrayEquals(new byte[] {'a','b','c'}, bytes);
+		assertThat(bytes).isEqualTo(new byte[] {'a','b','c'});
 
 		release(composite);
 	}
 
-	@Test
-	public void getByte() {
+	@ParameterizedDataBufferAllocatingTest
+	void getByte(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
 		DataBuffer buffer = stringBuffer("abc");
 
-		assertEquals('a', buffer.getByte(0));
-		assertEquals('b', buffer.getByte(1));
-		assertEquals('c', buffer.getByte(2));
-		try {
-			buffer.getByte(-1);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
-		}
+		assertThat(buffer.getByte(0)).isEqualTo((byte) 'a');
+		assertThat(buffer.getByte(1)).isEqualTo((byte) 'b');
+		assertThat(buffer.getByte(2)).isEqualTo((byte) 'c');
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+				buffer.getByte(-1));
 
-		try {
-			buffer.getByte(3);
-			fail("IndexOutOfBoundsException expected");
-		}
-		catch (IndexOutOfBoundsException ignored) {
-		}
+		assertThatExceptionOfType(IndexOutOfBoundsException.class).isThrownBy(() ->
+			buffer.getByte(3));
 
 		release(buffer);
 	}

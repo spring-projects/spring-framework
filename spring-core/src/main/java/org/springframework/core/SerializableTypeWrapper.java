@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,6 +51,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 final class SerializableTypeWrapper {
@@ -89,8 +90,8 @@ final class SerializableTypeWrapper {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends Type> T unwrap(T type) {
-		Type unwrapped = type;
-		while (unwrapped instanceof SerializableTypeProxy) {
+		Type unwrapped = null;
+		if (type instanceof SerializableTypeProxy) {
 			unwrapped = ((SerializableTypeProxy) type).getTypeProvider().getType();
 		}
 		return (unwrapped != null ? (T) unwrapped : type);
@@ -184,26 +185,25 @@ final class SerializableTypeWrapper {
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, @Nullable Object[] args) throws Throwable {
-			if (method.getName().equals("equals") && args != null) {
-				Object other = args[0];
-				// Unwrap proxies for speed
-				if (other instanceof Type) {
-					other = unwrap((Type) other);
-				}
-				return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
-			}
-			else if (method.getName().equals("hashCode")) {
-				return ObjectUtils.nullSafeHashCode(this.provider.getType());
-			}
-			else if (method.getName().equals("getTypeProvider")) {
-				return this.provider;
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			switch (method.getName()) {
+				case "equals":
+					Object other = args[0];
+					// Unwrap proxies for speed
+					if (other instanceof Type) {
+						other = unwrap((Type) other);
+					}
+					return ObjectUtils.nullSafeEquals(this.provider.getType(), other);
+				case "hashCode":
+					return ObjectUtils.nullSafeHashCode(this.provider.getType());
+				case "getTypeProvider":
+					return this.provider;
 			}
 
-			if (Type.class == method.getReturnType() && args == null) {
+			if (Type.class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
-			else if (Type[].class == method.getReturnType() && args == null) {
+			else if (Type[].class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
 				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));

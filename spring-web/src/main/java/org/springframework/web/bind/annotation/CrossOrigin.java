@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,18 +47,18 @@ import org.springframework.web.cors.CorsConfiguration;
  * @author Sam Brannen
  * @since 4.2
  */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface CrossOrigin {
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
-	String[] DEFAULT_ORIGINS = { "*" };
+	String[] DEFAULT_ORIGINS = {"*"};
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
-	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
+	String[] DEFAULT_ALLOWED_HEADERS = {"*"};
 
 	/** @deprecated as of Spring 5.0, in favor of {@link CorsConfiguration#applyPermitDefaultValues} */
 	@Deprecated
@@ -77,12 +77,12 @@ public @interface CrossOrigin {
 
 	/**
 	 * The list of allowed origins that be specific origins, e.g.
-	 * {@code "http://domain1.com"}, or {@code "*"} for all origins.
+	 * {@code "https://domain1.com"}, or {@code "*"} for all origins.
 	 * <p>A matched origin is listed in the {@code Access-Control-Allow-Origin}
 	 * response header of preflight actual CORS requests.
 	 * <p>By default all origins are allowed.
 	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a

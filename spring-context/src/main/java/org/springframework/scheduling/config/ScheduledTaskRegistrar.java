@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,19 +42,32 @@ import org.springframework.util.CollectionUtils;
  * expressions.
  *
  * <p>As of Spring 3.1, {@code ScheduledTaskRegistrar} has a more prominent user-facing
- * role when used in conjunction with the @{@link
- * org.springframework.scheduling.annotation.EnableAsync EnableAsync} annotation and its
+ * role when used in conjunction with the {@link
+ * org.springframework.scheduling.annotation.EnableAsync @EnableAsync} annotation and its
  * {@link org.springframework.scheduling.annotation.SchedulingConfigurer
  * SchedulingConfigurer} callback interface.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Tobias Montagna-Hay
+ * @author Sam Brannen
  * @since 3.0
  * @see org.springframework.scheduling.annotation.EnableAsync
  * @see org.springframework.scheduling.annotation.SchedulingConfigurer
  */
 public class ScheduledTaskRegistrar implements ScheduledTaskHolder, InitializingBean, DisposableBean {
+
+	/**
+	 * A special cron expression value that indicates a disabled trigger: {@value}.
+	 * <p>This is primarily meant for use with {@link #addCronTask(Runnable, String)}
+	 * when the value for the supplied {@code expression} is retrieved from an
+	 * external source &mdash; for example, from a property in the
+	 * {@link org.springframework.core.env.Environment Environment}.
+	 * @since 5.2
+	 * @see org.springframework.scheduling.annotation.Scheduled#CRON_DISABLED
+	 */
+	public static final String CRON_DISABLED = "-";
+
 
 	@Nullable
 	private TaskScheduler taskScheduler;
@@ -254,10 +267,14 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	}
 
 	/**
-	 * Add a Runnable task to be triggered per the given cron expression.
+	 * Add a {@link Runnable} task to be triggered per the given cron {@code expression}.
+	 * <p>As of Spring Framework 5.2, this method will not register the task if the
+	 * {@code expression} is equal to {@link #CRON_DISABLED}.
 	 */
 	public void addCronTask(Runnable task, String expression) {
-		addCronTask(new CronTask(task, expression));
+		if (!CRON_DISABLED.equals(expression)) {
+			addCronTask(new CronTask(task, expression));
+		}
 	}
 
 	/**

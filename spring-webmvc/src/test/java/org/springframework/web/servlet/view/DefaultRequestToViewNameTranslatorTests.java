@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,12 @@
 
 package org.springframework.web.servlet.view;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rick Evans
@@ -37,7 +37,7 @@ public class DefaultRequestToViewNameTranslatorTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.translator = new DefaultRequestToViewNameTranslator();
 		this.request = new MockHttpServletRequest();
@@ -133,9 +133,8 @@ public class DefaultRequestToViewNameTranslatorTests {
 
 	private void assertViewName(String expectedViewName) {
 		String actualViewName = this.translator.getViewName(this.request);
-		assertNotNull(actualViewName);
-		assertEquals("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)",
-				expectedViewName, actualViewName);
+		assertThat(actualViewName).isNotNull();
+		assertThat(actualViewName).as("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)").isEqualTo(expectedViewName);
 	}
 
 }

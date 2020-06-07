@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,20 +18,24 @@ package org.springframework.jms.listener;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Stephane Nicoll
@@ -48,11 +52,11 @@ public class DefaultMessageListenerContainerTests {
 		DefaultMessageListenerContainer container = createContainer(createFailingContainerFactory());
 		container.setBackOff(backOff);
 		container.start();
-		assertEquals(true, container.isRunning());
+		assertThat(container.isRunning()).isEqualTo(true);
 
 		container.refreshConnectionUntilSuccessful();
 
-		assertEquals(false, container.isRunning());
+		assertThat(container.isRunning()).isEqualTo(false);
 		verify(backOff).start();
 		verify(execution).nextBackOff();
 	}
@@ -69,7 +73,7 @@ public class DefaultMessageListenerContainerTests {
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
-		assertEquals(false, container.isRunning());
+		assertThat(container.isRunning()).isEqualTo(false);
 		verify(backOff).start();
 		verify(execution, times(2)).nextBackOff();
 	}
@@ -86,7 +90,7 @@ public class DefaultMessageListenerContainerTests {
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
-		assertEquals(true, container.isRunning());
+		assertThat(container.isRunning()).isEqualTo(true);
 		verify(backOff).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
 	}
@@ -179,7 +183,7 @@ public class DefaultMessageListenerContainerTests {
 
 		public void waitForCompletion() throws InterruptedException {
 			this.countDownLatch.await(2, TimeUnit.SECONDS);
-			assertEquals("callback was not invoked", 0, this.countDownLatch.getCount());
+			assertThat(this.countDownLatch.getCount()).as("callback was not invoked").isEqualTo(0);
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.cors;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -45,6 +46,9 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	@Nullable
+	private String lookupPathAttributeName;
+
 
 	/**
 	 * Set the PathMatcher implementation to use for matching URL paths
@@ -70,6 +74,17 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Optionally configure the name of the attribute that caches the lookupPath.
+	 * This is used to make the call to
+	 * {@link UrlPathHelper#getLookupPathForRequest(HttpServletRequest, String)}
+	 * @param lookupPathAttributeName the request attribute to check
+	 * @since 5.2
+	 */
+	public void setLookupPathAttributeName(@Nullable String lookupPathAttributeName) {
+		this.lookupPathAttributeName = lookupPathAttributeName;
 	}
 
 	/**
@@ -117,7 +132,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	@Override
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, this.lookupPathAttributeName);
 		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
 				return entry.getValue();

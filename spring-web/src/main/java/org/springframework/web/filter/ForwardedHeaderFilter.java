@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -158,6 +159,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 	}
 
+	@Override
+	protected void doFilterNestedErrorDispatch(HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
+
+		doFilterInternal(request, response, filterChain);
+	}
 
 	/**
 	 * Hide "Forwarded" or "X-Forwarded-*" headers.
@@ -308,7 +315,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		 * Constructor with required information.
 		 * @param delegateRequest supplier for the current
 		 * {@link HttpServletRequestWrapper#getRequest() delegate request} which
-		 * may change during a forward (e.g. Tocat.
+		 * may change during a forward (e.g. Tomcat.
 		 * @param pathHelper the path helper instance
 		 * @param baseUrl the host, scheme, and port based on forwarded headers
 		 */
@@ -364,16 +371,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			if (this.requestUri == null) {
 				return this.delegate.get().getRequestURI();
 			}
-			recalculatePathsIfNecesary();
+			recalculatePathsIfNecessary();
 			return this.requestUri;
 		}
 
 		public StringBuffer getRequestUrl() {
-			recalculatePathsIfNecesary();
+			recalculatePathsIfNecessary();
 			return new StringBuffer(this.requestUrl);
 		}
 
-		private void recalculatePathsIfNecesary() {
+		private void recalculatePathsIfNecessary() {
 			if (!this.actualRequestUri.equals(this.delegate.get().getRequestURI())) {
 				// Underlying path change (e.g. Servlet FORWARD).
 				this.actualRequestUri = this.delegate.get().getRequestURI();

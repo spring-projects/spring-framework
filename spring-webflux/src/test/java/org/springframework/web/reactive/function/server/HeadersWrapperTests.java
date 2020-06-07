@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,16 +24,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.support.ServerRequestWrapper;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
@@ -45,7 +46,7 @@ public class HeadersWrapperTests {
 	private ServerRequestWrapper.HeadersWrapper wrapper;
 
 
-	@Before
+	@BeforeEach
 	public void createWrapper() {
 		mockHeaders = mock(ServerRequest.Headers.class);
 		wrapper = new ServerRequestWrapper.HeadersWrapper(mockHeaders);
@@ -55,66 +56,66 @@ public class HeadersWrapperTests {
 	@Test
 	public void accept() {
 		List<MediaType> accept = Collections.singletonList(MediaType.APPLICATION_JSON);
-		when(mockHeaders.accept()).thenReturn(accept);
+		given(mockHeaders.accept()).willReturn(accept);
 
-		assertSame(accept, wrapper.accept());
+		assertThat(wrapper.accept()).isSameAs(accept);
 	}
 
 	@Test
 	public void acceptCharset() {
 		List<Charset> acceptCharset = Collections.singletonList(StandardCharsets.UTF_8);
-		when(mockHeaders.acceptCharset()).thenReturn(acceptCharset);
+		given(mockHeaders.acceptCharset()).willReturn(acceptCharset);
 
-		assertSame(acceptCharset, wrapper.acceptCharset());
+		assertThat(wrapper.acceptCharset()).isSameAs(acceptCharset);
 	}
 
 	@Test
 	public void contentLength() {
 		OptionalLong contentLength = OptionalLong.of(42L);
-		when(mockHeaders.contentLength()).thenReturn(contentLength);
+		given(mockHeaders.contentLength()).willReturn(contentLength);
 
-		assertSame(contentLength, wrapper.contentLength());
+		assertThat(wrapper.contentLength()).isSameAs(contentLength);
 	}
 
 	@Test
 	public void contentType() {
 		Optional<MediaType> contentType = Optional.of(MediaType.APPLICATION_JSON);
-		when(mockHeaders.contentType()).thenReturn(contentType);
+		given(mockHeaders.contentType()).willReturn(contentType);
 
-		assertSame(contentType, wrapper.contentType());
+		assertThat(wrapper.contentType()).isSameAs(contentType);
 	}
 
 	@Test
 	public void host() {
 		InetSocketAddress host = InetSocketAddress.createUnresolved("example.com", 42);
-		when(mockHeaders.host()).thenReturn(host);
+		given(mockHeaders.host()).willReturn(host);
 
-		assertSame(host, wrapper.host());
+		assertThat(wrapper.host()).isSameAs(host);
 	}
 
 	@Test
 	public void range() {
 		List<HttpRange> range = Collections.singletonList(HttpRange.createByteRange(42));
-		when(mockHeaders.range()).thenReturn(range);
+		given(mockHeaders.range()).willReturn(range);
 
-		assertSame(range, wrapper.range());
+		assertThat(wrapper.range()).isSameAs(range);
 	}
 
 	@Test
 	public void header() {
 		String name = "foo";
 		List<String> value = Collections.singletonList("bar");
-		when(mockHeaders.header(name)).thenReturn(value);
+		given(mockHeaders.header(name)).willReturn(value);
 
-		assertSame(value, wrapper.header(name));
+		assertThat(wrapper.header(name)).isSameAs(value);
 	}
 
 	@Test
 	public void asHttpHeaders() {
 		HttpHeaders httpHeaders = new HttpHeaders();
-		when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
+		given(mockHeaders.asHttpHeaders()).willReturn(httpHeaders);
 
-		assertSame(httpHeaders, wrapper.asHttpHeaders());
+		assertThat(wrapper.asHttpHeaders()).isSameAs(httpHeaders);
 	}
 
 }

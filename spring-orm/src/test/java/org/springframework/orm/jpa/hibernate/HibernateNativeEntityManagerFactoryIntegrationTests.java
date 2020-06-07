@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,7 @@ import java.util.List;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +29,7 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Hibernate-specific JPA tests with native SessionFactory setup and getCurrentSession interaction.
@@ -53,9 +53,11 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 	}
 
 
+	@Override
 	@Test
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
-		assertFalse("Must not have introduced config interface", entityManagerFactory instanceof EntityManagerFactoryInfo);
+		boolean condition = entityManagerFactory instanceof EntityManagerFactoryInfo;
+		assertThat(condition).as("Must not have introduced config interface").isFalse();
 	}
 
 	@Test
@@ -65,9 +67,9 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 		insertPerson(firstName);
 
 		List<Person> people = sharedEntityManager.createQuery("select p from Person as p").getResultList();
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
-		assertSame(applicationContext, people.get(0).postLoaded);
+		assertThat(people.size()).isEqualTo(1);
+		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
+		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
 	}
 
 	@Test
@@ -78,21 +80,21 @@ public class HibernateNativeEntityManagerFactoryIntegrationTests extends Abstrac
 
 		Query q = sessionFactory.getCurrentSession().createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertEquals(1, people.size());
-		assertEquals(firstName, people.get(0).getFirstName());
-		assertSame(applicationContext, people.get(0).postLoaded);
+		assertThat(people.size()).isEqualTo(1);
+		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
+		assertThat(people.get(0).postLoaded).isSameAs(applicationContext);
 	}
 
 	@Test  // SPR-16956
 	public void testReadOnly() {
-		assertSame(FlushMode.AUTO, sessionFactory.getCurrentSession().getHibernateFlushMode());
-		assertFalse(sessionFactory.getCurrentSession().isDefaultReadOnly());
+		assertThat(sessionFactory.getCurrentSession().getHibernateFlushMode()).isSameAs(FlushMode.AUTO);
+		assertThat(sessionFactory.getCurrentSession().isDefaultReadOnly()).isFalse();
 		endTransaction();
 
 		this.transactionDefinition.setReadOnly(true);
 		startNewTransaction();
-		assertSame(FlushMode.MANUAL, sessionFactory.getCurrentSession().getHibernateFlushMode());
-		assertTrue(sessionFactory.getCurrentSession().isDefaultReadOnly());
+		assertThat(sessionFactory.getCurrentSession().getHibernateFlushMode()).isSameAs(FlushMode.MANUAL);
+		assertThat(sessionFactory.getCurrentSession().isDefaultReadOnly()).isTrue();
 	}
 
 }

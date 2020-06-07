@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.jdbc.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -115,22 +116,28 @@ public abstract class DataSourceUtils {
 		Connection con = fetchConnection(dataSource);
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for JDBC Connection");
-			// Use same Connection for further JDBC actions within the transaction.
-			// Thread-bound object will get removed by synchronization at transaction completion.
-			ConnectionHolder holderToUse = conHolder;
-			if (holderToUse == null) {
-				holderToUse = new ConnectionHolder(con);
+			try {
+				// Use same Connection for further JDBC actions within the transaction.
+				// Thread-bound object will get removed by synchronization at transaction completion.
+				ConnectionHolder holderToUse = conHolder;
+				if (holderToUse == null) {
+					holderToUse = new ConnectionHolder(con);
+				}
+				else {
+					holderToUse.setConnection(con);
+				}
+				holderToUse.requested();
+				TransactionSynchronizationManager.registerSynchronization(
+						new ConnectionSynchronization(holderToUse, dataSource));
+				holderToUse.setSynchronizedWithTransaction(true);
+				if (holderToUse != conHolder) {
+					TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+				}
 			}
-			else {
-				holderToUse.setConnection(con);
-			}
-			holderToUse.requested();
-			TransactionSynchronizationManager.registerSynchronization(
-					new ConnectionSynchronization(holderToUse, dataSource));
-			holderToUse.setSynchronizedWithTransaction(true);
-			if (holderToUse != conHolder) {
-				TransactionSynchronizationManager.bindResource(dataSource, holderToUse);
+			catch (RuntimeException ex) {
+				// Unexpected exception from external delegation call -> close Connection and rethrow.
+				releaseConnection(con, dataSource);
+				throw ex;
 			}
 		}
 
@@ -162,6 +169,8 @@ public abstract class DataSourceUtils {
 	 * @return the previous isolation level, if any
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #resetConnectionAfterTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
 	@Nullable
 	public static Integer prepareConnectionForTransaction(Connection con, @Nullable TransactionDefinition definition)
@@ -169,10 +178,11 @@ public abstract class DataSourceUtils {
 
 		Assert.notNull(con, "No Connection specified");
 
+		boolean debugEnabled = logger.isDebugEnabled();
 		// Set read-only flag.
 		if (definition != null && definition.isReadOnly()) {
 			try {
-				if (logger.isDebugEnabled()) {
+				if (debugEnabled) {
 					logger.debug("Setting JDBC Connection [" + con + "] read-only");
 				}
 				con.setReadOnly(true);
@@ -194,7 +204,7 @@ public abstract class DataSourceUtils {
 		// Apply specific isolation level, if any.
 		Integer previousIsolationLevel = null;
 		if (definition != null && definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-			if (logger.isDebugEnabled()) {
+			if (debugEnabled) {
 				logger.debug("Changing isolation level of JDBC Connection [" + con + "] to " +
 						definition.getIsolationLevel());
 			}
@@ -213,8 +223,49 @@ public abstract class DataSourceUtils {
 	 * regarding read-only flag and isolation level.
 	 * @param con the Connection to reset
 	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @param resetReadOnly whether to reset the connection's read-only flag
+	 * @since 5.2.1
 	 * @see #prepareConnectionForTransaction
+	 * @see Connection#setTransactionIsolation
+	 * @see Connection#setReadOnly
 	 */
+	public static void resetConnectionAfterTransaction(
+			Connection con, @Nullable Integer previousIsolationLevel, boolean resetReadOnly) {
+
+		Assert.notNull(con, "No Connection specified");
+		boolean debugEnabled = logger.isDebugEnabled();
+		try {
+			// Reset transaction isolation to previous value, if changed for the transaction.
+			if (previousIsolationLevel != null) {
+				if (debugEnabled) {
+					logger.debug("Resetting isolation level of JDBC Connection [" +
+							con + "] to " + previousIsolationLevel);
+				}
+				con.setTransactionIsolation(previousIsolationLevel);
+			}
+
+			// Reset read-only flag if we originally switched it to true on transaction begin.
+			if (resetReadOnly) {
+				if (debugEnabled) {
+					logger.debug("Resetting read-only flag of JDBC Connection [" + con + "]");
+				}
+				con.setReadOnly(false);
+			}
+		}
+		catch (Throwable ex) {
+			logger.debug("Could not reset JDBC Connection after transaction", ex);
+		}
+	}
+
+	/**
+	 * Reset the given Connection after a transaction,
+	 * regarding read-only flag and isolation level.
+	 * @param con the Connection to reset
+	 * @param previousIsolationLevel the isolation level to restore, if any
+	 * @deprecated as of 5.1.11, in favor of
+	 * {@link #resetConnectionAfterTransaction(Connection, Integer, boolean)}
+	 */
+	@Deprecated
 	public static void resetConnectionAfterTransaction(Connection con, @Nullable Integer previousIsolationLevel) {
 		Assert.notNull(con, "No Connection specified");
 		try {
@@ -337,7 +388,6 @@ public abstract class DataSourceUtils {
 				return;
 			}
 		}
-		logger.debug("Returning JDBC Connection to DataSource");
 		doCloseConnection(con, dataSource);
 	}
 

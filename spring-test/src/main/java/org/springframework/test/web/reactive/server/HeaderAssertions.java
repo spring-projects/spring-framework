@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -28,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Assertions on headers of the response.
@@ -59,7 +61,7 @@ public class HeaderAssertions {
 	}
 
 	/**
-	 * Match the primary value of the response header with a regex.
+	 * Match the first value of the response header with a regex.
 	 * @param name the header name
 	 * @param pattern the regex pattern
 	 */
@@ -71,9 +73,36 @@ public class HeaderAssertions {
 	}
 
 	/**
-	 * Assert the primary value of the response header with a {@link Matcher}.
+	 * Match all values of the response header with the given regex
+	 * patterns which are applied to the values of the header in the
+	 * same order. Note that the number of pattenrs must match the
+	 * number of actual values.
 	 * @param name the header name
-	 * @param matcher the matcher to sue
+	 * @param patterns one or more regex patterns, one per expected value
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec valuesMatch(String name, String... patterns) {
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			List<String> values = getRequiredValues(name);
+			AssertionErrors.assertTrue(
+					getMessage(name) + " has fewer or more values " + values +
+							" than number of patterns to match with " + Arrays.toString(patterns),
+					values.size() == patterns.length);
+			for (int i = 0; i < values.size(); i++) {
+				String value = values.get(i);
+				String pattern = patterns[i];
+				AssertionErrors.assertTrue(
+						getMessage(name) + "[" + i + "]='" + value + "' does not match '" + pattern + "'",
+						value.matches(pattern));
+			}
+		});
+		return this.responseSpec;
+	}
+
+	/**
+	 * Assert the first value of the response header with a Hamcrest {@link Matcher}.
+	 * @param name the header name
+	 * @param matcher the matcher to use
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
@@ -83,9 +112,21 @@ public class HeaderAssertions {
 	}
 
 	/**
-	 * Assert the primary value of the response header with a {@link Matcher}.
+	 * Assert all values of the response header with a Hamcrest {@link Matcher}.
 	 * @param name the header name
-	 * @param consumer the matcher to sue
+	 * @param matcher the matcher to use
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec values(String name, Matcher<Iterable<String>> matcher) {
+		List<String> values = getRequiredValues(name);
+		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat(values, matcher));
+		return this.responseSpec;
+	}
+
+	/**
+	 * Consume the first value of the named response header.
+	 * @param name the header name
+	 * @param consumer the consumer to use
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(String name, Consumer<String> consumer) {
@@ -94,12 +135,28 @@ public class HeaderAssertions {
 		return this.responseSpec;
 	}
 
+	/**
+	 * Consume all values of the named response header.
+	 * @param name the header name
+	 * @param consumer the consumer to use
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec values(String name, Consumer<List<String>> consumer) {
+		List<String> values = getRequiredValues(name);
+		this.exchangeResult.assertWithDiagnostics(() -> consumer.accept(values));
+		return this.responseSpec;
+	}
+
 	private String getRequiredValue(String name) {
-		String value = getHeaders().getFirst(name);
-		if (value == null) {
+		return getRequiredValues(name).get(0);
+	}
+
+	private List<String> getRequiredValues(String name) {
+		List<String> values = getHeaders().get(name);
+		if (CollectionUtils.isEmpty(values)) {
 			AssertionErrors.fail(getMessage(name) + " not found");
 		}
-		return value;
+		return values;
 	}
 
 	/**

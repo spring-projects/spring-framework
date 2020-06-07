@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -130,8 +130,7 @@ public abstract class PropertiesLoaderUtils {
 	 * @throws IOException if loading failed
 	 */
 	public static void fillProperties(Properties props, Resource resource) throws IOException {
-		InputStream is = resource.getInputStream();
-		try {
+		try (InputStream is = resource.getInputStream()) {
 			String filename = resource.getFilename();
 			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 				props.loadFromXML(is);
@@ -139,9 +138,6 @@ public abstract class PropertiesLoaderUtils {
 			else {
 				props.load(is);
 			}
-		}
-		finally {
-			is.close();
 		}
 	}
 
@@ -182,17 +178,13 @@ public abstract class PropertiesLoaderUtils {
 			URL url = urls.nextElement();
 			URLConnection con = url.openConnection();
 			ResourceUtils.useCachesIfNecessary(con);
-			InputStream is = con.getInputStream();
-			try {
+			try (InputStream is = con.getInputStream()) {
 				if (resourceName.endsWith(XML_FILE_EXTENSION)) {
 					props.loadFromXML(is);
 				}
 				else {
 					props.load(is);
 				}
-			}
-			finally {
-				is.close();
 			}
 		}
 		return props;

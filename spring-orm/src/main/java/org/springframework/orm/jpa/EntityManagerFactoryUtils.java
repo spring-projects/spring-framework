@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa;
 
 import java.util.Map;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -266,22 +267,28 @@ public abstract class EntityManagerFactoryUtils {
 			em = (!CollectionUtils.isEmpty(properties) ? emf.createEntityManager(properties) : emf.createEntityManager());
 		}
 
-		// Use same EntityManager for further JPA operations within the transaction.
-		// Thread-bound object will get removed by synchronization at transaction completion.
-		logger.debug("Registering transaction synchronization for JPA EntityManager");
-		emHolder = new EntityManagerHolder(em);
-		if (synchronizedWithTransaction) {
-			Object transactionData = prepareTransaction(em, emf);
-			TransactionSynchronizationManager.registerSynchronization(
-					new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
-			emHolder.setSynchronizedWithTransaction(true);
+		try {
+			// Use same EntityManager for further JPA operations within the transaction.
+			// Thread-bound object will get removed by synchronization at transaction completion.
+			emHolder = new EntityManagerHolder(em);
+			if (synchronizedWithTransaction) {
+				Object transactionData = prepareTransaction(em, emf);
+				TransactionSynchronizationManager.registerSynchronization(
+						new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, true));
+				emHolder.setSynchronizedWithTransaction(true);
+			}
+			else {
+				// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
+				TransactionSynchronizationManager.registerSynchronization(
+						new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+			}
+			TransactionSynchronizationManager.bindResource(emf, emHolder);
 		}
-		else {
-			// Unsynchronized - just scope it for the transaction, as demanded by the JPA 2.1 spec...
-			TransactionSynchronizationManager.registerSynchronization(
-					new TransactionScopedEntityManagerSynchronization(emHolder, emf));
+		catch (RuntimeException ex) {
+			// Unexpected exception from external delegation call -> close EntityManager and rethrow.
+			closeEntityManager(em);
+			throw ex;
 		}
-		TransactionSynchronizationManager.bindResource(emf, emHolder);
 
 		return em;
 	}
@@ -415,17 +422,13 @@ public abstract class EntityManagerFactoryUtils {
 	 */
 	public static void closeEntityManager(@Nullable EntityManager em) {
 		if (em != null) {
-			logger.debug("Closing JPA EntityManager");
 			try {
 				if (em.isOpen()) {
 					em.close();
 				}
 			}
-			catch (PersistenceException ex) {
-				logger.debug("Could not close JPA EntityManager", ex);
-			}
 			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing JPA EntityManager", ex);
+				logger.error("Failed to release JPA EntityManager", ex);
 			}
 		}
 	}

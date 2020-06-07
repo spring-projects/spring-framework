@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +29,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Set;
 
 import org.springframework.beans.BeanMetadataElement;
@@ -49,6 +51,12 @@ import org.springframework.util.ClassUtils;
  */
 abstract class AutowireUtils {
 
+	public static final Comparator<Executable> EXECUTABLE_COMPARATOR = (e1, e2) -> {
+		int result = Boolean.compare(Modifier.isPublic(e2.getModifiers()), Modifier.isPublic(e1.getModifiers()));
+		return result != 0 ? result : Integer.compare(e2.getParameterCount(), e1.getParameterCount());
+	};
+
+
 	/**
 	 * Sort the given constructors, preferring public constructors and "greedy" ones with
 	 * a maximum number of arguments. The result will contain public constructors first,
@@ -57,16 +65,7 @@ abstract class AutowireUtils {
 	 * @param constructors the constructor array to sort
 	 */
 	public static void sortConstructors(Constructor<?>[] constructors) {
-		Arrays.sort(constructors, (c1, c2) -> {
-			boolean p1 = Modifier.isPublic(c1.getModifiers());
-			boolean p2 = Modifier.isPublic(c2.getModifiers());
-			if (p1 != p2) {
-				return (p1 ? -1 : 1);
-			}
-			int c1pl = c1.getParameterCount();
-			int c2pl = c2.getParameterCount();
-			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
-		});
+		Arrays.sort(constructors, EXECUTABLE_COMPARATOR);
 	}
 
 	/**
@@ -77,16 +76,7 @@ abstract class AutowireUtils {
 	 * @param factoryMethods the factory method array to sort
 	 */
 	public static void sortFactoryMethods(Method[] factoryMethods) {
-		Arrays.sort(factoryMethods, (fm1, fm2) -> {
-			boolean p1 = Modifier.isPublic(fm1.getModifiers());
-			boolean p2 = Modifier.isPublic(fm2.getModifiers());
-			if (p1 != p2) {
-				return (p1 ? -1 : 1);
-			}
-			int c1pl = fm1.getParameterCount();
-			int c2pl = fm2.getParameterCount();
-			return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
-		});
+		Arrays.sort(factoryMethods, EXECUTABLE_COMPARATOR);
 	}
 
 	/**
@@ -107,7 +97,7 @@ abstract class AutowireUtils {
 		// It was declared by CGLIB, but we might still want to autowire it
 		// if it was actually declared by the superclass.
 		Class<?> superclass = wm.getDeclaringClass().getSuperclass();
-		return !ClassUtils.hasMethod(superclass, wm.getName(), wm.getParameterTypes());
+		return !ClassUtils.hasMethod(superclass, wm);
 	}
 
 	/**
@@ -122,8 +112,7 @@ abstract class AutowireUtils {
 		if (setter != null) {
 			Class<?> targetClass = setter.getDeclaringClass();
 			for (Class<?> ifc : interfaces) {
-				if (ifc.isAssignableFrom(targetClass) &&
-						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
+				if (ifc.isAssignableFrom(targetClass) && ClassUtils.hasMethod(ifc, setter)) {
 					return true;
 				}
 			}
@@ -158,7 +147,7 @@ abstract class AutowireUtils {
 	 * on the given method itself.
 	 * <p>For example, given a factory method with the following signature, if
 	 * {@code resolveReturnTypeForFactoryMethod()} is invoked with the reflected
-	 * method for {@code creatProxy()} and an {@code Object[]} array containing
+	 * method for {@code createProxy()} and an {@code Object[]} array containing
 	 * {@code MyService.class}, {@code resolveReturnTypeForFactoryMethod()} will
 	 * infer that the target return type is {@code MyService}.
 	 * <pre class="code">{@code public static <T> T createProxy(Class<T> clazz)}</pre>
@@ -276,7 +265,7 @@ abstract class AutowireUtils {
 
 
 	/**
-	 * Reflective InvocationHandler for lazy access to the current target object.
+	 * Reflective {@link InvocationHandler} for lazy access to the current target object.
 	 */
 	@SuppressWarnings("serial")
 	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {

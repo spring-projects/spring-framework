@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -345,11 +345,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						}
 
 						// Apply cache settings, if any
-						if (getCacheControl() != null) {
-							String value = getCacheControl().getHeaderValue();
-							if (value != null) {
-								exchange.getResponse().getHeaders().setCacheControl(value);
-							}
+						CacheControl cacheControl = getCacheControl();
+						if (cacheControl != null) {
+							exchange.getResponse().getHeaders().setCacheControl(cacheControl);
 						}
 
 						// Check the media type for the resource
@@ -470,7 +468,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 					return true;
 				}
 			}
-			catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+			catch (IllegalArgumentException ex) {
+				// May not be possible to decode...
+			}
+			catch (UnsupportedEncodingException ex) {
 				// Should never happen...
 			}
 		}
@@ -494,22 +495,25 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	 */
 	protected boolean isInvalidPath(String path) {
 		if (path.contains("WEB-INF") || path.contains("META-INF")) {
-			logger.warn("Path contains \"WEB-INF\" or \"META-INF\".");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Path with \"WEB-INF\" or \"META-INF\": [" + path + "]");
+			}
 			return true;
 		}
 		if (path.contains(":/")) {
 			String relativePath = (path.charAt(0) == '/' ? path.substring(1) : path);
 			if (ResourceUtils.isUrl(relativePath) || relativePath.startsWith("url:")) {
-				logger.warn("Path represents URL or has \"url:\" prefix.");
+				if (logger.isWarnEnabled()) {
+					logger.warn("Path represents URL or has \"url:\" prefix: [" + path + "]");
+				}
 				return true;
 			}
 		}
-		if (path.contains("..")) {
-			path = StringUtils.cleanPath(path);
-			if (path.contains("../")) {
-				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath.");
-				return true;
+		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Path contains \"../\" after call to StringUtils#cleanPath: [" + path + "]");
 			}
+			return true;
 		}
 		return false;
 	}

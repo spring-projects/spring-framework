@@ -3,9 +3,9 @@
 	   xmlns:aop="http://www.springframework.org/schema/aop"
 	   xmlns:cache="http://www.springframework.org/schema/cache"
 	   xmlns:p="http://www.springframework.org/schema/p"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-       		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+       		http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
+       		http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<cache:advice id="cacheAdviceInterface" cache-manager="cacheManager">
 		<cache:caching cache="testCache">
@@ -27,12 +27,11 @@
 			<cache:cacheable method="nullValue" cache="testCache"/>
 		</cache:caching>
 		<cache:caching>
-			<cache:cache-evict method="invalidate" cache="testCache"/>
 			<cache:cache-evict method="evict" key="#p0" cache="testCache"/>
 			<cache:cache-evict method="evictWithException" cache="testCache"/>
 			<cache:cache-evict method="evictEarly" cache="testCache" before-invocation="true"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="testCache" before-invocation="true"/>
 			<cache:cache-evict method="evictAll" cache="testCache" all-entries="true"/>
+			<cache:cache-evict method="evictAllEarly" cache="testCache" all-entries="true" before-invocation="true"/>
 		</cache:caching>
 		<cache:caching cache="testCache">
 			<cache:cache-put method="update"/>
@@ -113,9 +112,9 @@
 		</property>
 	</bean>
 
-	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
+	<bean id="keyGenerator" class="org.springframework.context.testfixture.cache.SomeKeyGenerator"/>
 
-    <bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
+    <bean id="customKeyGenerator" class="org.springframework.context.testfixture.cache.SomeCustomKeyGenerator"/>
 
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
@@ -127,7 +126,7 @@
 
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
-	<bean id="service" class="org.springframework.cache.config.DefaultCacheableService"/>
+	<bean id="service" class="org.springframework.context.testfixture.cache.beans.DefaultCacheableService"/>
 
-	<bean id="classService" class="org.springframework.cache.config.AnnotatedClassCacheableService"/>
+	<bean id="classService" class="org.springframework.context.testfixture.cache.beans.AnnotatedClassCacheableService"/>
 </beans>

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,10 @@ package org.springframework.test.context.jdbc;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,13 +31,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Exact copy of {@link InferredDataSourceSqlScriptsTests}, except that test
@@ -47,31 +46,30 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @since 4.1
  * @see InferredDataSourceSqlScriptsTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @DirtiesContext
-public class InferredDataSourceTransactionalSqlScriptsTests {
+class InferredDataSourceTransactionalSqlScriptsTests {
 
 	@Autowired
-	private DataSource dataSource1;
+	DataSource dataSource1;
 
 	@Autowired
-	private DataSource dataSource2;
+	DataSource dataSource2;
 
 
 	@Test
 	@Transactional("txMgr1")
 	@Sql(scripts = "data-add-dogbert.sql", config = @SqlConfig(transactionManager = "txMgr1"))
-	public void database1() {
-		assertInTransaction(true);
+	void database1() {
+		assertThatTransaction().isActive();
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Transactional("txMgr2")
 	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(transactionManager = "txMgr2"))
-	public void database2() {
-		assertInTransaction(true);
+	void database2() {
+		assertThatTransaction().isActive();
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
 
@@ -80,7 +78,7 @@ public class InferredDataSourceTransactionalSqlScriptsTests {
 		Collections.sort(expected);
 		List<String> actual = jdbcTemplate.queryForList("select name from user", String.class);
 		Collections.sort(actual);
-		assertEquals("Users in database;", expected, actual);
+		assertThat(actual).as("Users in database;").isEqualTo(expected);
 	}
 
 
@@ -88,17 +86,17 @@ public class InferredDataSourceTransactionalSqlScriptsTests {
 	static class Config {
 
 		@Bean
-		public PlatformTransactionManager txMgr1() {
+		PlatformTransactionManager txMgr1() {
 			return new DataSourceTransactionManager(dataSource1());
 		}
 
 		@Bean
-		public PlatformTransactionManager txMgr2() {
+		PlatformTransactionManager txMgr2() {
 			return new DataSourceTransactionManager(dataSource2());
 		}
 
 		@Bean
-		public DataSource dataSource1() {
+		DataSource dataSource1() {
 			return new EmbeddedDatabaseBuilder()//
 			.setName("database1")//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
@@ -107,7 +105,7 @@ public class InferredDataSourceTransactionalSqlScriptsTests {
 		}
 
 		@Bean
-		public DataSource dataSource2() {
+		DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder()//
 			.setName("database2")//
 			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//

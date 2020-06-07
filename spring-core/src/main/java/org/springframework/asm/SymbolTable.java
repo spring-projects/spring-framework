@@ -139,7 +139,7 @@ final class SymbolTable {
     this.sourceClassReader = classReader;
 
     // Copy the constant pool binary content.
-    byte[] inputBytes = classReader.b;
+    byte[] inputBytes = classReader.classFileBuffer;
     int constantPoolOffset = classReader.getItem(1) - 1;
     int constantPoolLength = classReader.header - constantPoolOffset;
     constantPoolCount = classReader.getItemCount();
@@ -242,7 +242,7 @@ final class SymbolTable {
    */
   private void copyBootstrapMethods(final ClassReader classReader, final char[] charBuffer) {
     // Find attributOffset of the 'bootstrap_methods' array.
-    byte[] inputBytes = classReader.b;
+    byte[] inputBytes = classReader.classFileBuffer;
     int currentAttributeOffset = classReader.getFirstAttributeOffset();
     for (int i = classReader.readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
       String attributeName = classReader.readUTF8(currentAttributeOffset, charBuffer);
@@ -1183,8 +1183,10 @@ final class SymbolTable {
    *     corresponding to the common super class of the given types.
    */
   int addMergedType(final int typeTableIndex1, final int typeTableIndex2) {
-    // TODO sort the arguments? The merge result should be independent of their order.
-    long data = typeTableIndex1 | (((long) typeTableIndex2) << 32);
+    long data =
+        typeTableIndex1 < typeTableIndex2
+            ? typeTableIndex1 | (((long) typeTableIndex2) << 32)
+            : typeTableIndex2 | (((long) typeTableIndex1) << 32);
     int hashCode = hash(Symbol.MERGED_TYPE_TAG, typeTableIndex1 + typeTableIndex2);
     Entry entry = get(hashCode);
     while (entry != null) {

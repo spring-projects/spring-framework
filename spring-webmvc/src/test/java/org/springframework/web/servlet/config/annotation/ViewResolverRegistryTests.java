@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
@@ -40,7 +40,7 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with a {@link ViewResolverRegistry}.
@@ -53,7 +53,7 @@ public class ViewResolverRegistryTests {
 	private ViewResolverRegistry registry;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
@@ -67,44 +67,44 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void order() {
-		assertEquals(Ordered.LOWEST_PRECEDENCE, this.registry.getOrder());
+		assertThat(this.registry.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 		this.registry.enableContentNegotiation();
-		assertEquals(Ordered.HIGHEST_PRECEDENCE, this.registry.getOrder());
+		assertThat(this.registry.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
 	public void hasRegistrations() {
-		assertFalse(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isFalse();
 		this.registry.freeMarker();
-		assertTrue(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isTrue();
 	}
 
 	@Test
 	public void hasRegistrationsWhenContentNegotiationEnabled() {
-		assertFalse(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isFalse();
 		this.registry.enableContentNegotiation();
-		assertTrue(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isTrue();
 	}
 
 	@Test
 	public void noResolvers() {
-		assertNotNull(this.registry.getViewResolvers());
-		assertEquals(0, this.registry.getViewResolvers().size());
-		assertFalse(this.registry.hasRegistrations());
+		assertThat(this.registry.getViewResolvers()).isNotNull();
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(0);
+		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
 	@Test
 	public void customViewResolver() {
 		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/", ".jsp");
 		this.registry.viewResolver(viewResolver);
-		assertSame(viewResolver, this.registry.getViewResolvers().get(0));
+		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
 	}
 
 	@Test
 	public void beanName() {
 		this.registry.beanName();
-		assertEquals(1, this.registry.getViewResolvers().size());
-		assertEquals(BeanNameViewResolver.class, registry.getViewResolvers().get(0).getClass());
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
+		assertThat(registry.getViewResolvers().get(0).getClass()).isEqualTo(BeanNameViewResolver.class);
 	}
 
 	@Test
@@ -125,10 +125,10 @@ public class ViewResolverRegistryTests {
 	public void jspMultipleResolvers() {
 		this.registry.jsp().viewNames("view1", "view2");
 		this.registry.jsp().viewNames("view3", "view4");
-		assertNotNull(this.registry.getViewResolvers());
-		assertEquals(2, this.registry.getViewResolvers().size());
-		assertEquals(InternalResourceViewResolver.class, this.registry.getViewResolvers().get(0).getClass());
-		assertEquals(InternalResourceViewResolver.class, this.registry.getViewResolvers().get(1).getClass());
+		assertThat(this.registry.getViewResolvers()).isNotNull();
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(2);
+		assertThat(this.registry.getViewResolvers().get(0).getClass()).isEqualTo(InternalResourceViewResolver.class);
+		assertThat(this.registry.getViewResolvers().get(1).getClass()).isEqualTo(InternalResourceViewResolver.class);
 	}
 
 	@Test
@@ -184,8 +184,8 @@ public class ViewResolverRegistryTests {
 		MappingJackson2JsonView view = new MappingJackson2JsonView();
 		this.registry.enableContentNegotiation(view);
 		ContentNegotiatingViewResolver resolver = checkAndGetResolver(ContentNegotiatingViewResolver.class);
-		assertEquals(Arrays.asList(view), resolver.getDefaultViews());
-		assertEquals(Ordered.HIGHEST_PRECEDENCE, this.registry.getOrder());
+		assertThat(resolver.getDefaultViews()).isEqualTo(Arrays.asList(view));
+		assertThat(this.registry.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 	@Test
@@ -194,22 +194,22 @@ public class ViewResolverRegistryTests {
 		this.registry.enableContentNegotiation(view1);
 
 		ContentNegotiatingViewResolver resolver1 = checkAndGetResolver(ContentNegotiatingViewResolver.class);
-		assertEquals(Arrays.asList(view1), resolver1.getDefaultViews());
+		assertThat(resolver1.getDefaultViews()).isEqualTo(Arrays.asList(view1));
 
 		MarshallingView view2 = new MarshallingView();
 		this.registry.enableContentNegotiation(view2);
 
 		ContentNegotiatingViewResolver resolver2 = checkAndGetResolver(ContentNegotiatingViewResolver.class);
-		assertEquals(Arrays.asList(view1, view2), resolver2.getDefaultViews());
-		assertSame(resolver1, resolver2);
+		assertThat(resolver2.getDefaultViews()).isEqualTo(Arrays.asList(view1, view2));
+		assertThat(resolver2).isSameAs(resolver1);
 	}
 
 
 	@SuppressWarnings("unchecked")
 	private <T extends ViewResolver> T checkAndGetResolver(Class<T> resolverType) {
-		assertNotNull(this.registry.getViewResolvers());
-		assertEquals(1, this.registry.getViewResolvers().size());
-		assertEquals(resolverType, this.registry.getViewResolvers().get(0).getClass());
+		assertThat(this.registry.getViewResolvers()).isNotNull();
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
+		assertThat(this.registry.getViewResolvers().get(0).getClass()).isEqualTo(resolverType);
 		return (T) registry.getViewResolvers().get(0);
 	}
 
@@ -218,7 +218,7 @@ public class ViewResolverRegistryTests {
 		for (int i = 0; i < nameValuePairs.length ; i++, i++) {
 			Object expected = nameValuePairs[i + 1];
 			Object actual = accessor.getPropertyValue((String) nameValuePairs[i]);
-			assertEquals(expected, actual);
+			assertThat(actual).isEqualTo(expected);
 		}
 	}
 

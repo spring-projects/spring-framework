@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -38,7 +39,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Uses IBM-specific API to get a JDBC Connection with a specific isolation
  * level (and read-only flag) from a WebSphere DataSource
- * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">IBM code example</a>).
+ * (<a href="https://publib.boulder.ibm.com/infocenter/wasinfo/v5r1//topic/com.ibm.websphere.base.doc/info/aes/ae/rdat_extiapi.html">IBM code example</a>).
  * Supports the transaction-specific isolation level exposed by
  * {@link org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()}.
  * It's also possible to specify a default isolation level, to be applied when the
@@ -152,8 +153,8 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	 * Create a WebSphere {@code JDBCConnectionSpec} object for the given characteristics.
 	 * <p>The default implementation uses reflection to apply the given settings.
 	 * Can be overridden in subclasses to customize the JDBCConnectionSpec object
-	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
-	 * <a href="http://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
+	 * (<a href="https://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
+	 * <a href="https://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
 	 * @param isolationLevel the isolation level to apply (or {@code null} if none)
 	 * @param readOnlyFlag the read-only flag to apply (or {@code null} if none)
 	 * @param username the username to apply ({@code null} or empty indicates the default)

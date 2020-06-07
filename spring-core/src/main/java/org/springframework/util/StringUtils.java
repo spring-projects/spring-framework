@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
@@ -39,7 +40,7 @@ import org.springframework.lang.Nullable;
  * Miscellaneous {@link String} utility methods.
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
  * for a more comprehensive suite of {@code String} utilities.
  *
  * <p>This class delivers some simple functionality that should really be
@@ -59,6 +60,8 @@ import org.springframework.lang.Nullable;
  */
 public abstract class StringUtils {
 
+	private static final String[] EMPTY_STRING_ARRAY = {};
+
 	private static final String FOLDER_SEPARATOR = "/";
 
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
@@ -75,15 +78,20 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check whether the given {@code String} is empty.
+	 * Check whether the given object (possibly a {@code String}) is empty.
+	 * This is effectively a shortcut for {@code !hasLength(String)}.
 	 * <p>This method accepts any Object as an argument, comparing it to
 	 * {@code null} and the empty String. As a consequence, this method
 	 * will never return {@code true} for a non-null non-String object.
 	 * <p>The Object signature is useful for general attribute handling code
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
-	 * @param str the candidate String
+	 * <p><b>Note: If the object is typed to {@code String} upfront, prefer
+	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
+	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
+	 * @see #hasLength(String)
+	 * @see #hasText(String)
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
@@ -102,7 +110,8 @@ public abstract class StringUtils {
 	 * </pre>
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
-	 * @see #hasText(String)
+	 * @see #hasLength(String)
+	 * @see #hasText(CharSequence)
 	 */
 	public static boolean hasLength(@Nullable CharSequence str) {
 		return (str != null && str.length() > 0);
@@ -136,6 +145,8 @@ public abstract class StringUtils {
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null},
 	 * its length is greater than 0, and it does not contain whitespace only
+	 * @see #hasText(String)
+	 * @see #hasLength(CharSequence)
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
@@ -151,6 +162,8 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code String} is not {@code null}, its
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
+	 * @see #hasLength(String)
+	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
 		return (str != null && !str.isEmpty() && containsText(str));
@@ -407,14 +420,14 @@ public abstract class StringUtils {
 		int pos = 0;  // our position in the old string
 		int patLen = oldPattern.length();
 		while (index >= 0) {
-			sb.append(inString.substring(pos, index));
+			sb.append(inString, pos, index);
 			sb.append(newPattern);
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
 
 		// append any characters to the right of a match
-		sb.append(inString.substring(pos));
+		sb.append(inString, pos, inString.length());
 		return sb.toString();
 	}
 
@@ -440,16 +453,19 @@ public abstract class StringUtils {
 			return inString;
 		}
 
-		StringBuilder sb = new StringBuilder(inString.length());
+		int lastCharIndex = 0;
+		char[] result = new char[inString.length()];
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
 			if (charsToDelete.indexOf(c) == -1) {
-				sb.append(c);
+				result[lastCharIndex++] = c;
 			}
 		}
-		return sb.toString();
+		if (lastCharIndex == inString.length()) {
+			return inString;
+		}
+		return new String(result, 0, lastCharIndex);
 	}
-
 
 	//---------------------------------------------------------------------
 	// Convenience methods for working with formatted Strings
@@ -638,6 +654,11 @@ public abstract class StringUtils {
 		}
 		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
 
+		// Shortcut if there is no work to do
+		if (pathToUse.indexOf('.') == -1) {
+			return pathToUse;
+		}
+
 		// Strip prefix from path to analyze, to not treat it as part of the
 		// first path element. This is necessary to correctly parse paths like
 		// "file:core/../core/io/Resource.class", where the ".." should just
@@ -683,6 +704,10 @@ public abstract class StringUtils {
 			}
 		}
 
+		// All path elements stayed the same - shortcut
+		if (pathArray.length == pathElements.size()) {
+			return prefix + pathToUse;
+		}
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
 			pathElements.add(0, TOP_PATH);
@@ -727,7 +752,7 @@ public abstract class StringUtils {
 		}
 		Assert.notNull(charset, "Charset must not be null");
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
 		boolean changed = false;
 		for (int i = 0; i < length; i++) {
 			int ch = source.charAt(i);
@@ -740,7 +765,7 @@ public abstract class StringUtils {
 					if (u == -1 || l == -1) {
 						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
 					}
-					bos.write((char) ((u << 4) + l));
+					baos.write((char) ((u << 4) + l));
 					i += 2;
 					changed = true;
 				}
@@ -749,10 +774,10 @@ public abstract class StringUtils {
 				}
 			}
 			else {
-				bos.write(ch);
+				baos.write(ch);
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), charset) : source);
+		return (changed ? StreamUtils.copyToString(baos, charset) : source);
 	}
 
 	/**
@@ -774,7 +799,9 @@ public abstract class StringUtils {
 		if (tokens.length == 1) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
-			return (resolved.getLanguage().length() > 0 ? resolved : null);
+			if (resolved.getLanguage().length() > 0) {
+				return resolved;
+			}
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
@@ -873,6 +900,28 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
+	 * Copy the given {@link Collection} into a {@code String} array.
+	 * <p>The {@code Collection} must contain {@code String} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Collection<String> collection) {
+		return (!CollectionUtils.isEmpty(collection) ? collection.toArray(EMPTY_STRING_ARRAY) : EMPTY_STRING_ARRAY);
+	}
+
+	/**
+	 * Copy the given {@link Enumeration} into a {@code String} array.
+	 * <p>The {@code Enumeration} must contain {@code String} elements only.
+	 * @param enumeration the {@code Enumeration} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Enumeration<String> enumeration) {
+		return (enumeration != null ? toStringArray(Collections.list(enumeration)) : EMPTY_STRING_ARRAY);
+	}
+
+	/**
 	 * Append the given {@code String} to the given {@code String} array,
 	 * returning a new array consisting of the input array contents plus
 	 * the given {@code String}.
@@ -936,8 +985,7 @@ public abstract class StringUtils {
 			return array1;
 		}
 
-		List<String> result = new ArrayList<>();
-		result.addAll(Arrays.asList(array1));
+		List<String> result = new ArrayList<>(Arrays.asList(array1));
 		for (String str : array2) {
 			if (!result.contains(str)) {
 				result.add(str);
@@ -947,13 +995,13 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Turn given source {@code String} array into sorted array.
-	 * @param array the source array
-	 * @return the sorted array (never {@code null})
+	 * Sort the given {@code String} array if necessary.
+	 * @param array the original array (potentially empty)
+	 * @return the array in sorted form (never {@code null})
 	 */
 	public static String[] sortStringArray(String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
-			return new String[0];
+			return array;
 		}
 
 		Arrays.sort(array);
@@ -961,28 +1009,8 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Copy the given {@code Collection} into a {@code String} array.
-	 * <p>The {@code Collection} must contain {@code String} elements only.
-	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[0]);
-	}
-
-	/**
-	 * Copy the given Enumeration into a {@code String} array.
-	 * The Enumeration must contain {@code String} elements only.
-	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
-		return toStringArray(Collections.list(enumeration));
-	}
-
-	/**
-	 * Trim the elements of the given {@code String} array,
-	 * calling {@code String.trim()} on each of them.
+	 * Trim the elements of the given {@code String} array, calling
+	 * {@code String.trim()} on each non-null element.
 	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
@@ -1132,7 +1160,7 @@ public abstract class StringUtils {
 			@Nullable String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 
 		if (str == null) {
-			return new String[0];
+			return EMPTY_STRING_ARRAY;
 		}
 
 		StringTokenizer st = new StringTokenizer(str, delimiters);
@@ -1185,7 +1213,7 @@ public abstract class StringUtils {
 			@Nullable String str, @Nullable String delimiter, @Nullable String charsToDelete) {
 
 		if (str == null) {
-			return new String[0];
+			return EMPTY_STRING_ARRAY;
 		}
 		if (delimiter == null) {
 			return new String[] {str};
@@ -1298,14 +1326,11 @@ public abstract class StringUtils {
 			return ObjectUtils.nullSafeToString(arr[0]);
 		}
 
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < arr.length; i++) {
-			if (i > 0) {
-				sb.append(delim);
-			}
-			sb.append(arr[i]);
+		StringJoiner sj = new StringJoiner(delim);
+		for (Object o : arr) {
+			sj.add(String.valueOf(o));
 		}
-		return sb.toString();
+		return sj.toString();
 	}
 
 	/**

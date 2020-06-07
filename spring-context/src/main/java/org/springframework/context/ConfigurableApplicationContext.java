@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 03.11.2003
  */
 public interface ConfigurableApplicationContext extends ApplicationContext, Lifecycle, Closeable {
@@ -85,6 +86,14 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see java.lang.System#getenv()
 	 */
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
+
+	/**
+	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
+	 * shutdown hook} thread: {@value}.
+	 * @since 5.2
+	 * @see #registerShutdownHook()
+	 */
+	String SHUTDOWN_HOOK_THREAD_NAME = "SpringContextShutdownHook";
 
 
 	/**
@@ -139,6 +148,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
+	 * Specify the ClassLoader to load class path resources and bean classes with.
+	 * <p>This context class loader will be passed to the internal bean factory.
+	 * @since 5.2.7
+	 * @see org.springframework.core.io.DefaultResourceLoader#DefaultResourceLoader(ClassLoader)
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setBeanClassLoader
+	 */
+	void setClassLoader(ClassLoader classLoader);
+
+	/**
 	 * Register the given protocol resolver with this application context,
 	 * allowing for additional resource protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this context's standard
@@ -164,6 +182,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * on JVM shutdown unless it has already been closed at that time.
 	 * <p>This method can be called multiple times. Only one shutdown hook
 	 * (at max) will be registered for each context instance.
+	 * <p>As of Spring Framework 5.2, the {@linkplain Thread#getName() name} of
+	 * the shutdown hook thread should be {@link #SHUTDOWN_HOOK_THREAD_NAME}.
 	 * @see java.lang.Runtime#addShutdownHook
 	 * @see #close()
 	 */

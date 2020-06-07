@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -42,6 +43,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	private String defaultEncoding;
 
 	private boolean fallbackToSystemLocale = true;
+
+	@Nullable
+	private Locale defaultLocale;
 
 	private long cacheMillis = -1;
 
@@ -143,6 +147,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: set this flag to "false" in such a scenario.
+	 * @see #setDefaultLocale
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -152,16 +157,52 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Return whether to fall back to the system Locale if no files for a specific
 	 * Locale have been found.
 	 * @since 4.3
+	 * @deprecated as of 5.2.2, in favor of {@link #getDefaultLocale()}
 	 */
+	@Deprecated
 	protected boolean isFallbackToSystemLocale() {
 		return this.fallbackToSystemLocale;
 	}
 
 	/**
+	 * Specify a default Locale to fall back to, as an alternative to falling back
+	 * to the system Locale.
+	 * <p>Default is to fall back to the system Locale. You may override this with
+	 * a locally specified default Locale here, or enforce no fallback locale at all
+	 * through disabling {@link #setFallbackToSystemLocale "fallbackToSystemLocale"}.
+	 * @since 5.2.2
+	 * @see #setFallbackToSystemLocale
+	 * @see #getDefaultLocale()
+	 */
+	public void setDefaultLocale(@Nullable Locale defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
+	/**
+	 * Determine a default Locale to fall back to: either a locally specified default
+	 * Locale or the system Locale, or {@code null} for no fallback locale at all.
+	 * @since 5.2.2
+	 * @see #setDefaultLocale
+	 * @see #setFallbackToSystemLocale
+	 * @see Locale#getDefault()
+	 */
+	@Nullable
+	protected Locale getDefaultLocale() {
+		if (this.defaultLocale != null) {
+			return this.defaultLocale;
+		}
+		if (this.fallbackToSystemLocale) {
+			return Locale.getDefault();
+		}
+		return null;
+	}
+
+	/**
 	 * Set the number of seconds to cache loaded properties files.
 	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever (just like
-	 * {@code java.util.ResourceBundle}).
+	 * <li>Default is "-1", indicating to cache forever (matching the default behavior
+	 * of {@code java.util.ResourceBundle}). Note that this constant follows Spring
+	 * conventions, not {@link java.util.ResourceBundle.Control#getTimeToLive}.
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of seconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp
@@ -184,8 +225,9 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Set the number of milliseconds to cache loaded properties files.
 	 * Note that it is common to set seconds instead: {@link #setCacheSeconds}.
 	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever (just like
-	 * {@code java.util.ResourceBundle}).
+	 * <li>Default is "-1", indicating to cache forever (matching the default behavior
+	 * of {@code java.util.ResourceBundle}). Note that this constant follows Spring
+	 * conventions, not {@link java.util.ResourceBundle.Control#getTimeToLive}.
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of milliseconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp

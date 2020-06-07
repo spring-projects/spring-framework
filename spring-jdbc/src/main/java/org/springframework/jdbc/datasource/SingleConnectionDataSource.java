@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -175,7 +175,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 	/**
 	 * Specifying a custom username and password doesn't make sense
 	 * with a single Connection. Returns the single Connection if given
-	 * the same username and password; throws a SQLException else.
+	 * the same username and password; throws an SQLException else.
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
@@ -299,34 +299,25 @@ public class SingleConnectionDataSource extends DriverManagerDataSource implemen
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("unwrap")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return proxy;
-				}
-			}
-			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return true;
-				}
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: don't pass the call on.
-				return null;
-			}
-			else if (method.getName().equals("isClosed")) {
-				return false;
-			}
-			else if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying Connection.
-				return this.target;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Connection proxy.
+					return System.identityHashCode(proxy);
+				case "close":
+					// Handle close method: don't pass the call on.
+					return null;
+				case "isClosed":
+					return this.target.isClosed();
+				case "getTargetConnection":
+					// Handle getTargetConnection method: return underlying Connection.
+					return this.target;
+				case "unwrap":
+					return (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor":
+					return (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 			}
 
 			// Invoke method on target Connection.

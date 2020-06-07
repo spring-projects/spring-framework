@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
@@ -30,13 +31,21 @@ public class MBeanTestUtils {
 
 	/**
 	 * Resets MBeanServerFactory and ManagementFactory to a known consistent state.
-	 * This involves releasing all currently registered MBeanServers and resetting
+	 * <p>This involves releasing all currently registered MBeanServers and resetting
 	 * the platformMBeanServer to null.
 	 */
-	public static void resetMBeanServers() throws Exception {
+	public static synchronized void resetMBeanServers() throws Exception {
 		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
-			MBeanServerFactory.releaseMBeanServer(server);
+			try {
+				MBeanServerFactory.releaseMBeanServer(server);
+			}
+			catch (IllegalArgumentException ex) {
+				if (!ex.getMessage().contains("not in list")) {
+					throw ex;
+				}
+			}
 		}
+
 		Field field = ManagementFactory.class.getDeclaredField("platformMBeanServer");
 		field.setAccessible(true);
 		field.set(null, null);

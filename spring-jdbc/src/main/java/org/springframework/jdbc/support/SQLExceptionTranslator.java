@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,9 +49,7 @@ public interface SQLExceptionTranslator {
 	 * @param sql the SQL query or update that caused the problem (if known)
 	 * @param ex the offending {@code SQLException}
 	 * @return the DataAccessException wrapping the {@code SQLException},
-	 * or {@code null} if no translation could be applied
-	 * (in a custom translator; the default translators always throw an
-	 * {@link org.springframework.jdbc.UncategorizedSQLException} in such a case)
+	 * or {@code null} if no specific translation could be applied
 	 * @see org.springframework.dao.DataAccessException#getRootCause()
 	 */
 	@Nullable

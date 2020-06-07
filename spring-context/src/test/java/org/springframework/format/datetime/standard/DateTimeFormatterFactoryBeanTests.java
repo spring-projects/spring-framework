@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,10 +19,13 @@ package org.springframework.format.datetime.standard;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
+
 
 /**
  * @author Phillip Webb
@@ -35,27 +38,27 @@ public class DateTimeFormatterFactoryBeanTests {
 
 	@Test
 	public void isSingleton() {
-		assertThat(factory.isSingleton(), is(true));
+		assertThat(factory.isSingleton()).isTrue();
 	}
 
 	@Test
 	public void getObjectType() {
-		assertThat(factory.getObjectType(), is(equalTo(DateTimeFormatter.class)));
+		assertThat(factory.getObjectType()).isEqualTo(DateTimeFormatter.class);
 	}
 
 	@Test
 	public void getObject() {
 		factory.afterPropertiesSet();
-		assertThat(factory.getObject().toString(), is(equalTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString())));
+		assertThat(factory.getObject().toString()).isEqualTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
 	}
 
 	@Test
 	public void getObjectIsAlwaysSingleton() {
 		factory.afterPropertiesSet();
 		DateTimeFormatter formatter = factory.getObject();
-		assertThat(formatter.toString(), is(equalTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString())));
+		assertThat(formatter.toString()).isEqualTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
 		factory.setStylePattern("LL");
-		assertThat(factory.getObject(), is(sameInstance(formatter)));
+		assertThat(factory.getObject()).isSameAs(formatter);
 	}
 
 }

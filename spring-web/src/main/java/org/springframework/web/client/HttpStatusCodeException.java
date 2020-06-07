@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for exceptions based on an {@link HttpStatus}.
@@ -82,11 +83,34 @@ public abstract class HttpStatusCodeException extends RestClientResponseExceptio
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
 
-		super(statusCode.value() + " " + statusText, statusCode.value(), statusText,
-				responseHeaders, responseBody, responseCharset);
+		this(getMessage(statusCode, statusText),
+				statusCode, statusText, responseHeaders, responseBody, responseCharset);
+	}
+
+	/**
+	 * Construct instance with an {@link HttpStatus}, status text, content, and
+	 * a response charset.
+	 * @param message the exception message
+	 * @param statusCode the status code
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers, may be {@code null}
+	 * @param responseBody the response body content, may be {@code null}
+	 * @param responseCharset the response body charset, may be {@code null}
+	 * @since 5.2.2
+	 */
+	protected HttpStatusCodeException(String message, HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders responseHeaders, @Nullable byte[] responseBody, @Nullable Charset responseCharset) {
+
+		super(message, statusCode.value(), statusText, responseHeaders, responseBody, responseCharset);
 		this.statusCode = statusCode;
 	}
 
+	private static String getMessage(HttpStatus statusCode, String statusText) {
+		if (!StringUtils.hasLength(statusText)) {
+			statusText = statusCode.getReasonPhrase();
+		}
+		return statusCode.value() + " " + statusText;
+	}
 
 	/**
 	 * Return the HTTP status code.

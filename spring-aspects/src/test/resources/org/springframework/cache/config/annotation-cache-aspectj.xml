@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:cache="http://www.springframework.org/schema/cache"
 	xsi:schemaLocation="
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 
 	<!--
@@ -22,7 +22,7 @@
 
 	<cache:annotation-driven mode="aspectj" key-generator="keyGenerator"/>
 
-	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
+	<bean id="keyGenerator" class="org.springframework.context.testfixture.cache.SomeKeyGenerator"/>
 
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
@@ -40,7 +40,7 @@
 		</property>
 	</bean>
 
-	<bean id="customKeyGenerator" class="org.springframework.cache.config.SomeCustomKeyGenerator"/>
+	<bean id="customKeyGenerator" class="org.springframework.context.testfixture.cache.SomeCustomKeyGenerator"/>
 
 	<bean id="customCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">

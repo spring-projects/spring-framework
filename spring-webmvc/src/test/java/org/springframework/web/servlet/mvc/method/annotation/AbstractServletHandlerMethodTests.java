@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,19 +18,19 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import javax.servlet.ServletException;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.testfixture.servlet.MockServletConfig;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes:
@@ -48,11 +48,11 @@ public abstract class AbstractServletHandlerMethodTests {
 
 
 	protected DispatcherServlet getServlet() {
-		assertNotNull("DispatcherServlet not initialized", servlet);
+		assertThat(servlet).as("DispatcherServlet not initialized").isNotNull();
 		return servlet;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		this.servlet = null;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +59,7 @@ public class DeferredResult<T> {
 
 
 	@Nullable
-	private final Long timeout;
+	private final Long timeoutValue;
 
 	private final Supplier<?> timeoutResult;
 
@@ -89,34 +88,35 @@ public class DeferredResult<T> {
 	 * <p>By default not set in which case the default configured in the MVC
 	 * Java Config or the MVC namespace is used, or if that's not set, then the
 	 * timeout depends on the default of the underlying server.
-	 * @param timeout timeout value in milliseconds
+	 * @param timeoutValue timeout value in milliseconds
 	 */
-	public DeferredResult(Long timeout) {
-		this(timeout, () -> RESULT_NONE);
+	public DeferredResult(Long timeoutValue) {
+		this(timeoutValue, () -> RESULT_NONE);
 	}
 
 	/**
 	 * Create a DeferredResult with a timeout value and a default result to use
 	 * in case of timeout.
-	 * @param timeout timeout value in milliseconds (ignored if {@code null})
+	 * @param timeoutValue timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(@Nullable Long timeout, final Object timeoutResult) {
+	public DeferredResult(@Nullable Long timeoutValue, Object timeoutResult) {
+		this.timeoutValue = timeoutValue;
 		this.timeoutResult = () -> timeoutResult;
-		this.timeout = timeout;
 	}
 
 	/**
 	 * Variant of {@link #DeferredResult(Long, Object)} that accepts a dynamic
 	 * fallback value based on a {@link Supplier}.
-	 * @param timeout timeout value in milliseconds (ignored if {@code null})
+	 * @param timeoutValue timeout value in milliseconds (ignored if {@code null})
 	 * @param timeoutResult the result supplier to use
 	 * @since 5.1.1
 	 */
-	public DeferredResult(@Nullable Long timeout, Supplier<?> timeoutResult) {
+	public DeferredResult(@Nullable Long timeoutValue, Supplier<?> timeoutResult) {
+		this.timeoutValue = timeoutValue;
 		this.timeoutResult = timeoutResult;
-		this.timeout = timeout;
 	}
+
 
 	/**
 	 * Return {@code true} if this DeferredResult is no longer usable either
@@ -155,7 +155,7 @@ public class DeferredResult<T> {
 	 */
 	@Nullable
 	final Long getTimeoutValue() {
-		return this.timeout;
+		return this.timeoutValue;
 	}
 
 	/**

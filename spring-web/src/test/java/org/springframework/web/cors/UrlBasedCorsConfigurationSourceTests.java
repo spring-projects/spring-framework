@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,13 @@
 
 package org.springframework.web.cors;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link UrlBasedCorsConfigurationSource}.
@@ -33,7 +35,7 @@ public class UrlBasedCorsConfigurationSourceTests {
 	@Test
 	public void empty() {
 		MockHttpServletRequest request = new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html");
-		assertNull(this.configSource.getCorsConfiguration(request));
+		assertThat(this.configSource.getCorsConfiguration(request)).isNull();
 	}
 
 	@Test
@@ -42,15 +44,16 @@ public class UrlBasedCorsConfigurationSourceTests {
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/test.html");
-		assertNull(this.configSource.getCorsConfiguration(request));
+		assertThat(this.configSource.getCorsConfiguration(request)).isNull();
 
 		request.setRequestURI("/bar/test.html");
-		assertEquals(config, this.configSource.getCorsConfiguration(request));
+		assertThat(this.configSource.getCorsConfiguration(request)).isEqualTo(config);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void unmodifiableConfigurationsMap() {
-		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration()));
 	}
 
 }

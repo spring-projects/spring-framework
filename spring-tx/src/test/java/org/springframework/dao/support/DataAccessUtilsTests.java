@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,15 +22,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Juergen Hoeller
@@ -42,47 +44,23 @@ public class DataAccessUtilsTests {
 	public void withEmptyCollection() {
 		Collection<String> col = new HashSet<>();
 
-		assertNull(DataAccessUtils.uniqueResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isNull();
 
-		try {
-			DataAccessUtils.requiredUniqueResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(0, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.requiredUniqueResult(col))
+			.satisfies(sizeRequirements(1, 0));
 
-		try {
-			DataAccessUtils.objectResult(col, String.class);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(0, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.objectResult(col, String.class))
+			.satisfies(sizeRequirements(1, 0));
 
-		try {
-			DataAccessUtils.intResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(0, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.intResult(col))
+			.satisfies(sizeRequirements(1, 0));
 
-		try {
-			DataAccessUtils.longResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(0, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.longResult(col))
+			.satisfies(sizeRequirements(1, 0));
 	}
 
 	@Test
@@ -91,55 +69,25 @@ public class DataAccessUtilsTests {
 		col.add("test1");
 		col.add("test2");
 
-		try {
-			DataAccessUtils.uniqueResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.uniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
-		try {
-			DataAccessUtils.requiredUniqueResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.requiredUniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
-		try {
-			DataAccessUtils.objectResult(col, String.class);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.objectResult(col, String.class))
+			.satisfies(sizeRequirements(1, 2));
 
-		try {
-			DataAccessUtils.intResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.intResult(col))
+			.satisfies(sizeRequirements(1, 2));
 
-		try {
-			DataAccessUtils.longResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.longResult(col))
+			.satisfies(sizeRequirements(1, 2));
 	}
 
 	@Test
@@ -147,12 +95,12 @@ public class DataAccessUtilsTests {
 		Collection<Integer> col = new HashSet<>(1);
 		col.add(5);
 
-		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, Integer.class)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -162,12 +110,12 @@ public class DataAccessUtilsTests {
 		col.add(i);
 		col.add(i);
 
-		assertEquals(Integer.valueOf(5), DataAccessUtils.uniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Integer.valueOf(5), DataAccessUtils.objectResult(col, Integer.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, Integer.class)).isEqualTo(Integer.valueOf(5));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -177,15 +125,9 @@ public class DataAccessUtilsTests {
 		col.add(new Integer(5));
 		col.add(new Integer(5));
 
-		try {
-			DataAccessUtils.uniqueResult(col);
-			fail("Should have thrown IncorrectResultSizeDataAccessException");
-		}
-		catch (IncorrectResultSizeDataAccessException ex) {
-			// expected
-			assertEquals(1, ex.getExpectedSize());
-			assertEquals(2, ex.getActualSize());
-		}
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.uniqueResult(col))
+			.satisfies(sizeRequirements(1, 2));
 	}
 
 	@Test
@@ -193,12 +135,12 @@ public class DataAccessUtilsTests {
 		Collection<Long> col = new HashSet<>(1);
 		col.add(5L);
 
-		assertEquals(Long.valueOf(5L), DataAccessUtils.uniqueResult(col));
-		assertEquals(Long.valueOf(5L), DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(Long.valueOf(5L), DataAccessUtils.objectResult(col, Long.class));
-		assertEquals("5", DataAccessUtils.objectResult(col, String.class));
-		assertEquals(5, DataAccessUtils.intResult(col));
-		assertEquals(5, DataAccessUtils.longResult(col));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.objectResult(col, Long.class)).isEqualTo(Long.valueOf(5L));
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("5");
+		assertThat(DataAccessUtils.intResult(col)).isEqualTo(5);
+		assertThat(DataAccessUtils.longResult(col)).isEqualTo(5);
 	}
 
 	@Test
@@ -206,25 +148,15 @@ public class DataAccessUtilsTests {
 		Collection<String> col = new HashSet<>(1);
 		col.add("test1");
 
-		assertEquals("test1", DataAccessUtils.uniqueResult(col));
-		assertEquals("test1", DataAccessUtils.requiredUniqueResult(col));
-		assertEquals("test1", DataAccessUtils.objectResult(col, String.class));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo("test1");
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo("test1");
 
-		try {
-			DataAccessUtils.intResult(col);
-			fail("Should have thrown TypeMismatchDataAccessException");
-		}
-		catch (TypeMismatchDataAccessException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.intResult(col));
 
-		try {
-			DataAccessUtils.longResult(col);
-			fail("Should have thrown TypeMismatchDataAccessException");
-		}
-		catch (TypeMismatchDataAccessException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.longResult(col));
 	}
 
 	@Test
@@ -233,33 +165,23 @@ public class DataAccessUtilsTests {
 		Collection<Date> col = new HashSet<>(1);
 		col.add(date);
 
-		assertEquals(date, DataAccessUtils.uniqueResult(col));
-		assertEquals(date, DataAccessUtils.requiredUniqueResult(col));
-		assertEquals(date, DataAccessUtils.objectResult(col, Date.class));
-		assertEquals(date.toString(), DataAccessUtils.objectResult(col, String.class));
+		assertThat(DataAccessUtils.uniqueResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.requiredUniqueResult(col)).isEqualTo(date);
+		assertThat(DataAccessUtils.objectResult(col, Date.class)).isEqualTo(date);
+		assertThat(DataAccessUtils.objectResult(col, String.class)).isEqualTo(date.toString());
 
-		try {
-			DataAccessUtils.intResult(col);
-			fail("Should have thrown TypeMismatchDataAccessException");
-		}
-		catch (TypeMismatchDataAccessException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.intResult(col));
 
-		try {
-			DataAccessUtils.longResult(col);
-			fail("Should have thrown TypeMismatchDataAccessException");
-		}
-		catch (TypeMismatchDataAccessException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(TypeMismatchDataAccessException.class).isThrownBy(() ->
+				DataAccessUtils.longResult(col));
 	}
 
 	@Test
 	public void exceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
-		assertSame(in, DataAccessUtils.translateIfNecessary(in, mpet));
+		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(in);
 	}
 
 	@Test
@@ -268,9 +190,16 @@ public class DataAccessUtilsTests {
 		RuntimeException in = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");
 		mpet.addTranslation(in, out);
-		assertSame(out, DataAccessUtils.translateIfNecessary(in, mpet));
+		assertThat(DataAccessUtils.translateIfNecessary(in, mpet)).isSameAs(out);
 	}
 
+	private <E extends IncorrectResultSizeDataAccessException> Consumer<E> sizeRequirements(
+			int expectedSize, int actualSize) {
+		return ex -> {
+			assertThat(ex.getExpectedSize()).as("expected size").isEqualTo(expectedSize);
+			assertThat(ex.getActualSize()).as("actual size").isEqualTo(actualSize);
+		};
+	}
 
 	public static class MapPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
 

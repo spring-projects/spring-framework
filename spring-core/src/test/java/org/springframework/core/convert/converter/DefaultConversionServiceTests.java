@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,20 +44,17 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StopWatch;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link DefaultConversionService}.
@@ -71,607 +68,629 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  * @author Sam Brannen
  */
-public class DefaultConversionServiceTests {
+class DefaultConversionServiceTests {
 
 	private final DefaultConversionService conversionService = new DefaultConversionService();
 
 
 	@Test
-	public void testStringToCharacter() {
-		assertEquals(Character.valueOf('1'), conversionService.convert("1", Character.class));
+	void stringToCharacter() {
+		assertThat(conversionService.convert("1", Character.class)).isEqualTo(Character.valueOf('1'));
 	}
 
 	@Test
-	public void testStringToCharacterEmptyString() {
-		assertEquals(null, conversionService.convert("", Character.class));
-	}
-
-	@Test(expected = ConversionFailedException.class)
-	public void testStringToCharacterInvalidString() {
-		conversionService.convert("invalid", Character.class);
+	void stringToCharacterEmptyString() {
+		assertThat(conversionService.convert("", Character.class)).isEqualTo(null);
 	}
 
 	@Test
-	public void testCharacterToString() {
-		assertEquals("3", conversionService.convert('3', String.class));
+	void stringToCharacterInvalidString() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("invalid", Character.class));
 	}
 
 	@Test
-	public void testStringToBooleanTrue() {
-		assertEquals(true, conversionService.convert("true", Boolean.class));
-		assertEquals(true, conversionService.convert("on", Boolean.class));
-		assertEquals(true, conversionService.convert("yes", Boolean.class));
-		assertEquals(true, conversionService.convert("1", Boolean.class));
-		assertEquals(true, conversionService.convert("TRUE", Boolean.class));
-		assertEquals(true, conversionService.convert("ON", Boolean.class));
-		assertEquals(true, conversionService.convert("YES", Boolean.class));
+	void characterToString() {
+		assertThat(conversionService.convert('3', String.class)).isEqualTo("3");
 	}
 
 	@Test
-	public void testStringToBooleanFalse() {
-		assertEquals(false, conversionService.convert("false", Boolean.class));
-		assertEquals(false, conversionService.convert("off", Boolean.class));
-		assertEquals(false, conversionService.convert("no", Boolean.class));
-		assertEquals(false, conversionService.convert("0", Boolean.class));
-		assertEquals(false, conversionService.convert("FALSE", Boolean.class));
-		assertEquals(false, conversionService.convert("OFF", Boolean.class));
-		assertEquals(false, conversionService.convert("NO", Boolean.class));
+	void stringToBooleanTrue() {
+		assertThat(conversionService.convert("true", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("on", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("yes", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("1", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("TRUE", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("ON", Boolean.class)).isEqualTo(true);
+		assertThat(conversionService.convert("YES", Boolean.class)).isEqualTo(true);
 	}
 
 	@Test
-	public void testStringToBooleanEmptyString() {
-		assertEquals(null, conversionService.convert("", Boolean.class));
-	}
-
-	@Test(expected = ConversionFailedException.class)
-	public void testStringToBooleanInvalidString() {
-		conversionService.convert("invalid", Boolean.class);
-	}
-
-	@Test
-	public void testBooleanToString() {
-		assertEquals("true", conversionService.convert(true, String.class));
+	void stringToBooleanFalse() {
+		assertThat(conversionService.convert("false", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("off", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("no", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("0", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("FALSE", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("OFF", Boolean.class)).isEqualTo(false);
+		assertThat(conversionService.convert("NO", Boolean.class)).isEqualTo(false);
 	}
 
 	@Test
-	public void testStringToByte() throws Exception {
-		assertEquals(Byte.valueOf("1"), conversionService.convert("1", Byte.class));
+	void stringToBooleanEmptyString() {
+		assertThat(conversionService.convert("", Boolean.class)).isEqualTo(null);
 	}
 
 	@Test
-	public void testByteToString() {
-		assertEquals("65", conversionService.convert("A".getBytes()[0], String.class));
+	void stringToBooleanInvalidString() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert("invalid", Boolean.class));
 	}
 
 	@Test
-	public void testStringToShort() {
-		assertEquals(Short.valueOf("1"), conversionService.convert("1", Short.class));
+	void booleanToString() {
+		assertThat(conversionService.convert(true, String.class)).isEqualTo("true");
 	}
 
 	@Test
-	public void testShortToString() {
+	void stringToByte() {
+		assertThat(conversionService.convert("1", Byte.class)).isEqualTo((byte) 1);
+	}
+
+	@Test
+	void byteToString() {
+		assertThat(conversionService.convert("A".getBytes()[0], String.class)).isEqualTo("65");
+	}
+
+	@Test
+	void stringToShort() {
+		assertThat(conversionService.convert("1", Short.class)).isEqualTo((short) 1);
+	}
+
+	@Test
+	void shortToString() {
 		short three = 3;
-		assertEquals("3", conversionService.convert(three, String.class));
+		assertThat(conversionService.convert(three, String.class)).isEqualTo("3");
 	}
 
 	@Test
-	public void testStringToInteger() {
-		assertEquals(Integer.valueOf(1), conversionService.convert("1", Integer.class));
+	void stringToInteger() {
+		assertThat(conversionService.convert("1", Integer.class)).isEqualTo((int) Integer.valueOf(1));
 	}
 
 	@Test
-	public void testIntegerToString() {
-		assertEquals("3", conversionService.convert(3, String.class));
+	void integerToString() {
+		assertThat(conversionService.convert(3, String.class)).isEqualTo("3");
 	}
 
 	@Test
-	public void testStringToLong() {
-		assertEquals(Long.valueOf(1), conversionService.convert("1", Long.class));
+	void stringToLong() {
+		assertThat(conversionService.convert("1", Long.class)).isEqualTo(Long.valueOf(1));
 	}
 
 	@Test
-	public void testLongToString() {
-		assertEquals("3", conversionService.convert(3L, String.class));
+	void longToString() {
+		assertThat(conversionService.convert(3L, String.class)).isEqualTo("3");
 	}
 
 	@Test
-	public void testStringToFloat() {
-		assertEquals(Float.valueOf("1.0"), conversionService.convert("1.0", Float.class));
+	void stringToFloat() {
+		assertThat(conversionService.convert("1.0", Float.class)).isEqualTo(Float.valueOf("1.0"));
 	}
 
 	@Test
-	public void testFloatToString() {
-		assertEquals("1.0", conversionService.convert(Float.valueOf("1.0"), String.class));
+	void floatToString() {
+		assertThat(conversionService.convert(Float.valueOf("1.0"), String.class)).isEqualTo("1.0");
 	}
 
 	@Test
-	public void testStringToDouble() {
-		assertEquals(Double.valueOf("1.0"), conversionService.convert("1.0", Double.class));
+	void stringToDouble() {
+		assertThat(conversionService.convert("1.0", Double.class)).isEqualTo(Double.valueOf("1.0"));
 	}
 
 	@Test
-	public void testDoubleToString() {
-		assertEquals("1.0", conversionService.convert(Double.valueOf("1.0"), String.class));
+	void doubleToString() {
+		assertThat(conversionService.convert(Double.valueOf("1.0"), String.class)).isEqualTo("1.0");
 	}
 
 	@Test
-	public void testStringToBigInteger() {
-		assertEquals(new BigInteger("1"), conversionService.convert("1", BigInteger.class));
+	void stringToBigInteger() {
+		assertThat(conversionService.convert("1", BigInteger.class)).isEqualTo(new BigInteger("1"));
 	}
 
 	@Test
-	public void testBigIntegerToString() {
-		assertEquals("100", conversionService.convert(new BigInteger("100"), String.class));
+	void bigIntegerToString() {
+		assertThat(conversionService.convert(new BigInteger("100"), String.class)).isEqualTo("100");
 	}
 
 	@Test
-	public void testStringToBigDecimal() {
-		assertEquals(new BigDecimal("1.0"), conversionService.convert("1.0", BigDecimal.class));
+	void stringToBigDecimal() {
+		assertThat(conversionService.convert("1.0", BigDecimal.class)).isEqualTo(new BigDecimal("1.0"));
 	}
 
 	@Test
-	public void testBigDecimalToString() {
-		assertEquals("100.00", conversionService.convert(new BigDecimal("100.00"), String.class));
+	void bigDecimalToString() {
+		assertThat(conversionService.convert(new BigDecimal("100.00"), String.class)).isEqualTo("100.00");
 	}
 
 	@Test
-	public void testStringToNumber() {
-		assertEquals(new BigDecimal("1.0"), conversionService.convert("1.0", Number.class));
+	void stringToNumber() {
+		assertThat(conversionService.convert("1.0", Number.class)).isEqualTo(new BigDecimal("1.0"));
 	}
 
 	@Test
-	public void testStringToNumberEmptyString() {
-		assertEquals(null, conversionService.convert("", Number.class));
+	void stringToNumberEmptyString() {
+		assertThat(conversionService.convert("", Number.class)).isEqualTo(null);
 	}
 
 	@Test
-	public void testStringToEnum() throws Exception {
-		assertEquals(Foo.BAR, conversionService.convert("BAR", Foo.class));
+	void stringToEnum() {
+		assertThat(conversionService.convert("BAR", Foo.class)).isEqualTo(Foo.BAR);
 	}
 
 	@Test
-	public void testStringToEnumWithSubclass() throws Exception {
-		assertEquals(SubFoo.BAZ, conversionService.convert("BAZ", SubFoo.BAR.getClass()));
+	void stringToEnumWithSubclass() {
+		assertThat(conversionService.convert("BAZ", SubFoo.BAR.getClass())).isEqualTo(SubFoo.BAZ);
 	}
 
 	@Test
-	public void testStringToEnumEmptyString() {
-		assertEquals(null, conversionService.convert("", Foo.class));
+	void stringToEnumEmptyString() {
+		assertThat(conversionService.convert("", Foo.class)).isEqualTo(null);
 	}
 
 	@Test
-	public void testEnumToString() {
-		assertEquals("BAR", conversionService.convert(Foo.BAR, String.class));
+	void enumToString() {
+		assertThat(conversionService.convert(Foo.BAR, String.class)).isEqualTo("BAR");
 	}
 
 	@Test
-	public void testIntegerToEnum() throws Exception {
-		assertEquals(Foo.BAR, conversionService.convert(0, Foo.class));
+	void integerToEnum() {
+		assertThat(conversionService.convert(0, Foo.class)).isEqualTo(Foo.BAR);
 	}
 
 	@Test
-	public void testIntegerToEnumWithSubclass() throws Exception {
-		assertEquals(SubFoo.BAZ, conversionService.convert(1, SubFoo.BAR.getClass()));
+	void integerToEnumWithSubclass() {
+		assertThat(conversionService.convert(1, SubFoo.BAR.getClass())).isEqualTo(SubFoo.BAZ);
 	}
 
 	@Test
-	public void testIntegerToEnumNull() {
-		assertEquals(null, conversionService.convert(null, Foo.class));
+	void integerToEnumNull() {
+		assertThat(conversionService.convert(null, Foo.class)).isEqualTo(null);
 	}
 
 	@Test
-	public void testEnumToInteger() {
-		assertEquals(Integer.valueOf(0), conversionService.convert(Foo.BAR, Integer.class));
+	void enumToInteger() {
+		assertThat(conversionService.convert(Foo.BAR, Integer.class)).isEqualTo((int) Integer.valueOf(0));
 	}
 
 	@Test
-	public void testStringToEnumSet() throws Exception {
-		assertEquals(EnumSet.of(Foo.BAR), conversionService.convert("BAR", TypeDescriptor.valueOf(String.class),
-				new TypeDescriptor(getClass().getField("enumSet"))));
+	void stringToEnumSet() throws Exception {
+		assertThat(conversionService.convert("BAR", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(getClass().getField("enumSet")))).isEqualTo(EnumSet.of(Foo.BAR));
 	}
 
 	@Test
-	public void testStringToLocale() {
-		assertEquals(Locale.ENGLISH, conversionService.convert("en", Locale.class));
+	void stringToLocale() {
+		assertThat(conversionService.convert("en", Locale.class)).isEqualTo(Locale.ENGLISH);
 	}
 
 	@Test
-	public void testStringToLocaleWithCountry() {
-		assertEquals(Locale.US, conversionService.convert("en_US", Locale.class));
+	void stringToLocaleWithCountry() {
+		assertThat(conversionService.convert("en_US", Locale.class)).isEqualTo(Locale.US);
 	}
 
 	@Test
-	public void testStringToLocaleWithLanguageTag() {
-		assertEquals(Locale.US, conversionService.convert("en-US", Locale.class));
+	void stringToLocaleWithLanguageTag() {
+		assertThat(conversionService.convert("en-US", Locale.class)).isEqualTo(Locale.US);
 	}
 
 	@Test
-	public void testStringToCharset() {
-		assertEquals(StandardCharsets.UTF_8, conversionService.convert("UTF-8", Charset.class));
+	void stringToCharset() {
+		assertThat(conversionService.convert("UTF-8", Charset.class)).isEqualTo(StandardCharsets.UTF_8);
 	}
 
 	@Test
-	public void testCharsetToString() {
-		assertEquals("UTF-8", conversionService.convert(StandardCharsets.UTF_8, String.class));
+	void charsetToString() {
+		assertThat(conversionService.convert(StandardCharsets.UTF_8, String.class)).isEqualTo("UTF-8");
 	}
 
 	@Test
-	public void testStringToCurrency() {
-		assertEquals(Currency.getInstance("EUR"), conversionService.convert("EUR", Currency.class));
+	void stringToCurrency() {
+		assertThat(conversionService.convert("EUR", Currency.class)).isEqualTo(Currency.getInstance("EUR"));
 	}
 
 	@Test
-	public void testCurrencyToString() {
-		assertEquals("USD", conversionService.convert(Currency.getInstance("USD"), String.class));
+	void currencyToString() {
+		assertThat(conversionService.convert(Currency.getInstance("USD"), String.class)).isEqualTo("USD");
 	}
 
 	@Test
-	public void testStringToString() {
+	void stringToString() {
 		String str = "test";
-		assertSame(str, conversionService.convert(str, String.class));
+		assertThat(conversionService.convert(str, String.class)).isSameAs(str);
 	}
 
 	@Test
-	public void testUuidToStringAndStringToUuid() {
+	void uuidToStringAndStringToUuid() {
 		UUID uuid = UUID.randomUUID();
 		String convertToString = conversionService.convert(uuid, String.class);
 		UUID convertToUUID = conversionService.convert(convertToString, UUID.class);
-		assertEquals(uuid, convertToUUID);
+		assertThat(convertToUUID).isEqualTo(uuid);
 	}
 
 	@Test
-	public void testNumberToNumber() {
-		assertEquals(Long.valueOf(1), conversionService.convert(1, Long.class));
-	}
-
-	@Test(expected = ConversionFailedException.class)
-	public void testNumberToNumberNotSupportedNumber() {
-		conversionService.convert(1, CustomNumber.class);
+	void numberToNumber() {
+		assertThat(conversionService.convert(1, Long.class)).isEqualTo(Long.valueOf(1));
 	}
 
 	@Test
-	public void testNumberToCharacter() {
-		assertEquals(Character.valueOf('A'), conversionService.convert(65, Character.class));
+	void numberToNumberNotSupportedNumber() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(1, CustomNumber.class));
 	}
 
 	@Test
-	public void testCharacterToNumber() {
-		assertEquals(Integer.valueOf(65), conversionService.convert('A', Integer.class));
+	void numberToCharacter() {
+		assertThat(conversionService.convert(65, Character.class)).isEqualTo(Character.valueOf('A'));
+	}
+
+	@Test
+	void characterToNumber() {
+		assertThat(conversionService.convert('A', Integer.class)).isEqualTo(65);
 	}
 
 	// collection conversion
 
 	@Test
-	public void convertArrayToCollectionInterface() {
+	void convertArrayToCollectionInterface() {
 		List<?> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
-		assertEquals("1", result.get(0));
-		assertEquals("2", result.get(1));
-		assertEquals("3", result.get(2));
+		assertThat(result.get(0)).isEqualTo("1");
+		assertThat(result.get(1)).isEqualTo("2");
+		assertThat(result.get(2)).isEqualTo("3");
 	}
 
 	@Test
-	public void convertArrayToCollectionGenericTypeConversion() throws Exception {
+	void convertArrayToCollectionGenericTypeConversion() throws Exception {
 		@SuppressWarnings("unchecked")
 		List<Integer> result = (List<Integer>) conversionService.convert(new String[] {"1", "2", "3"}, TypeDescriptor
 				.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
-		assertEquals(Integer.valueOf(1), result.get(0));
-		assertEquals(Integer.valueOf(2), result.get(1));
-		assertEquals(Integer.valueOf(3), result.get(2));
+		assertThat((int) result.get(0)).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result.get(1)).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result.get(2)).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertArrayToStream() throws Exception {
+	void convertArrayToStream() throws Exception {
 		String[] source = {"1", "3", "4"};
 		@SuppressWarnings("unchecked")
 		Stream<Integer> result = (Stream<Integer>) this.conversionService.convert(source,
 				TypeDescriptor.valueOf(String[].class),
 				new TypeDescriptor(getClass().getDeclaredField("genericStream")));
-		assertEquals(8, result.mapToInt((x) -> x).sum());
+		assertThat(result.mapToInt(x -> x).sum()).isEqualTo(8);
 	}
 
 	@Test
-	public void testSpr7766() throws Exception {
+	void spr7766() throws Exception {
 		ConverterRegistry registry = (conversionService);
 		registry.addConverter(new ColorConverter());
 		@SuppressWarnings("unchecked")
 		List<Color> colors = (List<Color>) conversionService.convert(new String[] {"ffffff", "#000000"},
 				TypeDescriptor.valueOf(String[].class),
 				new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
-		assertEquals(2, colors.size());
-		assertEquals(Color.WHITE, colors.get(0));
-		assertEquals(Color.BLACK, colors.get(1));
+		assertThat(colors.size()).isEqualTo(2);
+		assertThat(colors.get(0)).isEqualTo(Color.WHITE);
+		assertThat(colors.get(1)).isEqualTo(Color.BLACK);
 	}
 
 	@Test
-	public void convertArrayToCollectionImpl() {
+	void convertArrayToCollectionImpl() {
 		LinkedList<?> result = conversionService.convert(new String[] {"1", "2", "3"}, LinkedList.class);
-		assertEquals("1", result.get(0));
-		assertEquals("2", result.get(1));
-		assertEquals("3", result.get(2));
-	}
-
-	@Test(expected = ConversionFailedException.class)
-	public void convertArrayToAbstractCollection() {
-		conversionService.convert(new String[]{"1", "2", "3"}, AbstractList.class);
-	}
-
-	public static enum FooEnum {
-		BAR, BAZ
+		assertThat(result.get(0)).isEqualTo("1");
+		assertThat(result.get(1)).isEqualTo("2");
+		assertThat(result.get(2)).isEqualTo("3");
 	}
 
 	@Test
-	public void convertArrayToString() {
+	void convertArrayToAbstractCollection() {
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				conversionService.convert(new String[]{"1", "2", "3"}, AbstractList.class));
+	}
+
+	@Test
+	void convertArrayToString() {
 		String result = conversionService.convert(new String[] {"1", "2", "3"}, String.class);
-		assertEquals("1,2,3", result);
+		assertThat(result).isEqualTo("1,2,3");
 	}
 
 	@Test
-	public void convertArrayToStringWithElementConversion() {
+	void convertArrayToStringWithElementConversion() {
 		String result = conversionService.convert(new Integer[] {1, 2, 3}, String.class);
-		assertEquals("1,2,3", result);
+		assertThat(result).isEqualTo("1,2,3");
 	}
 
 	@Test
-	public void convertEmptyArrayToString() {
+	void convertEmptyArrayToString() {
 		String result = conversionService.convert(new String[0], String.class);
-		assertEquals("", result);
+		assertThat(result).isEqualTo("");
 	}
 
 	@Test
-	public void convertStringToArray() {
+	void convertStringToArray() {
 		String[] result = conversionService.convert("1,2,3", String[].class);
-		assertEquals(3, result.length);
-		assertEquals("1", result[0]);
-		assertEquals("2", result[1]);
-		assertEquals("3", result[2]);
+		assertThat(result.length).isEqualTo(3);
+		assertThat(result[0]).isEqualTo("1");
+		assertThat(result[1]).isEqualTo("2");
+		assertThat(result[2]).isEqualTo("3");
 	}
 
 	@Test
-	public void convertStringToArrayWithElementConversion() {
+	void convertStringToArrayWithElementConversion() {
 		Integer[] result = conversionService.convert("1,2,3", Integer[].class);
-		assertEquals(3, result.length);
-		assertEquals(Integer.valueOf(1), result[0]);
-		assertEquals(Integer.valueOf(2), result[1]);
-		assertEquals(Integer.valueOf(3), result[2]);
+		assertThat(result.length).isEqualTo(3);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertStringToPrimitiveArrayWithElementConversion() {
+	void convertStringToPrimitiveArrayWithElementConversion() {
 		int[] result = conversionService.convert("1,2,3", int[].class);
-		assertEquals(3, result.length);
-		assertEquals(1, result[0]);
-		assertEquals(2, result[1]);
-		assertEquals(3, result[2]);
+		assertThat(result.length).isEqualTo(3);
+		assertThat(result[0]).isEqualTo(1);
+		assertThat(result[1]).isEqualTo(2);
+		assertThat(result[2]).isEqualTo(3);
 	}
 
 	@Test
-	public void convertEmptyStringToArray() {
+	void convertEmptyStringToArray() {
 		String[] result = conversionService.convert("", String[].class);
-		assertEquals(0, result.length);
+		assertThat(result.length).isEqualTo(0);
 	}
 
 	@Test
-	public void convertArrayToObject() {
+	void convertArrayToObject() {
 		Object[] array = new Object[] {3L};
 		Object result = conversionService.convert(array, Long.class);
-		assertEquals(3L, result);
+		assertThat(result).isEqualTo(3L);
 	}
 
 	@Test
-	public void convertArrayToObjectWithElementConversion() {
+	void convertArrayToObjectWithElementConversion() {
 		String[] array = new String[] {"3"};
 		Integer result = conversionService.convert(array, Integer.class);
-		assertEquals(Integer.valueOf(3), result);
+		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertArrayToObjectAssignableTargetType() {
+	void convertArrayToObjectAssignableTargetType() {
 		Long[] array = new Long[] {3L};
 		Long[] result = (Long[]) conversionService.convert(array, Object.class);
-		assertArrayEquals(array, result);
+		assertThat(result).isEqualTo(array);
 	}
 
 	@Test
-	public void convertObjectToArray() {
+	void convertObjectToArray() {
 		Object[] result = conversionService.convert(3L, Object[].class);
-		assertEquals(1, result.length);
-		assertEquals(3L, result[0]);
+		assertThat(result.length).isEqualTo(1);
+		assertThat(result[0]).isEqualTo(3L);
 	}
 
 	@Test
-	public void convertObjectToArrayWithElementConversion() {
+	void convertObjectToArrayWithElementConversion() {
 		Integer[] result = conversionService.convert(3L, Integer[].class);
-		assertEquals(1, result.length);
-		assertEquals(Integer.valueOf(3), result[0]);
+		assertThat(result.length).isEqualTo(1);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertCollectionToArray() {
+	void convertCollectionToArray() {
 		List<String> list = new ArrayList<>();
 		list.add("1");
 		list.add("2");
 		list.add("3");
 		String[] result = conversionService.convert(list, String[].class);
-		assertEquals("1", result[0]);
-		assertEquals("2", result[1]);
-		assertEquals("3", result[2]);
+		assertThat(result[0]).isEqualTo("1");
+		assertThat(result[1]).isEqualTo("2");
+		assertThat(result[2]).isEqualTo("3");
 	}
 
 	@Test
-	public void convertCollectionToArrayWithElementConversion() {
+	void convertCollectionToArrayWithElementConversion() {
 		List<String> list = new ArrayList<>();
 		list.add("1");
 		list.add("2");
 		list.add("3");
 		Integer[] result = conversionService.convert(list, Integer[].class);
-		assertEquals(Integer.valueOf(1), result[0]);
-		assertEquals(Integer.valueOf(2), result[1]);
-		assertEquals(Integer.valueOf(3), result[2]);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertCollectionToString() {
+	void convertCollectionToString() {
 		List<String> list = Arrays.asList("foo", "bar");
 		String result = conversionService.convert(list, String.class);
-		assertEquals("foo,bar", result);
+		assertThat(result).isEqualTo("foo,bar");
 	}
 
 	@Test
-	public void convertCollectionToStringWithElementConversion() throws Exception {
+	void convertCollectionToStringWithElementConversion() throws Exception {
 		List<Integer> list = Arrays.asList(3, 5);
 		String result = (String) conversionService.convert(list,
 				new TypeDescriptor(getClass().getField("genericList")), TypeDescriptor.valueOf(String.class));
-		assertEquals("3,5", result);
+		assertThat(result).isEqualTo("3,5");
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertStringToCollection() {
-		List result = conversionService.convert("1,2,3", List.class);
-		assertEquals(3, result.size());
-		assertEquals("1", result.get(0));
-		assertEquals("2", result.get(1));
-		assertEquals("3", result.get(2));
+	void convertStringToCollection() {
+		List<?> result = conversionService.convert("1,2,3", List.class);
+		assertThat(result.size()).isEqualTo(3);
+		assertThat(result.get(0)).isEqualTo("1");
+		assertThat(result.get(1)).isEqualTo("2");
+		assertThat(result.get(2)).isEqualTo("3");
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertStringToCollectionWithElementConversion() throws Exception {
-		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
+	void convertStringToCollectionWithElementConversion() throws Exception {
+		List<?> result = (List<?>) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericList")));
-		assertEquals(3, result.size());
-		assertEquals(1, result.get(0));
-		assertEquals(2, result.get(1));
-		assertEquals(3, result.get(2));
+		assertThat(result.size()).isEqualTo(3);
+		assertThat(result.get(0)).isEqualTo(1);
+		assertThat(result.get(1)).isEqualTo(2);
+		assertThat(result.get(2)).isEqualTo(3);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertEmptyStringToCollection() {
-		Collection result = conversionService.convert("", Collection.class);
-		assertEquals(0, result.size());
+	void convertEmptyStringToCollection() {
+		Collection<?> result = conversionService.convert("", Collection.class);
+		assertThat(result.size()).isEqualTo(0);
 	}
 
 	@Test
-	public void convertCollectionToObject() {
+	void convertCollectionToObject() {
 		List<Long> list = Collections.singletonList(3L);
 		Long result = conversionService.convert(list, Long.class);
-		assertEquals(Long.valueOf(3), result);
+		assertThat(result).isEqualTo(Long.valueOf(3));
 	}
 
 	@Test
-	public void convertCollectionToObjectWithElementConversion() {
+	void convertCollectionToObjectWithElementConversion() {
 		List<String> list = Collections.singletonList("3");
 		Integer result = conversionService.convert(list, Integer.class);
-		assertEquals(Integer.valueOf(3), result);
+		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertCollectionToObjectAssignableTarget() throws Exception {
+	void convertCollectionToObjectAssignableTarget() throws Exception {
 		Collection<String> source = new ArrayList<>();
 		source.add("foo");
 		Object result = conversionService.convert(source, new TypeDescriptor(getClass().getField("assignableTarget")));
-		assertEquals(source, result);
+		assertThat(result).isEqualTo(source);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertCollectionToObjectWithCustomConverter() throws Exception {
+	void convertCollectionToObjectWithCustomConverter() {
 		List<String> source = new ArrayList<>();
 		source.add("A");
 		source.add("B");
-		conversionService.addConverter(new Converter<List, ListWrapper>() {
-			@Override
-			public ListWrapper convert(List source) {
-				return new ListWrapper(source);
-			}
-		});
+		conversionService.addConverter(List.class, ListWrapper.class, ListWrapper::new);
 		ListWrapper result = conversionService.convert(source, ListWrapper.class);
-		assertSame(source, result.getList());
+		assertThat(result.getList()).isSameAs(source);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertObjectToCollection() {
-		List result = conversionService.convert(3L, List.class);
-		assertEquals(1, result.size());
-		assertEquals(3L, result.get(0));
+	void convertObjectToCollection() {
+		List<?> result = conversionService.convert(3L, List.class);
+		assertThat(result.size()).isEqualTo(1);
+		assertThat(result.get(0)).isEqualTo(3L);
 	}
 
 	@Test
-	public void convertObjectToCollectionWithElementConversion() throws Exception {
+	void convertObjectToCollectionWithElementConversion() throws Exception {
 		@SuppressWarnings("unchecked")
 		List<Integer> result = (List<Integer>) conversionService.convert(3L, TypeDescriptor.valueOf(Long.class),
 				new TypeDescriptor(getClass().getField("genericList")));
-		assertEquals(1, result.size());
-		assertEquals(Integer.valueOf(3), result.get(0));
+		assertThat(result.size()).isEqualTo(1);
+		assertThat((int) result.get(0)).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertArrayToArray() {
+	void convertStringArrayToIntegerArray() {
 		Integer[] result = conversionService.convert(new String[] {"1", "2", "3"}, Integer[].class);
-		assertEquals(Integer.valueOf(1), result[0]);
-		assertEquals(Integer.valueOf(2), result[1]);
-		assertEquals(Integer.valueOf(3), result[2]);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertArrayToPrimitiveArray() {
+	void convertStringArrayToIntArray() {
 		int[] result = conversionService.convert(new String[] {"1", "2", "3"}, int[].class);
-		assertEquals(1, result[0]);
-		assertEquals(2, result[1]);
-		assertEquals(3, result[2]);
+		assertThat(result[0]).isEqualTo(1);
+		assertThat(result[1]).isEqualTo(2);
+		assertThat(result[2]).isEqualTo(3);
 	}
 
 	@Test
-	public void convertArrayToWrapperArray() {
+	void convertIntegerArrayToIntegerArray() {
+		Integer[] result = conversionService.convert(new Integer[] {1, 2, 3}, Integer[].class);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
+	}
+
+	@Test
+	void convertIntegerArrayToIntArray() {
+		int[] result = conversionService.convert(new Integer[] {1, 2, 3}, int[].class);
+		assertThat(result[0]).isEqualTo(1);
+		assertThat(result[1]).isEqualTo(2);
+		assertThat(result[2]).isEqualTo(3);
+	}
+
+	@Test
+	void convertObjectArrayToIntegerArray() {
+		Integer[] result = conversionService.convert(new Object[] {1, 2, 3}, Integer[].class);
+		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
+	}
+
+	@Test
+	void convertObjectArrayToIntArray() {
+		int[] result = conversionService.convert(new Object[] {1, 2, 3}, int[].class);
+		assertThat(result[0]).isEqualTo(1);
+		assertThat(result[1]).isEqualTo(2);
+		assertThat(result[2]).isEqualTo(3);
+	}
+
+	@Test
+	void convertByteArrayToWrapperArray() {
 		byte[] byteArray = new byte[] {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertThat(converted, equalTo(new Byte[]{1, 2, 3}));
+		assertThat(converted).isEqualTo(new Byte[]{1, 2, 3});
 	}
 
 	@Test
-	public void convertArrayToArrayAssignable() {
+	void convertArrayToArrayAssignable() {
 		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
-		assertEquals(1, result[0]);
-		assertEquals(2, result[1]);
-		assertEquals(3, result[2]);
+		assertThat(result[0]).isEqualTo(1);
+		assertThat(result[1]).isEqualTo(2);
+		assertThat(result[2]).isEqualTo(3);
 	}
 
 	@Test
-	public void convertListOfNonStringifiable() {
+	void convertListOfNonStringifiable() {
 		List<Object> list = Arrays.asList(new TestEntity(1L), new TestEntity(2L));
-		assertTrue(conversionService.canConvert(list.getClass(), String.class));
+		assertThat(conversionService.canConvert(list.getClass(), String.class)).isTrue();
 		try {
 			conversionService.convert(list, String.class);
 		}
 		catch (ConversionFailedException ex) {
-			assertTrue(ex.getMessage().contains(list.getClass().getName()));
-			assertTrue(ex.getCause() instanceof ConverterNotFoundException);
-			assertTrue(ex.getCause().getMessage().contains(TestEntity.class.getName()));
+			assertThat(ex.getMessage().contains(list.getClass().getName())).isTrue();
+			assertThat(ex.getCause() instanceof ConverterNotFoundException).isTrue();
+			assertThat(ex.getCause().getMessage().contains(TestEntity.class.getName())).isTrue();
 		}
 	}
 
 	@Test
-	public void convertListOfStringToString() {
+	void convertListOfStringToString() {
 		List<String> list = Arrays.asList("Foo", "Bar");
-		assertTrue(conversionService.canConvert(list.getClass(), String.class));
+		assertThat(conversionService.canConvert(list.getClass(), String.class)).isTrue();
 		String result = conversionService.convert(list, String.class);
-		assertEquals("Foo,Bar", result);
+		assertThat(result).isEqualTo("Foo,Bar");
 	}
 
 	@Test
-	public void convertListOfListToString() {
+	void convertListOfListToString() {
 		List<String> list1 = Arrays.asList("Foo", "Bar");
 		List<String> list2 = Arrays.asList("Baz", "Boop");
 		List<List<String>> list = Arrays.asList(list1, list2);
-		assertTrue(conversionService.canConvert(list.getClass(), String.class));
+		assertThat(conversionService.canConvert(list.getClass(), String.class)).isTrue();
 		String result = conversionService.convert(list, String.class);
-		assertEquals("Foo,Bar,Baz,Boop", result);
+		assertThat(result).isEqualTo("Foo,Bar,Baz,Boop");
 	}
 
 	@Test
-	public void convertCollectionToCollection() throws Exception {
+	void convertCollectionToCollection() throws Exception {
 		Set<String> foo = new LinkedHashSet<>();
 		foo.add("1");
 		foo.add("2");
@@ -679,36 +698,36 @@ public class DefaultConversionServiceTests {
 		@SuppressWarnings("unchecked")
 		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.forObject(foo),
 				new TypeDescriptor(getClass().getField("genericList")));
-		assertEquals(Integer.valueOf(1), bar.get(0));
-		assertEquals(Integer.valueOf(2), bar.get(1));
-		assertEquals(Integer.valueOf(3), bar.get(2));
+		assertThat((int) bar.get(0)).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) bar.get(1)).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) bar.get(2)).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void convertCollectionToCollectionNull() throws Exception {
+	void convertCollectionToCollectionNull() throws Exception {
 		@SuppressWarnings("unchecked")
 		List<Integer> bar = (List<Integer>) conversionService.convert(null,
 				TypeDescriptor.valueOf(LinkedHashSet.class), new TypeDescriptor(getClass().getField("genericList")));
-		assertNull(bar);
+		assertThat((Object) bar).isNull();
 	}
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void convertCollectionToCollectionNotGeneric() throws Exception {
+	void convertCollectionToCollectionNotGeneric() {
 		Set<String> foo = new LinkedHashSet<>();
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
 		List bar = (List) conversionService.convert(foo, TypeDescriptor.valueOf(LinkedHashSet.class), TypeDescriptor
 				.valueOf(List.class));
-		assertEquals("1", bar.get(0));
-		assertEquals("2", bar.get(1));
-		assertEquals("3", bar.get(2));
+		assertThat(bar.get(0)).isEqualTo("1");
+		assertThat(bar.get(1)).isEqualTo("2");
+		assertThat(bar.get(2)).isEqualTo("3");
 	}
 
 	@Test
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public void convertCollectionToCollectionSpecialCaseSourceImpl() throws Exception {
+	void convertCollectionToCollectionSpecialCaseSourceImpl() throws Exception {
 		Map map = new LinkedHashMap();
 		map.put("1", "1");
 		map.put("2", "2");
@@ -716,258 +735,231 @@ public class DefaultConversionServiceTests {
 		Collection values = map.values();
 		List<Integer> bar = (List<Integer>) conversionService.convert(values,
 				TypeDescriptor.forObject(values), new TypeDescriptor(getClass().getField("genericList")));
-		assertEquals(3, bar.size());
-		assertEquals(Integer.valueOf(1), bar.get(0));
-		assertEquals(Integer.valueOf(2), bar.get(1));
-		assertEquals(Integer.valueOf(3), bar.get(2));
+		assertThat(bar.size()).isEqualTo(3);
+		assertThat((int) bar.get(0)).isEqualTo((int) Integer.valueOf(1));
+		assertThat((int) bar.get(1)).isEqualTo((int) Integer.valueOf(2));
+		assertThat((int) bar.get(2)).isEqualTo((int) Integer.valueOf(3));
 	}
 
 	@Test
-	public void collection() {
+	void collection() {
 		List<String> strings = new ArrayList<>();
 		strings.add("3");
 		strings.add("9");
 		@SuppressWarnings("unchecked")
 		List<Integer> integers = (List<Integer>) conversionService.convert(strings,
 				TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class)));
-		assertEquals(Integer.valueOf(3), integers.get(0));
-		assertEquals(Integer.valueOf(9), integers.get(1));
+		assertThat((int) integers.get(0)).isEqualTo((int) Integer.valueOf(3));
+		assertThat((int) integers.get(1)).isEqualTo((int) Integer.valueOf(9));
 	}
 
 	@Test
-	public void convertMapToMap() throws Exception {
+	void convertMapToMap() throws Exception {
 		Map<String, String> foo = new HashMap<>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
 		@SuppressWarnings("unchecked")
-		Map<Integer, FooEnum> map = (Map<Integer, FooEnum>) conversionService.convert(foo,
+		Map<Integer, Foo> map = (Map<Integer, Foo>) conversionService.convert(foo,
 				TypeDescriptor.forObject(foo), new TypeDescriptor(getClass().getField("genericMap")));
-		assertEquals(FooEnum.BAR, map.get(1));
-		assertEquals(FooEnum.BAZ, map.get(2));
+		assertThat(map.get(1)).isEqualTo(Foo.BAR);
+		assertThat(map.get(2)).isEqualTo(Foo.BAZ);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
-	public void convertHashMapValuesToList() {
+	void convertHashMapValuesToList() {
 		Map<String, Integer> hashMap = new LinkedHashMap<>();
 		hashMap.put("1", 1);
 		hashMap.put("2", 2);
-		List converted = conversionService.convert(hashMap.values(), List.class);
-		assertEquals(Arrays.asList(1, 2), converted);
+		List<?> converted = conversionService.convert(hashMap.values(), List.class);
+		assertThat(converted).isEqualTo(Arrays.asList(1, 2));
 	}
 
 	@Test
-	public void map() {
+	void map() {
 		Map<String, String> strings = new HashMap<>();
 		strings.put("3", "9");
 		strings.put("6", "31");
 		@SuppressWarnings("unchecked")
 		Map<Integer, Integer> integers = (Map<Integer, Integer>) conversionService.convert(strings,
 				TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Integer.class)));
-		assertEquals(Integer.valueOf(9), integers.get(3));
-		assertEquals(Integer.valueOf(31), integers.get(6));
+		assertThat((int) integers.get(3)).isEqualTo((int) Integer.valueOf(9));
+		assertThat((int) integers.get(6)).isEqualTo((int) Integer.valueOf(31));
 	}
 
 	@Test
-	public void convertPropertiesToString() {
+	void convertPropertiesToString() {
 		Properties foo = new Properties();
 		foo.setProperty("1", "BAR");
 		foo.setProperty("2", "BAZ");
 		String result = conversionService.convert(foo, String.class);
-		assertTrue(result.contains("1=BAR"));
-		assertTrue(result.contains("2=BAZ"));
+		assertThat(result.contains("1=BAR")).isTrue();
+		assertThat(result.contains("2=BAZ")).isTrue();
 	}
 
 	@Test
-	public void convertStringToProperties() {
+	void convertStringToProperties() {
 		Properties result = conversionService.convert("a=b\nc=2\nd=", Properties.class);
-		assertEquals(3, result.size());
-		assertEquals("b", result.getProperty("a"));
-		assertEquals("2", result.getProperty("c"));
-		assertEquals("", result.getProperty("d"));
+		assertThat(result.size()).isEqualTo(3);
+		assertThat(result.getProperty("a")).isEqualTo("b");
+		assertThat(result.getProperty("c")).isEqualTo("2");
+		assertThat(result.getProperty("d")).isEqualTo("");
 	}
 
 	@Test
-	public void convertStringToPropertiesWithSpaces() {
+	void convertStringToPropertiesWithSpaces() {
 		Properties result = conversionService.convert("   foo=bar\n   bar=baz\n    baz=boop", Properties.class);
-		assertEquals("bar", result.get("foo"));
-		assertEquals("baz", result.get("bar"));
-		assertEquals("boop", result.get("baz"));
+		assertThat(result.get("foo")).isEqualTo("bar");
+		assertThat(result.get("bar")).isEqualTo("baz");
+		assertThat(result.get("baz")).isEqualTo("boop");
 	}
 
 	// generic object conversion
 
 	@Test
-	public void convertObjectToStringWithValueOfMethodPresentUsingToString() {
+	void convertObjectToStringWithValueOfMethodPresentUsingToString() {
 		ISBN.reset();
-		assertEquals("123456789", conversionService.convert(new ISBN("123456789"), String.class));
+		assertThat(conversionService.convert(new ISBN("123456789"), String.class)).isEqualTo("123456789");
 
-		assertEquals("constructor invocations", 1, ISBN.constructorCount);
-		assertEquals("valueOf() invocations", 0, ISBN.valueOfCount);
-		assertEquals("toString() invocations", 1, ISBN.toStringCount);
+		assertThat(ISBN.constructorCount).as("constructor invocations").isEqualTo(1);
+		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isEqualTo(0);
+		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(1);
 	}
 
 	@Test
-	public void convertObjectToObjectUsingValueOfMethod() {
+	void convertObjectToObjectUsingValueOfMethod() {
 		ISBN.reset();
-		assertEquals(new ISBN("123456789"), conversionService.convert("123456789", ISBN.class));
+		assertThat(conversionService.convert("123456789", ISBN.class)).isEqualTo(new ISBN("123456789"));
 
-		assertEquals("valueOf() invocations", 1, ISBN.valueOfCount);
+		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isEqualTo(1);
 		// valueOf() invokes the constructor
-		assertEquals("constructor invocations", 2, ISBN.constructorCount);
-		assertEquals("toString() invocations", 0, ISBN.toStringCount);
+		assertThat(ISBN.constructorCount).as("constructor invocations").isEqualTo(2);
+		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(0);
 	}
 
 	@Test
-	public void convertObjectToStringUsingToString() {
+	void convertObjectToStringUsingToString() {
 		SSN.reset();
-		assertEquals("123456789", conversionService.convert(new SSN("123456789"), String.class));
+		assertThat(conversionService.convert(new SSN("123456789"), String.class)).isEqualTo("123456789");
 
-		assertEquals("constructor invocations", 1, SSN.constructorCount);
-		assertEquals("toString() invocations", 1, SSN.toStringCount);
+		assertThat(SSN.constructorCount).as("constructor invocations").isEqualTo(1);
+		assertThat(SSN.toStringCount).as("toString() invocations").isEqualTo(1);
 	}
 
 	@Test
-	public void convertObjectToObjectUsingObjectConstructor() {
+	void convertObjectToObjectUsingObjectConstructor() {
 		SSN.reset();
-		assertEquals(new SSN("123456789"), conversionService.convert("123456789", SSN.class));
+		assertThat(conversionService.convert("123456789", SSN.class)).isEqualTo(new SSN("123456789"));
 
-		assertEquals("constructor invocations", 2, SSN.constructorCount);
-		assertEquals("toString() invocations", 0, SSN.toStringCount);
+		assertThat(SSN.constructorCount).as("constructor invocations").isEqualTo(2);
+		assertThat(SSN.toStringCount).as("toString() invocations").isEqualTo(0);
 	}
 
 	@Test
-	public void convertStringToTimezone() {
-		assertEquals("GMT+02:00", conversionService.convert("GMT+2", TimeZone.class).getID());
+	void convertStringToTimezone() {
+		assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
 	}
 
 	@Test
-	public void convertObjectToStringWithJavaTimeOfMethodPresent() {
-		assertTrue(conversionService.convert(ZoneId.of("GMT+1"), String.class).startsWith("GMT+"));
+	void convertObjectToStringWithJavaTimeOfMethodPresent() {
+		assertThat(conversionService.convert(ZoneId.of("GMT+1"), String.class).startsWith("GMT+")).isTrue();
 	}
 
 	@Test
-	public void convertObjectToStringNotSupported() {
-		assertFalse(conversionService.canConvert(TestEntity.class, String.class));
+	void convertObjectToStringNotSupported() {
+		assertThat(conversionService.canConvert(TestEntity.class, String.class)).isFalse();
 	}
 
 	@Test
-	public void convertObjectToObjectWithJavaTimeOfMethod() {
-		assertEquals(ZoneId.of("GMT+1"), conversionService.convert("GMT+1", ZoneId.class));
-	}
-
-	@Test(expected = ConverterNotFoundException.class)
-	public void convertObjectToObjectNoValueOfMethodOrConstructor() {
-		conversionService.convert(Long.valueOf(3), SSN.class);
+	void convertObjectToObjectWithJavaTimeOfMethod() {
+		assertThat(conversionService.convert("GMT+1", ZoneId.class)).isEqualTo(ZoneId.of("GMT+1"));
 	}
 
 	@Test
-	public void convertObjectToObjectFinderMethod() {
+	void convertObjectToObjectNoValueOfMethodOrConstructor() {
+		assertThatExceptionOfType(ConverterNotFoundException.class).isThrownBy(() ->
+				conversionService.convert(Long.valueOf(3), SSN.class));
+	}
+
+	@Test
+	void convertObjectToObjectFinderMethod() {
 		TestEntity e = conversionService.convert(1L, TestEntity.class);
-		assertEquals(Long.valueOf(1), e.getId());
+		assertThat(e.getId()).isEqualTo(Long.valueOf(1));
 	}
 
 	@Test
-	public void convertObjectToObjectFinderMethodWithNull() {
+	void convertObjectToObjectFinderMethodWithNull() {
 		TestEntity entity = (TestEntity) conversionService.convert(null,
 				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
-		assertNull(entity);
+		assertThat((Object) entity).isNull();
 	}
 
 	@Test
-	public void convertObjectToObjectFinderMethodWithIdConversion() {
+	void convertObjectToObjectFinderMethodWithIdConversion() {
 		TestEntity entity = conversionService.convert("1", TestEntity.class);
-		assertEquals(Long.valueOf(1), entity.getId());
+		assertThat(entity.getId()).isEqualTo(Long.valueOf(1));
 	}
 
 	@Test
-	public void convertCharArrayToString() throws Exception {
+	void convertCharArrayToString() {
 		String converted = conversionService.convert(new char[] {'a', 'b', 'c'}, String.class);
-		assertThat(converted, equalTo("a,b,c"));
+		assertThat(converted).isEqualTo("a,b,c");
 	}
 
 	@Test
-	public void convertStringToCharArray() throws Exception {
+	void convertStringToCharArray() {
 		char[] converted = conversionService.convert("a,b,c", char[].class);
-		assertThat(converted, equalTo(new char[]{'a', 'b', 'c'}));
+		assertThat(converted).isEqualTo(new char[]{'a', 'b', 'c'});
 	}
 
 	@Test
-	public void convertStringToCustomCharArray() throws Exception {
-		conversionService.addConverter(new Converter<String, char[]>() {
-			@Override
-			public char[] convert(String source) {
-				return source.toCharArray();
-			}
-		});
+	void convertStringToCustomCharArray() {
+		conversionService.addConverter(String.class, char[].class, String::toCharArray);
 		char[] converted = conversionService.convert("abc", char[].class);
-		assertThat(converted, equalTo(new char[] {'a', 'b', 'c'}));
+		assertThat(converted).isEqualTo(new char[] {'a', 'b', 'c'});
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void multidimensionalArrayToListConversionShouldConvertEntriesCorrectly() {
+	void multidimensionalArrayToListConversionShouldConvertEntriesCorrectly() {
 		String[][] grid = new String[][] {new String[] {"1", "2", "3", "4"}, new String[] {"5", "6", "7", "8"},
 				new String[] {"9", "10", "11", "12"}};
 		List<String[]> converted = conversionService.convert(grid, List.class);
 		String[][] convertedBack = conversionService.convert(converted, String[][].class);
-		assertArrayEquals(grid, convertedBack);
+		assertThat(convertedBack).isEqualTo(grid);
 	}
 
 	@Test
-	public void convertCannotOptimizeArray() {
-		conversionService.addConverter(new Converter<Byte, Byte>() {
-			@Override
-			public Byte convert(Byte source) {
-				return (byte) (source + 1);
-			}
-		});
+	void convertCannotOptimizeArray() {
+		conversionService.addConverter(Byte.class, Byte.class, source -> (byte) (source + 1));
 		byte[] byteArray = new byte[] {1, 2, 3};
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
-		assertNotSame(byteArray, converted);
-		assertTrue(Arrays.equals(new byte[] {2, 3, 4}, converted));
+		assertThat(converted).isNotSameAs(byteArray);
+		assertThat(converted).isEqualTo(new byte[]{2, 3, 4});
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void convertObjectToOptional() {
+	void convertObjectToOptional() {
 		Method method = ClassUtils.getMethod(TestEntity.class, "handleOptionalValue", Optional.class);
 		MethodParameter parameter = new MethodParameter(method, 0);
 		TypeDescriptor descriptor = new TypeDescriptor(parameter);
 		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-		assertEquals(Optional.class, actual.getClass());
-		assertEquals(Arrays.asList(1, 2, 3), ((Optional<List<Integer>>) actual).get());
+		assertThat(actual.getClass()).isEqualTo(Optional.class);
+		assertThat(((Optional<List<Integer>>) actual).get()).isEqualTo(Arrays.asList(1, 2, 3));
 	}
 
 	@Test
-	public void convertObjectToOptionalNull() {
-		assertSame(Optional.empty(), conversionService.convert(null, TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class)));
-		assertSame(Optional.empty(), conversionService.convert(null, Optional.class));
+	void convertObjectToOptionalNull() {
+		assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Object.class),
+				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
+		assertThat((Object) conversionService.convert(null, Optional.class)).isSameAs(Optional.empty());
 	}
 
 	@Test
-	public void convertExistingOptional() {
-		assertSame(Optional.empty(), conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
-				TypeDescriptor.valueOf(Optional.class)));
-		assertSame(Optional.empty(), conversionService.convert(Optional.empty(), Optional.class));
-	}
-
-	@Test
-	public void testPerformance1() {
-		Assume.group(TestGroup.PERFORMANCE);
-		StopWatch watch = new StopWatch("integer->string conversionPerformance");
-		watch.start("convert 4,000,000 with conversion service");
-		for (int i = 0; i < 4000000; i++) {
-			conversionService.convert(3, String.class);
-		}
-		watch.stop();
-		watch.start("convert 4,000,000 manually");
-		for (int i = 0; i < 4000000; i++) {
-			Integer.valueOf(3).toString();
-		}
-		watch.stop();
-		// System.out.println(watch.prettyPrint());
+	void convertExistingOptional() {
+		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
+				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
+		assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
 	}
 
 
@@ -977,7 +969,7 @@ public class DefaultConversionServiceTests {
 
 	public Stream<Integer> genericStream;
 
-	public Map<Integer, FooEnum> genericMap = new HashMap<>();
+	public Map<Integer, Foo> genericMap = new HashMap<>();
 
 	public EnumSet<Foo> enumSet;
 

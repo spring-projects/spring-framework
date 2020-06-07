@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -12,22 +12,22 @@
 		</property>
 	</bean>
 
-	<bean id="test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="test" scope="prototype" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.CountingTestBean">
+	<bean id="prototypeTest" class="org.springframework.beans.testfixture.beans.CountingTestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-	<bean id="lazyInitTest" class="org.springframework.tests.sample.beans.CountingTestBean" lazy-init="true">
+	<bean id="lazyInitTest" class="org.springframework.beans.testfixture.beans.CountingTestBean" lazy-init="true">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="wife" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 

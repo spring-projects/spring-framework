@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.web.cors;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,21 +46,21 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS spec</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS spec</a>
  */
 public class CorsConfiguration {
 
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
-	private static final List<HttpMethod> DEFAULT_METHODS =
-			Collections.unmodifiableList(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
+	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
+			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
 
-	private static final List<String> DEFAULT_PERMIT_ALL =
-			Collections.unmodifiableList(Arrays.asList(ALL));
+	private static final List<String> DEFAULT_PERMIT_METHODS = Collections.unmodifiableList(
+			Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
 
-	private static final List<String> DEFAULT_PERMIT_METHODS =
-			Collections.unmodifiableList(Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
+	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
+			Collections.singletonList(ALL));
 
 
 	@Nullable
@@ -108,7 +109,7 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * Set the origins to allow, e.g. {@code "https://domain1.com"}.
 	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
 	 */
@@ -146,7 +147,7 @@ public class CorsConfiguration {
 	 * <p>If not set, only {@code "GET"} and {@code "HEAD"} are allowed.
 	 * <p>By default this is not set.
 	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>),
+	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
 	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
 	 * if present, in order to reflect the client-originated address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
@@ -305,6 +306,16 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * Configure how long, as a duration, the response from a pre-flight request
+	 * can be cached by clients.
+	 * @since 5.2
+	 * @see #setMaxAge(Long)
+	 */
+	public void setMaxAge(Duration maxAge) {
+		this.maxAge = maxAge.getSeconds();
+	}
+
+	/**
 	 * Configure how long, in seconds, the response from a pre-flight request
 	 * can be cached by clients.
 	 * <p>By default this is not set.
@@ -322,22 +333,21 @@ public class CorsConfiguration {
 		return this.maxAge;
 	}
 
+
 	/**
 	 * By default a newly created {@code CorsConfiguration} does not permit any
 	 * cross-origin requests and must be configured explicitly to indicate what
 	 * should be allowed.
-	 *
 	 * <p>Use this method to flip the initialization model to start with open
 	 * defaults that permit all cross-origin requests for GET, HEAD, and POST
 	 * requests. Note however that this method will not override any existing
 	 * values already set.
-	 *
 	 * <p>The following defaults are applied if not already set:
 	 * <ul>
-	 *     <li>Allow all origins.</li>
-	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
-	 *     <li>Allow all headers.</li>
-	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
+	 * <li>Allow all origins.</li>
+	 * <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
+	 * <li>Allow all headers.</li>
+	 * <li>Set max age to 1800 seconds (30 minutes).</li>
 	 * </ul>
 	 */
 	public CorsConfiguration applyPermitDefaultValues() {
@@ -361,23 +371,19 @@ public class CorsConfiguration {
 	/**
 	 * Combine the non-null properties of the supplied
 	 * {@code CorsConfiguration} with this one.
-	 *
 	 * <p>When combining single values like {@code allowCredentials} or
 	 * {@code maxAge}, {@code this} properties are overridden by non-null
 	 * {@code other} properties if any.
-	 *
 	 * <p>Combining lists like {@code allowedOrigins}, {@code allowedMethods},
 	 * {@code allowedHeaders} or {@code exposedHeaders} is done in an additive
 	 * way. For example, combining {@code ["GET", "POST"]} with
 	 * {@code ["PATCH"]} results in {@code ["GET", "POST", "PATCH"]}, but keep
 	 * in mind that combining {@code ["GET", "POST"]} with {@code ["*"]}
 	 * results in {@code ["*"]}.
-	 *
 	 * <p>Notice that default permit values set by
 	 * {@link CorsConfiguration#applyPermitDefaultValues()} are overridden by
 	 * any value explicitly defined.
-	 *
-	 * @return the combined {@code CorsConfiguration} or {@code this}
+	 * @return the combined {@code CorsConfiguration}, or {@code this}
 	 * configuration if the supplied configuration is {@code null}
 	 */
 	@Nullable

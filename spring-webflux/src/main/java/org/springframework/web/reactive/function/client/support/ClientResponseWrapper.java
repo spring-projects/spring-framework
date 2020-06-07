@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Implementation of the {@link ClientResponse} interface that can be subclassed
@@ -103,8 +104,8 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.bodyToMono(typeReference);
+	public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.bodyToMono(elementTypeRef);
 	}
 
 	@Override
@@ -113,8 +114,18 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.bodyToFlux(typeReference);
+	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.bodyToFlux(elementTypeRef);
+	}
+
+	@Override
+	public Mono<Void> releaseBody() {
+		return this.delegate.releaseBody();
+	}
+
+	@Override
+	public Mono<ResponseEntity<Void>> toBodilessEntity() {
+		return this.delegate.toBodilessEntity();
 	}
 
 	@Override
@@ -123,18 +134,28 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.toEntity(typeReference);
+	public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+		return this.delegate.toEntity(bodyTypeReference);
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementType) {
-		return this.delegate.toEntityList(elementType);
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
+		return this.delegate.toEntityList(elementClass);
 	}
 
 	@Override
-	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> typeReference) {
-		return this.delegate.toEntityList(typeReference);
+	public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
+		return this.delegate.toEntityList(elementTypeRef);
+	}
+
+	@Override
+	public Mono<WebClientResponseException> createException() {
+		return this.delegate.createException();
+	}
+
+	@Override
+	public String logPrefix() {
+		return this.delegate.logPrefix();
 	}
 
 	/**

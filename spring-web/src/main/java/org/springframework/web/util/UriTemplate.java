@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,14 +30,19 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents a URI template. A URI template is a URI-like String that contains variables
- * enclosed by braces ({@code {}}) which can be expanded to produce an actual URI.
+ * Representation of a URI template that can be expanded with URI variables via
+ * {@link #expand(Map)}, {@link #expand(Object[])}, or matched to a URL via
+ * {@link #match(String)}. This class is designed to be thread-safe and
+ * reusable, and allows any number of expand or match calls.
  *
- * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
- * for example usages.
- *
- * <p>This class is designed to be thread-safe and reusable, allowing for any number
- * of expand or match calls.
+ * <p><strong>Note:</strong> this class uses {@link UriComponentsBuilder}
+ * internally to expand URI templates, and is merely a shortcut for already
+ * prepared URI templates. For more dynamic preparation and extra flexibility,
+ * e.g. around URI encoding, consider using {@code UriComponentsBuilder} or the
+ * higher level {@link DefaultUriBuilderFactory} which adds several encoding
+ * modes on top of {@code UriComponentsBuilder}. See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-uri-building">reference docs</a>
+ * for further details.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -84,13 +89,13 @@ public class UriTemplate implements Serializable {
 	 * the Map values variable values. The order of variables is not significant.
 	 * <p>Example:
 	 * <pre class="code">
-	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
 	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
 	 * uriVariables.put("booking", "42");
 	 * uriVariables.put("hotel", "Rest & Relax");
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
-	 * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
+	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null};
@@ -107,10 +112,10 @@ public class UriTemplate implements Serializable {
 	 * The order of variables is significant.
 	 * <p>Example:
 	 * <pre class="code">
-	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
 	 * System.out.println(template.expand("Rest & Relax", 42));
 	 * </pre>
-	 * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
+	 * will print: <blockquote>{@code https://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
 	 * @param uriVariableValues the array of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if {@code uriVariables} is {@code null}
@@ -140,8 +145,8 @@ public class UriTemplate implements Serializable {
 	 * values are variable values, as occurred in the given URI.
 	 * <p>Example:
 	 * <pre class="code">
-	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-	 * System.out.println(template.match("http://example.com/hotels/1/bookings/42"));
+	 * UriTemplate template = new UriTemplate("https://example.com/hotels/{hotel}/bookings/{booking}");
+	 * System.out.println(template.match("https://example.com/hotels/1/bookings/42"));
 	 * </pre>
 	 * will print: <blockquote>{@code {hotel=1, booking=42}}</blockquote>
 	 * @param uri the URI to match to

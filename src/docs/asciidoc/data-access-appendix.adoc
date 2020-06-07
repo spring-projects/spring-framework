@@ -18,7 +18,7 @@ This part of the appendix lists XML schemas for data access, including the follo
 
 The `tx` tags deal with configuring all of those beans in Spring's comprehensive support
 for transactions. These tags are covered in the chapter entitled
-<<data-access.adoc#transaction,Transaction Management>>.
+<<data-access.adoc#transaction, Transaction Management>>.
 
 TIP: We strongly encourage you to look at the `'spring-tx.xsd'` file that ships with the
 Spring distribution. This file contains the XML Schema for Spring's transaction
@@ -32,7 +32,6 @@ the following preamble at the top of your Spring XML configuration file. The tex
 following snippet references the correct schema so that the tags in the `tx` namespace
 are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -42,9 +41,9 @@ are available to you:
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xmlns:tx="http://www.springframework.org/schema/tx" <1>
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd <2>
-			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx.xsd <2>
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- bean definitions here -->
 
@@ -52,7 +51,6 @@ are available to you:
 ----
 <1> Declare usage of the `tx` namespace.
 <2> Specify the location (with other schema locations).
-====
 
 NOTE: Often, when you use the elements in the `tx` namespace, you are also using the
 elements from the `aop` namespace (since the declarative transaction support in Spring is
@@ -67,14 +65,13 @@ to you.
 
 The `jdbc` elements let you quickly configure an embedded database or initialize an
 existing data source. These elements are documented in
-<<data-access.adoc#jdbc-embedded-database-support,Embedded Database Support>> and
-<<data-access.adoc#jdbc-initializing-datasource,Initializing a DataSource>>, respectively.
+<<data-access.adoc#jdbc-embedded-database-support, Embedded Database Support>> and
+<<data-access.adoc#jdbc-initializing-datasource, Initializing a DataSource>>, respectively.
 
 To use the elements in the `jdbc` schema, you need to have the following preamble at the
 top of your Spring XML configuration file. The text in the following snippet references
 the correct schema so that the elements in the `jdbc` namespace are available to you:
 
-====
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -83,8 +80,8 @@ the correct schema so that the elements in the `jdbc` namespace are available to
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:jdbc="http://www.springframework.org/schema/jdbc" <1>
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"> <2>
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc.xsd"> <2>
 
 		<!-- bean definitions here -->
 
@@ -92,4 +89,3 @@ the correct schema so that the elements in the `jdbc` namespace are available to
 ----
 <1> Declare usage of the `jdbc` namespace.
 <2> Specify the location (with other schema locations).
-====

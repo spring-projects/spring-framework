@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,30 +19,31 @@ package org.springframework.http.codec.xml;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractEncoderTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.Pojo;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Jaxb2XmlEncoder> {
+public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> {
 
 	public Jaxb2XmlEncoderTests() {
 		super(new Jaxb2XmlEncoder());
@@ -51,22 +52,22 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Jaxb2XmlEncode
 	@Override
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_XML));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_JSON));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		MediaType.TEXT_XML)).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		MediaType.APPLICATION_JSON)).isFalse();
 
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(Jaxb2XmlDecoderTests.TypePojo.class),
-				MediaType.APPLICATION_XML));
+		assertThat(this.encoder.canEncode(
+		ResolvableType.forClass(Jaxb2XmlDecoderTests.TypePojo.class),
+		MediaType.APPLICATION_XML)).isTrue();
 
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(getClass()),
-				MediaType.APPLICATION_XML));
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(getClass()),
+		MediaType.APPLICATION_XML)).isFalse();
 
 		// SPR-15464
-		assertFalse(this.encoder.canEncode(ResolvableType.NONE, null));
+		assertThat(this.encoder.canEncode(ResolvableType.NONE, null)).isFalse();
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTestCase<Jaxb2XmlEncode
 			dataBuffer.read(resultBytes);
 			release(dataBuffer);
 			String actual = new String(resultBytes, UTF_8);
-			assertThat(actual, isSimilarTo(expected));
+			assertThat(XmlContent.from(actual)).isSimilarTo(expected);
 		};
 	}
 

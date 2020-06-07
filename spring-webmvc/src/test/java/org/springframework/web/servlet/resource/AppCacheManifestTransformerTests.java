@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,18 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
@@ -47,7 +47,7 @@ public class AppCacheManifestTransformerTests {
 	private HttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -82,7 +82,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("foo.css");
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 
-		assertEquals(resource, result);
+		assertThat(result).isEqualTo(resource);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class AppCacheManifestTransformerTests {
 		Resource resource = getResource("error.appcache");
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 
-		assertEquals(resource, result);
+		assertThat(result).isEqualTo(resource);
 	}
 
 	@Test
@@ -103,18 +103,17 @@ public class AppCacheManifestTransformerTests {
 		byte[] bytes = FileCopyUtils.copyToByteArray(actual.getInputStream());
 		String content = new String(bytes, "UTF-8");
 
-		assertThat("should rewrite resource links", content,
-				containsString("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css"));
-		assertThat("should rewrite resource links", content,
-				containsString("/static/bar-11e16cf79faee7ac698c805cf28248d2.css"));
-		assertThat("should rewrite resource links", content,
-				containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
+		assertThat(content).as("rewrite resource links")
+				.contains("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css")
+				.contains("/static/bar-11e16cf79faee7ac698c805cf28248d2.css")
+				.contains("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js");
 
-		assertThat("should not rewrite external resources", content, containsString("//example.org/style.css"));
-		assertThat("should not rewrite external resources", content, containsString("http://example.org/image.png"));
+		assertThat(content).as("not rewrite external resources")
+				.contains("//example.org/style.css")
+				.contains("https://example.org/image.png");
 
-		assertThat("should generate fingerprint", content,
-				containsString("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d"));
+		assertThat(content).as("generate fingerprint")
+				.contains("# Hash: 65ebc023e50b2b731fcace2871f0dae3");
 	}
 
 	private Resource getResource(String filePath) {
