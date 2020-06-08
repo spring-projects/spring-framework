@@ -1650,12 +1650,23 @@ the aspect class or annotating it with the `@Order` annotation. Given two aspect
 aspect returning the lower value from `Ordered.getValue()` (or the annotation value) has
 the higher precedence.
 
-When two pieces of advice defined in the same aspect both need to run at the same
-join point, the ordering is undefined (since there is no way to retrieve the declaration
-order through reflection for javac-compiled classes). Consider collapsing such advice
-methods into one advice method per join point in each aspect class or refactor the
-pieces of advice into separate aspect classes that you can order at the aspect level.
+[NOTE]
+====
+As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+need to run at the same join point are assigned precedence based on their advice type in
+the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
+`@AfterReturning`, `@AfterThrowing`. Note, however, that due to the implementation style
+in Spring's `AspectJAfterAdvice`, an `@After` advice method will effectively be invoked
+after any `@AfterReturning` or `@AfterThrowing` advice methods in the same aspect.
 
+When two pieces of the same type of advice (for example, two `@After` advice methods)
+defined in the same `@Aspect` class both need to run at the same join point, the ordering
+is undefined (since there is no way to retrieve the source code declaration order through
+reflection for javac-compiled classes). Consider collapsing such advice methods into one
+advice method per join point in each `@Aspect` class or refactor the pieces of advice
+into separate `@Aspect` classes that you can order at the aspect level via `Ordered` or
+`@Order`.
+====
 
 
 [[aop-introductions]]
@@ -2554,6 +2565,26 @@ the ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The pr
 between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
 by either adding the `@Order` annotation to the bean that backs the aspect or by having
 the bean implement the `Ordered` interface.
+
+[NOTE]
+====
+In contrast to the precedence rules for advice methods defined in the same `@Aspect`
+class, when two pieces of advice defined in the same `<aop:aspect>` element both need to
+run at the same join point, the precedence is determined by the order in which the advice
+elements are declared within the enclosing `<aop:aspect>` element, from highest to lowest
+precedence.
+
+For example, given an `around` advice and a `before` advice defined in the same
+`<aop:aspect>` element that apply to the same join point, to ensure that the `around`
+advice has higher precedence than the `before` advice, the `<aop:around>` element must be
+declared before the `<aop:before>` element.
+
+As a general rule of thumb, if you find that you have multiple pieces of advice defined
+in the same `<aop:aspect>` element that apply to the same join point, consider collapsing
+such advice methods into one advice method per join point in each `<aop:aspect>` element
+or refactor the pieces of advice into separate `<aop:aspect>` elements that you can order
+at the aspect level.
+====
 
 
 
