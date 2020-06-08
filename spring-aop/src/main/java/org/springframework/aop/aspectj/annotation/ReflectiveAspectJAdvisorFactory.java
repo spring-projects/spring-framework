@@ -56,8 +56,8 @@ import org.springframework.util.comparator.InstanceComparator;
 
 /**
  * Factory that can create Spring AOP Advisors given AspectJ classes from
- * classes honoring the AspectJ 5 annotation syntax, using reflection to
- * invoke the corresponding advice methods.
+ * classes honoring AspectJ's annotation syntax, using reflection to invoke the
+ * corresponding advice methods.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
