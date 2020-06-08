@@ -196,7 +196,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * {@code ResourceHttpRequestHandler}.
 	 * <li>Determine the media type of views rendered with
 	 * {@code ContentNegotiatingViewResolver}.
-	 * <li>Whitelist extensions for RFD attack detection (check the Spring
+	 * <li>List safe extensions for RFD attack detection (check the Spring
 	 * Framework reference docs for details).
 	 * </ul>
 	 * @param mediaTypes media type mappings

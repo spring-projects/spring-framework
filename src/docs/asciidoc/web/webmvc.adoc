@@ -1725,11 +1725,11 @@ lower the risk but are not sufficient to prevent RFD attacks.
 
 To prevent RFD attacks, prior to rendering the response body, Spring MVC adds a
 `Content-Disposition:inline;filename=f.txt` header to suggest a fixed and safe download
-file. This is done only if the URL path contains a file extension that is neither whitelisted
-nor explicitly registered for content negotiation. However, it can potentially have
-side effects when URLs are typed directly into a browser.
+file. This is done only if the URL path contains a file extension that is neither
+allowed as safe nor explicitly registered for content negotiation. However, it can
+potentially have side effects when URLs are typed directly into a browser.
 
-Many common path extensions are whitelisted by default. Applications with custom
+Many common path extensions are allowed as safe by default. Applications with custom
 `HttpMessageConverter` implementations can explicitly register file extensions for content
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See <<mvc-config-content-negotiation>>.
