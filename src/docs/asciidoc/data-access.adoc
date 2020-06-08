@@ -1457,6 +1457,11 @@ programming arrangements as the following listing shows:
 	}
 ----
 
+Note that there are special considerations for the returned `Publisher` with regards to
+Reactive Streams cancellation signals. See the <<tx-prog-operator-cancel>> section under
+"Using the TransactionOperator" for more details.
+
+
 .Method visibility and `@Transactional`
 ****
 When you use proxies, you should apply the `@Transactional` annotation only to methods
@@ -2450,6 +2455,21 @@ method on the supplied `ReactiveTransaction` object, as follows:
 		}
 	})
 ----
+
+[[tx-prog-operator-cancel]]
+===== Cancel Signals
+
+In Reactive Streams, a `Subscriber` can cancel its `Subscription` and terminate its
+`Publisher`. Operators in Project Reactor, as well as in other libraries, such as `next()`,
+`take(long)`, `timeout(Duration)`, and others can issue cancellations. There is no way to
+know the reason for the cancellation, whether it is due to an error or a simply lack of
+interest to consume further, and in version 5.2 the `TransactionalOperator` defaults to
+committing the transaction on cancel. In version 5.3 this behavior will change and
+transactions will be roll back on cancel to create a reliable and deterministic outcome.
+As a result it is important to consider the operators used downstream from a transaction
+`Publisher`. In particular in the case of a `Flux` or other multi-value `Publisher`,
+the full output must be consumed to allow the transaction to complete.
+
 
 [[tx-prog-operator-settings]]
 ===== Specifying Transaction Settings
