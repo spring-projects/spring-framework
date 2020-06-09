@@ -457,11 +457,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			this.url = url;
 		}
 
-		DefaultBodyBuilder(HttpMethod httpMethod, URI url) {
-			this.methodValue = httpMethod.name();
-			this.url = url;
-		}
-
 		@Override
 		public BodyBuilder contextPath(String contextPath) {
 			this.contextPath = contextPath;
