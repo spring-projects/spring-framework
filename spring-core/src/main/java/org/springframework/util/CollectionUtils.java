@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -418,7 +418,7 @@ public abstract class CollectionUtils {
 		@Override
 		public V getFirst(K key) {
 			List<V> values = this.map.get(key);
-			return (values != null ? values.get(0) : null);
+			return (values != null && !values.isEmpty() ? values.get(0) : null);
 		}
 
 		@Override
@@ -439,7 +439,10 @@ public abstract class CollectionUtils {
 		public Map<K, V> toSingleValueMap() {
 			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.map.size());
 			for (Entry<K, List<V>> entry : map.entrySet()) {
-				singleValueMap.put(entry.getKey(), entry.getValue().get(0));
+				List<V> values = entry.getValue();
+				if (values != null && !values.isEmpty()) {
+					singleValueMap.put(entry.getKey(), values.get(0));
+				}
 			}
 			return singleValueMap;
 		}
@@ -506,10 +509,7 @@ public abstract class CollectionUtils {
 
 		@Override
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			return this.map.equals(other);
+			return (this == other || this.map.equals(other));
 		}
 
 		@Override
