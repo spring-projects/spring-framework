@@ -583,7 +583,7 @@ class ConcurrentReferenceHashMapTests {
 			}
 			// For testing we want more control of the hash
 			this.supplementalHash = super.getHash(o);
-			return o == null ? 0 : o.hashCode();
+			return (o == null ? 0 : o.hashCode());
 		}
 
 		public int getSupplementalHash() {

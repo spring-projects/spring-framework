@@ -364,7 +364,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 
 		public String getContextPath() {
-			return this.forwardedPrefix == null ? this.delegate.get().getContextPath() : this.forwardedPrefix;
+			return (this.forwardedPrefix == null ? this.delegate.get().getContextPath() : this.forwardedPrefix);
 		}
 
 		public String getRequestUri() {

@@ -599,7 +599,7 @@ final class MethodWriter extends MethodVisitor {
     this.name = name;
     this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);
     this.descriptor = descriptor;
-    this.signatureIndex = signature == null ? 0 : symbolTable.addConstantUtf8(signature);
+    this.signatureIndex = (signature == null ? 0 : symbolTable.addConstantUtf8(signature));
     if (exceptions != null && exceptions.length > 0) {
       numberOfExceptions = exceptions.length;
       this.exceptionIndexTable = new int[numberOfExceptions];

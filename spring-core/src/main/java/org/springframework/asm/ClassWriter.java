@@ -283,7 +283,7 @@ public class ClassWriter extends ClassVisitor {
     if (signature != null) {
       this.signatureIndex = symbolTable.addConstantUtf8(signature);
     }
-    this.superClass = superName == null ? 0 : symbolTable.addConstantClass(superName).index;
+    this.superClass = (superName == null ? 0 : symbolTable.addConstantClass(superName).index);
     if (interfaces != null && interfaces.length > 0) {
       interfaceCount = interfaces.length;
       this.interfaces = new int[interfaceCount];

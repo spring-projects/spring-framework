@@ -125,7 +125,7 @@ final class Handler {
     int handlerStart = firstHandler.startPc.bytecodeOffset;
     int handlerEnd = firstHandler.endPc.bytecodeOffset;
     int rangeStart = start.bytecodeOffset;
-    int rangeEnd = end == null ? Integer.MAX_VALUE : end.bytecodeOffset;
+    int rangeEnd = (end == null ? Integer.MAX_VALUE : end.bytecodeOffset);
     // Return early if [handlerStart,handlerEnd[ and [rangeStart,rangeEnd[ don't intersect.
     if (rangeStart >= handlerEnd || rangeEnd <= handlerStart) {
       return firstHandler;
