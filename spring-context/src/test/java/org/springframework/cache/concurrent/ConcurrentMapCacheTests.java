@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentMapCacheTests
-		extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
+public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
 
 	protected ConcurrentMap<Object, Object> nativeCache;
 
@@ -48,12 +47,11 @@ public class ConcurrentMapCacheTests
 
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
 		this.nativeCacheNoNull = new ConcurrentHashMap<>();
-		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL,
-				this.nativeCacheNoNull, false);
+		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL, this.nativeCacheNoNull, false);
 		this.cache.clear();
 	}
 
@@ -71,6 +69,7 @@ public class ConcurrentMapCacheTests
 	protected ConcurrentMap<Object, Object> getNativeCache() {
 		return this.nativeCache;
 	}
+
 
 	@Test
 	public void testIsStoreByReferenceByDefault() {
