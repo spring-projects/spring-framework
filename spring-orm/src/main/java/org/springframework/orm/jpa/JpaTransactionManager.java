@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Create a new JpaTransactionManager instance.
-	 * @param emf EntityManagerFactory to manage transactions for
+	 * @param emf the EntityManagerFactory to manage transactions for
 	 */
 	public JpaTransactionManager(EntityManagerFactory emf) {
 		this();
@@ -400,8 +400,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 						conHolder.setTimeoutInSeconds(timeoutToUse);
 					}
 					if (logger.isDebugEnabled()) {
-						logger.debug("Exposing JPA transaction as JDBC transaction [" +
-								conHolder.getConnectionHandle() + "]");
+						logger.debug("Exposing JPA transaction as JDBC [" + conHolder.getConnectionHandle() + "]");
 					}
 					TransactionSynchronizationManager.bindResource(getDataSource(), conHolder);
 					txObject.setConnectionHolder(conHolder);
@@ -581,13 +580,16 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		// Remove the JDBC connection holder from the thread, if exposed.
 		if (txObject.hasConnectionHolder()) {
 			TransactionSynchronizationManager.unbindResource(getDataSource());
-			try {
-				getJpaDialect().releaseJdbcConnection(txObject.getConnectionHolder().getConnectionHandle(),
-						txObject.getEntityManagerHolder().getEntityManager());
-			}
-			catch (Exception ex) {
-				// Just log it, to keep a transaction-related exception.
-				logger.error("Could not close JDBC connection after transaction", ex);
+			ConnectionHandle conHandle = txObject.getConnectionHolder().getConnectionHandle();
+			if (conHandle != null) {
+				try {
+					getJpaDialect().releaseJdbcConnection(conHandle,
+							txObject.getEntityManagerHolder().getEntityManager());
+				}
+				catch (Throwable ex) {
+					// Just log it, to keep a transaction-related exception.
+					logger.error("Failed to release JDBC connection after transaction", ex);
+				}
 			}
 		}
 

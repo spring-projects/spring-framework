@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.cache.transaction.AbstractTransactionSupportingCacheM
 
 /**
  * {@link org.springframework.cache.CacheManager} implementation
- * backed by a JCache {@link javax.cache.CacheManager}.
+ * backed by a JCache {@link CacheManager javax.cache.CacheManager}.
  *
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
@@ -42,15 +42,18 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 
 	/**
-	 * Create a new JCacheCacheManager, setting the target JCache CacheManager
-	 * through the {@link #setCacheManager} bean property.
+	 * Create a new {@code JCacheCacheManager} without a backing JCache
+	 * {@link CacheManager javax.cache.CacheManager}.
+	 * <p>The backing JCache {@code javax.cache.CacheManager} can be set via the
+	 * {@link #setCacheManager} bean property.
 	 */
 	public JCacheCacheManager() {
 	}
 
 	/**
-	 * Create a new JCacheCacheManager for the given backing JCache.
-	 * @param cacheManager the backing JCache {@link javax.cache.CacheManager}
+	 * Create a new {@code JCacheCacheManager} for the given backing JCache
+	 * {@link CacheManager javax.cache.CacheManager}.
+	 * @param cacheManager the backing JCache {@code javax.cache.CacheManager}
 	 */
 	public JCacheCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
@@ -58,14 +61,14 @@ public class JCacheCacheManager extends AbstractTransactionSupportingCacheManage
 
 
 	/**
-	 * Set the backing JCache {@link javax.cache.CacheManager}.
+	 * Set the backing JCache {@link CacheManager javax.cache.CacheManager}.
 	 */
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
 	}
 
 	/**
-	 * Return the backing JCache {@link javax.cache.CacheManager}.
+	 * Return the backing JCache {@link CacheManager javax.cache.CacheManager}.
 	 */
 	public CacheManager getCacheManager() {
 		return this.cacheManager;

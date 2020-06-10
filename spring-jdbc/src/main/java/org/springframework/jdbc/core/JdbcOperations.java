@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public interface JdbcOperations {
 	 * @param rse a callback that will extract all rows of results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #query(String, Object[], ResultSetExtractor)
+	 * @see #query(String, ResultSetExtractor, Object...)
 	 */
 	<T> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException;
 
@@ -110,7 +110,7 @@ public interface JdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @param rch a callback that will extract results, one row at a time
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #query(String, Object[], RowCallbackHandler)
+	 * @see #query(String, RowCallbackHandler, Object...)
 	 */
 	void query(String sql, RowCallbackHandler rch) throws DataAccessException;
 
@@ -124,7 +124,7 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #query(String, Object[], RowMapper)
+	 * @see #query(String, RowMapper, Object...)
 	 */
 	<T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException;
 
@@ -142,7 +142,7 @@ public interface JdbcOperations {
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForObject(String, Object[], RowMapper)
+	 * @see #queryForObject(String, RowMapper, Object...)
 	 */
 	<T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException;
 
@@ -161,7 +161,7 @@ public interface JdbcOperations {
 	 * @throws IncorrectResultSizeDataAccessException if the query does not return
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForObject(String, Object[], Class)
+	 * @see #queryForObject(String, Class, Object...)
 	 */
 	<T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException;
 
@@ -178,7 +178,7 @@ public interface JdbcOperations {
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForMap(String, Object[])
+	 * @see #queryForMap(String, Object...)
 	 * @see ColumnMapRowMapper
 	 */
 	Map<String, Object> queryForMap(String sql) throws DataAccessException;
@@ -195,7 +195,7 @@ public interface JdbcOperations {
 	 * (for example, {@code Integer.class})
 	 * @return a List of objects that match the specified element type
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForList(String, Object[], Class)
+	 * @see #queryForList(String, Class, Object...)
 	 * @see SingleColumnRowMapper
 	 */
 	<T> List<T> queryForList(String sql, Class<T> elementType) throws DataAccessException;
@@ -212,7 +212,7 @@ public interface JdbcOperations {
 	 * @param sql the SQL query to execute
 	 * @return an List that contains a Map per row
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForList(String, Object[])
+	 * @see #queryForList(String, Object...)
 	 */
 	List<Map<String, Object>> queryForList(String sql) throws DataAccessException;
 
@@ -231,7 +231,7 @@ public interface JdbcOperations {
 	 * @return a SqlRowSet representation (possibly a wrapper around a
 	 * {@code javax.sql.rowset.CachedRowSet})
 	 * @throws DataAccessException if there is any problem executing the query
-	 * @see #queryForRowSet(String, Object[])
+	 * @see #queryForRowSet(String, Object...)
 	 * @see SqlRowSetResultSetExtractor
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
@@ -884,6 +884,7 @@ public interface JdbcOperations {
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
 
@@ -894,6 +895,7 @@ public interface JdbcOperations {
 	 * @param argTypes the SQL types of the arguments
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
@@ -907,6 +909,7 @@ public interface JdbcOperations {
 	 * @param pss the ParameterizedPreparedStatementSetter to use
 	 * @return an array containing for each batch another array containing the numbers of rows affected
 	 * by each update in the batch
+	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 3.1
 	 */
 	<T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize,

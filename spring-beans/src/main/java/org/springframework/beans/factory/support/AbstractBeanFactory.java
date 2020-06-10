@@ -879,7 +879,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return whether this factory holds a InstantiationAwareBeanPostProcessor
-	 * that will get applied to singleton beans on shutdown.
+	 * that will get applied to singleton beans on creation.
 	 * @see #addBeanPostProcessor
 	 * @see org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor
 	 */
@@ -1508,7 +1508,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * should be used as fallback.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @return the type for the bean if determinable, or {@code null} else
+	 * @return the type for the bean if determinable, or {@code null} otherwise
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 * @see #getBean(String)
 	 */
