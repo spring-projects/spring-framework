@@ -35,9 +35,6 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import kotlin.reflect.KFunction;
-import kotlin.reflect.jvm.ReflectJvmMapping;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -802,17 +799,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		@SuppressWarnings("unused")
 		public void handle() {
 			throw new UnsupportedOperationException("Not implemented");
-		}
-	}
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		static private boolean isSuspend(Method method) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
 		}
 	}
 

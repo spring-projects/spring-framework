@@ -61,8 +61,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private final List<HttpMessageConverter<?>> messageConverters;
-
 	private final List<HttpMessageConverter<?>> sseMessageConverters;
 
 	private final ReactiveTypeHandler reactiveHandler;
@@ -76,7 +74,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	 */
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
-		this.messageConverters = messageConverters;
 		this.sseMessageConverters = initSseConverters(messageConverters);
 		this.reactiveHandler = new ReactiveTypeHandler();
 	}
@@ -93,7 +90,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			ReactiveAdapterRegistry registry, TaskExecutor executor, ContentNegotiationManager manager) {
 
 		Assert.notEmpty(messageConverters, "HttpMessageConverter List must not be empty");
-		this.messageConverters = messageConverters;
 		this.sseMessageConverters = initSseConverters(messageConverters);
 		this.reactiveHandler = new ReactiveTypeHandler(registry, executor, manager);
 	}
