@@ -24,13 +24,10 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Extension of {@link HttpEntity} that also exposes the HTTP method and the
@@ -69,16 +66,13 @@ import org.springframework.web.util.UriTemplateHandler;
  */
 public class RequestEntity<T> extends HttpEntity<T> {
 
-	private final static UriTemplateHandler DEFAULT_TEMPLATE_HANDLER = new DefaultUriBuilderFactory();
-
 	@Nullable
 	private final HttpMethod method;
 
-	private final Function<UriTemplateHandler, URI> uriFunction;
+	private final URI url;
 
 	@Nullable
 	private final Type type;
-
 
 	/**
 	 * Constructor with method and URL but without body nor headers.
@@ -146,19 +140,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
 			@Nullable HttpMethod method, URI url, @Nullable Type type) {
 
-		this(body, headers, method, handler -> url, type);
-	}
-
-	/**
-	 * Private constructor with URI function.
-	 * @since 5.3
-	 */
-	private RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
-			@Nullable HttpMethod method, Function<UriTemplateHandler, URI> uriFunction, @Nullable Type type) {
-
 		super(body, headers);
 		this.method = method;
-		this.uriFunction = uriFunction;
+		this.url = url;
 		this.type = type;
 	}
 
@@ -174,24 +158,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Return the URL of the request.
-	 * <p>If the URL was provided as a URI template, the returned URI is expanded
-	 * and encoded with {@link DefaultUriBuilderFactory}.
-	 * @return the URL as a {@code URI}
 	 */
 	public URI getUrl() {
-		return this.uriFunction.apply(DEFAULT_TEMPLATE_HANDLER);
-	}
-
-	/**
-	 * Return the URL of the request.
-	 * <p>If the URL was provided as a URI template, the returned URI is expanded
-	 * with the given {@link DefaultUriBuilderFactory}.
-	 * @param templateHandler the handler to use to expand the URI template with
-	 * @return the URL as a {@code URI}
-	 * @since 5.3
-	 */
-	public URI getUrl(UriTemplateHandler templateHandler) {
-		return this.uriFunction.apply(templateHandler);
+		return this.url;
 	}
 
 
@@ -235,13 +204,15 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	@Override
 	public String toString() {
+		return format(getMethod(), getUrl().toString(), getBody(), getHeaders());
+	}
+
+	static <T> String format(@Nullable HttpMethod httpMethod, String url, @Nullable T body, HttpHeaders headers) {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(getMethod());
+		builder.append(httpMethod);
 		builder.append(' ');
-		builder.append(getUrl());
+		builder.append(url);
 		builder.append(',');
-		T body = getBody();
-		HttpHeaders headers = getHeaders();
 		if (body != null) {
 			builder.append(body);
 			builder.append(',');
@@ -563,24 +534,42 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		private final HttpMethod method;
 
-		private final Function<UriTemplateHandler, URI> uriFunction;
-
 		private final HttpHeaders headers = new HttpHeaders();
 
+		@Nullable
+		private final URI uri;
 
-		public DefaultBodyBuilder(HttpMethod method, URI url) {
+		@Nullable
+		String uriTemplate;
+
+		@Nullable
+		private Object[] uriVarsArray;
+
+		@Nullable
+		Map<String, ?> uriVarsMap;
+
+		DefaultBodyBuilder(HttpMethod method, URI url) {
 			this.method = method;
-			this.uriFunction = handler -> url;
+			this.uri = url;
+			this.uriTemplate = null;
+			this.uriVarsArray = null;
+			this.uriVarsMap = null;
 		}
 
-		public DefaultBodyBuilder(HttpMethod method, String uriTemplate, Object... uriVars) {
+		DefaultBodyBuilder(HttpMethod method, String uriTemplate, Object... uriVars) {
 			this.method = method;
-			this.uriFunction = handler -> handler.expand(uriTemplate, uriVars);
+			this.uri = null;
+			this.uriTemplate = uriTemplate;
+			this.uriVarsArray = uriVars;
+			this.uriVarsMap = null;
 		}
 
-		public DefaultBodyBuilder(HttpMethod method, String uriTemplate, Map<String, ?> uriVars) {
+		DefaultBodyBuilder(HttpMethod method, String uriTemplate, Map<String, ?> uriVars) {
 			this.method = method;
-			this.uriFunction = handler -> handler.expand(uriTemplate, uriVars);
+			this.uri = null;
+			this.uriTemplate = uriTemplate;
+			this.uriVarsArray = null;
+			this.uriVarsMap = uriVars;
 		}
 
 		@Override
@@ -655,17 +644,85 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public RequestEntity<Void> build() {
-			return new RequestEntity<>(null, this.headers, this.method, this.uriFunction, null);
+			return buildInternal(null, null);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body) {
-			return new RequestEntity<>(body, this.headers, this.method, this.uriFunction, null);
+			return buildInternal(body, null);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body, Type type) {
-			return new RequestEntity<>(body, this.headers, this.method, this.uriFunction, type);
+			return buildInternal(body, type);
+		}
+
+		private <T> RequestEntity<T>  buildInternal(@Nullable T body, @Nullable Type type) {
+			if (this.uri != null) {
+				return new RequestEntity<>(body, this.headers, this.method, this.uri, type);
+			}
+			else if (this.uriTemplate != null){
+				return new UriTemplateRequestEntity<>(body, this.headers, this.method, type,
+						this.uriTemplate, this.uriVarsArray, this.uriVarsMap);
+			}
+			else {
+				throw new IllegalStateException("Neither URI nor URI template");
+			}
 		}
 	}
+
+
+	/**
+	 * RequestEntity initialized with a URI template and variables instead of a {@link URI}.
+	 * @since 5.3
+	 * @param <T> the body type
+	 */
+	public static class UriTemplateRequestEntity<T> extends RequestEntity<T> {
+
+		String uriTemplate;
+
+		@Nullable
+		private Object[] uriVarsArray;
+
+		@Nullable
+		Map<String, ?> uriVarsMap;
+
+
+		UriTemplateRequestEntity(
+				@Nullable T body, @Nullable MultiValueMap<String, String> headers,
+				@Nullable HttpMethod method, @Nullable Type type, String uriTemplate,
+				@Nullable Object[] uriVarsArray, @Nullable Map<String, ?> uriVarsMap) {
+
+			super(body, headers, method, null, type);
+			this.uriTemplate = uriTemplate;
+			this.uriVarsArray = uriVarsArray;
+			this.uriVarsMap = uriVarsMap;
+		}
+
+
+		public String getUriTemplate() {
+			return this.uriTemplate;
+		}
+
+		@Nullable
+		public Object[] getVars() {
+			return this.uriVarsArray;
+		}
+
+		@Nullable
+		public Map<String, ?> getVarsMap() {
+			return this.uriVarsMap;
+		}
+
+		@Override
+		public URI getUrl() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String toString() {
+			return format(getMethod(), getUriTemplate(), getBody(), getHeaders());
+		}
+	}
+
 }

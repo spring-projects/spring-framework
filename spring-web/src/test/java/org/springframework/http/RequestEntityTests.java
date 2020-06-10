@@ -82,16 +82,17 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void uriExpansion() throws URISyntaxException{
+	public void uriExpansion() {
 
 		RequestEntity<Void> entity =
 				RequestEntity.get("https://www.{host}.com/{path}", "example", "foo/bar").build();
 
-		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo%2Fbar"));
+		assertThat(entity).isInstanceOf(RequestEntity.UriTemplateRequestEntity.class);
+		RequestEntity.UriTemplateRequestEntity<Void> ext = (RequestEntity.UriTemplateRequestEntity<Void>) entity;
 
-		factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
-		assertThat(entity.getUrl(factory)).isEqualTo(new URI("https://www.example.com/foo/bar"));
+		DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		assertThat(ext.getUriTemplate()).isEqualTo("https://www.{host}.com/{path}");
+		assertThat(ext.getVars()).containsExactly("example", "foo/bar");
 	}
 
 

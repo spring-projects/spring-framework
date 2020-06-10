@@ -633,24 +633,34 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, Class<T> responseType)
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> entity, Class<T> responseType)
 			throws RestClientException {
 
-		RequestCallback requestCallback = httpEntityCallback(requestEntity, responseType);
+		RequestCallback requestCallback = httpEntityCallback(entity, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
-		URI url = requestEntity.getUrl(this.uriTemplateHandler);
-		return nonNull(doExecute(url, requestEntity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(resolveUrl(entity), entity.getMethod(), requestCallback, responseExtractor));
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
+	public <T> ResponseEntity<T> exchange(RequestEntity<?> entity, ParameterizedTypeReference<T> responseType)
 			throws RestClientException {
 
 		Type type = responseType.getType();
-		RequestCallback requestCallback = httpEntityCallback(requestEntity, type);
+		RequestCallback requestCallback = httpEntityCallback(entity, type);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
-		URI url = requestEntity.getUrl(this.uriTemplateHandler);
-		return nonNull(doExecute(url, requestEntity.getMethod(), requestCallback, responseExtractor));
+		return nonNull(doExecute(resolveUrl(entity), entity.getMethod(), requestCallback, responseExtractor));
+	}
+
+	private URI resolveUrl(RequestEntity<?> entity) {
+		if (entity instanceof RequestEntity.UriTemplateRequestEntity) {
+			RequestEntity.UriTemplateRequestEntity<?> ext = (RequestEntity.UriTemplateRequestEntity<?>) entity;
+			return (ext.getVars() != null ?
+					this.uriTemplateHandler.expand(ext.getUriTemplate(), ext.getVars()) :
+					this.uriTemplateHandler.expand(ext.getUriTemplate(), ext.getVarsMap()));
+		}
+		else {
+			return entity.getUrl();
+		}
 	}
 
 
