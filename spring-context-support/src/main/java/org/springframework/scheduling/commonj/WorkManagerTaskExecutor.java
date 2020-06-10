@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,13 +58,13 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * <p>The CommonJ WorkManager will usually be retrieved from the application
  * server's JNDI environment, as defined in the server's management console.
  *
- * <p>Note: On the upcoming EE 7 compliant versions of WebLogic and WebSphere, a
+ * <p>Note: On EE 7/8 compliant versions of WebLogic and WebSphere, a
  * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
- * should be preferred, following JSR-236 support in Java EE 7.
+ * should be preferred, following JSR-236 support in Java EE 7/8.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @deprecated as of 5.1, in favor of EE 7's
+ * @deprecated as of 5.1, in favor of the EE 7/8 based
  * {@link org.springframework.scheduling.concurrent.DefaultManagedTaskExecutor}
  */
 @Deprecated
@@ -121,6 +121,11 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	 * execution callback (which may be a wrapper around the user-supplied task).
 	 * <p>The primary use case is to set some execution context around the task's
 	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * <p><b>NOTE:</b> Exception handling in {@code TaskDecorator} implementations
+	 * is limited to plain {@code Runnable} execution via {@code execute} calls.
+	 * In case of {@code #submit} calls, the exposed {@code Runnable} will be a
+	 * {@code FutureTask} which does not propagate any exceptions; you might
+	 * have to cast it and call {@code Future#get} to evaluate exceptions.
 	 * @since 4.3
 	 */
 	public void setTaskDecorator(TaskDecorator taskDecorator) {
