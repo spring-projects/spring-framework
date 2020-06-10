@@ -195,11 +195,16 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 			return unmarshal(events, targetType.toClass());
 		}
 		catch (XMLStreamException ex) {
-			throw Exceptions.propagate(ex);
+			throw new DecodingException(ex.getMessage(), ex);
 		}
 		catch (Throwable ex) {
-			ex = (ex.getCause() instanceof XMLStreamException ? ex.getCause() : ex);
-			throw Exceptions.propagate(ex);
+			Throwable cause = ex.getCause();
+			if (cause instanceof XMLStreamException) {
+				throw new DecodingException(cause.getMessage(), cause);
+			}
+			else {
+				throw Exceptions.propagate(ex);
+			}
 		}
 		finally {
 			DataBufferUtils.release(dataBuffer);
