@@ -40,7 +40,9 @@ configure(allprojects) { project ->
 				entry 'log4j-jul'
 			}
 			dependency "org.slf4j:slf4j-api:1.7.30"
-			dependency "com.google.code.findbugs:findbugs:3.0.1"
+			dependency("com.google.code.findbugs:findbugs:3.0.1") {
+				exclude group: "dom4j", name: "dom4j"
+			}
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
 
 			dependencySet(group: 'org.aspectj', version: '1.9.5') {
