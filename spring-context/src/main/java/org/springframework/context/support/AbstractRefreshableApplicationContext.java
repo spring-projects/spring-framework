@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	private Boolean allowCircularReferences;
 
 	/** Bean factory for this context */
-	private DefaultListableBeanFactory beanFactory;
-
-	/** Synchronization monitor for the internal BeanFactory */
-	private final Object beanFactoryMonitor = new Object();
+	private volatile DefaultListableBeanFactory beanFactory;
 
 
 	/**
@@ -127,9 +124,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
 			loadBeanDefinitions(beanFactory);
-			synchronized (this.beanFactoryMonitor) {
-				this.beanFactory = beanFactory;
-			}
+			this.beanFactory = beanFactory;
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
@@ -138,17 +133,18 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 
 	@Override
 	protected void cancelRefresh(BeansException ex) {
-		synchronized (this.beanFactoryMonitor) {
-			if (this.beanFactory != null)
-				this.beanFactory.setSerializationId(null);
+		DefaultListableBeanFactory beanFactory = this.beanFactory;
+		if (beanFactory != null) {
+			beanFactory.setSerializationId(null);
 		}
 		super.cancelRefresh(ex);
 	}
 
 	@Override
 	protected final void closeBeanFactory() {
-		synchronized (this.beanFactoryMonitor) {
-			this.beanFactory.setSerializationId(null);
+		DefaultListableBeanFactory beanFactory = this.beanFactory;
+		if (beanFactory != null) {
+			beanFactory.setSerializationId(null);
 			this.beanFactory = null;
 		}
 	}
@@ -158,20 +154,17 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * i.e. has been refreshed at least once and not been closed yet.
 	 */
 	protected final boolean hasBeanFactory() {
-		synchronized (this.beanFactoryMonitor) {
-			return (this.beanFactory != null);
-		}
+		return (this.beanFactory != null);
 	}
 
 	@Override
 	public final ConfigurableListableBeanFactory getBeanFactory() {
-		synchronized (this.beanFactoryMonitor) {
-			if (this.beanFactory == null) {
-				throw new IllegalStateException("BeanFactory not initialized or already closed - " +
-						"call 'refresh' before accessing beans via the ApplicationContext");
-			}
-			return this.beanFactory;
+		DefaultListableBeanFactory beanFactory = this.beanFactory;
+		if (beanFactory == null) {
+			throw new IllegalStateException("BeanFactory not initialized or already closed - " +
+					"call 'refresh' before accessing beans via the ApplicationContext");
 		}
+		return beanFactory;
 	}
 
 	/**
