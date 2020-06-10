@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,14 +282,14 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		SuspendedResourcesHolder suspendedResources = (!joinTx ? suspend(null) : null);
 		UOWActionAdapter<T> action = null;
 		try {
-			if (definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
+			boolean actualTransaction = (uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION);
+			if (actualTransaction && definition.getTimeout() > TransactionDefinition.TIMEOUT_DEFAULT) {
 				this.uowManager.setUOWTimeout(uowType, definition.getTimeout());
 			}
 			if (debug) {
 				logger.debug("Invoking WebSphere UOW action: type=" + uowType + ", join=" + joinTx);
 			}
-			action = new UOWActionAdapter<T>(
-					definition, callback, (uowType == UOWManager.UOW_TYPE_GLOBAL_TRANSACTION), !joinTx, newSynch, debug);
+			action = new UOWActionAdapter<T>(definition, callback, actualTransaction, !joinTx, newSynch, debug);
 			this.uowManager.runUnderUOW(uowType, joinTx, action);
 			if (debug) {
 				logger.debug("Returned from WebSphere UOW action: type=" + uowType + ", join=" + joinTx);
@@ -308,7 +308,7 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 		}
 		catch (UOWActionException ex) {
 			TransactionSystemException tse =
-					new TransactionSystemException("UOWManager threw unexpected UOWActionException", ex);
+					new TransactionSystemException("UOWManager transaction processing failed", ex);
 			Throwable appEx = action.getException();
 			if (appEx != null) {
 				logger.error("Application exception overridden by rollback exception", appEx);
