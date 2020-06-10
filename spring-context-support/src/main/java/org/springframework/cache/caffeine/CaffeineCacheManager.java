@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -56,16 +56,18 @@ import org.springframework.util.ObjectUtils;
  */
 public class CaffeineCacheManager implements CacheManager {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
-
-	private boolean dynamic = true;
-
 	private Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder();
 
 	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
 
 	private boolean allowNullValues = true;
+
+	private boolean dynamic = true;
+
+	private final Map<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
+
+	private final Collection<String> customCacheNames = new CopyOnWriteArrayList<>();
 
 
 	/**
@@ -135,6 +137,13 @@ public class CaffeineCacheManager implements CacheManager {
 		doSetCaffeine(Caffeine.from(cacheSpecification));
 	}
 
+	private void doSetCaffeine(Caffeine<Object, Object> cacheBuilder) {
+		if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
+			this.cacheBuilder = cacheBuilder;
+			refreshCommonCaches();
+		}
+	}
+
 	/**
 	 * Set the Caffeine CacheLoader to use for building each individual
 	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
@@ -145,7 +154,7 @@ public class CaffeineCacheManager implements CacheManager {
 	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
 		if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
 			this.cacheLoader = cacheLoader;
-			refreshKnownCaches();
+			refreshCommonCaches();
 		}
 	}
 
@@ -158,7 +167,7 @@ public class CaffeineCacheManager implements CacheManager {
 	public void setAllowNullValues(boolean allowNullValues) {
 		if (this.allowNullValues != allowNullValues) {
 			this.allowNullValues = allowNullValues;
-			refreshKnownCaches();
+			refreshCommonCaches();
 		}
 	}
 
@@ -183,42 +192,76 @@ public class CaffeineCacheManager implements CacheManager {
 				this.dynamic ? createCaffeineCache(cacheName) : null);
 	}
 
+
 	/**
-	 * Create a new CaffeineCache instance for the specified cache name.
+	 * Register the given native Caffeine Cache instance with this cache manager,
+	 * adapting it to Spring's cache API for exposure through {@link #getCache}.
+	 * Any number of such custom caches may be registered side by side.
+	 * <p>This allows for custom settings per cache (as opposed to all caches
+	 * sharing the common settings in the cache manager's configuration) and
+	 * is typically used with the Caffeine builder API:
+	 * {@code registerCustomCache("myCache", Caffeine.newBuilder().maximumSize(10).build())}
+	 * <p>Note that any other caches, whether statically specified through
+	 * {@link #setCacheNames} or dynamically built on demand, still operate
+	 * with the common settings in the cache manager's configuration.
+ 	 * @param name the name of the cache
+	 * @param cache the custom Caffeine Cache instance to register
+	 * @since 5.2.8
+	 * @see #adaptCaffeineCache
+	 */
+	public void registerCustomCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache) {
+		this.customCacheNames.add(name);
+		this.cacheMap.put(name, adaptCaffeineCache(name, cache));
+	}
+
+	/**
+	 * Adapt the given new native Caffeine Cache instance to Spring's {@link Cache}
+	 * abstraction for the specified cache name.
+	 * @param name the name of the cache
+	 * @param cache the native Caffeine Cache instance
+	 * @return the Spring CaffeineCache adapter (or a decorator thereof)
+	 * @since 5.2.8
+	 * @see CaffeineCache
+	 * @see #isAllowNullValues()
+	 */
+	protected Cache adaptCaffeineCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache) {
+		return new CaffeineCache(name, cache, isAllowNullValues());
+	}
+
+	/**
+	 * Build a common {@link CaffeineCache} instance for the specified cache name,
+	 * using the common Caffeine configuration specified on this cache manager.
+	 * <p>Delegates to {@link #adaptCaffeineCache} as the adaptation method to
+	 * Spring's cache abstraction (allowing for centralized decoration etc),
+	 * passing in a freshly built native Caffeine Cache instance.
 	 * @param name the name of the cache
 	 * @return the Spring CaffeineCache adapter (or a decorator thereof)
+	 * @see #adaptCaffeineCache
+	 * @see #createNativeCaffeineCache
 	 */
 	protected Cache createCaffeineCache(String name) {
-		return new CaffeineCache(name, createNativeCaffeineCache(name), isAllowNullValues());
+		return adaptCaffeineCache(name, createNativeCaffeineCache(name));
 	}
 
 	/**
-	 * Create a native Caffeine Cache instance for the specified cache name.
+	 * Build a common Caffeine Cache instance for the specified cache name,
+	 * using the common Caffeine configuration specified on this cache manager.
 	 * @param name the name of the cache
 	 * @return the native Caffeine Cache instance
+	 * @see #createCaffeineCache
 	 */
 	protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
-		if (this.cacheLoader != null) {
-			return this.cacheBuilder.build(this.cacheLoader);
-		}
-		else {
-			return this.cacheBuilder.build();
-		}
-	}
-
-	private void doSetCaffeine(Caffeine<Object, Object> cacheBuilder) {
-		if (!ObjectUtils.nullSafeEquals(this.cacheBuilder, cacheBuilder)) {
-			this.cacheBuilder = cacheBuilder;
-			refreshKnownCaches();
-		}
+		return (this.cacheLoader != null ? this.cacheBuilder.build(this.cacheLoader) : this.cacheBuilder.build());
 	}
 
 	/**
-	 * Create the known caches again with the current state of this manager.
+	 * Recreate the common caches with the current state of this manager.
 	 */
-	private void refreshKnownCaches() {
+	private void refreshCommonCaches() {
 		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
-			entry.setValue(createCaffeineCache(entry.getKey()));
+			if (!this.customCacheNames.contains(entry.getKey())) {
+				entry.setValue(createCaffeineCache(entry.getKey()));
+			}
 		}
 	}
 
