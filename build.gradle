@@ -76,7 +76,7 @@ configure(allprojects) { project ->
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
-			dependency "org.apache.johnzon:johnzon-jsonb:1.2.6"
+			dependency "org.apache.johnzon:johnzon-jsonb:1.2.7"
 			dependency("org.codehaus.jettison:jettison:1.3.8") {
 				exclude group: "stax", name: "stax-api"
 			}
@@ -89,7 +89,7 @@ configure(allprojects) { project ->
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.4"
-			dependency "com.github.librepdf:openpdf:1.3.17"
+			dependency "com.github.librepdf:openpdf:1.3.19"
 			dependency "com.rometools:rome:1.12.2"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.3"
