@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ package org.springframework.web.servlet.view;
  * @see org.springframework.web.servlet.view.velocity.VelocityViewResolver
  * @see org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
  */
-public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
+public abstract class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	private boolean exposeRequestAttributes = false;
 
