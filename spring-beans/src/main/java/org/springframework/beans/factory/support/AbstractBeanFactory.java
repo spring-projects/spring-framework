@@ -241,10 +241,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws BeansException if the bean could not be created
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
-			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
+	protected <T> T doGetBean(
+			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
+			throws BeansException {
 
-		final String beanName = transformedBeanName(name);
+		String beanName = transformedBeanName(name);
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
@@ -296,7 +297,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			try {
-				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
@@ -353,7 +354,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					if (!StringUtils.hasLength(scopeName)) {
 						throw new IllegalStateException("No scope name defined for bean ´" + beanName + "'");
 					}
-					final Scope scope = this.scopes.get(scopeName);
+					Scope scope = this.scopes.get(scopeName);
 					if (scope == null) {
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
 					}
@@ -474,10 +475,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return false;
 		}
 		if (isFactoryBean(beanName, mbd)) {
-			final FactoryBean<?> fb = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
+			FactoryBean<?> fb = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
-						((fb instanceof SmartFactoryBean && ((SmartFactoryBean<?>) fb).isPrototype()) || !fb.isSingleton()),
+				return AccessController.doPrivileged(
+						(PrivilegedAction<Boolean>) () ->
+								((fb instanceof SmartFactoryBean && ((SmartFactoryBean<?>) fb).isPrototype()) ||
+										!fb.isSingleton()),
 						getAccessControlContext());
 			}
 			else {
@@ -1488,7 +1491,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
 	@Nullable
-	protected Class<?> resolveBeanClass(final RootBeanDefinition mbd, String beanName, final Class<?>... typesToMatch)
+	protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch)
 			throws CannotLoadBeanClassException {
 
 		try {
@@ -1496,8 +1499,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return mbd.getBeanClass();
 			}
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedExceptionAction<Class<?>>) () ->
-					doResolveBeanClass(mbd, typesToMatch), getAccessControlContext());
+				return AccessController.doPrivileged((PrivilegedExceptionAction<Class<?>>)
+						() -> doResolveBeanClass(mbd, typesToMatch), getAccessControlContext());
 			}
 			else {
 				return doResolveBeanClass(mbd, typesToMatch);
@@ -1686,7 +1689,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace(LogMessage.format("Bean creation exception on lazy FactoryBean type check: %s", ex));
 				}
 				else {
-					logger.debug(LogMessage.format("Bean creation exception on non-lazy FactoryBean type check: %s", ex));
+					logger.debug(LogMessage.format("Bean creation exception on eager FactoryBean type check: %s", ex));
 				}
 				onSuppressedException(ex);
 			}
