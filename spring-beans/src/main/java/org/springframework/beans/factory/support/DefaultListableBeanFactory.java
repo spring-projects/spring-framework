@@ -555,11 +555,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							LogMessage.format("Ignoring bean class loading failure for bean '%s'", beanName) :
 							LogMessage.format("Ignoring unresolvable metadata in bean definition '%s'", beanName));
 					logger.trace(message, ex);
+					// Register exception, in case the bean was accidentally unresolvable.
 					onSuppressedException(ex);
 				}
 			}
 		}
-
 
 		// Check manually registered singletons too.
 		for (String beanName : this.manualSingletonNames) {
