@@ -1,5 +1,7 @@
 buildscript {
 	repositories {
+		maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+		maven{ url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
@@ -59,7 +61,7 @@ configure(allprojects) { project ->
 
 	apply plugin: "java"
 	apply plugin: "kotlin"
-	apply plugin: "checkstyle"
+//	apply plugin: "checkstyle"
 	apply plugin: "propdeps"
 	apply plugin: "test-source-set-dependencies"
 	apply plugin: "io.spring.dependency-management"
@@ -141,12 +143,15 @@ configure(allprojects) { project ->
 		exclude(["**/Abstract*.class", '**/*$*'])
 	}
 
-	checkstyle {
+/*	checkstyle {
 		toolVersion = "8.33"
 		configDir = rootProject.file("src/checkstyle")
-	}
+	}*/
 
 	repositories {
+		mavenLocal()
+		maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+		maven{ url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
 		mavenCentral()
 		maven { url "https://repo.spring.io/libs-release" }
 	}
@@ -170,7 +175,7 @@ configure(allprojects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 		testCompileOnly("com.google.code.findbugs:jsr305:3.0.2")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.7")
+//		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.7")
 	}
 
 	ext.javadocLinks = [
