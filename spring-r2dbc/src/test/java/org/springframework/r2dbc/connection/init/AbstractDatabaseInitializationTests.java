@@ -49,7 +49,7 @@ public abstract class AbstractDatabaseInitializationTests {
 	}
 
 	private void runPopulator() {
-		DatabasePopulatorUtils.execute(databasePopulator, getConnectionFactory()) //
+		databasePopulator.populate(getConnectionFactory()) //
 				.as(StepVerifier::create) //
 				.verifyComplete();
 	}

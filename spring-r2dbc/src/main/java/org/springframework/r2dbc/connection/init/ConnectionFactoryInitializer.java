@@ -109,7 +109,7 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	private void execute(@Nullable DatabasePopulator populator) {
 		Assert.state(this.connectionFactory != null, "ConnectionFactory must be set");
 		if (this.enabled && populator != null) {
-			DatabasePopulatorUtils.execute(populator, this.connectionFactory).block();
+			populator.populate(this.connectionFactory).block();
 		}
 	}
 

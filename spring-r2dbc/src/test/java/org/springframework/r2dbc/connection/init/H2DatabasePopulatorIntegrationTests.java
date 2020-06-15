@@ -51,7 +51,7 @@ public class H2DatabasePopulatorIntegrationTests
 		// aliased function 'REVERSE'.
 		databasePopulator.setSeparator("\n\n");
 
-		DatabasePopulatorUtils.execute(databasePopulator, connectionFactory).as(
+		databasePopulator.populate(connectionFactory).as(
 				StepVerifier::create).verifyComplete();
 
 		assertUsersDatabaseCreated(connectionFactory, "White");
