@@ -97,9 +97,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class MvcUriComponentsBuilder {
 
-	/**
-	 * Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory.
-	 */
+	/** Well-known name for the {@link CompositeUriComponentsContributor} object in the bean factory. */
 	public static final String MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME = "mvcUriComponentsContributor";
 
 

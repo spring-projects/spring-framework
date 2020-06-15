@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Additional interface that a {@link HandlerMapping} can implement to expose
@@ -33,7 +37,32 @@ import org.springframework.web.servlet.HandlerMapping;
 public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**
-	 * Determine whether the given request matches the request criteria.
+	 * Return the parser of this {@code HandlerMapping}, if configured in which
+	 * case pre-parsed patterns are used.
+	 * @since 5.3
+	 */
+	@Nullable
+	PathPatternParser getPatternParser();
+
+	/**
+	 * Determine whether the request matches the given pattern. Use this method
+	 * when {@link #getPatternParser()} is not {@code null} which means that the
+	 * {@code HandlerMapping} has pre-parsed patterns enabled.
+	 * @param request the current request
+	 * @param pattern the pattern to match
+	 * @return the result from request matching, or {@code null} if none
+	 * @since 5.3
+	 */
+	@Nullable
+	default RequestMatchResult match(HttpServletRequest request, PathPattern pattern) {
+		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();
+		return (pattern.matches(path) ? new RequestMatchResult(pattern, path) : null);
+	}
+
+	/**
+	 * Determine whether the request matches the given pattern. Use this method
+	 * when {@link #getPatternParser()} returns {@code null} which means that the
+	 * {@code HandlerMapping} is uses String pattern matching.
 	 * @param request the current request
 	 * @param pattern the pattern to match
 	 * @return the result from request matching, or {@code null} if none

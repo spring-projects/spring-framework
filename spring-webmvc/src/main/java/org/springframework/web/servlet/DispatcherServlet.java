@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -50,6 +52,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.context.ThemeSource;
@@ -62,7 +65,9 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.util.NestedServletException;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -347,6 +352,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	private List<ViewResolver> viewResolvers;
 
+	private boolean parseRequestPath;
+
 
 	/**
 	 * Create a new {@code DispatcherServlet} that will create its own internal web
@@ -622,6 +629,27 @@ public class DispatcherServlet extends FrameworkServlet {
 						"': using default strategies from DispatcherServlet.properties");
 			}
 		}
+
+		this.parseRequestPath = initRequestPathParsing(this.handlerMappings);
+	}
+
+	private boolean initRequestPathParsing(List<HandlerMapping> mappings) {
+		for (HandlerMapping mapping : mappings) {
+			if (mapping instanceof AbstractHandlerMapping) {
+				if (((AbstractHandlerMapping) mapping).getPatternParser() != null) {
+					return true;
+				}
+			}
+			if (AopUtils.isAopProxy(mapping)) {
+				Object target = AopProxyUtils.getSingletonTarget(mapping);
+				if (target instanceof AbstractHandlerMapping) {
+					if (((AbstractHandlerMapping) target).getPatternParser() != null) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -939,6 +967,11 @@ public class DispatcherServlet extends FrameworkServlet {
 			request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 		}
 
+		RequestPath requestPath = null;
+		if (this.parseRequestPath && !ServletRequestPathUtils.hasParsedRequestPath(request)) {
+			requestPath = ServletRequestPathUtils.parseAndCache(request);
+		}
+
 		try {
 			doDispatch(request, response);
 		}
@@ -948,6 +981,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				if (attributesSnapshot != null) {
 					restoreAttributesAfterInclude(request, attributesSnapshot);
 				}
+			}
+			if (requestPath != null) {
+				ServletRequestPathUtils.clearParsedRequestPath(request);
 			}
 		}
 	}

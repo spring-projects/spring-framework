@@ -68,6 +68,7 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A {@code MockMvcBuilder} that accepts {@code @Controller} registrations
@@ -125,6 +126,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	@Nullable
 	private FlashMapManager flashMapManager;
+
+	@Nullable
+	private PathPatternParser patternParser;
 
 	private boolean useSuffixPatternMatch = true;
 
@@ -213,7 +217,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			@Nullable String[] pathPatterns, HandlerInterceptor... interceptors) {
 
 		for (HandlerInterceptor interceptor : interceptors) {
-			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, interceptor));
+			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, null, interceptor));
 		}
 		return this;
 	}
@@ -304,6 +308,17 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	public StandaloneMockMvcBuilder setFlashMapManager(FlashMapManager flashMapManager) {
 		this.flashMapManager = flashMapManager;
 		return this;
+	}
+
+	/**
+	 * Enable URL path matching with parsed
+	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}
+	 * instead of String pattern matching with a {@link org.springframework.util.PathMatcher}.
+	 * @param parser the parser to use
+	 * @since 5.3
+	 */
+	public void setPatternParser(PathPatternParser parser) {
+		this.patternParser = parser;
 	}
 
 	/**
@@ -450,15 +465,21 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		public RequestMappingHandlerMapping getHandlerMapping(
 				FormattingConversionService mvcConversionService,
 				ResourceUrlProvider mvcResourceUrlProvider) {
+
 			RequestMappingHandlerMapping handlerMapping = handlerMappingFactory.get();
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
-			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+			if (patternParser != null) {
+				handlerMapping.setPatternParser(patternParser);
+			}
+			else {
+				handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+				if (removeSemicolonContent != null) {
+					handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
+				}
+			}
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
 			handlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
-			if (removeSemicolonContent != null) {
-				handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
-			}
 			return handlerMapping;
 		}
 

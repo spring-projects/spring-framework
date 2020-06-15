@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Predicate;
 
 import javax.servlet.ServletContext;
 
@@ -287,32 +286,29 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		mapping.setContentNegotiationManager(contentNegotiationManager);
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
-		PathMatchConfigurer configurer = getPathMatchConfigurer();
+		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
+		if (pathConfig.getPatternParser() != null) {
+			mapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			mapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			mapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
 
-		Boolean useSuffixPatternMatch = configurer.isUseSuffixPatternMatch();
-		if (useSuffixPatternMatch != null) {
-			mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+			Boolean useSuffixPatternMatch = pathConfig.isUseSuffixPatternMatch();
+			if (useSuffixPatternMatch != null) {
+				mapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+			}
+			Boolean useRegisteredSuffixPatternMatch = pathConfig.isUseRegisteredSuffixPatternMatch();
+			if (useRegisteredSuffixPatternMatch != null) {
+				mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
+			}
 		}
-		Boolean useRegisteredSuffixPatternMatch = configurer.isUseRegisteredSuffixPatternMatch();
-		if (useRegisteredSuffixPatternMatch != null) {
-			mapping.setUseRegisteredSuffixPatternMatch(useRegisteredSuffixPatternMatch);
-		}
-		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
+		Boolean useTrailingSlashMatch = pathConfig.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
 		}
-
-		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
-		if (pathHelper != null) {
-			mapping.setUrlPathHelper(pathHelper);
-		}
-		PathMatcher pathMatcher = configurer.getPathMatcher();
-		if (pathMatcher != null) {
-			mapping.setPathMatcher(pathMatcher);
-		}
-		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
-		if (pathPrefixes != null) {
-			mapping.setPathPrefixes(pathPrefixes);
+		if (pathConfig.getPathPrefixes() != null) {
+			mapping.setPathPrefixes(pathConfig.getPathPrefixes());
 		}
 
 		return mapping;
@@ -335,6 +331,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected final Object[] getInterceptors(
 			FormattingConversionService mvcConversionService,
 			ResourceUrlProvider mvcResourceUrlProvider) {
+
 		if (this.interceptors == null) {
 			InterceptorRegistry registry = new InterceptorRegistry();
 			addInterceptors(registry);
@@ -374,30 +371,31 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
-	/**
-	 * Return a global {@link PathMatcher} instance for path matching
-	 * patterns in {@link HandlerMapping HandlerMappings}.
-	 * This instance can be configured using the {@link PathMatchConfigurer}
-	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
-	 * @since 4.1
-	 */
-	@Bean
-	public PathMatcher mvcPathMatcher() {
-		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
-		return (pathMatcher != null ? pathMatcher : new AntPathMatcher());
-	}
 
 	/**
-	 * Return a global {@link UrlPathHelper} instance for path matching
-	 * patterns in {@link HandlerMapping HandlerMappings}.
-	 * This instance can be configured using the {@link PathMatchConfigurer}
-	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * Return a global {@link UrlPathHelper} instance which is used to resolve
+	 * the request mapping path for an application. The instance can be
+	 * configured via {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * <p><b>Note:</b> This is only used when parsed patterns are not
+	 * {@link PathMatchConfigurer#setPatternParser enabled}.
 	 * @since 4.1
 	 */
 	@Bean
 	public UrlPathHelper mvcUrlPathHelper() {
-		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
-		return (pathHelper != null ? pathHelper : new UrlPathHelper());
+		return getPathMatchConfigurer().getUrlPathHelperOrDefault();
+	}
+
+	/**
+	 * Return a global {@link PathMatcher} instance which is used for URL path
+	 * matching with String patterns. The returned instance can be configured
+	 * using {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * <p><b>Note:</b> This is only used when parsed patterns are not
+	 * {@link PathMatchConfigurer#setPatternParser enabled}.
+	 * @since 4.1
+	 */
+	@Bean
+	public PathMatcher mvcPathMatcher() {
+		return getPathMatchConfigurer().getPathMatcherOrDefault();
 	}
 
 	/**
@@ -451,10 +449,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	@Nullable
 	public HandlerMapping viewControllerHandlerMapping(
-			@Qualifier("mvcPathMatcher") PathMatcher pathMatcher,
-			@Qualifier("mvcUrlPathHelper") UrlPathHelper urlPathHelper,
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
 			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
+
 		ViewControllerRegistry registry = new ViewControllerRegistry(this.applicationContext);
 		addViewControllers(registry);
 
@@ -462,8 +459,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (handlerMapping == null) {
 			return null;
 		}
-		handlerMapping.setPathMatcher(pathMatcher);
-		handlerMapping.setUrlPathHelper(urlPathHelper);
+		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
+		if (pathConfig.getPatternParser() != null) {
+			handlerMapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			handlerMapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			handlerMapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		}
 		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
@@ -524,8 +527,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	@Nullable
 	public HandlerMapping resourceHandlerMapping(
-			@Qualifier("mvcUrlPathHelper") UrlPathHelper urlPathHelper,
-			@Qualifier("mvcPathMatcher") PathMatcher pathMatcher,
 			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager,
 			@Qualifier("mvcConversionService") FormattingConversionService conversionService,
 			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
@@ -533,16 +534,23 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		Assert.state(this.applicationContext != null, "No ApplicationContext set");
 		Assert.state(this.servletContext != null, "No ServletContext set");
 
+		PathMatchConfigurer pathConfig = getPathMatchConfigurer();
+
 		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
-				this.servletContext, contentNegotiationManager, urlPathHelper);
+				this.servletContext, contentNegotiationManager, pathConfig.getUrlPathHelper());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping == null) {
 			return null;
 		}
-		handlerMapping.setPathMatcher(pathMatcher);
-		handlerMapping.setUrlPathHelper(urlPathHelper);
+		if (pathConfig.getPatternParser() != null) {
+			handlerMapping.setPatternParser(pathConfig.getPatternParser());
+		}
+		else {
+			handlerMapping.setUrlPathHelper(pathConfig.getUrlPathHelperOrDefault());
+			handlerMapping.setPathMatcher(pathConfig.getPathMatcherOrDefault());
+		}
 		handlerMapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
@@ -562,14 +570,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public ResourceUrlProvider mvcResourceUrlProvider() {
 		ResourceUrlProvider urlProvider = new ResourceUrlProvider();
-		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
-		if (pathHelper != null) {
-			urlProvider.setUrlPathHelper(pathHelper);
-		}
-		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
-		if (pathMatcher != null) {
-			urlProvider.setPathMatcher(pathMatcher);
-		}
+		urlProvider.setUrlPathHelper(getPathMatchConfigurer().getUrlPathHelperOrDefault());
+		urlProvider.setPathMatcher(getPathMatchConfigurer().getPathMatcherOrDefault());
 		return urlProvider;
 	}
 
