@@ -93,7 +93,7 @@ public final class Parameter {
 
 	/**
 	 * Returns whether this {@link Parameter} has a value.
-	 * @return whether this {@link Parameter} has a value. {@literal false} if {@link #getValue()} is {@code null}
+	 * @return whether this {@link Parameter} has a value. {@code false} if {@link #getValue()} is {@code null}
 	 */
 	public boolean hasValue() {
 		return this.value != null;
@@ -101,7 +101,7 @@ public final class Parameter {
 
 	/**
 	 * Returns whether this {@link Parameter} has a empty.
-	 * @return whether this {@link Parameter} is empty. {@literal true} if {@link #getValue()} is {@code null}
+	 * @return whether this {@link Parameter} is empty. {@code true} if {@link #getValue()} is {@code null}
 	 */
 	public boolean isEmpty() {
 		return this.value == null;

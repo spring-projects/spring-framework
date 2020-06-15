@@ -37,6 +37,7 @@ public class ResourceDatabasePopulatorUnitTests {
 
 	private static final Resource script3 = mock(Resource.class);
 
+
 	@Test
 	public void constructWithNullResource() {
 		assertThatIllegalArgumentException().isThrownBy(

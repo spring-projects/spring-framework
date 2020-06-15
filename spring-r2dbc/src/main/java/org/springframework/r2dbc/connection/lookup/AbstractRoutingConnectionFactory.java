@@ -104,11 +104,11 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * Specify whether to apply a lenient fallback to the default {@link ConnectionFactory}
 	 * if no specific {@link ConnectionFactory} could be found for the current lookup key.
 	 *
-	 * <p>Default is {@literal true}, accepting lookup keys without a corresponding entry
+	 * <p>Default is {@code true}, accepting lookup keys without a corresponding entry
 	 * in the target {@link ConnectionFactory} map - simply falling back to the default
 	 * {@link ConnectionFactory} in that case.
 	 *
-	 * <p>Switch this flag to {@literal false} if you would prefer the fallback to only
+	 * <p>Switch this flag to {@code false} if you would prefer the fallback to only
 	 * apply when no lookup key was emitted. Lookup keys without a {@link ConnectionFactory}
 	 * entry will then lead to an {@link IllegalStateException}.
 	 * @see #setTargetConnectionFactories

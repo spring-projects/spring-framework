@@ -129,9 +129,9 @@ public interface DatabaseClient extends ConnectionAccessor {
 		Builder executeFunction(ExecuteFunction executeFunction);
 
 		/**
-		 * Configure whether to use named parameter expansion. Defaults to {@literal true}.
-		 * @param enabled {@literal true} to use named parameter expansion.
-		 * {@literal false} to disable named parameter expansion.
+		 * Configure whether to use named parameter expansion. Defaults to {@code true}.
+		 * @param enabled {@code true} to use named parameter expansion.
+		 * {@code false} to disable named parameter expansion.
 		 * @see NamedParameterExpander
 		 */
 		Builder namedParameters(boolean enabled);

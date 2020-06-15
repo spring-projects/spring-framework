@@ -83,7 +83,7 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	 * Flag to explicitly enable or disable the {@link #setDatabasePopulator database populator} and
 	 * {@link #setDatabaseCleaner database cleaner}.
 	 *
-	 * @param enabled {@literal true} if the database populator and database cleaner should be called on startup and
+	 * @param enabled {@code true} if the database populator and database cleaner should be called on startup and
 	 *          shutdown, respectively
 	 */
 	public void setEnabled(boolean enabled) {

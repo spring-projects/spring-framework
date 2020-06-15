@@ -43,6 +43,7 @@ public class CompositeDatabasePopulatorTests {
 
 	DatabasePopulator mockedDatabasePopulator2 = mock(DatabasePopulator.class);
 
+
 	@BeforeEach
 	public void before() {
 		when(mockedDatabasePopulator1.populate(mockedConnection)).thenReturn(

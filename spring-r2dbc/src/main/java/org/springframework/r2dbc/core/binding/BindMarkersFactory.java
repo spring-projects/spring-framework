@@ -48,7 +48,7 @@ public interface BindMarkersFactory {
 	 * Return whether the {@link BindMarkersFactory} uses identifiable
 	 * placeholders.
 	 * @return whether the {@link BindMarkersFactory} uses identifiable
-	 * placeholders. {@literal false} if multiple placeholders cannot be
+	 * placeholders. {@code false} if multiple placeholders cannot be
 	 * distinguished by just the {@link BindMarker#getPlaceholder() placeholder}
 	 * identifier.
 	 */

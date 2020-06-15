@@ -138,7 +138,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	/**
 	 * Obtain the {@link ConnectionFactory} for actual use.
 	 *
-	 * @return the {@link ConnectionFactory} (never {@literal null})
+	 * @return the {@link ConnectionFactory} (never {@code null})
 	 * @throws IllegalStateException in case of no ConnectionFactory set
 	 */
 	protected ConnectionFactory obtainConnectionFactory() {
@@ -382,7 +382,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 * Prepare the transactional {@link Connection} right after transaction begin.
 	 * <p>
 	 * The default implementation executes a "SET TRANSACTION READ ONLY" statement if the {@link #setEnforceReadOnly
-	 * "enforceReadOnly"} flag is set to {@literal true} and the transaction definition indicates a read-only transaction.
+	 * "enforceReadOnly"} flag is set to {@code true} and the transaction definition indicates a read-only transaction.
 	 * <p>
 	 * The "SET TRANSACTION READ ONLY" is understood by Oracle, MySQL and Postgres and may work with other databases as
 	 * well. If you'd like to adapt this treatment, override this method accordingly.
@@ -441,7 +441,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	 * {@link IsolationLevel}s, override this method accordingly.
 	 *
 	 * @param isolationLevel the isolation level to translate.
-	 * @return the resolved isolation level. Can be {@literal null} if not resolvable or the isolation level should remain
+	 * @return the resolved isolation level. Can be {@code null} if not resolvable or the isolation level should remain
 	 *         {@link TransactionDefinition#ISOLATION_DEFAULT default}.
 	 * @see TransactionDefinition#getIsolationLevel()
 	 */

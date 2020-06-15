@@ -37,6 +37,7 @@ public abstract class AbstractDatabaseInitializationTests {
 
 	ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
 
+
 	@Test
 	public void scriptWithSingleLineCommentsAndFailedDrop() {
 		databasePopulator.addScript(resource("db-schema-failed-drop-comments.sql"));

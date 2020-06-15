@@ -49,7 +49,6 @@ public interface DatabasePopulator {
 
 	/**
 	 * Execute the given {@link DatabasePopulator} against the given {@link ConnectionFactory}.
-	 * @param populator the {@link DatabasePopulator} to execute
 	 * @param connectionFactory the {@link ConnectionFactory} to execute against
 	 * @return {@link Mono} that initiates {@link DatabasePopulator#populate(Connection)}
 	 * and is notified upon completion

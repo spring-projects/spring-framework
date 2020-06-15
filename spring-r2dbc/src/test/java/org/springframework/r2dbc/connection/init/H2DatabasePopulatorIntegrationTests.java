@@ -36,6 +36,7 @@ public class H2DatabasePopulatorIntegrationTests
 	ConnectionFactory connectionFactory = ConnectionFactories.get("r2dbc:h2:mem:///"
 			+ databaseName + "?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
 
+
 	@Override
 	ConnectionFactory getConnectionFactory() {
 		return this.connectionFactory;

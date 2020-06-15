@@ -31,6 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Unit tests for {@link ScriptUtils}.
  *
+ * @author Thomas Risberg
+ * @author Sam Brannen
+ * @author Phillip Webb
+ * @author Chris Baldwin
+ * @author Nicolas Debeissat
  * @author Mark Paluch
  */
 public class ScriptUtilsUnitTests {

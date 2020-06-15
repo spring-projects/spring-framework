@@ -162,14 +162,14 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		/**
 		 * Return whether the binding has a value associated with it.
-		 * @return {@literal true} if there is a value present, otherwise {@literal false}
+		 * @return {@code true} if there is a value present, otherwise {@code false}
 		 * for a {@code NULL} binding.
 		 */
 		public abstract boolean hasValue();
 
 		/**
 		 * Return whether the binding is empty.
-		 * @return {@literal true} if this is is a {@code NULL} binding
+		 * @return {@code true} if this is is a {@code NULL} binding
 		 */
 		public boolean isNull() {
 			return !hasValue();

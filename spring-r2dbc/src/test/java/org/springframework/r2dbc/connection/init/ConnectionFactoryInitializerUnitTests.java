@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.when;
 
@@ -44,9 +43,10 @@ public class ConnectionFactoryInitializerUnitTests {
 	MockConnectionFactory connectionFactory = MockConnectionFactory.builder().connection(
 			connection).build();
 
+
 	@Test
 	public void shouldInitializeConnectionFactory() {
-		when(populator.populate(any())).thenReturn(
+		when(populator.populate(connectionFactory)).thenReturn(
 				Mono.<Void> empty().doOnSubscribe(subscription -> called.set(true)));
 
 		ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
@@ -60,7 +60,7 @@ public class ConnectionFactoryInitializerUnitTests {
 
 	@Test
 	public void shouldCleanConnectionFactory() {
-		when(populator.populate(any())).thenReturn(
+		when(populator.populate(connectionFactory)).thenReturn(
 				Mono.<Void> empty().doOnSubscribe(subscription -> called.set(true)));
 
 		ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();

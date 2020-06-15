@@ -76,7 +76,7 @@ public abstract class ScriptUtils {
 	/**
 	 * End of file (EOF) SQL statement separator: {@code "^^^ END OF SCRIPT ^^^"}.
 	 * <p>This value may be supplied as the {@code separator} to {@link
-	 * #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)}
+	 * #executeSqlScript(Connection, EncodedResource, DataBufferFactory, boolean, boolean, String[], String, String, String)}
 	 * to denote that an SQL script contains a single statement (potentially
 	 * spanning multiple lines) with no explicit statement separator. Note that
 	 * such a script should not actually contain this value; it is merely a
@@ -373,7 +373,6 @@ public abstract class ScriptUtils {
 	 */
 	public static String readScript(LineNumberReader lineNumberReader, @Nullable String lineCommentPrefix,
 			@Nullable String separator, @Nullable String blockCommentEndDelimiter) throws IOException {
-
 		String[] lineCommentPrefixes = (lineCommentPrefix != null) ? new String[] { lineCommentPrefix } : null;
 		return readScript(lineNumberReader, lineCommentPrefixes, separator, blockCommentEndDelimiter);
 	}
@@ -480,7 +479,7 @@ public abstract class ScriptUtils {
 	 * @param resource the resource to load the SQL script from; encoded with the
 	 * current platform's default encoding
 	 * @throws ScriptException if an error occurred while executing the SQL script
-	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
+	 * @see #executeSqlScript(Connection, EncodedResource, DataBufferFactory, boolean, boolean, String[], String, String, String)
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
@@ -504,7 +503,7 @@ public abstract class ScriptUtils {
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
 	 * @throws ScriptException if an error occurred while executing the SQL script
-	 * @see #executeSqlScript(Connection, EncodedResource, boolean, boolean, String, String, String, String)
+	 * @see #executeSqlScript(Connection, EncodedResource, DataBufferFactory, boolean, boolean, String[], String, String, String)
 	 * @see #DEFAULT_STATEMENT_SEPARATOR
 	 * @see #DEFAULT_COMMENT_PREFIX
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
