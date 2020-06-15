@@ -136,6 +136,22 @@ public interface HandlerMapping {
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
+
+	/**
+	 * Whether this {@code HandlerMapping} instance has been enabled to use parsed
+	 * {@link org.springframework.web.util.pattern.PathPattern}s in which case
+	 * the {@link DispatcherServlet} automatically
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#parseAndCache parses}
+	 * the {@code RequestPath} to make it available for
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#getParsedRequestPath
+	 * access} in {@code HandlerMapping}s, {@code HandlerInterceptor}s, and
+	 * other components.
+	 * @since 5.3
+	 */
+	default boolean usesPathPatterns() {
+		return false;
+	}
+
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.

@@ -470,6 +470,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 
 	/**
+	 * Return "true" if this {@code HandlerMapping} has been
+	 * {@link #setPatternParser enabled} to use parsed {@code PathPattern}s.
+	 */
+	@Override
+	public boolean usesPathPatterns() {
+		return getPatternParser() != null;
+	}
+
+	/**
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
 	 * @param request current HTTP request
@@ -534,8 +543,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Initialize the path to use for request mapping.
-	 * <p>When parsed patterns are {@link #setPatternParser(PathPatternParser)
-	 * enabled} a parsed {@code RequestPath} is expected to have been
+	 * <p>When parsed patterns are {@link #usesPathPatterns() enabled} a parsed
+	 * {@code RequestPath} is expected to have been
 	 * {@link ServletRequestPathUtils#parseAndCache(HttpServletRequest) parsed}
 	 * externally by the {@link org.springframework.web.servlet.DispatcherServlet}
 	 * or {@link org.springframework.web.filter.ServletRequestPathFilter}.
@@ -545,7 +554,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @since 5.3
 	 */
 	protected String initLookupPath(HttpServletRequest request) {
-		if (getPatternParser() != null) {
+		if (usesPathPatterns()) {
 			request.removeAttribute(UrlPathHelper.PATH_ATTRIBUTE);
 			RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
 			String lookupPath = requestPath.pathWithinApplication().value();

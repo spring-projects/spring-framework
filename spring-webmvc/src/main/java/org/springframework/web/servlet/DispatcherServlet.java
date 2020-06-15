@@ -40,8 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -65,7 +63,6 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
@@ -630,26 +627,12 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		this.parseRequestPath = initRequestPathParsing(this.handlerMappings);
-	}
-
-	private boolean initRequestPathParsing(List<HandlerMapping> mappings) {
-		for (HandlerMapping mapping : mappings) {
-			if (mapping instanceof AbstractHandlerMapping) {
-				if (((AbstractHandlerMapping) mapping).getPatternParser() != null) {
-					return true;
-				}
-			}
-			if (AopUtils.isAopProxy(mapping)) {
-				Object target = AopProxyUtils.getSingletonTarget(mapping);
-				if (target instanceof AbstractHandlerMapping) {
-					if (((AbstractHandlerMapping) target).getPatternParser() != null) {
-						return true;
-					}
-				}
+		for (HandlerMapping mapping : this.handlerMappings) {
+			if (mapping.usesPathPatterns()) {
+				this.parseRequestPath = true;
+				break;
 			}
 		}
-		return false;
 	}
 
 	/**

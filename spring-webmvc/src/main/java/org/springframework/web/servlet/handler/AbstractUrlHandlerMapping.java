@@ -40,15 +40,14 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for URL-mapped {@link HandlerMapping} implementations.
  *
  * <p>Supports literal matches and pattern matches such as "/test/*", "/test/**",
  * and others. For details on pattern syntax refer to {@link PathPattern} when
- * parsed patterns are {@link #setPatternParser(PathPatternParser) enabled} or
- * see {@link AntPathMatcher} otherwise. The syntax is largely the same but the
+ * parsed patterns are {@link #usesPathPatterns() enabled} or see
+ * {@link AntPathMatcher} otherwise. The syntax is largely the same but the
  * {@code PathPattern} syntax is more tailored for web applications, and its
  * implementation is more efficient.
  *
@@ -135,7 +134,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = initLookupPath(request);
 		Object handler;
-		if (getPatternParser() != null) {
+		if (usesPathPatterns()) {
 			RequestPath path = ServletRequestPathUtils.getParsedRequestPath(request);
 			handler = lookupHandler(path, lookupPath, request);
 		}
@@ -167,8 +166,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	/**
 	 * Look up a handler instance for the given URL path. This method is used
-	 * when parsed {@code PathPattern}s are
-	 * {@link #setPatternParser(PathPatternParser) enabled}.
+	 * when parsed {@code PathPattern}s are {@link #usesPathPatterns() enabled}.
 	 * @param path the parsed RequestPath
 	 * @param lookupPath the String lookupPath for checking direct hits
 	 * @param request current HTTP request
@@ -462,8 +460,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Identical to {@link #getHandlerMap()} but with parsed patterns when
-	 * {@link #setPatternParser(PathPatternParser)} is set, or otherwise empty.
+	 * Identical to {@link #getHandlerMap()} but populated when parsed patterns
+	 * are {@link #usesPathPatterns() enabled}; otherwise empty.
 	 * @since 5.3
 	 */
 	public final Map<PathPattern, Object> getPathPatternHandlerMap() {

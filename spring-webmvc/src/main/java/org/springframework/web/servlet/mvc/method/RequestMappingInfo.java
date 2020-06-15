@@ -187,8 +187,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Return the patterns condition in use when parsed patterns are enabled via
-	 * {@link org.springframework.web.servlet.handler.AbstractHandlerMapping#setPatternParser(PathPatternParser)}.
+	 * Return the patterns condition in use when parsed patterns are
+	 * {@link AbstractHandlerMapping#usesPathPatterns() enabled}.
 	 * <p>This is mutually exclusive with {@link #getPatternsCondition()} such
 	 * that when one returns {@code null} the other one returns an instance.
 	 * @since 5.3
@@ -750,7 +750,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 
 		/**
-		 * Enable use of parsed {@link PathPattern} as described in
+		 * Enable use of parsed {@link PathPattern}s as described in
 		 * {@link AbstractHandlerMapping#setPatternParser(PathPatternParser)}.
 		 * <p><strong>Note:</strong> This property is mutually exclusive with
 		 * {@link #setPathMatcher(PathMatcher)}.
