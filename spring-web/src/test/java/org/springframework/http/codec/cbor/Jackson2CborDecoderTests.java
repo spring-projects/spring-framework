@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec.cbor;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +27,6 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.testfixture.codec.AbstractDecoderTests;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -64,11 +62,6 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborD
 
 		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
 		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isFalse();
-
-		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				new MediaType("application", "cbor", StandardCharsets.UTF_8))).isTrue();
-		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				new MediaType("application", "cbor", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Override

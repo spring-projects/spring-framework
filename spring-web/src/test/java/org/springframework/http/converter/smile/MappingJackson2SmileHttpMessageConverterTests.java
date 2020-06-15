@@ -17,7 +17,6 @@
 package org.springframework.http.converter.smile;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
@@ -46,8 +45,6 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "xml"))).isFalse();
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8))).isTrue();
-		assertThat(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Test
@@ -55,8 +52,6 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isFalse();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "xml"))).isFalse();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8))).isTrue();
-		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
 	@Test
