@@ -35,6 +35,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Slawomir Dymitrow
  * @since 1.1
  */
 public class GeneratedKeyHolder implements KeyHolder {
