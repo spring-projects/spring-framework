@@ -18,7 +18,6 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,11 +69,6 @@ public class Jackson2SmileEncoderTests extends AbstractEncoderTestCase<Jackson2S
 		assertTrue(this.encoder.canEncode(pojoType, SMILE_MIME_TYPE));
 		assertTrue(this.encoder.canEncode(pojoType, STREAM_SMILE_MIME_TYPE));
 		assertTrue(this.encoder.canEncode(pojoType, null));
-
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8)));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				new MimeType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1)));
 
 		// SPR-15464
 		assertTrue(this.encoder.canEncode(ResolvableType.NONE, null));

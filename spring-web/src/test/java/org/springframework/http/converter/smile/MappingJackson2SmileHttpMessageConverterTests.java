@@ -49,8 +49,6 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile")));
 		assertFalse(converter.canRead(MyBean.class, new MediaType("application", "json")));
 		assertFalse(converter.canRead(MyBean.class, new MediaType("application", "xml")));
-		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8)));
-		assertFalse(converter.canRead(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1)));
 	}
 
 	@Test
@@ -58,8 +56,6 @@ public class MappingJackson2SmileHttpMessageConverterTests {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile")));
 		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "json")));
 		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "xml")));
-		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.UTF_8)));
-		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1)));
 	}
 
 	@Test

@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec.json;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,11 +64,6 @@ public class Jackson2SmileDecoderTests extends AbstractDecoderTestCase<Jackson2S
 
 		assertFalse(decoder.canDecode(forClass(String.class), null));
 		assertFalse(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON));
-
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				new MimeType("application", "x-jackson-smile", StandardCharsets.UTF_8)));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				new MimeType("application", "x-jackson-smile", StandardCharsets.ISO_8859_1)));
 	}
 
 

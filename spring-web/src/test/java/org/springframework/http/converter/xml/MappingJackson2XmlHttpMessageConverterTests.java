@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -55,7 +56,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml")));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "soap+xml")));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.UTF_8)));
-		assertFalse(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1)));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("text", "xml", StandardCharsets.ISO_8859_1)));
 	}
 
 	@Test
@@ -193,6 +194,21 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		this.thrown.expect(HttpMessageNotReadableException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readNonUnicode() throws Exception {
+		String body = "<MyBean>" +
+				"<string>føø bår</string>" +
+				"</MyBean>";
+
+		Charset charset = StandardCharsets.ISO_8859_1;
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(charset));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml", charset));
+		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
+		assertEquals("føø bår", result.getString());
+	}
+
 
 
 	public static class MyBean {
