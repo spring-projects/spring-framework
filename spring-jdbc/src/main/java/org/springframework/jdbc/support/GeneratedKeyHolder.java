@@ -61,6 +61,12 @@ public class GeneratedKeyHolder implements KeyHolder {
 	@Override
 	@Nullable
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
+		return getKeyAs(Number.class);
+	}
+
+	@Override
+	@Nullable
+	public <T> T getKeyAs(Class<T> keyClass) throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (this.keyList.isEmpty()) {
 			return null;
 		}
@@ -72,13 +78,13 @@ public class GeneratedKeyHolder implements KeyHolder {
 		Iterator<Object> keyIter = this.keyList.get(0).values().iterator();
 		if (keyIter.hasNext()) {
 			Object key = keyIter.next();
-			if (!(key instanceof Number)) {
+			if (key == null || !(keyClass.isAssignableFrom(key.getClass()))) {
 				throw new DataRetrievalFailureException(
-						"The generated key is not of a supported numeric type. " +
+						"The generated key is not of a supported type. " +
 						"Unable to cast [" + (key != null ? key.getClass().getName() : null) +
-						"] to [" + Number.class.getName() + "]");
+						"] to [" + keyClass.getName() + "]");
 			}
-			return (Number) key;
+			return keyClass.cast(key);
 		}
 		else {
 			throw new DataRetrievalFailureException("Unable to retrieve the generated key. " +

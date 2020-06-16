@@ -52,12 +52,37 @@ public class KeyHolderTests {
 	}
 
 	@Test
+	public void singleKeyAsString() {
+		kh.getKeyList().addAll(singletonList(singletonMap("key", "1")));
+
+		assertThat(kh.getKeyAs(String.class)).as("single key should be returned").isEqualTo("1");
+	}
+
+	@Test
+	public void singleKeyAsWrongClass() {
+		kh.getKeyList().addAll(singletonList(singletonMap("key", "1")));
+
+		assertThatExceptionOfType(DataRetrievalFailureException.class).isThrownBy(() ->
+				kh.getKeyAs(Integer.class))
+				.withMessageStartingWith("The generated key is not of a supported type.");
+	}
+
+	@Test
+	public void singleKeyWithNullValue() {
+		kh.getKeyList().addAll(singletonList(singletonMap("key", null)));
+
+		assertThatExceptionOfType(DataRetrievalFailureException.class).isThrownBy(() ->
+				kh.getKeyAs(Integer.class))
+				.withMessageStartingWith("The generated key is not of a supported type.");
+	}
+
+	@Test
 	public void singleKeyNonNumeric() {
 		kh.getKeyList().addAll(singletonList(singletonMap("key", "1")));
 
 		assertThatExceptionOfType(DataRetrievalFailureException.class).isThrownBy(() ->
 				kh.getKey().intValue())
-			.withMessageStartingWith("The generated key is not of a supported numeric type.");
+			.withMessageStartingWith("The generated key is not of a supported type.");
 	}
 
 	@Test

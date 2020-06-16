@@ -59,6 +59,22 @@ public interface KeyHolder {
 	Number getKey() throws InvalidDataAccessApiUsageException;
 
 	/**
+	 * Retrieve the first item from the first map, assuming that there is just
+	 * one item and just one map, and that the item is an instance of provided class.
+	 * This is the typical case: a single generated key of desired class.
+	 * <p>Keys are held in a List of Maps, where each item in the list represents
+	 * the keys for each row. If there are multiple columns, then the Map will have
+	 * multiple entries as well. If this method encounters multiple entries in
+	 * either the map or the list meaning that multiple keys were returned,
+	 * then an InvalidDataAccessApiUsageException is thrown.
+	 * @param keyClass class of the requested key
+	 * @return the generated key as an instance of provided class
+	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
+	 */
+	@Nullable
+	<T> T getKeyAs(Class<T> keyClass) throws InvalidDataAccessApiUsageException;
+
+	/**
 	 * Retrieve the first map of keys.
 	 * <p>If there are multiple entries in the list (meaning that multiple rows
 	 * had keys returned), then an InvalidDataAccessApiUsageException is thrown.
