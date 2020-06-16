@@ -24,7 +24,6 @@ import kotlinx.serialization.json.Json;
 import kotlinx.serialization.json.JsonConfiguration;
 import kotlinx.serialization.json.JsonDecodingException;
 import kotlinx.serialization.modules.EmptyModule;
-import kotlinx.serialization.modules.SerialModule;
 import org.jetbrains.annotations.NotNull;
 
 import org.springframework.http.HttpInputMessage;
@@ -58,15 +57,15 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 	 * Construct a new {@code KotlinSerializationJsonHttpMessageConverter} with default configuration.
 	 */
 	public KotlinSerializationJsonHttpMessageConverter() {
-		this(JsonConfiguration.getDefault(), EmptyModule.INSTANCE);
+		this(new Json(JsonConfiguration.getDefault(), EmptyModule.INSTANCE));
 	}
 
 	/**
 	 * Construct a new {@code KotlinSerializationJsonHttpMessageConverter} with custom configuration.
 	 */
-	public KotlinSerializationJsonHttpMessageConverter(JsonConfiguration jsonConfiguration, SerialModule serialModule) {
+	public KotlinSerializationJsonHttpMessageConverter(Json json) {
 		super(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
-		this.json = new Json(jsonConfiguration, serialModule);
+		this.json = json;
 	}
 
 	@Override
@@ -101,7 +100,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 	protected void writeInternal(
 			@NotNull Object o,
 			@NotNull HttpOutputMessage outputMessage
-	) throws IOException, HttpMessageNotWritableException {
+	) throws HttpMessageNotWritableException {
 		try {
 			String json = this.json.stringify(this.resolver.resolve(o.getClass()), o);
 			MediaType contentType = outputMessage.getHeaders().getContentType();
