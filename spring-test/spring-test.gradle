@@ -2,6 +2,12 @@ description = "Spring TestContext Framework"
 
 apply plugin: "kotlin"
 
+// Workaround for https://youtrack.jetbrains.com/issue/KT-39610
+configurations["optional"].attributes.attribute(
+		org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
+		objects.named(Usage.class, "java-runtime")
+)
+
 dependencies {
 	compile(project(":spring-core"))
 	optional(project(":spring-aop"))
