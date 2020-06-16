@@ -69,6 +69,7 @@ class KeyHolderTests {
 
 	@Test
 	void getKeyWithMultipleKeysInMap() {
+		@SuppressWarnings("serial")
 		Map<String, Object> m = new HashMap<String, Object>() {{
 			put("key", 1);
 			put("seq", 2);
@@ -108,6 +109,7 @@ class KeyHolderTests {
 
 	@Test
 	void getKeysWithMultipleKeyRows() {
+		@SuppressWarnings("serial")
 		Map<String, Object> m = new HashMap<String, Object>() {{
 			put("key", 1);
 			put("seq", 2);
