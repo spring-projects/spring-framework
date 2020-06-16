@@ -184,7 +184,7 @@ transaction management. The following listing shows the definition of the
 		@Throws(TransactionException::class)
 		fun rollback(status: TransactionStatus)
 	}
----- 
+----
 
 This is primarily a service provider interface (SPI), although you can use it
 <<transaction-programmatic-ptm, programmatically>> from your application code. Because
@@ -241,7 +241,7 @@ listing shows the transaction strategy defined by
 		@Throws(TransactionException::class)
 		fun rollback(status: ReactiveTransaction): Mono<Void>
 	}
----- 
+----
 
 The reactive transaction manager is primarily a service provider interface (SPI),
 although you can use it <<transaction-programmatic-rtm, programmatically>> from your
@@ -1698,7 +1698,7 @@ in the application context:
 
 		@Transactional("account")
 		public void doSomething() { ... }
-		
+
 		@Transactional("reactive-account")
 		public Mono<Void> doSomethingReactive() { ... }
 	}
@@ -2399,11 +2399,11 @@ the `TransactionOperator` resembles the next example:
 		}
 
 		public Mono<Object> someServiceMethod() {
-			
+
 			// the code in this method executes in a transactional context
-			
+
             Mono<Object> update = updateOperation1();
-			
+
 			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
 		}
 	}
@@ -2463,9 +2463,7 @@ In Reactive Streams, a `Subscriber` can cancel its `Subscription` and terminate 
 `Publisher`. Operators in Project Reactor, as well as in other libraries, such as `next()`,
 `take(long)`, `timeout(Duration)`, and others can issue cancellations. There is no way to
 know the reason for the cancellation, whether it is due to an error or a simply lack of
-interest to consume further, and in version 5.2 the `TransactionalOperator` defaults to
-committing the transaction on cancel. In version 5.3 this behavior will change and
-transactions will be roll back on cancel to create a reliable and deterministic outcome.
+interest to consume further. Since version 5.3 cancel signals lead to a roll back.
 As a result it is important to consider the operators used downstream from a transaction
 `Publisher`. In particular in the case of a `Flux` or other multi-value `Publisher`,
 the full output must be consumed to allow the transaction to complete.
@@ -2490,7 +2488,7 @@ following example shows customization of the transactional settings for a specif
 
 		public SimpleService(ReactiveTransactionManager transactionManager) {
 			DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-			
+
 			// the transaction settings can be set here explicitly if so desired
 			definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 			definition.setTimeout(30); // 30 seconds
@@ -2588,9 +2586,9 @@ following example shows how to do so:
 	def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 	Mono<ReactiveTransaction> reactiveTx = txManager.getReactiveTransaction(def);
-	
+
 	reactiveTx.flatMap(status -> {
-		
+
 		Mono<Object> tx = ...; // execute your business logic here
 
 		return tx.then(txManager.commit(status))
@@ -2942,7 +2940,7 @@ this `DataSource`. The following example autowires a `DataSource`:
 ----
 	@Repository
 	class JdbcMovieFinder(dataSource: DataSource) : MovieFinder {
-		
+
 		private val jdbcTemplate = JdbcTemplate(dataSource)
 
 		// ...
@@ -3202,8 +3200,8 @@ The following query finds and populates a single domain object:
 ----
 	val actor = jdbcTemplate.queryForObject(
 				"select first_name, last_name from t_actor where id = ?",
-				arrayOf(1212L)) { rs, _ -> 
-			Actor(rs.getString("first_name"), rs.getString("last_name")) 
+				arrayOf(1212L)) { rs, _ ->
+			Actor(rs.getString("first_name"), rs.getString("last_name"))
 		}
 ----
 
@@ -3455,7 +3453,7 @@ method with `@Autowired`. The following example shows how to do so:
 	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao { // <2>
 
 		private val jdbcTemplate = JdbcTemplate(dataSource) // <3>
-		
+
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
@@ -3794,10 +3792,10 @@ translator:
 	private val jdbcTemplate = JdbcTemplate(dataSource).apply {
 		// create a custom translator and set the DataSource for the default translation lookup
 		exceptionTranslator = CustomSQLErrorCodesTranslator().apply {
-			this.dataSource = dataSource 
+			this.dataSource = dataSource
 		}
 	}
-	
+
 	fun updateShippingCharge(orderId: Long, pct: Long) {
 		// use the prepared JdbcTemplate for this update
 		this.jdbcTemplate!!.update("update orders" +
@@ -4021,8 +4019,8 @@ on Oracle but may not work on other platforms:
 	val name = "Rob"
 
 	val keyHolder = GeneratedKeyHolder()
-	jdbcTemplate.update({ 
-		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) } 
+	jdbcTemplate.update({
+		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) }
 	}, keyHolder)
 
 	// keyHolder.getKey() now contains the generated key
@@ -4960,7 +4958,7 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 		private var procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
 			isResultsMapCaseInsensitive = true
 		}).withProcedureName("read_actor")
-		
+
 		// ... additional methods
 	}
 ----
@@ -5718,7 +5716,7 @@ the supplied `ResultSet`, as follows:
 	import org.springframework.jdbc.core.RowMapper
 
 	class GenreMapper : RowMapper<Genre> {
-		
+
 		override fun mapRow(rs: ResultSet, rowNum: Int): Genre {
 			return Genre(rs.getString("name"))
 		}
@@ -6836,7 +6834,7 @@ implementation resembles the following example, based on the plain Hibernate API
 .Kotlin
 ----
 	class ProductDaoImpl(private val sessionFactory: SessionFactory) : ProductDao {
-		
+
 		fun loadProductsByCategory(category: String): Collection<*> {
 			return sessionFactory.currentSession
 					.createQuery("from test.Product product where product.category=?")
@@ -7044,7 +7042,7 @@ and an example for a business method implementation:
 ----
 	class ProductServiceImpl(transactionManager: PlatformTransactionManager,
 							private val productDao: ProductDao) : ProductService {
-		
+
 		private val transactionTemplate = TransactionTemplate(transactionManager)
 
 		fun increasePriceOfAllProductsInCategory(category: String) {
