@@ -16,9 +16,7 @@
 
 package org.springframework.test.web.client.match;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -29,11 +27,10 @@ import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.JsonExpectationsHelper;
@@ -149,21 +146,42 @@ public class ContentRequestMatchers {
 	 * Parse the body as form data and compare to the given {@code MultiValueMap}.
 	 * @since 4.3
 	 */
-	public RequestMatcher formData(MultiValueMap<String, String> expectedContent) {
+	public RequestMatcher formData(MultiValueMap<String, String> expected) {
+		return formData(expected, true);
+	}
+
+	/**
+	 * Variant of {@link #formData(MultiValueMap)} that matches the given subset
+	 * of expected form parameters.
+	 * @since 5.3
+	 */
+	public RequestMatcher formDataContains(Map<String, String> expected) {
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>(expected.size());
+		expected.forEach(multiValueMap::add);
+		return formData(multiValueMap, false);
+	}
+
+	private RequestMatcher formData(MultiValueMap<String, String> expectedMap, boolean containsExactly) {
 		return request -> {
-			HttpInputMessage inputMessage = new HttpInputMessage() {
-				@Override
-				public InputStream getBody() throws IOException {
-					MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-					return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			MockHttpInputMessage message = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
+			message.getHeaders().putAll(mockRequest.getHeaders());
+			MultiValueMap<String, String> actualMap = new FormHttpMessageConverter().read(null, message);
+			if (containsExactly) {
+				assertEquals("Form data", expectedMap, actualMap);
+			}
+			else {
+				assertTrue("Form data " + actualMap, expectedMap.size() <= actualMap.size());
+				for (Map.Entry<String, ? extends List<?>> entry : expectedMap.entrySet()) {
+					String name = entry.getKey();
+					List<?> values = entry.getValue();
+					assertTrue("No form parameter '" + name + "'", actualMap.get(name) != null);
+					assertTrue("Parameter value count " + values.size(), values.size() <= actualMap.get(name).size());
+					for (int i = 0; i < values.size(); i++) {
+						assertEquals("Form parameter", values.get(i), actualMap.get(name).get(i));
+					}
 				}
-				@Override
-				public HttpHeaders getHeaders() {
-					return request.getHeaders();
-				}
-			};
-			FormHttpMessageConverter converter = new FormHttpMessageConverter();
-			assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
+			}
 		};
 	}
 
@@ -197,17 +215,17 @@ public class ContentRequestMatchers {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	private RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, boolean assertSize) {
+	private RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, boolean containsExactly) {
 		return request -> {
 			MultiValueMap<String, ?> actualMap = MultipartHelper.parse(request);
-			if (assertSize) {
+			if (containsExactly) {
 				assertEquals("Multipart request content: " + actualMap, expectedMap.size(), actualMap.size());
 			}
 			for (Map.Entry<String, ? extends List<?>> entry : expectedMap.entrySet()) {
 				String name = entry.getKey();
 				List<?> values = entry.getValue();
 				assertTrue("No Multipart '" + name + "'", actualMap.get(name) != null);
-				assertTrue("Multipart value count " + values.size(), assertSize ?
+				assertTrue("Multipart value count " + values.size(), containsExactly ?
 						values.size() == actualMap.get(name).size() :
 						values.size() <= actualMap.get(name).size());
 				for (int i = 0; i < values.size(); i++) {
@@ -225,8 +243,7 @@ public class ContentRequestMatchers {
 						assertEquals("Multipart content", expected, (String) actual);
 					}
 					else {
-						throw new IllegalArgumentException(
-								"Unexpected multipart value type: " + expected.getClass());
+						throw new IllegalArgumentException("Unexpected multipart value: " + expected.getClass());
 					}
 				}
 			}
