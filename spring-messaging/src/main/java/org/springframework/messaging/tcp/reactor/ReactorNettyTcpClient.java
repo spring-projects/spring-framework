@@ -87,7 +87,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 	private Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
-	private volatile boolean stopping = false;
+	private volatile boolean stopping;
 
 
 	/**

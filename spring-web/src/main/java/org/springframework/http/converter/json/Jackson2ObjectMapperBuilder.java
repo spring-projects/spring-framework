@@ -106,7 +106,7 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private static volatile boolean kotlinWarningLogged = false;
+	private static volatile boolean kotlinWarningLogged;
 
 	private final Log logger = HttpLogging.forLogName(getClass());
 
