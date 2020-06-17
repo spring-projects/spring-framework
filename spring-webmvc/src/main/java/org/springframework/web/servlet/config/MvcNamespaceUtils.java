@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -39,6 +44,7 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Marten Deinum
  * @since 3.1
  */
 public abstract class MvcNamespaceUtils {
@@ -60,12 +66,15 @@ public abstract class MvcNamespaceUtils {
 
 	private static final String HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME = "mvcHandlerMappingIntrospector";
 
-
 	public static void registerDefaultComponents(ParserContext parserContext, @Nullable Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
 		registerHttpRequestHandlerAdapter(parserContext, source);
 		registerSimpleControllerHandlerAdapter(parserContext, source);
 		registerHandlerMappingIntrospector(parserContext, source);
+		registerThemeResolver(parserContext, source);
+		registerLocaleResolver(parserContext, source);
+		registerFlashMapManager(parserContext, source);
+		registerViewNameTranslator(parserContext, source);
 	}
 
 	/**
@@ -222,6 +231,70 @@ public abstract class MvcNamespaceUtils {
 			return new RuntimeBeanReference(name);
 		}
 		return null;
+	}
+
+	/**
+	 * Registers  an {@link FixedThemeResolver} under a well-known name
+	 * unless already registered.
+	 *
+	 * @since 5.3
+	 */
+	private static void registerThemeResolver(ParserContext parserContext, @Nullable Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(DispatcherServlet.THEME_RESOLVER_BEAN_NAME)) {
+			RootBeanDefinition beanDef = new RootBeanDefinition(FixedThemeResolver.class);
+			beanDef.setSource(source);
+			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, beanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(beanDef, DispatcherServlet.THEME_RESOLVER_BEAN_NAME));
+		}
+	}
+
+	/**
+	 * Registers  an {@link AcceptHeaderLocaleResolver} under a well-known name
+	 * unless already registered.
+	 *
+	 * @since 5.3
+	 */
+	private static void registerLocaleResolver(ParserContext parserContext, @Nullable Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME)) {
+			RootBeanDefinition beanDef = new RootBeanDefinition(AcceptHeaderLocaleResolver.class);
+			beanDef.setSource(source);
+			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, beanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(beanDef, DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME));
+		}
+	}
+
+	/**
+	 * Registers  an {@link SessionFlashMapManager} under a well-known name
+	 * unless already registered.
+	 *
+	 * @since 5.3
+	 */
+	private static void registerFlashMapManager(ParserContext parserContext, @Nullable Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME)) {
+			RootBeanDefinition beanDef = new RootBeanDefinition(SessionFlashMapManager.class);
+			beanDef.setSource(source);
+			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME, beanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(beanDef, DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME));
+		}
+	}
+
+	/**
+	 * Registers  an {@link DefaultRequestToViewNameTranslator} under a well-known name
+	 * unless already registered.
+	 *
+	 * @since 5.3
+	 */
+	private static void registerViewNameTranslator(ParserContext parserContext, @Nullable Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME)) {
+			RootBeanDefinition beanDef = new RootBeanDefinition(DefaultRequestToViewNameTranslator.class);
+			beanDef.setSource(source);
+			beanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME, beanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(beanDef, DispatcherServlet.REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME));
+		}
 	}
 
 }
