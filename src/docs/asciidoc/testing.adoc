@@ -2307,8 +2307,6 @@ Spring provides the following implementations:
   locations.
 * `GenericXmlWebContextLoader`: Loads a `WebApplicationContext` from XML resource
   locations.
-* `GenericPropertiesContextLoader`: Loads a standard `ApplicationContext` from Java
-  properties files.
 
 
 [[testcontext-bootstrapping]]

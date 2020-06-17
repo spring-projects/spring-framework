@@ -736,23 +736,11 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | ViewResolver| Description
 
 | `AbstractCachingViewResolver`
-| Sub-classes of `AbstractCachingViewResolver` cache view instances that they resolve.
+| Subclasses of `AbstractCachingViewResolver` cache view instances that they resolve.
   Caching improves performance of certain view technologies. You can turn off the
-  cache by setting the `cache` property to `false`. Furthermore, if you must refresh a
-  certain view at runtime (for example, when a FreeMarker template is modified), you can use
-  the `removeFromCache(String viewName, Locale loc)` method.
-
-| `XmlViewResolver`
-| Implementation of `ViewResolver` that accepts a configuration file written in XML with
-  the same DTD as Spring's XML bean factories. The default configuration file is
-  `/WEB-INF/views.xml`.
-
-| `ResourceBundleViewResolver`
-| Implementation of `ViewResolver` that uses bean definitions in a `ResourceBundle`,
-  specified by the bundle base name. For each view it is supposed to resolve, it uses
-  the value of the property `[viewname].(class)` as the view class and the value of the
-  property `[viewname].url` as the view URL. You can find examples in the chapter on
-  <<mvc-view>>.
+  cache by setting the `cache` property to `false`. Furthermore, if you must refresh
+  a certain view at runtime (for example, when a FreeMarker template is modified),
+  you can use the `removeFromCache(String viewName, Locale loc)` method.
 
 | `UrlBasedViewResolver`
 | Simple implementation of the `ViewResolver` interface that affects the direct
@@ -774,6 +762,12 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | `ContentNegotiatingViewResolver`
 | Implementation of the `ViewResolver` interface that resolves a view based on the
   request file name or `Accept` header. See <<mvc-multiple-representations>>.
+
+| `BeanNameViewResolver`
+| Implementation of the `ViewResolver` interface that interprets a view name as a
+  bean name in the current application context. This is a very flexible variant which
+  allows for mixing and matching different view types based on distinct view names.
+  Each such `View` can be defined as a bean e.g. in XML or in configuration classes.
 |===
 
 
