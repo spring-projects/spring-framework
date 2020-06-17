@@ -2,16 +2,15 @@
 = View Technologies
 [.small]#<<web-reactive.adoc#webflux-view, WebFlux>>#
 
-The use of view technologies in Spring MVC is pluggable, whether you decide to use
-Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter
-of a configuration change. This chapter covers view technologies integrated with
-Spring MVC. We assume you are already familiar with <<mvc-viewresolver>>.
+The use of view technologies in Spring MVC is pluggable. Whether you decide to use
+Thymeleaf, Groovy Markup Templates, JSPs, or other technologies is primarily a matter of
+a configuration change. This chapter covers view technologies integrated with Spring MVC.
+We assume you are already familiar with <<mvc-viewresolver>>.
 
-WARNING: The views of a Spring MVC application live within the internal trust boundaries of that
-application.
-Views have access to all the beans of your application context.
-As such, it is not recommended to use Spring MVC's template support in applications where the
-templates are editable by external sources, since this can have security implications.
+WARNING: The views of a Spring MVC application live within the internal trust boundaries
+of that application. Views have access to all the beans of your application context. As
+such, it is not recommended to use Spring MVC's template support in applications where
+the templates are editable by external sources, since this can have security implications.
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
@@ -21,7 +20,7 @@ Thymeleaf is a modern server-side Java template engine that emphasizes natural H
 templates that can be previewed in a browser by double-clicking, which is very helpful
 for independent work on UI templates (for example, by a designer) without the need for
 a running server. If you want to replace JSPs, Thymeleaf offers one of the most
-extensive set of features to make such a transition easier. Thymeleaf is actively
+extensive sets of features to make such a transition easier. Thymeleaf is actively
 developed and maintained. For a more complete introduction, see the
 https://www.thymeleaf.org/[Thymeleaf] project home page.
 
@@ -325,7 +324,7 @@ The `showErrors` macro takes a separator parameter (the characters that are used
 separate multiple errors on a given field) and also accepts a second parameter -- this
 time, a class name or style attribute. Note that FreeMarker can specify default
 values for the attributes parameter. The following example shows how to use the `formInput`
-and `showWErrors` macros:
+and `showErrors` macros:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -840,7 +839,7 @@ The Spring Framework has a built-in integration for using Spring MVC with JSP an
 [[mvc-view-jsp-resolver]]
 === View Resolvers
 
-When developing with JSPs, you typically declare a `InternalResourceViewResolver` bean.
+When developing with JSPs, you typically declare an `InternalResourceViewResolver` bean.
 
 `InternalResourceViewResolver` can be used for dispatching to any Servlet resource but in
 particular for JSPs. As a best practice, we strongly encourage placing your JSP files in
