@@ -31,11 +31,11 @@ package org.springframework.asm;
  * The constant pool entries, the BootstrapMethods attribute entries and the (ASM specific) type
  * table entries of a class.
  *
+ * @author Eric Bruneton
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.4">JVMS
  *     4.4</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.23">JVMS
  *     4.7.23</a>
- * @author Eric Bruneton
  */
 final class SymbolTable {
 
@@ -1046,8 +1046,10 @@ final class SymbolTable {
     // bootstrap methods. We must therefore add the bootstrap method arguments to the constant pool
     // and BootstrapMethods attribute first, so that the BootstrapMethods attribute is not modified
     // while adding the given bootstrap method to it, in the rest of this method.
-    for (Object bootstrapMethodArgument : bootstrapMethodArguments) {
-      addConstant(bootstrapMethodArgument);
+    int numBootstrapArguments = bootstrapMethodArguments.length;
+    int[] bootstrapMethodArgumentIndexes = new int[numBootstrapArguments];
+    for (int i = 0; i < numBootstrapArguments; i++) {
+      bootstrapMethodArgumentIndexes[i] = addConstant(bootstrapMethodArguments[i]).index;
     }
 
     // Write the bootstrap method in the BootstrapMethods table. This is necessary to be able to
@@ -1062,10 +1064,10 @@ final class SymbolTable {
                 bootstrapMethodHandle.getDesc(),
                 bootstrapMethodHandle.isInterface())
             .index);
-    int numBootstrapArguments = bootstrapMethodArguments.length;
+
     bootstrapMethodsAttribute.putShort(numBootstrapArguments);
-    for (Object bootstrapMethodArgument : bootstrapMethodArguments) {
-      bootstrapMethodsAttribute.putShort(addConstant(bootstrapMethodArgument).index);
+    for (int i = 0; i < numBootstrapArguments; i++) {
+      bootstrapMethodsAttribute.putShort(bootstrapMethodArgumentIndexes[i]);
     }
 
     // Compute the length and the hash code of the bootstrap method.
