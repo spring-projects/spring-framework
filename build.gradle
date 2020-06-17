@@ -3,7 +3,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.4-M2' apply false
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
 	id 'org.asciidoctor.jvm.convert' version '2.4.0'
-	id 'io.spring.nohttp' version '0.0.4.RELEASE'
+	id 'io.spring.nohttp' version '0.0.5.RELEASE'
 	id 'de.undercouch.download' version '4.0.4'
 	id "io.freefair.aspectj" version '5.0.0' apply false
 	id "com.github.ben-manes.versions" version '0.28.0'
@@ -401,7 +401,7 @@ configure(rootProject) {
 
 	nohttp {
 		source.exclude "**/test-output/**"
-		whitelistFile = project.file("src/nohttp/whitelist.lines")
+		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
 		projectDirs.forEach { dir ->
