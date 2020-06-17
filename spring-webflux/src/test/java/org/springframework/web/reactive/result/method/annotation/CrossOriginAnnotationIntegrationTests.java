@@ -76,7 +76,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 
 	@Override
 	protected RestTemplate initRestTemplate() {
-		// JDK default HTTP client blacklist headers like Origin
+		// JDK default HTTP client disallowed headers like Origin
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 
