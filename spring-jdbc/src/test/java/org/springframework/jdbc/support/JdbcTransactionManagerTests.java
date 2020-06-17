@@ -50,7 +50,6 @@ import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -494,9 +493,7 @@ public class JdbcTransactionManagerTests {
 							protected void doInTransactionWithoutResult(TransactionStatus status) {
 							}
 						});
-						TransactionSynchronizationManager.registerSynchronization(
-								new TransactionSynchronizationAdapter() {
-								});
+						TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {});
 					}
 				};
 
