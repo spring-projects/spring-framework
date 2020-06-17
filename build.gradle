@@ -4,7 +4,7 @@ plugins {
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
 	id 'org.asciidoctor.jvm.convert' version '2.4.0'
 	id 'io.spring.gradle-enterprise-conventions' version '0.0.2'
-	id 'io.spring.nohttp' version '0.0.4.RELEASE'
+	id 'io.spring.nohttp' version '0.0.5.RELEASE'
 	id 'de.undercouch.download' version '4.0.0'
 	id 'com.gradle.build-scan' version '3.2'
 	id "com.jfrog.artifactory" version '4.12.0' apply false
@@ -386,7 +386,7 @@ configure(rootProject) {
 
 	nohttp {
 		source.exclude "**/test-output/**"
-		whitelistFile = project.file("src/nohttp/whitelist.lines")
+		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
 		projectDirs.forEach { dir ->
