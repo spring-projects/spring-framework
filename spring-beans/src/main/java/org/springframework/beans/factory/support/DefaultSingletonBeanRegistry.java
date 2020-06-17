@@ -176,17 +176,41 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param allowEarlyReference whether early references should be created or not
 	 * @return the registered singleton object, or {@code null} if none found
 	 */
+	/**
+	 * 这里解释一下 allowEarlyReference 参数，allowEarlyReference 表示是否允许其他 bean 引用
+	 * 正在创建中的 bean，用于处理循环引用的问题。关于循环引用，这里先简单介绍一下。先看下面的配置：
+	 *
+	 *   <bean id="hello" class="xyz.coolblog.service.Hello">
+	 *       <property name="world" ref="world"/>
+	 *   </bean>
+	 *   <bean id="world" class="xyz.coolblog.service.World">
+	 *       <property name="hello" ref="hello"/>
+	 *   </bean>
+	 *
+	 * 如上所示，hello 依赖 world，world 又依赖于 hello，他们之间形成了循环依赖。Spring 在构建
+	 * hello 这个 bean 时，会检测到它依赖于 world，于是先去实例化 world。实例化 world 时，发现
+	 * world 依赖 hello。这个时候容器又要去初始化 hello。由于 hello 已经在初始化进程中了，为了让
+	 * world 能完成初始化，这里先让 world 引用正在初始化中的 hello。world 初始化完成后，hello
+	 * 就可引用到 world 实例，这样 hello 也就能完成初始了。
+	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// 从 singletonObjects 获取实例，singletonObjects 中缓存的实例都是完全实例化好的 bean，可以直接使用
 		Object singletonObject = this.singletonObjects.get(beanName);
+		//如果 singletonObject = null，正在创建beanmap包含beanName，则从相应的 earlySingletonObjects 获取一个原始的（raw）bean（尚未填充属性）
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				//earlySingletonObjects 为空 且 允许 提前引用
 				if (singletonObject == null && allowEarlyReference) {
+					// 获取相应的工厂类
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
+						// 提前曝光 bean 实例，用于解决循环依赖
 						singletonObject = singletonFactory.getObject();
+						// 放入缓存中，如果还有其他 bean 依赖当前 bean，其他 bean 可以直接从 earlySingletonObjects 取结果
 						this.earlySingletonObjects.put(beanName, singletonObject);
+						//工厂类 移除beanName
 						this.singletonFactories.remove(beanName);
 					}
 				}

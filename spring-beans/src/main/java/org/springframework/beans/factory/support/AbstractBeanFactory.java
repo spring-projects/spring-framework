@@ -240,11 +240,33 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		/*
+		 * 通过 name 获取 beanName。这里不使用 name 直接作为 beanName 有两点原因：
+		 * 1. name 可能会以 & 字符开头，表明调用者想获取 FactoryBean 本身，而非 FactoryBean
+		 *    实现类所创建的 bean。在 BeanFactory 中，FactoryBean 的实现类和其他的 bean 存储
+		 *    方式是一致的，即 <beanName, bean>，beanName 中是没有 & 这个字符的。所以我们需要
+		 *    将 name 的首字符 & 移除，这样才能从缓存里取到 FactoryBean 实例。
+		 * 2. 若 name 是一个别名，则应将别名转换为具体的实例名，也就是 beanName。
+		 */
 		String beanName = transformedBeanName(name);
 		Object bean;
 
+		/*
+		 * 从缓存中获取单例 bean。Spring 是使用 Map 作为 beanName 和 bean 实例的缓存的，所以这
+		 * 里暂时可以把 getSingleton(beanName) 等价于 beanMap.get(beanName)。当然，实际的
+		 * 逻辑并非如此简单，后面再细说。
+		 */
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
+		/*
+		 * 如果 sharedInstance = null，则说明缓存里没有对应的实例，表明这个实例还没创建。
+		 * BeanFactory 并不会在一开始就将所有的单例 bean 实例化好，而是在调用 getBean 获取
+		 * bean 时再实例化，也就是懒加载。
+		 * getBean 方法有很多重载，比如 getBean(String name, Object... args)，我们在首次获取
+		 * 某个 bean 时，可以传入用于初始化 bean 的参数数组（args），BeanFactory 会根据这些参数
+		 * 去匹配合适的构造方法构造 bean 实例。当然，如果单例 bean 早已创建好，这里的 args 就没有
+		 * 用了，BeanFactory 不会多次实例化单例 bean。
+		 */
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
 				if (isSingletonCurrentlyInCreation(beanName)) {
@@ -255,6 +277,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			/*
+			 * 如果 sharedInstance 是普通的单例 bean，下面的方法会直接返回。但如果
+			 * sharedInstance 是 FactoryBean 类型的，则需调用 getObject 工厂方法获取真正的
+			 * bean 实例。如果用户想获取 FactoryBean 本身，这里也不会做特别的处理，直接返回
+			 * 即可。毕竟 FactoryBean 的实现类本身也是一种 bean，只不过具有一点特殊的功能而已。
+			 */
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
@@ -1264,6 +1292,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (mbd == null) {
+				// bd.getParentName() == null，表明无父配置，这时直接将当前的 BeanDefinition 升级为 RootBeanDefinition
 				if (bd.getParentName() == null) {
 					// Use copy of given root bean definition.
 					if (bd instanceof RootBeanDefinition) {
@@ -1274,14 +1303,31 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 				}
 				else {
+					//有父配置，和父配置合并
 					// Child bean definition: needs to be merged with parent.
 					BeanDefinition pbd;
 					try {
 						String parentBeanName = transformedBeanName(bd.getParentName());
+
+						/*
+						 * 判断父类 beanName 与子类 beanName 名称是否相同。若相同，则父类 bean 一定
+						 * 在父容器中。原因也很简单，容器底层是用 Map 缓存 <beanName, bean> 键值对
+						 * 的。同一个容器下，使用同一个 beanName 映射两个 bean 实例显然是不合适的。
+						 * 有的朋友可能会觉得可以这样存储：<beanName, [bean1, bean2]> ，似乎解决了
+						 * 一对多的问题。但是也有问题，调用 getName(beanName) 时，到底返回哪个 bean
+						 * 实例好呢？
+						 */
 						if (!beanName.equals(parentBeanName)) {
+							/*
+							 * 这里再次调用 getMergedBeanDefinition，只不过参数值变为了
+							 * parentBeanName，用于合并父 BeanDefinition 和爷爷辈的
+							 * BeanDefinition。如果爷爷辈的 BeanDefinition 仍有父
+							 * BeanDefinition，则继续合并
+							 */
 							pbd = getMergedBeanDefinition(parentBeanName);
 						}
 						else {
+							// 获取父容器，并判断，父容器的类型，若不是 ConfigurableBeanFactory 则判抛出异常
 							BeanFactory parent = getParentBeanFactory();
 							if (parent instanceof ConfigurableBeanFactory) {
 								pbd = ((ConfigurableBeanFactory) parent).getMergedBeanDefinition(parentBeanName);
@@ -1297,11 +1343,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						throw new BeanDefinitionStoreException(bd.getResourceDescription(), beanName,
 								"Could not resolve parent bean definition '" + bd.getParentName() + "'", ex);
 					}
+					// 以父 BeanDefinition 的配置信息为蓝本创建 RootBeanDefinition，也就是“已合并的 BeanDefinition”
 					// Deep copy with overridden values.
 					mbd = new RootBeanDefinition(pbd);
+					// 用子 BeanDefinition 中的属性覆盖父 BeanDefinition 中的属性
 					mbd.overrideFrom(bd);
 				}
 
+				// 如果用户未配置 scope 属性，则默认将该属性配置为 singleton
 				// Set default singleton scope, if not configured before.
 				if (!StringUtils.hasLength(mbd.getScope())) {
 					mbd.setScope(SCOPE_SINGLETON);
@@ -1318,6 +1367,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// Cache the merged bean definition for the time being
 				// (it might still get re-merged later on in order to pick up metadata changes)
 				if (containingBd == null && isCacheBeanMetadata()) {
+					// 缓存合并后的 BeanDefinition
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
@@ -1649,10 +1699,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
+		//name 不为空且 以& 开头
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;
 			}
+			//bean不是 factoryBean 抛异常
 			if (!(beanInstance instanceof FactoryBean)) {
 				throw new BeanIsNotAFactoryException(beanName, beanInstance.getClass());
 			}
@@ -1673,10 +1725,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Return bean instance from factory.
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 			// Caches object obtained from FactoryBean if it is a singleton.
+			// 如果 mbd 为空，则判断是否存在名字为 beanName 的 BeanDefinition
 			if (mbd == null && containsBeanDefinition(beanName)) {
+				// 合并 BeanDefinition
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
+			// synthetic 字面意思是"合成的"。通过全局查找，我发现在 AOP 相关的类中会将该属性设为 true。
+			// 所以我觉得该字段可能表示某个 bean 是不是被 AOP 增强过，也就是 AOP 基于原始类合成了一个新的代理类。
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			// 调用 getObjectFromFactoryBean 方法继续获取实例
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;
