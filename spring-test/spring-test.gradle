@@ -41,6 +41,7 @@ dependencies {
 	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
 	optional("com.jayway.jsonpath:json-path")
+	optional("commons-fileupload:commons-fileupload")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("io.projectreactor:reactor-test")
@@ -74,7 +75,6 @@ dependencies {
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.apache.httpcomponents:httpclient")
 	testCompile("io.projectreactor.netty:reactor-netty")
-	testCompile("commons-fileupload:commons-fileupload")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testRuntime("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
