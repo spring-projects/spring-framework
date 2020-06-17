@@ -233,7 +233,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return WebExchangeDataBinder.extractValuesToBind(exchange).map(bindValues -> {
+		return extractValuesToBind(exchange).map(bindValues -> {
 			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
@@ -269,6 +269,10 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			}
 			return BeanUtils.instantiateClass(ctor, args);
 		});
+	}
+
+	protected Mono<Map<String, Object>> extractValuesToBind(ServerWebExchange exchange) {
+		return WebExchangeDataBinder.extractValuesToBind(exchange);
 	}
 
 	private boolean hasErrorsArgument(MethodParameter parameter) {
