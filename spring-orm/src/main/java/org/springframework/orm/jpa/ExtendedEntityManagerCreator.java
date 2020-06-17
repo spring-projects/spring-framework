@@ -439,7 +439,7 @@ public abstract class ExtendedEntityManagerCreator {
 		@Nullable
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
-		public volatile boolean closeOnCompletion = false;
+		public volatile boolean closeOnCompletion;
 
 		public ExtendedEntityManagerSynchronization(
 				EntityManager em, @Nullable PersistenceExceptionTranslator exceptionTranslator) {

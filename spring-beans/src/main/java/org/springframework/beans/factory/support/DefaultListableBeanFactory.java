@@ -183,7 +183,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private volatile String[] frozenBeanDefinitionNames;
 
 	/** Whether bean definition metadata may be cached for all beans. */
-	private volatile boolean configurationFrozen = false;
+	private volatile boolean configurationFrozen;
 
 
 	/**

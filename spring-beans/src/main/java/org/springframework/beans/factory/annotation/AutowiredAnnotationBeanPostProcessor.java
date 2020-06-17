@@ -613,7 +613,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object cachedFieldValue;
@@ -678,7 +678,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object[] cachedMethodArguments;
