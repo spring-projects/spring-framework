@@ -2,7 +2,6 @@ pluginManagement {
 	repositories {
 		gradlePluginPortal()
 		maven { url 'https://repo.spring.io/plugins-release' }
-		maven { url "https://dl.bintray.com/kotlin/kotlin-eap" } // Kotlin
 	}
 }
 

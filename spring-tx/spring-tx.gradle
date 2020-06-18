@@ -2,12 +2,6 @@ description = "Spring Transaction"
 
 apply plugin: "kotlin"
 
-// Workaround for https://youtrack.jetbrains.com/issue/KT-39610
-configurations["optional"].attributes.attribute(
-		org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
-		objects.named(Usage.class, "java-runtime")
-)
-
 dependencies {
 	compile(project(":spring-beans"))
 	compile(project(":spring-core"))
