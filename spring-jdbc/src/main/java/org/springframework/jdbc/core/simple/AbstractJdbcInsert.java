@@ -465,7 +465,7 @@ public abstract class AbstractJdbcInsert {
 
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
 				Long key = getJdbcTemplate().queryForObject(
-						getInsertString() + " " + keyQuery, values.toArray(), Long.class);
+						getInsertString() + " " + keyQuery, Long.class, values.toArray());
 				Map<String, Object> keys = new HashMap<>(2);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);

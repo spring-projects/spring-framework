@@ -749,6 +749,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
 	public <T> T query(String sql, @Nullable Object[] args, ResultSetExtractor<T> rse) throws DataAccessException {
@@ -776,6 +777,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		query(sql, newArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
+	@Deprecated
 	@Override
 	public void query(String sql, @Nullable Object[] args, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, newArgPreparedStatementSetter(args), rch);
@@ -801,6 +803,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
+	@Deprecated
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
@@ -868,6 +871,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
@@ -890,6 +894,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
+	@Deprecated
 	@Override
 	public <T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
@@ -915,6 +920,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
+	@Deprecated
 	@Override
 	public <T> List<T> queryForList(String sql, @Nullable Object[] args, Class<T> elementType) throws DataAccessException {
 		return query(sql, args, getSingleColumnRowMapper(elementType));
