@@ -343,11 +343,18 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 				}
 			}
 			if (result != null) {
-				while (result.endsWith("/")) {
-					result = result.substring(0, result.length() - 1);
+				StringBuilder prefix = new StringBuilder(result.length());
+				String[] rawPrefixes = StringUtils.tokenizeToStringArray(result, ",");
+				for (String rawPrefix : rawPrefixes) {
+					int endIndex = rawPrefix.length();
+					while (endIndex > 0 && rawPrefix.charAt(endIndex - 1) == '/') {
+						endIndex--;
+					}
+					prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
 				}
+				return prefix.toString();
 			}
-			return result;
+			return null;
 		}
 
 		@Nullable

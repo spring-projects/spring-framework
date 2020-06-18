@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,13 @@ import static org.mockito.Mockito.mock;
 public class ForwardedHeaderFilterTests {
 
 	private static final String X_FORWARDED_PROTO = "x-forwarded-proto";  // SPR-14372 (case insensitive)
+
 	private static final String X_FORWARDED_HOST = "x-forwarded-host";
+
 	private static final String X_FORWARDED_PORT = "x-forwarded-port";
+
 	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
+
 	private static final String X_FORWARDED_SSL = "x-forwarded-ssl";
 
 
@@ -348,6 +352,24 @@ public class ForwardedHeaderFilterTests {
 
 		HttpServletRequest actual = filterAndGetWrappedRequest();
 		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/prefix/mvc-showcase");
+	}
+
+	@Test
+	void shouldConcatenatePrefixes() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/first,/second");
+		this.request.setRequestURI("/mvc-showcase");
+
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/first/second/mvc-showcase");
+	}
+
+	@Test
+	void shouldConcatenatePrefixesWithTrailingSlashes() throws Exception {
+		this.request.addHeader(X_FORWARDED_PREFIX, "/first/,/second//");
+		this.request.setRequestURI("/mvc-showcase");
+
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+		assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/first/second/mvc-showcase");
 	}
 
 	@Test

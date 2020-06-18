@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -128,15 +129,20 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	@Nullable
 	private static String getForwardedPrefix(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
-		String prefix = headers.getFirst("X-Forwarded-Prefix");
-		if (prefix != null) {
-			int endIndex = prefix.length();
-			while (endIndex > 1 && prefix.charAt(endIndex - 1) == '/') {
-				endIndex--;
+		String header = headers.getFirst("X-Forwarded-Prefix");
+		if (header != null) {
+			StringBuilder prefix = new StringBuilder(header.length());
+			String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
+			for (String rawPrefix : rawPrefixes) {
+				int endIndex = rawPrefix.length();
+				while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
+					endIndex--;
+				}
+				prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
 			}
-			prefix = (endIndex != prefix.length() ? prefix.substring(0, endIndex) : prefix);
+			return prefix.toString();
 		}
-		return prefix;
+		return header;
 	}
 
 }
