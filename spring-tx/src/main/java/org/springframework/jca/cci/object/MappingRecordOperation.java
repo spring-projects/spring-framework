@@ -25,8 +25,6 @@ import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jca.cci.core.RecordCreator;
-import org.springframework.jca.cci.core.RecordExtractor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -45,7 +43,10 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see #createInputRecord(javax.resource.cci.RecordFactory, Object)
  * @see #extractOutputData(javax.resource.cci.Record)
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
@@ -75,7 +76,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
 	 * @see org.springframework.jca.cci.core.CciTemplate#setOutputRecordCreator
 	 */
-	public void setOutputRecordCreator(RecordCreator creator) {
+	public void setOutputRecordCreator(org.springframework.jca.cci.core.RecordCreator creator) {
 		getCciTemplate().setOutputRecordCreator(creator);
 	}
 
@@ -126,7 +127,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * Implementation of RecordCreator that calls the enclosing
 	 * class's {@code createInputRecord} method.
 	 */
-	protected class RecordCreatorImpl implements RecordCreator {
+	protected class RecordCreatorImpl implements org.springframework.jca.cci.core.RecordCreator {
 
 		private final Object inputObject;
 
@@ -145,7 +146,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 * Implementation of RecordExtractor that calls the enclosing
 	 * class's {@code extractOutputData} method.
 	 */
-	protected class RecordExtractorImpl implements RecordExtractor<Object> {
+	protected class RecordExtractorImpl implements org.springframework.jca.cci.core.RecordExtractor<Object> {
 
 		@Override
 		public Object extractData(Record record) throws ResourceException, SQLException, DataAccessException {

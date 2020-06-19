@@ -30,7 +30,10 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @author Juergen Hoeller
  * @since 1.2
  * @see javax.resource.cci.ResultSet
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 

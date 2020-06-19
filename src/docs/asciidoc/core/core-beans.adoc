@@ -4045,11 +4045,6 @@ dependency type. The following table summarizes the most important `Aware` inter
 | Name of the declaring bean.
 | <<beans-factory-aware>>
 
-| `BootstrapContextAware`
-| Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA-aware `ApplicationContext` instances.
-| <<integration.adoc#cci, JCA CCI>>
-
 | `LoadTimeWeaverAware`
 | Defined weaver for processing class definition at load time.
 | <<aop-aj-ltw>>

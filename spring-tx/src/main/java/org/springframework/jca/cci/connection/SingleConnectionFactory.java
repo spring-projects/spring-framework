@@ -51,7 +51,10 @@ import org.springframework.util.Assert;
  * @see #getConnection()
  * @see javax.resource.cci.Connection#close()
  * @see org.springframework.jca.cci.core.CciTemplate
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class SingleConnectionFactory extends DelegatingConnectionFactory implements DisposableBean {
 
