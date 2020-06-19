@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 
 import javax.net.ssl.SSLSession;
 
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
@@ -155,7 +156,11 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	protected SslInfo initSslInfo() {
-		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);
+		Channel channel = ((Connection) this.request).channel();
+		SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
+		if (sslHandler == null && channel.parent() != null) { // HTTP/2
+			sslHandler = channel.parent().pipeline().get(SslHandler.class);
+		}
 		if (sslHandler != null) {
 			SSLSession session = sslHandler.engine().getSession();
 			return new DefaultSslInfo(session);
