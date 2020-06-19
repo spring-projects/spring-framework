@@ -42,7 +42,9 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	 * @since 5.3
 	 */
 	@Nullable
-	PathPatternParser getPatternParser();
+	default PathPatternParser getPatternParser() {
+		return null;
+	}
 
 	/**
 	 * Determine whether the request matches the given pattern. Use this method
