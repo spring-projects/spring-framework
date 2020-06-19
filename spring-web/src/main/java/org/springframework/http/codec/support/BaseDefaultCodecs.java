@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
@@ -69,6 +70,13 @@ import org.springframework.util.ClassUtils;
  * @author Sebastien Deleuze
  */
 class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigurer.DefaultCodecConfig {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	static final boolean jackson2Present;
 
@@ -284,7 +292,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					((AbstractJackson2Decoder) codec).setMaxInMemorySize(size);
 				}
 			}
-			if (jaxb2Present) {
+			if (jaxb2Present && !shouldIgnoreXml) {
 				if (codec instanceof Jaxb2XmlDecoder) {
 					((Jaxb2XmlDecoder) codec).setMaxInMemorySize(size);
 				}
@@ -353,7 +361,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(readers, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
 					(Jackson2SmileDecoder) this.jackson2SmileDecoder : new Jackson2SmileDecoder()));
 		}
-		if (jaxb2Present) {
+		if (jaxb2Present && !shouldIgnoreXml) {
 			addCodec(readers, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
@@ -449,7 +457,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			writers.add(new EncoderHttpMessageWriter<>(this.jackson2SmileEncoder != null ?
 					(Jackson2SmileEncoder) this.jackson2SmileEncoder : new Jackson2SmileEncoder()));
 		}
-		if (jaxb2Present) {
+		if (jaxb2Present && !shouldIgnoreXml) {
 			writers.add(new EncoderHttpMessageWriter<>(this.jaxb2Encoder != null ?
 					(Jaxb2XmlEncoder) this.jaxb2Encoder : new Jaxb2XmlEncoder()));
 		}

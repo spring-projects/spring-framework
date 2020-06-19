@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.SpringProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -82,6 +83,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * @author Roy Clarkson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 3.0
  * @see HttpMessageConverter
  * @see RequestCallback
@@ -89,6 +91,13 @@ import org.springframework.web.util.UriTemplateHandler;
  * @see ResponseErrorHandler
  */
 public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	private static final boolean romePresent;
 
@@ -138,11 +147,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter(false));
-		try {
-			this.messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
+		if (!shouldIgnoreXml) {
+			try {
+				this.messageConverters.add(new SourceHttpMessageConverter<>());
+			}
+			catch (Error err) {
+				// Ignore when no TransformerFactory implementation is available
+			}
 		}
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
@@ -151,11 +162,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 
-		if (jackson2XmlPresent) {
-			this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
-		}
-		else if (jaxb2Present) {
-			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+		if (!shouldIgnoreXml) {
+			if (jackson2XmlPresent) {
+				this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+			}
+			else if (jaxb2Present) {
+				this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+			}
 		}
 
 		if (jackson2Present) {

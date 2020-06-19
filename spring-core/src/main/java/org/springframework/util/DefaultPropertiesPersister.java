@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Properties;
+
+import org.springframework.core.SpringProperties;
 
 /**
  * Default implementation of the {@link PropertiesPersister} interface.
@@ -46,12 +48,21 @@ import java.util.Properties;
  * "defaultEncoding" and "fileEncodings" properties).
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 10.03.2004
  * @see java.util.Properties
  * @see java.util.Properties#load
  * @see java.util.Properties#store
  */
 public class DefaultPropertiesPersister implements PropertiesPersister {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
+
 
 	@Override
 	public void load(Properties props, InputStream is) throws IOException {
@@ -75,16 +86,25 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 
 	@Override
 	public void loadFromXml(Properties props, InputStream is) throws IOException {
+		if (shouldIgnoreXml) {
+			throw new UnsupportedOperationException("XML support disabled");
+		}
 		props.loadFromXML(is);
 	}
 
 	@Override
 	public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
+		if (shouldIgnoreXml) {
+			throw new UnsupportedOperationException("XML support disabled");
+		}
 		props.storeToXML(os, header);
 	}
 
 	@Override
 	public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
+		if (shouldIgnoreXml) {
+			throw new UnsupportedOperationException("XML support disabled");
+		}
 		props.storeToXML(os, header, encoding);
 	}
 
