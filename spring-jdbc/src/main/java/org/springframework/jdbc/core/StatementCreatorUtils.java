@@ -26,6 +26,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -405,6 +408,15 @@ public abstract class StatementCreatorUtils {
 			else if (inValue instanceof Calendar) {
 				Calendar cal = (Calendar) inValue;
 				ps.setTimestamp(paramIndex, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+			}
+			else if (inValue instanceof LocalDateTime) {
+				ps.setTimestamp(paramIndex, java.sql.Timestamp.valueOf((LocalDateTime) inValue));
+			}
+			else if (inValue instanceof LocalDate) {
+				ps.setDate(paramIndex, java.sql.Date.valueOf((LocalDate) inValue));
+			}
+			else if (inValue instanceof LocalTime) {
+				ps.setTime(paramIndex, java.sql.Time.valueOf((LocalTime) inValue));
 			}
 			else {
 				// Fall back to generic setObject call without SQL type specified.
