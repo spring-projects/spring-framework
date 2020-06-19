@@ -17,10 +17,11 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
-import io.netty.buffer.ByteBufAllocator;
 import reactor.core.publisher.Flux;
+import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.http.client.HttpClientResponse;
 
@@ -48,16 +49,24 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory bufferFactory;
 
+	private final Connection connection;
+
 	private final HttpHeaders headers;
 
-	private final AtomicBoolean rejectSubscribers = new AtomicBoolean();
+	// 0 - not subscribed, 1 - subscribed, 2 - cancelled
+	private final AtomicInteger state = new AtomicInteger(0);
 
 
-	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
+	/**
+	 * Constructor that matches the inputs from
+	 * {@link reactor.netty.http.client.HttpClient.ResponseReceiver#responseConnection(BiFunction)}.
+	 * @since 5.3
+	 */
+	public ReactorClientHttpResponse(HttpClientResponse response, Connection connection) {
 		this.response = response;
-		this.inbound = inbound;
-		this.bufferFactory = new NettyDataBufferFactory(alloc);
-
+		this.inbound = connection.inbound();
+		this.bufferFactory = new NettyDataBufferFactory(connection.outbound().alloc());
+		this.connection = connection;
 		MultiValueMap<String, String> adapter = new NettyHeadersAdapter(response.responseHeaders());
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 	}
@@ -67,17 +76,17 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public Flux<DataBuffer> getBody() {
 		return this.inbound.receive()
 				.doOnSubscribe(s -> {
-					if (this.rejectSubscribers.get()) {
-						throw new IllegalStateException("The client response body can only be consumed once.");
+					if (!this.state.compareAndSet(0, 1)) {
+						// https://github.com/reactor/reactor-netty/issues/503
+						// FluxReceive rejects multiple subscribers, but not after a cancel().
+						// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
+						// So we need to reject once in cancelled state.
+						if (this.state.get() == 2) {
+							throw new IllegalStateException("The client response body can only be consumed once.");
+						}
 					}
 				})
-				.doOnCancel(() ->
-					// https://github.com/reactor/reactor-netty/issues/503
-					// FluxReceive rejects multiple subscribers, but not after a cancel().
-					// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
-					// So we need to intercept and reject them in that case.
-					this.rejectSubscribers.set(true)
-				)
+				.doOnCancel(() -> this.state.compareAndSet(1, 2))
 				.map(byteBuf -> {
 					byteBuf.retain();
 					return this.bufferFactory.wrap(byteBuf);
@@ -112,6 +121,20 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 							.httpOnly(c.isHttpOnly())
 							.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
+	/**
+	 * For use by {@link ReactorClientHttpConnector}.
+	 */
+	boolean bodyNotSubscribed() {
+		return this.state.get() == 0;
+	}
+
+	/**
+	 * For use by {@link ReactorClientHttpConnector}.
+	 */
+	Connection getConnection() {
+		return this.connection;
 	}
 
 	@Override
