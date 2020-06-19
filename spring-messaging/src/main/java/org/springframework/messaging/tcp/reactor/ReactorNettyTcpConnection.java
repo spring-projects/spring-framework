@@ -17,7 +17,7 @@
 package org.springframework.messaging.tcp.reactor;
 
 import io.netty.buffer.ByteBuf;
-import reactor.core.publisher.DirectProcessor;
+import reactor.core.publisher.FluxIdentityProcessor;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
@@ -42,11 +42,11 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	private final ReactorNettyCodec<P> codec;
 
-	private final DirectProcessor<Void> closeProcessor;
+	private final FluxIdentityProcessor<Void> closeProcessor;
 
 
 	public ReactorNettyTcpConnection(NettyInbound inbound, NettyOutbound outbound,
-			ReactorNettyCodec<P> codec, DirectProcessor<Void> closeProcessor) {
+			ReactorNettyCodec<P> codec, FluxIdentityProcessor<Void> closeProcessor) {
 
 		this.inbound = inbound;
 		this.outbound = outbound;
