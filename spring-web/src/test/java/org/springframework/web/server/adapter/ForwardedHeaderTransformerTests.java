@@ -156,7 +156,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
-	public void noForwardedFor() throws URISyntaxException {
+	public void forwardedForNotPresent() throws URISyntaxException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Forwarded", "host=84.198.58.199;proto=https");
 
@@ -186,6 +186,7 @@ public class ForwardedHeaderTransformerTests {
 				.build();
 
 		request = this.requestMutator.apply(request);
+		assertThat(request.getRemoteAddress()).isNotNull();
 		assertThat(request.getRemoteAddress().getHostName()).isEqualTo("203.0.113.195");
 		assertThat(request.getRemoteAddress().getPort()).isEqualTo(4711);
 	}
@@ -201,6 +202,7 @@ public class ForwardedHeaderTransformerTests {
 				.build();
 
 		request = this.requestMutator.apply(request);
+		assertThat(request.getRemoteAddress()).isNotNull();
 		assertThat(request.getRemoteAddress().getHostName()).isEqualTo("203.0.113.195");
 	}
 

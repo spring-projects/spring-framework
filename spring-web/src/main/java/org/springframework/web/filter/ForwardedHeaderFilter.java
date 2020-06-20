@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -24,7 +25,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,9 +33,8 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -220,10 +219,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	 */
 	private static class ForwardedHeaderExtractingRequest extends ForwardedHeaderRemovingRequest {
 
-		private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
-		private static final String FORWARDED_HEADER = "Forwarded";
-		private static final Pattern FORWARDED_FOR_PATTERN = Pattern.compile("(?i:^[^,]*for=.+)");
-
 		@Nullable
 		private final String scheme;
 
@@ -235,21 +230,16 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final int port;
 
 		@Nullable
-		private final String remoteHost;
-
-		@Nullable
-		private final String remoteAddr;
-
-		private final int remotePort;
+		private final InetSocketAddress remoteAddress;
 
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
 
-		ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
-			super(request);
+		ForwardedHeaderExtractingRequest(HttpServletRequest servletRequest, UrlPathHelper pathHelper) {
+			super(servletRequest);
 
-			HttpRequest httpRequest = new ServletServerHttpRequest(request);
-			UriComponents uriComponents = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+			ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+			UriComponents uriComponents = UriComponentsBuilder.fromHttpRequest(request).build();
 			int port = uriComponents.getPort();
 
 			this.scheme = uriComponents.getScheme();
@@ -257,24 +247,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
-			HttpHeaders headers = httpRequest.getHeaders();
-			boolean hasForwardedFor = StringUtils.hasText(headers.getFirst(X_FORWARDED_FOR_HEADER)) ||
-					(StringUtils.hasText(headers.getFirst(FORWARDED_HEADER)) &&
-						FORWARDED_FOR_PATTERN.matcher(headers.getFirst(FORWARDED_HEADER)).matches());
-			if (hasForwardedFor) {
-				UriComponents remoteUriComponents = UriComponentsBuilder.newInstance()
-						.host(request.getRemoteHost())
-						.port(request.getRemotePort())
-						.adaptFromForwardedForHeader(headers)
-						.build();
-				this.remoteHost = remoteUriComponents.getHost();
-				this.remoteAddr = this.remoteHost;
-				this.remotePort = remoteUriComponents.getPort();
-			} else {
-				this.remoteHost = request.getRemoteHost();
-				this.remoteAddr = request.getRemoteAddr();
-				this.remotePort = request.getRemotePort();
-			}
+			this.remoteAddress = UriComponentsBuilder.parseForwardedFor(request, request.getRemoteAddress());
 
 			String baseUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port);
 			Supplier<HttpServletRequest> delegateRequest = () -> (HttpServletRequest) getRequest();
@@ -322,18 +295,18 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		@Nullable
 		public String getRemoteHost() {
-			return this.remoteHost;
+			return (this.remoteAddress != null ? this.remoteAddress.getHostString() : super.getRemoteHost());
 		}
 
 		@Override
 		@Nullable
 		public String getRemoteAddr() {
-			return this.remoteAddr;
+			return (this.remoteAddress != null ? this.remoteAddress.getHostString() : super.getRemoteAddr());
 		}
 
 		@Override
 		public int getRemotePort() {
-			return remotePort;
+			return (this.remoteAddress != null ? this.remoteAddress.getPort() : super.getRemotePort());
 		}
 	}
 
