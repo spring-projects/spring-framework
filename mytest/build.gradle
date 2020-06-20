@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile project(":spring-context")
+}
+
+group 'org.springframework'
+version '5.2.8.BUILD-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

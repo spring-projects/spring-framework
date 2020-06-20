@@ -1,9 +1,9 @@
 buildscript {
 	repositories {
-		maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+		maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
 	}
 	dependencies {
 		classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.21.RELEASE'
@@ -26,10 +26,10 @@ plugins {
 
 allprojects {
 	repositories {
-		maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-		maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+		maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+		maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
 	}
 }
 
@@ -299,15 +299,16 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
-			maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-			maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
-			maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-			maven { url 'http://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
+			maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+			maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
+			maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+			maven { url 'https://maven.aliyun.com/nexus/content/repositories/gradle-plugin' }
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}
 	configurations.all {
 		resolutionStrategy {
+			force 'xml-apis:xml-apis:1.4.01'
 			cacheChangingModulesFor 0, "seconds"
 			cacheDynamicVersionsFor 0, "seconds"
 		}
