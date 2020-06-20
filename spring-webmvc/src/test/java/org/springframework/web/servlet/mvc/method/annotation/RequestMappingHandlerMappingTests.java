@@ -36,7 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -82,13 +81,14 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void useRegisteredSuffixPatternMatch() {
 
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setApplicationContext(new StaticWebApplicationContext());
 
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
+		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
 		handlerMapping.setContentNegotiationManager(manager);
@@ -101,9 +101,10 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void useRegisteredSuffixPatternMatchInitialization() {
 		Map<String, MediaType> fileExtensions = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
+		org.springframework.web.accept.PathExtensionContentNegotiationStrategy strategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
 		final Set<String> extensions = new HashSet<>();
@@ -129,6 +130,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void suffixPatternMatchSettings() {
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 

@@ -263,6 +263,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void contentNegotiation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);

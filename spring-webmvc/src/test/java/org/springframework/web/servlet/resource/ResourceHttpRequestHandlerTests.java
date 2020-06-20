@@ -242,6 +242,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-13658
+	@SuppressWarnings("deprecation")
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("bar", new MediaType("foo", "bar"));
@@ -263,6 +264,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-14577
+	@SuppressWarnings("deprecation")
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);

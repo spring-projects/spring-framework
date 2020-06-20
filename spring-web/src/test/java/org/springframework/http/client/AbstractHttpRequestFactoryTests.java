@@ -129,7 +129,6 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 	}
 
 	@Test
-	@SuppressWarnings("try")
 	void headersAfterExecute() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
 
@@ -138,6 +137,7 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 				FileCopyUtils.copy(body, request.getBody());
 				try (ClientHttpResponse response = request.execute()) {
+					assertThat(response).isNotNull();
 					request.getHeaders().add("MyHeader", "value");
 				}
 		});

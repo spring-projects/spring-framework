@@ -267,6 +267,7 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * if configured by the application, to the given codec , including any
 	 * codec it contains.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void initCodec(@Nullable Object codec) {
 
 		if (codec instanceof DecoderHttpMessageReader) {

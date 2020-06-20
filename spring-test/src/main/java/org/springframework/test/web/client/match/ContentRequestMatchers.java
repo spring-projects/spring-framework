@@ -240,7 +240,7 @@ public class ContentRequestMatchers {
 					}
 					else if (expected instanceof String) {
 						assertTrue("Multipart is not a String", actual instanceof String);
-						assertEquals("Multipart content", expected, (String) actual);
+						assertEquals("Multipart content", expected, actual);
 					}
 					else {
 						throw new IllegalArgumentException("Unexpected multipart value: " + expected.getClass());

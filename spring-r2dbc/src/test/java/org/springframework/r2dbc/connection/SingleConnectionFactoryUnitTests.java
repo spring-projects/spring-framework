@@ -37,12 +37,11 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Mark Paluch
  */
-public class SingleConnectionFactoryUnitTests {
+class SingleConnectionFactoryUnitTests {
 
 	@Test
-	public void shouldAllocateSameConnection() {
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				"r2dbc:h2:mem:///foo", false);
+	void shouldAllocateSameConnection() {
+		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", false);
 
 		Mono<? extends Connection> cf1 = factory.create();
 		Mono<? extends Connection> cf2 = factory.create();
@@ -55,9 +54,8 @@ public class SingleConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldApplyAutoCommit() {
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				"r2dbc:h2:mem:///foo", false);
+	void shouldApplyAutoCommit() {
+		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", false);
 		factory.setAutoCommit(false);
 
 		factory.create().as(StepVerifier::create)
@@ -74,9 +72,9 @@ public class SingleConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldSuppressClose() {
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				"r2dbc:h2:mem:///foo", true);
+	@SuppressWarnings("rawtypes")
+	void shouldSuppressClose() {
+		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", true);
 
 		Connection connection = factory.create().block();
 
@@ -91,27 +89,24 @@ public class SingleConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldNotSuppressClose() {
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				"r2dbc:h2:mem:///foo", false);
+	void shouldNotSuppressClose() {
+		SingleConnectionFactory factory = new SingleConnectionFactory("r2dbc:h2:mem:///foo", false);
 
 		Connection connection = factory.create().block();
 
 		StepVerifier.create(connection.close()).verifyComplete();
 
-		StepVerifier.create(connection.setTransactionIsolationLevel(
-				IsolationLevel.READ_COMMITTED)).verifyError(
-						R2dbcNonTransientResourceException.class);
+		StepVerifier.create(connection.setTransactionIsolationLevel(IsolationLevel.READ_COMMITTED))
+			.verifyError(R2dbcNonTransientResourceException.class);
 		factory.destroy();
 	}
 
 	@Test
-	public void releaseConnectionShouldNotCloseConnection() {
+	void releaseConnectionShouldNotCloseConnection() {
 		Connection connectionMock = mock(Connection.class);
 		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
 
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				connectionMock, metadata, true);
+		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, true);
 
 		Connection connection = factory.create().block();
 
@@ -123,14 +118,13 @@ public class SingleConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void releaseConnectionShouldCloseUnrelatedConnection() {
+	void releaseConnectionShouldCloseUnrelatedConnection() {
 		Connection connectionMock = mock(Connection.class);
 		Connection otherConnection = mock(Connection.class);
 		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
 		when(otherConnection.close()).thenReturn(Mono.empty());
 
-		SingleConnectionFactory factory = new SingleConnectionFactory(
-				connectionMock, metadata, false);
+		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, false);
 
 		factory.create().as(StepVerifier::create).expectNextCount(1).verifyComplete();
 

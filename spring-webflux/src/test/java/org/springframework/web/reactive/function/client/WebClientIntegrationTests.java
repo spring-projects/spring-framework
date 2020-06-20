@@ -387,6 +387,7 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	@SuppressWarnings("rawtypes")
 	void retrieveJsonNull(ClientHttpConnector connector) {
 		startServer(connector);
 

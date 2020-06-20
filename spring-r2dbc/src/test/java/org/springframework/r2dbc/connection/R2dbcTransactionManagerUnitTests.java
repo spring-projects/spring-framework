@@ -53,7 +53,7 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Mark Paluch
  */
-public class R2dbcTransactionManagerUnitTests {
+class R2dbcTransactionManagerUnitTests {
 
 	ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
 
@@ -62,8 +62,8 @@ public class R2dbcTransactionManagerUnitTests {
 	private R2dbcTransactionManager tm;
 
 	@BeforeEach
-	public void before() {
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock));
 		when(connectionMock.beginTransaction()).thenReturn(Mono.empty());
 		when(connectionMock.close()).thenReturn(Mono.empty());
@@ -71,7 +71,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testSimpleTransaction() {
+	void testSimpleTransaction() {
 		TestTransactionSynchronization sync = new TestTransactionSynchronization(
 				TransactionSynchronization.STATUS_COMMITTED);
 		AtomicInteger commits = new AtomicInteger();
@@ -103,7 +103,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testBeginFails() {
+	void testBeginFails() {
 		reset(connectionFactoryMock);
 		when(connectionFactoryMock.create()).thenReturn(
 				Mono.error(new R2dbcBadGrammarException("fail")));
@@ -125,7 +125,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void appliesIsolationLevel() {
+	void appliesIsolationLevel() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 		when(connectionMock.getTransactionIsolationLevel()).thenReturn(
 				IsolationLevel.READ_COMMITTED);
@@ -151,7 +151,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void doesNotSetIsolationLevelIfMatch() {
+	void doesNotSetIsolationLevelIfMatch() {
 		when(connectionMock.getTransactionIsolationLevel()).thenReturn(
 				IsolationLevel.READ_COMMITTED);
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
@@ -173,7 +173,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void doesNotSetAutoCommitDisabled() {
+	void doesNotSetAutoCommitDisabled() {
 		when(connectionMock.isAutoCommit()).thenReturn(false);
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
@@ -193,7 +193,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void restoresAutoCommit() {
+	void restoresAutoCommit() {
 		when(connectionMock.isAutoCommit()).thenReturn(true);
 		when(connectionMock.setAutoCommit(anyBoolean())).thenReturn(Mono.empty());
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
@@ -216,7 +216,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void appliesReadOnly() {
+	void appliesReadOnly() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
 		Statement statement = mock(Statement.class);
@@ -244,7 +244,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testCommitFails() {
+	void testCommitFails() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Commit should fail"))));
 
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
@@ -266,7 +266,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testRollback() {
+	void testRollback() {
 
 		AtomicInteger commits = new AtomicInteger();
 		when(connectionMock.commitTransaction()).thenReturn(
@@ -295,7 +295,8 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testRollbackFails() {
+	@SuppressWarnings("unchecked")
+	void testRollbackFails() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Commit should fail"))), Mono.empty());
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
@@ -319,7 +320,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testTransactionSetRollbackOnly() {
+	void testTransactionSetRollbackOnly() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 		TestTransactionSynchronization sync = new TestTransactionSynchronization(
 				TransactionSynchronization.STATUS_ROLLED_BACK);
@@ -352,7 +353,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testPropagationNeverWithExistingTransaction() {
+	void testPropagationNeverWithExistingTransaction() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -377,7 +378,7 @@ public class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
-	public void testPropagationSupportsAndRequiresNew() {
+	void testPropagationSupportsAndRequiresNew() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -419,9 +420,7 @@ public class R2dbcTransactionManagerUnitTests {
 
 		public boolean afterCompletionCalled;
 
-		public Throwable afterCompletionException;
-
-		public TestTransactionSynchronization(int status) {
+		TestTransactionSynchronization(int status) {
 			this.status = status;
 		}
 
@@ -471,7 +470,7 @@ public class R2dbcTransactionManagerUnitTests {
 				return Mono.fromRunnable(() -> doAfterCompletion(status));
 			}
 			catch (Throwable ex) {
-				this.afterCompletionException = ex;
+				// ignore
 			}
 
 			return Mono.empty();
