@@ -64,7 +64,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 	@Override
 	protected RestTemplate initRestTemplate() {
-		// JDK default HTTP client blacklists headers like Origin
+		// JDK default HTTP client disallowed headers like Origin
 		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 

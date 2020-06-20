@@ -1891,12 +1891,11 @@ bean, as the following example shows:
 	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 	@Configuration
-
 	public class AppConfig {
 
 		@Bean
 		public LocalValidatorFactoryBean validator() {
-			return new LocalValidatorFactoryBean;
+			return new LocalValidatorFactoryBean();
 		}
 	}
 ----
@@ -2050,12 +2049,11 @@ a custom extension, also by Hibernate Validator 4.3) into a Spring context throu
 	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 	@Configuration
-
 	public class AppConfig {
 
 		@Bean
 		public MethodValidationPostProcessor validationPostProcessor() {
-			return new MethodValidationPostProcessor;
+			return new MethodValidationPostProcessor();
 		}
 	}
 
