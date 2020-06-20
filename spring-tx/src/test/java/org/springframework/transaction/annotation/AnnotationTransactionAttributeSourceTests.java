@@ -65,7 +65,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		proxy.getAge();
 		assertThat(ptm.commits).isEqualTo(1);
 
-		ITestBean1 serializedProxy = (ITestBean1) SerializationTestUtils.serializeAndDeserialize(proxy);
+		ITestBean1 serializedProxy = SerializationTestUtils.serializeAndDeserialize(proxy);
 		serializedProxy.getAge();
 		Advised advised = (Advised) serializedProxy;
 		TransactionInterceptor serializedTi = (TransactionInterceptor) advised.getAdvisors()[0].getAdvice();

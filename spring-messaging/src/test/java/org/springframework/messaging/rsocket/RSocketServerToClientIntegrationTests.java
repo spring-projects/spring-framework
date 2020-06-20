@@ -204,7 +204,7 @@ public class RSocketServerToClientIntegrationTests {
 			Mono.fromRunnable(testEcho)
 					.doOnError(ex -> result.onError(ex))
 					.doOnSuccess(o -> result.onComplete())
-					.subscribeOn(Schedulers.elastic()) // StepVerifier will block
+					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
 					.subscribe();
 		}
 	}

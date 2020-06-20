@@ -523,7 +523,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializableSingleton");
 		assertThat(bf.getBean("serializableSingleton")).as("Should be a Singleton").isSameAs(p);
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo("serializableSingleton");
@@ -546,7 +546,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializablePrototype");
 		assertThat(bf.getBean("serializablePrototype")).as("Should not be a Singleton").isNotSameAs(p);
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo("serializablePrototype");
@@ -558,7 +558,7 @@ public class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(SERIALIZATION_CONTEXT, CLASS));
 		Person p = (Person) bf.getBean("serializableSingleton");
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&serializableSingleton");
-		ProxyFactoryBean pfb2 = (ProxyFactoryBean) SerializationTestUtils.serializeAndDeserialize(pfb);
+		ProxyFactoryBean pfb2 = SerializationTestUtils.serializeAndDeserialize(pfb);
 		Person p2 = (Person) pfb2.getObject();
 		assertThat(p2).isEqualTo(p);
 		assertThat(p2).isNotSameAs(p);

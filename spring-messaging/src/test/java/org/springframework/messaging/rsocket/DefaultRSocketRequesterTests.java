@@ -27,8 +27,8 @@ import java.util.function.Function;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import io.rsocket.AbstractRSocket;
 import io.rsocket.Payload;
+import io.rsocket.RSocket;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -248,7 +248,7 @@ public class DefaultRSocketRequesterTests {
 	}
 
 
-	private static class TestRSocket extends AbstractRSocket {
+	private static class TestRSocket implements RSocket {
 
 		private Mono<Payload> payloadMonoToReturn = Mono.empty();
 		private Flux<Payload> payloadFluxToReturn = Flux.empty();

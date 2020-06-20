@@ -1787,7 +1787,7 @@ class DefaultListableBeanFactoryTests {
 		lbf.setSerializationId("test");
 
 		ObjectProvider<ConstructorDependency> provider = lbf.getBeanProvider(ConstructorDependency.class);
-		ObjectProvider deserialized = (ObjectProvider) SerializationTestUtils.serializeAndDeserialize(provider);
+		ObjectProvider deserialized = SerializationTestUtils.serializeAndDeserialize(provider);
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(
 				deserialized::getObject);
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->
