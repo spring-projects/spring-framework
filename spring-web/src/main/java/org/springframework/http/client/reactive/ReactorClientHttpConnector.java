@@ -75,12 +75,13 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		this.httpClient = defaultInitializer.andThen(mapper).apply(initHttpClient(factory));
 	}
 
+	@SuppressWarnings("deprecation")
 	private static HttpClient initHttpClient(ReactorResourceFactory resourceFactory) {
 		ConnectionProvider provider = resourceFactory.getConnectionProvider();
 		LoopResources resources = resourceFactory.getLoopResources();
 		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
 		Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-		return HttpClient.create(provider).runOn(resources);
+		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
 	}
 
 	/**
