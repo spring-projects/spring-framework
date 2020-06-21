@@ -310,6 +310,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>This enables convenient customizations for application purposes, e.g.
 	 * setting Hibernate filters.
 	 * @since 5.3
+	 * @see Session#enableFilter
 	 */
 	public void setSessionInitializer(Consumer<Session> sessionInitializer) {
 		this.sessionInitializer = sessionInitializer;
@@ -478,7 +479,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
 						obtainSessionFactory().openSession());
 				if (this.sessionInitializer != null) {
-					this.sessionInitializer.accept(session);
+					this.sessionInitializer.accept(newSession);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");

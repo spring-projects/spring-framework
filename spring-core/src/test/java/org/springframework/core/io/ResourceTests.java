@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,18 +298,11 @@ class ResourceTests {
 	@Test
 	void readableChannel() throws IOException {
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
-		ReadableByteChannel channel = null;
-		try {
-			channel = resource.readableChannel();
+		try (ReadableByteChannel channel = resource.readableChannel()) {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
 			assertThat(buffer.limit() > 0).isTrue();
-		}
-		finally {
-			if (channel != null) {
-				channel.close();
-			}
 		}
 	}
 

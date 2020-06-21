@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLSession;
 
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
@@ -95,6 +96,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		}
 		else {
 			InetSocketAddress localAddress = request.hostAddress();
+			Assert.state(localAddress != null, "No host address available");
 			return new URI(scheme, null, localAddress.getHostString(),
 					localAddress.getPort(), null, null, null);
 		}
@@ -145,19 +147,25 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public InetSocketAddress getRemoteAddress() {
-		return this.request.remoteAddress();
-	}
-
-	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.request.hostAddress();
 	}
 
 	@Override
 	@Nullable
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
+	}
+
+	@Override
+	@Nullable
 	protected SslInfo initSslInfo() {
-		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);
+		Channel channel = ((Connection) this.request).channel();
+		SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
+		if (sslHandler == null && channel.parent() != null) { // HTTP/2
+			sslHandler = channel.parent().pipeline().get(SslHandler.class);
+		}
 		if (sslHandler != null) {
 			SSLSession session = sslHandler.engine().getSession();
 			return new DefaultSslInfo(session);

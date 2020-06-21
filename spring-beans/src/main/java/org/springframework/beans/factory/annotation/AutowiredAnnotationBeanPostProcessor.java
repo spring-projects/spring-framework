@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -128,8 +128,8 @@ import org.springframework.util.StringUtils;
  * @see Autowired
  * @see Value
  */
-public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
+public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
+		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -613,7 +613,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object cachedFieldValue;
@@ -678,7 +678,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object[] cachedMethodArguments;

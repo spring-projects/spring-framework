@@ -26,7 +26,6 @@ import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * An {@link org.springframework.http.HttpHeaders} variant that adds support for
@@ -71,7 +70,8 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 
 	/**
 	 * Returns {@code WebSocketHttpHeaders} object that can only be read, not written to.
-	 * @deprecated as of 5.2.7 in favor of {@link HttpHeaders#readOnlyHttpHeaders(MultiValueMap)}
+	 * @deprecated as of 5.1.16, in favor of calling {@link #WebSocketHttpHeaders(HttpHeaders)}
+	 * with a read-only wrapper from {@link HttpHeaders#readOnlyHttpHeaders(HttpHeaders)}
 	 */
 	@Deprecated
 	public static WebSocketHttpHeaders readOnlyWebSocketHttpHeaders(WebSocketHttpHeaders headers) {

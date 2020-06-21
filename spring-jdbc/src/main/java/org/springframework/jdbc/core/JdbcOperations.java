@@ -369,7 +369,9 @@ public interface JdbcOperations {
 	 * @param rse a callback that will extract results
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if the query fails
+	 * @deprecated as of 5.3, in favor of {@link #query(String, ResultSetExtractor, Object...)}
 	 */
+	@Deprecated
 	@Nullable
 	<T> T query(String sql, @Nullable Object[] args, ResultSetExtractor<T> rse) throws DataAccessException;
 
@@ -440,7 +442,9 @@ public interface JdbcOperations {
 	 * only the argument value but also the SQL type and optionally the scale
 	 * @param rch a callback that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
+	 * @deprecated as of 5.3, in favor of {@link #query(String, RowCallbackHandler, Object...)}
 	 */
+	@Deprecated
 	void query(String sql, @Nullable Object[] args, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
@@ -514,7 +518,9 @@ public interface JdbcOperations {
 	 * @param rowMapper a callback that will map one object per row
 	 * @return the result List, containing mapped objects
 	 * @throws DataAccessException if the query fails
+	 * @deprecated as of 5.3, in favor of {@link #query(String, RowMapper, Object...)}
 	 */
+	@Deprecated
 	<T> List<T> query(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
 	/**
@@ -620,7 +626,9 @@ public interface JdbcOperations {
 	 * @throws IncorrectResultSizeDataAccessException if the query does not
 	 * return exactly one row
 	 * @throws DataAccessException if the query fails
+	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, RowMapper, Object...)}
 	 */
+	@Deprecated
 	@Nullable
 	<T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException;
 
@@ -681,7 +689,9 @@ public interface JdbcOperations {
 	 * exactly one row, or does not return exactly one column in that row
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForObject(String, Class)
+	 * @deprecated as of 5.3, in favor of {@link #queryForObject(String, Class, Object...)}
 	 */
+	@Deprecated
 	@Nullable
 	<T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException;
 
@@ -783,7 +793,9 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 * @see #queryForList(String, Class)
 	 * @see SingleColumnRowMapper
+	 * @deprecated as of 5.3, in favor of {@link #queryForList(String, Class, Object...)}
 	 */
+	@Deprecated
 	<T> List<T> queryForList(String sql, @Nullable Object[] args, Class<T> elementType) throws DataAccessException;
 
 	/**
@@ -965,6 +977,8 @@ public interface JdbcOperations {
 	 * @param pss object to set parameters on the PreparedStatement
 	 * created by this method
 	 * @return an array of the number of rows affected by each statement
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
@@ -974,6 +988,8 @@ public interface JdbcOperations {
 	 * @param sql the SQL statement to execute
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs) throws DataAccessException;
@@ -985,20 +1001,24 @@ public interface JdbcOperations {
 	 * @param argTypes the SQL types of the arguments
 	 * (constants from {@code java.sql.Types})
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) throws DataAccessException;
 
 	/**
-	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
-	 * The arguments' values will be set using the ParameterizedPreparedStatementSetter.
+	 * Execute multiple batches using the supplied SQL statement with the collect of supplied
+	 * arguments. The arguments' values will be set using the ParameterizedPreparedStatementSetter.
 	 * Each batch should be of size indicated in 'batchSize'.
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
 	 * @param batchSize batch size
 	 * @param pss the ParameterizedPreparedStatementSetter to use
-	 * @return an array containing for each batch another array containing the numbers of rows affected
-	 * by each update in the batch
+	 * @return an array containing for each batch another array containing the numbers of
+	 * rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 * @since 3.1
 	 */

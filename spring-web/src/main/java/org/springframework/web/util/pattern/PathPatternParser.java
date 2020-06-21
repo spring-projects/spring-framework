@@ -112,4 +112,35 @@ public class PathPatternParser {
 		return new InternalPathPatternParser(this).parse(pathPattern);
 	}
 
+
+	/**
+	 * Shared, read-only instance of {@code PathPatternParser}. Uses default settings:
+	 * <ul>
+	 * <li>{@code matchOptionalTrailingSeparator=true}
+	 * <li>{@code caseSensitivetrue}
+	 * <li>{@code pathOptions=PathContainer.Options.HTTP_PATH}
+	 * </ul>
+	 */
+	public final static PathPatternParser defaultInstance = new PathPatternParser() {
+
+		@Override
+		public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
+			raiseError();
+		}
+
+		@Override
+		public void setCaseSensitive(boolean caseSensitive) {
+			raiseError();
+		}
+
+		@Override
+		public void setPathOptions(PathContainer.Options pathOptions) {
+			raiseError();
+		}
+
+		private void raiseError() {
+			throw new UnsupportedOperationException(
+					"This is a read-only, shared instance that cannot be modified");
+		}
+	};
 }

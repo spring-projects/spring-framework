@@ -43,6 +43,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -179,13 +180,15 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public InetSocketAddress getRemoteAddress() {
-		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
+	@NonNull
+	public InetSocketAddress getLocalAddress() {
+		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
 	}
 
 	@Override
-	public InetSocketAddress getLocalAddress() {
-		return new InetSocketAddress(this.request.getLocalAddr(), this.request.getLocalPort());
+	@NonNull
+	public InetSocketAddress getRemoteAddress() {
+		return new InetSocketAddress(this.request.getRemoteHost(), this.request.getRemotePort());
 	}
 
 	@Override

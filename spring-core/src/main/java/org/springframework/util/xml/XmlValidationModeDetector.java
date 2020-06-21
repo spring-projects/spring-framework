@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,7 @@ public class XmlValidationModeDetector {
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-		try {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 			boolean isDtdValidated = false;
 			String content;
 			while ((content = reader.readLine()) != null) {
@@ -114,9 +113,6 @@ public class XmlValidationModeDetector {
 			// Choked on some character encoding...
 			// Leave the decision up to the caller.
 			return VALIDATION_AUTO;
-		}
-		finally {
-			reader.close();
 		}
 	}
 

@@ -187,7 +187,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		assertThat(bean.em).isNotNull();
 		assertThat(SerializationTestUtils.serializeAndDeserialize(bean.em)).isNotNull();
 
-		SimpleMapScope serialized = (SimpleMapScope) SerializationTestUtils.serializeAndDeserialize(myScope);
+		SimpleMapScope serialized = SerializationTestUtils.serializeAndDeserialize(myScope);
 		serialized.close();
 		assertThat(DummyInvocationHandler.closed).isTrue();
 		DummyInvocationHandler.closed = false;

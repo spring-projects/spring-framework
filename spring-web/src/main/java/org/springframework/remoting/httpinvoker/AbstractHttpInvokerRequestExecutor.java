@@ -166,12 +166,8 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see #doWriteRemoteInvocation
 	 */
 	protected void writeRemoteInvocation(RemoteInvocation invocation, OutputStream os) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os));
-		try {
+		try (ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os))) {
 			doWriteRemoteInvocation(invocation, oos);
-		}
-		finally {
-			oos.close();
 		}
 	}
 

@@ -23,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.ReferenceCounted;
-import io.rsocket.AbstractRSocket;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
@@ -240,7 +239,7 @@ class RSocketBufferLeakTests {
 	 * Store all intercepted incoming and outgoing payloads and then use
 	 * {@link #checkForLeaks()} at the end to check reference counts.
 	 */
-	private static class PayloadInterceptor extends AbstractRSocket implements RSocketInterceptor {
+	private static class PayloadInterceptor implements RSocket, RSocketInterceptor {
 
 		private final List<PayloadSavingDecorator> rsockets = new CopyOnWriteArrayList<>();
 
@@ -288,7 +287,7 @@ class RSocketBufferLeakTests {
 		}
 
 
-		private static class PayloadSavingDecorator extends AbstractRSocket {
+		private static class PayloadSavingDecorator implements RSocket {
 
 			private final RSocket delegate;
 

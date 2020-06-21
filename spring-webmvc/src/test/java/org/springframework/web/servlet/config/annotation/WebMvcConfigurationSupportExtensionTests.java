@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 				.findFirst()
 				.orElseThrow(() -> new AssertionError("UserController bean not found"))
 				.getKey();
-		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton("/api/user/{id}"));
+		assertThat(info.getPatternValues()).isEqualTo(Collections.singleton("/api/user/{id}"));
 
 		AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping) this.config.viewControllerHandlerMapping(
-				this.config.mvcPathMatcher(), this.config.mvcUrlPathHelper(),
 				this.config.mvcConversionService(), this.config.mvcResourceUrlProvider());
 		handlerMapping.setApplicationContext(this.context);
 		assertThat(handlerMapping).isNotNull();
@@ -171,7 +170,6 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertThat(chain.getHandler()).isNotNull();
 
 		handlerMapping = (AbstractHandlerMapping) this.config.resourceHandlerMapping(
-				this.config.mvcUrlPathHelper(), this.config.mvcPathMatcher(),
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcResourceUrlProvider());
 		handlerMapping.setApplicationContext(this.context);
@@ -265,6 +263,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void contentNegotiation() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
@@ -290,7 +289,6 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		request.setRequestURI("/resources/foo.gif");
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.config.resourceHandlerMapping(
-				this.config.mvcUrlPathHelper(), this.config.mvcPathMatcher(),
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcResourceUrlProvider());
 		handlerMapping.setApplicationContext(this.context);

@@ -26,7 +26,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * @author Thierry Templier
  * @author Juergen Hoeller
  * @since 1.2
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class CannotGetCciConnectionException extends DataAccessResourceFailureException {
 

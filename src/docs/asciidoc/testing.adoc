@@ -2307,8 +2307,6 @@ Spring provides the following implementations:
   locations.
 * `GenericXmlWebContextLoader`: Loads a `WebApplicationContext` from XML resource
   locations.
-* `GenericPropertiesContextLoader`: Loads a standard `ApplicationContext` from Java
-  properties files.
 
 
 [[testcontext-bootstrapping]]
@@ -7271,7 +7269,7 @@ Another important distinction when using Spring MVC Test is that, conceptually, 
 tests are the server-side, so you can check what handler was used, if an exception was
 handled with a HandlerExceptionResolver, what the content of the model is, what binding
 errors there were, and other details. That means that it is easier to write expectations,
-since the server is not a black box, as it is when testing it through an actual HTTP
+since the server is not an opaque box, as it is when testing it through an actual HTTP
 client. This is generally an advantage of classic unit testing: It is easier to write,
 reason about, and debug but does not replace the need for full integration tests. At the
 same time, it is important not to lose sight of the fact that the response is the most

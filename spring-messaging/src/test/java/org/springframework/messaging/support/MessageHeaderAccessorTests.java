@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -384,7 +384,7 @@ public class MessageHeaderAccessorTests {
 		mutableAccessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
 		message = new GenericMessage<>(message.getPayload(), mutableAccessor.getMessageHeaders());
-		Message<?> output = (Message<?>) SerializationTestUtils.serializeAndDeserialize(message);
+		Message<?> output = SerializationTestUtils.serializeAndDeserialize(message);
 		assertThat(output.getPayload()).isEqualTo("test");
 		assertThat(output.getHeaders().get("foo")).isEqualTo("bar");
 		assertThat(output.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isNotNull();

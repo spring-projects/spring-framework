@@ -806,7 +806,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param propertyPath property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
-	@SuppressWarnings("unchecked")  // avoid nested generic
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.

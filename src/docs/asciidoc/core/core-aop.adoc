@@ -1637,8 +1637,8 @@ In many cases, you do this binding anyway (as in the preceding example).
 
 What happens when multiple pieces of advice all want to run at the same join point?
 Spring AOP follows the same precedence rules as AspectJ to determine the order of advice
-execution. The highest precedence advice runs first "`on the way in`" (so, given two pieces
-of before advice, the one with highest precedence runs first). "`On the way out`" from a
+execution. The highest precedence advice runs first "on the way in" (so, given two pieces
+of before advice, the one with highest precedence runs first). "On the way out" from a
 join point, the highest precedence advice runs last (so, given two pieces of after
 advice, the one with the highest precedence will run second).
 
@@ -1646,16 +1646,27 @@ When two pieces of advice defined in different aspects both need to run at the s
 join point, unless you specify otherwise, the order of execution is undefined. You can
 control the order of execution by specifying precedence. This is done in the normal
 Spring way by either implementing the `org.springframework.core.Ordered` interface in
-the aspect class or annotating it with the `Order` annotation. Given two aspects, the
+the aspect class or annotating it with the `@Order` annotation. Given two aspects, the
 aspect returning the lower value from `Ordered.getValue()` (or the annotation value) has
 the higher precedence.
 
-When two pieces of advice defined in the same aspect both need to run at the same
-join point, the ordering is undefined (since there is no way to retrieve the declaration
-order through reflection for javac-compiled classes). Consider collapsing such advice
-methods into one advice method per join point in each aspect class or refactor the
-pieces of advice into separate aspect classes that you can order at the aspect level.
+[NOTE]
+====
+As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+need to run at the same join point are assigned precedence based on their advice type in
+the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
+`@AfterReturning`, `@AfterThrowing`. Note, however, that due to the implementation style
+in Spring's `AspectJAfterAdvice`, an `@After` advice method will effectively be invoked
+after any `@AfterReturning` or `@AfterThrowing` advice methods in the same aspect.
 
+When two pieces of the same type of advice (for example, two `@After` advice methods)
+defined in the same `@Aspect` class both need to run at the same join point, the ordering
+is undefined (since there is no way to retrieve the source code declaration order through
+reflection for javac-compiled classes). Consider collapsing such advice methods into one
+advice method per join point in each `@Aspect` class or refactor the pieces of advice
+into separate `@Aspect` classes that you can order at the aspect level via `Ordered` or
+`@Order`.
+====
 
 
 [[aop-introductions]]
@@ -1950,9 +1961,9 @@ expression so that only `@Idempotent` operations match, as follows:
 == Schema-based AOP Support
 
 If you prefer an XML-based format, Spring also offers support for defining aspects
-using the new `aop` namespace tags. The exact same pointcut expressions and advice kinds
+using the `aop` namespace tags. The exact same pointcut expressions and advice kinds
 as when using the @AspectJ style are supported. Hence, in this section we focus on
-the new syntax and refer the reader to the discussion in the previous section
+that syntax and refer the reader to the discussion in the previous section
 (<<aop-ataspectj>>) for an understanding of writing pointcut expressions and the binding
 of advice parameters.
 
@@ -1982,7 +1993,7 @@ When you use the schema support, an aspect is a regular Java object defined as a
 your Spring application context. The state and behavior are captured in the fields and
 methods of the object, and the pointcut and advice information are captured in the XML.
 
-You can declare an aspect by using the <aop:aspect> element, and reference the backing bean
+You can declare an aspect by using the `<aop:aspect>` element, and reference the backing bean
 by using the `ref` attribute, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2069,7 +2080,7 @@ collects the `this` object as the join point context and passes it to the advice
 		<aop:aspect id="myAspect" ref="aBean">
 
 			<aop:pointcut id="businessService"
-				expression="execution(* com.xyz.myapp.service.*.*(..)) && this(service)"/>
+				expression="execution(* com.xyz.myapp.service.*.*(..)) &amp;&amp; this(service)"/>
 
 			<aop:before pointcut-ref="businessService" method="monitor"/>
 
@@ -2098,9 +2109,10 @@ parameters of the matching names, as follows:
 	}
 ----
 
-When combining pointcut sub-expressions, `&&` is awkward within an XML document, so
-you can use the `and`, `or`, and `not` keywords in place of `&&`, `||`, and `!`,
-respectively. For example, the previous pointcut can be better written as follows:
+When combining pointcut sub-expressions, `+&amp;&amp;+` is awkward within an XML
+document, so you can use the `and`, `or`, and `not` keywords in place of `+&amp;&amp;+`,
+`||`, and `!`, respectively. For example, the previous pointcut can be better written as
+follows:
 
 [source,xml,indent=0,subs="verbatim"]
 ----
@@ -2136,7 +2148,7 @@ exactly the same semantics.
 ==== Before Advice
 
 Before advice runs before a matched method execution. It is declared inside an
-`<aop:aspect>` by using the <aop:before> element, as the following example shows:
+`<aop:aspect>` by using the `<aop:before>` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2198,8 +2210,8 @@ shows how to declare it:
 	</aop:aspect>
 ----
 
-As in the @AspectJ style, you can get the return value within the
-advice body. To do so, use the returning attribute to specify the name of the parameter to which
+As in the @AspectJ style, you can get the return value within the advice body.
+To do so, use the `returning` attribute to specify the name of the parameter to which
 the return value should be passed, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2236,7 +2248,7 @@ example, you can declare the method signature as follows:
 ==== After Throwing Advice
 
 After throwing advice executes when a matched method execution exits by throwing an
-exception. It is declared inside an `<aop:aspect>` by using the after-throwing element,
+exception. It is declared inside an `<aop:aspect>` by using the `after-throwing` element,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2252,8 +2264,8 @@ as the following example shows:
 	</aop:aspect>
 ----
 
-As in the @AspectJ style, you can get the thrown exception within
-the advice body. To do so, use the throwing attribute to specify the name of the parameter to
+As in the @AspectJ style, you can get the thrown exception within the advice body.
+To do so, use the `throwing` attribute to specify the name of the parameter to
 which the exception should be passed as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2309,7 +2321,7 @@ by using the `after` element, as the following example shows:
 [[aop-schema-advice-around]]
 ==== Around Advice
 
-The last kind of advice is around advice. Around advice runs "`around`" a matched method
+The last kind of advice is around advice. Around advice runs "around" a matched method
 execution. It has the opportunity to do work both before and after the method executes
 and to determine when, how, and even if the method actually gets to execute at all.
 Around advice is often used to share state before and after a method
@@ -2548,10 +2560,31 @@ ms     %     Task name
 [[aop-ordering]]
 ==== Advice Ordering
 
-When multiple advice needs to execute at the same join point (executing method) the
-ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
-between aspects is determined by either adding the `Order` annotation to the bean
-that backs the aspect or by having the bean implement the `Ordered` interface.
+When multiple pieces of advice need to execute at the same join point (executing method)
+the ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
+between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
+by either adding the `@Order` annotation to the bean that backs the aspect or by having
+the bean implement the `Ordered` interface.
+
+[NOTE]
+====
+In contrast to the precedence rules for advice methods defined in the same `@Aspect`
+class, when two pieces of advice defined in the same `<aop:aspect>` element both need to
+run at the same join point, the precedence is determined by the order in which the advice
+elements are declared within the enclosing `<aop:aspect>` element, from highest to lowest
+precedence.
+
+For example, given an `around` advice and a `before` advice defined in the same
+`<aop:aspect>` element that apply to the same join point, to ensure that the `around`
+advice has higher precedence than the `before` advice, the `<aop:around>` element must be
+declared before the `<aop:before>` element.
+
+As a general rule of thumb, if you find that you have multiple pieces of advice defined
+in the same `<aop:aspect>` element that apply to the same join point, consider collapsing
+such advice methods into one advice method per join point in each `<aop:aspect>` element
+or refactor the pieces of advice into separate `<aop:aspect>` elements that you can order
+at the aspect level.
+====
 
 
 

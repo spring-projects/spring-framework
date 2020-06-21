@@ -210,11 +210,4 @@ class EncoderHttpMessageWriterTests {
 				.willReturn(encodedStream);
 	}
 
-	private void configureEncoder(DataBuffer dataBuffer, MimeType... mimeTypes) {
-		List<MimeType> typeList = Arrays.asList(mimeTypes);
-		given(this.encoder.getEncodableMimeTypes()).willReturn(typeList);
-		given(this.encoder.encodeValue(any(), any(), any(), this.mediaTypeCaptor.capture(), any()))
-				.willReturn(dataBuffer);
-	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,21 @@
 
 package org.springframework.web.servlet.mvc;
 
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,162 +39,164 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rick Evans
  * @since 14.09.2005
  */
-public class UrlFilenameViewControllerTests {
+class UrlFilenameViewControllerTests {
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	@SuppressWarnings("unused")
+	private static Stream<Function<String, MockHttpServletRequest>> pathPatternsArguments() {
+		return PathPatternsTestUtils.requestArguments();
+	}
 
 
-	@Test
-	public void withPlainFilename() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withPlainFilename(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/index");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withFilenamePlusExtension() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withFilenamePlusExtension(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/index.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withFilenameAndMatrixVariables() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index;a=A;b=B");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withFilenameAndMatrixVariables(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/index;a=A;b=B");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withPrefixAndSuffix() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		ctrl.setPrefix("mypre_");
-		ctrl.setSuffix("_mysuf");
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withPrefixAndSuffix(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		controller.setPrefix("mypre_");
+		controller.setSuffix("_mysuf");
+		MockHttpServletRequest request = requestFactory.apply("/index.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("mypre_index_mysuf");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withPrefix() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		ctrl.setPrefix("mypre_");
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withPrefix(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		controller.setPrefix("mypre_");
+		MockHttpServletRequest request = requestFactory.apply("/index.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("mypre_index");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withSuffix() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		ctrl.setSuffix("_mysuf");
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void withSuffix(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		controller.setSuffix("_mysuf");
+		MockHttpServletRequest request = requestFactory.apply("/index.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index_mysuf");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void multiLevel() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void multiLevel(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/docs/cvs/commit.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void multiLevelWithMapping() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
+	@PathPatternsParameterizedTest
+	void multiLevelWithMapping(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/docs/cvs/commit.html");
 		exposePathInMapping(request, "/docs/**");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("cvs/commit");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void multiLevelMappingWithFallback() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
+	@PathPatternsParameterizedTest
+	void multiLevelMappingWithFallback(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/docs/cvs/commit.html");
 		exposePathInMapping(request, "/docs/cvs/commit.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withContextMapping() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+	@PathPatternsParameterizedTest
+	void withContextMapping(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/docs/cvs/commit.html");
 		request.setContextPath("/myapp");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+		ServletRequestPathUtils.parseAndCache(request);
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("docs/cvs/commit");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
 	@Test
-	public void settingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		ctrl.setPrefix(null);
-		assertThat(ctrl.getPrefix()).as("For setPrefix(..) with null, the empty string must be used instead.").isNotNull();
-		assertThat(ctrl.getPrefix()).as("For setPrefix(..) with null, the empty string must be used instead.").isEqualTo("");
+	void settingPrefixToNullCausesEmptyStringToBeUsed() {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		controller.setPrefix(null);
+		assertThat(controller.getPrefix())
+				.as("For setPrefix(..) with null, the empty string must be used instead.")
+				.isNotNull();
+		assertThat(controller.getPrefix())
+				.as("For setPrefix(..) with null, the empty string must be used instead.")
+				.isEqualTo("");
 	}
 
 	@Test
-	public void settingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		ctrl.setSuffix(null);
-		assertThat(ctrl.getSuffix()).as("For setPrefix(..) with null, the empty string must be used instead.").isNotNull();
-		assertThat(ctrl.getSuffix()).as("For setPrefix(..) with null, the empty string must be used instead.").isEqualTo("");
+	void settingSuffixToNullCausesEmptyStringToBeUsed() {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		controller.setSuffix(null);
+		assertThat(controller.getSuffix())
+				.as("For setPrefix(..) with null, the empty string must be used instead.")
+				.isNotNull();
+		assertThat(controller.getSuffix())
+				.as("For setPrefix(..) with null, the empty string must be used instead.")
+				.isEqualTo("");
 	}
 
 	/**
 	 * This is the expected behavior, and it now has a test to prove it.
 	 * https://opensource.atlassian.com/projects/spring/browse/SPR-2789
 	 */
-	@Test
-	public void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+	@PathPatternsParameterizedTest
+	void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line(
+			Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/products/view.html");
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("products/view");
 		assertThat(mv.getModel().isEmpty()).isTrue();
 	}
 
-	@Test
-	public void withFlashAttributes() throws Exception {
-		UrlFilenameViewController ctrl = new UrlFilenameViewController();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
+	@PathPatternsParameterizedTest
+	void withFlashAttributes(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		UrlFilenameViewController controller = new UrlFilenameViewController();
+		MockHttpServletRequest request = requestFactory.apply("/index");
 		request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		ModelAndView mv = ctrl.handleRequest(request, response);
+		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
 		assertThat(mv.getModel().size()).isEqualTo(1);
 		assertThat(mv.getModel().get("name")).isEqualTo("value");
 	}
 
 	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
-		String pathInMapping = this.pathMatcher.extractPathWithinPattern(mapping, request.getRequestURI());
+		String pathInMapping = new AntPathMatcher().extractPathWithinPattern(mapping, request.getRequestURI());
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathInMapping);
 	}
 

@@ -43,7 +43,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
 	private static final SortedSet<PathPattern> EMPTY_PATH_PATTERN =
-			new TreeSet<>(Collections.singleton(new PathPatternParser().parse("")));
+			new TreeSet<>(Collections.singleton(PathPatternParser.defaultInstance.parse("")));
 
 
 	private final SortedSet<PathPattern> patterns;

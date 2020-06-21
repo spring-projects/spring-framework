@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ public class ForwardedHeaderTransformerTests {
 
 
 	@Test
-	public void removeOnly() {
-
+	void removeOnly() {
 		this.requestMutator.setRemoveOnly(true);
 
 		HttpHeaders headers = new HttpHeaders();
@@ -57,7 +56,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
-	public void xForwardedHeaders() throws Exception {
+	void xForwardedHeaders() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-Host", "84.198.58.199");
 		headers.add("X-Forwarded-Port", "443");
@@ -70,7 +69,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
-	public void forwardedHeader() throws Exception {
+	void forwardedHeader() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Forwarded", "host=84.198.58.199;proto=https");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
@@ -80,7 +79,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
-	public void xForwardedPrefix() throws Exception {
+	void xForwardedPrefix() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-Prefix", "/prefix");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
@@ -91,7 +90,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test // gh-23305
-	public void xForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
+	void xForwardedPrefixShouldNotLeadToDecodedPath() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-Prefix", "/prefix");
 		ServerHttpRequest request = MockServerHttpRequest
@@ -107,7 +106,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
-	public void xForwardedPrefixTrailingSlash() throws Exception {
+	void xForwardedPrefixTrailingSlash() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-Prefix", "/prefix////");
 		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
@@ -118,7 +117,7 @@ public class ForwardedHeaderTransformerTests {
 	}
 
 	@Test // SPR-17525
-	public void shouldNotDoubleEncode() throws Exception {
+	void shouldNotDoubleEncode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Forwarded", "host=84.198.58.199;proto=https");
 
@@ -130,6 +129,28 @@ public class ForwardedHeaderTransformerTests {
 		request = this.requestMutator.apply(request);
 
 		assertThat(request.getURI()).isEqualTo(new URI("https://84.198.58.199/a%20b?q=a%2Bb"));
+		assertForwardedHeadersRemoved(request);
+	}
+
+	@Test
+	void shouldConcatenatePrefixes() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/first,/second");
+		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
+
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/first/second/path"));
+		assertThat(request.getPath().value()).isEqualTo("/first/second/path");
+		assertForwardedHeadersRemoved(request);
+	}
+
+	@Test
+	void shouldConcatenatePrefixesWithTrailingSlashes() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("X-Forwarded-Prefix", "/first/,/second//");
+		ServerHttpRequest request = this.requestMutator.apply(getRequest(headers));
+
+		assertThat(request.getURI()).isEqualTo(new URI("https://example.com/first/second/path"));
+		assertThat(request.getPath().value()).isEqualTo("/first/second/path");
 		assertForwardedHeadersRemoved(request);
 	}
 

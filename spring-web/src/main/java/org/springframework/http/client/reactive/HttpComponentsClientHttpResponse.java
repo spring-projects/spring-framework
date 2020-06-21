@@ -94,8 +94,7 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private long getMaxAgeSeconds(Cookie cookie) {
 		String maxAgeAttribute = cookie.getAttribute(Cookie.MAX_AGE_ATTR);
-
-		return maxAgeAttribute == null ? -1 : Long.parseLong(maxAgeAttribute);
+		return (maxAgeAttribute != null ? Long.parseLong(maxAgeAttribute) : -1);
 	}
 
 	@Override

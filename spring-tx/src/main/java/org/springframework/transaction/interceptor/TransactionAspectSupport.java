@@ -388,11 +388,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		else {
+			Object result;
 			final ThrowableHolder throwableHolder = new ThrowableHolder();
 
 			// It's a CallbackPreferringPlatformTransactionManager: pass a TransactionCallback in.
 			try {
-				Object result = ((CallbackPreferringPlatformTransactionManager) ptm).execute(txAttr, status -> {
+				result = ((CallbackPreferringPlatformTransactionManager) ptm).execute(txAttr, status -> {
 					TransactionInfo txInfo = prepareTransactionInfo(ptm, txAttr, joinpointIdentification, status);
 					try {
 						Object retVal = invocation.proceedWithInvocation();
@@ -422,12 +423,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 						cleanupTransactionInfo(txInfo);
 					}
 				});
-
-				// Check result state: It might indicate a Throwable to rethrow.
-				if (throwableHolder.throwable != null) {
-					throw throwableHolder.throwable;
-				}
-				return result;
 			}
 			catch (ThrowableHolderException ex) {
 				throw ex.getCause();
@@ -445,11 +440,17 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				throw ex2;
 			}
+
+			// Check result state: It might indicate a Throwable to rethrow.
+			if (throwableHolder.throwable != null) {
+				throw throwableHolder.throwable;
+			}
+			return result;
 		}
 	}
 
 	/**
-	 * Clear the cache.
+	 * Clear the transaction manager cache.
 	 */
 	protected void clearTransactionManagerCache() {
 		this.transactionManagerCache.clear();
@@ -878,7 +879,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 										},
 										this::commitTransactionAfterReturning,
 										(txInfo, err) -> Mono.empty(),
-										this::commitTransactionAfterReturning)
+										this::rollbackTransactionOnCancel)
 										.onErrorResume(ex ->
 												completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
 							}
@@ -908,7 +909,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 											},
 											this::commitTransactionAfterReturning,
 											(txInfo, ex) -> Mono.empty(),
-											this::commitTransactionAfterReturning)
+											this::rollbackTransactionOnCancel)
 									.onErrorResume(ex ->
 											completeTransactionAfterThrowing(it, ex).then(Mono.error(ex)));
 						}
@@ -971,6 +972,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() + "]");
 				}
 				return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction());
+			}
+			return Mono.empty();
+		}
+
+		private Mono<Void> rollbackTransactionOnCancel(@Nullable ReactiveTransactionInfo txInfo) {
+			if (txInfo != null && txInfo.getReactiveTransaction() != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Rolling back transaction for [" + txInfo.getJoinpointIdentification() + "] after cancellation");
+				}
+				return txInfo.getTransactionManager().rollback(txInfo.getReactiveTransaction());
 			}
 			return Mono.empty();
 		}

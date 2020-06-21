@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1210,17 +1210,16 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Session interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Session proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: suppress, not valid.
-				return null;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Session proxy.
+					return System.identityHashCode(proxy);
+				case "close":
+					// Handle close method: suppress, not valid.
+					return null;
 			}
 
 			// Invoke method on target Session.

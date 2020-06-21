@@ -413,7 +413,7 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * {@code BlockHoundIntegration} for spring-core classes.
-	 * <p>Whitelists the following:
+	 * <p>Explicitly allow the following:
 	 * <ul>
 	 * <li>Reading class info via {@link LocalVariableTableParameterNameDiscoverer}.
 	 * <li>Locking within {@link ConcurrentReferenceHashMap}.

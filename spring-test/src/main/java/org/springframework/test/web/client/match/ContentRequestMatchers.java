@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.test.web.client.match;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -26,16 +26,22 @@ import javax.xml.transform.dom.DOMSource;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -140,21 +146,107 @@ public class ContentRequestMatchers {
 	 * Parse the body as form data and compare to the given {@code MultiValueMap}.
 	 * @since 4.3
 	 */
-	public RequestMatcher formData(MultiValueMap<String, String> expectedContent) {
+	public RequestMatcher formData(MultiValueMap<String, String> expected) {
+		return formData(expected, true);
+	}
+
+	/**
+	 * Variant of {@link #formData(MultiValueMap)} that matches the given subset
+	 * of expected form parameters.
+	 * @since 5.3
+	 */
+	public RequestMatcher formDataContains(Map<String, String> expected) {
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>(expected.size());
+		expected.forEach(multiValueMap::add);
+		return formData(multiValueMap, false);
+	}
+
+	private RequestMatcher formData(MultiValueMap<String, String> expectedMap, boolean containsExactly) {
 		return request -> {
-			HttpInputMessage inputMessage = new HttpInputMessage() {
-				@Override
-				public InputStream getBody() throws IOException {
-					MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-					return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+			MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+			MockHttpInputMessage message = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
+			message.getHeaders().putAll(mockRequest.getHeaders());
+			MultiValueMap<String, String> actualMap = new FormHttpMessageConverter().read(null, message);
+			if (containsExactly) {
+				assertEquals("Form data", expectedMap, actualMap);
+			}
+			else {
+				assertTrue("Form data " + actualMap, expectedMap.size() <= actualMap.size());
+				for (Map.Entry<String, ? extends List<?>> entry : expectedMap.entrySet()) {
+					String name = entry.getKey();
+					List<?> values = entry.getValue();
+					assertTrue("No form parameter '" + name + "'", actualMap.get(name) != null);
+					assertTrue("Parameter value count " + values.size(), values.size() <= actualMap.get(name).size());
+					for (int i = 0; i < values.size(); i++) {
+						assertEquals("Form parameter", values.get(i), actualMap.get(name).get(i));
+					}
 				}
-				@Override
-				public HttpHeaders getHeaders() {
-					return request.getHeaders();
+			}
+		};
+	}
+
+	/**
+	 * Parse the body as multipart data and assert it contains exactly the
+	 * values from the given {@code MultiValueMap}. Values may be of type:
+	 * <ul>
+	 * <li>{@code String} - form field
+	 * <li>{@link Resource} - content from a file
+	 * <li>{@code byte[]} - other raw content
+	 * </ul>
+	 * <p><strong>Note:</strong> This method uses the Apache Commons File Upload
+	 * library to parse the multipart data and it must be on the test classpath.
+	 * @param expectedMap the expected multipart values
+	 * @since 5.3
+	 */
+	public RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap) {
+		return multipartData(expectedMap, true);
+	}
+
+	/**
+	 * Variant of {@link #multipartData(MultiValueMap)} that does the same but
+	 * only for a subset of the actual values.
+	 * @param expectedMap the expected multipart values
+	 * @since 5.3
+	 */
+	public RequestMatcher multipartDataContains(Map<String, ?> expectedMap) {
+		MultiValueMap<String, Object> map = new LinkedMultiValueMap<>(expectedMap.size());
+		expectedMap.forEach(map::add);
+		return multipartData(map, false);
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	private RequestMatcher multipartData(MultiValueMap<String, ?> expectedMap, boolean containsExactly) {
+		return request -> {
+			MultiValueMap<String, ?> actualMap = MultipartHelper.parse(request);
+			if (containsExactly) {
+				assertEquals("Multipart request content: " + actualMap, expectedMap.size(), actualMap.size());
+			}
+			for (Map.Entry<String, ? extends List<?>> entry : expectedMap.entrySet()) {
+				String name = entry.getKey();
+				List<?> values = entry.getValue();
+				assertTrue("No Multipart '" + name + "'", actualMap.get(name) != null);
+				assertTrue("Multipart value count " + values.size(), containsExactly ?
+						values.size() == actualMap.get(name).size() :
+						values.size() <= actualMap.get(name).size());
+				for (int i = 0; i < values.size(); i++) {
+					Object expected = values.get(i);
+					Object actual = actualMap.get(name).get(i);
+					if (expected instanceof Resource) {
+						expected = StreamUtils.copyToByteArray(((Resource) expected).getInputStream());
+					}
+					if (expected instanceof byte[]) {
+						assertTrue("Multipart is not a file", actual instanceof MultipartFile);
+						assertEquals("Multipart content", expected, ((MultipartFile) actual).getBytes());
+					}
+					else if (expected instanceof String) {
+						assertTrue("Multipart is not a String", actual instanceof String);
+						assertEquals("Multipart content", expected, actual);
+					}
+					else {
+						throw new IllegalArgumentException("Unexpected multipart value: " + expected.getClass());
+					}
 				}
-			};
-			FormHttpMessageConverter converter = new FormHttpMessageConverter();
-			assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
+			}
 		};
 	}
 
@@ -259,6 +351,34 @@ public class ContentRequestMatchers {
 		}
 
 		protected abstract void matchInternal(MockClientHttpRequest request) throws Exception;
+	}
+
+
+	private static class MultipartHelper {
+
+		public static MultiValueMap<String, ?> parse(ClientHttpRequest request) {
+			MultipartHttpServletRequest servletRequest = adaptToMultipartRequest(request);
+			MultiValueMap<String, Object> result = new LinkedMultiValueMap<>();
+			for (Map.Entry<String, List<MultipartFile>> entry : servletRequest.getMultiFileMap().entrySet()) {
+				for (MultipartFile value : entry.getValue()) {
+					result.add(entry.getKey(), value);
+				}
+			}
+			for (Map.Entry<String, String[]> entry : servletRequest.getParameterMap().entrySet()) {
+				for (String value : entry.getValue()) {
+					result.add(entry.getKey(), value);
+				}
+			}
+			return result;
+		}
+
+		private static MultipartHttpServletRequest adaptToMultipartRequest(ClientHttpRequest request) {
+			MockClientHttpRequest source = (MockClientHttpRequest) request;
+			MockHttpServletRequest target = new MockHttpServletRequest();
+			target.setContent(source.getBodyAsBytes());
+			source.getHeaders().forEach((name, values) -> values.forEach(v -> target.addHeader(name, v)));
+			return new CommonsMultipartResolver().resolveMultipart(target);
+		}
 	}
 
 }

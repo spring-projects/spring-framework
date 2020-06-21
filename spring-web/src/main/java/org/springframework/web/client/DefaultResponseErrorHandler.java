@@ -139,7 +139,9 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 			return preface + "[no body]";
 		}
 
-		charset = charset == null ? StandardCharsets.UTF_8 : charset;
+		if (charset == null) {
+			charset = StandardCharsets.UTF_8;
+		}
 		int maxChars = 200;
 
 		if (responseBody.length < maxChars * 2) {

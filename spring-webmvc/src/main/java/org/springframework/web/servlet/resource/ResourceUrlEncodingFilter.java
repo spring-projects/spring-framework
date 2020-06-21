@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,12 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
 			throw new ServletException("ResourceUrlEncodingFilter only supports HTTP requests");
 		}
+
 		ResourceUrlEncodingRequestWrapper wrappedRequest =
 				new ResourceUrlEncodingRequestWrapper((HttpServletRequest) request);
 		ResourceUrlEncodingResponseWrapper wrappedResponse =
 				new ResourceUrlEncodingResponseWrapper(wrappedRequest, (HttpServletResponse) response);
+
 		filterChain.doFilter(wrappedRequest, wrappedResponse);
 	}
 

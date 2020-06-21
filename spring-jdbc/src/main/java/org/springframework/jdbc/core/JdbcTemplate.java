@@ -749,6 +749,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
 	public <T> T query(String sql, @Nullable Object[] args, ResultSetExtractor<T> rse) throws DataAccessException {
@@ -776,6 +777,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		query(sql, newArgTypePreparedStatementSetter(args, argTypes), rch);
 	}
 
+	@Deprecated
 	@Override
 	public void query(String sql, @Nullable Object[] args, RowCallbackHandler rch) throws DataAccessException {
 		query(sql, newArgPreparedStatementSetter(args), rch);
@@ -801,6 +803,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return result(query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper)));
 	}
 
+	@Deprecated
 	@Override
 	public <T> List<T> query(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return result(query(sql, args, new RowMapperResultSetExtractor<>(rowMapper)));
@@ -868,6 +871,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
 	public <T> T queryForObject(String sql, @Nullable Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
@@ -890,6 +894,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
 	}
 
+	@Deprecated
 	@Override
 	public <T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException {
 		return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
@@ -915,6 +920,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
 	}
 
+	@Deprecated
 	@Override
 	public <T> List<T> queryForList(String sql, @Nullable Object[] args, Class<T> elementType) throws DataAccessException {
 		return query(sql, args, getSingleColumnRowMapper(elementType));
@@ -1581,34 +1587,25 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of PersistenceManager proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("unwrap")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return proxy;
-				}
-			}
-			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class<?>) args[0]).isInstance(proxy)) {
-					return true;
-				}
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: suppress, not valid.
-				return null;
-			}
-			else if (method.getName().equals("isClosed")) {
-				return false;
-			}
-			else if (method.getName().equals("getTargetConnection")) {
-				// Handle getTargetConnection method: return underlying Connection.
-				return this.target;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of PersistenceManager proxy.
+					return System.identityHashCode(proxy);
+				case "close":
+					// Handle close method: suppress, not valid.
+					return null;
+				case "isClosed":
+					return false;
+				case "getTargetConnection":
+					// Handle getTargetConnection method: return underlying Connection.
+					return this.target;
+				case "unwrap":
+					return (((Class<?>) args[0]).isInstance(proxy) ? proxy : this.target.unwrap((Class<?>) args[0]));
+				case "isWrapperFor":
+					return (((Class<?>) args[0]).isInstance(proxy) || this.target.isWrapperFor((Class<?>) args[0]));
 			}
 
 			// Invoke method on target Connection.

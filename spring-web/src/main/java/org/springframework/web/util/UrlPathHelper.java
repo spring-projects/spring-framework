@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.MappingMatch;
 
@@ -29,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -50,6 +52,13 @@ import org.springframework.util.StringUtils;
  * @see javax.servlet.RequestDispatcher
  */
 public class UrlPathHelper {
+
+	/**
+	 * Name of Servlet request attribute that holds a
+	 * {@link #getLookupPathForRequest resolved} lookupPath.
+	 * @since 5.3
+	 */
+	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".path";
 
 	private static boolean isServlet4Present =
 			ClassUtils.isPresent("javax.servlet.http.HttpServletMapping",
@@ -161,23 +170,51 @@ public class UrlPathHelper {
 
 
 	/**
+	 * {@link #getLookupPathForRequest Resolve} the lookupPath and cache it in a
+	 * a request attribute with the key {@link #PATH_ATTRIBUTE} for subsequent
+	 * access via {@link #getResolvedLookupPath(ServletRequest)}.
+	 * @param request the current request
+	 * @return the resolved path
+	 * @since 5.3
+	 */
+	public String resolveAndCacheLookupPath(HttpServletRequest request) {
+		String lookupPath = getLookupPathForRequest(request);
+		request.setAttribute(PATH_ATTRIBUTE, lookupPath);
+		return lookupPath;
+	}
+
+	/**
+	 * Return a previously {@link #getLookupPathForRequest resolved} lookupPath.
+	 * @param request the current request
+	 * @return the previously resolved lookupPath
+	 * @throws IllegalArgumentException if the not found
+	 * @since 5.3
+	 */
+	public static String getResolvedLookupPath(ServletRequest request) {
+		String lookupPath = (String) request.getAttribute(PATH_ATTRIBUTE);
+		Assert.notNull(lookupPath, "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
+		return lookupPath;
+	}
+
+	/**
 	 * Variant of {@link #getLookupPathForRequest(HttpServletRequest)} that
 	 * automates checking for a previously computed lookupPath saved as a
 	 * request attribute. The attribute is only used for lookup purposes.
 	 * @param request current HTTP request
-	 * @param lookupPathAttributeName the request attribute to check
+	 * @param name the request attribute that holds the lookupPath
 	 * @return the lookup path
 	 * @since 5.2
-	 * @see org.springframework.web.servlet.HandlerMapping#LOOKUP_PATH
+	 * @deprecated as of 5.3 in favor of using
+	 * {@link #resolveAndCacheLookupPath(HttpServletRequest)} and
+	 * {@link #getResolvedLookupPath(ServletRequest)}.
 	 */
-	public String getLookupPathForRequest(HttpServletRequest request, @Nullable String lookupPathAttributeName) {
-		if (lookupPathAttributeName != null) {
-			String result = (String) request.getAttribute(lookupPathAttributeName);
-			if (result != null) {
-				return result;
-			}
+	@Deprecated
+	public String getLookupPathForRequest(HttpServletRequest request, @Nullable String name) {
+		String result = null;
+		if (name != null) {
+			result = (String) request.getAttribute(name);
 		}
-		return getLookupPathForRequest(request);
+		return (result != null ? result : getLookupPathForRequest(request));
 	}
 
 	/**

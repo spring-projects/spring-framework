@@ -108,7 +108,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param maxFramePayloadLength the max length for frames.
 	 * @since 5.1
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} wiht a constructor argument.
+	 * {@link WebsocketServerSpec.Builder} with a constructor argument.
 	 */
 	@Deprecated
 	public void setMaxFramePayloadLength(Integer maxFramePayloadLength) {
@@ -136,7 +136,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param handlePing whether to let Ping frames through for handling
 	 * @since 5.2.4
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} wiht a constructor argument.
+	 * {@link WebsocketServerSpec.Builder} with a constructor argument.
 	 */
 	@Deprecated
 	public void setHandlePing(boolean handlePing) {

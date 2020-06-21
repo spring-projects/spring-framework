@@ -73,6 +73,9 @@ dependencies {
 }
 
 jar {
+	reproducibleFileOrder = true
+	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {

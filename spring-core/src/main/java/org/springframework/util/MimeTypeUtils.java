@@ -428,7 +428,7 @@ public abstract class MimeTypeUtils {
 
 		private final Function<K, V> generator;
 
-		private volatile int size = 0;
+		private volatile int size;
 
 		public ConcurrentLruCache(int maxSize, Function<K, V> generator) {
 			Assert.isTrue(maxSize > 0, "LRU max size should be positive");

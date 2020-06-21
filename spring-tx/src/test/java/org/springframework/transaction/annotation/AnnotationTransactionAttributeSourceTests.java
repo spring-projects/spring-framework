@@ -32,6 +32,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -54,7 +55,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		TestBean1 tb = new TestBean1();
 		CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 		AnnotationTransactionAttributeSource tas = new AnnotationTransactionAttributeSource();
-		TransactionInterceptor ti = new TransactionInterceptor(ptm, tas);
+		TransactionInterceptor ti = new TransactionInterceptor((TransactionManager) ptm, tas);
 
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setInterfaces(ITestBean1.class);
@@ -64,7 +65,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		proxy.getAge();
 		assertThat(ptm.commits).isEqualTo(1);
 
-		ITestBean1 serializedProxy = (ITestBean1) SerializationTestUtils.serializeAndDeserialize(proxy);
+		ITestBean1 serializedProxy = SerializationTestUtils.serializeAndDeserialize(proxy);
 		serializedProxy.getAge();
 		Advised advised = (Advised) serializedProxy;
 		TransactionInterceptor serializedTi = (TransactionInterceptor) advised.getAdvisors()[0].getAdvice();

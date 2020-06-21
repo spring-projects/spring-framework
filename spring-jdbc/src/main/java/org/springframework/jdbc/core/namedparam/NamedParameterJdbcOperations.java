@@ -530,6 +530,8 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql the SQL statement to execute
 	 * @param batchValues the array of Maps containing the batch of arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, Map<String, ?>[] batchValues);
@@ -537,8 +539,11 @@ public interface NamedParameterJdbcOperations {
 	/**
 	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
 	 * @param sql the SQL statement to execute
-	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of arguments for the query
+	 * @param batchArgs the array of {@link SqlParameterSource} containing the batch of
+	 * arguments for the query
 	 * @return an array containing the numbers of rows affected by each update in the batch
+	 * (may also contain special JDBC-defined negative values for affected rows such as
+	 * {@link java.sql.Statement#SUCCESS_NO_INFO}/{@link java.sql.Statement#EXECUTE_FAILED})
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int[] batchUpdate(String sql, SqlParameterSource[] batchArgs);

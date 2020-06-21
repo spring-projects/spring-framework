@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
+
+	/**
+	 * Specify the ClassLoader to load class path resources and bean classes with.
+	 * <p>This context class loader will be passed to the internal bean factory.
+	 * @since 5.2.7
+	 * @see org.springframework.core.io.DefaultResourceLoader#DefaultResourceLoader(ClassLoader)
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setBeanClassLoader
+	 */
+	void setClassLoader(ClassLoader classLoader);
 
 	/**
 	 * Register the given protocol resolver with this application context,

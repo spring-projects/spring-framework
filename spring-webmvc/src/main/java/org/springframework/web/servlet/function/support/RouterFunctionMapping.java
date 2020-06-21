@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -47,9 +48,18 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
  * {@linkplain org.springframework.core.annotation.Order order}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.2
  */
 public class RouterFunctionMapping extends AbstractHandlerMapping implements InitializingBean {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
+
 
 	@Nullable
 	private RouterFunction<?> routerFunction;
@@ -152,11 +162,13 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
 
-		try {
-			messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
+		if (!shouldIgnoreXml) {
+			try {
+				messageConverters.add(new SourceHttpMessageConverter<>());
+			}
+			catch (Error err) {
+				// Ignore when no TransformerFactory implementation is available
+			}
 		}
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
@@ -166,8 +178,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	@Nullable
 	@Override
 	protected Object getHandlerInternal(HttpServletRequest servletRequest) throws Exception {
-		String lookupPath = getUrlPathHelper().getLookupPathForRequest(servletRequest);
-		servletRequest.setAttribute(LOOKUP_PATH, lookupPath);
 		if (this.routerFunction != null) {
 			ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters);
 			servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);

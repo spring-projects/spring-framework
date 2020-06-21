@@ -990,7 +990,7 @@ Kotlin and the Spring Framework:
 * https://kotlinlang.org/docs/reference/[Kotlin language reference]
 * https://slack.kotlinlang.org/[Kotlin Slack] (with a dedicated #spring channel)
 * https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow, with `spring` and `kotlin` tags]
-* https://try.kotlinlang.org/[Try Kotlin in your browser]
+* https://play.kotlinlang.org/[Try Kotlin in your browser]
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
 
