@@ -497,14 +497,20 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 						}
 						return;
 					}
+					boolean required = false;
+					PropertyDescriptor pd = null;
 					if (method.getParameterCount() == 0) {
+						//In case of an @Autowired method with no parameters, 
+						// we're nevertheless invoking it since it may perform some initialization logic... 
+						// even if such logic is better suited in an @PostConstruct method or a constructor.
 						if (logger.isInfoEnabled()) {
 							logger.info("Autowired annotation should only be used on methods with parameters: " +
 									method);
 						}
+					} else {
+						required = determineRequiredStatus(ann);
+						pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					}
-					boolean required = determineRequiredStatus(ann);
-					PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 					currElements.add(new AutowiredMethodElement(method, required, pd));
 				}
 			});
@@ -698,8 +704,9 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 			if (this.cached) {
 				// Shortcut for avoiding synchronization...
 				arguments = resolveCachedArguments(beanName);
-			}
-			else {
+   			} else if (method.getParameterCount() == 0) {
+      			arguments = new Object[0]; 
+			} else {
 				int argumentCount = method.getParameterCount();
 				arguments = new Object[argumentCount];
 				DependencyDescriptor[] descriptors = new DependencyDescriptor[argumentCount];
