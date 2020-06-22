@@ -69,7 +69,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private static final Map<MediaType, byte[]> STREAM_SEPARATORS;
 
-	private static final Map<Charset, JsonEncoding> ENCODINGS;
+	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
 		STREAM_SEPARATORS = new HashMap<>(4);
@@ -78,8 +78,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		ENCODINGS = new HashMap<>(JsonEncoding.values().length);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
-			Charset charset = Charset.forName(encoding.getJavaName());
-			ENCODINGS.put(charset, encoding);
+			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}
 	}
 
@@ -116,7 +115,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		}
 		if (mimeType != null && mimeType.getCharset() != null) {
 			Charset charset = mimeType.getCharset();
-			if (!ENCODINGS.containsKey(charset)) {
+			if (!ENCODINGS.containsKey(charset.name())) {
 				return false;
 			}
 		}
@@ -286,7 +285,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	protected JsonEncoding getJsonEncoding(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			Charset charset = mimeType.getCharset();
-			JsonEncoding result = ENCODINGS.get(charset);
+			JsonEncoding result = ENCODINGS.get(charset.name());
 			if (result != null) {
 				return result;
 			}
