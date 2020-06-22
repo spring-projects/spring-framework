@@ -71,6 +71,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 		this.uri = original.getURI();
 		this.httpMethodValue = original.getMethodValue();
+		this.contextPath = original.getPath().contextPath().value();
 		this.body = original.getBody();
 
 		this.httpHeaders = HttpHeaders.writableHttpHeaders(original.getHeaders());
