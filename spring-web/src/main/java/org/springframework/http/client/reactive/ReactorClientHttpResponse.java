@@ -42,6 +42,7 @@ import org.springframework.util.MultiValueMap;
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
@@ -66,7 +67,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	/**
 	 * Constructor that matches the inputs from
 	 * {@link reactor.netty.http.client.HttpClient.ResponseReceiver#responseConnection(BiFunction)}.
-	 * @since 5.3
+	 * @since 5.2.8
 	 */
 	public ReactorClientHttpResponse(HttpClientResponse response, Connection connection) {
 		this.response = response;
@@ -79,7 +80,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	/**
 	 * Constructor with inputs extracted from a {@link Connection}.
-	 * @deprecated as of 5.2.8
+	 * @deprecated as of 5.2.8, in favor of {@link #ReactorClientHttpResponse(HttpClientResponse, Connection)}
 	 */
 	@Deprecated
 	public ReactorClientHttpResponse(HttpClientResponse response, NettyInbound inbound, ByteBufAllocator alloc) {
