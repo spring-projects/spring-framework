@@ -48,7 +48,6 @@ class DatabaseStartupValidatorTests {
 	@BeforeEach
 	void setUp() throws Exception {
 		given(dataSource.getConnection()).willReturn(connection);
-		validator.setDataSource(dataSource);
 	}
 
 	@Test
@@ -60,6 +59,7 @@ class DatabaseStartupValidatorTests {
 	void shouldUseJdbc4IsValidByDefault() throws Exception {
 		given(connection.isValid(1)).willReturn(true);
 
+		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(1)).isValid(1);
@@ -70,6 +70,7 @@ class DatabaseStartupValidatorTests {
 	void shouldCallValidatonTwiceWhenNotValid() throws Exception {
 		given(connection.isValid(1)).willReturn(false, true);
 
+		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
@@ -80,6 +81,7 @@ class DatabaseStartupValidatorTests {
 	void shouldCallValidatonTwiceInCaseOfException() throws Exception {
 		given(connection.isValid(1)).willThrow(new SQLException("Test")).willReturn(true);
 
+		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
@@ -94,6 +96,7 @@ class DatabaseStartupValidatorTests {
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery)).willReturn(true);
 
+		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 
@@ -113,6 +116,7 @@ class DatabaseStartupValidatorTests {
 				.willThrow(new SQLException("Test"))
 				.willReturn(true);
 
+		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 
