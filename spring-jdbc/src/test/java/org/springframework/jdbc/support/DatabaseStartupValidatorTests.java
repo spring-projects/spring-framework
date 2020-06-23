@@ -25,81 +25,75 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Mock object based test for {@code DatabaseStartupValidator}.
+ * Mock object based tests for {@code DatabaseStartupValidator}.
  *
- * @author Marten Deinum,
+ * @author Marten Deinum
  */
 class DatabaseStartupValidatorTests {
 
-	private Connection connection;
-	private DataSource dataSource;
+	private final DataSource dataSource = mock(DataSource.class);
+
+	private final Connection connection = mock(Connection.class);
+
+	private final DatabaseStartupValidator validator = new DatabaseStartupValidator();
+
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		connection = mock(Connection.class);
-		dataSource = mock(DataSource.class);
+	void setUp() throws Exception {
 		given(dataSource.getConnection()).willReturn(connection);
-	}
-
-	@Test
-	public void properSetupForDataSource() {
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
-		assertThatThrownBy(validator::afterPropertiesSet)
-				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	public void shouldUseJdbc4IsValidByDefault() throws Exception {
-		given(connection.isValid(1)).willReturn(true);
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
 		validator.setDataSource(dataSource);
+	}
+
+	@Test
+	void properSetupForDataSource() {
+		assertThatIllegalArgumentException().isThrownBy(validator::afterPropertiesSet);
+	}
+
+	@Test
+	void shouldUseJdbc4IsValidByDefault() throws Exception {
+		given(connection.isValid(1)).willReturn(true);
+
 		validator.afterPropertiesSet();
 
 		verify(connection, times(1)).isValid(1);
 		verify(connection, times(1)).close();
-
 	}
 
 	@Test
-	public void shouldCallValidatonTwiceWhenNotValid() throws Exception {
+	void shouldCallValidatonTwiceWhenNotValid() throws Exception {
 		given(connection.isValid(1)).willReturn(false, true);
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
-		validator.setDataSource(dataSource);
+
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
 		verify(connection, times(2)).close();
-
 	}
 
 	@Test
-	public void shouldCallValidatonTwiceInCaseOfException() throws Exception {
+	void shouldCallValidatonTwiceInCaseOfException() throws Exception {
 		given(connection.isValid(1)).willThrow(new SQLException("Test")).willReturn(true);
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
-		validator.setDataSource(dataSource);
+
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
 		verify(connection, times(2)).close();
-
 	}
 
 	@Test
-	public void useValidationQueryInsteadOfIsValid() throws Exception {
+	@SuppressWarnings("deprecation")
+	void useValidationQueryInsteadOfIsValid() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
 		Statement statement = mock(Statement.class);
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery)).willReturn(true);
 
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
-		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 
@@ -110,7 +104,8 @@ class DatabaseStartupValidatorTests {
 	}
 
 	@Test
-	public void shouldExecuteValidatonTwiceOnError() throws Exception {
+	@SuppressWarnings("deprecation")
+	void shouldExecuteValidatonTwiceOnError() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
 		Statement statement = mock(Statement.class);
 		given(connection.createStatement()).willReturn(statement);
@@ -118,8 +113,6 @@ class DatabaseStartupValidatorTests {
 				.willThrow(new SQLException("Test"))
 				.willReturn(true);
 
-		DatabaseStartupValidator validator = new DatabaseStartupValidator();
-		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 
@@ -128,4 +121,5 @@ class DatabaseStartupValidatorTests {
 		verify(connection, times(2)).close();
 		verify(statement, times(2)).close();
 	}
+
 }
