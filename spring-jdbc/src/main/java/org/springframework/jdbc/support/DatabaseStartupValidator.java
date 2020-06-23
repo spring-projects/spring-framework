@@ -59,7 +59,12 @@ public class DatabaseStartupValidator implements InitializingBean {
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 * The query used to validate the connection
+	 * @deprecated in favor of JDBC 4.0 connection validation
+	 */
 	@Nullable
+	@Deprecated
 	private String validationQuery;
 
 	private int interval = DEFAULT_INTERVAL;
@@ -76,7 +81,10 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	/**
 	 * Set the SQL query string to use for validation.
+	 *
+	 * @deprecated in favor of the JDBC 4.0 connection validation
 	 */
+	@Deprecated
 	public void setValidationQuery(String validationQuery) {
 		this.validationQuery = validationQuery;
 	}
@@ -108,9 +116,6 @@ public class DatabaseStartupValidator implements InitializingBean {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
-		if (this.validationQuery == null) {
-			throw new IllegalArgumentException("Property 'validationQuery' is required");
-		}
 
 		try {
 			boolean validated = false;
@@ -124,18 +129,29 @@ public class DatabaseStartupValidator implements InitializingBean {
 				try {
 					con = this.dataSource.getConnection();
 					if (con == null) {
-						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
+						throw new CannotGetJdbcConnectionException("Failed to execute validation: " +
 								"DataSource returned null from getConnection(): " + this.dataSource);
 					}
-					stmt = con.createStatement();
-					stmt.execute(this.validationQuery);
-					validated = true;
+					if (this.validationQuery == null) {
+						validated = con.isValid(this.interval);
+					}
+					else {
+						stmt = con.createStatement();
+						stmt.execute(this.validationQuery);
+						validated = true;
+					}
 				}
 				catch (SQLException ex) {
 					latestEx = ex;
 					if (logger.isDebugEnabled()) {
-						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+						if (this.validationQuery != null) {
+							logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+						}
+						else {
+							logger.debug(" Validation threw exception", ex);
+						}
 					}
+
 					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
 						if (rest > this.interval) {
