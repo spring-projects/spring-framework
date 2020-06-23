@@ -3837,7 +3837,7 @@ The check against conditional request headers can also be made in the controller
 [subs="verbatim,quotes"]
 ----
 	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
+	public String myHandleMethod(WebRequest request, Model model) {
 
 		long eTag = ... <1>
 
