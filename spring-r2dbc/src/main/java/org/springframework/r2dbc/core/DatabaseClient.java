@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * or obtain a {@link DatabaseClient#builder()} to create an instance.
  *
  * Usage example:
- * <p><pre class="code">
+ * <pre class="code">
  * ConnectionFactory factory = …
  *
  * DatabaseClient client = DatabaseClient.create(factory);
@@ -60,7 +60,6 @@ public interface DatabaseClient extends ConnectionAccessor {
 	 * SQL call along with options leading to the execution. The SQL string can
 	 * contain either native parameter bind markers or named parameters (e.g.
 	 * {@literal :foo, :bar}) when {@link NamedParameterExpander} is enabled.
-	 *
 	 * @param sql must not be {@code null} or empty
 	 * @return a new {@link GenericExecuteSpec}
 	 * @see NamedParameterExpander
@@ -74,7 +73,6 @@ public interface DatabaseClient extends ConnectionAccessor {
 	 * the execution. The SQL string can contain either native parameter
 	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
 	 * {@link NamedParameterExpander} is enabled.
-	 *
 	 * <p>Accepts {@link PreparedOperation} as SQL and binding {@link Supplier}
 	 * @param sqlSupplier must not be {@code null}
 	 * @return a new {@link GenericExecuteSpec}
@@ -85,7 +83,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 	GenericExecuteSpec sql(Supplier<String> sqlSupplier);
 
 
-	// Static, factory methods
+	// Static factory methods
 
 	/**
 	 * Create a {@code DatabaseClient} that will use the provided {@link ConnectionFactory}.
@@ -146,7 +144,6 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * Builder the {@link DatabaseClient} instance.
 		 */
 		DatabaseClient build();
-
 	}
 
 
@@ -187,10 +184,8 @@ public interface DatabaseClient extends ConnectionAccessor {
 		/**
 		 * Add the given filter to the end of the filter chain.
 		 * <p>Filter functions are typically used to invoke methods on the Statement
-		 * before it is executed.
-		 *
-		 * For example:
-		 * <p><pre class="code">
+		 * before it is executed. For example:
+		 * <pre class="code">
 		 * DatabaseClient client = …;
 		 * client.sql("SELECT book_id FROM book").filter(statement -> statement.fetchSize(100))
 		 * </pre>
@@ -204,10 +199,8 @@ public interface DatabaseClient extends ConnectionAccessor {
 		/**
 		 * Add the given filter to the end of the filter chain.
 		 * <p>Filter functions are typically used to invoke methods on the Statement
-		 * before it is executed.
-		 *
-		 * For example:
-		 * <p><pre class="code">
+		 * before it is executed. For example:
+		 * <pre class="code">
 		 * DatabaseClient client = …;
 		 * client.sql("SELECT book_id FROM book").filter((statement, next) -> next.execute(statement.fetchSize(100)))
 		 * </pre>
@@ -244,7 +237,6 @@ public interface DatabaseClient extends ConnectionAccessor {
 		 * @return a {@link Mono} ignoring its payload (actively dropping).
 		 */
 		Mono<Void> then();
-
 	}
 
 }

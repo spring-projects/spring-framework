@@ -53,7 +53,6 @@ import org.springframework.r2dbc.core.binding.BindTarget;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-
 /**
  * Default implementation of {@link DatabaseClient}.
  *
@@ -72,22 +71,17 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 	private final ExecuteFunction executeFunction;
 
-	private final boolean namedParameters;
-
 	@Nullable
 	private final NamedParameterExpander namedParameterExpander;
 
 
-	DefaultDatabaseClient(BindMarkersFactory bindMarkersFactory,
-			ConnectionFactory connectionFactory, ExecuteFunction executeFunction,
-			boolean namedParameters) {
+	DefaultDatabaseClient(BindMarkersFactory bindMarkersFactory, ConnectionFactory connectionFactory,
+			ExecuteFunction executeFunction, boolean namedParameters) {
 
 		this.bindMarkersFactory = bindMarkersFactory;
 		this.connectionFactory = connectionFactory;
 		this.executeFunction = executeFunction;
-		this.namedParameters = namedParameters;
-		this.namedParameterExpander = namedParameters ? new NamedParameterExpander()
-				: null;
+		this.namedParameterExpander = (namedParameters ? new NamedParameterExpander() : null);
 	}
 
 
@@ -233,9 +227,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		final StatementFilterFunction filterFunction;
 
-
 		DefaultGenericExecuteSpec(Supplier<String> sqlSupplier) {
-
 			this.byIndex = Collections.emptyMap();
 			this.byName = Collections.emptyMap();
 			this.sqlSupplier = sqlSupplier;
@@ -255,8 +247,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
 			Assert.notNull(value, () -> String.format(
-					"Value at index %d must not be null. Use bindNull(…) instead.",
-					index));
+					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
 
@@ -286,8 +277,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 			Assert.hasText(name, "Parameter name must not be null or empty!");
 			Assert.notNull(value, () -> String.format(
-					"Value for parameter %s must not be null. Use bindNull(…) instead.",
-					name));
+					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
 
@@ -314,9 +304,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
-
 			Assert.notNull(filter, "Statement FilterFunction must not be null");
-
 			return new DefaultGenericExecuteSpec(this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
 		}
 
@@ -336,38 +324,29 @@ class DefaultDatabaseClient implements DatabaseClient {
 			return fetch().rowsUpdated().then();
 		}
 
-		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier,
-				BiFunction<Row, RowMetadata, T> mappingFunction) {
-
+		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, BiFunction<Row, RowMetadata, T> mappingFunction) {
 			String sql = getRequiredSql(sqlSupplier);
-
 			Function<Connection, Statement> statementFunction = connection -> {
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL statement [" + sql + "]");
 				}
-
 				if (sqlSupplier instanceof PreparedOperation<?>) {
-
 					Statement statement = connection.createStatement(sql);
 					BindTarget bindTarget = new StatementWrapper(statement);
 					((PreparedOperation<?>) sqlSupplier).bindTo(bindTarget);
-
 					return statement;
 				}
 
-				if (DefaultDatabaseClient.this.namedParameters) {
+				if (DefaultDatabaseClient.this.namedParameterExpander != null) {
+					Map<String, Parameter> remainderByName = new LinkedHashMap<>(this.byName);
+					Map<Integer, Parameter> remainderByIndex = new LinkedHashMap<>(this.byIndex);
 
-					Map<String, Parameter> remainderByName = new LinkedHashMap<>(
-							this.byName);
-					Map<Integer, Parameter> remainderByIndex = new LinkedHashMap<>(
-							this.byIndex);
+					List<String> parameterNames = DefaultDatabaseClient.this.namedParameterExpander.getParameterNames(sql);
+					MapBindParameterSource namedBindings = retrieveParameters(
+							sql, parameterNames, remainderByName, remainderByIndex);
 
-					MapBindParameterSource namedBindings = retrieveParameters(sql,
-							remainderByName, remainderByIndex);
-
-					PreparedOperation<String> operation = DefaultDatabaseClient.this.namedParameterExpander.expand(sql,
-							DefaultDatabaseClient.this.bindMarkersFactory, namedBindings);
+					PreparedOperation<String> operation = DefaultDatabaseClient.this.namedParameterExpander.expand(
+							sql, DefaultDatabaseClient.this.bindMarkersFactory, namedBindings);
 
 					String expanded = getRequiredSql(operation);
 					if (logger.isTraceEnabled()) {
@@ -406,23 +385,16 @@ class DefaultDatabaseClient implements DatabaseClient {
 					mappingFunction);
 		}
 
-		private MapBindParameterSource retrieveParameters(String sql,
-				Map<String, Parameter> remainderByName,
-				Map<Integer, Parameter> remainderByIndex) {
-			List<String> parameterNames = DefaultDatabaseClient.this.namedParameterExpander.getParameterNames(sql);
-			Map<String, Parameter> namedBindings = new LinkedHashMap<>(
-					parameterNames.size());
+		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
+				Map<String, Parameter> remainderByName, Map<Integer, Parameter> remainderByIndex) {
+
+			Map<String, Parameter> namedBindings = new LinkedHashMap<>(parameterNames.size());
 			for (String parameterName : parameterNames) {
-
-				Parameter parameter = getParameter(remainderByName, remainderByIndex,
-						parameterNames, parameterName);
-
+				Parameter parameter = getParameter(remainderByName, remainderByIndex, parameterNames, parameterName);
 				if (parameter == null) {
 					throw new InvalidDataAccessApiUsageException(
-							String.format("No parameter specified for [%s] in query [%s]",
-									parameterName, sql));
+							String.format("No parameter specified for [%s] in query [%s]", parameterName, sql));
 				}
-
 				namedBindings.put(parameterName, parameter);
 			}
 			return new MapBindParameterSource(namedBindings);
@@ -430,8 +402,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		@Nullable
 		private Parameter getParameter(Map<String, Parameter> remainderByName,
-				Map<Integer, Parameter> remainderByIndex, List<String> parameterNames,
-				String parameterName) {
+				Map<Integer, Parameter> remainderByIndex, List<String> parameterNames, String parameterName) {
 
 			if (this.byName.containsKey(parameterName)) {
 				remainderByName.remove(parameterName);
@@ -456,8 +427,9 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private void bindByName(Statement statement, Map<String, Parameter> byName) {
 			byName.forEach((name, parameter) -> {
-				if (parameter.hasValue()) {
-					statement.bind(name, parameter.getValue());
+				Object value = parameter.getValue();
+				if (value != null) {
+					statement.bind(name, value);
 				}
 				else {
 					statement.bindNull(name, parameter.getType());
@@ -467,8 +439,9 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private void bindByIndex(Statement statement, Map<Integer, Parameter> byIndex) {
 			byIndex.forEach((i, parameter) -> {
-				if (parameter.hasValue()) {
-					statement.bind(i, parameter.getValue());
+				Object value = parameter.getValue();
+				if (value != null) {
+					statement.bind(i, value);
 				}
 				else {
 					statement.bindNull(i, parameter.getType());
@@ -477,10 +450,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		private String getRequiredSql(Supplier<String> sqlSupplier) {
-
 			String sql = sqlSupplier.get();
-			Assert.state(StringUtils.hasText(sql),
-					"SQL returned by SQL supplier must not be empty!");
+			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
 			return sql;
 		}
 
@@ -497,32 +468,26 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private final Connection target;
 
-
 		CloseSuppressingInvocationHandler(Connection target) {
 			this.target = target;
 		}
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
-			// Invocation on ConnectionProxy interface coming in...
-
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return proxy == args[0];
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of PersistenceManager proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("unwrap")) {
-				return this.target;
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: suppress, not valid.
-				return Mono.error(
-						new UnsupportedOperationException("Close is not supported!"));
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return proxy == args[0];
+				case "hashCode":
+					// Use hashCode of PersistenceManager proxy.
+					return System.identityHashCode(proxy);
+				case "unwrap":
+					return this.target;
+				case "close":
+					// Handle close method: suppress, not valid.
+					return Mono.error(
+							new UnsupportedOperationException("Close is not supported!"));
 			}
 
 			// Invoke method on target Connection.
@@ -533,12 +498,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 				throw ex.getTargetException();
 			}
 		}
-
 	}
 
+
 	/**
-	 * Holder for a connection that makes sure the close action is invoked atomically only
-	 * once.
+	 * Holder for a connection that makes sure the close action is invoked atomically only once.
 	 */
 	static class ConnectionCloseHolder extends AtomicBoolean {
 
@@ -548,7 +512,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		final Function<Connection, Publisher<Void>> closeFunction;
 
-
 		ConnectionCloseHolder(Connection connection,
 				Function<Connection, Publisher<Void>> closeFunction) {
 			this.connection = connection;
@@ -556,23 +519,19 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		Mono<Void> close() {
-
 			return Mono.defer(() -> {
-
 				if (compareAndSet(false, true)) {
 					return Mono.from(this.closeFunction.apply(this.connection));
 				}
-
 				return Mono.empty();
 			});
 		}
-
 	}
+
 
 	static class StatementWrapper implements BindTarget {
 
 		final Statement statement;
-
 
 		StatementWrapper(Statement statement) {
 			this.statement = statement;
@@ -597,7 +556,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 		public void bindNull(int index, Class<?> type) {
 			this.statement.bindNull(index, type);
 		}
-
 	}
 
 }

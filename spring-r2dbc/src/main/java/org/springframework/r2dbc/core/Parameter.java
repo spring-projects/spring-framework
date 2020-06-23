@@ -74,8 +74,7 @@ public final class Parameter {
 
 
 	/**
-	 * Returns the column value. Can be {@code null}.
-	 * @return the column value. Can be {@code null}
+	 * Return the column value. Can be {@code null}.
 	 * @see #hasValue()
 	 */
 	@Nullable
@@ -85,7 +84,6 @@ public final class Parameter {
 
 	/**
 	 * Returns the column value type. Must be also present if the {@code value} is {@code null}.
-	 * @return the column value type
 	 */
 	public Class<?> getType() {
 		return this.type;
@@ -93,29 +91,30 @@ public final class Parameter {
 
 	/**
 	 * Returns whether this {@link Parameter} has a value.
-	 * @return whether this {@link Parameter} has a value. {@code false} if {@link #getValue()} is {@code null}
+	 * @return {@code false} if {@link #getValue()} is {@code null}
 	 */
 	public boolean hasValue() {
-		return this.value != null;
+		return (this.value != null);
 	}
 
 	/**
 	 * Returns whether this {@link Parameter} has a empty.
-	 * @return whether this {@link Parameter} is empty. {@code true} if {@link #getValue()} is {@code null}
+	 * @return {@code true} if {@link #getValue()} is {@code null}
 	 */
 	public boolean isEmpty() {
-		return this.value == null;
+		return (this.value == null);
 	}
 
+
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(o instanceof Parameter)) {
+		if (!(obj instanceof Parameter)) {
 			return false;
 		}
-		Parameter other = (Parameter) o;
+		Parameter other = (Parameter) obj;
 		return ObjectUtils.nullSafeEquals(this.value, other.value) && ObjectUtils.nullSafeEquals(this.type, other.type);
 	}
 
@@ -126,12 +125,7 @@ public final class Parameter {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Parameter");
-		sb.append("[value=").append(this.value);
-		sb.append(", type=").append(this.type);
-		sb.append(']');
-		return sb.toString();
+		return "Parameter[value=" + this.value + ", type=" + this.type + ']';
 	}
 
 }

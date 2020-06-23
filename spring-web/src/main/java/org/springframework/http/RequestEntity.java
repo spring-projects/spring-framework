@@ -69,6 +69,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	@Nullable
 	private final HttpMethod method;
 
+	@Nullable
 	private final URI url;
 
 	@Nullable
@@ -138,7 +139,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 */
 	public RequestEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers,
-			@Nullable HttpMethod method, URI url, @Nullable Type type) {
+			@Nullable HttpMethod method, @Nullable URI url, @Nullable Type type) {
 
 		super(body, headers);
 		this.method = method;
@@ -160,6 +161,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * Return the URL of the request.
 	 */
 	public URI getUrl() {
+		if (this.url == null) {
+			throw new UnsupportedOperationException();
+		}
 		return this.url;
 	}
 
@@ -679,14 +683,13 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 */
 	public static class UriTemplateRequestEntity<T> extends RequestEntity<T> {
 
-		String uriTemplate;
+		private final String uriTemplate;
 
 		@Nullable
-		private Object[] uriVarsArray;
+		private final Object[] uriVarsArray;
 
 		@Nullable
-		Map<String, ?> uriVarsMap;
-
+		private final Map<String, ?> uriVarsMap;
 
 		UriTemplateRequestEntity(
 				@Nullable T body, @Nullable MultiValueMap<String, String> headers,
@@ -698,7 +701,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			this.uriVarsArray = uriVarsArray;
 			this.uriVarsMap = uriVarsMap;
 		}
-
 
 		public String getUriTemplate() {
 			return this.uriTemplate;
@@ -712,11 +714,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Nullable
 		public Map<String, ?> getVarsMap() {
 			return this.uriVarsMap;
-		}
-
-		@Override
-		public URI getUrl() {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override

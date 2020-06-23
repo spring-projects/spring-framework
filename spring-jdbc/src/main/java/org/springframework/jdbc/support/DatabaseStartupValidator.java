@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  * Particularly appropriate for waiting on a slowly starting Oracle database.
  *
  * @author Juergen Hoeller
+ * @author Marten Deinum
  * @since 18.12.2003
  */
 public class DatabaseStartupValidator implements InitializingBean {
@@ -59,12 +60,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 	@Nullable
 	private DataSource dataSource;
 
-	/**
-	 * The query used to validate the connection
-	 * @deprecated in favor of JDBC 4.0 connection validation
-	 */
 	@Nullable
-	@Deprecated
 	private String validationQuery;
 
 	private int interval = DEFAULT_INTERVAL;
@@ -81,8 +77,7 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	/**
 	 * Set the SQL query string to use for validation.
-	 *
-	 * @deprecated in favor of the JDBC 4.0 connection validation
+	 * @deprecated as of 5.3, in favor of the JDBC 4.0 connection validation
 	 */
 	@Deprecated
 	public void setValidationQuery(String validationQuery) {
@@ -148,10 +143,9 @@ public class DatabaseStartupValidator implements InitializingBean {
 							logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
 						}
 						else {
-							logger.debug(" Validation threw exception", ex);
+							logger.debug("Validation check threw exception", ex);
 						}
 					}
-
 					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;
 						if (rest > this.interval) {

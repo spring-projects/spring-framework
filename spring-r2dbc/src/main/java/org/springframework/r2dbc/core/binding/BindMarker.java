@@ -32,13 +32,12 @@ import io.r2dbc.spi.Statement;
 public interface BindMarker {
 
 	/**
-	 * Returns the database-specific placeholder for a given substitution.
+	 * Return the database-specific placeholder for a given substitution.
 	 */
 	String getPlaceholder();
 
 	/**
 	 * Bind the given {@code value} to the {@link Statement} using the underlying binding strategy.
-	 *
 	 * @param bindTarget the target to bind the value to
 	 * @param value the actual value. Must not be {@code null}
 	 * Use {@link #bindNull(BindTarget, Class)} for {@code null} values

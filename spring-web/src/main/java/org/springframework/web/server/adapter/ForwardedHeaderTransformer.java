@@ -137,19 +137,19 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	private static String getForwardedPrefix(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		String header = headers.getFirst("X-Forwarded-Prefix");
-		if (header != null) {
-			StringBuilder prefix = new StringBuilder(header.length());
-			String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
-			for (String rawPrefix : rawPrefixes) {
-				int endIndex = rawPrefix.length();
-				while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
-					endIndex--;
-				}
-				prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
-			}
-			return prefix.toString();
+		if (header == null) {
+			return null;
 		}
-		return header;
+		StringBuilder prefix = new StringBuilder(header.length());
+		String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
+		for (String rawPrefix : rawPrefixes) {
+			int endIndex = rawPrefix.length();
+			while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
+				endIndex--;
+			}
+			prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
+		}
+		return prefix.toString();
 	}
 
 }
