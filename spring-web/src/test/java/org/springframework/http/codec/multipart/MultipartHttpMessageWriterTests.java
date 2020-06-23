@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.core.publisher.UnicastProcessor;
 
 import org.springframework.core.ResolvableType;
@@ -207,12 +208,12 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test  // SPR-16402
 	public void singleSubscriberWithResource() throws IOException {
-		UnicastProcessor<Resource> processor = UnicastProcessor.create();
+		Sinks.StandaloneFluxSink<Resource> sink = Sinks.unicast();
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		Mono.just(logo).subscribe(processor);
+		sink.next(logo);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-		bodyBuilder.asyncPart("logo", processor, Resource.class);
+		bodyBuilder.asyncPart("logo", sink.asFlux(), Resource.class);
 
 		Mono<MultiValueMap<String, HttpEntity<?>>> result = Mono.just(bodyBuilder.build());
 
