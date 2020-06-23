@@ -254,7 +254,7 @@ public class PersonHandler {
 		int personId = Integer.parseInt(request.pathVariable("id"));
 		Person person = repository.getPerson(personId);
 		if (person != null) {
-			return ok().contentType(APPLICATION_JSON).body(person))
+			return ok().contentType(APPLICATION_JSON).body(person);
 		}
 		else {
 			return ServerResponse.notFound().build();
