@@ -115,8 +115,8 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 				.next()
 				.doOnCancel(() -> {
 					ReactorClientHttpResponse response = responseRef.get();
-					if (response != null && response.bodyNotSubscribed()) {
-						response.getConnection().dispose();
+					if (response != null) {
+						response.releaseAfterCancel(method);
 					}
 				});
 	}
