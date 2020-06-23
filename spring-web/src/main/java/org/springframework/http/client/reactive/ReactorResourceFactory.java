@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * and is expected typically to be declared as a Spring-managed bean.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.1
  */
 public class ReactorResourceFactory implements InitializingBean, DisposableBean {
@@ -97,8 +98,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 */
 	public void addGlobalResourcesConsumer(Consumer<HttpResources> consumer) {
 		this.useGlobalResources = true;
-		this.globalResourcesConsumer = this.globalResourcesConsumer != null ?
-				this.globalResourcesConsumer.andThen(consumer) : consumer;
+		this.globalResourcesConsumer = (this.globalResourcesConsumer != null ?
+				this.globalResourcesConsumer.andThen(consumer) : consumer);
 	}
 
 	/**
@@ -221,8 +222,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Override
 	public void destroy() {
 		if (this.useGlobalResources) {
-			HttpResources.disposeLoopsAndConnectionsLater(
-					this.shutdownQuietPeriod, this.shutdownTimeout).block();
+			HttpResources.disposeLoopsAndConnectionsLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 		}
 		else {
 			try {
