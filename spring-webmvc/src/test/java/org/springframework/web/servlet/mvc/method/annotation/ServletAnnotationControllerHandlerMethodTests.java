@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,6 +60,8 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
@@ -134,11 +137,16 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
+import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -163,11 +171,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
-	@SuppressWarnings("unused")
 	static Stream<Boolean> pathPatternsArguments() {
 		return Stream.of(true, false);
 	}
-
 
 	@PathPatternsParameterizedTest
 	void emptyValueMapping(boolean usePathPatterns) throws Exception {
@@ -2099,6 +2105,26 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertThat(response.getContentAsString()).isEqualTo("2010-01-01");
 	}
 
+	@Test
+	void routerFunction() throws ServletException, IOException {
+		GenericWebApplicationContext wac = new GenericWebApplicationContext();
+		wac.registerBean(RouterFunction.class, () ->
+				RouterFunctions.route()
+						.GET("/foo", request -> ServerResponse.ok().body("foo-body"))
+						.build());
+		wac.refresh();
+
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setApplicationContext(wac);
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("foo-body");
+	}
 
 	@Controller
 	static class ControllerWithEmptyValueMapping {
