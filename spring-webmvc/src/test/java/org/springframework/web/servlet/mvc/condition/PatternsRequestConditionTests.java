@@ -48,6 +48,12 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
+	void getDirectUrls() {
+		PatternsRequestCondition condition = new PatternsRequestCondition("/something", "/else/**");
+		assertThat(condition.getDirectPaths()).containsExactly("/something");
+	}
+
+	@Test
 	void combineEmptySets() {
 		PatternsRequestCondition c1 = new PatternsRequestCondition();
 		PatternsRequestCondition c2 = new PatternsRequestCondition();
