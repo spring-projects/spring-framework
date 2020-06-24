@@ -1219,7 +1219,7 @@ The following example shows how to use the `@BeforeTransaction` annotation:
 ----
 	@BeforeTransaction // <1>
 	void beforeTransaction() {
-		// logic to be executed before a transaction is started
+		// logic to be run before a transaction is started
 	}
 ----
 <1> Run this method before a transaction.
@@ -1229,7 +1229,7 @@ The following example shows how to use the `@BeforeTransaction` annotation:
 ----
 	@BeforeTransaction // <1>
 	fun beforeTransaction() {
-		// logic to be executed before a transaction is started
+		// logic to be run before a transaction is started
 	}
 ----
 <1> Run this method before a transaction.
@@ -1249,7 +1249,7 @@ methods.
 ----
 	@AfterTransaction // <1>
 	void afterTransaction() {
-		// logic to be executed after a transaction has ended
+		// logic to be run after a transaction has ended
 	}
 ----
 <1> Run this method after a transaction.
@@ -1259,7 +1259,7 @@ methods.
 ----
 	@AfterTransaction // <1>
 	fun afterTransaction() {
-		// logic to be executed after a transaction has ended
+		// logic to be run after a transaction has ended
 	}
 ----
 <1> Run this method after a transaction.
@@ -1278,7 +1278,7 @@ it:
 	@Test
 	@Sql({"/test-schema.sql", "/test-user-data.sql"}) // <1>
 	void userTest() {
-		// execute code that relies on the test schema and test data
+		// run code that relies on the test schema and test data
 	}
 ----
 <1> Run two scripts for this test.
@@ -1289,7 +1289,7 @@ it:
 	@Test
 	@Sql("/test-schema.sql", "/test-user-data.sql") // <1>
 	fun userTest() {
-		// execute code that relies on the test schema and test data
+		// run code that relies on the test schema and test data
 	}
 ----
 <1> Run two scripts for this test.
@@ -1312,7 +1312,7 @@ configured with the `@Sql` annotation. The following example shows how to use it
 		config = @SqlConfig(commentPrefix = "`", separator = "@@") // <1>
 	)
 	void userTest() {
-		// execute code that relies on the test data
+		// run code that relies on the test data
 	}
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
@@ -1323,7 +1323,7 @@ configured with the `@Sql` annotation. The following example shows how to use it
 	@Test
 	@Sql("/test-user-data.sql", config = SqlConfig(commentPrefix = "`", separator = "@@")) // <1>
 	fun userTest() {
-		// execute code that relies on the test data
+		// run code that relies on the test data
 	}
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
@@ -1352,7 +1352,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 		@Test
 		@Sql("/user-test-data-001.sql")
 		void standardUserProfile() {
-			// execute code that relies on test data set 001
+			// run code that relies on test data set 001
 		}
 	}
 ----
@@ -1369,7 +1369,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 		@Test
 		@Sql("/user-test-data-001.sql")
 		fun standardUserProfile() {
-			// execute code that relies on test data set 001
+			// run code that relies on test data set 001
 		}
 	}
 ----
@@ -1388,7 +1388,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 		@Sql("/user-test-data-001.sql")
 		@SqlMergeMode(MERGE) // <1>
 		void standardUserProfile() {
-			// execute code that relies on test data set 001
+			// run code that relies on test data set 001
 		}
 	}
 ----
@@ -1405,7 +1405,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 		@Sql("/user-test-data-001.sql")
 		@SqlMergeMode(MERGE) // <1>
 		fun standardUserProfile() {
-			// execute code that relies on test data set 001
+			// run code that relies on test data set 001
 		}
 	}
 ----
@@ -1430,7 +1430,7 @@ annotation. The following example shows how to declare an SQL group:
 		@Sql("/test-user-data.sql")
 	)}
 	void userTest() {
-		// execute code that uses the test schema and test data
+		// run code that uses the test schema and test data
 	}
 ----
 <1> Declare a group of SQL scripts.
@@ -1443,7 +1443,7 @@ annotation. The following example shows how to declare an SQL group:
 		Sql("/test-schema.sql", config = SqlConfig(commentPrefix = "`")),
 		Sql("/test-user-data.sql"))
 	fun userTest() {
-		// execute code that uses the test schema and test data
+		// run code that uses the test schema and test data
 	}
 ----
 <1> Declare a group of SQL scripts.
@@ -1610,7 +1610,7 @@ example shows how to use it:
 ----
 	@Timed(millis = 1000) // <1>
 	public void testProcessWithOneSecondTimeout() {
-		// some logic that should not take longer than 1 second to execute
+		// some logic that should not take longer than 1 second to run
 	}
 ----
 <1> Set the time period for the test to one second.
@@ -1620,7 +1620,7 @@ example shows how to use it:
 ----
 	@Timed(millis = 1000) // <1>
 	fun testProcessWithOneSecondTimeout() {
-		// some logic that should not take longer than 1 second to execute
+		// some logic that should not take longer than 1 second to run
 	}
 ----
 <1> Set the time period for the test to one second.
@@ -1637,7 +1637,7 @@ before failing.
 ===== `@Repeat`
 
 `@Repeat` indicates that the annotated test method must be run repeatedly. The number of
-times that the test method is to be executed is specified in the annotation.
+times that the test method is to be run is specified in the annotation.
 
 The scope of execution to be repeated includes execution of the test method itself as
 well as any setting up or tearing down of the test fixture. The following example shows
@@ -1892,7 +1892,7 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 ===== `@DisabledIf`
 
 `@DisabledIf` is used to signal that the annotated JUnit Jupiter test class or test
-method is disabled and should not be executed if the supplied `expression` evaluates to
+method is disabled and should not be run if the supplied `expression` evaluates to
 `true`. Specifically, if the expression evaluates to `Boolean.TRUE` or a `String` equal
 to `true` (ignoring case), the test is disabled. When applied at the class level, all
 test methods within that class are automatically disabled as well.
@@ -2244,7 +2244,7 @@ Spring test suite for further information and examples of various implementation
 
 ===== `TestContext`
 
-`TestContext` encapsulates the context in which a test is executed (agnostic of the
+`TestContext` encapsulates the context in which a test is run (agnostic of the
 actual testing framework in use) and provides context management and caching support for
 the test instance for which it is responsible. The `TestContext` also delegates to a
 `SmartContextLoader` to load an `ApplicationContext` if requested.
@@ -3697,7 +3697,7 @@ Furthermore, it is sometimes necessary to resolve active profiles for tests
 programmatically instead of declaratively -- for example, based on:
 
 * The current operating system.
-* Whether tests are being executed on a continuous integration build server.
+* Whether tests are being run on a continuous integration build server.
 * The presence of certain environment variables.
 * The presence of custom class-level annotations.
 * Other concerns.
@@ -4364,7 +4364,7 @@ faster.
 ====
 The Spring TestContext framework stores application contexts in a static cache. This
 means that the context is literally stored in a `static` variable. In other words, if
-tests execute in separate processes, the static cache is cleared between each test
+tests run in separate processes, the static cache is cleared between each test
 execution, which effectively disables the caching mechanism.
 
 To benefit from the caching mechanism, all tests must run within the same process or test
@@ -4386,7 +4386,7 @@ alternative, you can set the same property programmatically by using the
 `SpringProperties` API.
 
 Since having a large number of application contexts loaded within a given test suite can
-cause the suite to take an unnecessarily long time to execute, it is often beneficial to
+cause the suite to take an unnecessarily long time to run, it is often beneficial to
 know exactly how many contexts have been loaded and cached. To view the statistics for
 the underlying context cache, you can set the log level for the
 `org.springframework.test.context.cache` logging category to `DEBUG`.
@@ -5087,7 +5087,7 @@ JUnit Jupiter's `@BeforeAll` or `@AfterAll` and methods annotated with TestNG's
 `@BeforeSuite`, `@AfterSuite`, `@BeforeClass`, or `@AfterClass` — are _not_ run within a
 test-managed transaction.
 
-If you need to execute code in a suite-level or class-level lifecycle method within a
+If you need to run code in a suite-level or class-level lifecycle method within a
 transaction, you may wish to inject a corresponding `PlatformTransactionManager` into
 your test class and then use that with a `TransactionTemplate` for programmatic
 transaction management.
@@ -5276,7 +5276,7 @@ for further details.
 [[testcontext-tx-before-and-after-tx]]
 ===== Running Code Outside of a Transaction
 
-Occasionally, you may need to execute certain code before or after a transactional test
+Occasionally, you may need to run certain code before or after a transactional test
 method but outside the transactional context -- for example, to verify the initial
 database state prior to running your test or to verify expected transactional commit
 behavior after your test runs (if the test was configured to commit the transaction).
@@ -5344,7 +5344,7 @@ following example shows the relevant annotations:
 
 		@AfterEach
 		void tearDownWithinTransaction() {
-			// execute "tear down" logic within the transaction
+			// run "tear down" logic within the transaction
 		}
 
 		@AfterTransaction
@@ -5382,7 +5382,7 @@ following example shows the relevant annotations:
 
 		@AfterEach
 		fun tearDownWithinTransaction() {
-			// execute "tear down" logic within the transaction
+			// run "tear down" logic within the transaction
 		}
 
 		@AfterTransaction
@@ -5522,7 +5522,7 @@ The following example shows matching methods for JPA:
 ==== Executing SQL Scripts
 
 When writing integration tests against a relational database, it is often beneficial to
-execute SQL scripts to modify the database schema or insert test data into tables. The
+run SQL scripts to modify the database schema or insert test data into tables. The
 `spring-jdbc` module provides support for _initializing_ an embedded or existing database
 by executing SQL scripts when the Spring `ApplicationContext` is loaded. See
 <<data-access.adoc#jdbc-embedded-database-support, Embedded database support>> and
@@ -5531,7 +5531,7 @@ embedded database>> for details.
 
 Although it is very useful to initialize a database for testing _once_ when the
 `ApplicationContext` is loaded, sometimes it is essential to be able to modify the
-database _during_ integration tests. The following sections explain how to execute SQL
+database _during_ integration tests. The following sections explain how to run SQL
 scripts programmatically and declaratively during integration tests.
 
 [[testcontext-executing-sql-programmatically]]
@@ -5547,7 +5547,7 @@ integration test methods.
 
 `ScriptUtils` provides a collection of static utility methods for working with SQL
 scripts and is mainly intended for internal use within the framework. However, if you
-require full control over how SQL scripts are parsed and executed, `ScriptUtils` may suit
+require full control over how SQL scripts are parsed and run, `ScriptUtils` may suit
 your needs better than some of the other alternatives described later. See the
 {api-spring-framework}/jdbc/datasource/init/ScriptUtils.html[javadoc] for individual
 methods in `ScriptUtils` for further details.
@@ -5561,10 +5561,10 @@ default value. See the
 {api-spring-framework}/jdbc/datasource/init/ResourceDatabasePopulator.html[javadoc] for
 details on default values. To run the scripts configured in a
 `ResourceDatabasePopulator`, you can invoke either the `populate(Connection)` method to
-execute the populator against a `java.sql.Connection` or the `execute(DataSource)` method
-to execute the populator against a `javax.sql.DataSource`. The following example
+run the populator against a `java.sql.Connection` or the `execute(DataSource)` method
+to run the populator against a `javax.sql.DataSource`. The following example
 specifies SQL scripts for a test schema and test data, sets the statement separator to
-`@@`, and executes the scripts against a `DataSource`:
+`@@`, and run the scripts against a `DataSource`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -5577,7 +5577,7 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 				new ClassPathResource("test-data.sql"));
 		populator.setSeparator("@@");
 		populator.execute(this.dataSource);
-		// execute code that uses the test schema and data
+		// run code that uses the test schema and data
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -5591,7 +5591,7 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 				ClassPathResource("test-data.sql"))
 		populator.setSeparator("@@")
 		populator.execute(dataSource)
-		// execute code that uses the test schema and data
+		// run code that uses the test schema and data
 	}
 ----
 
@@ -5599,7 +5599,7 @@ Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for 
 and running SQL scripts. Similarly, the `executeSqlScript(..)` methods in
 <<testcontext-support-classes-junit4, `AbstractTransactionalJUnit4SpringContextTests`>>
 and <<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
-internally use a `ResourceDatabasePopulator` to run SQL scripts. See the javadoc for the
+internally use a `ResourceDatabasePopulator` to run SQL scripts. See the Javadoc for the
 various `executeSqlScript(..)` methods for further details.
 
 [[testcontext-executing-sql-declaratively]]
@@ -5639,13 +5639,13 @@ within a JUnit Jupiter based integration test class:
 
 		@Test
 		void emptySchemaTest() {
-			// execute code that uses the test schema without any test data
+			// run code that uses the test schema without any test data
 		}
 
 		@Test
 		@Sql({"/test-schema.sql", "/test-user-data.sql"})
 		void userTest() {
-			// execute code that uses the test schema and test data
+			// run code that uses the test schema and test data
 		}
 	}
 ----
@@ -5659,13 +5659,13 @@ within a JUnit Jupiter based integration test class:
 
 		@Test
 		fun emptySchemaTest() {
-			// execute code that uses the test schema without any test data
+			// run code that uses the test schema without any test data
 		}
 
 		@Test
 		@Sql("/test-schema.sql", "/test-user-data.sql")
 		fun userTest() {
-			// execute code that uses the test schema and test data
+			// run code that uses the test schema and test data
 		}
 	}
 ----
@@ -5702,7 +5702,7 @@ The following example shows how to use `@Sql` as a repeatable annotation with Ja
 	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
 	@Sql("/test-user-data.sql")
 	void userTest() {
-		// execute code that uses the test schema and test data
+		// run code that uses the test schema and test data
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -5728,7 +5728,7 @@ other JVM languages such as Kotlin.
 		@Sql("/test-user-data.sql")
 	)}
 	void userTest() {
-		// execute code that uses the test schema and test data
+		// run code that uses the test schema and test data
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -5739,14 +5739,14 @@ other JVM languages such as Kotlin.
 		Sql("/test-schema.sql", config = SqlConfig(commentPrefix = "`")),
 		Sql("/test-user-data.sql"))
 	fun userTest() {
-		// execute code that uses the test schema and test data
+		// Run code that uses the test schema and test data
 	}
 ----
 
 [[testcontext-executing-sql-declaratively-script-execution-phases]]
 ====== Script Execution Phases
 
-By default, SQL scripts are executed before the corresponding test method. However, if
+By default, SQL scripts are run before the corresponding test method. However, if
 you need to run a particular set of scripts after the test method (for example, to clean
 up database state), you can use the `executionPhase` attribute in `@Sql`, as the
 following example shows:
@@ -5765,7 +5765,7 @@ following example shows:
 		executionPhase = AFTER_TEST_METHOD
 	)
 	void userTest() {
-		// execute code that needs the test data to be committed
+		// run code that needs the test data to be committed
 		// to the database outside of the test's transaction
 	}
 ----
@@ -5780,7 +5780,7 @@ following example shows:
 			config = SqlConfig(transactionMode = ISOLATED),
 			executionPhase = AFTER_TEST_METHOD))
 	fun userTest() {
-		// execute code that needs the test data to be committed
+		// run code that needs the test data to be committed
 		// to the database outside of the test's transaction
 	}
 ----
@@ -5858,7 +5858,7 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 		void usersTest() {
 			// verify state in test database:
 			assertNumUsers(2);
-			// execute code that uses the test data...
+			// run code that uses the test data...
 		}
 
 		int countRowsInTable(String tableName) {
@@ -5885,7 +5885,7 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 		fun usersTest() {
 			// verify state in test database:
 			assertNumUsers(2)
-			// execute code that uses the test data...
+			// run code that uses the test data...
 		}
 
 		fun countRowsInTable(tableName: String): Int {
@@ -5923,7 +5923,7 @@ via `@SqlMergeMode(OVERRIDE)`. Consult the <<spring-testing-annotation-sqlmergem
 
 Spring Framework 5.0 introduced basic support for executing tests in parallel within a
 single JVM when using the Spring TestContext Framework. In general, this means that most
-test classes or test methods can be executed in parallel without any changes to test code
+test classes or test methods can be run in parallel without any changes to test code
 or configuration.
 
 TIP: For details on how to set up parallel test execution, see the documentation for your
@@ -5932,15 +5932,15 @@ testing framework, build tool, or IDE.
 Keep in mind that the introduction of concurrency into your test suite can result in
 unexpected side effects, strange runtime behavior, and tests that fail intermittently or
 seemingly randomly. The Spring Team therefore provides the following general guidelines
-for when not to execute tests in parallel.
+for when not to run tests in parallel.
 
-Do not execute tests in parallel if the tests:
+Do not run tests in parallel if the tests:
 
 * Use Spring Framework's `@DirtiesContext` support.
 * Use Spring Boot's `@MockBean` or `@SpyBean` support.
 * Use JUnit 4's `@FixMethodOrder` support or any testing framework feature
   that is designed to ensure that test methods run in a particular order. Note,
-  however, that this does not apply if entire test classes are executed in parallel.
+  however, that this does not apply if entire test classes are run in parallel.
 * Change the state of shared services or systems such as a database, message broker,
   filesystem, and others. This applies to both embedded and external systems.
 
@@ -5997,7 +5997,7 @@ run with the custom Spring `Runner`:
 
 		@Test
 		public void testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6011,7 +6011,7 @@ run with the custom Spring `Runner`:
 
 		@Test
 		fun testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6057,7 +6057,7 @@ to declare these rules in an integration test:
 
 		@Test
 		public void testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6074,7 +6074,7 @@ to declare these rules in an integration test:
 
 		@Test
 		fun testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 
 		companion object {
@@ -6158,7 +6158,7 @@ The following code listing shows how to configure a test class to use the
 
 		@Test
 		void testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6174,7 +6174,7 @@ The following code listing shows how to configure a test class to use the
 
 		@Test
 		fun testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6196,7 +6196,7 @@ used in the previous example:
 
 		@Test
 		void testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6211,7 +6211,7 @@ used in the previous example:
 
 		@Test
 		fun testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6229,7 +6229,7 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 
 		@Test
 		void testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6244,7 +6244,7 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 
 		@Test
 		fun testMethod() {
-			// execute test logic...
+			// test logic...
 		}
 	}
 ----
@@ -6469,7 +6469,7 @@ bean lookups or to test the state of the context as a whole.
 access. This class expects a `javax.sql.DataSource` bean and a
 `PlatformTransactionManager` bean to be defined in the `ApplicationContext`. When you
 extend `AbstractTransactionalTestNGSpringContextTests`, you can access a `protected`
-`jdbcTemplate` instance variable that you can use to execute SQL statements to query the
+`jdbcTemplate` instance variable that you can use to run SQL statements to query the
 database. You can use such queries to confirm database state both before and after
 running database-related application code, and Spring ensures that such queries run in
 the scope of the same transaction as the application code. When used in conjunction with
@@ -8416,7 +8416,7 @@ requests are allowed to come in any order. The following example uses `ignoreExp
 	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build()
 ----
 
-Even with unordered requests by default, each request is allowed to execute once only.
+Even with unordered requests by default, each request is allowed to run once only.
 The `expect` method provides an overloaded variant that accepts an `ExpectedCount`
 argument that specifies a count range (for example, `once`, `manyTimes`, `max`, `min`,
 `between`, and so on). The following example uses `times`:

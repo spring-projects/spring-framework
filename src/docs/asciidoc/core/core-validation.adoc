@@ -1097,7 +1097,7 @@ might match only if the target entity type declares a static finder method (for 
 === The `ConversionService` API
 
 `ConversionService` defines a unified API for executing type conversion logic at
-runtime. Converters are often executed behind the following facade interface:
+runtime. Converters are often run behind the following facade interface:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1218,7 +1218,7 @@ it like you would for any other bean. The following example shows how to do so:
 ----
 	@Service
 	class MyService(private val conversionService: ConversionService) {
-		
+
 		fun doIt() {
 			conversionService.convert(...)
 		}

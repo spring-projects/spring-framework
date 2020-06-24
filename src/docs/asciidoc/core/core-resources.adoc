@@ -273,7 +273,7 @@ application contexts may be used to obtain `Resource` instances.
 When you call `getResource()` on a specific application context, and the location path
 specified doesn't have a specific prefix, you get back a `Resource` type that is
 appropriate to that particular application context. For example, assume the following
-snippet of code was executed against a `ClassPathXmlApplicationContext` instance:
+snippet of code was run against a `ClassPathXmlApplicationContext` instance:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -286,7 +286,7 @@ snippet of code was executed against a `ClassPathXmlApplicationContext` instance
 	val template = ctx.getResource("some/resource/path/myTemplate.txt")
 ----
 
-Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If the same method were executed
+Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If the same method were run
 against a `FileSystemXmlApplicationContext` instance, it would return a
 `FileSystemResource`. For a `WebApplicationContext`, it would return a
 `ServletContextResource`. It would similarly return appropriate objects for each context.
