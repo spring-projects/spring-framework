@@ -101,7 +101,7 @@ operations on the output, but you need to adapt the output for use with another 
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
 of RxJava or another reactive library. See <<webflux-reactive-libraries>> for more details.
 
-NOTE: In addition to Reactive APIs, WebFlux can also be used with 
+NOTE: In addition to Reactive APIs, WebFlux can also be used with
 <<languages.adoc#coroutines, Coroutines>> APIs in Kotlin which provides a more imperative style of programming.
 The following Kotlin code samples will be provided with Coroutines APIs.
 
@@ -218,7 +218,7 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally
 do not make applications run faster. They can, in some cases, (for example, if using the
-`WebClient` to execute remote calls in parallel). On the whole, it requires more work to do
+`WebClient` to run remote calls in parallel). On the whole, it requires more work to do
 things the non-blocking way and that can slightly increase the required processing time.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small,
@@ -893,7 +893,7 @@ not meet the stated goals, please let us know.
 [[webflux-logging-id]]
 ==== Log Id
 
-In WebFlux, a single request can be executed over multiple threads and the thread ID
+In WebFlux, a single request can be run over multiple threads and the thread ID
 is not useful for correlating log messages that belong to a specific request. This is why
 WebFlux log messages are prefixed with a request-specific ID by default.
 
@@ -1104,7 +1104,7 @@ many extra convenient options.
 `DispatcherHandler` processes requests as follows:
 
 * Each `HandlerMapping` is asked to find a matching handler, and the first match is used.
-* If a handler is found, it is executed through an appropriate `HandlerAdapter`, which
+* If a handler is found, it is run through an appropriate `HandlerAdapter`, which
 exposes the return value from the execution as `HandlerResult`.
 * The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
 processing by writing to the response directly or by using a view to render.
@@ -4022,7 +4022,7 @@ underlying FreeMarker view technology):
 	@Configuration
 	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
-		
+
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.freeMarker()
 		}
