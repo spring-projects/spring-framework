@@ -81,24 +81,25 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		String name = element.getLocalName();
-		if (name.equals("view-controller")) {
-			if (element.hasAttribute("view-name")) {
-				controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
-			}
-			if (statusCode != null) {
+		switch (name) {
+			case "view-controller":
+				if (element.hasAttribute("view-name")) {
+					controller.getPropertyValues().add("viewName", element.getAttribute("view-name"));
+				}
+				if (statusCode != null) {
+					controller.getPropertyValues().add("statusCode", statusCode);
+				}
+				break;
+			case "redirect-view-controller":
+				controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
+				break;
+			case "status-controller":
 				controller.getPropertyValues().add("statusCode", statusCode);
-			}
-		}
-		else if (name.equals("redirect-view-controller")) {
-			controller.getPropertyValues().add("view", getRedirectView(element, statusCode, source));
-		}
-		else if (name.equals("status-controller")) {
-			controller.getPropertyValues().add("statusCode", statusCode);
-			controller.getPropertyValues().add("statusOnly", true);
-		}
-		else {
-			// Should never happen...
-			throw new IllegalStateException("Unexpected tag name: " + name);
+				controller.getPropertyValues().add("statusOnly", true);
+				break;
+			default:
+				// Should never happen...
+				throw new IllegalStateException("Unexpected tag name: " + name);
 		}
 
 		Map<String, BeanDefinition> urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().get("urlMap");
