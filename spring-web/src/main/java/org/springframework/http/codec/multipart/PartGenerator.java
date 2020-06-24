@@ -44,7 +44,6 @@ import reactor.core.scheduler.Scheduler;
 
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -60,8 +59,6 @@ import org.springframework.util.FastByteArrayOutputStream;
  * @since 5.3
  */
 final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
-
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private static final Log logger = LogFactory.getLog(PartGenerator.class);
 
@@ -513,7 +510,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 				DataBufferUtils.release(buffer);
 			}
 			this.content.clear();
-			Flux<DataBuffer> content = Flux.just(bufferFactory.wrap(bytes));
+			Flux<DataBuffer> content = Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 			emitPart(DefaultParts.part(this.headers, content));
 		}
 
@@ -678,8 +675,10 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		}
 
 		private Flux<DataBuffer> partContent() {
-			return DataBufferUtils.readByteChannel(() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
-					bufferFactory, 1024)
+			return DataBufferUtils
+					.readByteChannel(
+							() -> Files.newByteChannel(this.file, StandardOpenOption.READ),
+							DefaultDataBufferFactory.sharedInstance, 1024)
 					.subscribeOn(PartGenerator.this.blockingOperationScheduler);
 		}
 

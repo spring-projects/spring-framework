@@ -74,7 +74,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private boolean ignoreFailedDrops = false;
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory dataBufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 
 	/**

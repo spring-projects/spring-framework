@@ -232,7 +232,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	public void frameDecoderMatchesDataBufferFactory() throws Exception {
 		testPayloadDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
-		testPayloadDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
+		testPayloadDecoder(DefaultDataBufferFactory.sharedInstance, PayloadDecoder.DEFAULT);
 	}
 
 	private void testPayloadDecoder(DataBufferFactory bufferFactory, PayloadDecoder payloadDecoder)

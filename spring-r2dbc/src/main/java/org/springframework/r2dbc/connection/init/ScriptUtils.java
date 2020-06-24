@@ -512,8 +512,9 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#releaseConnection
 	 */
 	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
-		return executeSqlScript(connection, resource, new DefaultDataBufferFactory(), false, false, DEFAULT_COMMENT_PREFIX,
-				DEFAULT_STATEMENT_SEPARATOR, DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		return executeSqlScript(connection, resource, DefaultDataBufferFactory.sharedInstance, false, false,
+				DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
+				DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 	/**

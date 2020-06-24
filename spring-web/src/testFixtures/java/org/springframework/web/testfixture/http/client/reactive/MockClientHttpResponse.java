@@ -26,7 +26,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -54,8 +53,6 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
 	private Flux<DataBuffer> body = Flux.empty();
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	public MockClientHttpResponse(HttpStatus status) {
@@ -109,7 +106,7 @@ public class MockClientHttpResponse implements ClientHttpResponse {
 	private DataBuffer toDataBuffer(String body, Charset charset) {
 		byte[] bytes = body.getBytes(charset);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return this.bufferFactory.wrap(byteBuffer);
+		return DefaultDataBufferFactory.sharedInstance.wrap(byteBuffer);
 	}
 
 	@Override

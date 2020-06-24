@@ -155,7 +155,7 @@ class EncoderHttpMessageWriterTests {
 
 	@Test
 	void setContentLengthForMonoBody() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBufferFactory factory = DefaultDataBufferFactory.sharedInstance;
 		DataBuffer buffer = factory.wrap("body".getBytes(StandardCharsets.UTF_8));
 		configureEncoder(Flux.just(buffer), MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);

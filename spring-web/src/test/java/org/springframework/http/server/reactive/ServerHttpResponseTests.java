@@ -178,7 +178,7 @@ public class ServerHttpResponseTests {
 
 
 	private DefaultDataBuffer wrap(String a) {
-		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
+		return DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
 	}
 
 
@@ -193,7 +193,7 @@ public class ServerHttpResponseTests {
 		private final List<DataBuffer> body = new ArrayList<>();
 
 		public TestServerHttpResponse() {
-			super(new DefaultDataBufferFactory());
+			super(DefaultDataBufferFactory.sharedInstance);
 		}
 
 		@Override

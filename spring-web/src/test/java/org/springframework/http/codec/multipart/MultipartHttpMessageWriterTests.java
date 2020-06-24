@@ -251,7 +251,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	@Test  // SPR-16376
 	public void customContentDisposition() throws IOException {
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		Flux<DataBuffer> buffers = DataBufferUtils.read(logo, new DefaultDataBufferFactory(), 1024);
+		Flux<DataBuffer> buffers = DataBufferUtils.read(logo, DefaultDataBufferFactory.sharedInstance, 1024);
 		long contentLength = logo.contentLength();
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();

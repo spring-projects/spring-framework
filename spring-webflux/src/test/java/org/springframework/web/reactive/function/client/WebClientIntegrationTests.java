@@ -627,7 +627,7 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> {});
 
 		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
-		Flux<DataBuffer> body = DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096);
+		Flux<DataBuffer> body = DataBufferUtils.read(resource, DefaultDataBufferFactory.sharedInstance, 4096);
 
 		Mono<Void> result = this.webClient.post()
 				.uri("/")

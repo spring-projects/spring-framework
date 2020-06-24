@@ -54,7 +54,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 	private final BiFunction<HttpMethod, URI, ? extends HttpClientContext> contextProvider;
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory dataBufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 
 	/**

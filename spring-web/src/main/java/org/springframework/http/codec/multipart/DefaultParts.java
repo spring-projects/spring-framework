@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ContentDisposition;
@@ -107,8 +106,6 @@ abstract class DefaultParts {
 
 		private final String value;
 
-		private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 		public DefaultFormFieldPart(HttpHeaders headers, String value) {
 			super(headers);
 			this.value = value;
@@ -118,7 +115,7 @@ abstract class DefaultParts {
 		public Flux<DataBuffer> content() {
 			return Flux.defer(() -> {
 				byte[] bytes = this.value.getBytes(MultipartUtils.charset(headers()));
-				return Flux.just(this.bufferFactory.wrap(bytes));
+				return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 			});
 		}
 

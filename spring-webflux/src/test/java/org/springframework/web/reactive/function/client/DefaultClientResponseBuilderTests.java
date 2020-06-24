@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,14 +40,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class DefaultClientResponseBuilderTests {
 
-	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
-
 	@Test
 	public void normal() {
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+				.map(DefaultDataBufferFactory.sharedInstance::wrap);
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_GATEWAY, ExchangeStrategies.withDefaults())
 				.header("foo", "bar")
@@ -71,7 +67,7 @@ public class DefaultClientResponseBuilderTests {
 	public void mutate() {
 		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+				.map(DefaultDataBufferFactory.sharedInstance::wrap);
 
 		HttpRequest mockClientHttpRequest = new MockClientHttpRequest(HttpMethod.GET, "/path");
 

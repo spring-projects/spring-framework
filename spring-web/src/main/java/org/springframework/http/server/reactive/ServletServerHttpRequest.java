@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
-	static final DataBuffer EOF_BUFFER = new DefaultDataBufferFactory().allocateBuffer(0);
+	static final DataBuffer EOF_BUFFER = DefaultDataBufferFactory.sharedInstance.allocateBuffer(0);
 
 
 	private final HttpServletRequest request;
