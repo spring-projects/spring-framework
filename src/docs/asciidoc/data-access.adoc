@@ -6619,7 +6619,7 @@ You can customize the client by calling the following methods:
 * `….bindMarkers(…)`: Supply a specific `BindMarkersFactory` to configure named
 parameter to database bind marker translation.
 * `….executeFunction(…)`: Set the `ExecuteFunction` how `Statement` objects get
- executed.
+ run.
 * `….namedParameters(false)`: Disable named parameter expansion. Enabled by default.
 
 TIP: Dialects are resolved by {api-spring-framework}/r2dbc/core/binding/BindMarkersFactoryResolver.html[`BindMarkersFactoryResolver`]
@@ -6804,7 +6804,7 @@ input parameters. Parameterized statements bear the risk of SQL injection if
 parameters are not escaped properly. `DatabaseClient` leverages R2DBC's
 `bind` API to eliminate the risk of SQL injection for query parameters.
 You can provide a parameterized SQL statement with the `execute(…)` operator
-and bind parameters to the actual `Statement`. Your R2DBC driver then executes
+and bind parameters to the actual `Statement`. Your R2DBC driver then runs
 the statement by using prepared statements and parameter substitution.
 
 Parameter binding supports two binding strategies:
@@ -6853,7 +6853,7 @@ Consider the following query:
 SELECT id, name, state FROM table WHERE (name, age) IN (('John', 35), ('Ann', 50))
 ----
 
-The preceding query can be parametrized and executed as follows:
+The preceding query can be parametrized and run as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6901,7 +6901,7 @@ The following example shows a simpler variant using `IN` predicates:
 ===== Statement Filters
 
 Sometimes it you need to fine-tune options on the actual `Statement`
-before it gets executed. Register a `Statement` filter
+before it gets run. Register a `Statement` filter
 (`StatementFilterFunction`) through `DatabaseClient` to intercept and
 modify statements in their execution, as the following example shows:
 
@@ -6943,7 +6943,7 @@ modify statements in their execution, as the following example shows:
 	    .filter { statement -> s.fetchSize(25) }
 ----
 
-`StatementFilterFunction` implementations allow filtering of the executed 
+`StatementFilterFunction` implementations allow filtering of the
 `Statement` and filtering of `Result` objects.
 
 [[r2dbc-DatabaseClient-idioms]]
@@ -7089,7 +7089,7 @@ necessarily have to know how the production data source is configured.
 
 When you use Spring's R2DBC layer, you can can configure your own with a
 connection pool implementation provided by a third party. A popular
-implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring 
+implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring
 distribution are meant only for testing purposes and do not provide pooling.
 
 To configure a `ConnectionFactory`:
@@ -7162,7 +7162,7 @@ javadoc for more details.
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
 single R2DBC datasources. It binds an R2DBC connection from the specified connection factory
-to the subscriber `Context`, potentially allowing for one subscriber connection for each 
+to the subscriber `Context`, potentially allowing for one subscriber connection for each
 connection factory.
 
 Application code is required to retrieve the R2DBC connection through
