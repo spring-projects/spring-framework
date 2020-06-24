@@ -64,9 +64,10 @@ public class ForwardedHeaderFilterTests {
 
 	private final ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
 
-	private MockHttpServletRequest request;
-
+	@SuppressWarnings("serial")
 	private final MockFilterChain filterChain = new MockFilterChain(new HttpServlet() {});
+
+	private MockHttpServletRequest request;
 
 
 	@BeforeEach

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
-import reactor.core.publisher.UnicastProcessor;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
@@ -233,7 +232,8 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test // SPR-16402
 	public void singleSubscriberWithStrings() {
-		UnicastProcessor<String> processor = UnicastProcessor.create();
+		@SuppressWarnings("deprecation")
+		reactor.core.publisher.UnicastProcessor<String> processor = reactor.core.publisher.UnicastProcessor.create();
 		Flux.just("foo", "bar", "baz").subscribe(processor);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
