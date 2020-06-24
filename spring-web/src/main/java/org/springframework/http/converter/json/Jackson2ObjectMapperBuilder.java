@@ -595,8 +595,8 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
-	@SuppressWarnings("unchecked")
-	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
+	@SafeVarargs
+	public final Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
 		this.moduleClasses = modules;
 		this.findWellKnownModules = true;
 		return this;
