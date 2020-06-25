@@ -18,21 +18,21 @@ package org.springframework.expression.spel.support;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.ParseException;
-import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.TypedValue;
+import org.springframework.expression.*;
 import org.springframework.expression.spel.AbstractExpressionTests;
 import org.springframework.expression.spel.SpelUtilities;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.ReflectionHelper.ArgumentsMatchKind;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -364,6 +364,19 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 				field.write(ctx, tester, "field", null));
 	}
 
+	@Test
+	void testReflectiveMethodResolver() throws AccessException {
+		MethodResolver resolver=new ReflectiveMethodResolver();
+		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+		Object obj= Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class<?>[]{Runnable.class}, new InvocationHandler() {
+			@Override
+			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+				return null;
+			}
+		});
+		MethodExecutor mexec=resolver.resolve(evaluationContext,obj,"toString",new ArrayList<>());
+		Assert.notNull(mexec,"MethodExecutor should not be empty.");
+	}
 
 	/**
 	 * Used to validate the match returned from a compareArguments call.
