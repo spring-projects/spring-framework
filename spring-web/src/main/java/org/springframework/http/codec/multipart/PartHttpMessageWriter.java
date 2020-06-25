@@ -26,6 +26,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -66,7 +67,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		Flux<DataBuffer> body = Flux.from(parts)
 				.concatMap(part -> encodePart(boundary, part, outputMessage.bufferFactory()))
 				.concatWith(generateLastLine(boundary, outputMessage.bufferFactory()))
-				.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release);
+				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 
 		return outputMessage.writeWith(body);
 	}

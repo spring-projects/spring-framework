@@ -504,7 +504,7 @@ public abstract class DataBufferUtils {
 				catch (IllegalStateException ex) {
 					// Avoid dependency on Netty: IllegalReferenceCountException
 					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to release PooledDataBuffer", ex);
+						logger.debug("Failed to release PooledDataBuffer: " + dataBuffer, ex);
 					}
 					return false;
 				}
