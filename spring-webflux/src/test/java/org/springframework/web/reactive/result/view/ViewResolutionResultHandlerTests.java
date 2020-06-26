@@ -398,7 +398,7 @@ public class ViewResolutionResultHandlerTests {
 			model = new TreeMap<>(model);
 			String value = this.name + ": " + model.toString();
 			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
-			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+			DataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,8 +198,8 @@ public class AspectJExpressionPointcutTests {
 		// not currently testable in a reliable fashion
 		//assertDoesNotMatchStringClass(classFilter);
 
-		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, new Double(12))).as("Should match with setSomeNumber with Double input").isTrue();
-		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, new Integer(11))).as("Should not match setSomeNumber with Integer input").isFalse();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 12D)).as("Should match with setSomeNumber with Double input").isTrue();
+		assertThat(methodMatcher.matches(setSomeNumber, TestBean.class, 11)).as("Should not match setSomeNumber with Integer input").isFalse();
 		assertThat(methodMatcher.matches(getAge, TestBean.class)).as("Should not match getAge").isFalse();
 		assertThat(methodMatcher.isRuntime()).as("Should be a runtime match").isTrue();
 	}
@@ -224,10 +224,10 @@ public class AspectJExpressionPointcutTests {
 		TestBean testBean = getAdvisedProxy(expression, interceptor);
 
 		assertThat(interceptor.getCount()).as("Calls should be 0").isEqualTo(0);
-		testBean.setSomeNumber(new Double(30));
+		testBean.setSomeNumber(30D);
 		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 
-		testBean.setSomeNumber(new Integer(90));
+		testBean.setSomeNumber(90);
 		assertThat(interceptor.getCount()).as("Calls should be 1").isEqualTo(1);
 	}
 

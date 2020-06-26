@@ -242,7 +242,6 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void modulesToInstallByClass() {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(CustomIntegerModule.class)
@@ -292,7 +291,6 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test  // SPR-12634
-	@SuppressWarnings("unchecked")
 	void customizeWellKnownModulesWithModuleClass()
 			throws JsonProcessingException, UnsupportedEncodingException {
 

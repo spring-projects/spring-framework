@@ -125,9 +125,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void body() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -141,9 +140,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void bodyToMono() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -157,9 +155,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void bodyToMonoTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -175,9 +172,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void bodyToFlux() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -192,9 +188,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void bodyToFluxTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -211,9 +206,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntity() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -230,9 +224,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntityWithUnknownStatusCode() throws Exception {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer
-				= factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
@@ -255,9 +248,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntityTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -276,9 +268,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntityList() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		mockTextPlainResponse(body);
 
@@ -295,9 +286,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntityListWithUnknownStatusCode() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
@@ -320,8 +310,8 @@ public class DefaultClientResponseTests {
 
 	@Test
 	public void toEntityListTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer = factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		mockTextPlainResponse(body);

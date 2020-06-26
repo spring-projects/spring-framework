@@ -36,7 +36,6 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
@@ -151,11 +150,10 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	public ServerRequest.Builder body(String body) {
 		Assert.notNull(body, "Body must not be null");
 		releaseBody();
-		DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 		this.body = Flux.just(body).
 				map(s -> {
 					byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-					return dataBufferFactory.wrap(bytes);
+					return DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 				});
 		return this;
 	}

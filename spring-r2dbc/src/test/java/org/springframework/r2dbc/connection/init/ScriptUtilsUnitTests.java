@@ -213,7 +213,7 @@ public class ScriptUtilsUnitTests {
 	private String readScript(String path) {
 		EncodedResource resource = new EncodedResource(
 				new ClassPathResource(path, getClass()));
-		return ScriptUtils.readScript(resource, new DefaultDataBufferFactory()).block();
+		return ScriptUtils.readScript(resource, DefaultDataBufferFactory.sharedInstance).block();
 	}
 
 }

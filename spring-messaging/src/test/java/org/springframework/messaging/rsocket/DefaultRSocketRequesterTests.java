@@ -65,8 +65,6 @@ public class DefaultRSocketRequesterTests {
 
 	private final RSocketStrategies strategies = RSocketStrategies.create();
 
-	private final DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	@BeforeEach
 	public void setUp() {
@@ -244,7 +242,8 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	private Payload toPayload(String value) {
-		return PayloadUtils.createPayload(bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		return PayloadUtils.createPayload(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 	}
 
 

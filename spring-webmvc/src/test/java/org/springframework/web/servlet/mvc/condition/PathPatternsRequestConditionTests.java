@@ -49,6 +49,12 @@ public class PathPatternsRequestConditionTests {
 	}
 
 	@Test
+	void getDirectUrls() {
+		PathPatternsRequestCondition condition = createCondition("/something", "/else/**");
+		assertThat(condition.getDirectPaths()).containsExactly("/something");
+	}
+
+	@Test
 	void combineEmptySets() {
 		PathPatternsRequestCondition c1 = createCondition();
 		PathPatternsRequestCondition c2 = createCondition();

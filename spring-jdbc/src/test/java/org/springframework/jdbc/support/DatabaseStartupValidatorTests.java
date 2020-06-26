@@ -25,6 +25,9 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -48,10 +51,21 @@ class DatabaseStartupValidatorTests {
 	@BeforeEach
 	void setUp() throws Exception {
 		given(dataSource.getConnection()).willReturn(connection);
+		validator.setDataSource(dataSource);
+		validator.setTimeout(3); // ensure tests don't accidentally run too long
+	}
+
+	@Test
+	void exceededTimeoutThrowsException() {
+		validator.setTimeout(1);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class)
+			.isThrownBy(validator::afterPropertiesSet);
 	}
 
 	@Test
 	void properSetupForDataSource() {
+		validator.setDataSource(null);
+
 		assertThatIllegalArgumentException().isThrownBy(validator::afterPropertiesSet);
 	}
 
@@ -59,7 +73,6 @@ class DatabaseStartupValidatorTests {
 	void shouldUseJdbc4IsValidByDefault() throws Exception {
 		given(connection.isValid(1)).willReturn(true);
 
-		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(1)).isValid(1);
@@ -70,7 +83,6 @@ class DatabaseStartupValidatorTests {
 	void shouldCallValidatonTwiceWhenNotValid() throws Exception {
 		given(connection.isValid(1)).willReturn(false, true);
 
-		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
@@ -81,7 +93,6 @@ class DatabaseStartupValidatorTests {
 	void shouldCallValidatonTwiceInCaseOfException() throws Exception {
 		given(connection.isValid(1)).willThrow(new SQLException("Test")).willReturn(true);
 
-		validator.setDataSource(dataSource);
 		validator.afterPropertiesSet();
 
 		verify(connection, times(2)).isValid(1);
@@ -96,7 +107,6 @@ class DatabaseStartupValidatorTests {
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery)).willReturn(true);
 
-		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 
@@ -116,7 +126,6 @@ class DatabaseStartupValidatorTests {
 				.willThrow(new SQLException("Test"))
 				.willReturn(true);
 
-		validator.setDataSource(dataSource);
 		validator.setValidationQuery(validationQuery);
 		validator.afterPropertiesSet();
 

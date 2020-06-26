@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ public class MockServerTests {
 
 	private DataBuffer toDataBuffer(String value) {
 		byte[] bytes = value.getBytes(UTF_8);
-		return new DefaultDataBufferFactory().wrap(bytes);
+		return DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 	}
 
 }

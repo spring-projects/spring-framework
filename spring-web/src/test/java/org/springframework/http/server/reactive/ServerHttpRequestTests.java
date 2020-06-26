@@ -198,7 +198,7 @@ public class ServerHttpRequestTests {
 		MockHttpServletRequest request = new TestHttpServletRequest(uri);
 		request.setContextPath(contextPath);
 		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
-		return new ServletServerHttpRequest(request, asyncContext, "", new DefaultDataBufferFactory(), 1024);
+		return new ServletServerHttpRequest(request, asyncContext, "", DefaultDataBufferFactory.sharedInstance, 1024);
 	}
 
 	private static class TestHttpServletRequest extends MockHttpServletRequest {

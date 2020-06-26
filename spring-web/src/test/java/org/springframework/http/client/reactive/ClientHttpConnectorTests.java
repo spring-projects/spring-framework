@@ -45,7 +45,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
@@ -67,8 +66,6 @@ public class ClientHttpConnectorTests {
 			EnumSet.of(HttpMethod.PUT, HttpMethod.POST, HttpMethod.PATCH);
 
 	private final MockWebServer server = new MockWebServer();
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	@BeforeEach
 	void startServer() throws IOException {
@@ -102,7 +99,7 @@ public class ClientHttpConnectorTests {
 			if (requestHasBody) {
 				Mono<DataBuffer> body = Mono.fromCallable(() -> {
 					byte[] bytes = requestBody.getBytes(StandardCharsets.UTF_8);
-					return this.bufferFactory.wrap(bytes);
+					return DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 				});
 				return request.writeWith(body);
 			}
@@ -228,7 +225,7 @@ public class ClientHttpConnectorTests {
 	private Mono<DataBuffer> stringBuffer(String value) {
 		return Mono.fromCallable(() -> {
 			byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-			DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer(bytes.length);
 			buffer.write(bytes);
 			return buffer;
 		});

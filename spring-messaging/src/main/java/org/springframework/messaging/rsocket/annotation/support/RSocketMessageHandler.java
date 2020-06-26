@@ -71,10 +71,9 @@ import org.springframework.util.StringUtils;
  * {@link SocketAcceptor} adapter to register with the
  * {@link io.rsocket.core.RSocketServer}.
  *
- * <p>For a client, possibly in the same process as a server, consider
- * consider using the static factory method
- * {@link #responder(RSocketStrategies, Object...)} to obtain a client
- * responder to be registered via
+ * <p>For a client, possibly in the same process as a server, consider using the
+ * static factory method {@link #responder(RSocketStrategies, Object...)} to
+ * obtain a client responder to be registered via
  * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketConnector
  * RSocketRequester.Builder}.
  *
@@ -500,8 +499,8 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * annotated handler methods. This is intended to be passed into
 	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory}.
 	 * <p>In effect a shortcut to create and initialize
-	 * {@code RSocketMessageHandler} with the given strategies and handlers,
-	 * use {@link #responder()} to obtain the responder, and plug that into
+	 * {@code RSocketMessageHandler} with the given strategies and handlers.
+	 * Use {@link #responder()} to obtain the responder and plug that into
 	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory ClientRSocketFactory}.
 	 * For more advanced scenarios, e.g. discovering handlers through a custom
 	 * stereotype annotation, consider declaring {@code RSocketMessageHandler}
@@ -509,15 +508,16 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * @param strategies the strategies to set on the created
 	 * {@code RSocketMessageHandler}
 	 * @param candidateHandlers a list of Objects and/or Classes with annotated
-	 * handler methods; used to call {@link #setHandlers(List)} with
-	 * on the created {@code RSocketMessageHandler}
+	 * handler methods; used to call {@link #setHandlers(List)} on the created
+	 * {@code RSocketMessageHandler}
 	 * @return a configurer that may be passed into
 	 * {@link org.springframework.messaging.rsocket.RSocketRequester.Builder#rsocketFactory}
-	 * @deprecated as of 5.2.6  following the deprecation of
+	 * @deprecated as of 5.2.6 following the deprecation of
 	 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
-	 * in RSocket 1.0 RC7.
+	 * in RSocket 1.0 RC7
 	 */
 	@Deprecated
+	@SuppressWarnings("deprecation")
 	public static org.springframework.messaging.rsocket.ClientRSocketFactoryConfigurer clientResponder(
 			RSocketStrategies strategies, Object... candidateHandlers) {
 
@@ -536,5 +536,3 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		};
 	}
 }
-
-
