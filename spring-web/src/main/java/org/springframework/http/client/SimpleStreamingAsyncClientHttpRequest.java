@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.http.HttpHeaders;
@@ -102,23 +101,23 @@ final class SimpleStreamingAsyncClientHttpRequest extends AbstractAsyncClientHtt
 	}
 
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers) throws IOException {
 		return this.taskExecutor.submitListenable(() -> {
 			try {
-				if (body != null) {
-					body.close();
+				if (this.body != null) {
+					this.body.close();
 				}
 				else {
-					SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
-					connection.connect();
+					SimpleBufferingClientHttpRequest.addHeaders(this.connection, headers);
+					this.connection.connect();
 					// Immediately trigger the request in a no-output scenario as well
-					connection.getResponseCode();
+					this.connection.getResponseCode();
 				}
 			}
 			catch (IOException ex) {
 				// ignore
 			}
-			return new SimpleClientHttpResponse(connection);
+			return new SimpleClientHttpResponse(this.connection);
 		});
 
 	}
