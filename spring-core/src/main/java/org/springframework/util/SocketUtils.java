@@ -54,7 +54,7 @@ public class SocketUtils {
 	public static final int PORT_RANGE_MAX = 65535;
 
 
-	private static final Random random = new Random(System.currentTimeMillis());
+	private static Random random = new Random(System.currentTimeMillis());
 
 
 	/**
@@ -76,6 +76,13 @@ public class SocketUtils {
 	public SocketUtils() {
 	}
 
+	/**
+	 * Set custom random source.
+	 * Default uses {@code System.currentTimeMillis()} instead of {@code Random}'s default.
+	 */
+	public static void setRandom(Random random) {
+		SocketUtils.random = random;
+	}
 
 	/**
 	 * Find an available TCP port randomly selected from the range
