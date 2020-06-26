@@ -249,6 +249,84 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
+	void fromHttpUrlWithoutFragment() {
+		String httpUrl = "http://localhost:8080/test/print";
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("http");
+		assertThat(uriComponents.getUserInfo()).isNull();
+		assertThat(uriComponents.getHost()).isEqualTo("localhost");
+		assertThat(uriComponents.getPort()).isEqualTo(8080);
+		assertThat(uriComponents.getPath()).isEqualTo("/test/print");
+		assertThat(uriComponents.getPathSegments()).isEqualTo(Arrays.asList("test", "print"));
+		assertThat(uriComponents.getQuery()).isNull();
+		assertThat(uriComponents.getFragment()).isNull();
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+
+		httpUrl = "http://user:test@localhost:8080/test/print?foo=bar";
+		uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("http");
+		assertThat(uriComponents.getUserInfo()).isEqualTo("user:test");
+		assertThat(uriComponents.getHost()).isEqualTo("localhost");
+		assertThat(uriComponents.getPort()).isEqualTo(8080);
+		assertThat(uriComponents.getPath()).isEqualTo("/test/print");
+		assertThat(uriComponents.getPathSegments()).isEqualTo(Arrays.asList("test", "print"));
+		assertThat(uriComponents.getQuery()).isEqualTo("foo=bar");
+		assertThat(uriComponents.getFragment()).isNull();
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+
+		httpUrl = "http://localhost:8080/test/print?foo=bar";
+		uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("http");
+		assertThat(uriComponents.getUserInfo()).isNull();
+		assertThat(uriComponents.getHost()).isEqualTo("localhost");
+		assertThat(uriComponents.getPort()).isEqualTo(8080);
+		assertThat(uriComponents.getPath()).isEqualTo("/test/print");
+		assertThat(uriComponents.getPathSegments()).isEqualTo(Arrays.asList("test", "print"));
+		assertThat(uriComponents.getQuery()).isEqualTo("foo=bar");
+		assertThat(uriComponents.getFragment()).isNull();
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+	}
+
+	@Test  // gh-25300
+	void fromHttpUrlWithFragment() {
+		String httpUrl = "https://example.com#baz";
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("https");
+		assertThat(uriComponents.getUserInfo()).isNull();
+		assertThat(uriComponents.getHost()).isEqualTo("example.com");
+		assertThat(uriComponents.getPort()).isEqualTo(-1);
+		assertThat(uriComponents.getPath()).isNullOrEmpty();
+		assertThat(uriComponents.getPathSegments()).isEmpty();
+		assertThat(uriComponents.getQuery()).isNull();
+		assertThat(uriComponents.getFragment()).isEqualTo("baz");
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+
+		httpUrl = "http://localhost:8080/test/print#baz";
+		uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("http");
+		assertThat(uriComponents.getUserInfo()).isNull();
+		assertThat(uriComponents.getHost()).isEqualTo("localhost");
+		assertThat(uriComponents.getPort()).isEqualTo(8080);
+		assertThat(uriComponents.getPath()).isEqualTo("/test/print");
+		assertThat(uriComponents.getPathSegments()).isEqualTo(Arrays.asList("test", "print"));
+		assertThat(uriComponents.getQuery()).isNull();
+		assertThat(uriComponents.getFragment()).isEqualTo("baz");
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+
+		httpUrl = "http://localhost:8080/test/print?foo=bar#baz";
+		uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
+		assertThat(uriComponents.getScheme()).isEqualTo("http");
+		assertThat(uriComponents.getUserInfo()).isNull();
+		assertThat(uriComponents.getHost()).isEqualTo("localhost");
+		assertThat(uriComponents.getPort()).isEqualTo(8080);
+		assertThat(uriComponents.getPath()).isEqualTo("/test/print");
+		assertThat(uriComponents.getPathSegments()).isEqualTo(Arrays.asList("test", "print"));
+		assertThat(uriComponents.getQuery()).isEqualTo("foo=bar");
+		assertThat(uriComponents.getFragment()).isEqualTo("baz");
+		assertThat(uriComponents.toUri().toString()).isEqualTo(httpUrl);
+	}
+
+	@Test
 	void fromHttpRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");

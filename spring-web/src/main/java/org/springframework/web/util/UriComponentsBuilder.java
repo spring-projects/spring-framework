@@ -59,6 +59,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * @author Oliver Gierke
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -95,7 +96,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
+					PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
 
 	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
 
@@ -288,6 +289,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			builder.path(matcher.group(8));
 			builder.query(matcher.group(10));
+			String fragment = matcher.group(12);
+			if (StringUtils.hasText(fragment)) {
+				builder.fragment(fragment);
+			}
 			return builder;
 		}
 		else {
