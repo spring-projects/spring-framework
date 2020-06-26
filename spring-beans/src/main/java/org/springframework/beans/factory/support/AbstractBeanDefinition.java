@@ -189,9 +189,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Nullable
 	private String destroyMethodName;
 
-	private boolean enforceInitMethod = true;
+	private boolean enforceInitMethod;
 
-	private boolean enforceDestroyMethod = true;
+	private boolean enforceDestroyMethod;
 
 	private boolean synthetic = false;
 
