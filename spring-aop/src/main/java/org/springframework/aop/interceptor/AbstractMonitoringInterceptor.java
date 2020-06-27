@@ -103,7 +103,8 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 		if (this.logTargetClassInvocation && clazz.isInstance(invocation.getThis())) {
 			clazz = invocation.getThis().getClass();
 		}
-		return getPrefix() + clazz.getName() + '.' + method.getName() + getSuffix();
+		String clazzName = clazz.getName();
+		return getPrefix() + clazzName + '.' + method.getName() + getSuffix();
 	}
 
 }
