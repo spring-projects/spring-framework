@@ -24,6 +24,8 @@ import org.springframework.lang.Nullable;
  * interface, it is used as a factory for an object to expose, not directly as a
  * bean instance that will be exposed itself.
  *
+ * 通过这个对象实例的getObject()会返回一个新的对象
+ *
  * <p><b>NB: A bean that implements this interface cannot be used as a normal bean.</b>
  * A FactoryBean is defined in a bean style, but the object exposed for bean
  * references ({@link #getObject()}) is always the object that it creates.

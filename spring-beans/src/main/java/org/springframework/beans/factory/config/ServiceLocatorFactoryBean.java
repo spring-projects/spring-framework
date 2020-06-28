@@ -202,6 +202,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	@Nullable
 	private ListableBeanFactory beanFactory;
 
+	// jdk动态代理 serviceLocatorInterface，实际上调用的是 ServiceLocatorInvocationHandler {@line serviceLocatorInterface}
 	@Nullable
 	private Object proxy;
 
@@ -347,6 +348,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 	/**
 	 * Invocation handler that delegates service locator calls to the bean factory.
+	 * 示例：调用 TestService getTestService(); 代码逻辑是：从 bean factory 中查找数据类型为 TestService的对象并返回
 	 */
 	private class ServiceLocatorInvocationHandler implements InvocationHandler {
 

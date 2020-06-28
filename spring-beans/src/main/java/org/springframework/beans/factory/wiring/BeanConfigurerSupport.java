@@ -34,6 +34,8 @@ import org.springframework.util.ClassUtils;
  * Convenient base class for bean configurers that can perform Dependency Injection
  * on objects (however they may be created). Typically subclassed by AspectJ aspects.
  *
+ * 将BeanDefinition 中的信息装配到 示例对象中 {@code configureBean(Object beanInstance) }
+ *
  * <p>Subclasses may also need a custom metadata resolution strategy, in the
  * {@link BeanWiringInfoResolver} interface. The default implementation looks for
  * a bean with the same name as the fully-qualified class name. (This is the default
@@ -144,7 +146,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
 		Assert.state(beanFactory != null, "No BeanFactory available");
 		try {
-			String beanName = bwi.getBeanName();
+			String beanName = bwi.getBeanName(); // 装配的Bean名称
 			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && beanName != null &&
 					!beanFactory.containsBean(beanName))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).

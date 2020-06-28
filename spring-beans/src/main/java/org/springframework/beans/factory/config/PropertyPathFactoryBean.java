@@ -220,6 +220,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 			target = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		}
 		Assert.state(this.propertyPath != null, "No property path specified");
+		// 获取 target的属性值
 		return target.getPropertyValue(this.propertyPath);
 	}
 

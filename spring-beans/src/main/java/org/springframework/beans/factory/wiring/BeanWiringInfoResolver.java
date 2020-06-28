@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
  * {@link ClassNameBeanWiringInfoResolver}, which uses the fully-qualified
  * class name as bean name.
  *
+ * Bean 装配信息解析策略
+ *
  * @author Rod Johnson
  * @since 2.0
  * @see BeanWiringInfo

@@ -24,9 +24,14 @@ import org.springframework.util.Assert;
 /**
  * Specialization of {@link MapPropertySource} designed for use with
  * {@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}.
+ * 专门设计为 AbstractEnvironment#getSystemEnvironment() 读取环境变量使用
+ *
  * Compensates for constraints in Bash and other shells that do not allow for variables
  * containing the period character and/or hyphen character; also allows for uppercase
  * variations on property names for more idiomatic shell use.
+ *
+ * bash和其他shell中不允许变量名称包含'.'和'-' ，通过这个类做一些补偿；
+ * 支持shell中定义大写的属性名
  *
  * <p>For example, a call to {@code getProperty("foo.bar")} will attempt to find a value
  * for the original property or any 'equivalent' property, returning the first found:
@@ -37,6 +42,7 @@ import org.springframework.util.Assert;
  * <li>{@code FOO_BAR} - with underscores and upper case</li>
  * </ul>
  * Any hyphen variant of the above would work as well, or even mix dot/hyphen variants.
+ * 上述的任何 “连字符” 都可以正常工作，甚至是混合使用
  *
  * <p>The same applies for calls to {@link #containsProperty(String)}, which returns
  * {@code true} if any of the above properties are present, otherwise {@code false}.
@@ -44,7 +50,7 @@ import org.springframework.util.Assert;
  * <p>This feature is particularly useful when specifying active or default profiles as
  * environment variables. The following is not allowable under Bash:
  *
- * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>
+ * <pre class="code">spring.profiles.active=p1 java -classpath ... MyApp</pre>  在Bash下不能这样设置
  *
  * However, the following syntax is permitted and is also more conventional:
  *
@@ -105,17 +111,18 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	protected final String resolvePropertyName(String name) {
 		Assert.notNull(name, "Property name must not be null");
-		String resolvedName = checkPropertyName(name);
+		String resolvedName = checkPropertyName(name); // 容器中包含解析后的属性名称（将'.'和'-'换成'_'后的属性名称）
 		if (resolvedName != null) {
 			return resolvedName;
 		}
 		String uppercasedName = name.toUpperCase();
 		if (!name.equals(uppercasedName)) {
-			resolvedName = checkPropertyName(uppercasedName);
+			resolvedName = checkPropertyName(uppercasedName);// 转换成大写后，再次查找一次
 			if (resolvedName != null) {
 				return resolvedName;
 			}
 		}
+		// 如果容器中不存在，则返回最原始的
 		return name;
 	}
 
@@ -125,17 +132,17 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 		if (containsKey(name)) {
 			return name;
 		}
-		// Check name with just dots replaced
+		// Check name with just dots replaced 把'.'换成'_'
 		String noDotName = name.replace('.', '_');
 		if (!name.equals(noDotName) && containsKey(noDotName)) {
 			return noDotName;
 		}
-		// Check name with just hyphens replaced
+		// Check name with just hyphens replaced 把'-'换成'_'
 		String noHyphenName = name.replace('-', '_');
 		if (!name.equals(noHyphenName) && containsKey(noHyphenName)) {
 			return noHyphenName;
 		}
-		// Check name with dots and hyphens replaced
+		// Check name with dots and hyphens replaced 把'.'和'-'换成'_'
 		String noDotNoHyphenName = noDotName.replace('-', '_');
 		if (!noDotName.equals(noDotNoHyphenName) && containsKey(noDotNoHyphenName)) {
 			return noDotNoHyphenName;

@@ -56,6 +56,7 @@ import org.springframework.util.ObjectUtils;
  * @see PropertySourcesPropertyResolver
  * @see MutablePropertySources
  * @see org.springframework.context.annotation.PropertySource
+ * 属性资源的来源，通过name来建立和source的关系
  */
 public abstract class PropertySource<T> {
 
@@ -103,6 +104,8 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
+	 * 判断 source中是否含有指定的属性
+	 * 设计模式：模板方法
 	 * Return whether this {@code PropertySource} contains the given name.
 	 * <p>This implementation simply checks for a {@code null} return value
 	 * from {@link #getProperty(String)}. Subclasses may wish to implement

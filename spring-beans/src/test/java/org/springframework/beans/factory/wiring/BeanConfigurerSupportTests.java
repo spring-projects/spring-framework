@@ -48,6 +48,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.setBeanFactory(new DefaultListableBeanFactory());
 		configurer.configureBean(beanInstance);
+
 		verify(resolver).resolveWiringInfo(beanInstance);
 		assertNull(beanInstance.getName());
 	}
@@ -73,6 +74,7 @@ public class BeanConfigurerSupportTests {
 		configurer.setBeanFactory(factory);
 		configurer.afterPropertiesSet();
 		configurer.configureBean(beanInstance);
+
 		assertEquals("Bean is evidently not being configured (for some reason)", "Harriet Wheeler", beanInstance.getName());
 	}
 

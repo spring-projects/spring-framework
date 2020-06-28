@@ -21,7 +21,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Holder for bean wiring metadata information about a particular class. Used in
+ * Holder for bean wiring metadata information about a particular class. Bean装配的元信息
+ * Used in
  * conjunction with the {@link org.springframework.beans.factory.annotation.Configurable}
  * annotation and the AspectJ {@code AnnotationBeanConfigurerAspect}.
  *
@@ -35,7 +36,7 @@ import org.springframework.util.Assert;
 public class BeanWiringInfo {
 
 	/**
-	 * Constant that indicates autowiring bean properties by name.
+	 * Constant that indicates autowiring(自动装配) bean properties by name.
 	 * @see #BeanWiringInfo(int, boolean)
 	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#AUTOWIRE_BY_NAME
 	 */
