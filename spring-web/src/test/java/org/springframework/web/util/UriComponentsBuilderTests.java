@@ -219,6 +219,12 @@ class UriComponentsBuilderTests {
 		assertThat(resultIPv4compatible.getHost()).isEqualTo("[::192.168.1.1]");
 	}
 
+	@Test
+	void fromUriStringInvalidIPv6Host() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				UriComponentsBuilder.fromUriString("http://[1abc:2abc:3abc::5ABC:6abc:8080/resource"));
+	}
+
 	@Test  // SPR-11970
 	void fromUriStringNoPathWithReservedCharInQuery() {
 		UriComponents result = UriComponentsBuilder.fromUriString("https://example.com?foo=bar@baz").build();
