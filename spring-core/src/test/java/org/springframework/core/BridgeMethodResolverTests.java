@@ -87,7 +87,7 @@ public class BridgeMethodResolverTests {
 	}
 
 	@Test
-	public void testIsBridgeMethodFor() throws Exception {
+	public void testIsridgeMethodBFor() throws Exception {
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
