@@ -85,7 +85,6 @@ class ConfigurationClassBeanDefinitionReader {
 	 * <p>The default is "false".
 	 */
 	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
-	
 
 	private final BeanDefinitionRegistry registry;
 
