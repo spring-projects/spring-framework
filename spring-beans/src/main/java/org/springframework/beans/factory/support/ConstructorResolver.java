@@ -337,7 +337,7 @@ class ConstructorResolver {
 		Method[] candidates = getCandidateMethods(factoryClass, mbd);
 		Method uniqueCandidate = null;
 		for (Method candidate : candidates) {
-			if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
+			if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate,null)) {
 				if (uniqueCandidate == null) {
 					uniqueCandidate = candidate;
 				}
@@ -465,7 +465,7 @@ class ConstructorResolver {
 				candidates = new ArrayList<>();
 				Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 				for (Method candidate : rawCandidates) {
-					if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
+					if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate,beanName)) {
 						candidates.add(candidate);
 					}
 				}

@@ -23,8 +23,12 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.foo.SomeBean;
+import org.springframework.context.annotation.foo.SomeConfig;
+import org.springframework.context.annotation.foo.SomeOtherBean;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +68,15 @@ public class ImportedConfigurationClassEnhancementTests {
 		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutowired.class);
 	}
 
+	@Test
+	public void checkOverloadedBean(){
+		ApplicationContext ctx = new AnnotationConfigApplicationContext("org.springframework.context.annotation.foo");
+		SomeOtherBean someOtherBean =(SomeOtherBean) ctx.getBean("other");
+		SomeBean someBean =(SomeBean) ctx.getBean("foo");
+		assertThat(someBean).isNotNull();
+		assertThat(someOtherBean).isNotNull();
+	}
+
 	private void autowiredConfigClassBeanMethodsRespectScoping(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
@@ -81,7 +94,6 @@ public class ImportedConfigurationClassEnhancementTests {
 		ConfigThatImportsNonConfigClass config = ctx.getBean(ConfigThatImportsNonConfigClass.class);
 		assertThat(config.testBean).isSameAs(ctx.getBean(TestBean.class));
 	}
-
 
 
 	@Configuration

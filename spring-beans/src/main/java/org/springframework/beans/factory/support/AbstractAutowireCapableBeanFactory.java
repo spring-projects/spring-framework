@@ -754,7 +754,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					clazz -> ReflectionUtils.getUniqueDeclaredMethods(clazz, ReflectionUtils.USER_DECLARED_METHODS));
 
 			for (Method candidate : candidates) {
-				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate) &&
+				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate,beanName) &&
 						candidate.getParameterCount() >= minNrOfArgs) {
 					// Declared type variables to inspect?
 					if (candidate.getTypeParameters().length > 0) {
