@@ -24,11 +24,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -76,7 +74,16 @@ import org.springframework.util.TypeUtils;
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
-	private static final Map<String, JsonEncoding> ENCODINGS = jsonEncodings();
+	private static final Map<String, JsonEncoding> ENCODINGS;
+
+	static {
+		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		for (JsonEncoding encoding : JsonEncoding.values()) {
+			ENCODINGS.put(encoding.getJavaName(), encoding);
+		}
+		ENCODINGS.put("US-ASCII", JsonEncoding.UTF8);
+	}
+
 
 	/**
 	 * The default charset used by the converter.
@@ -397,11 +404,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			object = ((MappingJacksonValue) object).getValue();
 		}
 		return super.getContentLength(object, contentType);
-	}
-
-	private static Map<String, JsonEncoding> jsonEncodings() {
-		return EnumSet.allOf(JsonEncoding.class).stream()
-				.collect(Collectors.toMap(JsonEncoding::getJavaName, Function.identity()));
 	}
 
 }
