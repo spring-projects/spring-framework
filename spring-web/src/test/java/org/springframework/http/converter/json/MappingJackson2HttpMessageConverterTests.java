@@ -67,6 +67,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canRead(Map.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
 		assertThat(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
 	}
 
@@ -75,6 +76,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(Map.class, new MediaType("application", "json"))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
 		assertThat(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
 	}
 
@@ -458,6 +460,33 @@ public class MappingJackson2HttpMessageConverterTests {
 		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
 
 		assertThat(result).containsExactly(entry("føø", "bår"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readAscii() throws Exception {
+		String body = "{\"foo\":\"bar\"}";
+		Charset charset = StandardCharsets.US_ASCII;
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(charset));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json", charset));
+		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
+
+		assertThat(result).containsExactly(entry("foo", "bar"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void writeAscii() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		Map<String,Object> body = new HashMap<>();
+		body.put("foo", "bar");
+		Charset charset = StandardCharsets.US_ASCII;
+		MediaType contentType = new MediaType("application", "json", charset);
+		converter.write(body, contentType, outputMessage);
+
+		String result = outputMessage.getBodyAsString(charset);
+		assertThat(result).isEqualTo("{\"foo\":\"bar\"}");
+		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
 	}
 
 
