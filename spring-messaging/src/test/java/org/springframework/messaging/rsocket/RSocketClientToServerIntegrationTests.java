@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -108,7 +108,7 @@ public class RSocketClientToServerIntegrationTests {
 				.concatMap(i -> requester.route("receive").data("Hello " + i).send())
 				.blockLast();
 
-		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads)
+		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
@@ -171,7 +171,7 @@ public class RSocketClientToServerIntegrationTests {
 				.concatMap(s -> requester.route("foo-updates").metadata(s, FOO_MIME_TYPE).sendMetadata())
 				.blockLast();
 
-		StepVerifier.create(context.getBean(ServerController.class).metadataPushPayloads)
+		StepVerifier.create(context.getBean(ServerController.class).metadataPushPayloads.asFlux())
 				.expectNext("bar")
 				.expectNext("baz")
 				.thenAwait(Duration.ofMillis(50))
@@ -225,14 +225,14 @@ public class RSocketClientToServerIntegrationTests {
 	@Controller
 	static class ServerController {
 
-		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
+		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
 
-		final ReplayProcessor<String> metadataPushPayloads = ReplayProcessor.create();
+		final Sinks.StandaloneFluxSink<String> metadataPushPayloads = Sinks.replayAll();
 
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.onNext(payload);
+			this.fireForgetPayloads.next(payload);
 		}
 
 		@MessageMapping("echo")
@@ -274,7 +274,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@ConnectMapping("foo-updates")
 		public void handleMetadata(@Header("foo") String foo) {
-			this.metadataPushPayloads.onNext(foo);
+			this.metadataPushPayloads.next(foo);
 		}
 
 		@MessageExceptionHandler

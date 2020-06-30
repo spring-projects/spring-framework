@@ -141,23 +141,18 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isObjectMethod(method)) {
-
 				if (ReflectionUtils.isToStringMethod(method)) {
 					return proxyToString(proxy);
 				}
-
 				if (ReflectionUtils.isEqualsMethod(method)) {
 					return (proxy == args[0]);
 				}
-
 				if (ReflectionUtils.isHashCodeMethod(method)) {
 					return System.identityHashCode(proxy);
 				}
 			}
 
-			// Invocation on ConnectionProxy interface coming in...
 			switch (method.getName()) {
-
 				case "unwrap":
 					return this.connection;
 				case "close":
@@ -183,14 +178,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 
 		private String proxyToString(@Nullable Object proxy) {
 			// Allow for differentiating between the proxy and the raw Connection.
-			StringBuilder sb = new StringBuilder("Transaction-aware proxy for target Connection ");
-			if (this.connection != null) {
-				sb.append("[").append(this.connection.toString()).append("]");
-			}
-			else {
-				sb.append(" from ConnectionFactory [").append(this.targetConnectionFactory).append("]");
-			}
-			return sb.toString();
+			return "Transaction-aware proxy for target Connection [" + this.connection.toString() + "]";
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,9 +136,10 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndLocations() {
 		Class<?> testClass = PropertiesLocationsFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
+		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, array("classpath:/foo.properties"), EMPTY_CLASS_ARRAY,
@@ -146,9 +147,10 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void buildMergedConfigWithLocalAnnotationAndOverriddenContextLoaderAndClasses() {
 		Class<?> testClass = PropertiesClassesFoo.class;
-		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
+		Class<? extends ContextLoader> expectedContextLoaderClass = org.springframework.test.context.support.GenericPropertiesContextLoader.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, array(FooConfig.class),

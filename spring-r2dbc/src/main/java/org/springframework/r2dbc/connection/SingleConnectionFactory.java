@@ -91,10 +91,9 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 
 	/**
 	 * Create a new {@link SingleConnectionFactory} using a R2DBC connection URL.
-	 *
 	 * @param url the R2DBC URL to use for accessing {@link ConnectionFactory} discovery.
-	 * @param suppressClose if the returned {@link Connection} should be a close-suppressing proxy or the physical
-	 *          {@link Connection}.
+	 * @param suppressClose if the returned {@link Connection} should be a close-suppressing proxy
+	 * or the physical {@link Connection}.
 	 * @see ConnectionFactories#get(String)
 	 */
 	public SingleConnectionFactory(String url, boolean suppressClose) {
@@ -106,21 +105,18 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	/**
 	 * Create a new {@link SingleConnectionFactory} with a given {@link Connection} and
 	 * {@link ConnectionFactoryMetadata}.
-	 *
 	 * @param target underlying target {@link Connection}.
 	 * @param metadata {@link ConnectionFactory} metadata to be associated with this {@link ConnectionFactory}.
 	 * @param suppressClose if the {@link Connection} should be wrapped with a {@link Connection} that suppresses
-	 *          {@code close()} calls (to allow for normal {@code close()} usage in applications that expect a pooled
-	 *          {@link Connection} but do not know our {@link SmartConnectionFactory} interface).
+	 * @code close()} calls (to allow for normal {@code close()} usage in applications that expect a pooled
+	 * @link Connection}).
 	 */
-	public SingleConnectionFactory(Connection target, ConnectionFactoryMetadata metadata,
-			boolean suppressClose) {
+	public SingleConnectionFactory(Connection target, ConnectionFactoryMetadata metadata, boolean suppressClose) {
 		super(new ConnectionFactory() {
 			@Override
 			public Publisher<? extends Connection> create() {
 				return Mono.just(target);
 			}
-
 			@Override
 			public ConnectionFactoryMetadata getMetadata() {
 				return metadata;
@@ -136,15 +132,16 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 
 
 	/**
-	 * Set whether the returned {@link Connection} should be a close-suppressing proxy or the physical {@link Connection}.
+	 * Set whether the returned {@link Connection} should be a close-suppressing proxy
+	 * or the physical {@link Connection}.
 	 */
 	public void setSuppressClose(boolean suppressClose) {
 		this.suppressClose = suppressClose;
 	}
 
 	/**
-	 * Return whether the returned {@link Connection} will be a close-suppressing proxy or the physical
-	 * {@link Connection}.
+	 * Return whether the returned {@link Connection} will be a close-suppressing proxy
+	 * or the physical {@link Connection}.
 	 */
 	protected boolean isSuppressClose() {
 		return this.suppressClose;
@@ -159,7 +156,6 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 
 	/**
 	 * Return whether the returned {@link Connection}'s "autoCommit" setting should be overridden.
-	 *
 	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
 	@Nullable
@@ -167,28 +163,25 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		return this.autoCommit;
 	}
 
+
 	@Override
 	public Mono<? extends Connection> create() {
-
 		Connection connection = this.target.get();
-
 		return this.connectionEmitter.map(connectionToUse -> {
-
 			if (connection == null) {
-				this.target.compareAndSet(connection, connectionToUse);
-				this.connection = (isSuppressClose() ? getCloseSuppressingConnectionProxy(connectionToUse) : connectionToUse);
+				this.target.compareAndSet(null, connectionToUse);
+				this.connection =
+						(isSuppressClose() ? getCloseSuppressingConnectionProxy(connectionToUse) : connectionToUse);
 			}
-
 			return this.connection;
 		}).flatMap(this::prepareConnection);
 	}
 
 	/**
-	 * Close the underlying {@link Connection}. The provider of this {@link ConnectionFactory} needs to care for proper
-	 * shutdown.
-	 * <p>
-	 * As this bean implements {@link DisposableBean}, a bean factory will automatically invoke this on destruction of its
-	 * cached singletons.
+	 * Close the underlying {@link Connection}.
+	 * The provider of this {@link ConnectionFactory} needs to care for proper shutdown.
+	 * <p>As this bean implements {@link DisposableBean}, a bean factory will automatically
+	 * invoke this on destruction of its cached singletons.
 	 */
 	@Override
 	public void destroy() {
@@ -199,46 +192,36 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 	 * Reset the underlying shared Connection, to be reinitialized on next access.
 	 */
 	public Mono<Void> resetConnection() {
-
 		Connection connection = this.target.get();
-
 		if (connection == null) {
 			return Mono.empty();
 		}
-
 		return Mono.defer(() -> {
-
 			if (this.target.compareAndSet(connection, null)) {
-
 				this.connection = null;
-
 				return Mono.from(connection.close());
 			}
-
 			return Mono.empty();
 		});
 	}
 
 	/**
-	 * Prepare the {@link Connection} before using it. Applies {@link #getAutoCommitValue() auto-commit} settings if
-	 * configured.
-	 *
+	 * Prepare the {@link Connection} before using it.
+	 * Applies {@link #getAutoCommitValue() auto-commit} settings if configured.
 	 * @param connection the requested {@link Connection}.
 	 * @return the prepared {@link Connection}.
 	 */
 	protected Mono<Connection> prepareConnection(Connection connection) {
-
 		Boolean autoCommit = getAutoCommitValue();
 		if (autoCommit != null) {
 			return Mono.from(connection.setAutoCommit(autoCommit)).thenReturn(connection);
 		}
-
 		return Mono.just(connection);
 	}
 
 	/**
-	 * Wrap the given {@link Connection} with a proxy that delegates every method call to it but suppresses close calls.
-	 *
+	 * Wrap the given {@link Connection} with a proxy that delegates every method call to it
+	 * but suppresses close calls.
 	 * @param target the original {@link Connection} to wrap.
 	 * @return the wrapped Connection.
 	 */
@@ -264,22 +247,18 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 		@Override
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			// Invocation on ConnectionProxy interface coming in...
-
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return proxy == args[0];
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of PersistenceManager proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("unwrap")) {
-				return this.target;
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: suppress, not valid.
-				return Mono.empty();
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return proxy == args[0];
+				case "hashCode":
+					// Use hashCode of PersistenceManager proxy.
+					return System.identityHashCode(proxy);
+				case "unwrap":
+					return this.target;
+				case "close":
+					// Handle close method: suppress, not valid.
+					return Mono.empty();
 			}
 
 			// Invoke method on target Connection.
@@ -290,7 +269,6 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory
 				throw ex.getTargetException();
 			}
 		}
-
 	}
 
 }

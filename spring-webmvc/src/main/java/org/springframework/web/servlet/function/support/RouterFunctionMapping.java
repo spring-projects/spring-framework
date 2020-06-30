@@ -38,6 +38,7 @@ import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * {@code HandlerMapping} implementation that supports {@link RouterFunction RouterFunctions}.
@@ -76,6 +77,9 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	 * {@link RouterFunction} instances available in the application context.
 	 */
 	public RouterFunctionMapping() {
+		// gh-23236 will ensure the configured parser is used to parse patterns
+		// For now this helps to signal to the DispatcherServlet the need to initialize the RequestPath
+		setPatternParser(new PathPatternParser());
 	}
 
 	/**

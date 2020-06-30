@@ -23,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.util.ReferenceCounted;
-import io.rsocket.AbstractRSocket;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
@@ -43,7 +42,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -240,15 +239,15 @@ class RSocketBufferLeakTests {
 	 * Store all intercepted incoming and outgoing payloads and then use
 	 * {@link #checkForLeaks()} at the end to check reference counts.
 	 */
-	private static class PayloadInterceptor extends AbstractRSocket implements RSocketInterceptor {
+	private static class PayloadInterceptor implements RSocket, RSocketInterceptor {
 
 		private final List<PayloadSavingDecorator> rsockets = new CopyOnWriteArrayList<>();
 
 		void checkForLeaks() {
 			this.rsockets.stream().map(PayloadSavingDecorator::getPayloads)
 					.forEach(payloadInfoProcessor -> {
-						payloadInfoProcessor.onComplete();
-						payloadInfoProcessor
+						payloadInfoProcessor.complete();
+						payloadInfoProcessor.asFlux()
 								.doOnNext(this::checkForLeak)
 								.blockLast();
 					});
@@ -288,22 +287,22 @@ class RSocketBufferLeakTests {
 		}
 
 
-		private static class PayloadSavingDecorator extends AbstractRSocket {
+		private static class PayloadSavingDecorator implements RSocket {
 
 			private final RSocket delegate;
 
-			private ReplayProcessor<PayloadLeakInfo> payloads = ReplayProcessor.create();
+			private Sinks.StandaloneFluxSink<PayloadLeakInfo> payloads = Sinks.replayAll();
 
 			PayloadSavingDecorator(RSocket delegate) {
 				this.delegate = delegate;
 			}
 
-			ReplayProcessor<PayloadLeakInfo> getPayloads() {
+			Sinks.StandaloneFluxSink<PayloadLeakInfo> getPayloads() {
 				return this.payloads;
 			}
 
 			void reset() {
-				this.payloads = ReplayProcessor.create();
+				this.payloads = Sinks.replayAll();
 			}
 
 			@Override
@@ -329,7 +328,7 @@ class RSocketBufferLeakTests {
 			}
 
 			private io.rsocket.Payload addPayload(io.rsocket.Payload payload) {
-				this.payloads.onNext(new PayloadLeakInfo(payload));
+				this.payloads.next(new PayloadLeakInfo(payload));
 				return payload;
 			}
 

@@ -123,8 +123,16 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
 		implements AutowireCapableBeanFactory {
 
+	/**
+	 * Whether this environment lives within a native image.
+	 * Exposed as a private static field rather than in a {@code NativeImageDetector.inNativeImage()} static method due to https://github.com/oracle/graal/issues/2594.
+	 * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
+	 */
+	private static final boolean IN_NATIVE_IMAGE = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+
+
 	/** Strategy for creating bean instances. */
-	private InstantiationStrategy instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+	private InstantiationStrategy instantiationStrategy;
 
 	/** Resolver strategy for method parameter names. */
 	@Nullable
@@ -176,6 +184,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		ignoreDependencyInterface(BeanNameAware.class);
 		ignoreDependencyInterface(BeanFactoryAware.class);
 		ignoreDependencyInterface(BeanClassLoaderAware.class);
+		if (IN_NATIVE_IMAGE) {
+			this.instantiationStrategy = new SimpleInstantiationStrategy();
+		}
+		else {
+			this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+		}
 	}
 
 	/**

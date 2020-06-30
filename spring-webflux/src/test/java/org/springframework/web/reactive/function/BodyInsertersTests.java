@@ -421,9 +421,8 @@ public class BodyInsertersTests {
 
 	@Test
 	public void ofDataBuffers() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		BodyInserter<Flux<DataBuffer>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromDataBuffers(body);

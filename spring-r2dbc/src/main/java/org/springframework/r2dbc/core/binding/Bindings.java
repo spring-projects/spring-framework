@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 
 import io.r2dbc.spi.Statement;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -69,35 +70,8 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	}
 
 
-	/**
-	 * Create a new, empty {@link Bindings} object.
-	 *
-	 * @return a new, empty {@link Bindings} object.
-	 */
-	public static Bindings empty() {
-		return EMPTY;
-	}
-
-
 	protected Map<BindMarker, Binding> getBindings() {
 		return this.bindings;
-	}
-
-	/**
-	 * Merge this bindings with an other {@link Bindings} object and create a new merged
-	 * {@link Bindings} object.
-	 * @param left the left object to merge with
-	 * @param right the right object to merge with
-	 * @return a new, merged {@link Bindings} object
-	 */
-	public static Bindings merge(Bindings left, Bindings right) {
-		Assert.notNull(left, "Left side Bindings must not be null");
-		Assert.notNull(right, "Right side Bindings must not be null");
-		List<Binding> result = new ArrayList<>(
-				left.getBindings().size() + right.getBindings().size());
-		result.addAll(left.getBindings().values());
-		result.addAll(right.getBindings().values());
-		return new Bindings(result);
 	}
 
 	/**
@@ -138,6 +112,32 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	@Override
 	public Spliterator<Binding> spliterator() {
 		return this.bindings.values().spliterator();
+	}
+
+
+	/**
+	 * Create a new, empty {@link Bindings} object.
+	 * @return a new, empty {@link Bindings} object.
+	 */
+	public static Bindings empty() {
+		return EMPTY;
+	}
+
+	/**
+	 * Merge this bindings with an other {@link Bindings} object and create a new merged
+	 * {@link Bindings} object.
+	 * @param left the left object to merge with
+	 * @param right the right object to merge with
+	 * @return a new, merged {@link Bindings} object
+	 */
+	public static Bindings merge(Bindings left, Bindings right) {
+		Assert.notNull(left, "Left side Bindings must not be null");
+		Assert.notNull(right, "Right side Bindings must not be null");
+		List<Binding> result = new ArrayList<>(
+				left.getBindings().size() + right.getBindings().size());
+		result.addAll(left.getBindings().values());
+		result.addAll(right.getBindings().values());
+		return new Bindings(result);
 	}
 
 
@@ -188,7 +188,6 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		 * @param bindTarget the target to apply bindings to
 		 */
 		public abstract void apply(BindTarget bindTarget);
-
 	}
 
 
@@ -199,12 +198,10 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		private final Object value;
 
-
 		ValueBinding(BindMarker marker, Object value) {
 			super(marker);
 			this.value = value;
 		}
-
 
 		@Override
 		public boolean hasValue() {
@@ -212,6 +209,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		}
 
 		@Override
+		@NonNull
 		public Object getValue() {
 			return this.value;
 		}
@@ -220,8 +218,8 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		public void apply(BindTarget bindTarget) {
 			getBindMarker().bind(bindTarget, getValue());
 		}
-
 	}
+
 
 	/**
 	 * {@code NULL} binding.
@@ -230,12 +228,10 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		private final Class<?> valueType;
 
-
 		NullBinding(BindMarker marker, Class<?> valueType) {
 			super(marker);
 			this.valueType = valueType;
 		}
-
 
 		@Override
 		public boolean hasValue() {
@@ -256,7 +252,6 @@ public class Bindings implements Iterable<Bindings.Binding> {
 		public void apply(BindTarget bindTarget) {
 			getBindMarker().bindNull(bindTarget, getValueType());
 		}
-
 	}
 
 }

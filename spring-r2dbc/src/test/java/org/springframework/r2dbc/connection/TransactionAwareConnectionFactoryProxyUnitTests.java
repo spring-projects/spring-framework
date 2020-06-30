@@ -42,7 +42,7 @@ import static org.mockito.BDDMockito.when;
  * @author Mark Paluch
  * @author Christoph Strobl
  */
-public class TransactionAwareConnectionFactoryProxyUnitTests {
+class TransactionAwareConnectionFactoryProxyUnitTests {
 
 	ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
 
@@ -55,14 +55,15 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	R2dbcTransactionManager tm;
 
 	@BeforeEach
-	public void before() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock1),
 				(Mono) Mono.just(connectionMock2), (Mono) Mono.just(connectionMock3));
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
 
 	@Test
-	public void createShouldWrapConnection() {
+	void createShouldWrapConnection() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.as(StepVerifier::create)
 				.consumeNextWith(connection -> assertThat(connection).isInstanceOf(Wrapped.class))
@@ -70,7 +71,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void unwrapShouldReturnTargetConnection() {
+	void unwrapShouldReturnTargetConnection() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.map(Wrapped.class::cast).as(StepVerifier::create)
 				.consumeNextWith(wrapped -> assertThat(wrapped.unwrap()).isEqualTo(connectionMock1))
@@ -78,7 +79,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void unwrapShouldReturnTargetConnectionEvenWhenClosed() {
+	void unwrapShouldReturnTargetConnectionEvenWhenClosed() {
 		when(connectionMock1.close()).thenReturn(Mono.empty());
 
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
@@ -90,7 +91,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void getTargetConnectionShouldReturnTargetConnection() {
+	void getTargetConnectionShouldReturnTargetConnection() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.map(Wrapped.class::cast).as(StepVerifier::create)
 				.consumeNextWith(wrapped -> assertThat(wrapped.unwrap()).isEqualTo(connectionMock1))
@@ -98,7 +99,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void getMetadataShouldThrowsErrorEvenWhenClosed() {
+	void getMetadataShouldThrowsErrorEvenWhenClosed() {
 		when(connectionMock1.close()).thenReturn(Mono.empty());
 
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
@@ -110,7 +111,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void hashCodeShouldReturnProxyHash() {
+	void hashCodeShouldReturnProxyHash() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.map(Connection.class::cast).as(StepVerifier::create)
 				.consumeNextWith(connection -> assertThat(connection.hashCode()).isEqualTo(
@@ -118,7 +119,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void equalsShouldCompareCorrectly() {
+	void equalsShouldCompareCorrectly() {
 		new TransactionAwareConnectionFactoryProxy(connectionFactoryMock).create()
 				.map(Connection.class::cast).as(StepVerifier::create)
 				.consumeNextWith(connection -> {
@@ -128,7 +129,7 @@ public class TransactionAwareConnectionFactoryProxyUnitTests {
 	}
 
 	@Test
-	public void shouldEmitBoundConnection() {
+	void shouldEmitBoundConnection() {
 		when(connectionMock1.beginTransaction()).thenReturn(Mono.empty());
 		when(connectionMock1.commitTransaction()).thenReturn(Mono.empty());
 		when(connectionMock1.close()).thenReturn(Mono.empty());

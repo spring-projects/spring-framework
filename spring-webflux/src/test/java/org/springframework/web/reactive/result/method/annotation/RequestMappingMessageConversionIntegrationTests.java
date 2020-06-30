@@ -44,7 +44,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -487,9 +486,8 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		@GetMapping("/publisher")
 		public Publisher<ByteBuffer> getPublisher() {
-			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
-			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
+			return encoder.encode(Mono.just(new Person("Robert")), DefaultDataBufferFactory.sharedInstance,
 					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::asByteBuffer);
 		}
 

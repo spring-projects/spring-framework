@@ -52,7 +52,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
-import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
 import org.springframework.web.testfixture.servlet.MockPart;
@@ -61,7 +60,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * @author Arjen Poutsma
@@ -481,10 +479,6 @@ class DefaultServerRequestTests {
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
-				.ifNoneMatch(eTag)
-				.ifModifiedSince(oneMinuteAgo.toEpochMilli())
-				);
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 

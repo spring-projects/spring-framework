@@ -53,8 +53,6 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest implements 
 
 	private final URI url;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 	private Flux<DataBuffer> body = Flux.error(
 			new IllegalStateException("The body is not set. " +
 					"Did handling complete with success? Is a custom \"writeHandler\" configured?"));
@@ -109,7 +107,7 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest implements 
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return DefaultDataBufferFactory.sharedInstance;
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -164,13 +165,41 @@ public class ServerHttpRequestTests {
 		assertThat(request.getHeaders().get(headerName)).containsExactly(headerValue3);
 	}
 
-	private ServerHttpRequest createRequest(String uriString) throws Exception {
-		URI uri = URI.create(uriString);
-		MockHttpServletRequest request = new TestHttpServletRequest(uri);
-		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
-		return new ServletServerHttpRequest(request, asyncContext, "", new DefaultDataBufferFactory(), 1024);
+	@Test
+	void mutateWithExistingContextPath() throws Exception {
+		ServerHttpRequest request = createRequest("/context/path", "/context");
+
+		ServerHttpRequest mutated = request.mutate().build();
+		assertThat(mutated.getPath().contextPath().value()).isEqualTo("/context");
+		assertThat(mutated.getPath().pathWithinApplication().value()).isEqualTo("/path");
+		assertThat(mutated.getURI().getRawPath()).isEqualTo("/context/path");
+
+		mutated = request.mutate().contextPath("/other").path("/other/path").build();
+		assertThat(mutated.getPath().contextPath().value()).isEqualTo("/other");
+		assertThat(mutated.getPath().pathWithinApplication().value()).isEqualTo("/path");
+		assertThat(mutated.getURI().getRawPath()).isEqualTo("/other/path");
 	}
 
+	@Test
+	void mutateContextPathWithoutUpdatingPathShouldFail() throws Exception {
+		ServerHttpRequest request = createRequest("/context/path", "/context");
+
+		assertThatThrownBy(() -> request.mutate().path("/fail").build())
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Invalid contextPath '/context': must match the start of requestPath: '/fail'");
+	}
+
+	private ServerHttpRequest createRequest(String uriString) throws Exception {
+		return createRequest(uriString, "");
+	}
+
+	private ServerHttpRequest createRequest(String uriString, String contextPath) throws Exception {
+		URI uri = URI.create(uriString);
+		MockHttpServletRequest request = new TestHttpServletRequest(uri);
+		request.setContextPath(contextPath);
+		AsyncContext asyncContext = new MockAsyncContext(request, new MockHttpServletResponse());
+		return new ServletServerHttpRequest(request, asyncContext, "", DefaultDataBufferFactory.sharedInstance, 1024);
+	}
 
 	private static class TestHttpServletRequest extends MockHttpServletRequest {
 

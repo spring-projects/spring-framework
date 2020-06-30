@@ -48,6 +48,12 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
+	void getDirectUrls() {
+		PatternsRequestCondition condition = new PatternsRequestCondition("/something", "/else/**");
+		assertThat(condition.getDirectPaths()).containsExactly("/something");
+	}
+
+	@Test
 	void combineEmptySets() {
 		PatternsRequestCondition c1 = new PatternsRequestCondition();
 		PatternsRequestCondition c2 = new PatternsRequestCondition();
@@ -108,6 +114,7 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void matchSuffixPattern() {
 		MockHttpServletRequest request = initRequest("/foo.html");
 
@@ -129,6 +136,7 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test // SPR-8410
+	@SuppressWarnings("deprecation")
 	void matchSuffixPatternUsingFileExtensions() {
 		PatternsRequestCondition condition = new PatternsRequestCondition(
 				new String[] {"/jobs/{jobName}"}, null, null, true, false, Collections.singletonList("json"));
@@ -147,6 +155,7 @@ class PatternsRequestConditionTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	void matchSuffixPatternUsingFileExtensions2() {
 		PatternsRequestCondition condition1 = new PatternsRequestCondition(
 				new String[] {"/prefix"}, null, null, true, false, Collections.singletonList("json"));

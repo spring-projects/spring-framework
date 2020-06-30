@@ -134,7 +134,6 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 	}
 
 	@Test
-	@SuppressWarnings("try")
 	public void multipleWrites() throws Exception {
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		final byte[] body = "Hello World".getBytes("UTF-8");
@@ -149,12 +148,12 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		try (ClientHttpResponse response = futureResponse.get()) {
+			assertThat(response).isNotNull();
 			assertThatIllegalStateException().isThrownBy(() -> FileCopyUtils.copy(body, request.getBody()));
 		}
 	}
 
 	@Test
-	@SuppressWarnings("try")
 	public void headersAfterExecute() throws Exception {
 		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 		request.getHeaders().add("MyHeader", "value");
@@ -163,6 +162,7 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
 		try (ClientHttpResponse response = futureResponse.get()) {
+			assertThat(response).isNotNull();
 			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 					request.getHeaders().add("MyHeader", "value"));
 		}

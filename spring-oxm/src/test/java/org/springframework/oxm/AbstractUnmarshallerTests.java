@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public abstract class AbstractUnmarshallerTests<U extends Unmarshaller> {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("deprecation")  // on JDK 9
 	public void unmarshalSAXSource() throws Exception {
 		XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		SAXSource source = new SAXSource(reader, new InputSource(new StringReader(INPUT_STRING)));

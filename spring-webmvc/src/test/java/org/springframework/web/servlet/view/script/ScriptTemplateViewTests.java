@@ -304,7 +304,6 @@ public class ScriptTemplateViewTests {
 		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test  // gh-23258
 	public void engineSupplierWithNonSharedEngine() {
 		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));

@@ -32,10 +32,8 @@ import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.FluxIdentityProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Processors;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.Connection;
@@ -317,7 +315,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 					logger.debug("Connected to " + conn.address());
 				}
 			});
-			FluxIdentityProcessor<Void> completion = Processors.more().multicastNoBackpressure();
+			MonoProcessor<Void> completion = MonoProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 

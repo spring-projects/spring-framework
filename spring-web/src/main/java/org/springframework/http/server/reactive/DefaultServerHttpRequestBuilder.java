@@ -57,6 +57,9 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	@Nullable
 	private SslInfo sslInfo;
 
+	@Nullable
+	private InetSocketAddress remoteAddress;
+
 	private Flux<DataBuffer> body;
 
 	private final ServerHttpRequest originalRequest;
@@ -68,6 +71,8 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		this.uri = original.getURI();
 		this.headers = HttpHeaders.writableHttpHeaders(original.getHeaders());
 		this.httpMethodValue = original.getMethodValue();
+		this.contextPath = original.getPath().contextPath().value();
+		this.remoteAddress = original.getRemoteAddress();
 		this.body = original.getBody();
 		this.originalRequest = original;
 	}
@@ -118,9 +123,15 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 	}
 
 	@Override
+	public ServerHttpRequest.Builder remoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+		return this;
+	}
+
+	@Override
 	public ServerHttpRequest build() {
 		return new MutatedServerHttpRequest(getUriToUse(), this.contextPath,
-				this.httpMethodValue, this.sslInfo, this.body, this.originalRequest);
+				this.httpMethodValue, this.sslInfo, this.remoteAddress, this.body, this.originalRequest);
 	}
 
 	private URI getUriToUse() {
@@ -169,18 +180,22 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Nullable
 		private final SslInfo sslInfo;
 
+		@Nullable
+		private InetSocketAddress remoteAddress;
+
 		private final Flux<DataBuffer> body;
 
 		private final ServerHttpRequest originalRequest;
 
 
 		public MutatedServerHttpRequest(URI uri, @Nullable String contextPath,
-				String methodValue, @Nullable SslInfo sslInfo,
+				String methodValue, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
 				Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
 			super(uri, contextPath, originalRequest.getHeaders());
 			this.methodValue = methodValue;
-			this.sslInfo = sslInfo != null ? sslInfo : originalRequest.getSslInfo();
+			this.remoteAddress = (remoteAddress != null ? remoteAddress : originalRequest.getRemoteAddress());
+			this.sslInfo = (sslInfo != null ? sslInfo : originalRequest.getSslInfo());
 			this.body = body;
 			this.originalRequest = originalRequest;
 		}
@@ -204,7 +219,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 		@Override
 		@Nullable
 		public InetSocketAddress getRemoteAddress() {
-			return this.originalRequest.getRemoteAddress();
+			return this.remoteAddress;
 		}
 
 		@Override

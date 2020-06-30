@@ -75,10 +75,10 @@ class SocketUtilsTests {
 	}
 
 	@Test
-	@SuppressWarnings("try")
 	void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = SocketUtils.findAvailableTcpPort();
 		try (ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"))) {
+			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() ->
 					SocketUtils.findAvailableTcpPort(port, port))
@@ -149,10 +149,10 @@ class SocketUtilsTests {
 	}
 
 	@Test
-	@SuppressWarnings("try")
 	void findAvailableUdpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = SocketUtils.findAvailableUdpPort();
 		try (DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"))) {
+			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() ->
 					SocketUtils.findAvailableUdpPort(port, port))

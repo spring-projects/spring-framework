@@ -80,7 +80,6 @@ public abstract class ConnectionFactoryUtils {
 	 * Translates exceptions into the Spring hierarchy of unchecked generic
 	 * data access exceptions, simplifying calling code and making any
 	 * exception that is thrown more meaningful.
-	 *
 	 * <p>Is aware of a corresponding Connection bound to the current
 	 * {@link TransactionSynchronizationManager}. Will bind a Connection to the
 	 * {@link TransactionSynchronizationManager} if transaction synchronization is active.
@@ -99,7 +98,6 @@ public abstract class ConnectionFactoryUtils {
 	/**
 	 * Actually obtain a R2DBC Connection from the given {@link ConnectionFactory}.
 	 * Same as {@link #getConnection}, but preserving the original exceptions.
-	 *
 	 * <p>Is aware of a corresponding Connection bound to the current
 	 * {@link TransactionSynchronizationManager}. Will bind a Connection to the
 	 * {@link TransactionSynchronizationManager} if transaction synchronization is active
@@ -193,11 +191,9 @@ public abstract class ConnectionFactoryUtils {
 	 * @param connectionFactory the {@link ConnectionFactory} that the Connection was obtained from
 	 * @see #doGetConnection
 	 */
-	public static Mono<Void> doReleaseConnection(Connection connection,
-			ConnectionFactory connectionFactory) {
+	public static Mono<Void> doReleaseConnection(Connection connection, ConnectionFactory connectionFactory) {
 		return TransactionSynchronizationManager.forCurrentTransaction()
 				.flatMap(synchronizationManager -> {
-
 			ConnectionHolder conHolder = (ConnectionHolder) synchronizationManager.getResource(connectionFactory);
 			if (conHolder != null && connectionEquals(conHolder, connection)) {
 				// It's the transactional Connection: Don't close it.
@@ -235,7 +231,6 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the corresponding DataAccessException instance
 	 */
 	public static DataAccessException convertR2dbcException(String task, @Nullable String sql, R2dbcException ex) {
-
 		if (ex instanceof R2dbcTransientException) {
 			if (ex instanceof R2dbcTransientResourceException) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
@@ -247,7 +242,6 @@ public abstract class ConnectionFactoryUtils {
 				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
 			}
 		}
-
 		if (ex instanceof R2dbcNonTransientException) {
 			if (ex instanceof R2dbcNonTransientResourceException) {
 				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
@@ -262,7 +256,6 @@ public abstract class ConnectionFactoryUtils {
 				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 		}
-
 		return new UncategorizedR2dbcException(buildMessage(task, sql, ex), sql, ex);
 	}
 
@@ -326,7 +319,6 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #CONNECTION_SYNCHRONIZATION_ORDER
 	 */
 	private static int getConnectionSynchronizationOrder(ConnectionFactory connectionFactory) {
-
 		int order = CONNECTION_SYNCHRONIZATION_ORDER;
 		ConnectionFactory current = connectionFactory;
 		while (current instanceof DelegatingConnectionFactory) {
@@ -335,6 +327,7 @@ public abstract class ConnectionFactoryUtils {
 		}
 		return order;
 	}
+
 
 	/**
 	 * Callback for resource cleanup at the end of a non-native R2DBC transaction.
@@ -354,7 +347,6 @@ public abstract class ConnectionFactoryUtils {
 			this.connectionFactory = connectionFactory;
 			this.order = getConnectionSynchronizationOrder(connectionFactory);
 		}
-
 
 		@Override
 		public int getOrder() {
@@ -387,7 +379,8 @@ public abstract class ConnectionFactoryUtils {
 		public Mono<Void> resume() {
 			if (this.holderActive) {
 				return TransactionSynchronizationManager.forCurrentTransaction()
-						.doOnNext(synchronizationManager -> synchronizationManager.bindResource(this.connectionFactory, this.connectionHolder))
+						.doOnNext(synchronizationManager ->
+								synchronizationManager.bindResource(this.connectionFactory, this.connectionHolder))
 						.then();
 			}
 			return Mono.empty();
@@ -401,8 +394,7 @@ public abstract class ConnectionFactoryUtils {
 			// to avoid issues with strict transaction implementations that expect
 			// the close call before transaction completion.
 			if (!this.connectionHolder.isOpen()) {
-				return TransactionSynchronizationManager.forCurrentTransaction()
-						.flatMap(synchronizationManager -> {
+				return TransactionSynchronizationManager.forCurrentTransaction().flatMap(synchronizationManager -> {
 					synchronizationManager.unbindResource(this.connectionFactory);
 					this.holderActive = false;
 					if (this.connectionHolder.hasConnection()) {
@@ -439,4 +431,5 @@ public abstract class ConnectionFactoryUtils {
 			return Mono.empty();
 		}
 	}
+
 }

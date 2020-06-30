@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class AnnotationDrivenTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service.setSomething("someName");
-		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service = SerializationTestUtils.serializeAndDeserialize(service);
 		service.setSomething("someName");
 	}
 
@@ -96,7 +96,7 @@ public class AnnotationDrivenTests {
 	public void serializableWithoutPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
-		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);
+		service = SerializationTestUtils.serializeAndDeserialize(service);
 		service.setSomething("someName");
 	}
 

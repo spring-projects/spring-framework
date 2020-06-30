@@ -16,6 +16,7 @@
 
 package org.springframework.web.server.adapter;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Locale;
@@ -51,7 +52,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, ServerHttpRequest> {
 
 	static final Set<String> FORWARDED_HEADER_NAMES =
-			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH));
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<>(10, Locale.ENGLISH));
 
 	static {
 		FORWARDED_HEADER_NAMES.add("Forwarded");
@@ -60,6 +61,7 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Ssl");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-For");
 	}
 
 
@@ -100,6 +102,11 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 					builder.path(prefix + uri.getRawPath());
 					builder.contextPath(prefix);
 				}
+				InetSocketAddress remoteAddress = request.getRemoteAddress();
+				remoteAddress = UriComponentsBuilder.parseForwardedFor(request, remoteAddress);
+				if (remoteAddress != null) {
+					builder.remoteAddress(remoteAddress);
+				}
 			}
 			removeForwardedHeaders(builder);
 			request = builder.build();
@@ -130,19 +137,19 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 	private static String getForwardedPrefix(ServerHttpRequest request) {
 		HttpHeaders headers = request.getHeaders();
 		String header = headers.getFirst("X-Forwarded-Prefix");
-		if (header != null) {
-			StringBuilder prefix = new StringBuilder(header.length());
-			String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
-			for (String rawPrefix : rawPrefixes) {
-				int endIndex = rawPrefix.length();
-				while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
-					endIndex--;
-				}
-				prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
-			}
-			return prefix.toString();
+		if (header == null) {
+			return null;
 		}
-		return header;
+		StringBuilder prefix = new StringBuilder(header.length());
+		String[] rawPrefixes = StringUtils.tokenizeToStringArray(header, ",");
+		for (String rawPrefix : rawPrefixes) {
+			int endIndex = rawPrefix.length();
+			while (endIndex > 1 && rawPrefix.charAt(endIndex - 1) == '/') {
+				endIndex--;
+			}
+			prefix.append((endIndex != rawPrefix.length() ? rawPrefix.substring(0, endIndex) : rawPrefix));
+		}
+		return prefix.toString();
 	}
 
 }

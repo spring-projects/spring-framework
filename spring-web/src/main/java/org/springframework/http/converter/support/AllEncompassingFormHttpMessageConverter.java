@@ -78,7 +78,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 				// Ignore when no TransformerFactory implementation is available
 			}
 
-			if (jaxb2Present) {
+			if (jaxb2Present && !jackson2XmlPresent) {
 				addPartConverter(new Jaxb2RootElementHttpMessageConverter());
 			}
 		}

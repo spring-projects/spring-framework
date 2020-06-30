@@ -76,7 +76,7 @@ import org.springframework.util.TypeUtils;
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
-	private static final Map<Charset, JsonEncoding> ENCODINGS = jsonEncodings();
+	private static final Map<String, JsonEncoding> ENCODINGS = jsonEncodings();
 
 	/**
 	 * The default charset used by the converter.
@@ -184,7 +184,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 		if (mediaType != null && mediaType.getCharset() != null) {
 			Charset charset = mediaType.getCharset();
-			if (!ENCODINGS.containsKey(charset)) {
+			if (!ENCODINGS.containsKey(charset.name())) {
 				return false;
 			}
 		}
@@ -247,7 +247,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset = getCharset(contentType);
 
-		boolean isUnicode = ENCODINGS.containsKey(charset);
+		boolean isUnicode = ENCODINGS.containsKey(charset.name());
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
@@ -374,7 +374,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected JsonEncoding getJsonEncoding(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
-			JsonEncoding encoding = ENCODINGS.get(charset);
+			JsonEncoding encoding = ENCODINGS.get(charset.name());
 			if (encoding != null) {
 				return encoding;
 			}
@@ -399,9 +399,9 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return super.getContentLength(object, contentType);
 	}
 
-	private static Map<Charset, JsonEncoding> jsonEncodings() {
+	private static Map<String, JsonEncoding> jsonEncodings() {
 		return EnumSet.allOf(JsonEncoding.class).stream()
-				.collect(Collectors.toMap(encoding -> Charset.forName(encoding.getJavaName()), Function.identity()));
+				.collect(Collectors.toMap(JsonEncoding::getJavaName, Function.identity()));
 	}
 
 }

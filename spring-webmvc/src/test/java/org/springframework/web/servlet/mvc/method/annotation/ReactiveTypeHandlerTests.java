@@ -30,10 +30,10 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleEmitter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -138,11 +138,11 @@ public class ReactiveTypeHandlerTests {
 		Bar bar1 = new Bar("foo");
 		Bar bar2 = new Bar("bar");
 
-		EmitterProcessor<Bar> emitter = EmitterProcessor.create();
-		testDeferredResultSubscriber(emitter, Flux.class, forClass(Bar.class), () -> {
-			emitter.onNext(bar1);
-			emitter.onNext(bar2);
-			emitter.onComplete();
+		Sinks.StandaloneFluxSink<Bar> sink = Sinks.unicast();
+		testDeferredResultSubscriber(sink.asFlux(), Flux.class, forClass(Bar.class), () -> {
+			sink.next(bar1);
+			sink.next(bar2);
+			sink.complete();
 		}, Arrays.asList(bar1, bar2));
 	}
 
@@ -189,16 +189,16 @@ public class ReactiveTypeHandlerTests {
 	public void writeServerSentEvents() throws Exception {
 
 		this.servletRequest.addHeader("Accept", "text/event-stream");
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		SseEmitter sseEmitter = (SseEmitter) handleValue(processor, Flux.class, forClass(String.class));
+		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		SseEmitter sseEmitter = (SseEmitter) handleValue(sink.asFlux(), Flux.class, forClass(String.class));
 
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		processor.onNext("foo");
-		processor.onNext("bar");
-		processor.onNext("baz");
-		processor.onComplete();
+		sink.next("foo");
+		sink.next("bar");
+		sink.next("baz");
+		sink.complete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
@@ -208,16 +208,16 @@ public class ReactiveTypeHandlerTests {
 
 		ResolvableType type = ResolvableType.forClassWithGenerics(ServerSentEvent.class, String.class);
 
-		EmitterProcessor<ServerSentEvent<?>> processor = EmitterProcessor.create();
-		SseEmitter sseEmitter = (SseEmitter) handleValue(processor, Flux.class, type);
+		Sinks.StandaloneFluxSink<ServerSentEvent<?>> sink = Sinks.unicast();
+		SseEmitter sseEmitter = (SseEmitter) handleValue(sink.asFlux(), Flux.class, type);
 
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		processor.onNext(ServerSentEvent.builder("foo").id("1").build());
-		processor.onNext(ServerSentEvent.builder("bar").id("2").build());
-		processor.onNext(ServerSentEvent.builder("baz").id("3").build());
-		processor.onComplete();
+		sink.next(ServerSentEvent.builder("foo").id("1").build());
+		sink.next(ServerSentEvent.builder("bar").id("2").build());
+		sink.next(ServerSentEvent.builder("baz").id("3").build());
+		sink.complete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("id:1\ndata:foo\n\nid:2\ndata:bar\n\nid:3\ndata:baz\n\n");
 	}
@@ -227,8 +227,8 @@ public class ReactiveTypeHandlerTests {
 
 		this.servletRequest.addHeader("Accept", "application/stream+json");
 
-		EmitterProcessor<Bar> processor = EmitterProcessor.create();
-		ResponseBodyEmitter emitter = handleValue(processor, Flux.class, forClass(Bar.class));
+		Sinks.StandaloneFluxSink<Bar> sink = Sinks.unicast();
+		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(Bar.class));
 
 		EmitterHandler emitterHandler = new EmitterHandler();
 		emitter.initialize(emitterHandler);
@@ -239,9 +239,9 @@ public class ReactiveTypeHandlerTests {
 		Bar bar1 = new Bar("foo");
 		Bar bar2 = new Bar("bar");
 
-		processor.onNext(bar1);
-		processor.onNext(bar2);
-		processor.onComplete();
+		sink.next(bar1);
+		sink.next(bar2);
+		sink.complete();
 
 		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/stream+json");
 		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
@@ -250,16 +250,16 @@ public class ReactiveTypeHandlerTests {
 	@Test
 	public void writeText() throws Exception {
 
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		ResponseBodyEmitter emitter = handleValue(processor, Flux.class, forClass(String.class));
+		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(String.class));
 
 		EmitterHandler emitterHandler = new EmitterHandler();
 		emitter.initialize(emitterHandler);
 
-		processor.onNext("The quick");
-		processor.onNext(" brown fox jumps over ");
-		processor.onNext("the lazy dog");
-		processor.onComplete();
+		sink.next("The quick");
+		sink.next(" brown fox jumps over ");
+		sink.next("the lazy dog");
+		sink.complete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("The quick brown fox jumps over the lazy dog");
 	}

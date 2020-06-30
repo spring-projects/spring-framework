@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class MockServerSpecTests {
 		@Override
 		protected WebHttpHandlerBuilder initHttpHandlerBuilder() {
 			return WebHttpHandlerBuilder.webHandler(exchange -> {
-				DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+				DefaultDataBufferFactory factory = DefaultDataBufferFactory.sharedInstance;
 				String text = exchange.getAttributes().toString();
 				DataBuffer buffer = factory.wrap(text.getBytes(StandardCharsets.UTF_8));
 				return exchange.getResponse().writeWith(Mono.just(buffer));

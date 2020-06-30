@@ -242,8 +242,9 @@ public class ClientCodecConfigurerTests {
 		Object expected = !textOnly;
 		assertThat(decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM)).isEqualTo(expected);
 
+		byte[] bytes = "line1\nline2".getBytes(StandardCharsets.UTF_8);
 		Flux<String> decoded = (Flux<String>) decoder.decode(
-				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
+				Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes)),
 				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
 
 		assertThat(decoded.collectList().block(Duration.ZERO)).isEqualTo(Arrays.asList("line1", "line2"));

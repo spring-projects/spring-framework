@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import io.netty.util.IllegalReferenceCountException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -502,9 +501,10 @@ public abstract class DataBufferUtils {
 				try {
 					return pooledDataBuffer.release();
 				}
-				catch (IllegalReferenceCountException ex) {
+				catch (IllegalStateException ex) {
+					// Avoid dependency on Netty: IllegalReferenceCountException
 					if (logger.isDebugEnabled()) {
-						logger.debug("RefCount already at 0", ex);
+						logger.debug("Failed to release PooledDataBuffer", ex);
 					}
 					return false;
 				}

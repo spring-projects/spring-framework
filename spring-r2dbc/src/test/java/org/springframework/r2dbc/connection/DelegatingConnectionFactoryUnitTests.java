@@ -30,18 +30,18 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Mark Paluch
  */
-public class DelegatingConnectionFactoryUnitTests {
+class DelegatingConnectionFactoryUnitTests {
 
 	ConnectionFactory delegate = mock(ConnectionFactory.class);
 
 	Connection connectionMock = mock(Connection.class);
 
-	DelegatingConnectionFactory connectionFactory = new ExampleConnectionFactory(
-			delegate);
+	DelegatingConnectionFactory connectionFactory = new ExampleConnectionFactory(delegate);
+
 
 	@Test
-	public void shouldDelegateGetConnection() {
-
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	void shouldDelegateGetConnection() {
 		Mono<Connection> connectionMono = Mono.just(connectionMock);
 		when(delegate.create()).thenReturn((Mono) connectionMono);
 
@@ -49,7 +49,7 @@ public class DelegatingConnectionFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldDelegateUnwrapWithoutImplementing() {
+	void shouldDelegateUnwrapWithoutImplementing() {
 		assertThat(connectionFactory.unwrap()).isSameAs(delegate);
 	}
 

@@ -218,7 +218,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 		}
 		Set<String> result = Collections.emptySet();
 		for (String pattern : this.patterns) {
-			if (this.pathMatcher.isPattern(pattern)) {
+			if (!this.pathMatcher.isPattern(pattern)) {
 				result = (result.isEmpty() ? new HashSet<>(1) : result);
 				result.add(pattern);
 			}

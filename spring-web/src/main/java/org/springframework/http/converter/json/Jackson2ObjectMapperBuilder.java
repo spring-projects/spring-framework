@@ -529,7 +529,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules to
+	 * <p>Multiple invocations are not additive, the last one defines the modules to
 	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
@@ -546,7 +546,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules to
+	 * <p>Multiple invocations are not additive, the last one defines the modules to
 	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
@@ -565,14 +565,15 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules
+	 * <p>Multiple invocations are not additive, the last one defines the modules
 	 * to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
-	 * <p>Specify either this or {@link #modules}, not both.
+	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @since 4.1.5
+	 * @see #modulesToInstall(Class...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modulesToInstall(Module... modules) {
@@ -583,18 +584,20 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules by class to be registered with
-	 * the {@link ObjectMapper}. Multiple invocations are not additive,
-	 * the last one defines the modules to register.
+	 * the {@link ObjectMapper}.
+	 * <p>Multiple invocations are not additive, the last one defines the modules
+	 * to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
-	 * <p>Specify either this or {@link #modules}, not both.
+	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
-	@SuppressWarnings("unchecked")
-	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
+	@SafeVarargs
+	@SuppressWarnings("varargs")
+	public final Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
 		this.moduleClasses = modules;
 		this.findWellKnownModules = true;
 		return this;

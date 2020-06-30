@@ -203,12 +203,14 @@ public class DelegatingWebMvcConfigurationTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void configurePathMatcher() {
 		PathMatcher pathMatcher = mock(PathMatcher.class);
 		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
+			@SuppressWarnings("deprecation")
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUseRegisteredSuffixPatternMatch(true)
 						.setUseTrailingSlashMatch(false)

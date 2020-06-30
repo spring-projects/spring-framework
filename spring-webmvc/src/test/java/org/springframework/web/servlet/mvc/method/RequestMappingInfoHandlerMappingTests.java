@@ -550,6 +550,7 @@ class RequestMappingInfoHandlerMappingTests {
 			}
 		}
 
+		@SuppressWarnings("deprecation")
 		private RequestMappingInfo.BuilderConfiguration getBuilderConfig() {
 			RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 			if (getPatternParser() != null) {

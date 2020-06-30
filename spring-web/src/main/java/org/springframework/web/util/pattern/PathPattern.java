@@ -190,7 +190,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @since 5.2
 	 */
 	public boolean hasPatternSyntax() {
-		return (this.score > 0 || this.patternString.indexOf('?') != -1);
+		return (this.score > 0 || this.catchAll || this.patternString.indexOf('?') != -1);
 	}
 
 	/**

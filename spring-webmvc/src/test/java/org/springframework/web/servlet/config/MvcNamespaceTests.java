@@ -350,6 +350,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 

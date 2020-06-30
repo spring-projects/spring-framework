@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class NameMatchMethodPointcutTests {
 	public void testSerializable() throws Throwable {
 		testSets();
 		// Count is now 2
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(proxied);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(proxied);
 		NopInterceptor nop2 = (NopInterceptor) ((Advised) p2).getAdvisors()[0].getAdvice();
 		p2.getName();
 		assertThat(nop2.getCount()).isEqualTo(2);

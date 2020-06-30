@@ -30,7 +30,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -428,8 +427,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static class DefaultBodyBuilder implements BodyBuilder {
 
-		private static final DataBufferFactory BUFFER_FACTORY = new DefaultDataBufferFactory();
-
 		private final String methodValue;
 
 		private final URI url;
@@ -579,7 +576,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
 		@Override
 		public MockServerHttpRequest body(String body) {
-			return body(Flux.just(BUFFER_FACTORY.wrap(body.getBytes(getCharset()))));
+			byte[] bytes = body.getBytes(getCharset());
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
+			return body(Flux.just(buffer));
 		}
 
 		private Charset getCharset() {

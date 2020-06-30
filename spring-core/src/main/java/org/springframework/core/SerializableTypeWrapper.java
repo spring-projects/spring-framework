@@ -59,6 +59,13 @@ final class SerializableTypeWrapper {
 	private static final Class<?>[] SUPPORTED_SERIALIZABLE_TYPES = {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
+	/**
+	 * Whether this environment lives within a native image.
+	 * Exposed as a private static field rather than in a {@code NativeImageDetector.inNativeImage()} static method due to https://github.com/oracle/graal/issues/2594.
+	 * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
+	 */
+	private static final boolean IN_NATIVE_IMAGE = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+
 	static final ConcurrentReferenceHashMap<Type, Type> cache = new ConcurrentReferenceHashMap<>(256);
 
 
@@ -109,9 +116,9 @@ final class SerializableTypeWrapper {
 			// No serializable type wrapping necessary (e.g. for java.lang.Class)
 			return providedType;
 		}
-		if (GraalDetector.inImageCode() || !Serializable.class.isAssignableFrom(Class.class)) {
+		if (IN_NATIVE_IMAGE || !Serializable.class.isAssignableFrom(Class.class)) {
 			// Let's skip any wrapping attempts if types are generally not serializable in
-			// the current runtime environment (even java.lang.Class itself, e.g. on Graal)
+			// the current runtime environment (even java.lang.Class itself, e.g. on GraalVM native images)
 			return providedType;
 		}
 

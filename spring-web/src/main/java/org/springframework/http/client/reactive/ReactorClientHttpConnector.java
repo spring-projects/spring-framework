@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * Reactor-Netty implementation of {@link ClientHttpConnector}.
  *
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
@@ -75,12 +76,13 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		this.httpClient = defaultInitializer.andThen(mapper).apply(initHttpClient(factory));
 	}
 
+	@SuppressWarnings("deprecation")
 	private static HttpClient initHttpClient(ReactorResourceFactory resourceFactory) {
 		ConnectionProvider provider = resourceFactory.getConnectionProvider();
 		LoopResources resources = resourceFactory.getLoopResources();
 		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
 		Assert.notNull(resources, "No LoopResources: is ReactorResourceFactory not initialized yet?");
-		return HttpClient.create(provider).runOn(resources);
+		return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
 	}
 
 	/**
@@ -115,8 +117,8 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 				.next()
 				.doOnCancel(() -> {
 					ReactorClientHttpResponse response = responseRef.get();
-					if (response != null && response.bodyNotSubscribed()) {
-						response.getConnection().dispose();
+					if (response != null) {
+						response.releaseAfterCancel(method);
 					}
 				});
 	}

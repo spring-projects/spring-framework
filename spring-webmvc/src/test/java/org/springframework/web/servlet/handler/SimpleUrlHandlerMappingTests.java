@@ -93,6 +93,7 @@ public class SimpleUrlHandlerMappingTests {
 		Object otherBean = wac.getBean("otherController");
 		Object defaultBean = wac.getBean("starController");
 		HandlerMapping hm = (HandlerMapping) wac.getBean(beanName);
+		wac.close();
 
 		boolean usePathPatterns = (((AbstractHandlerMapping) hm).getPatternParser() != null);
 		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("GET", "/welcome.html", usePathPatterns);

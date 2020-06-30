@@ -65,7 +65,6 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * in an ongoing transaction
 	 */
 	public ConnectionHolder(Connection connection, boolean transactionActive) {
-
 		this.currentConnection = connection;
 		this.transactionActive = transactionActive;
 	}
@@ -80,7 +79,6 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
 	 * Set whether this holder represents an active, R2DBC-managed transaction.
-	 *
 	 * @see R2dbcTransactionManager
 	 */
 	protected void setTransactionActive(boolean transactionActive) {
@@ -111,7 +109,6 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * @see #released()
 	 */
 	public Connection getConnection() {
-
 		Assert.notNull(this.currentConnection, "Active Connection is required");
 		return this.currentConnection;
 	}

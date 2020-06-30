@@ -43,7 +43,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
 
-	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 
 	/**

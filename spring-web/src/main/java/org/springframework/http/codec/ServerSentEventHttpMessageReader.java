@@ -30,7 +30,6 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
@@ -48,8 +47,6 @@ import org.springframework.lang.Nullable;
 public class ServerSentEventHttpMessageReader implements HttpMessageReader<Object> {
 
 	private static final ResolvableType STRING_TYPE = ResolvableType.forClass(String.class);
-
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@Nullable
@@ -194,7 +191,7 @@ public class ServerSentEventHttpMessageReader implements HttpMessageReader<Objec
 			throw new CodecException("No SSE decoder configured and the data is not String.");
 		}
 		byte[] bytes = data.toString().getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = bufferFactory.wrap(bytes);  // wrapping only, no allocation
+		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);  // wrapping only, no allocation
 		return this.decoder.decode(buffer, dataType, MediaType.TEXT_EVENT_STREAM, hints);
 	}
 

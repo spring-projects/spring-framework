@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePropertiesPersister;
 import org.springframework.lang.Nullable;
-import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -80,7 +80,7 @@ import org.springframework.util.StringUtils;
  * @see #setFileEncodings
  * @see #setPropertiesPersister
  * @see #setResourceLoader
- * @see org.springframework.util.DefaultPropertiesPersister
+ * @see ResourcePropertiesPersister
  * @see org.springframework.core.io.DefaultResourceLoader
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
@@ -98,7 +98,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	private boolean concurrentRefresh = true;
 
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+	private PropertiesPersister propertiesPersister = ResourcePropertiesPersister.INSTANCE;
 
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
@@ -143,12 +143,12 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
-	 * <p>The default is a DefaultPropertiesPersister.
-	 * @see org.springframework.util.DefaultPropertiesPersister
+	 * <p>The default is ResourcePropertiesPersister.
+	 * @see ResourcePropertiesPersister#INSTANCE
 	 */
 	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
-				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+				(propertiesPersister != null ? propertiesPersister : ResourcePropertiesPersister.INSTANCE);
 	}
 
 	/**

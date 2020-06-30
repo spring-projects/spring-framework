@@ -38,7 +38,6 @@ import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-import org.springframework.web.servlet.view.XmlViewResolver;
 
 /**
  * @author Juergen Hoeller
@@ -47,6 +46,7 @@ import org.springframework.web.servlet.view.XmlViewResolver;
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void refresh() throws BeansException {
 		registerSingleton("/locale.do", LocaleChecker.class);
 
@@ -62,7 +62,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("location", "org/springframework/web/context/WEB-INF/sessionContext.xml");
-		registerSingleton("viewResolver2", XmlViewResolver.class, pvs);
+		registerSingleton("viewResolver2", org.springframework.web.servlet.view.XmlViewResolver.class, pvs);
 
 		super.refresh();
 	}

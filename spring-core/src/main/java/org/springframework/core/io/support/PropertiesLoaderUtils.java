@@ -29,7 +29,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.ResourceUtils;
 
@@ -79,7 +78,7 @@ public abstract class PropertiesLoaderUtils {
 	public static void fillProperties(Properties props, EncodedResource resource)
 			throws IOException {
 
-		fillProperties(props, resource, new DefaultPropertiesPersister());
+		fillProperties(props, resource, ResourcePropertiesPersister.INSTANCE);
 	}
 
 	/**

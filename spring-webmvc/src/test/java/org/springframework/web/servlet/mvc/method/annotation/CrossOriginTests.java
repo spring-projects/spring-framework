@@ -82,6 +82,7 @@ class CrossOriginTests {
 
 		TestRequestMappingInfoHandlerMapping mapping2 = new TestRequestMappingInfoHandlerMapping();
 		wac.getAutowireCapableBeanFactory().initializeBean(mapping2, "mapping2");
+		wac.close();
 
 		return Stream.of(mapping1, mapping2);
 	}

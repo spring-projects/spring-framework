@@ -176,6 +176,12 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder sslInfo(SslInfo sslInfo);
 
 		/**
+		 * Set the address of the remote client.
+		 * @since 5.3
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
+
+		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.
 		 */
 		ServerHttpRequest build();
