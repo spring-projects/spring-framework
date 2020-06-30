@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
+/**
+ * @author lifejwang11
+ * @since 5.2
+ */
 @Configuration
 public class SomeConfig {
 
