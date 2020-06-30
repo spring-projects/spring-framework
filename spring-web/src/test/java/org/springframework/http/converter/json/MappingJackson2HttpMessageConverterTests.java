@@ -43,8 +43,14 @@ import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Jackson 2.x converter tests.
@@ -65,6 +71,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "json")));
 		assertTrue(converter.canRead(Map.class, new MediaType("application", "json")));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8)));
+		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII)));
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
 	}
 
@@ -73,6 +80,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "json")));
 		assertTrue(converter.canWrite(Map.class, new MediaType("application", "json")));
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.UTF_8)));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.US_ASCII)));
 		assertFalse(converter.canWrite(MyBean.class, new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
 	}
 
@@ -463,6 +471,34 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		assertEquals(1, result.size());
 		assertEquals("bår", result.get("føø"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readAscii() throws Exception {
+		String body = "{\"foo\":\"bar\"}";
+		Charset charset = StandardCharsets.US_ASCII;
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(charset));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json", charset));
+		HashMap<String, Object> result = (HashMap<String, Object>) this.converter.read(HashMap.class, inputMessage);
+
+		assertEquals(1, result.size());
+		assertEquals("bar", result.get("foo"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void writeAscii() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		Map<String,Object> body = new HashMap<>();
+		body.put("foo", "bar");
+		Charset charset = StandardCharsets.US_ASCII;
+		MediaType contentType = new MediaType("application", "json", charset);
+		converter.write(body, contentType, outputMessage);
+
+		String result = outputMessage.getBodyAsString(charset);
+		assertEquals("{\"foo\":\"bar\"}", result);
+		assertEquals(contentType, outputMessage.getHeaders().getContentType());
 	}
 
 

@@ -42,7 +42,9 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
@@ -73,6 +75,8 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2Js
 
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.UTF_8)));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.US_ASCII)));
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
 
@@ -221,6 +225,17 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTestCase<Jackson2Js
 				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void encodeAscii() {
+		Mono<Object> input = Mono.just(new Pojo("foo", "bar"));
+
+		testEncode(input, ResolvableType.forClass(Pojo.class), step -> step
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.verifyComplete(),
+				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
+
 	}
 
 

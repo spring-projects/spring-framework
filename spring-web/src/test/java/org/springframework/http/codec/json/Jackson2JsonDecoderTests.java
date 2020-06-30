@@ -92,6 +92,8 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 		assertTrue(this.decoder.canDecode(forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.UTF_8)));
 		assertTrue(this.decoder.canDecode(forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.US_ASCII)));
+		assertTrue(this.decoder.canDecode(forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.ISO_8859_1)));
 
 	}
@@ -246,8 +248,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 				stringBuffer("{\"føø\":\"bår\"}", StandardCharsets.ISO_8859_1)
 		);
 
-		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {
-				}),
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
 				step -> step.assertNext(o -> {
 					assertTrue(o instanceof Map);
 					Map<String, String> map = (Map<String, String>) o;
@@ -263,8 +264,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 	public void decodeMonoNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 
-		testDecodeToMono(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {
-				}),
+		testDecodeToMono(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
 				step -> step.assertNext(o -> {
 					Map<String, String> map = (Map<String, String>) o;
 					assertEquals("bar", map.get("foo"));
@@ -273,6 +273,24 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTestCase<Jackson2Js
 				MediaType.parseMediaType("application/json; charset=utf-16"),
 				null);
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void decodeAscii() {
+		Flux<DataBuffer> input = Flux.concat(
+				stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.US_ASCII)
+		);
+
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
+				step -> step.assertNext(o -> {
+					Map<String, String> map = (Map<String, String>) o;
+					assertEquals("bar", map.get("foo"));
+				})
+				.verifyComplete(),
+				MediaType.parseMediaType("application/json; charset=us-ascii"),
+				null);
+	}
+
 
 	private Mono<DataBuffer> stringBuffer(String value) {
 		return stringBuffer(value, StandardCharsets.UTF_8);
