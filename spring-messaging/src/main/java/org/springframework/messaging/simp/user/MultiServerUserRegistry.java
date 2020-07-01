@@ -209,7 +209,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		public UserRegistrySnapshot(String id, SimpUserRegistry registry) {
 			this.id = id;
 			Set<SimpUser> users = registry.getUsers();
-			this.users = new HashMap<>(users.size());
+			this.users = new HashMap<>(users.size(), 1);
 			for (SimpUser user : users) {
 				this.users.put(user.getName(), new TransferSimpUser(user));
 			}

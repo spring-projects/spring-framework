@@ -482,7 +482,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size(), 1);
 		this.headers.forEach((key, value) -> singleValueMap.put(key, value.get(0)));
 		return singleValueMap;
 	}

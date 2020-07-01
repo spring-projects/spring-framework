@@ -48,7 +48,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	private static final Map<String, RequestMethodsRequestCondition> requestMethodConditionCache;
 
 	static {
-		requestMethodConditionCache = new HashMap<>(RequestMethod.values().length);
+		requestMethodConditionCache = new HashMap<>(RequestMethod.values().length, 1);
 		for (RequestMethod method : RequestMethod.values()) {
 			requestMethodConditionCache.put(method.name(), new RequestMethodsRequestCondition(method));
 		}

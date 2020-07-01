@@ -85,7 +85,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> map = new LinkedHashMap<>(size());
+		Map<String, String> map = new LinkedHashMap<>(size(), 1);
 		this.response.headerIterator().forEachRemaining(h -> map.putIfAbsent(h.getName(), h.getValue()));
 		return map;
 	}

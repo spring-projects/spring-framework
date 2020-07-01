@@ -81,7 +81,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size(), 1);
 		this.headers.forEach(values ->
 				singleValueMap.put(values.getHeaderName().toString(), values.getFirst()));
 		return singleValueMap;

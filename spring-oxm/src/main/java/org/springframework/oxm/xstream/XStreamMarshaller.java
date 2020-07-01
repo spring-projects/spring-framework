@@ -584,7 +584,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
-		Map<String, Class<?>> result = new LinkedHashMap<>(map.size());
+		Map<String, Class<?>> result = new LinkedHashMap<>(map.size(), 1);
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();

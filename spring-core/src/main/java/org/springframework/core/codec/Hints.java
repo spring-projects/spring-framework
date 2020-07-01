@@ -120,7 +120,7 @@ public abstract class Hints {
 			return hints2;
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints1.size() + hints2.size());
+			Map<String, Object> result = new HashMap<>(hints1.size() + hints2.size(), 1);
 			result.putAll(hints1);
 			result.putAll(hints2);
 			return result;
@@ -141,7 +141,7 @@ public abstract class Hints {
 			return Collections.singletonMap(hintName, hintValue);
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints.size() + 1);
+			Map<String, Object> result = new HashMap<>(hints.size() + 1, 1);
 			result.putAll(hints);
 			result.put(hintName, hintValue);
 			return result;

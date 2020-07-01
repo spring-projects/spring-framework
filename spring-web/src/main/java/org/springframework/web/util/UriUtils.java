@@ -325,7 +325,7 @@ public abstract class UriUtils {
 	 * @since 5.0
 	 */
 	public static Map<String, String> encodeUriVariables(Map<String, ?> uriVariables) {
-		Map<String, String> result = new LinkedHashMap<>(uriVariables.size());
+		Map<String, String> result = new LinkedHashMap<>(uriVariables.size(), 1);
 		uriVariables.forEach((key, value) -> {
 			String stringValue = (value != null ? value.toString() : "");
 			result.put(key, encode(stringValue, StandardCharsets.UTF_8));

@@ -103,7 +103,7 @@ class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegratio
 
 	private Map<String, String> parseBody(String body) {
 		String[] lines = body.split("\\n");
-		Map<String, String> result = new LinkedHashMap<>(lines.length);
+		Map<String, String> result = new LinkedHashMap<>(lines.length, 1);
 		for (String line : lines) {
 			int idx = line.indexOf('=');
 			String key = line.substring(0, idx);

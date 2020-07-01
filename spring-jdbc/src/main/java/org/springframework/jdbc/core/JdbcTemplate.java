@@ -1333,7 +1333,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
 			throws SQLException {
 
-		Map<String, Object> results = new LinkedHashMap<>(parameters.size());
+		Map<String, Object> results = new LinkedHashMap<>(parameters.size(), 1);
 		int sqlColIndex = 1;
 		for (SqlParameter param : parameters) {
 			if (param instanceof SqlOutParameter) {

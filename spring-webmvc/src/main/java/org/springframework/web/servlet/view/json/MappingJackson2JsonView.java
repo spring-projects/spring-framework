@@ -155,7 +155,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 */
 	@Override
 	protected Object filterModel(Map<String, Object> model) {
-		Map<String, Object> result = new HashMap<>(model.size());
+		Map<String, Object> result = new HashMap<>(model.size(), 1);
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		model.forEach((clazz, value) -> {
 			if (!(value instanceof BindingResult) && modelKeys.contains(clazz) &&

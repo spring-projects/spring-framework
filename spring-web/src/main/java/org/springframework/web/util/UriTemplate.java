@@ -154,7 +154,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size());
+		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size(), 1);
 		Matcher matcher = this.matchPattern.matcher(uri);
 		if (matcher.find()) {
 			for (int i = 1; i <= matcher.groupCount(); i++) {

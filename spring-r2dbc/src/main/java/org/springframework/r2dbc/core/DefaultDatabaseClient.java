@@ -388,7 +388,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
 				Map<String, Parameter> remainderByName, Map<Integer, Parameter> remainderByIndex) {
 
-			Map<String, Parameter> namedBindings = new LinkedHashMap<>(parameterNames.size());
+			Map<String, Parameter> namedBindings = new LinkedHashMap<>(parameterNames.size(), 1);
 			for (String parameterName : parameterNames) {
 				Parameter parameter = getParameter(remainderByName, remainderByIndex, parameterNames, parameterName);
 				if (parameter == null) {

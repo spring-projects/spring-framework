@@ -905,7 +905,7 @@ public abstract class AnnotationUtils {
 		if (!methods.hasDefaultValueMethod()) {
 			return Collections.emptyMap();
 		}
-		Map<String, DefaultValueHolder> result = new LinkedHashMap<>(methods.size());
+		Map<String, DefaultValueHolder> result = new LinkedHashMap<>(methods.size(), 1);
 		if (!methods.hasNestedAnnotation()) {
 			// Use simpler method if there are no nested annotations
 			for (int i = 0; i < methods.size(); i++) {

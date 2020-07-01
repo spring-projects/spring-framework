@@ -154,7 +154,7 @@ public class WebSocketExtension {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<>(parts.length - 1);
+			parameters = new LinkedHashMap<>(parts.length - 1, 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');

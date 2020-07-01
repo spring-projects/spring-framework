@@ -72,11 +72,11 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		STREAM_SEPARATORS = new HashMap<>(4);
+		STREAM_SEPARATORS = new HashMap<>(2, 1);
 		STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
 		STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
 
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1, 1);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}

@@ -332,7 +332,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		size += (model != null ? model.size() : 0);
 		size += (pathVars != null ? pathVars.size() : 0);
 
-		Map<String, Object> mergedModel = new LinkedHashMap<>(size);
+		Map<String, Object> mergedModel = new LinkedHashMap<>(size, 1);
 		mergedModel.putAll(this.staticAttributes);
 		if (pathVars != null) {
 			mergedModel.putAll(pathVars);

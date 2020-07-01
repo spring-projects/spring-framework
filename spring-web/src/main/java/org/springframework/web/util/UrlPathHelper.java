@@ -615,7 +615,7 @@ public class UrlPathHelper {
 			return vars;
 		}
 		else {
-			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
+			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size(), 1);
 			vars.forEach((key, value) -> decodedVars.put(key, decodeInternal(request, value)));
 			return decodedVars;
 		}

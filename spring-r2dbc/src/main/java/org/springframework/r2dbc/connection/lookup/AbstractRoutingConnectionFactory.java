@@ -134,7 +134,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
-		this.resolvedConnectionFactories = new HashMap<>(this.targetConnectionFactories.size());
+		this.resolvedConnectionFactories = new HashMap<>(this.targetConnectionFactories.size(), 1);
 		this.targetConnectionFactories.forEach((key, value) -> {
 			Object lookupKey = resolveSpecifiedLookupKey(key);
 			ConnectionFactory connectionFactory = resolveSpecifiedConnectionFactory(value);

@@ -83,7 +83,7 @@ class TomcatHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size(), 1);
 		this.keySet().forEach(key -> singleValueMap.put(key, getFirst(key)));
 		return singleValueMap;
 	}

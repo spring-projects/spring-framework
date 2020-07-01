@@ -115,7 +115,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 				HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 				if (servletRequest != null && MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
 					Collection<Part> parts = servletRequest.getParts();
-					LinkedHashMap<String, Part> result = new LinkedHashMap<>(parts.size());
+					LinkedHashMap<String, Part> result = new LinkedHashMap<>(parts.size(), 1);
 					for (Part part : parts) {
 						if (!result.containsKey(part.getName())) {
 							result.put(part.getName(), part);
@@ -127,7 +127,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			}
 			else {
 				Map<String, String[]> parameterMap = webRequest.getParameterMap();
-				Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
+				Map<String, String> result = new LinkedHashMap<>(parameterMap.size(), 1);
 				parameterMap.forEach((key, values) -> {
 					if (values.length > 0) {
 						result.put(key, values[0]);

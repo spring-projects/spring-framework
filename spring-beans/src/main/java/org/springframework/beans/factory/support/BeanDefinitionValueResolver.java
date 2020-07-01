@@ -447,7 +447,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the managed map, resolve reference if necessary.
 	 */
 	private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
-		Map<Object, Object> resolved = new LinkedHashMap<>(mm.size());
+		Map<Object, Object> resolved = new LinkedHashMap<>(mm.size(), 1);
 		mm.forEach((key, value) -> {
 			Object resolvedKey = resolveValueIfNecessary(argName, key);
 			Object resolvedValue = resolveValueIfNecessary(new KeyedArgName(argName, key), value);

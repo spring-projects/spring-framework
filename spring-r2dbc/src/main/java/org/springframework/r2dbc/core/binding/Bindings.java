@@ -60,7 +60,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	 */
 	public Bindings(Collection<Binding> bindings) {
 		Assert.notNull(bindings, "Bindings must not be null");
-		Map<BindMarker, Binding> mapping = new LinkedHashMap<>(bindings.size());
+		Map<BindMarker, Binding> mapping = new LinkedHashMap<>(bindings.size(), 1);
 		bindings.forEach(binding -> mapping.put(binding.getBindMarker(), binding));
 		this.bindings = mapping;
 	}

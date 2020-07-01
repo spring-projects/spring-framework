@@ -88,7 +88,7 @@ public class RSocketFrameTypeMessageCondition extends AbstractMessageCondition<R
 	private static final Map<String, RSocketFrameTypeMessageCondition> frameTypeConditionCache;
 
 	static {
-		frameTypeConditionCache = new HashMap<>(FrameType.values().length);
+		frameTypeConditionCache = new HashMap<>(FrameType.values().length, 1);
 		for (FrameType type : FrameType.values()) {
 			frameTypeConditionCache.put(type.name(), new RSocketFrameTypeMessageCondition(type));
 		}

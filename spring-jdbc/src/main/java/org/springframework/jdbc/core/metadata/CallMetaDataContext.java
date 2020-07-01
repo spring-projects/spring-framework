@@ -369,7 +369,7 @@ public class CallMetaDataContext {
 			return workParams;
 		}
 
-		Map<String, String> limitedInParamNamesMap = new HashMap<>(this.limitedInParameterNames.size());
+		Map<String, String> limitedInParamNamesMap = new HashMap<>(this.limitedInParameterNames.size(), 1);
 		for (String limitedParamName : this.limitedInParameterNames) {
 			limitedInParamNamesMap.put(lowerCase(provider.parameterNameToUse(limitedParamName)), limitedParamName);
 		}
@@ -482,8 +482,8 @@ public class CallMetaDataContext {
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 
-		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size());
-		Map<String, Object> matchedParameters = new HashMap<>(this.callParameters.size());
+		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size(), 1);
+		Map<String, Object> matchedParameters = new HashMap<>(this.callParameters.size()), 1;
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
 				String parameterName = parameter.getName();
@@ -551,7 +551,7 @@ public class CallMetaDataContext {
 			return inParameters;
 		}
 
-		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size());
+		Map<String, String> callParameterNames = new HashMap<>(this.callParameters.size(), 1);
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
 				String parameterName =  parameter.getName();
@@ -562,7 +562,7 @@ public class CallMetaDataContext {
 			}
 		}
 
-		Map<String, Object> matchedParameters = new HashMap<>(inParameters.size());
+		Map<String, Object> matchedParameters = new HashMap<>(inParameters.size(), 1);
 		inParameters.forEach((parameterName, parameterValue) -> {
 			String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 			String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
@@ -602,7 +602,7 @@ public class CallMetaDataContext {
 	}
 
 	public Map<String, ?> matchInParameterValuesWithCallParameters(Object[] parameterValues) {
-		Map<String, Object> matchedParameters = new HashMap<>(parameterValues.length);
+		Map<String, Object> matchedParameters = new HashMap<>(parameterValues.length, 1);
 		int i = 0;
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {

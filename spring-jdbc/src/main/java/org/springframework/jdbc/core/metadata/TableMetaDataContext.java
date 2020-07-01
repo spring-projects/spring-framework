@@ -319,7 +319,7 @@ public class TableMetaDataContext {
 	public int[] createInsertTypes() {
 		int[] types = new int[getTableColumns().size()];
 		List<TableParameterMetaData> parameters = obtainMetaDataProvider().getTableParameterMetaData();
-		Map<String, TableParameterMetaData> parameterMap = new LinkedHashMap<>(parameters.size());
+		Map<String, TableParameterMetaData> parameterMap = new LinkedHashMap<>(parameters.size(), 1);
 		for (TableParameterMetaData tpmd : parameters) {
 			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
 		}

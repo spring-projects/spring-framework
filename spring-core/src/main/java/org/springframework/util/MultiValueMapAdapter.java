@@ -88,7 +88,7 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
 	@Override
 	public Map<K, V> toSingleValueMap() {
-		Map<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
+		Map<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size(), 1);
 		this.targetMap.forEach((key, values) -> {
 			if (values != null && !values.isEmpty()) {
 				singleValueMap.put(key, values.get(0));

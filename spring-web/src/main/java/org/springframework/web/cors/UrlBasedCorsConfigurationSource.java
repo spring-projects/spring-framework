@@ -232,7 +232,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * Return all configured CORS mappings.
 	 */
 	public Map<String, CorsConfiguration> getCorsConfigurations() {
-		Map<String, CorsConfiguration> result = new HashMap<>(this.corsConfigurations.size());
+		Map<String, CorsConfiguration> result = new HashMap<>(this.corsConfigurations.size(), 1);
 		this.corsConfigurations.forEach((pattern, config) -> result.put(pattern.getPatternString(), config));
 		return Collections.unmodifiableMap(result);
 	}

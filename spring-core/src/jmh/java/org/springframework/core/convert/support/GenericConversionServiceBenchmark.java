@@ -78,7 +78,7 @@ public class GenericConversionServiceBenchmark {
 
 	@Benchmark
 	public void convertMapOfStringToListOfIntegerBaseline(MapBenchmarkState state, Blackhole bh) {
-		Map<String, Integer> target = new HashMap<>(state.source.size());
+		Map<String, Integer> target = new HashMap<>(state.source.size(), 1);
 		state.source.forEach((k, v) -> target.put(k, Integer.valueOf(v)));
 		bh.consume(target);
 	}
@@ -90,7 +90,7 @@ public class GenericConversionServiceBenchmark {
 
 		@Setup(Level.Trial)
 		public void setup() throws Exception {
-			this.source = new HashMap<>(this.collectionSize);
+			this.source = new HashMap<>(this.collectionSize, 1);
 			Map<String, Integer> target = new HashMap<>();
 			this.targetTypeDesc = TypeDescriptor.forObject(target);
 			this.source = IntStream.rangeClosed(1, collectionSize).mapToObj(String::valueOf)

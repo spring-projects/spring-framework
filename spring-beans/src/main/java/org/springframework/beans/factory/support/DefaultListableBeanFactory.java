@@ -437,7 +437,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (beanNames.length == 0) {
 					return Stream.empty();
 				}
-				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
+				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length, 1);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
 					if (!(beanInstance instanceof NullBean)) {
@@ -650,7 +650,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) throws BeansException {
 
 		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
-		Map<String, T> result = new LinkedHashMap<>(beanNames.length);
+		Map<String, T> result = new LinkedHashMap<>(beanNames.length, 1);
 		for (String beanName : beanNames) {
 			try {
 				Object beanInstance = getBean(beanName);
@@ -700,7 +700,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		String[] beanNames = getBeanNamesForAnnotation(annotationType);
-		Map<String, Object> result = new LinkedHashMap<>(beanNames.length);
+		Map<String, Object> result = new LinkedHashMap<>(beanNames.length, 1);
 		for (String beanName : beanNames) {
 			Object beanInstance = getBean(beanName);
 			if (!(beanInstance instanceof NullBean)) {
@@ -1206,7 +1206,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, requiredType.toClass(), args));
 		}
 		else if (candidateNames.length > 1) {
-			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
+			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length, 1);
 			for (String beanName : candidateNames) {
 				if (containsSingleton(beanName) && args == null) {
 					Object beanInstance = getBean(beanName);
@@ -1503,7 +1503,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
-		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length);
+		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length, 1);
 		for (Map.Entry<Class<?>, Object> classObjectEntry : this.resolvableDependencies.entrySet()) {
 			Class<?> autowiringType = classObjectEntry.getKey();
 			if (autowiringType.isAssignableFrom(requiredType)) {

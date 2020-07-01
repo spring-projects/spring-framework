@@ -77,7 +77,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1, 1);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}
