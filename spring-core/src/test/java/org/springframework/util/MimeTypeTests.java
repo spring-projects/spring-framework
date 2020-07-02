@@ -172,6 +172,10 @@ class MimeTypeTests {
 		assertThat(suffixXml.isCompatibleWith(applicationWildcardXml)).isTrue();
 
 		assertThat(applicationWildcardXml.isCompatibleWith(MimeTypeUtils.APPLICATION_JSON)).isFalse();
+
+		MimeType applicationJSON = new MimeType("application", "vnd+json");
+		MimeType applicationWildcardJSON = new MimeType("application", "*");
+		assertThat(applicationJSON.isCompatibleWith(applicationWildcardJSON)).isTrue();
 	}
 
 	@Test

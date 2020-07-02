@@ -377,6 +377,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			if (getSubtype().equals(other.getSubtype())) {
 				return true;
 			}
+			if (WILDCARD_TYPE.equals(other.getSubtype())){
+				return true;
+			}
 			// Wildcard with suffix? e.g. application/*+xml
 			if (isWildcardSubtype() || other.isWildcardSubtype()) {
 				int thisPlusIdx = getSubtype().lastIndexOf('+');
