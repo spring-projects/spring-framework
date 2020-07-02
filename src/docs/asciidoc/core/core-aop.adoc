@@ -2410,7 +2410,7 @@ some around advice used in conjunction with a number of strongly typed parameter
 		Person getPerson(String personName, int age);
 	}
 
-	public class DefaultFooService implements FooService {
+	public class DefaultPersonService implements PersonService {
 
 		public Person getPerson(String name, int age) {
 			return new Person(name, age);
@@ -2427,7 +2427,7 @@ some around advice used in conjunction with a number of strongly typed parameter
 		fun getPerson(personName: String, age: Int): Person
 	}
 
-	class DefaultFooService : FooService {
+	class DefaultPersonService : PersonService {
 
 		fun getPerson(name: String, age: Int): Person {
 			return Person(name, age)
