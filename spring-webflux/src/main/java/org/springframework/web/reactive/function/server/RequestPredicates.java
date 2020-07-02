@@ -441,7 +441,6 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-
 			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
 		}
 
@@ -465,7 +464,6 @@ public abstract class RequestPredicates {
 			}
 		}
 
-
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.method(Collections.unmodifiableSet(this.httpMethods));
@@ -483,9 +481,9 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class PathPatternPredicate implements RequestPredicate {
+	private static class PathPatternPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
-		private final PathPattern pattern;
+		private PathPattern pattern;
 
 		public PathPatternPredicate(PathPattern pattern) {
 			Assert.notNull(pattern, "'pattern' must not be null");
@@ -530,9 +528,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			String patternString = this.pattern.getPatternString();
+			this.pattern = parser.parse(patternString);
+		}
+
+		@Override
 		public String toString() {
 			return this.pattern.getPatternString();
 		}
+
 	}
 
 
@@ -750,7 +755,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
 	 * must match.
 	 */
-	static class AndRequestPredicate implements RequestPredicate {
+	static class AndRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -789,6 +794,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
@@ -797,7 +812,8 @@ public abstract class RequestPredicates {
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
 	 */
-	static class NegateRequestPredicate implements RequestPredicate {
+	static class NegateRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+
 		private final RequestPredicate delegate;
 
 		public NegateRequestPredicate(RequestPredicate delegate) {
@@ -823,6 +839,13 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return "!" + this.delegate.toString();
 		}
@@ -832,7 +855,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
-	static class OrRequestPredicate implements RequestPredicate {
+	static class OrRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -882,6 +905,15 @@ public abstract class RequestPredicates {
 			visitor.endOr();
 		}
 
+		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
+		}
 
 		@Override
 		public String toString() {

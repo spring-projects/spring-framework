@@ -128,9 +128,18 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
 		mapping.setContentTypeResolver(contentTypeResolver);
-		mapping.setCorsConfigurations(getCorsConfigurations());
-
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
+		configureAbstractHandlerMapping(mapping, configurer);
+		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
+		if (pathPrefixes != null) {
+			mapping.setPathPrefixes(pathPrefixes);
+		}
+
+		return mapping;
+	}
+
+	private void configureAbstractHandlerMapping(AbstractHandlerMapping mapping, PathMatchConfigurer configurer) {
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
@@ -139,12 +148,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
-		if (pathPrefixes != null) {
-			mapping.setPathPrefixes(pathPrefixes);
-		}
-
-		return mapping;
 	}
 
 	/**
@@ -210,8 +213,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		RouterFunctionMapping mapping = createRouterFunctionMapping();
 		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setMessageReaders(serverCodecConfigurer.getReaders());
-		mapping.setCorsConfigurations(getCorsConfigurations());
-
+		configureAbstractHandlerMapping(mapping, getPathMatchConfigurer());
 		return mapping;
 	}
 

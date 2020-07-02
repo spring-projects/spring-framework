@@ -427,10 +427,10 @@ public abstract class RequestPredicates {
 		void unknown(RequestPredicate predicate);
 	}
 
+
 	private static class HttpMethodPredicate implements RequestPredicate {
 
 		private final Set<HttpMethod> httpMethods;
-
 
 		public HttpMethodPredicate(HttpMethod httpMethod) {
 			Assert.notNull(httpMethod, "HttpMethod must not be null");
@@ -479,9 +479,9 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class PathPatternPredicate implements RequestPredicate {
+	private static class PathPatternPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
-		private final PathPattern pattern;
+		private PathPattern pattern;
 
 		public PathPatternPredicate(PathPattern pattern) {
 			Assert.notNull(pattern, "'pattern' must not be null");
@@ -513,6 +513,7 @@ public abstract class RequestPredicates {
 					pattern);
 			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
 		}
+
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
 			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
@@ -525,9 +526,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			String patternString = this.pattern.getPatternString();
+			this.pattern = parser.parse(patternString);
+		}
+
+		@Override
 		public String toString() {
 			return this.pattern.getPatternString();
 		}
+
 	}
 
 
@@ -642,12 +650,14 @@ public abstract class RequestPredicates {
 		}
 	}
 
+
 	private static class PathExtensionPredicate implements RequestPredicate {
 
 		private final Predicate<String> extensionPredicate;
 
 		@Nullable
 		private final String extension;
+
 		public PathExtensionPredicate(Predicate<String> extensionPredicate) {
 			Assert.notNull(extensionPredicate, "Predicate must not be null");
 			this.extensionPredicate = extensionPredicate;
@@ -743,7 +753,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
 	 * must match.
 	 */
-	static class AndRequestPredicate implements RequestPredicate {
+	static class AndRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -782,6 +792,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
@@ -790,7 +810,8 @@ public abstract class RequestPredicates {
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
 	 */
-	static class NegateRequestPredicate implements RequestPredicate {
+	static class NegateRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+
 		private final RequestPredicate delegate;
 
 		public NegateRequestPredicate(RequestPredicate delegate) {
@@ -816,6 +837,13 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return "!" + this.delegate.toString();
 		}
@@ -825,7 +853,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
-	static class OrRequestPredicate implements RequestPredicate {
+	static class OrRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -873,6 +901,16 @@ public abstract class RequestPredicates {
 			visitor.or();
 			this.right.accept(visitor);
 			visitor.endOr();
+		}
+
+		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
 		}
 
 		@Override

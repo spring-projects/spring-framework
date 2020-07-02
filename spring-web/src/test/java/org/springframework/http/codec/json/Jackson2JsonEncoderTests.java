@@ -72,6 +72,8 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
 		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
+		assertThat(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isFalse();
 
 		// SPR-15464
@@ -223,6 +225,17 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				.consumeNextWith(expectString("[{\"foo\":\"foo\",\"bar\":\"bar\"}]"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
+	}
+
+	@Test
+	public void encodeAscii() {
+		Mono<Object> input = Mono.just(new Pojo("foo", "bar"));
+
+		testEncode(input, ResolvableType.forClass(Pojo.class), step -> step
+				.consumeNextWith(expectString("{\"foo\":\"foo\",\"bar\":\"bar\"}"))
+				.verifyComplete(),
+				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
+
 	}
 
 

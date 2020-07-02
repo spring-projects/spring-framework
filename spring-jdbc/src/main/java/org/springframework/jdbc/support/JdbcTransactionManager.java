@@ -20,6 +20,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.lang.Nullable;
@@ -43,6 +44,7 @@ import org.springframework.lang.Nullable;
  * may also throw such exceptions in their {@code flush} and {@code beforeCommit} phases.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.3
  * @see DataSourceTransactionManager
  * @see #setDataSource
@@ -50,6 +52,14 @@ import org.springframework.lang.Nullable;
  */
 @SuppressWarnings("serial")
 public class JdbcTransactionManager extends DataSourceTransactionManager {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
+
 
 	@Nullable
 	private volatile SQLExceptionTranslator exceptionTranslator;
@@ -87,7 +97,9 @@ public class JdbcTransactionManager extends DataSourceTransactionManager {
 	 * @see java.sql.DatabaseMetaData#getDatabaseProductName()
 	 */
 	public void setDatabaseProductName(String dbName) {
-		this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		if (!shouldIgnoreXml) {
+			this.exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dbName);
+		}
 	}
 
 	/**
@@ -116,7 +128,12 @@ public class JdbcTransactionManager extends DataSourceTransactionManager {
 		synchronized (this) {
 			exceptionTranslator = this.exceptionTranslator;
 			if (exceptionTranslator == null) {
-				exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
+				if (shouldIgnoreXml) {
+					exceptionTranslator = new SQLExceptionSubclassTranslator();
+				}
+				else {
+					exceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(obtainDataSource());
+				}
 				this.exceptionTranslator = exceptionTranslator;
 			}
 			return exceptionTranslator;

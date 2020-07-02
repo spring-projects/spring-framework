@@ -916,7 +916,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		publishEvent(new ContextRefreshedEvent(this));
 
 		// Participate in LiveBeansView MBean, if active.
-		LiveBeansView.registerApplicationContext(this);
+		if (!IN_NATIVE_IMAGE) {
+			LiveBeansView.registerApplicationContext(this);
+		}
 	}
 
 	/**
@@ -1024,7 +1026,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Closing " + this);
 			}
 
-			LiveBeansView.unregisterApplicationContext(this);
+			if (!IN_NATIVE_IMAGE) {
+				LiveBeansView.unregisterApplicationContext(this);
+			}
 
 			try {
 				// Publish shutdown event.

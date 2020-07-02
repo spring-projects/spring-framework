@@ -261,11 +261,11 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	 */
 	private static class BuiltRouterFunction extends RouterFunctions.AbstractRouterFunction<ServerResponse> {
 
-		private List<RouterFunction<ServerResponse>> routerFunctions;
+		private final List<RouterFunction<ServerResponse>> routerFunctions;
 
 		public BuiltRouterFunction(List<RouterFunction<ServerResponse>> routerFunctions) {
 			Assert.notEmpty(routerFunctions, "RouterFunctions must not be empty");
-			this.routerFunctions = routerFunctions;
+			this.routerFunctions = new ArrayList<>(routerFunctions);
 		}
 
 		@Override
