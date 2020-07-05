@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
@@ -625,6 +626,25 @@ public abstract class BeanUtils {
 				URL.class == type ||
 				Locale.class == type ||
 				Class.class == type));
+	}
+
+	/**
+	 * This is a convenience wrapper over {@link BeanUtils#copyProperties(Object, Object)} which
+	 * ignores the properties whose values are null.
+	 *
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @throws BeansException if the copying failed
+	 */
+	public static void copyNonNullProperties(Object source, Object target) throws BeansException{
+		BeanWrapper beanWrapper = new BeanWrapperImpl(source);
+		String[] nullProps =
+				Arrays.stream(beanWrapper.getPropertyDescriptors())
+						.filter(pd -> null == beanWrapper.getPropertyValue(pd.getName()))
+						.map(FeatureDescriptor::getName)
+						.toArray(String[]::new);
+
+		copyProperties(source, target, nullProps);
 	}
 
 
