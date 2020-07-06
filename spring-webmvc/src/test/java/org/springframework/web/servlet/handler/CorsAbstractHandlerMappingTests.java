@@ -129,7 +129,7 @@ class CorsAbstractHandlerMappingTests {
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
-		assertThat(getRequiredCorsConfiguration(chain, false).getAllowedOriginsPatterns()).containsExactly(".*\\.domain2\\.com");
+		assertThat(mapping.getRequiredCorsConfig().getAllowedOriginsPatterns()).containsExactly(".*\\.domain2\\.com");
 	}
 
 	@PathPatternsParameterizedTest
