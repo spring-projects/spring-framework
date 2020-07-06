@@ -484,7 +484,7 @@ pointcut expressions by name. The following example shows three pointcut express
 	@Pointcut("execution(public * \*(..))")
 	private void anyPublicOperation() {} // <1>
 
-	@Pointcut("within(com.xyz.someapp.trading..*)")
+	@Pointcut("within(com.xyz.myapp.trading..*)")
 	private void inTrading() {} // <2>
 
 	@Pointcut("anyPublicOperation() && inTrading()")
@@ -502,7 +502,7 @@ trading module.
 	@Pointcut("execution(public * \*(..))")
 	private fun anyPublicOperation() {} // <1>
 
-	@Pointcut("within(com.xyz.someapp.trading..*)")
+	@Pointcut("within(com.xyz.myapp.trading..*)")
 	private fun inTrading() {} // <2>
 
 	@Pointcut("anyPublicOperation() && inTrading()")
@@ -526,13 +526,13 @@ matching.
 
 When working with enterprise applications, developers often want to refer to modules of the
 application and particular sets of operations from within several aspects. We recommend
-defining a "`SystemArchitecture`" aspect that captures common pointcut expressions for
+defining a `SystemArchitecture` aspect that captures common pointcut expressions for
 this purpose. Such an aspect typically resembles the following example:
 
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
-	package com.xyz.someapp;
+	package com.xyz.myapp;
 
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Pointcut;
@@ -542,26 +542,26 @@ this purpose. Such an aspect typically resembles the following example:
 
 		/**
 		 * A join point is in the web layer if the method is defined
-		 * in a type in the com.xyz.someapp.web package or any sub-package
+		 * in a type in the com.xyz.myapp.web package or any sub-package
 		 * under that.
 		 */
-		@Pointcut("within(com.xyz.someapp.web..*)")
+		@Pointcut("within(com.xyz.myapp.web..*)")
 		public void inWebLayer() {}
 
 		/**
 		 * A join point is in the service layer if the method is defined
-		 * in a type in the com.xyz.someapp.service package or any sub-package
+		 * in a type in the com.xyz.myapp.service package or any sub-package
 		 * under that.
 		 */
-		@Pointcut("within(com.xyz.someapp.service..*)")
+		@Pointcut("within(com.xyz.myapp.service..*)")
 		public void inServiceLayer() {}
 
 		/**
 		 * A join point is in the data access layer if the method is defined
-		 * in a type in the com.xyz.someapp.dao package or any sub-package
+		 * in a type in the com.xyz.myapp.dao package or any sub-package
 		 * under that.
 		 */
-		@Pointcut("within(com.xyz.someapp.dao..*)")
+		@Pointcut("within(com.xyz.myapp.dao..*)")
 		public void inDataAccessLayer() {}
 
 		/**
@@ -570,15 +570,15 @@ this purpose. Such an aspect typically resembles the following example:
 		 * "service" package, and that implementation types are in sub-packages.
 		 *
 		 * If you group service interfaces by functional area (for example,
-		 * in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
-		 * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+		 * in packages com.xyz.myapp.abc.service and com.xyz.myapp.def.service) then
+		 * the pointcut expression "execution(* com.xyz.myapp..service.*.*(..))"
 		 * could be used instead.
 		 *
 		 * Alternatively, you can write the expression using the 'bean'
 		 * PCD, like so "bean(*Service)". (This assumes that you have
 		 * named your Spring service beans in a consistent fashion.)
 		 */
-		@Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
+		@Pointcut("execution(* com.xyz.myapp..service.*.*(..))")
 		public void businessService() {}
 
 		/**
@@ -586,7 +586,7 @@ this purpose. Such an aspect typically resembles the following example:
 		 * dao interface. This definition assumes that interfaces are placed in the
 		 * "dao" package, and that implementation types are in sub-packages.
 		 */
-		@Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
+		@Pointcut("execution(* com.xyz.myapp.dao.*.*(..))")
 		public void dataAccessOperation() {}
 
 	}
@@ -594,7 +594,7 @@ this purpose. Such an aspect typically resembles the following example:
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
-	package com.xyz.someapp
+	package com.xyz.myapp
 
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Pointcut
@@ -606,28 +606,28 @@ this purpose. Such an aspect typically resembles the following example:
 
 		/**
 		* A join point is in the web layer if the method is defined
-		* in a type in the com.xyz.someapp.web package or any sub-package
+		* in a type in the com.xyz.myapp.web package or any sub-package
 		* under that.
 		*/
-		@Pointcut("within(com.xyz.someapp.web..*)")
+		@Pointcut("within(com.xyz.myapp.web..*)")
 		fun inWebLayer() {
 		}
 
 		/**
 		* A join point is in the service layer if the method is defined
-		* in a type in the com.xyz.someapp.service package or any sub-package
+		* in a type in the com.xyz.myapp.service package or any sub-package
 		* under that.
 		*/
-		@Pointcut("within(com.xyz.someapp.service..*)")
+		@Pointcut("within(com.xyz.myapp.service..*)")
 		fun inServiceLayer() {
 		}
 
 		/**
 		* A join point is in the data access layer if the method is defined
-		* in a type in the com.xyz.someapp.dao package or any sub-package
+		* in a type in the com.xyz.myapp.dao package or any sub-package
 		* under that.
 		*/
-		@Pointcut("within(com.xyz.someapp.dao..*)")
+		@Pointcut("within(com.xyz.myapp.dao..*)")
 		fun inDataAccessLayer() {
 		}
 
@@ -637,15 +637,15 @@ this purpose. Such an aspect typically resembles the following example:
 		* "service" package, and that implementation types are in sub-packages.
 		*
 		* If you group service interfaces by functional area (for example,
-		* in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
-		* the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+		* in packages com.xyz.myapp.abc.service and com.xyz.myapp.def.service) then
+		* the pointcut expression "execution(* com.xyz.myapp..service.*.*(..))"
 		* could be used instead.
 		*
 		* Alternatively, you can write the expression using the 'bean'
 		* PCD, like so "bean(*Service)". (This assumes that you have
 		* named your Spring service beans in a consistent fashion.)
 		*/
-		@Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
+		@Pointcut("execution(* com.xyz.myapp..service.*.*(..))")
 		fun businessService() {
 		}
 
@@ -654,7 +654,7 @@ this purpose. Such an aspect typically resembles the following example:
 		* dao interface. This definition assumes that interfaces are placed in the
 		* "dao" package, and that implementation types are in sub-packages.
 		*/
-		@Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
+		@Pointcut("execution(* com.xyz.myapp.dao.*.*(..))")
 		fun dataAccessOperation() {
 		}
 
@@ -669,7 +669,7 @@ write the following:
 ----
 	<aop:config>
 		<aop:advisor
-			pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
+			pointcut="com.xyz.myapp.SystemArchitecture.businessService()"
 			advice-ref="tx-advice"/>
 	</aop:config>
 
@@ -1057,7 +1057,9 @@ the following example shows:
 	@Aspect
 	class AfterReturningExample {
 
-		@AfterReturning(pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()", returning = "retVal")
+		@AfterReturning(
+			pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			returning = "retVal")
 		fun doAccessCheck(retVal: Any) {
 			// ...
 		}
@@ -1148,7 +1150,9 @@ following example shows how to do so:
 	@Aspect
 	class AfterThrowingExample {
 
-		@AfterThrowing(pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()", throwing = "ex")
+		@AfterThrowing(
+			pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			throwing = "ex")
 		fun doRecoveryActions(ex: DataAccessException) {
 			// ...
 		}
@@ -1744,8 +1748,8 @@ it until later.
 By default, there is a single instance of each aspect within the application
 context. AspectJ calls this the singleton instantiation model. It is possible to define
 aspects with alternate lifecycles. Spring supports AspectJ's `perthis` and `pertarget`
-instantiation models ( `percflow, percflowbelow,` and `pertypewithin` are not currently
-supported).
+instantiation models; `percflow`, `percflowbelow`, and `pertypewithin` are not currently
+supported.
 
 You can declare a `perthis` aspect by specifying a `perthis` clause in the `@Aspect`
 annotation. Consider the following example:
@@ -1758,7 +1762,7 @@ annotation. Consider the following example:
 
 		private int someState;
 
-		@Before(com.xyz.myapp.SystemArchitecture.businessService())
+		@Before("com.xyz.myapp.SystemArchitecture.businessService()")
 		public void recordServiceUsage() {
 			// ...
 		}
@@ -1773,7 +1777,7 @@ annotation. Consider the following example:
 
 		private val someState: Int = 0
 
-		@Before(com.xyz.myapp.SystemArchitecture.businessService())
+		@Before("com.xyz.myapp.SystemArchitecture.businessService()")
 		fun recordServiceUsage() {
 			// ...
 		}
@@ -1781,15 +1785,15 @@ annotation. Consider the following example:
 	}
 ----
 
-In the preceding example, the effect of the `'perthis'` clause is that one aspect instance is created for
-each unique service object that executes a business service (each unique object bound to
-'this' at join points matched by the pointcut expression). The aspect instance is
-created the first time that a method is invoked on the service object. The aspect goes
-out of scope when the service object goes out of scope. Before the aspect instance is
-created, none of the advice within it executes. As soon as the aspect instance has been
-created, the advice declared within it executes at matched join points, but only
-when the service object is the one with which this aspect is associated. See the AspectJ
-Programming Guide for more information on `per` clauses.
+In the preceding example, the effect of the `'perthis'` clause is that one aspect
+instance is created for each unique service object that executes a business service (each
+unique object bound to 'this' at join points matched by the pointcut expression). The
+aspect instance is created the first time that a method is invoked on the service object.
+The aspect goes out of scope when the service object goes out of scope. Before the aspect
+instance is created, none of the advice within it executes. As soon as the aspect
+instance has been created, the advice declared within it executes at matched join points,
+but only when the service object is the one with which this aspect is associated. See the
+AspectJ Programming Guide for more information on `per` clauses.
 
 The `pertarget` instantiation model works in exactly the same way as `perthis`, but it
 creates one aspect instance for each unique target object at matched join points.
@@ -1949,7 +1953,8 @@ expression so that only `@Idempotent` operations match, as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Around("com.xyz.myapp.SystemArchitecture.businessService() && " + "@annotation(com.xyz.myapp.service.Idempotent)")
+	@Around("com.xyz.myapp.SystemArchitecture.businessService() && " +
+			"@annotation(com.xyz.myapp.service.Idempotent)")
 	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
 		// ...
 	}
