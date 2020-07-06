@@ -85,6 +85,12 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 
 		assertThat(decoder.canDecode(forClass(String.class), null)).isFalse();
 		assertThat(decoder.canDecode(forClass(Pojo.class), APPLICATION_XML)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.UTF_8))).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				new MediaType("application", "json", StandardCharsets.ISO_8859_1))).isTrue();
 	}
 
 	@Test  // SPR-15866
@@ -223,8 +229,7 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 	public void decodeNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 
-		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {
-				}),
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
 				step -> step.assertNext(o -> assertThat((Map<String, String>) o).containsEntry("foo", "bar"))
 						.verifyComplete(),
 				MediaType.parseMediaType("application/json; charset=utf-16"),
@@ -233,16 +238,44 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 
 	@Test
 	@SuppressWarnings("unchecked")
+	public void decodeNonUnicode() {
+		Flux<DataBuffer> input = Flux.concat(
+				stringBuffer("{\"føø\":\"bår\"}", StandardCharsets.ISO_8859_1)
+		);
+
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
+				step -> step.assertNext(o -> assertThat((Map<String, String>) o).containsEntry("føø", "bår"))
+						.verifyComplete(),
+				MediaType.parseMediaType("application/json; charset=iso-8859-1"),
+				null);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void decodeMonoNonUtf8Encoding() {
 		Mono<DataBuffer> input = stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.UTF_16);
 
-		testDecodeToMono(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {
-				}),
+		testDecodeToMono(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
 				step -> step.assertNext(o -> assertThat((Map<String, String>) o).containsEntry("foo", "bar"))
 						.verifyComplete(),
 				MediaType.parseMediaType("application/json; charset=utf-16"),
 				null);
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void decodeAscii() {
+		Flux<DataBuffer> input = Flux.concat(
+				stringBuffer("{\"foo\":\"bar\"}", StandardCharsets.US_ASCII)
+		);
+
+		testDecode(input, ResolvableType.forType(new ParameterizedTypeReference<Map<String, String>>() {}),
+				step -> step.assertNext(o -> assertThat((Map<String, String>) o).containsEntry("foo", "bar"))
+						.verifyComplete(),
+				MediaType.parseMediaType("application/json; charset=us-ascii"),
+				null);
+	}
+
 
 	private Mono<DataBuffer> stringBuffer(String value) {
 		return stringBuffer(value, StandardCharsets.UTF_8);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,12 +76,12 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
- * Set up with Hibernate 5.2/5.3, this builder is also a convenient way to set up
+ * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3/5.4, as of Spring 5.2.
+ * Set up with Hibernate 5.2+, this builder is also a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
- * <p>This builder supports Hibernate 5.3 {@code BeanContainer} integration,
+ * <p>This builder supports Hibernate 5.3/5.4 {@code BeanContainer} integration,
  * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
  * setup, as well as other advanced Hibernate configuration options beyond the
  * standard JPA bootstrap contract.
@@ -437,24 +437,23 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			try {
-				if (method.getName().equals("equals")) {
+			switch (method.getName()) {
+				case "equals":
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				}
-				else if (method.getName().equals("hashCode")) {
+				case "hashCode":
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
-				}
-				else if (method.getName().equals("getProperties")) {
+				case "getProperties":
 					return getProperties();
-				}
-				else if (method.getName().equals("getWrappedObject")) {
+				case "getWrappedObject":
 					// Call coming in through InfrastructureProxy interface...
 					return getSessionFactory();
-				}
-				// Regular delegation to the target SessionFactory,
-				// enforcing its full initialization...
+			}
+
+			// Regular delegation to the target SessionFactory,
+			// enforcing its full initialization...
+			try {
 				return method.invoke(getSessionFactory(), args);
 			}
 			catch (InvocationTargetException ex) {

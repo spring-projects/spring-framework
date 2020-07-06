@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
@@ -41,8 +42,8 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
-	private static final SortedSet<PathPattern> EMPTY_PATTERNS =
-			new TreeSet<>(Collections.singleton(new PathPatternParser().parse("")));
+	private static final SortedSet<PathPattern> EMPTY_PATH_PATTERN =
+			new TreeSet<>(Collections.singleton(PathPatternParser.defaultInstance.parse("")));
 
 
 	private final SortedSet<PathPattern> patterns;
@@ -53,20 +54,20 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public PatternsRequestCondition(PathPattern... patterns) {
-		this(Arrays.asList(patterns));
+		this(ObjectUtils.isEmpty(patterns) ? Collections.emptyList() : Arrays.asList(patterns));
 	}
 
 	/**
 	 * Creates a new instance with the given URL patterns.
 	 */
 	public PatternsRequestCondition(List<PathPattern> patterns) {
-		this(patterns.isEmpty() ? EMPTY_PATTERNS : new TreeSet<>(patterns));
+		this.patterns = (patterns.isEmpty() ? EMPTY_PATH_PATTERN : new TreeSet<>(patterns));
 	}
-
 
 	private PatternsRequestCondition(SortedSet<PathPattern> patterns) {
 		this.patterns = patterns;
 	}
+
 
 	public Set<PathPattern> getPatterns() {
 		return this.patterns;
@@ -94,25 +95,28 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
-		SortedSet<PathPattern> combined;
-		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
-			combined = new TreeSet<>();
+		if (isEmptyPathPattern() && other.isEmptyPathPattern()) {
+			return this;
+		}
+		else if (other.isEmptyPathPattern()) {
+			return this;
+		}
+		else if (isEmptyPathPattern()) {
+			return other;
+		}
+		else {
+			SortedSet<PathPattern> combined = new TreeSet<>();
 			for (PathPattern pattern1 : this.patterns) {
 				for (PathPattern pattern2 : other.patterns) {
 					combined.add(pattern1.combine(pattern2));
 				}
 			}
+			return new PatternsRequestCondition(combined);
 		}
-		else if (!this.patterns.isEmpty()) {
-			combined = this.patterns;
-		}
-		else if (!other.patterns.isEmpty()) {
-			combined = other.patterns;
-		}
-		else {
-			combined = EMPTY_PATTERNS;
-		}
-		return new PatternsRequestCondition(combined);
+	}
+
+	private boolean isEmptyPathPattern() {
+		return this.patterns == EMPTY_PATH_PATTERN;
 	}
 
 	/**
@@ -126,31 +130,21 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	@Override
 	@Nullable
 	public PatternsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (this.patterns.isEmpty()) {
-			return this;
-		}
 		SortedSet<PathPattern> matches = getMatchingPatterns(exchange);
-		return (!matches.isEmpty() ? new PatternsRequestCondition(matches) : null);
+		return (matches != null ? new PatternsRequestCondition(matches) : null);
 	}
 
-	/**
-	 * Find the patterns matching the given lookup path. Invoking this method should
-	 * yield results equivalent to those of calling
-	 * {@link #getMatchingCondition(ServerWebExchange)}.
-	 * This method is provided as an alternative to be used if no request is available
-	 * (e.g. introspection, tooling, etc).
-	 * @param exchange the current exchange
-	 * @return a sorted set of matching patterns sorted with the closest match first
-	 */
+	@Nullable
 	private SortedSet<PathPattern> getMatchingPatterns(ServerWebExchange exchange) {
 		PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
-		TreeSet<PathPattern> pathPatterns = new TreeSet<>();
+		TreeSet<PathPattern> result = null;
 		for (PathPattern pattern : this.patterns) {
 			if (pattern.matches(lookupPath)) {
-				pathPatterns.add(pattern);
+				result = (result != null ? result : new TreeSet<>());
+				result.add(pattern);
 			}
 		}
-		return pathPatterns;
+		return result;
 	}
 
 	/**

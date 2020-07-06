@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.function.Consumer;
 
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
@@ -124,6 +125,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean allowResultAccessAfterCompletion = false;
 
 	private boolean hibernateManagedSession = false;
+
+	@Nullable
+	private Consumer<Session> sessionInitializer;
 
 	@Nullable
 	private Object entityInterceptor;
@@ -301,6 +305,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
+	 * Specify a callback for customizing every Hibernate {@code Session} resource
+	 * created for a new transaction managed by this {@code HibernateTransactionManager}.
+	 * <p>This enables convenient customizations for application purposes, e.g.
+	 * setting Hibernate filters.
+	 * @since 5.3
+	 * @see Session#enableFilter
+	 */
+	public void setSessionInitializer(Consumer<Session> sessionInitializer) {
+		this.sessionInitializer = sessionInitializer;
+	}
+
+	/**
 	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
 	 * and change property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this transaction manager.
@@ -462,6 +478,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Session newSession = (entityInterceptor != null ?
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
 						obtainSessionFactory().openSession());
+				if (this.sessionInitializer != null) {
+					this.sessionInitializer.accept(newSession);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}

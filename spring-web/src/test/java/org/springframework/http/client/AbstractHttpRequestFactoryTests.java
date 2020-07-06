@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 /**
  * @author Arjen Poutsma
  */
-public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTests {
+abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTests {
 
 	protected ClientHttpRequestFactory factory;
 
 
 	@BeforeEach
-	public final void createFactory() throws Exception {
+	final void createFactory() throws Exception {
 		factory = createRequestFactory();
 		if (factory instanceof InitializingBean) {
 			((InitializingBean) factory).afterPropertiesSet();
@@ -54,7 +54,7 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 	}
 
 	@AfterEach
-	public final void destroyFactory() throws Exception {
+	final void destroyFactory() throws Exception {
 		if (factory instanceof DisposableBean) {
 			((DisposableBean) factory).destroy();
 		}
@@ -65,7 +65,7 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 
 
 	@Test
-	public void status() throws Exception {
+	void status() throws Exception {
 		URI uri = new URI(baseUrl + "/status/notfound");
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
@@ -77,7 +77,7 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 	}
 
 	@Test
-	public void echo() throws Exception {
+	void echo() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.PUT);
 		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.PUT);
 
@@ -107,7 +107,7 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 	}
 
 	@Test
-	public void multipleWrites() throws Exception {
+	void multipleWrites() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
 
 		final byte[] body = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -129,8 +129,7 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 	}
 
 	@Test
-	@SuppressWarnings("try")
-	public void headersAfterExecute() throws Exception {
+	void headersAfterExecute() throws Exception {
 		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/status/ok"), HttpMethod.POST);
 
 		request.getHeaders().add("MyHeader", "value");
@@ -138,13 +137,14 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 				FileCopyUtils.copy(body, request.getBody());
 				try (ClientHttpResponse response = request.execute()) {
+					assertThat(response).isNotNull();
 					request.getHeaders().add("MyHeader", "value");
 				}
 		});
 	}
 
 	@Test
-	public void httpMethods() throws Exception {
+	void httpMethods() throws Exception {
 		assertHttpMethod("get", HttpMethod.GET);
 		assertHttpMethod("head", HttpMethod.HEAD);
 		assertHttpMethod("post", HttpMethod.POST);
@@ -154,31 +154,25 @@ public abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebSer
 	}
 
 	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
-		ClientHttpResponse response = null;
-		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
-			if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
-				// requires a body
-				try {
-					request.getBody().write(32);
-				}
-				catch (UnsupportedOperationException ex) {
-					// probably a streaming request - let's simply ignore it
-				}
+		ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
+		if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+			// requires a body
+			try {
+				request.getBody().write(32);
 			}
-			response = request.execute();
+			catch (UnsupportedOperationException ex) {
+				// probably a streaming request - let's simply ignore it
+			}
+		}
+
+		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
 			assertThat(request.getMethod().name()).as("Invalid method").isEqualTo(path.toUpperCase(Locale.ENGLISH));
-		}
-		finally {
-			if (response != null) {
-				response.close();
-			}
 		}
 	}
 
 	@Test
-	public void queryParameters() throws Exception {
+	void queryParameters() throws Exception {
 		URI uri = new URI(baseUrl + "/params?param1=value&param2=value1&param2=value2");
 		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
 

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -298,8 +299,14 @@ final class PostProcessorRegistrationDelegate {
 	private static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> postProcessors) {
 
-		for (BeanPostProcessor postProcessor : postProcessors) {
-			beanFactory.addBeanPostProcessor(postProcessor);
+		if (beanFactory instanceof AbstractBeanFactory) {
+			// Bulk addition is more efficient against our CopyOnWriteArrayList there
+			((AbstractBeanFactory) beanFactory).addBeanPostProcessors(postProcessors);
+		}
+		else {
+			for (BeanPostProcessor postProcessor : postProcessors) {
+				beanFactory.addBeanPostProcessor(postProcessor);
+			}
 		}
 	}
 

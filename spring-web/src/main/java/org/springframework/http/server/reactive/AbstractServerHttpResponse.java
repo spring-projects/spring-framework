@@ -75,6 +75,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
 
+	@Nullable
+	private HttpHeaders readOnlyHeaders;
+
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		this(dataBufferFactory, new HttpHeaders());
@@ -155,8 +158,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.state.get() == State.COMMITTED ?
-				HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		if (this.readOnlyHeaders != null) {
+			return this.readOnlyHeaders;
+		}
+		else if (this.state.get() == State.COMMITTED) {
+			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			return this.readOnlyHeaders;
+		}
+		else {
+			return this.headers;
+		}
 	}
 
 	@Override

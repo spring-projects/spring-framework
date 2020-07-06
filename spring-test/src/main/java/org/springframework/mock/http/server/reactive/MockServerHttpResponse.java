@@ -57,7 +57,7 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 
 	public MockServerHttpResponse() {
-		this(new DefaultDataBufferFactory());
+		this(DefaultDataBufferFactory.sharedInstance);
 	}
 
 	public MockServerHttpResponse(DataBufferFactory dataBufferFactory) {

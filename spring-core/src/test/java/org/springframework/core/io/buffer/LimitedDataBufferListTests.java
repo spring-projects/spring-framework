@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,6 @@ import org.junit.jupiter.api.Test;
  */
 public class LimitedDataBufferListTests {
 
-	private final static DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
-
 	@Test
 	void limitEnforced() {
 		Assertions.assertThatThrownBy(() -> new LimitedDataBufferList(5).add(toDataBuffer("123456")))
@@ -51,7 +48,8 @@ public class LimitedDataBufferListTests {
 
 
 	private static DataBuffer toDataBuffer(String value) {
-		return bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8));
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		return DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 	}
 
 }

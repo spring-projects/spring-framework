@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import io.rsocket.AbstractRSocket;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import io.rsocket.Payload;
+import io.rsocket.RSocket;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,8 +64,6 @@ public class DefaultRSocketRequesterTests {
 	private RSocketRequester requester;
 
 	private final RSocketStrategies strategies = RSocketStrategies.create();
-
-	private final DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@BeforeEach
@@ -244,11 +242,12 @@ public class DefaultRSocketRequesterTests {
 	}
 
 	private Payload toPayload(String value) {
-		return PayloadUtils.createPayload(bufferFactory.wrap(value.getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		return PayloadUtils.createPayload(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 	}
 
 
-	private static class TestRSocket extends AbstractRSocket {
+	private static class TestRSocket implements RSocket {
 
 		private Mono<Payload> payloadMonoToReturn = Mono.empty();
 		private Flux<Payload> payloadFluxToReturn = Flux.empty();

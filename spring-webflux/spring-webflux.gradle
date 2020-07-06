@@ -16,8 +16,6 @@ dependencies {
 	optional("org.freemarker:freemarker")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
-	optional("io.reactivex:rxjava")
-	optional("io.reactivex:rxjava-reactive-streams")
 	optional("io.projectreactor.netty:reactor-netty")
 	optional("org.apache.tomcat:tomcat-websocket")
 	optional("org.eclipse.jetty.websocket:websocket-server") {
@@ -38,7 +36,7 @@ dependencies {
 	testCompile("com.fasterxml:aalto-xml")
 	testCompile("org.hibernate:hibernate-validator")
 	testCompile("javax.validation:validation-api")
-	testCompile "io.reactivex.rxjava2:rxjava"
+	testCompile("io.reactivex.rxjava3:rxjava")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("io.undertow:undertow-core")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core")

@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -59,6 +60,7 @@ import org.springframework.web.util.UriComponents.UriTemplateVariables;
  * @author Oliver Gierke
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -95,11 +97,15 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
+					PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
 
-	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("host=\"?([^;,\"]+)\"?");
+	private static final String FORWARDED_VALUE = "\"?([^;,\"]+)\"?";
 
-	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("proto=\"?([^;,\"]+)\"?");
+	private static final Pattern FORWARDED_HOST_PATTERN = Pattern.compile("(?i:host)=" + FORWARDED_VALUE);
+
+	private static final Pattern FORWARDED_PROTO_PATTERN = Pattern.compile("(?i:proto)=" + FORWARDED_VALUE);
+
+	private static final Pattern FORWARDED_FOR_PATTERN = Pattern.compile("(?i:for)=" + FORWARDED_VALUE);
 
 	private static final Object[] EMPTY_VALUES = new Object[0];
 
@@ -230,13 +236,16 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			builder.scheme(scheme);
 			if (opaque) {
-				String ssp = uri.substring(scheme.length()).substring(1);
+				String ssp = uri.substring(scheme.length() + 1);
 				if (StringUtils.hasLength(fragment)) {
 					ssp = ssp.substring(0, ssp.length() - (fragment.length() + 1));
 				}
 				builder.schemeSpecificPart(ssp);
 			}
 			else {
+				if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
+					throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
+				}
 				builder.userInfo(userInfo);
 				builder.host(host);
 				if (StringUtils.hasLength(port)) {
@@ -288,6 +297,10 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			}
 			builder.path(matcher.group(8));
 			builder.query(matcher.group(10));
+			String fragment = matcher.group(12);
+			if (StringUtils.hasText(fragment)) {
+				builder.fragment(fragment);
+			}
 			return builder;
 		}
 		else {
@@ -304,9 +317,52 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 * @param request the source request
 	 * @return the URI components of the URI
 	 * @since 4.1.5
+	 * @see #parseForwardedFor(HttpRequest, InetSocketAddress)
 	 */
 	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
 		return fromUri(request.getURI()).adaptFromForwardedHeaders(request.getHeaders());
+	}
+
+	/**
+	 * Parse the first "Forwarded: for=..." or "X-Forwarded-For" header value to
+	 * an {@code InetSocketAddress} representing the address of the client.
+	 * @param request a request with headers that may contain forwarded headers
+	 * @param remoteAddress the current remoteAddress
+	 * @return an {@code InetSocketAddress} with the extracted host and port, or
+	 * {@code null} if the headers are not present.
+	 * @since 5.3
+	 * @see <a href="https://tools.ietf.org/html/rfc7239#section-5.2">RFC 7239, Section 5.2</a>
+	 */
+	@Nullable
+	public static InetSocketAddress parseForwardedFor(
+			HttpRequest request, @Nullable InetSocketAddress remoteAddress) {
+
+		int port = (remoteAddress != null ?
+				remoteAddress.getPort() : "https".equals(request.getURI().getScheme()) ? 443 : 80);
+
+		String forwardedHeader = request.getHeaders().getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
+			Matcher matcher = FORWARDED_FOR_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				String value = matcher.group(1).trim();
+				String host = value;
+				int portSeparatorIdx = value.lastIndexOf(':');
+				if (portSeparatorIdx > value.lastIndexOf(']')) {
+					host = value.substring(0, portSeparatorIdx);
+					port = Integer.parseInt(value.substring(portSeparatorIdx + 1));
+				}
+				return new InetSocketAddress(host, port);
+			}
+		}
+
+		String forHeader = request.getHeaders().getFirst("X-Forwarded-For");
+		if (StringUtils.hasText(forHeader)) {
+			String host = StringUtils.tokenizeToStringArray(forHeader, ",")[0];
+			return new InetSocketAddress(host, port);
+		}
+
+		return null;
 	}
 
 	/**
@@ -797,14 +853,14 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on");
 	}
 
-	private void adaptForwardedHost(String hostToUse) {
-		int portSeparatorIdx = hostToUse.lastIndexOf(':');
-		if (portSeparatorIdx > hostToUse.lastIndexOf(']')) {
-			host(hostToUse.substring(0, portSeparatorIdx));
-			port(Integer.parseInt(hostToUse.substring(portSeparatorIdx + 1)));
+	private void adaptForwardedHost(String rawValue) {
+		int portSeparatorIdx = rawValue.lastIndexOf(':');
+		if (portSeparatorIdx > rawValue.lastIndexOf(']')) {
+			host(rawValue.substring(0, portSeparatorIdx));
+			port(Integer.parseInt(rawValue.substring(portSeparatorIdx + 1)));
 		}
 		else {
-			host(hostToUse);
+			host(rawValue);
 			port(null);
 		}
 	}

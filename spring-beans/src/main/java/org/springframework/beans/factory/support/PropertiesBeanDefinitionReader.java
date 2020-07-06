@@ -35,8 +35,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.ResourcePropertiesPersister;
 import org.springframework.lang.Nullable;
-import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
@@ -74,7 +74,10 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 26.11.2003
  * @see DefaultListableBeanFactory
+ * @deprecated as of 5.3, in favor of Spring's common bean definition formats
+ * and/or custom reader implementations
  */
+@Deprecated
 public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
@@ -145,7 +148,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	@Nullable
 	private String defaultParentBean;
 
-	private PropertiesPersister propertiesPersister = new DefaultPropertiesPersister();
+	private PropertiesPersister propertiesPersister = ResourcePropertiesPersister.INSTANCE;
 
 
 	/**
@@ -184,12 +187,12 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 
 	/**
 	 * Set the PropertiesPersister to use for parsing properties files.
-	 * The default is DefaultPropertiesPersister.
-	 * @see org.springframework.util.DefaultPropertiesPersister
+	 * The default is ResourcePropertiesPersister.
+	 * @see ResourcePropertiesPersister#INSTANCE
 	 */
 	public void setPropertiesPersister(@Nullable PropertiesPersister propertiesPersister) {
 		this.propertiesPersister =
-				(propertiesPersister != null ? propertiesPersister : new DefaultPropertiesPersister());
+				(propertiesPersister != null ? propertiesPersister : ResourcePropertiesPersister.INSTANCE);
 	}
 
 	/**

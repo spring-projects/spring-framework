@@ -17,28 +17,36 @@
 package org.springframework.messaging.rsocket;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import io.rsocket.Payload;
+import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
 import io.rsocket.core.RSocketServer;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.WellKnownMimeType;
+import io.rsocket.plugins.RSocketInterceptor;
 import io.rsocket.transport.netty.server.CloseableChannel;
 import io.rsocket.transport.netty.server.TcpServerTransport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -51,11 +59,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RSocketClientToServerIntegrationTests {
 
+	private static final MimeType FOO_MIME_TYPE = MimeTypeUtils.parseMimeType("messaging/x.foo");
+
+
 	private static AnnotationConfigApplicationContext context;
 
 	private static CloseableChannel server;
 
-	private static FireAndForgetCountingInterceptor interceptor = new FireAndForgetCountingInterceptor();
+	private static CountingInterceptor interceptor = new CountingInterceptor();
 
 	private static RSocketRequester requester;
 
@@ -65,7 +76,7 @@ public class RSocketClientToServerIntegrationTests {
 	public static void setupOnce() {
 
 		MimeType metadataMimeType = MimeTypeUtils.parseMimeType(
-				WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString());
+				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 
 		context = new AnnotationConfigApplicationContext(ServerConfig.class);
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
@@ -97,7 +108,7 @@ public class RSocketClientToServerIntegrationTests {
 				.concatMap(i -> requester.route("receive").data("Hello " + i).send())
 				.blockLast();
 
-		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads)
+		StepVerifier.create(context.getBean(ServerController.class).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
@@ -105,8 +116,7 @@ public class RSocketClientToServerIntegrationTests {
 				.thenCancel()
 				.verify(Duration.ofSeconds(5));
 
-		assertThat(interceptor.getRSocketCount()).isEqualTo(1);
-		assertThat(interceptor.getFireAndForgetCount(0))
+		assertThat(interceptor.getFireAndForgetCount())
 				.as("Fire and forget requests did not actually complete handling on the server side")
 				.isEqualTo(3);
 	}
@@ -156,6 +166,24 @@ public class RSocketClientToServerIntegrationTests {
 	}
 
 	@Test
+	public void metadataPush() {
+		Flux.just("bar", "baz")
+				.concatMap(s -> requester.route("foo-updates").metadata(s, FOO_MIME_TYPE).sendMetadata())
+				.blockLast();
+
+		StepVerifier.create(context.getBean(ServerController.class).metadataPushPayloads.asFlux())
+				.expectNext("bar")
+				.expectNext("baz")
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
+
+		assertThat(interceptor.getMetadataPushCount())
+				.as("Metadata pushes did not actually complete handling on the server side")
+				.isEqualTo(2);
+	}
+
+	@Test
 	public void voidReturnValue() {
 		Mono<String> result = requester.route("void-return-value").data("Hello").retrieveMono(String.class);
 		StepVerifier.create(result).expectComplete().verify(Duration.ofSeconds(5));
@@ -197,11 +225,14 @@ public class RSocketClientToServerIntegrationTests {
 	@Controller
 	static class ServerController {
 
-		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
+		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
+
+		final Sinks.StandaloneFluxSink<String> metadataPushPayloads = Sinks.replayAll();
+
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.onNext(payload);
+			this.fireForgetPayloads.next(payload);
 		}
 
 		@MessageMapping("echo")
@@ -241,6 +272,11 @@ public class RSocketClientToServerIntegrationTests {
 					Mono.error(new IllegalStateException("bad"));
 		}
 
+		@ConnectMapping("foo-updates")
+		public void handleMetadata(@Header("foo") String foo) {
+			this.metadataPushPayloads.next(foo);
+		}
+
 		@MessageExceptionHandler
 		Mono<String> handleException(IllegalArgumentException ex) {
 			return Mono.delay(Duration.ofMillis(10)).map(aLong -> ex.getMessage() + " handled");
@@ -270,8 +306,63 @@ public class RSocketClientToServerIntegrationTests {
 
 		@Bean
 		public RSocketStrategies rsocketStrategies() {
-			return RSocketStrategies.create();
+			return RSocketStrategies.builder()
+					.metadataExtractorRegistry(registry ->
+							registry.metadataToExtract(FOO_MIME_TYPE, String.class, "foo"))
+					.build();
 		}
 	}
 
+
+	private static class CountingInterceptor implements RSocket, RSocketInterceptor {
+
+		private RSocket delegate;
+
+		private final AtomicInteger fireAndForgetCount = new AtomicInteger(0);
+
+		private final AtomicInteger metadataPushCount = new AtomicInteger(0);
+
+
+		public int getFireAndForgetCount() {
+			return this.fireAndForgetCount.get();
+		}
+
+		public int getMetadataPushCount() {
+			return this.metadataPushCount.get();
+		}
+
+		@Override
+		public RSocket apply(RSocket rsocket) {
+			Assert.isNull(this.delegate, "Unexpected RSocket connection");
+			this.delegate = rsocket;
+			return this;
+		}
+
+		@Override
+		public Mono<Void> fireAndForget(Payload payload) {
+			return this.delegate.fireAndForget(payload)
+					.doOnSuccess(aVoid -> this.fireAndForgetCount.incrementAndGet());
+		}
+
+		@Override
+		public Mono<Void> metadataPush(Payload payload) {
+			return this.delegate.metadataPush(payload)
+					.doOnSuccess(aVoid -> this.metadataPushCount.incrementAndGet());
+		}
+
+		@Override
+		public Mono<Payload> requestResponse(Payload payload) {
+			return this.delegate.requestResponse(payload);
+		}
+
+		@Override
+		public Flux<Payload> requestStream(Payload payload) {
+			return this.delegate.requestStream(payload);
+		}
+
+		@Override
+		public Flux<Payload> requestChannel(Publisher<Payload> payloads) {
+			return this.delegate.requestChannel(payloads);
+		}
+	}
 }

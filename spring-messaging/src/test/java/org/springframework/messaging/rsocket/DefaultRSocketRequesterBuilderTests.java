@@ -52,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -75,7 +74,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@BeforeEach
 	public void setup() {
 		this.transport = mock(ClientTransport.class);
-		given(this.transport.connect(anyInt())).willReturn(Mono.just(this.connection));
+		given(this.transport.connect()).willReturn(Mono.just(this.connection));
 	}
 
 
@@ -106,7 +105,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		// RSocketStrategies and RSocketConnector configurers should have been called
 
-		verify(this.transport).connect(anyInt());
+		verify(this.transport).connect();
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
 		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
 		assertThat(this.connectorConfigurer.connector()).isNotNull();
@@ -233,7 +232,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	public void frameDecoderMatchesDataBufferFactory() throws Exception {
 		testPayloadDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
-		testPayloadDecoder(new DefaultDataBufferFactory(), PayloadDecoder.DEFAULT);
+		testPayloadDecoder(DefaultDataBufferFactory.sharedInstance, PayloadDecoder.DEFAULT);
 	}
 
 	private void testPayloadDecoder(DataBufferFactory bufferFactory, PayloadDecoder payloadDecoder)

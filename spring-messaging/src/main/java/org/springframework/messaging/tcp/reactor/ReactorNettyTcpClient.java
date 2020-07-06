@@ -19,7 +19,6 @@ package org.springframework.messaging.tcp.reactor;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,8 +32,6 @@ import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.DirectProcessor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
@@ -46,6 +43,7 @@ import reactor.netty.NettyOutbound;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 import reactor.netty.tcp.TcpClient;
+import reactor.util.retry.Retry;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
@@ -88,7 +86,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 	private Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
-	private volatile boolean stopping = false;
+	private volatile boolean stopping;
 
 
 	/**
@@ -103,14 +101,13 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * @param codec for encoding and decoding the input/output byte streams
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
-	@SuppressWarnings("deprecation")
 	public ReactorNettyTcpClient(String host, int port, ReactorNettyCodec<P> codec) {
 		Assert.notNull(host, "host is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.fixed("tcp-client-pool", 10000);
+		this.poolResources = ConnectionProvider.create("tcp-client-pool", 10000);
 		this.codec = codec;
 
 		this.tcpClient = TcpClient.create(this.poolResources)
@@ -129,13 +126,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	 * @since 5.1.3
 	 * @see org.springframework.messaging.simp.stomp.StompReactorNettyCodec
 	 */
-	@SuppressWarnings("deprecation")
 	public ReactorNettyTcpClient(Function<TcpClient, TcpClient> clientConfigurer, ReactorNettyCodec<P> codec) {
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
 		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.fixed("tcp-client-pool", 10000);
+		this.poolResources = ConnectionProvider.create("tcp-client-pool", 10000);
 		this.codec = codec;
 
 		this.tcpClient = clientConfigurer.apply(TcpClient
@@ -199,7 +195,6 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 		Assert.notNull(strategy, "ReconnectStrategy is required");
@@ -218,8 +213,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 				.doOnError(updateConnectMono(connectMono))
 				.doOnError(handler::afterConnectFailure)    // report all connect failures to the handler
 				.flatMap(Connection::onDispose)             // post-connect issues
-				.retryWhen(reconnectFunction(strategy))
-				.repeatWhen(reconnectFunction(strategy))
+				.retryWhen(Retry.from(signals -> signals
+						.map(retrySignal -> (int) retrySignal.totalRetriesInARow())
+						.flatMap(attempt -> reconnect(attempt, strategy))))
+				.repeatWhen(flux -> flux
+						.scan(1, (count, element) -> count++)
+						.flatMap(attempt -> reconnect(attempt, strategy)))
 				.subscribe();
 
 		return new MonoToListenableFutureAdapter<>(connectMono);
@@ -244,12 +243,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		};
 	}
 
-	private <T> Function<Flux<T>, Publisher<?>> reconnectFunction(ReconnectStrategy reconnectStrategy) {
-		return flux -> flux
-				.scan(1, (count, element) -> count++)
-				.flatMap(attempt -> Optional.ofNullable(reconnectStrategy.getTimeToNextAttempt(attempt))
-						.map(time -> Mono.delay(Duration.ofMillis(time), this.scheduler))
-						.orElse(Mono.empty()));
+	private Publisher<? extends Long> reconnect(Integer attempt, ReconnectStrategy reconnectStrategy) {
+		Long time = reconnectStrategy.getTimeToNextAttempt(attempt);
+		return (time != null ? Mono.delay(Duration.ofMillis(time), this.scheduler) : Mono.empty());
 	}
 
 	@Override
@@ -319,7 +315,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 					logger.debug("Connected to " + conn.address());
 				}
 			});
-			DirectProcessor<Void> completion = DirectProcessor.create();
+			MonoProcessor<Void> completion = MonoProcessor.create();
 			TcpConnection<P> connection = new ReactorNettyTcpConnection<>(inbound, outbound,  codec, completion);
 			scheduler.schedule(() -> this.connectionHandler.afterConnected(connection));
 
@@ -342,7 +338,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 		private final ReactorNettyCodec<P> codec;
 
-		public StompMessageDecoder(ReactorNettyCodec<P> codec) {
+		StompMessageDecoder(ReactorNettyCodec<P> codec) {
 			this.codec = codec;
 		}
 

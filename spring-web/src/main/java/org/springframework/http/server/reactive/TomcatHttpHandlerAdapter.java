@@ -44,6 +44,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -105,14 +106,13 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			this.bufferSize = bufferSize;
 		}
 
-		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
+		private static MultiValueMap<String, String> createTomcatHttpHeaders(HttpServletRequest request) {
 			RequestFacade requestFacade = getRequestFacade(request);
 			org.apache.catalina.connector.Request connectorRequest = (org.apache.catalina.connector.Request)
 					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
 			Assert.state(connectorRequest != null, "No Tomcat connector request");
 			Request tomcatRequest = connectorRequest.getCoyoteRequest();
-			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
-			return new HttpHeaders(headers);
+			return new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
 		}
 
 		private static RequestFacade getRequestFacade(HttpServletRequest request) {

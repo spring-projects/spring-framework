@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 				}
 				else if (trimmedToken.startsWith(RuleBasedTransactionAttribute.PREFIX_TIMEOUT)) {
 					String value = trimmedToken.substring(DefaultTransactionAttribute.PREFIX_TIMEOUT.length());
-					attr.setTimeout(Integer.parseInt(value));
+					attr.setTimeoutString(value);
 				}
 				else if (trimmedToken.equals(RuleBasedTransactionAttribute.READ_ONLY_MARKER)) {
 					attr.setReadOnly(true);
@@ -84,6 +84,7 @@ public class TransactionAttributeEditor extends PropertyEditorSupport {
 					throw new IllegalArgumentException("Invalid transaction attribute token: [" + trimmedToken + "]");
 				}
 			}
+			attr.resolveAttributeStrings(null);  // placeholders expected to be pre-resolved
 			setValue(attr);
 		}
 		else {

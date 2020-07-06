@@ -37,6 +37,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
@@ -253,6 +254,26 @@ public abstract class RouterFunctions {
 		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		return new RouterFunctionWebHandler(strategies, routerFunction);
+	}
+
+	/**
+	 * Changes the {@link PathPatternParser} on the given {@linkplain RouterFunction router function}. This method
+	 * can be used to change the {@code PathPatternParser} properties from the defaults, for instance to change
+	 * {@linkplain PathPatternParser#setCaseSensitive(boolean) case sensitivity}.
+	 * @param routerFunction the router function to change the parser in
+	 * @param parser the parser to change to.
+	 * @param <T> the type of response returned by the handler function
+	 * @return the change router function
+	 */
+	public static <T extends ServerResponse> RouterFunction<T> changeParser(RouterFunction<T> routerFunction,
+			PathPatternParser parser) {
+
+		Assert.notNull(routerFunction, "RouterFunction must not be null");
+		Assert.notNull(parser, "Parser must not be null");
+
+		ChangePathPatternParserVisitor visitor = new ChangePathPatternParserVisitor(parser);
+		routerFunction.accept(visitor);
+		return routerFunction;
 	}
 
 	/**
@@ -895,6 +916,7 @@ public abstract class RouterFunctions {
 		public void accept(Visitor visitor) {
 			visitor.route(this.predicate, this.handlerFunction);
 		}
+
 	}
 
 
@@ -938,6 +960,7 @@ public abstract class RouterFunctions {
 			this.routerFunction.accept(visitor);
 			visitor.endNested(this.predicate);
 		}
+
 	}
 
 

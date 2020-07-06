@@ -271,7 +271,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private static class EndFrameBuffer extends DataBufferWrapper {
 
-		private static final DataBuffer BUFFER = new DefaultDataBufferFactory().wrap(new byte[0]);
+		private static final DataBuffer BUFFER = DefaultDataBufferFactory.sharedInstance.wrap(new byte[0]);
 
 		private byte[] delimiter;
 

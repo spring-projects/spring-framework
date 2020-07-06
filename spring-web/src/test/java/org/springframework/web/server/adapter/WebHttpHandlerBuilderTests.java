@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class WebHttpHandlerBuilderTests {
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
+		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		return exchange.getResponse().writeWith(Flux.just(buffer));
 	}
 

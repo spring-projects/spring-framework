@@ -128,7 +128,7 @@ public class TaskExecutorFactoryBean implements
 					}
 				}
 				else {
-					Integer value = Integer.valueOf(this.poolSize);
+					int value = Integer.parseInt(this.poolSize);
 					corePoolSize = value;
 					maxPoolSize = value;
 				}

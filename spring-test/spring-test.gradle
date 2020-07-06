@@ -35,6 +35,7 @@ dependencies {
 	optional("org.xmlunit:xmlunit-matchers")
 	optional("org.skyscreamer:jsonassert")
 	optional("com.jayway.jsonpath:json-path")
+	optional("commons-fileupload:commons-fileupload")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("io.projectreactor:reactor-test")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,7 +246,7 @@ public abstract class AbstractAopProxyTests {
 		assertThat(cta.getCalls()).isEqualTo(1);
 
 		// Will throw exception if it fails
-		Person p2 = (Person) SerializationTestUtils.serializeAndDeserialize(p);
+		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
 		assertThat(p2).isNotSameAs(p);
 		assertThat(p2.getName()).isEqualTo(p.getName());
 		assertThat(p2.getAge()).isEqualTo(p.getAge());

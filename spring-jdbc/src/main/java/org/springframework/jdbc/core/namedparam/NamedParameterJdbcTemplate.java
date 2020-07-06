@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -226,6 +227,20 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, EmptySqlParameterSource.INSTANCE, rowMapper);
+	}
+
+	@Override
+	public <T> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+			throws DataAccessException {
+
+		return getJdbcOperations().queryForStream(getPreparedStatementCreator(sql, paramSource), rowMapper);
+	}
+
+	@Override
+	public <T> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+			throws DataAccessException {
+
+		return queryForStream(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
 	@Override

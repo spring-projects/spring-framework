@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
@@ -204,7 +204,7 @@ public class RSocketServerToClientIntegrationTests {
 			Mono.fromRunnable(testEcho)
 					.doOnError(ex -> result.onError(ex))
 					.doOnSuccess(o -> result.onComplete())
-					.subscribeOn(Schedulers.elastic()) // StepVerifier will block
+					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
 					.subscribe();
 		}
 	}
@@ -212,11 +212,11 @@ public class RSocketServerToClientIntegrationTests {
 
 	private static class ClientHandler {
 
-		final ReplayProcessor<String> fireForgetPayloads = ReplayProcessor.create();
+		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.onNext(payload);
+			this.fireForgetPayloads.next(payload);
 		}
 
 		@MessageMapping("echo")

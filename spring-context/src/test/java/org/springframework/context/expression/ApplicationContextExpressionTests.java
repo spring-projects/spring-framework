@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ class ApplicationContextExpressionTests {
 			assertThat(tb3.optionalValue3.isPresent()).isFalse();
 			assertThat(tb3.tb).isSameAs(tb0);
 
-			tb3 = (ValueTestBean) SerializationTestUtils.serializeAndDeserialize(tb3);
+			tb3 = SerializationTestUtils.serializeAndDeserialize(tb3);
 			assertThat(tb3.countryFactory.getObject()).isEqualTo("123 UK");
 
 			ConstructorValueTestBean tb4 = ac.getBean("tb4", ConstructorValueTestBean.class);

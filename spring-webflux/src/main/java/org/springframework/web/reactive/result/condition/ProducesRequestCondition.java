@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,11 +93,33 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param resolver used to determine requested content type
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
-		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
+		this.expressions = parseExpressions(produces, headers);
 		if (this.expressions.size() > 1) {
 			Collections.sort(this.expressions);
 		}
 		this.contentTypeResolver = resolver != null ? resolver : DEFAULT_CONTENT_TYPE_RESOLVER;
+	}
+
+	private List<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
+		Set<ProduceMediaTypeExpression> result = null;
+		if (!ObjectUtils.isEmpty(headers)) {
+			for (String header : headers) {
+				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
+				if ("Accept".equalsIgnoreCase(expr.name)) {
+					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
+						result = (result != null ? result : new LinkedHashSet<>());
+						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
+					}
+				}
+			}
+		}
+		if (!ObjectUtils.isEmpty(produces)) {
+			for (String produce : produces) {
+				result = (result != null ? result : new LinkedHashSet<>());
+				result.add(new ProduceMediaTypeExpression(produce));
+			}
+		}
+		return (result != null ? new ArrayList<>(result) : Collections.emptyList());
 	}
 
 	/**
@@ -108,26 +131,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		this.contentTypeResolver = other.contentTypeResolver;
 	}
 
-
-	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>();
-		if (headers != null) {
-			for (String header : headers) {
-				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
-				if ("Accept".equalsIgnoreCase(expr.name)) {
-					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
-						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
-					}
-				}
-			}
-		}
-		if (produces != null) {
-			for (String produce : produces) {
-				result.add(new ProduceMediaTypeExpression(produce));
-			}
-		}
-		return result;
-	}
 
 	/**
 	 * Return the contained "produces" expressions.

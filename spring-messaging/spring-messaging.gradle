@@ -26,7 +26,7 @@ dependencies {
 	testCompile("org.apache.activemq:activemq-kahadb-store")
 	testCompile("org.apache.activemq:activemq-stomp")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile "io.reactivex.rxjava2:rxjava"
+	testCompile "io.reactivex.rxjava3:rxjava"
 	testCompile("org.jetbrains.kotlin:kotlin-reflect")
 	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
 	testCompile("org.xmlunit:xmlunit-assertj")

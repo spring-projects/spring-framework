@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
@@ -166,6 +167,26 @@ public abstract class RouterFunctions {
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
 		return new ResourcesRouterFunction(lookupFunction);
+	}
+
+	/**
+	 * Changes the {@link PathPatternParser} on the given {@linkplain RouterFunction router function}. This method
+	 * can be used to change the {@code PathPatternParser} properties from the defaults, for instance to change
+	 * {@linkplain PathPatternParser#setCaseSensitive(boolean) case sensitivity}.
+	 * @param routerFunction the router function to change the parser in
+	 * @param parser the parser to change to.
+	 * @param <T> the type of response returned by the handler function
+	 * @return the change router function
+	 */
+	public static <T extends ServerResponse> RouterFunction<T> changeParser(RouterFunction<T> routerFunction,
+			PathPatternParser parser) {
+
+		Assert.notNull(routerFunction, "RouterFunction must not be null");
+		Assert.notNull(parser, "Parser must not be null");
+
+		ChangePathPatternParserVisitor visitor = new ChangePathPatternParserVisitor(parser);
+		routerFunction.accept(visitor);
+		return routerFunction;
 	}
 
 
@@ -617,6 +638,8 @@ public abstract class RouterFunctions {
 		 */
 		RouterFunction<ServerResponse> build();
 	}
+
+
 	/**
 	 * Receives notifications from the logical structure of router functions.
 	 */
@@ -670,6 +693,7 @@ public abstract class RouterFunctions {
 		}
 	}
 
+
 	/**
 	 * A composed routing function that first invokes one function, and then invokes the
 	 * another function (of the same response type {@code T}) if this route had
@@ -704,6 +728,7 @@ public abstract class RouterFunctions {
 			this.second.accept(visitor);
 		}
 	}
+
 
 	/**
 	 * A composed routing function that first invokes one function, and then invokes
@@ -778,8 +803,8 @@ public abstract class RouterFunctions {
 		}
 	}
 
-	private static final class DefaultRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -812,8 +837,8 @@ public abstract class RouterFunctions {
 
 	}
 
-	private static final class DefaultNestedRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultNestedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -857,6 +882,7 @@ public abstract class RouterFunctions {
 		}
 
 	}
+
 
 	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
 

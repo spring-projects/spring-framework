@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.constructor.ConstructorException;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -29,6 +31,7 @@ import org.springframework.core.io.ByteArrayResource;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Tests for {@link YamlProcessor}.
@@ -37,14 +40,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class YamlProcessorTests {
+class YamlProcessorTests {
 
 	private final YamlProcessor processor = new YamlProcessor() {};
 
 
 	@Test
-	public void arrayConvertedToIndexedBeanReference() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar: [1,2,3]".getBytes()));
+	void arrayConvertedToIndexedBeanReference() {
+		setYaml("foo: bar\nbar: [1,2,3]");
 		this.processor.process((properties, map) -> {
 			assertThat(properties.size()).isEqualTo(4);
 			assertThat(properties.get("foo")).isEqualTo("bar");
@@ -59,30 +62,30 @@ public class YamlProcessorTests {
 	}
 
 	@Test
-	public void stringResource() {
-		this.processor.setResources(new ByteArrayResource("foo # a document that is a literal".getBytes()));
+	void stringResource() {
+		setYaml("foo # a document that is a literal");
 		this.processor.process((properties, map) -> assertThat(map.get("document")).isEqualTo("foo"));
 	}
 
 	@Test
-	public void badDocumentStart() {
-		this.processor.setResources(new ByteArrayResource("foo # a document\nbar: baz".getBytes()));
+	void badDocumentStart() {
+		setYaml("foo # a document\nbar: baz");
 		assertThatExceptionOfType(ParserException.class)
 			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
 			.withMessageContaining("line 2, column 1");
 	}
 
 	@Test
-	public void badResource() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\ncd\nspam:\n  foo: baz".getBytes()));
+	void badResource() {
+		setYaml("foo: bar\ncd\nspam:\n  foo: baz");
 		assertThatExceptionOfType(ScannerException.class)
 			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
 			.withMessageContaining("line 3, column 1");
 	}
 
 	@Test
-	public void mapConvertedToIndexedBeanReference() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\nbar:\n spam: bucket".getBytes()));
+	void mapConvertedToIndexedBeanReference() {
+		setYaml("foo: bar\nbar:\n spam: bucket");
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("bar.spam")).isEqualTo("bucket");
 			assertThat(properties).hasSize(2);
@@ -90,8 +93,8 @@ public class YamlProcessorTests {
 	}
 
 	@Test
-	public void integerKeyBehaves() {
-		this.processor.setResources(new ByteArrayResource("foo: bar\n1: bar".getBytes()));
+	void integerKeyBehaves() {
+		setYaml("foo: bar\n1: bar");
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("[1]")).isEqualTo("bar");
 			assertThat(properties).hasSize(2);
@@ -99,8 +102,8 @@ public class YamlProcessorTests {
 	}
 
 	@Test
-	public void integerDeepKeyBehaves() {
-		this.processor.setResources(new ByteArrayResource("foo:\n  1: bar".getBytes()));
+	void integerDeepKeyBehaves() {
+		setYaml("foo:\n  1: bar");
 		this.processor.process((properties, map) -> {
 			assertThat(properties.get("foo[1]")).isEqualTo("bar");
 			assertThat(properties).hasSize(1);
@@ -109,8 +112,8 @@ public class YamlProcessorTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void flattenedMapIsSameAsPropertiesButOrdered() {
-		this.processor.setResources(new ByteArrayResource("cat: dog\nfoo: bar\nbar:\n spam: bucket".getBytes()));
+	void flattenedMapIsSameAsPropertiesButOrdered() {
+		setYaml("cat: dog\nfoo: bar\nbar:\n spam: bucket");
 		this.processor.process((properties, map) -> {
 			Map<String, Object> flattenedMap = processor.getFlattenedMap(map);
 			assertThat(flattenedMap).isInstanceOf(LinkedHashMap.class);
@@ -132,6 +135,45 @@ public class YamlProcessorTests {
 			// But the flattened map retains the order from the input.
 			assertThat(keysFromFlattenedMap).containsExactly("cat", "foo", "bar.spam");
 		});
+	}
+
+	@Test
+	void customTypeSupportedByDefault() throws Exception {
+		URL url = new URL("https://localhost:9000/");
+		setYaml("value: !!java.net.URL [\"" + url + "\"]");
+
+		this.processor.process((properties, map) -> {
+			assertThat(properties).containsExactly(entry("value", url));
+			assertThat(map).containsExactly(entry("value", url));
+		});
+	}
+
+	@Test
+	void customTypesSupportedDueToExplicitConfiguration() throws Exception {
+		this.processor.setSupportedTypes(URL.class, String.class);
+
+		URL url = new URL("https://localhost:9000/");
+		setYaml("value: !!java.net.URL [!!java.lang.String [\"" + url + "\"]]");
+
+		this.processor.process((properties, map) -> {
+			assertThat(properties).containsExactly(entry("value", url));
+			assertThat(map).containsExactly(entry("value", url));
+		});
+	}
+
+	@Test
+	void customTypeNotSupportedDueToExplicitConfiguration() {
+		this.processor.setSupportedTypes(List.class);
+
+		setYaml("value: !!java.net.URL [\"https://localhost:9000/\"]");
+
+		assertThatExceptionOfType(ConstructorException.class)
+			.isThrownBy(() -> this.processor.process((properties, map) -> {}))
+			.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+	}
+
+	private void setYaml(String yaml) {
+		this.processor.setResources(new ByteArrayResource(yaml.getBytes()));
 	}
 
 }

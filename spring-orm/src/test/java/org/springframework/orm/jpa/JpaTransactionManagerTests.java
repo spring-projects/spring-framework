@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -572,7 +572,7 @@ public class JpaTransactionManagerTests {
 			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				EntityManagerFactoryUtils.getTransactionalEntityManager(factory).flush();
-				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 					@Override
 					public void afterCompletion(int status) {
 						tt.execute(new TransactionCallback() {

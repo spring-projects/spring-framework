@@ -2125,7 +2125,7 @@ startup, because it must satisfy the singleton's dependencies. The lazy-initiali
 is injected into a singleton bean elsewhere that is not lazy-initialized.
 
 You can also control lazy-initialization at the container level by using the
-`default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -4044,11 +4044,6 @@ dependency type. The following table summarizes the most important `Aware` inter
 | `BeanNameAware`
 | Name of the declaring bean.
 | <<beans-factory-aware>>
-
-| `BootstrapContextAware`
-| Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA-aware `ApplicationContext` instances.
-| <<integration.adoc#cci, JCA CCI>>
 
 | `LoadTimeWeaverAware`
 | Defined weaver for processing class definition at load time.
@@ -10562,12 +10557,12 @@ simple class that extends Spring's `ApplicationEvent` base class:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListEvent extends ApplicationEvent {
+	public class BlockedListEvent extends ApplicationEvent {
 
 		private final String address;
 		private final String content;
 
-		public BlackListEvent(Object source, String address, String content) {
+		public BlockedListEvent(Object source, String address, String content) {
 			super(source);
 			this.address = address;
 			this.content = content;
@@ -10579,7 +10574,7 @@ simple class that extends Spring's `ApplicationEvent` base class:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListEvent(source: Any,
+	class BlockedListEvent(source: Any,
 						val address: String,
 						val content: String) : ApplicationEvent(source)
 ----
@@ -10594,11 +10589,11 @@ example shows such a class:
 ----
 	public class EmailService implements ApplicationEventPublisherAware {
 
-		private List<String> blackList;
+		private List<String> blockedList;
 		private ApplicationEventPublisher publisher;
 
-		public void setBlackList(List<String> blackList) {
-			this.blackList = blackList;
+		public void setBlockedList(List<String> blockedList) {
+			this.blockedList = blockedList;
 		}
 
 		public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
@@ -10606,8 +10601,8 @@ example shows such a class:
 		}
 
 		public void sendEmail(String address, String content) {
-			if (blackList.contains(address)) {
-				publisher.publishEvent(new BlackListEvent(this, address, content));
+			if (blockedList.contains(address)) {
+				publisher.publishEvent(new BlockedListEvent(this, address, content));
 				return;
 			}
 			// send email...
@@ -10619,11 +10614,11 @@ example shows such a class:
 ----
 	class EmailService : ApplicationEventPublisherAware {
 
-		private lateinit var blackList: List<String>
+		private lateinit var blockedList: List<String>
 		private lateinit var publisher: ApplicationEventPublisher
 
-		fun setBlackList(blackList: List<String>) {
-			this.blackList = blackList
+		fun setBlockedList(blockedList: List<String>) {
+			this.blockedList = blockedList
 		}
 
 		override fun setApplicationEventPublisher(publisher: ApplicationEventPublisher) {
@@ -10631,8 +10626,8 @@ example shows such a class:
 		}
 
 		fun sendEmail(address: String, content: String) {
-			if (blackList!!.contains(address)) {
-				publisher!!.publishEvent(BlackListEvent(this, address, content))
+			if (blockedList!!.contains(address)) {
+				publisher!!.publishEvent(BlockedListEvent(this, address, content))
 				return
 			}
 			// send email...
@@ -10653,7 +10648,7 @@ shows such a class:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListNotifier implements ApplicationListener<BlackListEvent> {
+	public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
 
 		private String notificationAddress;
 
@@ -10661,7 +10656,7 @@ shows such a class:
 			this.notificationAddress = notificationAddress;
 		}
 
-		public void onApplicationEvent(BlackListEvent event) {
+		public void onApplicationEvent(BlockedListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10669,25 +10664,26 @@ shows such a class:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListNotifier : ApplicationListener<BlackListEvent> {
+	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
 
 		lateinit var notificationAddres: String
 
-		override fun onApplicationEvent(event: BlackListEvent) {
+		override fun onApplicationEvent(event: BlockedListEvent) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
 ----
 
 Notice that `ApplicationListener` is generically parameterized with the type of your
-custom event (`BlackListEvent` in the preceding example). This means that the `onApplicationEvent()` method can
-remain type-safe, avoiding any need for downcasting. You can register as many event
-listeners as you wish, but note that, by default, event listeners receive events
-synchronously. This means that the `publishEvent()` method blocks until all listeners have
-finished processing the event. One advantage of this synchronous and single-threaded
-approach is that, when a listener receives an event, it operates inside the transaction
-context of the publisher if a transaction context is available. If another strategy for
-event publication becomes necessary, see the javadoc for Spring's
+custom event (`BlockedListEvent` in the preceding example). This means that the
+`onApplicationEvent()` method can remain type-safe, avoiding any need for downcasting.
+You can register as many event listeners as you wish, but note that, by default, event
+listeners receive events synchronously. This means that the `publishEvent()` method
+blocks until all listeners have finished processing the event. One advantage of this
+synchronous and single-threaded approach is that, when a listener receives an event, it
+operates inside the transaction context of the publisher if a transaction context is
+available. If another strategy for event publication becomes necessary, see the javadoc
+for Spring's
 {api-spring-framework}/context/event/ApplicationEventMulticaster.html[`ApplicationEventMulticaster`] interface
 and {api-spring-framework}/context/event/SimpleApplicationEventMulticaster.html[`SimpleApplicationEventMulticaster`]
 implementation for configuration options.
@@ -10698,7 +10694,7 @@ the classes above:
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="emailService" class="example.EmailService">
-		<property name="blackList">
+		<property name="blockedList">
 			<list>
 				<value>known.spammer@example.org</value>
 				<value>known.hacker@example.org</value>
@@ -10707,15 +10703,15 @@ the classes above:
 		</property>
 	</bean>
 
-	<bean id="blackListNotifier" class="example.BlackListNotifier">
-		<property name="notificationAddress" value="blacklist@example.org"/>
+	<bean id="blockedListNotifier" class="example.BlockedListNotifier">
+		<property name="notificationAddress" value="blockedlist@example.org"/>
 	</bean>
 ----
 
 Putting it all together, when the `sendEmail()` method of the `emailService` bean is
-called, if there are any email messages that should be blacklisted, a custom event of type
-`BlackListEvent` is published. The `blackListNotifier` bean is registered as an
-`ApplicationListener` and receives the `BlackListEvent`, at which point it can
+called, if there are any email messages that should be blocked, a custom event of type
+`BlockedListEvent` is published. The `blockedListNotifier` bean is registered as an
+`ApplicationListener` and receives the `BlockedListEvent`, at which point it can
 notify appropriate parties.
 
 NOTE: Spring's eventing mechanism is designed for simple communication between Spring beans
@@ -10731,13 +10727,13 @@ architectures that build upon the well-known Spring programming model.
 ==== Annotation-based Event Listeners
 
 As of Spring 4.2, you can register an event listener on any public method of a managed
-bean by using the `@EventListener` annotation. The `BlackListNotifier` can be rewritten as
+bean by using the `@EventListener` annotation. The `BlockedListNotifier` can be rewritten as
 follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	public class BlackListNotifier {
+	public class BlockedListNotifier {
 
 		private String notificationAddress;
 
@@ -10746,7 +10742,7 @@ follows:
 		}
 
 		@EventListener
-		public void processBlackListEvent(BlackListEvent event) {
+		public void processBlockedListEvent(BlockedListEvent event) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10754,12 +10750,12 @@ follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	class BlackListNotifier {
+	class BlockedListNotifier {
 
 		lateinit var notificationAddress: String
 
 		@EventListener
-		fun processBlackListEvent(event: BlackListEvent) {
+		fun processBlockedListEvent(event: BlockedListEvent) {
 			// notify appropriate parties via notificationAddress...
 		}
 	}
@@ -10802,7 +10798,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Java
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	public void processBlackListEvent(BlackListEvent blEvent) {
+	public void processBlockedListEvent(BlockedListEvent blockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10810,7 +10806,7 @@ The following example shows how our notifier can be rewritten to be invoked only
 .Kotlin
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
-	fun processBlackListEvent(blEvent: BlackListEvent) {
+	fun processBlockedListEvent(blockedListEvent: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10852,7 +10848,7 @@ method signature to return the event that should be published, as the following 
 .Java
 ----
 	@EventListener
-	public ListUpdateEvent handleBlackListEvent(BlackListEvent event) {
+	public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
 		// notify appropriate parties via notificationAddress and
 		// then publish a ListUpdateEvent...
 	}
@@ -10861,7 +10857,7 @@ method signature to return the event that should be published, as the following 
 .Kotlin
 ----
 	@EventListener
-	fun handleBlackListEvent(event: BlackListEvent): ListUpdateEvent {
+	fun handleBlockedListEvent(event: BlockedListEvent): ListUpdateEvent {
 		// notify appropriate parties via notificationAddress and
 		// then publish a ListUpdateEvent...
 	}
@@ -10870,7 +10866,7 @@ method signature to return the event that should be published, as the following 
 NOTE: This feature is not supported for
 <<context-functionality-events-async, asynchronous listeners>>.
 
-This new method publishes a new `ListUpdateEvent` for every `BlackListEvent` handled by the
+This new method publishes a new `ListUpdateEvent` for every `BlockedListEvent` handled by the
 method above. If you need to publish several events, you can return a `Collection` of events
 instead.
 
@@ -10887,8 +10883,8 @@ The following example shows how to do so:
 ----
 	@EventListener
 	@Async
-	public void processBlackListEvent(BlackListEvent event) {
-		// BlackListEvent is processed in a separate thread
+	public void processBlockedListEvent(BlockedListEvent event) {
+		// BlockedListEvent is processed in a separate thread
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -10896,8 +10892,8 @@ The following example shows how to do so:
 ----
 	@EventListener
 	@Async
-	fun processBlackListEvent(event: BlackListEvent) {
-		// BlackListEvent is processed in a separate thread
+	fun processBlockedListEvent(event: BlockedListEvent) {
+		// BlockedListEvent is processed in a separate thread
 	}
 ----
 
@@ -10922,7 +10918,7 @@ annotation to the method declaration, as the following example shows:
 ----
 	@EventListener
 	@Order(42)
-	public void processBlackListEvent(BlackListEvent event) {
+	public void processBlockedListEvent(BlockedListEvent event) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
@@ -10931,7 +10927,7 @@ annotation to the method declaration, as the following example shows:
 ----
 	@EventListener
 	@Order(42)
-	fun processBlackListEvent(event: BlackListEvent) {
+	fun processBlockedListEvent(event: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----

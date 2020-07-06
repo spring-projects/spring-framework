@@ -16,9 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.server.PathContainer;
 
 /**
@@ -36,8 +33,6 @@ import org.springframework.http.server.PathContainer;
  * @since 5.0
  */
 public class PathPatternParser {
-
-	private static final Log logger = LogFactory.getLog(PathPatternParser.class);
 
 	private boolean matchOptionalTrailingSeparator = true;
 
@@ -114,12 +109,38 @@ public class PathPatternParser {
 	 * @throws PatternParseException in case of parse errors
 	 */
 	public PathPattern parse(String pathPattern) throws PatternParseException {
-		int wildcardIndex = pathPattern.indexOf("**" + this.pathOptions.separator());
-		if (wildcardIndex != -1 && wildcardIndex != pathPattern.length() - 3) {
-			logger.warn("'**' patterns are not supported in the middle of patterns and will be rejected in the future. " +
-					"Consider using '*' instead for matching a single path segment.");
-		}
 		return new InternalPathPatternParser(this).parse(pathPattern);
 	}
 
+
+	/**
+	 * Shared, read-only instance of {@code PathPatternParser}. Uses default settings:
+	 * <ul>
+	 * <li>{@code matchOptionalTrailingSeparator=true}
+	 * <li>{@code caseSensitivetrue}
+	 * <li>{@code pathOptions=PathContainer.Options.HTTP_PATH}
+	 * </ul>
+	 */
+	public final static PathPatternParser defaultInstance = new PathPatternParser() {
+
+		@Override
+		public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
+			raiseError();
+		}
+
+		@Override
+		public void setCaseSensitive(boolean caseSensitive) {
+			raiseError();
+		}
+
+		@Override
+		public void setPathOptions(PathContainer.Options pathOptions) {
+			raiseError();
+		}
+
+		private void raiseError() {
+			throw new UnsupportedOperationException(
+					"This is a read-only, shared instance that cannot be modified");
+		}
+	};
 }

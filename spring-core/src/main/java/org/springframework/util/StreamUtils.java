@@ -87,9 +87,9 @@ public abstract class StreamUtils {
 		StringBuilder out = new StringBuilder();
 		InputStreamReader reader = new InputStreamReader(in, charset);
 		char[] buffer = new char[BUFFER_SIZE];
-		int bytesRead = -1;
-		while ((bytesRead = reader.read(buffer)) != -1) {
-			out.append(buffer, 0, bytesRead);
+		int charsRead;
+		while ((charsRead = reader.read(buffer)) != -1) {
+			out.append(buffer, 0, charsRead);
 		}
 		return out.toString();
 	}
@@ -127,10 +127,11 @@ public abstract class StreamUtils {
 		Assert.notNull(out, "No OutputStream specified");
 
 		out.write(in);
+		out.flush();
 	}
 
 	/**
-	 * Copy the contents of the given String to the given output OutputStream.
+	 * Copy the contents of the given String to the given OutputStream.
 	 * <p>Leaves the stream open when done.
 	 * @param in the String to copy from
 	 * @param charset the Charset
@@ -161,7 +162,7 @@ public abstract class StreamUtils {
 
 		int byteCount = 0;
 		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead = -1;
+		int bytesRead;
 		while ((bytesRead = in.read(buffer)) != -1) {
 			out.write(buffer, 0, bytesRead);
 			byteCount += bytesRead;

@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.ReplayProcessor;
 import reactor.util.retry.Retry;
 
 import org.springframework.context.annotation.Bean;
@@ -81,15 +80,16 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	private void testEcho() {
 		int count = 100;
 		Flux<String> input = Flux.range(1, count).map(index -> "msg-" + index);
-		ReplayProcessor<Object> output = ReplayProcessor.create(count);
-		this.client.execute(getUrl("/echo"), session -> session
-				.send(input.map(session::textMessage))
-				.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
-				.subscribeWith(output)
-				.then())
+		AtomicReference<List<String>> actualRef = new AtomicReference<>();
+		this.client.execute(getUrl("/echo"), session ->
+				session.send(input.map(session::textMessage))
+						.thenMany(session.receive().take(count).map(WebSocketMessage::getPayloadAsText))
+						.collectList()
+						.doOnNext(actualRef::set)
+						.then())
 				.block(TIMEOUT);
-		assertThat(output.isTerminated()).isTrue();
-		assertThat(output.collectList().block()).isEqualTo(input.collectList().block());
+		assertThat(actualRef.get()).isNotNull();
+		assertThat(actualRef.get()).isEqualTo(input.collectList().block());
 	}
 
 	@ParameterizedWebSocketTest
@@ -147,9 +147,11 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
+		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.create();
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
+					session.closeStatus().subscribe(statusProcessor);
 					return session.receive()
 							.doOnNext(s -> logger.debug("inbound " + s))
 							.then()
@@ -158,6 +160,8 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 							);
 				})
 				.block(TIMEOUT);
+
+		assertThat(statusProcessor.block()).isEqualTo(CloseStatus.GOING_AWAY);
 	}
 
 	@ParameterizedWebSocketTest

@@ -252,11 +252,6 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			this.entityType = entityType;
 		}
 
-		private static <T> boolean isResource(T entity) {
-			return !(entity instanceof InputStreamResource) &&
-					(entity instanceof Resource);
-		}
-
 		@Override
 		public T entity() {
 			return this.entity;

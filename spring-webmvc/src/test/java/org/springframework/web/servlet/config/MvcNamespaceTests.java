@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,9 +85,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.RequestToViewNameTranslator;
+import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -154,6 +158,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Marten Deinum
  */
 public class MvcNamespaceTests {
 
@@ -221,6 +226,10 @@ public class MvcNamespaceTests {
 		assertThat(appContext.getBean(ConversionService.class)).isNotNull();
 		assertThat(appContext.getBean(LocalValidatorFactoryBean.class)).isNotNull();
 		assertThat(appContext.getBean(Validator.class)).isNotNull();
+		assertThat(appContext.getBean("themeResolver", ThemeResolver.class)).isNotNull();
+		assertThat(appContext.getBean("localeResolver", LocaleResolver.class)).isNotNull();
+		assertThat(appContext.getBean("flashMapManager", FlashMapManager.class)).isNotNull();
+		assertThat(appContext.getBean("viewNameTranslator", RequestToViewNameTranslator.class)).isNotNull();
 
 		// default web binding initializer behavior test
 		request = new MockHttpServletRequest("GET", "/");
@@ -341,6 +350,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 

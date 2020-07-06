@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 /**
@@ -22,13 +23,14 @@ package org.springframework.web.util;
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see DefaultUriBuilderFactory
  */
 public interface UriBuilderFactory extends UriTemplateHandler {
 
 	/**
 	 * Initialize a builder with the given URI template.
 	 * @param uriTemplate the URI template to use
-	 * @return the URI builder instance
+	 * @return the builder instance
 	 */
 	UriBuilder uriString(String uriTemplate);
 

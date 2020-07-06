@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -346,16 +346,11 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		byte[] bytes = {'a', 'b', 'c'};
 		buffer.write(bytes);
 
-		InputStream inputStream = buffer.asInputStream(true);
-
-		try {
+		try (InputStream inputStream = buffer.asInputStream(true)) {
 			byte[] result = new byte[3];
 			int len = inputStream.read(result);
 			assertThat(len).isEqualTo(3);
 			assertThat(result).isEqualTo(bytes);
-		}
-		finally {
-			inputStream.close();
 		}
 
 		// AbstractDataBufferAllocatingTests.leakDetector will verify the buffer's release

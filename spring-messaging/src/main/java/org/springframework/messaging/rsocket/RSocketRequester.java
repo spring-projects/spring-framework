@@ -277,6 +277,12 @@ public interface RSocketRequester {
 		RequestSpec metadata(Consumer<MetadataSpec<?>> configurer);
 
 		/**
+		 * Perform a {@link RSocket#metadataPush(Payload) metadataPush}.
+		 * @since 5.3
+		 */
+		Mono<Void> sendMetadata();
+
+		/**
 		 * Provide payload data for the request. This can be one of:
 		 * <ul>
 		 * <li>Concrete value
@@ -344,7 +350,12 @@ public interface RSocketRequester {
 	interface RetrieveSpec {
 
 		/**
-		 * Perform a {@link RSocket#fireAndForget fireAndForget}.
+		 * Perform a {@link RSocket#fireAndForget fireAndForget} sending the
+		 * provided data and metadata.
+		 * @return a completion that indicates if the payload was sent
+		 * successfully or not. Note, however that is a one-way send and there
+		 * is no indication of whether or how the even was handled on the
+		 * remote end.
 		 */
 		Mono<Void> send();
 

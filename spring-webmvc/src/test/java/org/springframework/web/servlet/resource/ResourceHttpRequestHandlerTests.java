@@ -152,7 +152,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "versionString/foo.css");
 		this.handler.handleRequest(this.request, this.response);
 
-		assertThat(this.response.getHeader("ETag")).isEqualTo("\"versionString\"");
+		assertThat(this.response.getHeader("ETag")).isEqualTo("W/\"versionString\"");
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
 	}
@@ -242,6 +242,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-13658
+	@SuppressWarnings("deprecation")
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("bar", new MediaType("foo", "bar"));
@@ -263,6 +264,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-14577
+	@SuppressWarnings("deprecation")
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);

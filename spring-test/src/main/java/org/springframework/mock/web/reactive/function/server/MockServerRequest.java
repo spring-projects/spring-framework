@@ -45,7 +45,6 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -63,11 +62,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Arjen Poutsma
  * @since 5.0
- * @deprecated as of 5.2.5 in favor of
- * {@link ServerRequest#create(ServerWebExchange, List)} combined with
- * {@link MockServerWebExchange}.
  */
-@Deprecated
 public final class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;

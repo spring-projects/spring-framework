@@ -172,9 +172,7 @@ public abstract class ExtendedEntityManagerCreator {
 		Assert.notNull(emf, "EntityManagerFactory must not be null");
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			EntityManagerFactory nativeEmf = emfInfo.getNativeEntityManagerFactory();
-			EntityManager rawEntityManager = (!CollectionUtils.isEmpty(properties) ?
-					nativeEmf.createEntityManager(properties) : nativeEmf.createEntityManager());
+			EntityManager rawEntityManager = emfInfo.createNativeEntityManager(properties);
 			return createProxy(rawEntityManager, emfInfo, true, synchronizedWithTransaction);
 		}
 		else {
@@ -300,60 +298,58 @@ public abstract class ExtendedEntityManagerCreator {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of EntityManager proxy.
-				return hashCode();
-			}
-			else if (method.getName().equals("getTargetEntityManager")) {
-				// Handle EntityManagerProxy interface.
-				return this.target;
-			}
-			else if (method.getName().equals("unwrap")) {
-				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null) {
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of EntityManager proxy.
+					return hashCode();
+				case "getTargetEntityManager":
+					// Handle EntityManagerProxy interface.
 					return this.target;
-				}
-				else if (targetClass.isInstance(proxy)) {
-					return proxy;
-				}
-			}
-			else if (method.getName().equals("isOpen")) {
-				if (this.containerManaged) {
-					return true;
-				}
-			}
-			else if (method.getName().equals("close")) {
-				if (this.containerManaged) {
-					throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
-				}
-				ExtendedEntityManagerSynchronization synch = (ExtendedEntityManagerSynchronization)
-						TransactionSynchronizationManager.getResource(this.target);
-				if (synch != null) {
-					// Local transaction joined - don't actually call close() before transaction completion
-					synch.closeOnCompletion = true;
+				case "unwrap":
+					// Handle JPA 2.0 unwrap method - could be a proxy match.
+					Class<?> targetClass = (Class<?>) args[0];
+					if (targetClass == null) {
+						return this.target;
+					}
+					else if (targetClass.isInstance(proxy)) {
+						return proxy;
+					}
+					break;
+				case "isOpen":
+					if (this.containerManaged) {
+						return true;
+					}
+					break;
+				case "close":
+					if (this.containerManaged) {
+						throw new IllegalStateException("Invalid usage: Cannot close a container-managed EntityManager");
+					}
+					ExtendedEntityManagerSynchronization synch = (ExtendedEntityManagerSynchronization)
+							TransactionSynchronizationManager.getResource(this.target);
+					if (synch != null) {
+						// Local transaction joined - don't actually call close() before transaction completion
+						synch.closeOnCompletion = true;
+						return null;
+					}
+					break;
+				case "getTransaction":
+					if (this.synchronizedWithTransaction) {
+						throw new IllegalStateException(
+								"Cannot obtain local EntityTransaction from a transaction-synchronized EntityManager");
+					}
+					break;
+				case "joinTransaction":
+					doJoinTransaction(true);
 					return null;
-				}
-			}
-			else if (method.getName().equals("getTransaction")) {
-				if (this.synchronizedWithTransaction) {
-					throw new IllegalStateException(
-							"Cannot obtain local EntityTransaction from a transaction-synchronized EntityManager");
-				}
-			}
-			else if (method.getName().equals("joinTransaction")) {
-				doJoinTransaction(true);
-				return null;
-			}
-			else if (method.getName().equals("isJoinedToTransaction")) {
-				// Handle JPA 2.1 isJoinedToTransaction method for the non-JTA case.
-				if (!this.jta) {
-					return TransactionSynchronizationManager.hasResource(this.target);
-				}
+				case "isJoinedToTransaction":
+					// Handle JPA 2.1 isJoinedToTransaction method for the non-JTA case.
+					if (!this.jta) {
+						return TransactionSynchronizationManager.hasResource(this.target);
+					}
+					break;
 			}
 
 			// Do automatic joining if required. Excludes toString, equals, hashCode calls.
@@ -443,7 +439,7 @@ public abstract class ExtendedEntityManagerCreator {
 		@Nullable
 		private final PersistenceExceptionTranslator exceptionTranslator;
 
-		public volatile boolean closeOnCompletion = false;
+		public volatile boolean closeOnCompletion;
 
 		public ExtendedEntityManagerSynchronization(
 				EntityManager em, @Nullable PersistenceExceptionTranslator exceptionTranslator) {

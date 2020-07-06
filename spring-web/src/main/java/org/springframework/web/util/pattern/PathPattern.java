@@ -47,9 +47,12 @@ import org.springframework.util.StringUtils;
  * and captures it as a variable named "spring"</li>
  * </ul>
  *
- * Notable behavior difference with {@code AntPathMatcher}:<br>
- * {@code **} and its capturing variant <code>{*spring}</code> cannot be used in the middle of a pattern
- * string, only at the end: {@code /pages/{**}} is valid, but {@code /pages/{**}/details} is not.
+ * <p><strong>Note:</strong> In contrast to
+ * {@link org.springframework.util.AntPathMatcher}, {@code **} is supported only
+ * at the end of a pattern. For example {@code /pages/{**}} is valid but
+ * {@code /pages/{**}/details} is not. The same applies also to the capturing
+ * variant <code>{*spring}</code>. The aim is to eliminate ambiguity when
+ * comparing patterns for specificity.
  *
  * <h3>Examples</h3>
  * <ul>
@@ -187,7 +190,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @since 5.2
 	 */
 	public boolean hasPatternSyntax() {
-		return (this.score > 0 || this.patternString.indexOf('?') != -1);
+		return (this.score > 0 || this.catchAll || this.patternString.indexOf('?') != -1);
 	}
 
 	/**
