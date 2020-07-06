@@ -524,10 +524,10 @@ matching.
 [[aop-common-pointcuts]]
 ==== Sharing Common Pointcut Definitions
 
-When working with enterprise applications, developers often want to refer to modules of the
-application and particular sets of operations from within several aspects. We recommend
-defining a `SystemArchitecture` aspect that captures common pointcut expressions for
-this purpose. Such an aspect typically resembles the following example:
+When working with enterprise applications, developers often want to refer to modules of
+the application and particular sets of operations from within several aspects. We
+recommend defining a `CommonPointcuts` aspect that captures common pointcut expressions
+for this purpose. Such an aspect typically resembles the following example:
 
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
@@ -538,7 +538,7 @@ this purpose. Such an aspect typically resembles the following example:
 	import org.aspectj.lang.annotation.Pointcut;
 
 	@Aspect
-	public class SystemArchitecture {
+	public class CommonPointcuts {
 
 		/**
 		 * A join point is in the web layer if the method is defined
@@ -599,10 +599,8 @@ this purpose. Such an aspect typically resembles the following example:
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Pointcut
 
-	import org.springframework.aop.Pointcut
-
 	@Aspect
-	class SystemArchitecture {
+	class CommonPointcuts {
 
 		/**
 		* A join point is in the web layer if the method is defined
@@ -669,7 +667,7 @@ write the following:
 ----
 	<aop:config>
 		<aop:advisor
-			pointcut="com.xyz.myapp.SystemArchitecture.businessService()"
+			pointcut="com.xyz.myapp.CommonPointcuts.businessService()"
 			advice-ref="tx-advice"/>
 	</aop:config>
 
@@ -923,7 +921,7 @@ You can declare before advice in an aspect by using the `@Before` annotation:
 	@Aspect
 	public class BeforeExample {
 
-		@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		public void doAccessCheck() {
 			// ...
 		}
@@ -939,7 +937,7 @@ You can declare before advice in an aspect by using the `@Before` annotation:
 	@Aspect
 	class BeforeExample {
 
-		@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		fun doAccessCheck() {
 			// ...
 		}
@@ -999,7 +997,7 @@ declare it by using the `@AfterReturning` annotation:
 	@Aspect
 	public class AfterReturningExample {
 
-		@AfterReturning("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@AfterReturning("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		public void doAccessCheck() {
 			// ...
 		}
@@ -1015,7 +1013,7 @@ declare it by using the `@AfterReturning` annotation:
 	@Aspect
 	class AfterReturningExample {
 
-		@AfterReturning("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@AfterReturning("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		fun doAccessCheck() {
 			// ...
 		}
@@ -1040,7 +1038,7 @@ the following example shows:
 	public class AfterReturningExample {
 
 		@AfterReturning(
-			pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			pointcut="com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
 			returning="retVal")
 		public void doAccessCheck(Object retVal) {
 			// ...
@@ -1058,7 +1056,7 @@ the following example shows:
 	class AfterReturningExample {
 
 		@AfterReturning(
-			pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			pointcut = "com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
 			returning = "retVal")
 		fun doAccessCheck(retVal: Any) {
 			// ...
@@ -1093,7 +1091,7 @@ example shows:
 	@Aspect
 	public class AfterThrowingExample {
 
-		@AfterThrowing("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@AfterThrowing("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		public void doRecoveryActions() {
 			// ...
 		}
@@ -1109,7 +1107,7 @@ example shows:
 	@Aspect
 	class AfterThrowingExample {
 
-		@AfterThrowing("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@AfterThrowing("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		fun doRecoveryActions() {
 			// ...
 		}
@@ -1133,7 +1131,7 @@ following example shows how to do so:
 	public class AfterThrowingExample {
 
 		@AfterThrowing(
-			pointcut="com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			pointcut="com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
 			throwing="ex")
 		public void doRecoveryActions(DataAccessException ex) {
 			// ...
@@ -1151,7 +1149,7 @@ following example shows how to do so:
 	class AfterThrowingExample {
 
 		@AfterThrowing(
-			pointcut = "com.xyz.myapp.SystemArchitecture.dataAccessOperation()",
+			pointcut = "com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
 			throwing = "ex")
 		fun doRecoveryActions(ex: DataAccessException) {
 			// ...
@@ -1184,7 +1182,7 @@ The following example shows how to use after finally advice:
 	@Aspect
 	public class AfterFinallyExample {
 
-		@After("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@After("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		public void doReleaseLock() {
 			// ...
 		}
@@ -1200,7 +1198,7 @@ The following example shows how to use after finally advice:
 	@Aspect
 	class AfterFinallyExample {
 
-		@After("com.xyz.myapp.SystemArchitecture.dataAccessOperation()")
+		@After("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
 		fun doReleaseLock() {
 			// ...
 		}
@@ -1252,7 +1250,7 @@ The following example shows how to use around advice:
 	@Aspect
 	public class AroundExample {
 
-		@Around("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
 		public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
 			// start stopwatch
 			Object retVal = pjp.proceed();
@@ -1272,7 +1270,7 @@ The following example shows how to use around advice:
 	@Aspect
 	class AroundExample {
 
-		@Around("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
 		fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
 			// start stopwatch
 			val retVal = pjp.proceed()
@@ -1331,7 +1329,7 @@ You could write the following:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
 	public void validateAccount(Account account) {
 		// ...
 	}
@@ -1339,7 +1337,7 @@ You could write the following:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
 	fun validateAccount(account: Account) {
 		// ...
 	}
@@ -1358,7 +1356,7 @@ from the advice. This would look as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Pointcut("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
 	private void accountDataAccessOperation(Account account) {}
 
 	@Before("accountDataAccessOperation(account)")
@@ -1369,7 +1367,7 @@ from the advice. This would look as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Pointcut("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
 	private fun accountDataAccessOperation(account: Account) {
 	}
 
@@ -1612,7 +1610,7 @@ The following example shows how to do so:
 .Java
 ----
 	@Around("execution(List<Account> find*(..)) && " +
-			"com.xyz.myapp.SystemArchitecture.inDataAccessLayer() && " +
+			"com.xyz.myapp.CommonPointcuts.inDataAccessLayer() && " +
 			"args(accountHolderNamePattern)")
 	public Object preProcessQueryPattern(ProceedingJoinPoint pjp,
 			String accountHolderNamePattern) throws Throwable {
@@ -1624,7 +1622,7 @@ The following example shows how to do so:
 .Kotlin
 ----
 	@Around("execution(List<Account> find*(..)) && " +
-			"com.xyz.myapp.SystemArchitecture.inDataAccessLayer() && " +
+			"com.xyz.myapp.CommonPointcuts.inDataAccessLayer() && " +
 			"args(accountHolderNamePattern)")
 	fun preProcessQueryPattern(pjp: ProceedingJoinPoint,
 							accountHolderNamePattern: String): Any {
@@ -1695,7 +1693,7 @@ the `UsageTracked` interface (to expose statistics via JMX for example):
 		@DeclareParents(value="com.xzy.myapp.service.*+", defaultImpl=DefaultUsageTracked.class)
 		public static UsageTracked mixin;
 
-		@Before("com.xyz.myapp.SystemArchitecture.businessService() && this(usageTracked)")
+		@Before("com.xyz.myapp.CommonPointcuts.businessService() && this(usageTracked)")
 		public void recordUsage(UsageTracked usageTracked) {
 			usageTracked.incrementUseCount();
 		}
@@ -1713,7 +1711,7 @@ the `UsageTracked` interface (to expose statistics via JMX for example):
 			lateinit var mixin: UsageTracked
 		}
 
-		@Before("com.xyz.myapp.SystemArchitecture.businessService() && this(usageTracked)")
+		@Before("com.xyz.myapp.CommonPointcuts.businessService() && this(usageTracked)")
 		fun recordUsage(usageTracked: UsageTracked) {
 			usageTracked.incrementUseCount()
 		}
@@ -1757,12 +1755,12 @@ annotation. Consider the following example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
+	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
 	public class MyAspect {
 
 		private int someState;
 
-		@Before("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Before("com.xyz.myapp.CommonPointcuts.businessService()")
 		public void recordServiceUsage() {
 			// ...
 		}
@@ -1772,12 +1770,12 @@ annotation. Consider the following example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Aspect("perthis(com.xyz.myapp.SystemArchitecture.businessService())")
+	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
 	class MyAspect {
 
 		private val someState: Int = 0
 
-		@Before("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Before("com.xyz.myapp.CommonPointcuts.businessService()")
 		fun recordServiceUsage() {
 			// ...
 		}
@@ -1841,7 +1839,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 			this.order = order;
 		}
 
-		@Around("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
 		public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 			int numAttempts = 0;
 			PessimisticLockingFailureException lockFailureException;
@@ -1881,7 +1879,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 			this.order = order
 		}
 
-		@Around("com.xyz.myapp.SystemArchitecture.businessService()")
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
 		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
 			var numAttempts = 0
 			var lockFailureException: PessimisticLockingFailureException
@@ -1944,7 +1942,7 @@ expression so that only `@Idempotent` operations match, as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Around("com.xyz.myapp.SystemArchitecture.businessService() && " +
+	@Around("com.xyz.myapp.CommonPointcuts.businessService() && " +
 			"@annotation(com.xyz.myapp.service.Idempotent)")
 	public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
 		// ...
@@ -1953,7 +1951,7 @@ expression so that only `@Idempotent` operations match, as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Around("com.xyz.myapp.SystemArchitecture.businessService() && " +
+	@Around("com.xyz.myapp.CommonPointcuts.businessService() && " +
 			"@annotation(com.xyz.myapp.service.Idempotent)")
 	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
 		// ...
@@ -2048,12 +2046,12 @@ pointcut expression. Another way of defining the above pointcut would be as foll
 	<aop:config>
 
 		<aop:pointcut id="businessService"
-			expression="com.xyz.myapp.SystemArchitecture.businessService()"/>
+			expression="com.xyz.myapp.CommonPointcuts.businessService()"/>
 
 	</aop:config>
 ----
 
-Assume that you have a `SystemArchitecture` aspect as described in <<aop-common-pointcuts>>.
+Assume that you have a `CommonPointcuts` aspect as described in <<aop-common-pointcuts>>.
 
 Then declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut,
 as the following example shows:
@@ -2617,7 +2615,7 @@ through JMX for example.)
 			default-impl="com.xyz.myapp.service.tracking.DefaultUsageTracked"/>
 
 		<aop:before
-			pointcut="com.xyz.myapp.SystemArchitecture.businessService()
+			pointcut="com.xyz.myapp.CommonPointcuts.businessService()
 				and this(usageTracked)"
 				method="recordUsage"/>
 
@@ -3606,7 +3604,7 @@ fully qualified class names:
 		// the creation of a new bean (any object in the domain model)
 		protected pointcut beanCreation(Object beanInstance) :
 			initialization(new(..)) &&
-			SystemArchitecture.inDomainModel() &&
+			CommonPointcuts.inDomainModel() &&
 			this(beanInstance);
 	}
 ----
