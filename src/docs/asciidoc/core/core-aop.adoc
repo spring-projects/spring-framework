@@ -1327,7 +1327,7 @@ You could write the following:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Before("execution(* com.xyz.myapp.SystemArchitecture.dataAccessOperation(..)) && args(account,..)")
 	public void validateAccount(Account account) {
 		// ...
 	}
@@ -1335,7 +1335,7 @@ You could write the following:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Before("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Before("execution(* com.xyz.myapp.SystemArchitecture.dataAccessOperation(..)) && args(account,..)")
 	fun validateAccount(account: Account) {
 		// ...
 	}
@@ -1354,7 +1354,7 @@ from the advice. This would look as follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Pointcut("execution(* com.xyz.myapp.SystemArchitecture.dataAccessOperation(..)) && args(account,..)")
 	private void accountDataAccessOperation(Account account) {}
 
 	@Before("accountDataAccessOperation(account)")
@@ -1365,7 +1365,7 @@ from the advice. This would look as follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Pointcut("com.xyz.myapp.SystemArchitecture.dataAccessOperation() && args(account,..)")
+	@Pointcut("execution(* com.xyz.myapp.SystemArchitecture.dataAccessOperation(..)) && args(account,..)")
 	private fun accountDataAccessOperation(account: Account) {
 	}
 
