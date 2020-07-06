@@ -599,8 +599,6 @@ for this purpose. Such an aspect typically resembles the following example:
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Pointcut
 
-	import org.springframework.aop.Pointcut
-
 	@Aspect
 	class CommonPointcuts {
 
