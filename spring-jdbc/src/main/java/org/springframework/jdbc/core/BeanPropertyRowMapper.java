@@ -255,7 +255,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 				result.append('_').append(Character.toLowerCase(s));
 			}
 			else {
-				result.append(Character.toLowerCase(s));
+				result.append(s);
 			}
 		}
 		return result.toString();
