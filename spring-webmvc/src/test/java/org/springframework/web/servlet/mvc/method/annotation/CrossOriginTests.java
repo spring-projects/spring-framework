@@ -206,7 +206,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
+		assertThat(config.getAllowedOriginPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -218,7 +218,7 @@ class CrossOriginTests {
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertThat(config).isNotNull();
 		assertThat(config.getAllowedOrigins()).isNull();
-		assertThat(config.getAllowedOriginsPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
+		assertThat(config.getAllowedOriginPatterns()).isEqualTo(Collections.singletonList(".*\\.example\\.com"));
 		assertThat(config.getAllowCredentials()).isNull();
 	}
 
@@ -433,12 +433,12 @@ class CrossOriginTests {
 		public void customOriginDefinedViaPlaceholder() {
 		}
 
-		@CrossOrigin(originsPatterns = ".*\\.example\\.com")
+		@CrossOrigin(originPatterns = ".*\\.example\\.com")
 		@RequestMapping("/customOriginPattern")
 		public void customOriginPatternDefinedViaValueAttribute() {
 		}
 
-		@CrossOrigin(originsPatterns = "${myDomainPattern}")
+		@CrossOrigin(originPatterns = "${myDomainPattern}")
 		@RequestMapping("/customOriginPatternPlaceholder")
 		public void customOriginPatternDefinedViaPlaceholder() {
 		}

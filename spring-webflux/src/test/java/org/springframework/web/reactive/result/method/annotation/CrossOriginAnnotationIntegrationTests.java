@@ -282,12 +282,13 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	@Configuration
 	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/CrossOriginAnnotationIntegrationTests*")
-	@SuppressWarnings({"unused", "WeakerAccess"})
+	@SuppressWarnings("WeakerAccess")
 	static class WebConfig {
 	}
 
 
-	@RestController @SuppressWarnings("unused")
+	@RestController
+	@SuppressWarnings("unused")
 	private static class MethodLevelController {
 
 		@GetMapping("/no")
@@ -357,13 +358,13 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 			return "placeholder";
 		}
 
-		@CrossOrigin(originsPatterns = ".*\\.com")
+		@CrossOrigin(originPatterns = ".*\\.com")
 		@GetMapping("/origin-pattern-value-attribute")
 		public String customOriginPatternDefinedViaValueAttribute() {
 			return "pattern-value-attribute";
 		}
 
-		@CrossOrigin(originsPatterns = "${myOriginPattern}")
+		@CrossOrigin(originPatterns = "${myOriginPattern}")
 		@GetMapping("/origin-pattern-placeholder")
 		public String customOriginPatternDefinedViaPlaceholder() {
 			return "pattern-placeholder";

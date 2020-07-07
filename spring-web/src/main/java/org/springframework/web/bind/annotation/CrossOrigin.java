@@ -109,7 +109,7 @@ public @interface CrossOrigin {
 	 * See the Spring Framework reference for more on this filter.
 	 * @see #value
 	 */
-	String[] originsPatterns() default {};
+	String[] originPatterns() default {};
 
 	/**
 	 * The list of request headers that are permitted in actual requests,
