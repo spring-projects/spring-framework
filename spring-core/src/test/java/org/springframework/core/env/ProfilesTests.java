@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,11 +292,72 @@ public class ProfilesTests {
 
 	@Test
 	public void sensibleToString() {
-		assertEquals("spring & framework or java | kotlin",
-				Profiles.of("spring & framework", "java | kotlin").toString());
+		assertEquals("spring", Profiles.of("spring").toString());
+		assertEquals("(spring & framework) | (spring & java)", Profiles.of("(spring & framework) | (spring & java)").toString());
+		assertEquals("(spring&framework)|(spring&java)", Profiles.of("(spring&framework)|(spring&java)").toString());
+		assertEquals("spring & framework or java | kotlin", Profiles.of("spring & framework", "java | kotlin").toString());
+		assertEquals("java | kotlin or spring & framework", Profiles.of("java | kotlin", "spring & framework").toString());
 	}
 
-	private void assertMalformed(Supplier<Profiles> supplier) {
+	@Test
+	public void sensibleEquals() {
+		assertEqual("(spring & framework) | (spring & java)");
+		assertEqual("(spring&framework)|(spring&java)");
+		assertEqual("spring & framework", "java | kotlin");
+
+		// Ensure order of individual expressions does not affect equals().
+		String expression1 = "A | B";
+		String expression2 = "C & (D | E)";
+		Profiles profiles1 = Profiles.of(expression1, expression2);
+		Profiles profiles2 = Profiles.of(expression2, expression1);
+		assertEquals(profiles1, profiles2);
+		assertEquals(profiles2, profiles1);
+	}
+
+	private void assertEqual(String... expressions) {
+		Profiles profiles1 = Profiles.of(expressions);
+		Profiles profiles2 = Profiles.of(expressions);
+		assertEquals(profiles1, profiles2);
+		assertEquals(profiles2, profiles1);
+	}
+
+	@Test
+	public void sensibleHashCode() {
+		assertHashCode("(spring & framework) | (spring & java)");
+		assertHashCode("(spring&framework)|(spring&java)");
+		assertHashCode("spring & framework", "java | kotlin");
+
+		// Ensure order of individual expressions does not affect hashCode().
+		String expression1 = "A | B";
+		String expression2 = "C & (D | E)";
+		Profiles profiles1 = Profiles.of(expression1, expression2);
+		Profiles profiles2 = Profiles.of(expression2, expression1);
+		assertEquals(profiles1.hashCode(), profiles2.hashCode());
+	}
+
+	private void assertHashCode(String... expressions) {
+		Profiles profiles1 = Profiles.of(expressions);
+		Profiles profiles2 = Profiles.of(expressions);
+		assertEquals(profiles1.hashCode(), profiles2.hashCode());
+	}
+
+	@Test
+	public void equalsAndHashCodeAreNotBasedOnLogicalStructureOfNodesWithinExpressionTree() {
+		Profiles profiles1 = Profiles.of("A | B");
+		Profiles profiles2 = Profiles.of("B | A");
+
+		assertTrue(profiles1.matches(activeProfiles("A")));
+		assertTrue(profiles1.matches(activeProfiles("B")));
+		assertTrue(profiles2.matches(activeProfiles("A")));
+		assertTrue(profiles2.matches(activeProfiles("B")));
+
+		assertNotEquals(profiles1, profiles2);
+		assertNotEquals(profiles2, profiles1);
+		assertNotEquals(profiles1.hashCode(), profiles2.hashCode());
+	}
+
+
+	private static void assertMalformed(Supplier<Profiles> supplier) {
 		try {
 			supplier.get();
 			fail("Not malformed");
@@ -305,7 +366,7 @@ public class ProfilesTests {
 			assertTrue(ex.getMessage().contains("Malformed"));
 		}
 	}
-	
+
 	private static Predicate<String> activeProfiles(String... profiles) {
 		return new MockActiveProfiles(profiles);
 	}
