@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -197,6 +198,27 @@ public class IndexingTests {
 		catch (EvaluationException ex) {
 			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
 		}
+	}
+
+	public List<BigDecimal> decimals;
+
+	@Test
+	public void autoGrowWithoutDefaultConstructor() {
+		this.decimals = new ArrayList<>();
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "123.4");
+		assertThat(decimals.get(0)).isEqualTo(BigDecimal.valueOf(123.4));
+	}
+
+	@Test
+	public void indexIntoPropertyContainingNullList() {
+		this.decimals = new ArrayList<>();
+		this.decimals.add(null);
+		this.decimals.add(BigDecimal.ONE);
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
+		assertThat(decimals.get(0)).isEqualTo(BigDecimal.valueOf(9876.5));
+		assertThat(decimals.get(1)).isEqualTo(BigDecimal.ONE);
 	}
 
 	@Test
