@@ -1,0 +1,30 @@
+
+
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group 'org.springframework'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile(project(":spring-beans"))
+    compile(project(":spring-core"))
+    compile(project(":spring-context"))
+    compile(project(":spring-webmvc"))
+    compile(project(":spring-jdbc"))
+    compile(project(":spring-tx"))
+    compile(project(":spring-aop"))
+    optional("org.aspectj:aspectjweaver")
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compile group: 'javax.servlet.jsp.jstl', name: 'jstl-api', version: '1.2'
+    compile group: 'javax.servlet.jsp.jstl', name: 'jstl', version: '1.2'
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.22'
+    compile group: 'com.h2database', name: 'h2', version: '1.4.200'
+}

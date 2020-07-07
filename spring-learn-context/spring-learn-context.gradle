@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'org.springframework'
+version '5.2.6.BUILD-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile(project(":spring-beans"))
+    compile(project(":spring-core"))
+    compile(project(":spring-context"))
+    testCompile(testFixtures(project(":spring-beans")))
+    testCompile(testFixtures(project(":spring-context")))
+    testCompile(testFixtures(project(":spring-core")))
+}

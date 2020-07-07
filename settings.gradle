@@ -36,6 +36,8 @@ include "spring-webmvc"
 include "spring-websocket"
 include "framework-bom"
 include "integration-tests"
+include "spring-learn-context"
+include "spring-learn-web"
 
 rootProject.name = "spring"
 rootProject.children.each {project ->

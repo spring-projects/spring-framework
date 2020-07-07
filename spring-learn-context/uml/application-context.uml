@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="0.0" y="0.0">org.springframework.context.support.AbstractApplicationContext</node>
+    <node x="145.0" y="1739.0">org.springframework.context.support.AbstractXmlApplicationContext</node>
+    <node x="141.5" y="1842.0">org.springframework.context.support.ClassPathXmlApplicationContext</node>
+    <node x="83.0" y="1401.0">org.springframework.context.support.AbstractRefreshableApplicationContext</node>
+    <node x="96.0" y="1548.0">org.springframework.context.support.AbstractRefreshableConfigApplicationContext</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.springframework.context.support.AbstractXmlApplicationContext" target="org.springframework.context.support.AbstractRefreshableConfigApplicationContext">
+      <point x="0.0" y="-26.5" />
+      <point x="0.0" y="70.5" />
+    </edge>
+    <edge source="org.springframework.context.support.AbstractRefreshableConfigApplicationContext" target="org.springframework.context.support.AbstractRefreshableApplicationContext">
+      <point x="0.0" y="-70.5" />
+      <point x="0.0" y="48.5" />
+    </edge>
+    <edge source="org.springframework.context.support.ClassPathXmlApplicationContext" target="org.springframework.context.support.AbstractXmlApplicationContext">
+      <point x="0.0" y="-14.5" />
+      <point x="0.0" y="26.5" />
+    </edge>
+    <edge source="org.springframework.context.support.AbstractRefreshableApplicationContext" target="org.springframework.context.support.AbstractApplicationContext">
+      <point x="0.0" y="-48.5" />
+      <point x="0.0" y="675.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="320.0" y="279.0" />
+  <SelectedNodes>
+    <node>org.springframework.context.support.AbstractApplicationContext</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+
