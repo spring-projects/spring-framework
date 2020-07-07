@@ -712,16 +712,24 @@ public class Indexer extends SpelNodeImpl {
 				}
 				TypeDescriptor elementType = this.collectionEntryDescriptor.getElementTypeDescriptor();
 				try {
-					Constructor<?> ctor = ReflectionUtils.accessibleConstructor(elementType.getType());
+					Constructor<?> ctor = getConstructor(elementType.getType());
 					int newElements = this.index - this.collection.size();
 					while (newElements >= 0) {
-						this.collection.add(ctor.newInstance());
+						this.collection.add(ctor == null ? null : ctor.newInstance());
 						newElements--;
 					}
 				}
 				catch (Throwable ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
 				}
+			}
+		}
+
+		Constructor<?> getConstructor(Class<?> type) {
+			try {
+				return ReflectionUtils.accessibleConstructor(type);
+			} catch (Throwable ex) {
+				return null;
 			}
 		}
 
