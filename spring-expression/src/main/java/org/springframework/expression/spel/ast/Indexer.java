@@ -728,7 +728,8 @@ public class Indexer extends SpelNodeImpl {
 		Constructor<?> getConstructor(Class<?> type) {
 			try {
 				return ReflectionUtils.accessibleConstructor(type);
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				return null;
 			}
 		}
