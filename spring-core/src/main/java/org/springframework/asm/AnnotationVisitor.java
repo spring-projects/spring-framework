@@ -68,12 +68,13 @@ public abstract class AnnotationVisitor {
    *     calls. May be {@literal null}.
    */
   public AnnotationVisitor(final int api, final AnnotationVisitor annotationVisitor) {
-    if (api != Opcodes.ASM8
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
         && api != Opcodes.ASM7
         && api != Opcodes.ASM6
         && api != Opcodes.ASM5
         && api != Opcodes.ASM4
-        && api != Opcodes.ASM9_EXPERIMENTAL) {
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
     // SPRING PATCH: no preview mode check for ASM 9 experimental

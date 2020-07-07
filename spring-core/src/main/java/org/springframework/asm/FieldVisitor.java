@@ -38,8 +38,8 @@ public abstract class FieldVisitor {
 
   /**
    * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7} or {@link
-   * Opcodes#ASM8}.
+   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7}, {@link
+   * Opcodes#ASM8} or {@link Opcodes#ASM9}.
    */
   protected final int api;
 
@@ -50,8 +50,8 @@ public abstract class FieldVisitor {
    * Constructs a new {@link FieldVisitor}.
    *
    * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7} or {@link
-   *     Opcodes#ASM8}.
+   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7}, {@link
+   *     Opcodes#ASM8} or {@link Opcodes#ASM9}.
    */
   public FieldVisitor(final int api) {
     this(api, null);
@@ -67,12 +67,13 @@ public abstract class FieldVisitor {
    *     null.
    */
   public FieldVisitor(final int api, final FieldVisitor fieldVisitor) {
-    if (api != Opcodes.ASM8
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
         && api != Opcodes.ASM7
         && api != Opcodes.ASM6
         && api != Opcodes.ASM5
         && api != Opcodes.ASM4
-        && api != Opcodes.ASM9_EXPERIMENTAL) {
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
     // SPRING PATCH: no preview mode check for ASM 9 experimental

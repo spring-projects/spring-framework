@@ -37,8 +37,8 @@ package org.springframework.asm;
  */
 public abstract class RecordComponentVisitor {
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be {@link
-   * Opcodes#ASM8}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
+   * Opcodes#ASM8} or {@link Opcodes#ASM9}.
    */
   protected final int api;
 
@@ -50,7 +50,8 @@ public abstract class RecordComponentVisitor {
   /**
    * Constructs a new {@link RecordComponentVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be {@link Opcodes#ASM8}.
+   * @param api the ASM API version implemented by this visitor. Must be one of {@link Opcodes#ASM8}
+   *     or {@link Opcodes#ASM9}.
    */
   public RecordComponentVisitor(final int api) {
     this(api, null);
@@ -65,12 +66,13 @@ public abstract class RecordComponentVisitor {
    */
   public RecordComponentVisitor(
       final int api, final RecordComponentVisitor recordComponentVisitor) {
-    if (api != Opcodes.ASM8
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
         && api != Opcodes.ASM7
         && api != Opcodes.ASM6
         && api != Opcodes.ASM5
         && api != Opcodes.ASM4
-        && api != Opcodes.ASM9_EXPERIMENTAL) {
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
     // SPRING PATCH: no preview mode check for ASM 9 experimental
