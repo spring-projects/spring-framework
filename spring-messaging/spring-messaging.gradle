@@ -34,4 +34,5 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-core")
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 	testRuntime("com.sun.activation:javax.activation")
+	testRuntime(project(":spring-context"))
 }
