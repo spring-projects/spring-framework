@@ -161,8 +161,7 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 		ResponseEntity<String> entity = performOptions("/ambiguous", this.headers, String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("http://localhost:9000");
-		assertThat(entity.getHeaders().getAccessControlAllowMethods())
-				.containsExactly(HttpMethod.GET);
+		assertThat(entity.getHeaders().getAccessControlAllowMethods()).containsExactly(HttpMethod.GET);
 		assertThat(entity.getHeaders().getAccessControlAllowCredentials()).isEqualTo(true);
 		assertThat(entity.getHeaders().get(HttpHeaders.VARY))
 				.containsExactly(HttpHeaders.ORIGIN, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD,
@@ -177,12 +176,9 @@ class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegration
 
 		@Override
 		protected void addCorsMappings(CorsRegistry registry) {
-			registry.addMapping("/cors-restricted")
-					.allowedOrigins("https://foo")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/cors-restricted").allowedOrigins("https://foo").allowedMethods("GET", "POST");
 			registry.addMapping("/cors");
-			registry.addMapping("/ambiguous")
-					.allowedMethods("GET", "POST");
+			registry.addMapping("/ambiguous").allowedMethods("GET", "POST");
 		}
 	}
 

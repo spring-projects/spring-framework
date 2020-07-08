@@ -68,7 +68,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		context.register(WebConfig.class);
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://site1.com");
-		props.setProperty("myOriginPattern", ".*\\.com");
+		props.setProperty("myOriginPattern", "https://*.com");
 		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		context.register(PropertySourcesPlaceholderConfigurer.class);
 		context.refresh();
@@ -358,7 +358,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 			return "placeholder";
 		}
 
-		@CrossOrigin(originPatterns = ".*\\.com")
+		@CrossOrigin(originPatterns = "https://*.com")
 		@GetMapping("/origin-pattern-value-attribute")
 		public String customOriginPatternDefinedViaValueAttribute() {
 			return "pattern-value-attribute";
@@ -388,7 +388,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 			return "bar";
 		}
 
-		@CrossOrigin(allowCredentials = "true")
+		@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 		@GetMapping("/baz")
 		public String baz() {
 			return "baz";

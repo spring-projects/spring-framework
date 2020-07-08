@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.web.cors.CorsConfiguration;
@@ -77,37 +78,20 @@ public @interface CrossOrigin {
 	String[] value() default {};
 
 	/**
-	 * The list of allowed origins that be specific origins, e.g.
-	 * {@code "https://domain1.com"}, or {@code "*"} for all origins.
-	 * <p>A matched origin is listed in the {@code Access-Control-Allow-Origin}
-	 * response header of preflight actual CORS requests.
-	 * <p>By default all origins are allowed.
-	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
-	 * if present, in order to reflect the client-originated address.
-	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
-	 * central place whether to extract and use, or to discard such headers.
-	 * See the Spring Framework reference for more on this filter.
-	 * @see #value
+	 * A list of origins for which cross-origin requests are allowed. Please,
+	 * see {@link CorsConfiguration#setAllowedOrigins(List)} for details.
+	 * <p>By default all origins are allowed unless {@code originPatterns} is
+	 * also set in which case {@code originPatterns} is used instead.
 	 */
 	@AliasFor("value")
 	String[] origins() default {};
 
 	/**
-	 * The list of allowed origins patterns that be specific origins, e.g.
-	 * {@code ".*\.domain1\.com"}, or {@code ".*"} for matching all origins.
-	 * <p>A matched origin is listed in the {@code Access-Control-Allow-Origin}
-	 * response header of preflight actual CORS requests.
-	 * <p>By default all origins are allowed.
-	 * <p><strong>Note:</strong> CORS checks use values from "Forwarded"
-	 * (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>),
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" headers,
-	 * if present, in order to reflect the client-originated address.
-	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
-	 * central place whether to extract and use, or to discard such headers.
-	 * See the Spring Framework reference for more on this filter.
-	 * @see #value
+	 * Alternative to {@link #origins()} that supports origins declared via
+	 * wildcard patterns. Please, see
+	 * @link CorsConfiguration#setAllowedOriginPatterns(List)} for details.
+	 * <p>By default this is not set.
+	 * @since 5.3
 	 */
 	String[] originPatterns() default {};
 

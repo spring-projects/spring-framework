@@ -516,6 +516,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				CorsConfiguration globalConfig = getCorsConfigurationSource().getCorsConfiguration(request);
 				config = (globalConfig != null ? globalConfig.combine(config) : config);
 			}
+			if (config != null) {
+				config.validateAllowCredentials();
+			}
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 

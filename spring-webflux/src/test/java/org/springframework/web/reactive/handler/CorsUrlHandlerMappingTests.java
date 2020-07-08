@@ -113,7 +113,7 @@ public class CorsUrlHandlerMappingTests {
 	@Test
 	public void actualRequestWithGlobalPatternCorsConfig() throws Exception {
 		CorsConfiguration mappedConfig = new CorsConfiguration();
-		mappedConfig.addAllowedOriginPattern(".*\\.domain2.com");
+		mappedConfig.addAllowedOriginPattern("https://*.domain2.com");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
 		String origin = "https://example.domain2.com";
@@ -122,7 +122,8 @@ public class CorsUrlHandlerMappingTests {
 
 		assertThat(actual).isNotNull();
 		assertThat(actual).isSameAs(this.welcomeController);
-		assertThat(exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://example.domain2.com");
+		assertThat(exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
+				.isEqualTo("https://example.domain2.com");
 	}
 
 	@Test
@@ -197,7 +198,7 @@ public class CorsUrlHandlerMappingTests {
 		@Override
 		public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {
 			CorsConfiguration config = new CorsConfiguration();
-			config.addAllowedOrigin("*");
+			config.addAllowedOriginPattern("*");
 			config.setAllowCredentials(true);
 			return config;
 		}

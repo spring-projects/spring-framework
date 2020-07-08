@@ -123,14 +123,14 @@ class CorsAbstractHandlerMappingTests {
 	@PathPatternsParameterizedTest
 	void actualRequestWithMappedPatternCorsConfiguration(TestHandlerMapping mapping) throws Exception {
 		CorsConfiguration config = new CorsConfiguration();
-		config.addAllowedOriginPattern(".*\\.domain2\\.com");
+		config.addAllowedOriginPattern("http://*.domain2.com");
 		mapping.setCorsConfigurations(Collections.singletonMap("/foo", config));
 		MockHttpServletRequest request = getCorsRequest("/foo");
 		HandlerExecutionChain chain = mapping.getHandler(request);
 
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isInstanceOf(SimpleHandler.class);
-		assertThat(mapping.getRequiredCorsConfig().getAllowedOriginPatterns()).containsExactly(".*\\.domain2\\.com");
+		assertThat(mapping.getRequiredCorsConfig().getAllowedOriginPatterns()).containsExactly("http://*.domain2.com");
 	}
 
 	@PathPatternsParameterizedTest
@@ -158,7 +158,8 @@ class CorsAbstractHandlerMappingTests {
 
 		CorsConfiguration config = mapping.getRequiredCorsConfig();
 		assertThat(config).isNotNull();
-		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).containsExactly("*");
 		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
@@ -174,7 +175,8 @@ class CorsAbstractHandlerMappingTests {
 
 		CorsConfiguration config = mapping.getRequiredCorsConfig();
 		assertThat(config).isNotNull();
-		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).containsExactly("*");
 		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
@@ -283,7 +285,7 @@ class CorsAbstractHandlerMappingTests {
 		@Override
 		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 			CorsConfiguration config = new CorsConfiguration();
-			config.addAllowedOrigin("*");
+			config.addAllowedOriginPattern("*");
 			config.setAllowCredentials(true);
 			return config;
 		}
