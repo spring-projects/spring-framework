@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private static final SortedSet<PathPattern> EMPTY_PATH_PATTERN =
 			new TreeSet<>(Collections.singleton(PathPatternParser.defaultInstance.parse("")));
+
+	private static final Set<String> EMPTY_PATH = Collections.singleton("");
 
 
 	private final SortedSet<PathPattern> patterns;
@@ -83,6 +86,28 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		return " || ";
 	}
 
+	private boolean isEmptyPathMapping() {
+		return this.patterns == EMPTY_PATH_PATTERN;
+	}
+
+	/**
+	 * Return the mapping paths that are not patterns.
+	 * @since 5.3
+	 */
+	public Set<String> getDirectPaths() {
+		if (isEmptyPathMapping()) {
+			return EMPTY_PATH;
+		}
+		Set<String> result = Collections.emptySet();
+		for (PathPattern pattern : this.patterns) {
+			if (!pattern.hasPatternSyntax()) {
+				result = (result.isEmpty() ? new HashSet<>(1) : result);
+				result.add(pattern.getPatternString());
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Returns a new instance with URL patterns from the current instance ("this") and
 	 * the "other" instance as follows:
@@ -95,13 +120,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
-		if (isEmptyPathPattern() && other.isEmptyPathPattern()) {
+		if (isEmptyPathMapping() && other.isEmptyPathMapping()) {
 			return this;
 		}
-		else if (other.isEmptyPathPattern()) {
+		else if (other.isEmptyPathMapping()) {
 			return this;
 		}
-		else if (isEmptyPathPattern()) {
+		else if (isEmptyPathMapping()) {
 			return other;
 		}
 		else {
@@ -113,10 +138,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			}
 			return new PatternsRequestCondition(combined);
 		}
-	}
-
-	private boolean isEmptyPathPattern() {
-		return this.patterns == EMPTY_PATH_PATTERN;
 	}
 
 	/**
