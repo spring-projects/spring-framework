@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,8 @@ import java.net.URI
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriVariables: Any): T? =
-		getForObject(url, T::class.java, *uriVariables)
+inline fun <reified T> RestOperations.getForObject(url: String, vararg uriVariables: Any): T =
+		getForObject(url, T::class.java, *uriVariables) as T
 
 /**
  * Extension for [RestOperations.getForObject] providing a `getForObject<Foo>(...)`
@@ -48,8 +48,8 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, vararg uriV
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariables: Map<String, Any?>): T? =
-		getForObject(url, T::class.java, uriVariables)
+inline fun <reified T> RestOperations.getForObject(url: String, uriVariables: Map<String, Any?>): T =
+		getForObject(url, T::class.java, uriVariables) as T
 
 /**
  * Extension for [RestOperations.getForObject] providing a `getForObject<Foo>(...)`
@@ -62,8 +62,8 @@ inline fun <reified T: Any> RestOperations.getForObject(url: String, uriVariable
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
-		getForObject(url, T::class.java)
+inline fun <reified T> RestOperations.getForObject(url: URI): T =
+		getForObject(url, T::class.java) as T
 
 /**
  * Extension for [RestOperations.getForEntity] providing a `getForEntity<Foo>(...)`
@@ -75,7 +75,7 @@ inline fun <reified T: Any> RestOperations.getForObject(url: URI): T? =
  * @since 5.0.2
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntity<T> =
+inline fun <reified T> RestOperations.getForEntity(url: URI): ResponseEntity<T> =
 		getForEntity(url, T::class.java)
 
 /**
@@ -89,7 +89,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: URI): ResponseEntit
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriVariables: Any): ResponseEntity<T> =
+inline fun <reified T> RestOperations.getForEntity(url: String, vararg uriVariables: Any): ResponseEntity<T> =
 		getForEntity(url, T::class.java, *uriVariables)
 
 /**
@@ -102,7 +102,7 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, vararg uriV
  * @since 5.0.2
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariables: Map<String, *>): ResponseEntity<T> =
+inline fun <reified T> RestOperations.getForEntity(url: String, uriVariables: Map<String, *>): ResponseEntity<T> =
 		getForEntity(url, T::class.java, uriVariables)
 
 /**
@@ -115,9 +115,9 @@ inline fun <reified T: Any> RestOperations.getForEntity(url: String, uriVariable
  * @since 5.0.2
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any? = null,
-														  vararg uriVariables: Any): T? =
-		patchForObject(url, request, T::class.java, *uriVariables)
+inline fun <reified T> RestOperations.patchForObject(url: String, request: Any? = null,
+														  vararg uriVariables: Any): T =
+		patchForObject(url, request, T::class.java, *uriVariables) as T
 
 /**
  * Extension for [RestOperations.patchForObject] providing a `patchForObject<Foo>(...)`
@@ -129,9 +129,9 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: 
  * @since 5.0.2
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: Any? = null,
-														  uriVariables: Map<String, *>): T? =
-		patchForObject(url, request, T::class.java, uriVariables)
+inline fun <reified T> RestOperations.patchForObject(url: String, request: Any? = null,
+														  uriVariables: Map<String, *>): T =
+		patchForObject(url, request, T::class.java, uriVariables) as T
 
 /**
  * Extension for [RestOperations.patchForObject] providing a `patchForObject<Foo>(...)`
@@ -143,8 +143,8 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: String, request: 
  * @since 5.0.2
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.patchForObject(url: URI, request: Any? = null): T? =
-		patchForObject(url, request, T::class.java)
+inline fun <reified T> RestOperations.patchForObject(url: URI, request: Any? = null): T =
+		patchForObject(url, request, T::class.java) as T
 
 /**
  * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
@@ -157,9 +157,9 @@ inline fun <reified T: Any> RestOperations.patchForObject(url: URI, request: Any
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any? = null,
-														 vararg uriVariables: Any): T? =
-		postForObject(url, request, T::class.java, *uriVariables)
+inline fun <reified T> RestOperations.postForObject(url: String, request: Any? = null,
+														 vararg uriVariables: Any): T =
+		postForObject(url, request, T::class.java, *uriVariables) as T
 
 /**
  * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
@@ -172,9 +172,9 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: String, request: Any? = null,
-														 uriVariables: Map<String, *>): T? =
-		postForObject(url, request, T::class.java, uriVariables)
+inline fun <reified T> RestOperations.postForObject(url: String, request: Any? = null,
+														 uriVariables: Map<String, *>): T =
+		postForObject(url, request, T::class.java, uriVariables) as T
 
 /**
  * Extension for [RestOperations.postForObject] providing a `postForObject<Foo>(...)`
@@ -187,8 +187,8 @@ inline fun <reified T: Any> RestOperations.postForObject(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any? = null): T? =
-		postForObject(url, request, T::class.java)
+inline fun <reified T> RestOperations.postForObject(url: URI, request: Any? = null): T =
+		postForObject(url, request, T::class.java) as T
 
 /**
  * Extension for [RestOperations.postForEntity] providing a `postForEntity<Foo>(...)`
@@ -201,7 +201,7 @@ inline fun <reified T: Any> RestOperations.postForObject(url: URI, request: Any?
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any? = null,
+inline fun <reified T> RestOperations.postForEntity(url: String, request: Any? = null,
 		vararg uriVariables: Any): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java, *uriVariables)
 
@@ -216,7 +216,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: Any? = null,
+inline fun <reified T> RestOperations.postForEntity(url: String, request: Any? = null,
 		uriVariables: Map<String, *>): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java, uriVariables)
 
@@ -231,7 +231,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: String, request: A
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any? = null): ResponseEntity<T> =
+inline fun <reified T> RestOperations.postForEntity(url: URI, request: Any? = null): ResponseEntity<T> =
 		postForEntity(url, request, T::class.java)
 
 /**
@@ -244,7 +244,7 @@ inline fun <reified T: Any> RestOperations.postForEntity(url: URI, request: Any?
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod,
+inline fun <reified T> RestOperations.exchange(url: String, method: HttpMethod,
 		requestEntity: HttpEntity<*>? = null, vararg uriVariables: Any): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, *uriVariables)
 
@@ -258,7 +258,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMethod,
+inline fun <reified T> RestOperations.exchange(url: String, method: HttpMethod,
 		requestEntity: HttpEntity<*>? = null, uriVariables: Map<String, *>): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {}, uriVariables)
 
@@ -272,7 +272,7 @@ inline fun <reified T: Any> RestOperations.exchange(url: String, method: HttpMet
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod,
+inline fun <reified T> RestOperations.exchange(url: URI, method: HttpMethod,
 		requestEntity: HttpEntity<*>? = null): ResponseEntity<T> =
 		exchange(url, method, requestEntity, object : ParameterizedTypeReference<T>() {})
 
@@ -286,5 +286,5 @@ inline fun <reified T: Any> RestOperations.exchange(url: URI, method: HttpMethod
  * @since 5.0
  */
 @Throws(RestClientException::class)
-inline fun <reified T: Any> RestOperations.exchange(requestEntity: RequestEntity<*>): ResponseEntity<T> =
+inline fun <reified T> RestOperations.exchange(requestEntity: RequestEntity<*>): ResponseEntity<T> =
 		exchange(requestEntity, object : ParameterizedTypeReference<T>() {})

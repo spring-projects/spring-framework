@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,24 +16,14 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
-
-import org.opentest4j.AssertionFailedError;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,10 +38,13 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.*;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.*;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.testkit.engine.EventConditions.event;
+import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
+import static org.junit.platform.testkit.engine.EventConditions.test;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
+import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
 /**
  * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
@@ -73,60 +66,38 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.*
  */
 class FailingBeforeAndAfterMethodsSpringExtensionTests {
 
-	private static Stream<Class<?>> testClasses() {
-		// @formatter:off
-		return Stream.of(
-				AlwaysFailingBeforeTestClassTestCase.class,
-				AlwaysFailingAfterTestClassTestCase.class,
-				AlwaysFailingPrepareTestInstanceTestCase.class,
-				AlwaysFailingBeforeTestMethodTestCase.class,
-				AlwaysFailingBeforeTestExecutionTestCase.class,
-				AlwaysFailingAfterTestExecutionTestCase.class,
-				AlwaysFailingAfterTestMethodTestCase.class,
-				FailingBeforeTransactionTestCase.class,
-				FailingAfterTransactionTestCase.class);
-		// @formatter:on
-	}
+	@ParameterizedTest
+	@ValueSource(classes = {
+		AlwaysFailingBeforeTestClassTestCase.class,
+		AlwaysFailingAfterTestClassTestCase.class,
+		AlwaysFailingPrepareTestInstanceTestCase.class,
+		AlwaysFailingBeforeTestMethodTestCase.class,
+		AlwaysFailingBeforeTestExecutionTestCase.class,
+		AlwaysFailingAfterTestExecutionTestCase.class,
+		AlwaysFailingAfterTestMethodTestCase.class,
+		FailingBeforeTransactionTestCase.class,
+		FailingAfterTransactionTestCase.class
+	})
+	void failingBeforeAndAfterCallbacks(Class<?> testClass) {
+		Events events = EngineTestKit.engine("junit-jupiter")
+			.selectors(selectClass(testClass))
+			.execute()
+			.testEvents()
+			.assertStatistics(stats -> stats
+				.skipped(0)
+				.aborted(0)
+				.started(getExpectedStartedCount(testClass))
+				.succeeded(getExpectedSucceededCount(testClass))
+				.failed(getExpectedFailedCount(testClass)));
 
-	@TestFactory
-	Stream<DynamicTest> generateTests() throws Exception {
-		return testClasses().map(clazz -> dynamicTest(clazz.getSimpleName(), () -> runTestAndAssertCounters(clazz)));
-	}
-
-	private void runTestAndAssertCounters(Class<?> testClass) {
-		Launcher launcher = LauncherFactory.create();
-		ExceptionTrackingListener listener = new ExceptionTrackingListener();
-		launcher.registerTestExecutionListeners(listener);
-
-		launcher.execute(request().selectors(selectClass(testClass)).build());
-		TestExecutionSummary summary = listener.getSummary();
-
-		String name = testClass.getSimpleName();
-		int expectedStartedCount = getExpectedStartedCount(testClass);
-		int expectedSucceededCount = getExpectedSucceededCount(testClass);
-		int expectedFailedCount = getExpectedFailedCount(testClass);
-
-		// @formatter:off
-		assertAll(
-			() -> assertEquals(1, summary.getTestsFoundCount(), () -> name + ": tests found"),
-			() -> assertEquals(0, summary.getTestsSkippedCount(), () -> name + ": tests skipped"),
-			() -> assertEquals(0, summary.getTestsAbortedCount(), () -> name + ": tests aborted"),
-			() -> assertEquals(expectedStartedCount, summary.getTestsStartedCount(), () -> name + ": tests started"),
-			() -> assertEquals(expectedSucceededCount, summary.getTestsSucceededCount(), () -> name + ": tests succeeded"),
-			() -> assertEquals(expectedFailedCount, summary.getTestsFailedCount(), () -> name + ": tests failed")
-		);
-		// @formatter:on
-
-		// Ensure it was an AssertionFailedError that failed the test and not
+		// Ensure it was an AssertionError that failed the test and not
 		// something else like an error in the @Configuration class, etc.
-		if (expectedFailedCount > 0) {
-			assertEquals(1, listener.exceptions.size(), "exceptions expected");
-			Throwable exception = listener.exceptions.get(0);
-			if (!(exception instanceof AssertionFailedError)) {
-				throw new AssertionFailedError(
-					exception.getClass().getName() + " is not an instance of " + AssertionFailedError.class.getName(),
-					exception);
-			}
+		if (getExpectedFailedCount(testClass) > 0) {
+			events.assertThatEvents().haveExactly(1,
+				event(test("testNothing"),
+					finishedWithFailure(
+						instanceOf(AssertionError.class),
+						message(msg -> msg.contains("always failing")))));
 		}
 	}
 
@@ -284,18 +255,6 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
-		}
-	}
-
-	private static class ExceptionTrackingListener extends SummaryGeneratingListener {
-
-		List<Throwable> exceptions = new ArrayList<>();
-
-
-		@Override
-		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-			super.executionFinished(testIdentifier, testExecutionResult);
-			testExecutionResult.getThrowable().ifPresent(exceptions::add);
 		}
 	}
 

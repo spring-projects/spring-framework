@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
@@ -45,6 +46,9 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	private boolean headersWritten = false;
 
 	private boolean bodyUsed = false;
+
+	@Nullable
+	private HttpHeaders readOnlyHeaders;
 
 
 	/**
@@ -73,7 +77,16 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		if (this.readOnlyHeaders != null) {
+			return this.readOnlyHeaders;
+		}
+		else if (this.headersWritten) {
+			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			return this.readOnlyHeaders;
+		}
+		else {
+			return this.headers;
+		}
 	}
 
 	@Override

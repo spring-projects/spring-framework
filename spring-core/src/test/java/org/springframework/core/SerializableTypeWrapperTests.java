@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,60 +29,59 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link SerializableTypeWrapper}.
  *
  * @author Phillip Webb
  */
-public class SerializableTypeWrapperTests {
+class SerializableTypeWrapperTests {
 
 	@Test
-	public void forField() throws Exception {
+	void forField() throws Exception {
 		Type type = SerializableTypeWrapper.forField(Fields.class.getField("parameterizedType"));
-		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>"));
+		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>");
 		assertSerializable(type);
 	}
 
 	@Test
-	public void forMethodParameter() throws Exception {
+	void forMethodParameter() throws Exception {
 		Method method = Methods.class.getDeclaredMethod("method", Class.class, Object.class);
 		Type type = SerializableTypeWrapper.forMethodParameter(MethodParameter.forExecutable(method, 0));
-		assertThat(type.toString(), equalTo("java.lang.Class<T>"));
+		assertThat(type.toString()).isEqualTo("java.lang.Class<T>");
 		assertSerializable(type);
 	}
 
 	@Test
-	public void forConstructor() throws Exception {
+	void forConstructor() throws Exception {
 		Constructor<?> constructor = Constructors.class.getDeclaredConstructor(List.class);
 		Type type = SerializableTypeWrapper.forMethodParameter(MethodParameter.forExecutable(constructor, 0));
-		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>"));
+		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>");
 		assertSerializable(type);
 	}
 
 	@Test
-	public void classType() throws Exception {
+	void classType() throws Exception {
 		Type type = SerializableTypeWrapper.forField(Fields.class.getField("classType"));
-		assertThat(type.toString(), equalTo("class java.lang.String"));
+		assertThat(type.toString()).isEqualTo("class java.lang.String");
 		assertSerializable(type);
 	}
 
 	@Test
-	public void genericArrayType() throws Exception {
+	void genericArrayType() throws Exception {
 		GenericArrayType type = (GenericArrayType) SerializableTypeWrapper.forField(Fields.class.getField("genericArrayType"));
-		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>[]"));
+		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>[]");
 		assertSerializable(type);
 		assertSerializable(type.getGenericComponentType());
 	}
 
 	@Test
-	public void parameterizedType() throws Exception {
+	void parameterizedType() throws Exception {
 		ParameterizedType type = (ParameterizedType) SerializableTypeWrapper.forField(Fields.class.getField("parameterizedType"));
-		assertThat(type.toString(), equalTo("java.util.List<java.lang.String>"));
+		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>");
 		assertSerializable(type);
 		assertSerializable(type.getOwnerType());
 		assertSerializable(type.getRawType());
@@ -91,18 +90,18 @@ public class SerializableTypeWrapperTests {
 	}
 
 	@Test
-	public void typeVariableType() throws Exception {
+	void typeVariableType() throws Exception {
 		TypeVariable<?> type = (TypeVariable<?>) SerializableTypeWrapper.forField(Fields.class.getField("typeVariableType"));
-		assertThat(type.toString(), equalTo("T"));
+		assertThat(type.toString()).isEqualTo("T");
 		assertSerializable(type);
 		assertSerializable(type.getBounds());
 	}
 
 	@Test
-	public void wildcardType() throws Exception {
+	void wildcardType() throws Exception {
 		ParameterizedType typeSource = (ParameterizedType) SerializableTypeWrapper.forField(Fields.class.getField("wildcardType"));
 		WildcardType type = (WildcardType) typeSource.getActualTypeArguments()[0];
-		assertThat(type.toString(), equalTo("? extends java.lang.CharSequence"));
+		assertThat(type.toString()).isEqualTo("? extends java.lang.CharSequence");
 		assertSerializable(type);
 		assertSerializable(type.getLowerBounds());
 		assertSerializable(type.getUpperBounds());
@@ -115,7 +114,7 @@ public class SerializableTypeWrapperTests {
 		oos.writeObject(source);
 		oos.close();
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
-		assertThat(ois.readObject(), equalTo(source));
+		assertThat(ois.readObject()).isEqualTo(source);
 	}
 
 

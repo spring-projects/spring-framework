@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,20 +21,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.mock.web.test.MockFilterChain;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.filter.ForwardedHeaderFilter;
+import org.springframework.web.testfixture.servlet.MockFilterChain;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -52,11 +53,11 @@ public class WebUtilsTests {
 		params.put("myKey3_myValue3.x", "xxx");
 		params.put("myKey4_myValue4.y", new String[] {"yyy"});
 
-		assertNull(WebUtils.findParameterValue(params, "myKey0"));
-		assertEquals("myValue1", WebUtils.findParameterValue(params, "myKey1"));
-		assertEquals("myValue2", WebUtils.findParameterValue(params, "myKey2"));
-		assertEquals("myValue3", WebUtils.findParameterValue(params, "myKey3"));
-		assertEquals("myValue4", WebUtils.findParameterValue(params, "myKey4"));
+		assertThat(WebUtils.findParameterValue(params, "myKey0")).isNull();
+		assertThat(WebUtils.findParameterValue(params, "myKey1")).isEqualTo("myValue1");
+		assertThat(WebUtils.findParameterValue(params, "myKey2")).isEqualTo("myValue2");
+		assertThat(WebUtils.findParameterValue(params, "myKey3")).isEqualTo("myValue3");
+		assertThat(WebUtils.findParameterValue(params, "myKey4")).isEqualTo("myValue4");
 	}
 
 	@Test
@@ -64,104 +65,104 @@ public class WebUtilsTests {
 		MultiValueMap<String, String> variables;
 
 		variables = WebUtils.parseMatrixVariables(null);
-		assertEquals(0, variables.size());
+		assertThat(variables.size()).isEqualTo(0);
 
 		variables = WebUtils.parseMatrixVariables("year");
-		assertEquals(1, variables.size());
-		assertEquals("", variables.getFirst("year"));
+		assertThat(variables.size()).isEqualTo(1);
+		assertThat(variables.getFirst("year")).isEqualTo("");
 
 		variables = WebUtils.parseMatrixVariables("year=2012");
-		assertEquals(1, variables.size());
-		assertEquals("2012", variables.getFirst("year"));
+		assertThat(variables.size()).isEqualTo(1);
+		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables("year=2012;colors=red,blue,green");
-		assertEquals(2, variables.size());
-		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
-		assertEquals("2012", variables.getFirst("year"));
+		assertThat(variables.size()).isEqualTo(2);
+		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables(";year=2012;colors=red,blue,green;");
-		assertEquals(2, variables.size());
-		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
-		assertEquals("2012", variables.getFirst("year"));
+		assertThat(variables.size()).isEqualTo(2);
+		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
+		assertThat(variables.getFirst("year")).isEqualTo("2012");
 
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
-		assertEquals(1, variables.size());
-		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+		assertThat(variables.size()).isEqualTo(1);
+		assertThat(variables.get("colors")).isEqualTo(Arrays.asList("red", "blue", "green"));
 	}
 
 	@Test
 	public void isValidOrigin() {
 		List<String> allowed = Collections.emptyList();
-		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed));
-		assertFalse(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain1.example", allowed)).isTrue();
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain2.example", allowed)).isFalse();
 
 		allowed = Collections.singletonList("*");
-		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+		assertThat(checkValidOrigin("mydomain1.example", -1, "http://mydomain2.example", allowed)).isTrue();
 
-		allowed = Collections.singletonList("http://mydomain1.com");
-		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
-		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed));
+		allowed = Collections.singletonList("http://mydomain1.example");
+		assertThat(checkValidOrigin("mydomain2.example", -1, "http://mydomain1.example", allowed)).isTrue();
+		assertThat(checkValidOrigin("mydomain2.example", -1, "http://mydomain3.example", allowed)).isFalse();
 	}
 
 	@Test
 	public void isSameOrigin() {
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80"));
-		assertTrue(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com"));
-		assertTrue(checkSameOrigin("https", "mydomain1.com", 443, "https://mydomain1.com:443"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", 123, "http://mydomain1.com:123"));
-		assertTrue(checkSameOrigin("ws", "mydomain1.com", -1, "ws://mydomain1.com"));
-		assertTrue(checkSameOrigin("wss", "mydomain1.com", 443, "wss://mydomain1.com"));
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80")).isTrue();
+		assertThat(checkSameOrigin("https", "mydomain1.example", 443, "https://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("https", "mydomain1.example", 443, "https://mydomain1.example:443")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", 123, "http://mydomain1.example:123")).isTrue();
+		assertThat(checkSameOrigin("ws", "mydomain1.example", -1, "ws://mydomain1.example")).isTrue();
+		assertThat(checkSameOrigin("wss", "mydomain1.example", 443, "wss://mydomain1.example")).isTrue();
 
-		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain2.com"));
-		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "https://mydomain1.com"));
-		assertFalse(checkSameOrigin("http", "mydomain1.com", -1, "invalid-origin"));
-		assertFalse(checkSameOrigin("https", "mydomain1.com", -1, "http://mydomain1.com"));
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain2.example")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "https://mydomain1.example")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "invalid-origin")).isFalse();
+		assertThat(checkSameOrigin("https", "mydomain1.example", -1, "http://mydomain1.example")).isFalse();
 
 		// Handling of invalid origins as described in SPR-13478
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com/path"));
-		assertTrue(checkSameOrigin("http", "mydomain1.com", -1, "http://mydomain1.com:80/path"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com/path"));
-		assertFalse(checkSameOrigin("http", "mydomain2.com", -1, "http://mydomain1.com:80/path"));
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example/")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80/")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example/path")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain1.example", -1, "http://mydomain1.example:80/path")).isTrue();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example/")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example:80/")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example/path")).isFalse();
+		assertThat(checkSameOrigin("http", "mydomain2.example", -1, "http://mydomain1.example:80/path")).isFalse();
 
 		// Handling of IPv6 hosts as described in SPR-13525
-		assertTrue(checkSameOrigin("http", "[::1]", -1, "http://[::1]"));
-		assertTrue(checkSameOrigin("http", "[::1]", 8080, "http://[::1]:8080"));
-		assertTrue(checkSameOrigin("http",
+		assertThat(checkSameOrigin("http", "[::1]", -1, "http://[::1]")).isTrue();
+		assertThat(checkSameOrigin("http", "[::1]", 8080, "http://[::1]:8080")).isTrue();
+		assertThat(checkSameOrigin("http",
 				"[2001:0db8:0000:85a3:0000:0000:ac1f:8001]", -1,
-				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]"));
-		assertTrue(checkSameOrigin("http",
+				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]")).isTrue();
+		assertThat(checkSameOrigin("http",
 				"[2001:0db8:0000:85a3:0000:0000:ac1f:8001]", 8080,
-				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080"));
-		assertFalse(checkSameOrigin("http", "[::1]", -1, "http://[::1]:8080"));
-		assertFalse(checkSameOrigin("http", "[::1]", 8080,
-				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080"));
+				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080")).isTrue();
+		assertThat(checkSameOrigin("http", "[::1]", -1, "http://[::1]:8080")).isFalse();
+		assertThat(checkSameOrigin("http", "[::1]", 8080,
+				"http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080")).isFalse();
 	}
 
 	@Test  // SPR-16262
 	public void isSameOriginWithXForwardedHeaders() throws Exception {
-		String server = "mydomain1.com";
-		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", -1, "https://mydomain2.com");
-		testWithXForwardedHeaders(server, -1, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
-		testWithXForwardedHeaders(server, 123, "https", "mydomain2.com", 456, "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithXForwardedHeaders(server, -1, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, 123, "https", null, -1, "https://mydomain1.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", -1, "https://mydomain2.example");
+		testWithXForwardedHeaders(server, -1, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
+		testWithXForwardedHeaders(server, 123, "https", "mydomain2.example", 456, "https://mydomain2.example:456");
 	}
 
 	@Test  // SPR-16262
 	public void isSameOriginWithForwardedHeader() throws Exception {
-		String server = "mydomain1.com";
-		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com", "https://mydomain2.com");
-		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
-		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.com:456", "https://mydomain2.com:456");
+		String server = "mydomain1.example";
+		testWithForwardedHeader(server, -1, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, 123, "proto=https", "https://mydomain1.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example", "https://mydomain2.example");
+		testWithForwardedHeader(server, -1, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
+		testWithForwardedHeader(server, 123, "proto=https; host=mydomain2.example:456", "https://mydomain2.example:456");
 	}
 
 
@@ -210,7 +211,7 @@ public class WebUtilsTests {
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(request);
 		ServerHttpRequest httpRequest = new ServletServerHttpRequest(requestToUse);
 
-		assertTrue(WebUtils.isSameOrigin(httpRequest));
+		assertThat(WebUtils.isSameOrigin(httpRequest)).isTrue();
 	}
 
 	private void testWithForwardedHeader(String serverName, int port, String forwardedHeader,
@@ -227,7 +228,7 @@ public class WebUtilsTests {
 		HttpServletRequest requestToUse = adaptFromForwardedHeaders(request);
 		ServerHttpRequest httpRequest = new ServletServerHttpRequest(requestToUse);
 
-		assertTrue(WebUtils.isSameOrigin(httpRequest));
+		assertThat(WebUtils.isSameOrigin(httpRequest)).isTrue();
 	}
 
 	// SPR-16668

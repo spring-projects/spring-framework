@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,10 @@
 
 package org.springframework.http;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.springframework.util.MultiValueMap;
  * {@code HttpHeaders} object that can only be read, not written to.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.1.1
  */
 class ReadOnlyHttpHeaders extends HttpHeaders {
@@ -40,9 +42,14 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 	@Nullable
 	private MediaType cachedContentType;
 
-	ReadOnlyHttpHeaders(HttpHeaders headers) {
-		super(headers.headers);
+	@Nullable
+	private List<MediaType> cachedAccept;
+
+
+	ReadOnlyHttpHeaders(MultiValueMap<String, String> headers) {
+		super(headers);
 	}
+
 
 	@Override
 	public MediaType getContentType() {
@@ -54,6 +61,23 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 			this.cachedContentType = contentType;
 			return contentType;
 		}
+	}
+
+	@Override
+	public List<MediaType> getAccept() {
+		if (this.cachedAccept != null) {
+			return this.cachedAccept;
+		}
+		else {
+			List<MediaType> accept = super.getAccept();
+			this.cachedAccept = accept;
+			return accept;
+		}
+	}
+
+	@Override
+	public void clearContentHeaders() {
+		// No-op.
 	}
 
 	@Override
@@ -124,9 +148,10 @@ class ReadOnlyHttpHeaders extends HttpHeaders {
 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
-		return Collections.unmodifiableSet(this.headers.entrySet().stream()
-				.map(AbstractMap.SimpleImmutableEntry::new)
-				.collect(Collectors.toSet()));
+		return this.headers.entrySet().stream().map(SimpleImmutableEntry::new)
+				.collect(Collectors.collectingAndThen(
+						Collectors.toCollection(LinkedHashSet::new), // Retain original ordering of entries
+						Collections::unmodifiableSet));
 	}
 
 }

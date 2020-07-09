@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,12 @@ import org.springframework.lang.Nullable;
  * Assert.notNull(clazz, "The class must not be null");
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
- * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
- * for a more comprehensive suite of {@code String} utilities.
+ * <p>Mainly for internal use within the framework; for a more comprehensive suite
+ * of assertion utilities consider {@code org.apache.commons.lang3.Validate} from
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>,
+ * Google Guava's
+ * <a href="https://github.com/google/guava/wiki/PreconditionsExplained">Preconditions</a>,
+ * or similar third-party libraries.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -493,6 +496,47 @@ public abstract class Assert {
 	public static void notEmpty(@Nullable Collection<?> collection) {
 		notEmpty(collection,
 				"[Assertion failed] - this collection must not be empty: it must contain at least 1 element");
+	}
+
+	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">Assert.noNullElements(collection, "Collection must contain non-null elements");</pre>
+	 * @param collection the collection to check
+	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, String message) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(message);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Assert that a collection contains no {@code null} elements.
+	 * <p>Note: Does not complain if the collection is empty!
+	 * <pre class="code">
+	 * Assert.noNullElements(collection, () -&gt; "Collection " + collectionName + " must contain non-null elements");
+	 * </pre>
+	 * @param collection the collection to check
+	 * @param messageSupplier a supplier for the exception message to use if the
+	 * assertion fails
+	 * @throws IllegalArgumentException if the collection contains a {@code null} element
+	 * @since 5.2
+	 */
+	public static void noNullElements(@Nullable Collection<?> collection, Supplier<String> messageSupplier) {
+		if (collection != null) {
+			for (Object element : collection) {
+				if (element == null) {
+					throw new IllegalArgumentException(nullSafeGet(messageSupplier));
+				}
+			}
+		}
 	}
 
 	/**

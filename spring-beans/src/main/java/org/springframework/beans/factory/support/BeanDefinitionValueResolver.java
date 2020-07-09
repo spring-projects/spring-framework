@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,10 +30,13 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -57,7 +60,7 @@ import org.springframework.util.StringUtils;
  */
 class BeanDefinitionValueResolver {
 
-	private final AbstractBeanFactory beanFactory;
+	private final AbstractAutowireCapableBeanFactory beanFactory;
 
 	private final String beanName;
 
@@ -73,8 +76,8 @@ class BeanDefinitionValueResolver {
 	 * @param beanDefinition the BeanDefinition of the bean that we work on
 	 * @param typeConverter the TypeConverter to use for resolving TypedStringValues
 	 */
-	public BeanDefinitionValueResolver(
-			AbstractBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition, TypeConverter typeConverter) {
+	public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
+			BeanDefinition beanDefinition, TypeConverter typeConverter) {
 
 		this.beanFactory = beanFactory;
 		this.beanName = beanName;
@@ -129,6 +132,17 @@ class BeanDefinitionValueResolver {
 			String innerBeanName = "(inner bean)" + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR +
 					ObjectUtils.getIdentityHexString(bd);
 			return resolveInnerBean(argName, innerBeanName, bd);
+		}
+		else if (value instanceof DependencyDescriptor) {
+			Set<String> autowiredBeanNames = new LinkedHashSet<>(4);
+			Object result = this.beanFactory.resolveDependency(
+					(DependencyDescriptor) value, this.beanName, autowiredBeanNames, this.typeConverter);
+			for (String autowiredBeanName : autowiredBeanNames) {
+				if (this.beanFactory.containsBean(autowiredBeanName)) {
+					this.beanFactory.registerDependentBean(autowiredBeanName, this.beanName);
+				}
+			}
+			return result;
 		}
 		else if (value instanceof ManagedArray) {
 			// May need to resolve contained runtime references.
@@ -282,6 +296,54 @@ class BeanDefinitionValueResolver {
 	}
 
 	/**
+	 * Resolve a reference to another bean in the factory.
+	 */
+	@Nullable
+	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
+		try {
+			Object bean;
+			Class<?> beanType = ref.getBeanType();
+			if (ref.isToParent()) {
+				BeanFactory parent = this.beanFactory.getParentBeanFactory();
+				if (parent == null) {
+					throw new BeanCreationException(
+							this.beanDefinition.getResourceDescription(), this.beanName,
+							"Cannot resolve reference to bean " + ref +
+									" in parent factory: no parent factory available");
+				}
+				if (beanType != null) {
+					bean = parent.getBean(beanType);
+				}
+				else {
+					bean = parent.getBean(String.valueOf(doEvaluate(ref.getBeanName())));
+				}
+			}
+			else {
+				String resolvedName;
+				if (beanType != null) {
+					NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
+					bean = namedBean.getBeanInstance();
+					resolvedName = namedBean.getBeanName();
+				}
+				else {
+					resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
+					bean = this.beanFactory.getBean(resolvedName);
+				}
+				this.beanFactory.registerDependentBean(resolvedName, this.beanName);
+			}
+			if (bean instanceof NullBean) {
+				bean = null;
+			}
+			return bean;
+		}
+		catch (BeansException ex) {
+			throw new BeanCreationException(
+					this.beanDefinition.getResourceDescription(), this.beanName,
+					"Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
+		}
+	}
+
+	/**
 	 * Resolve an inner bean definition.
 	 * @param argName the name of the argument that the inner bean is defined for
 	 * @param innerBeanName the name of the inner bean
@@ -338,45 +400,12 @@ class BeanDefinitionValueResolver {
 	private String adaptInnerBeanName(String innerBeanName) {
 		String actualInnerBeanName = innerBeanName;
 		int counter = 0;
+		String prefix = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 		while (this.beanFactory.isBeanNameInUse(actualInnerBeanName)) {
 			counter++;
-			actualInnerBeanName = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
+			actualInnerBeanName = prefix + counter;
 		}
 		return actualInnerBeanName;
-	}
-
-	/**
-	 * Resolve a reference to another bean in the factory.
-	 */
-	@Nullable
-	private Object resolveReference(Object argName, RuntimeBeanReference ref) {
-		try {
-			Object bean;
-			String refName = ref.getBeanName();
-			refName = String.valueOf(doEvaluate(refName));
-			if (ref.isToParent()) {
-				if (this.beanFactory.getParentBeanFactory() == null) {
-					throw new BeanCreationException(
-							this.beanDefinition.getResourceDescription(), this.beanName,
-							"Can't resolve reference to bean '" + refName +
-							"' in parent factory: no parent factory available");
-				}
-				bean = this.beanFactory.getParentBeanFactory().getBean(refName);
-			}
-			else {
-				bean = this.beanFactory.getBean(refName);
-				this.beanFactory.registerDependentBean(refName, this.beanName);
-			}
-			if (bean instanceof NullBean) {
-				bean = null;
-			}
-			return bean;
-		}
-		catch (BeansException ex) {
-			throw new BeanCreationException(
-					this.beanDefinition.getResourceDescription(), this.beanName,
-					"Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
-		}
 	}
 
 	/**
@@ -385,8 +414,7 @@ class BeanDefinitionValueResolver {
 	private Object resolveManagedArray(Object argName, List<?> ml, Class<?> elementType) {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
-			Array.set(resolved, i,
-					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+			Array.set(resolved, i, resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -397,8 +425,7 @@ class BeanDefinitionValueResolver {
 	private List<?> resolveManagedList(Object argName, List<?> ml) {
 		List<Object> resolved = new ArrayList<>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
-			resolved.add(
-					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+			resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}

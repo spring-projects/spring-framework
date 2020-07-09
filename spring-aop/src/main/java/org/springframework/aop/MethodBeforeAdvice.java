@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,9 +32,9 @@ public interface MethodBeforeAdvice extends BeforeAdvice {
 
 	/**
 	 * Callback before a given method is invoked.
-	 * @param method method being invoked
-	 * @param args arguments to the method
-	 * @param target target of the method invocation. May be {@code null}.
+	 * @param method the method being invoked
+	 * @param args the arguments to the method
+	 * @param target the target of the method invocation. May be {@code null}.
 	 * @throws Throwable if this object wishes to abort the call.
 	 * Any exception thrown will be returned to the caller if it's
 	 * allowed by the method signature. Otherwise the exception

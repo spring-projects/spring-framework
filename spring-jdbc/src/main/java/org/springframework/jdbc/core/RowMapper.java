@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ public interface RowMapper<T> {
 	 * @param rs the ResultSet to map (pre-initialized for the current row)
 	 * @param rowNum the number of the current row
 	 * @return the result object for the current row (may be {@code null})
-	 * @throws SQLException if a SQLException is encountered getting
+	 * @throws SQLException if an SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
 	@Nullable

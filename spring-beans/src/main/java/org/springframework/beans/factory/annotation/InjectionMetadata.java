@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -47,6 +48,27 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InjectionMetadata {
 
+	/**
+	 * An empty {@code InjectionMetadata} instance with no-op callbacks.
+	 * @since 5.2
+	 */
+	public static final InjectionMetadata EMPTY = new InjectionMetadata(Object.class, Collections.emptyList()) {
+		@Override
+		protected boolean needsRefresh(Class<?> clazz) {
+			return false;
+		}
+		@Override
+		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+		}
+		@Override
+		public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
+		}
+		@Override
+		public void clear(@Nullable PropertyValues pvs) {
+		}
+	};
+
+
 	private static final Log logger = LogFactory.getLog(InjectionMetadata.class);
 
 	private final Class<?> targetClass;
@@ -57,11 +79,29 @@ public class InjectionMetadata {
 	private volatile Set<InjectedElement> checkedElements;
 
 
+	/**
+	 * Create a new {@code InjectionMetadata instance}.
+	 * <p>Preferably use {@link #forElements} for reusing the {@link #EMPTY}
+	 * instance in case of no elements.
+	 * @param targetClass the target class
+	 * @param elements the associated elements to inject
+	 * @see #forElements
+	 */
 	public InjectionMetadata(Class<?> targetClass, Collection<InjectedElement> elements) {
 		this.targetClass = targetClass;
 		this.injectedElements = elements;
 	}
 
+
+	/**
+	 * Determine whether this metadata instance needs to be refreshed.
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @since 5.2.4
+	 */
+	protected boolean needsRefresh(Class<?> clazz) {
+		return this.targetClass != clazz;
+	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
@@ -108,8 +148,27 @@ public class InjectionMetadata {
 	}
 
 
+	/**
+	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
+	 * @param elements the elements to inject (possibly empty)
+	 * @param clazz the target class
+	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance,
+	 * or {@link #EMPTY} in case of no elements
+	 * @since 5.2
+	 */
+	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
+		return (elements.isEmpty() ? InjectionMetadata.EMPTY : new InjectionMetadata(clazz, elements));
+	}
+
+	/**
+	 * Check whether the given injection metadata needs to be refreshed.
+	 * @param metadata the existing metadata instance
+	 * @param clazz the current target class
+	 * @return {@code true} indicating a refresh, {@code false} otherwise
+	 * @see #needsRefresh(Class)
+	 */
 	public static boolean needsRefresh(@Nullable InjectionMetadata metadata, Class<?> clazz) {
-		return (metadata == null || metadata.targetClass != clazz);
+		return (metadata == null || metadata.needsRefresh(clazz));
 	}
 
 
@@ -252,7 +311,7 @@ public class InjectionMetadata {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

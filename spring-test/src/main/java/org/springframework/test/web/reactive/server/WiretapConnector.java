@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -125,16 +124,13 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	final static class WiretapRecorder {
 
-		private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
-
 		@Nullable
 		private final Flux<? extends DataBuffer> publisher;
 
 		@Nullable
 		private final Flux<? extends Publisher<? extends DataBuffer>> publisherNested;
 
-		private final DataBuffer buffer = bufferFactory.allocateBuffer();
+		private final DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
 
 		private final MonoProcessor<byte[]> content = MonoProcessor.create();
 

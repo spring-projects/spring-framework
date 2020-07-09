@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,11 +58,11 @@ public class DefaultResourceLoader implements ResourceLoader {
 	/**
 	 * Create a new DefaultResourceLoader.
 	 * <p>ClassLoader access will happen using the thread context class loader
-	 * at the time of this ResourceLoader's initialization.
+	 * at the time of actual resource access (since 5.3). For more control, pass
+	 * a specific ClassLoader to {@link #DefaultResourceLoader(ClassLoader)}.
 	 * @see java.lang.Thread#getContextClassLoader()
 	 */
 	public DefaultResourceLoader() {
-		this.classLoader = ClassUtils.getDefaultClassLoader();
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * Specify the ClassLoader to load class path resources with, or {@code null}
 	 * for using the thread context class loader at the time of actual resource access.
 	 * <p>The default is that ClassLoader access will happen using the thread context
-	 * class loader at the time of this ResourceLoader's initialization.
+	 * class loader at the time of actual resource access (since 5.3).
 	 */
 	public void setClassLoader(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -144,7 +144,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
 
-		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
+		for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
 				return resource;

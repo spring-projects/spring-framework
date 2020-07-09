@@ -26,11 +26,13 @@ correct schema so that the elements in the `jee` namespace are available to you:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:jee="http://www.springframework.org/schema/jee"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"__>
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jee https://www.springframework.org/schema/jee/spring-jee.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
 
@@ -44,12 +46,12 @@ The following example shows how to use JNDI to look up a data source without the
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="**dataSource**" class="org.springframework.jndi.JndiObjectFactoryBean">
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="jdbc/MyDataSource"/>
 	</bean>
 	<bean id="userDao" class="com.foo.JdbcUserDao">
 		<!-- Spring will do the cast automatically (as usual) -->
-		<property name="dataSource" ref="**dataSource**"/>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 ----
 
@@ -59,11 +61,11 @@ schema:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jee:jndi-lookup id="**dataSource**" jndi-name="jdbc/MyDataSource"/>
+	<jee:jndi-lookup id="dataSource" jndi-name="jdbc/MyDataSource"/>
 
 	<bean id="userDao" class="com.foo.JdbcUserDao">
 		<!-- Spring will do the cast automatically (as usual) -->
-		<property name="dataSource" ref="**dataSource**"/>
+		<property name="dataSource" ref="dataSource"/>
 	</bean>
 ----
 
@@ -174,10 +176,10 @@ different properties with `jee`:
 [[xsd-schemas-jee-local-slsb]]
 ==== `<jee:local-slsb/>` (Simple)
 
-The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless SessionBean.
+The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean without `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -189,8 +191,8 @@ SessionBean without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean with `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -204,10 +206,10 @@ SessionBean with `jee`:
 [[xsd-schemas-jee-local-slsb-complex]]
 ==== `<jee:local-slsb/>` (Complex)
 
-The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless SessionBean.
+The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean and a number of properties without `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+and a number of properties without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -222,8 +224,8 @@ SessionBean and a number of properties without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a local EJB Stateless
-SessionBean and a number of properties with `jee`:
+The following example shows how to configures a reference to a local EJB Stateless Session Bean
+and a number of properties with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -240,11 +242,10 @@ SessionBean and a number of properties with `jee`:
 [[xsd-schemas-jee-remote-slsb]]
 ==== <jee:remote-slsb/>
 
-The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless
-SessionBean.
+The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless Session Bean.
 
-The following example shows how to configures a reference to a remote EJB Stateless
-SessionBean without `jee`:
+The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+without `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -261,8 +262,8 @@ SessionBean without `jee`:
 	</bean>
 ----
 
-The following example shows how to configures a reference to a remote EJB Stateless
-SessionBean with `jee`:
+The following example shows how to configures a reference to a remote EJB Stateless Session Bean
+with `jee`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -283,8 +284,8 @@ SessionBean with `jee`:
 === The `jms` Schema
 
 The `jms` elements deal with configuring JMS-related beans, such as Spring's
-<<integration.adoc#jms-mdp,Message Listener Containers>>. These elements are detailed in the
-section of the <<integration.adoc#jms,JMS chapter>> entitled <<integration.adoc#jms-namespace,
+<<integration.adoc#jms-mdp, Message Listener Containers>>. These elements are detailed in the
+section of the <<integration.adoc#jms, JMS chapter>> entitled <<integration.adoc#jms-namespace,
 JMS Namespace Support>>. See that chapter for full details on this support
 and the `jms` elements themselves.
 
@@ -299,11 +300,13 @@ are available to you:
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:jms="http://www.springframework.org/schema/jms"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"__>
+		xmlns:jms="http://www.springframework.org/schema/jms"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jms https://www.springframework.org/schema/jms/spring-jms.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----
 
@@ -322,8 +325,8 @@ This element is detailed in
 
 You can use the `cache` elements to enable support for Spring's `@CacheEvict`, `@CachePut`,
 and `@Caching` annotations. It it also supports declarative XML-based caching. See
-<<integration.adoc#cache-annotation-enable,Enabling Caching Annotations>> and
-<<integration.adoc#cache-declarative-xml,Declarative XML-based Caching>> for details.
+<<integration.adoc#cache-annotation-enable, Enabling Caching Annotations>> and
+<<integration.adoc#cache-declarative-xml, Declarative XML-based Caching>> for details.
 
 To use the elements in the `cache` schema, you need to have the following preamble at the
 top of your Spring XML configuration file. The text in the following snippet references
@@ -335,10 +338,12 @@ the correct schema so that the elements in the `cache` namespace are available t
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__>
+		xmlns:cache="http://www.springframework.org/schema/cache"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/cache https://www.springframework.org/schema/cache/spring-cache.xsd">
 
 		<!-- bean definitions here -->
+
 	</beans>
 ----

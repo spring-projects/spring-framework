@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -112,12 +113,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	protected RemoteInvocation readRemoteInvocation(HttpServletRequest request, InputStream is)
 			throws IOException, ClassNotFoundException {
 
-		ObjectInputStream ois = createObjectInputStream(decorateInputStream(request, is));
-		try {
+		try (ObjectInputStream ois = createObjectInputStream(decorateInputStream(request, is))) {
 			return doReadRemoteInvocation(ois);
-		}
-		finally {
-			ois.close();
 		}
 	}
 
@@ -169,13 +166,9 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
-		ObjectOutputStream oos =
-				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)));
-		try {
+		try (ObjectOutputStream oos =
+				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)))) {
 			doWriteRemoteInvocationResult(result, oos);
-		}
-		finally {
-			oos.close();
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,6 +49,17 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	private Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
 
+	ClientDefaultCodecsImpl() {
+	}
+
+	ClientDefaultCodecsImpl(ClientDefaultCodecsImpl other) {
+		super(other);
+		this.multipartCodecs = (other.multipartCodecs != null ?
+				new DefaultMultipartCodecs(other.multipartCodecs) : null);
+		this.sseDecoder = other.sseDecoder;
+	}
+
+
 	/**
 	 * Set a supplier for part writers to use when
 	 * {@link #multipartCodecs()} are not explicitly configured.
@@ -73,27 +84,28 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 		this.sseDecoder = decoder;
 	}
 
+	@Override
+	public ClientDefaultCodecsImpl clone() {
+		ClientDefaultCodecsImpl codecs = new ClientDefaultCodecsImpl();
+		codecs.multipartCodecs = this.multipartCodecs;
+		codecs.sseDecoder = this.sseDecoder;
+		codecs.partWritersSupplier = this.partWritersSupplier;
+		return codecs;
+	}
 
 	@Override
 	protected void extendObjectReaders(List<HttpMessageReader<?>> objectReaders) {
-		objectReaders.add(new ServerSentEventHttpMessageReader(getSseDecoder()));
-	}
 
-	@Nullable
-	private Decoder<?> getSseDecoder() {
-		return (this.sseDecoder != null ? this.sseDecoder : jackson2Present ? getJackson2JsonDecoder() : null);
+		Decoder<?> decoder = (this.sseDecoder != null ?
+				this.sseDecoder :
+				jackson2Present ? getJackson2JsonDecoder() : null);
+
+		addCodec(objectReaders, new ServerSentEventHttpMessageReader(decoder));
 	}
 
 	@Override
 	protected void extendTypedWriters(List<HttpMessageWriter<?>> typedWriters) {
-
-		FormHttpMessageWriter formWriter = new FormHttpMessageWriter();
-		formWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
-
-		MultipartHttpMessageWriter multipartWriter = new MultipartHttpMessageWriter(getPartWriters(), formWriter);
-		multipartWriter.setEnableLoggingRequestDetails(isEnableLoggingRequestDetails());
-
-		typedWriters.add(multipartWriter);
+		addCodec(typedWriters, new MultipartHttpMessageWriter(getPartWriters(), new FormHttpMessageWriter()));
 	}
 
 	private List<HttpMessageWriter<?>> getPartWriters() {
@@ -115,6 +127,15 @@ class ClientDefaultCodecsImpl extends BaseDefaultCodecs implements ClientCodecCo
 	private static class DefaultMultipartCodecs implements ClientCodecConfigurer.MultipartCodecs {
 
 		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
+
+
+		DefaultMultipartCodecs() {
+		}
+
+		DefaultMultipartCodecs(DefaultMultipartCodecs other) {
+			this.writers.addAll(other.writers);
+		}
+
 
 		@Override
 		public ClientCodecConfigurer.MultipartCodecs encoder(Encoder<?> encoder) {

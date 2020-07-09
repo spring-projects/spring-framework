@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,9 +39,15 @@ import org.springframework.lang.Nullable;
  *
  * <p><b>{@code FactoryBean} is a programmatic contract. Implementations are not
  * supposed to rely on annotation-driven injection or other reflective facilities.</b>
- * {@link #getObjectType()} {@link #getObject()} invocations may arrive early in
- * the bootstrap process, even ahead of any post-processor setup. If you need access
+ * {@link #getObjectType()} {@link #getObject()} invocations may arrive early in the
+ * bootstrap process, even ahead of any post-processor setup. If you need access to
  * other beans, implement {@link BeanFactoryAware} and obtain them programmatically.
+ *
+ * <p><b>The container is only responsible for managing the lifecycle of the FactoryBean
+ * instance, not the lifecycle of the objects created by the FactoryBean.</b> Therefore,
+ * a destroy method on an exposed bean object (such as {@link java.io.Closeable#close()}
+ * will <i>not</i> be called automatically. Instead, a FactoryBean should implement
+ * {@link DisposableBean} and delegate any such close call to the underlying object.
  *
  * <p>Finally, FactoryBean objects participate in the containing BeanFactory's
  * synchronization of bean creation. There is usually no need for internal
@@ -57,6 +63,17 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.jndi.JndiObjectFactoryBean
  */
 public interface FactoryBean<T> {
+
+	/**
+	 * The name of an attribute that can be
+	 * {@link org.springframework.core.AttributeAccessor#setAttribute set} on a
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} so that
+	 * factory beans can signal their object type when it can't be deduced from
+	 * the factory bean class.
+	 * @since 5.2
+	 */
+	String OBJECT_TYPE_ATTRIBUTE = "factoryBeanObjectType";
+
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object

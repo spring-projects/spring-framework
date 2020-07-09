@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,20 +20,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test fixture with {@link ModelAndViewResolverMethodReturnValueHandler}.
@@ -51,7 +52,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private ServletWebRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);
@@ -68,16 +69,17 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 		handler.handleReturnValue(testBean, returnType, mavContainer, request);
 
-		assertEquals("viewName", mavContainer.getViewName());
-		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
-		assertFalse(mavContainer.isRequestHandled());
+		assertThat(mavContainer.getViewName()).isEqualTo("viewName");
+		assertThat(mavContainer.getModel().get("modelAttrName")).isSameAs(testBean);
+		assertThat(mavContainer.isRequestHandled()).isFalse();
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void modelAndViewResolverUnresolved() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
 		mavResolvers.add(new TestModelAndViewResolver(TestBean.class));
-		handler.handleReturnValue(99, returnType, mavContainer, request);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+				handler.handleReturnValue(99, returnType, mavContainer, request));
 	}
 
 	@Test
@@ -85,15 +87,16 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(null, returnType, mavContainer, request);
 
-		assertNull(mavContainer.getView());
-		assertNull(mavContainer.getViewName());
-		assertTrue(mavContainer.getModel().isEmpty());
+		assertThat(mavContainer.getView()).isNull();
+		assertThat(mavContainer.getViewName()).isNull();
+		assertThat(mavContainer.getModel().isEmpty()).isTrue();
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void handleSimpleType() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
-		handler.handleReturnValue(55, returnType, mavContainer, request);
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+					handler.handleReturnValue(55, returnType, mavContainer, request));
 	}
 
 	@Test
@@ -101,7 +104,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(new TestBean(), returnType, mavContainer, request);
 
-		assertTrue(mavContainer.containsAttribute("testBean"));
+		assertThat(mavContainer.containsAttribute("testBean")).isTrue();
 	}
 
 

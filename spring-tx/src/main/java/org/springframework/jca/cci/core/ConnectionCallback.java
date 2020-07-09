@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.core;
 
 import java.sql.SQLException;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -41,7 +42,10 @@ import org.springframework.lang.Nullable;
  * @see CciTemplate#execute(ConnectionCallback)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
  * @see CciTemplate#execute(javax.resource.cci.InteractionSpec, RecordCreator, RecordExtractor)
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @FunctionalInterface
 public interface ConnectionCallback<T> {
 

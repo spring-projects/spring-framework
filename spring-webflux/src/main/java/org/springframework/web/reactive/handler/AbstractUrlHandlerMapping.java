@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -107,15 +107,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	@Nullable
 	protected Object lookupHandler(PathContainer lookupPath, ServerWebExchange exchange) throws Exception {
-
-		List<PathPattern> matches = this.handlerMap.keySet().stream()
-				.filter(key -> key.matches(lookupPath))
-				.collect(Collectors.toList());
-
-		if (matches.isEmpty()) {
+		List<PathPattern> matches = null;
+		for (PathPattern pattern : this.handlerMap.keySet()) {
+			if (pattern.matches(lookupPath)) {
+				matches = (matches != null ? matches : new ArrayList<>());
+				matches.add(pattern);
+			}
+		}
+		if (matches == null) {
 			return null;
 		}
-
 		if (matches.size() > 1) {
 			matches.sort(PathPattern.SPECIFICITY_COMPARATOR);
 			if (logger.isTraceEnabled()) {

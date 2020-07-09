@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,11 +28,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -49,17 +48,16 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link StompBrokerRelayMessageHandler} running against ActiveMQ.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class StompBrokerRelayMessageHandlerIntegrationTests {
-
-	@Rule
-	public final TestName testName = new TestName();
 
 	private static final Log logger = LogFactory.getLog(StompBrokerRelayMessageHandlerIntegrationTests.class);
 
@@ -76,9 +74,10 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 	private int port;
 
 
-	@Before
-	public void setup() throws Exception {
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	public void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
+
 		this.port = SocketUtils.findAvailableTcpPort(61613);
 		this.responseChannel = new ExecutorSubscribableChannel();
 		this.responseHandler = new TestMessageHandler();
@@ -113,7 +112,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
-	@After
+	@AfterEach
 	public void stop() throws Exception {
 		try {
 			logger.debug("STOMP broker relay stats: " + this.relay.getStatsInfo());
@@ -131,13 +130,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			return;
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
-		this.activeMQBroker.addShutdownHook(new Runnable() {
-			public void run() {
-				latch.countDown();
-			}
-		});
+		this.activeMQBroker.addShutdownHook(latch::countDown);
 		this.activeMQBroker.stop();
-		assertTrue("Broker did not stop", latch.await(5, TimeUnit.SECONDS));
+		assertThat(latch.await(5, TimeUnit.SECONDS)).as("Broker did not stop").isTrue();
 		logger.debug("Broker stopped");
 	}
 
@@ -166,7 +161,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.responseHandler.expectMessages(send);
 	}
 
-	@Test(expected = MessageDeliveryException.class)
+	@Test
 	public void messageDeliveryExceptionIfSystemSessionForwardFails() throws Exception {
 		logger.debug("Starting test messageDeliveryExceptionIfSystemSessionForwardFails()");
 
@@ -174,7 +169,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		this.eventPublisher.expectBrokerAvailabilityEvent(false);
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders()));
+		assertThatExceptionOfType(MessageDeliveryException.class).isThrownBy(() ->
+				this.relay.handleMessage(MessageBuilder.createMessage("test".getBytes(), headers.getMessageHeaders())));
 	}
 
 	@Test
@@ -259,8 +255,8 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		public void expectBrokerAvailabilityEvent(boolean isBrokerAvailable) throws InterruptedException {
 			BrokerAvailabilityEvent event = this.eventQueue.poll(20000, TimeUnit.MILLISECONDS);
-			assertNotNull("Times out waiting for BrokerAvailabilityEvent[" + isBrokerAvailable + "]", event);
-			assertEquals(isBrokerAvailable, event.isBrokerAvailable());
+			assertThat(event).as("Times out waiting for BrokerAvailabilityEvent[" + isBrokerAvailable + "]").isNotNull();
+			assertThat(event.isBrokerAvailable()).isEqualTo(isBrokerAvailable);
 		}
 	}
 
@@ -282,9 +278,9 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
-				assertNotNull("Timed out waiting for messages, expected [" + expectedMessages + "]", message);
+				assertThat(message).as("Timed out waiting for messages, expected [" + expectedMessages + "]").isNotNull();
 				MessageExchange match = findMatch(expectedMessages, message);
-				assertNotNull("Unexpected message=" + message + ", expected [" + expectedMessages + "]", match);
+				assertThat(match).as("Unexpected message=" + message + ", expected [" + expectedMessages + "]").isNotNull();
 				expectedMessages.remove(match);
 			}
 		}

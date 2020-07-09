@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ public interface Condition {
 	/**
 	 * Determine if the condition matches.
 	 * @param context the condition context
-	 * @param metadata metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+	 * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
 	 * or {@link org.springframework.core.type.MethodMetadata method} being checked
 	 * @return {@code true} if the condition matches and the component can be registered,
 	 * or {@code false} to veto the annotated component's registration

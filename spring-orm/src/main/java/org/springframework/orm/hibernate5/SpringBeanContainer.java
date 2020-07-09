@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.hibernate.resource.beans.container.spi.ContainedBean;
 import org.hibernate.resource.beans.spi.BeanInstanceProducer;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
@@ -62,7 +63,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * Please note that Spring's {@link LocalSessionFactoryBean} is an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
- * JPA purposes: In particular with Hibernate 5.3, the Hibernate {@code SessionFactory}
+ * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
  * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
  * Hibernate {@code BeanContainer} integration will be registered out of the box.
  *
@@ -155,7 +156,22 @@ public final class SpringBeanContainer implements BeanContainer {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
 						beanType + ": " + ex);
 			}
-			return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(beanType));
+			try {
+				return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(beanType));
+			}
+			catch (RuntimeException ex2) {
+				if (ex instanceof BeanCreationException) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Fallback producer failed for " + beanType + ": " + ex2);
+					}
+					// Rethrow original Spring exception from first attempt.
+					throw ex;
+				}
+				else {
+					// Throw fallback producer exception since original was probably NoSuchBeanDefinitionException.
+					throw ex2;
+				}
+			}
 		}
 	}
 
@@ -177,9 +193,24 @@ public final class SpringBeanContainer implements BeanContainer {
 		catch (BeansException ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Falling back to Hibernate's default producer after bean creation failure for " +
-						beanType + ": " + ex);
+						beanType + " with name '" + name + "': " + ex);
 			}
-			return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(name, beanType));
+			try {
+				return new SpringContainedBean<>(fallbackProducer.produceBeanInstance(name, beanType));
+			}
+			catch (RuntimeException ex2) {
+				if (ex instanceof BeanCreationException) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Fallback producer failed for " + beanType + " with name '" + name + "': " + ex2);
+					}
+					// Rethrow original Spring exception from first attempt.
+					throw ex;
+				}
+				else {
+					// Throw fallback producer exception since original was probably NoSuchBeanDefinitionException.
+					throw ex2;
+				}
+			}
 		}
 	}
 

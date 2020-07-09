@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,24 +32,23 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * {@link javax.servlet.Filter} that handles CORS preflight requests and intercepts
- * CORS simple and actual requests thanks to a {@link CorsProcessor} implementation
- * ({@link DefaultCorsProcessor} by default) in order to add the relevant CORS
- * response headers (like {@code Access-Control-Allow-Origin}) using the provided
- * {@link CorsConfigurationSource} (for example an {@link UrlBasedCorsConfigurationSource}
- * instance.
+ * {@link javax.servlet.Filter} to handle CORS pre-flight requests and intercept
+ * CORS simple and actual requests with a {@link CorsProcessor}, and to update
+ * the response, e.g. with CORS response headers, based on the policy matched
+ * through the provided {@link CorsConfigurationSource}.
  *
- * <p>This is an alternative to Spring MVC Java config and XML namespace CORS configuration,
- * useful for applications depending only on spring-web (not on spring-webmvc) or for
- * security constraints requiring CORS checks to be performed at {@link javax.servlet.Filter}
- * level.
+ * <p>This is an alternative to configuring CORS in the Spring MVC Java config
+ * and the Spring MVC XML namespace. It is useful for applications depending
+ * only on spring-web (not on spring-webmvc) or for security constraints that
+ * require CORS checks to be performed at {@link javax.servlet.Filter} level.
  *
- * <p>This filter could be used in conjunction with {@link DelegatingFilterProxy} in order
- * to help with its initialization.
+ * <p>This filter could be used in conjunction with {@link DelegatingFilterProxy}
+ * in order to help with its initialization.
  *
  * @author Sebastien Deleuze
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+ * @see UrlBasedCorsConfigurationSource
  */
 public class CorsFilter extends OncePerRequestFilter {
 
@@ -83,16 +83,11 @@ public class CorsFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(request);
-			if (corsConfiguration != null) {
-				boolean isValid = this.processor.processRequest(corsConfiguration, request, response);
-				if (!isValid || CorsUtils.isPreFlightRequest(request)) {
-					return;
-				}
-			}
+		CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(request);
+		boolean isValid = this.processor.processRequest(corsConfiguration, request, response);
+		if (!isValid || CorsUtils.isPreFlightRequest(request)) {
+			return;
 		}
-
 		filterChain.doFilter(request, response);
 	}
 

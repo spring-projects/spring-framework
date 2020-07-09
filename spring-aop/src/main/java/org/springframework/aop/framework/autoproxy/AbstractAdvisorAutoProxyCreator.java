@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,16 +31,18 @@ import org.springframework.util.Assert;
  * Generic auto proxy creator that builds AOP proxies for specific beans
  * based on detected Advisors for each bean.
  *
- * <p>Subclasses must implement the abstract {@link #findCandidateAdvisors()}
- * method to return a list of Advisors applying to any object. Subclasses can
+ * <p>Subclasses may override the {@link #findCandidateAdvisors()} method to
+ * return a custom list of Advisors applying to any object. Subclasses can
  * also override the inherited {@link #shouldSkip} method to exclude certain
  * objects from auto-proxying.
  *
- * <p>Advisors or advices requiring ordering should implement the
+ * <p>Advisors or advices requiring ordering should be annotated with
+ * {@link org.springframework.core.annotation.Order @Order} or implement the
  * {@link org.springframework.core.Ordered} interface. This class sorts
- * Advisors by Ordered order value. Advisors that don't implement the
- * Ordered interface will be considered as unordered; they will appear
- * at the end of the advisor chain in undefined order.
+ * advisors using the {@link AnnotationAwareOrderComparator}. Advisors that are
+ * not annotated with {@code @Order} or don't implement the {@code Ordered}
+ * interface will be considered as unordered; they will appear at the end of the
+ * advisor chain in an undefined order.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

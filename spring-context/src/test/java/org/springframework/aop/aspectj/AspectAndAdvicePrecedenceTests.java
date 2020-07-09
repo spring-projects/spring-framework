@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,17 +19,15 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.ITestBean;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Adrian Colyer
@@ -48,7 +46,7 @@ public class AspectAndAdvicePrecedenceTests {
 	private ITestBean testBean;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -101,12 +99,12 @@ public class AspectAndAdvicePrecedenceTests {
 		private void checkAdvice(String whatJustHappened) {
 			//System.out.println("[" + adviceInvocationNumber + "] " + whatJustHappened + " ==> " + EXPECTED[adviceInvocationNumber]);
 			if (adviceInvocationNumber > (EXPECTED.length - 1)) {
-				fail("Too many advice invocations, expecting " + EXPECTED.length
+				throw new AssertionError("Too many advice invocations, expecting " + EXPECTED.length
 						+ " but had " + adviceInvocationNumber);
 			}
 			String expecting = EXPECTED[adviceInvocationNumber++];
 			if (!whatJustHappened.equals(expecting)) {
-				fail("Expecting '" + expecting + "' on advice invocation " + adviceInvocationNumber +
+				throw new AssertionError("Expecting '" + expecting + "' on advice invocation " + adviceInvocationNumber +
 						" but got '" + whatJustHappened + "'");
 			}
 		}

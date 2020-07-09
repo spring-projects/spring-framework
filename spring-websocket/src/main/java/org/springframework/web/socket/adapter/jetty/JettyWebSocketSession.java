@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,7 +74,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance.
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket session
 	 */
 	public JettyWebSocketSession(Map<String, Object> attributes) {
 		this(attributes, null);
@@ -82,7 +82,7 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	/**
 	 * Create a new {@link JettyWebSocketSession} instance associated with the given user.
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 * @param user the user associated with the session; if {@code null} we'll fallback on the
 	 * user available via {@link org.eclipse.jetty.websocket.api.Session#getUpgradeRequest()}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,19 @@
 
 package org.springframework.web.reactive.function.server
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.Part
+import org.springframework.util.CollectionUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.server.WebSession
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.net.InetSocketAddress
 import java.security.Principal
 
 /**
@@ -49,12 +54,30 @@ inline fun <reified T : Any> ServerRequest.bodyToFlux(): Flux<T> =
 		bodyToFlux(object : ParameterizedTypeReference<T>() {})
 
 /**
- * Coroutines variant of [ServerRequest.bodyToMono].
+ * Coroutines [kotlinx.coroutines.flow.Flow] based variant of [ServerRequest.bodyToFlux].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T? =
+inline fun <reified T : Any> ServerRequest.bodyToFlow(): Flow<T> =
+		bodyToFlux<T>().asFlow()
+
+/**
+ * Non-nullable Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitBody(): T =
+		bodyToMono<T>().awaitSingle()
+
+/**
+ * Nullable Coroutines variant of [ServerRequest.bodyToMono].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2
+ */
+suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
 		bodyToMono<T>().awaitFirstOrNull()
 
 /**
@@ -81,8 +104,8 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @author Sebastien Deleuze
  * @since 5.2
  */
-suspend fun ServerRequest.awaitPrincipal(): Principal =
-		principal().awaitSingle()
+suspend fun ServerRequest.awaitPrincipal(): Principal? =
+		principal().awaitFirstOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.session].
@@ -92,3 +115,56 @@ suspend fun ServerRequest.awaitPrincipal(): Principal =
  */
 suspend fun ServerRequest.awaitSession(): WebSession =
 		session().awaitSingle()
+
+/**
+ * Nullable variant of [ServerRequest.remoteAddress]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.remoteAddressOrNull(): InetSocketAddress? = remoteAddress().orElse(null)
+
+/**
+ * Nullable variant of [ServerRequest.attribute]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.attributeOrNull(name: String): Any? = attributes()[name]
+
+/**
+ * Nullable variant of [ServerRequest.queryParam]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.queryParamOrNull(name: String): String? {
+	val queryParamValues = queryParams()[name]
+	return if (CollectionUtils.isEmpty(queryParamValues)) {
+		null
+	} else {
+		var value: String? = queryParamValues!![0]
+		if (value == null) {
+			value = ""
+		}
+		value
+	}
+}
+
+/**
+ * Nullable variant of [ServerRequest.Headers.contentLength]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.Headers.contentLengthOrNull(): Long? =
+		contentLength().run { if (isPresent) asLong else null }
+
+/**
+ * Nullable variant of [ServerRequest.Headers.contentType]
+ *
+ * @author Sebastien Deleuze
+ * @since 5.2.2
+ */
+fun ServerRequest.Headers.contentTypeOrNull(): MediaType? =
+		contentType().orElse(null)

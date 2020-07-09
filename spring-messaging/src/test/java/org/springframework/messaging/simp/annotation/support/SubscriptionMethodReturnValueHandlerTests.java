@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
@@ -45,8 +45,12 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test fixture for {@link SubscriptionMethodReturnValueHandler}.
@@ -54,6 +58,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
+@ExtendWith(MockitoExtension.class)
 public class SubscriptionMethodReturnValueHandlerTests {
 
 	public static final MimeType MIME_TYPE = new MimeType("text", "plain", StandardCharsets.UTF_8);
@@ -61,13 +66,15 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	private static final String PAYLOAD = "payload";
 
 
+	@Mock
+	private MessageChannel messageChannel;
+
+	@Captor
+	private ArgumentCaptor<Message<?>> messageCaptor;
+
 	private SubscriptionMethodReturnValueHandler handler;
 
 	private SubscriptionMethodReturnValueHandler jsonHandler;
-
-	@Mock private MessageChannel messageChannel;
-
-	@Captor private ArgumentCaptor<Message<?>> messageCaptor;
 
 	private MethodParameter subscribeEventReturnType;
 
@@ -78,10 +85,8 @@ public class SubscriptionMethodReturnValueHandlerTests {
 	private MethodParameter subscribeEventJsonViewReturnType;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		MockitoAnnotations.initMocks(this);
-
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
 		messagingTemplate.setMessageConverter(new StringMessageConverter());
 		this.handler = new SubscriptionMethodReturnValueHandler(messagingTemplate);
@@ -106,9 +111,9 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(this.subscribeEventReturnType));
-		assertFalse(this.handler.supportsReturnType(this.subscribeEventSendToReturnType));
-		assertFalse(this.handler.supportsReturnType(this.messageMappingReturnType));
+		assertThat(this.handler.supportsReturnType(this.subscribeEventReturnType)).isTrue();
+		assertThat(this.handler.supportsReturnType(this.subscribeEventSendToReturnType)).isFalse();
+		assertThat(this.handler.supportsReturnType(this.messageMappingReturnType)).isFalse();
 	}
 
 	@Test
@@ -123,18 +128,18 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		this.handler.handleReturnValue(PAYLOAD, this.subscribeEventReturnType, inputMessage);
 
 		verify(this.messageChannel).send(this.messageCaptor.capture());
-		assertNotNull(this.messageCaptor.getValue());
+		assertThat(this.messageCaptor.getValue()).isNotNull();
 
 		Message<?> message = this.messageCaptor.getValue();
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(message);
 
-		assertNull("SimpMessageHeaderAccessor should have disabled id", headerAccessor.getId());
-		assertNull("SimpMessageHeaderAccessor should have disabled timestamp", headerAccessor.getTimestamp());
-		assertEquals(sessionId, headerAccessor.getSessionId());
-		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(destination, headerAccessor.getDestination());
-		assertEquals(MIME_TYPE, headerAccessor.getContentType());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertThat(headerAccessor.getId()).as("SimpMessageHeaderAccessor should have disabled id").isNull();
+		assertThat(headerAccessor.getTimestamp()).as("SimpMessageHeaderAccessor should have disabled timestamp").isNull();
+		assertThat(headerAccessor.getSessionId()).isEqualTo(sessionId);
+		assertThat(headerAccessor.getSubscriptionId()).isEqualTo(subscriptionId);
+		assertThat(headerAccessor.getDestination()).isEqualTo(destination);
+		assertThat(headerAccessor.getContentType()).isEqualTo(MIME_TYPE);
+		assertThat(headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER)).isEqualTo(this.subscribeEventReturnType);
 	}
 
 	@Test
@@ -145,7 +150,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		String destination = "/dest";
 		Message<?> inputMessage = createInputMessage(sessionId, subscriptionId, destination, null);
 
-		MessageSendingOperations messagingTemplate = Mockito.mock(MessageSendingOperations.class);
+		MessageSendingOperations messagingTemplate = mock(MessageSendingOperations.class);
 		SubscriptionMethodReturnValueHandler handler = new SubscriptionMethodReturnValueHandler(messagingTemplate);
 
 		handler.handleReturnValue(PAYLOAD, this.subscribeEventReturnType, inputMessage);
@@ -156,11 +161,11 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(captor.getValue(), SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertTrue(headerAccessor.isMutable());
-		assertEquals(sessionId, headerAccessor.getSessionId());
-		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.isMutable()).isTrue();
+		assertThat(headerAccessor.getSessionId()).isEqualTo(sessionId);
+		assertThat(headerAccessor.getSubscriptionId()).isEqualTo(subscriptionId);
+		assertThat(headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER)).isEqualTo(this.subscribeEventReturnType);
 	}
 
 	@Test
@@ -176,9 +181,9 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 		verify(this.messageChannel).send(this.messageCaptor.capture());
 		Message<?> message = this.messageCaptor.getValue();
-		assertNotNull(message);
+		assertThat(message).isNotNull();
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_8)).isEqualTo("{\"withView1\":\"with\"}");
 	}
 
 
@@ -232,6 +237,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 		private String withoutView;
 
+		@SuppressWarnings("unused")
 		public String getWithView1() {
 			return withView1;
 		}
@@ -240,6 +246,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 			this.withView1 = withView1;
 		}
 
+		@SuppressWarnings("unused")
 		public String getWithView2() {
 			return withView2;
 		}
@@ -248,6 +255,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 			this.withView2 = withView2;
 		}
 
+		@SuppressWarnings("unused")
 		public String getWithoutView() {
 			return withoutView;
 		}

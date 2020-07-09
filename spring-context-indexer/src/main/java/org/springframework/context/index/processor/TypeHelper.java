@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.context.index.processor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -115,7 +116,7 @@ class TypeHelper {
 			return this.env.getElementUtils().getAllAnnotationMirrors(e);
 		}
 		catch (Exception ex) {
-			// This may fail if one of the annotation is not available
+			// This may fail if one of the annotations is not available.
 			return Collections.emptyList();
 		}
 	}

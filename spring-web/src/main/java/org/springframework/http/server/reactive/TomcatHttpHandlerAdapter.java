@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,9 @@ import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +44,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -103,14 +106,13 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			this.bufferSize = bufferSize;
 		}
 
-		private static HttpHeaders createTomcatHttpHeaders(HttpServletRequest request) {
+		private static MultiValueMap<String, String> createTomcatHttpHeaders(HttpServletRequest request) {
 			RequestFacade requestFacade = getRequestFacade(request);
 			org.apache.catalina.connector.Request connectorRequest = (org.apache.catalina.connector.Request)
 					ReflectionUtils.getField(COYOTE_REQUEST_FIELD, requestFacade);
 			Assert.state(connectorRequest != null, "No Tomcat connector request");
 			Request tomcatRequest = connectorRequest.getCoyoteRequest();
-			TomcatHeadersAdapter headers = new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
-			return new HttpHeaders(headers);
+			return new TomcatHeadersAdapter(tomcatRequest.getMimeHeaders());
 		}
 
 		private static RequestFacade getRequestFacade(HttpServletRequest request) {
@@ -130,13 +132,17 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
+			ServletInputStream inputStream = ((ServletRequest) getNativeRequest()).getInputStream();
+			if (!(inputStream instanceof CoyoteInputStream)) {
+				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
+				return super.readFromInputStream();
+			}
 			boolean release = true;
 			int capacity = this.bufferSize;
 			DataBuffer dataBuffer = this.factory.allocateBuffer(capacity);
 			try {
 				ByteBuffer byteBuffer = dataBuffer.asByteBuffer(0, capacity);
-				ServletRequest request = getNativeRequest();
-				int read = ((CoyoteInputStream) request.getInputStream()).read(byteBuffer);
+				int read = ((CoyoteInputStream) inputStream).read(byteBuffer);
 				logBytesRead(read);
 				if (read > 0) {
 					dataBuffer.writePosition(read);
@@ -204,10 +210,18 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		@Override
 		protected void applyHeaders() {
 			HttpServletResponse response = getNativeResponse();
-			MediaType contentType = getHeaders().getContentType();
+			MediaType contentType = null;
+			try {
+				contentType = getHeaders().getContentType();
+			}
+			catch (Exception ex) {
+				String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+				response.setContentType(rawContentType);
+			}
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_TYPE);
 			Charset charset = (contentType != null ? contentType.getCharset() : null);
 			if (response.getCharacterEncoding() == null && charset != null) {
 				response.setCharacterEncoding(charset.name());
@@ -216,6 +230,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			if (contentLength != -1) {
 				response.setContentLengthLong(contentLength);
 			}
+			getHeaders().remove(HttpHeaders.CONTENT_LENGTH);
 		}
 
 		@Override

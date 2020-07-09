@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link DefaultMultipartHttpServletRequest}.
@@ -49,7 +49,7 @@ public class DefaultMultipartHttpServletRequestTests {
 
 		String[] values = createMultipartRequest().getParameterValues("key");
 
-		assertArrayEquals(new String[] {"p", "q"}, values);
+		assertThat(values).isEqualTo(new String[] {"p", "q"});
 	}
 
 	@Test // SPR-16590
@@ -63,10 +63,10 @@ public class DefaultMultipartHttpServletRequestTests {
 
 		Map<String, String[]> map = createMultipartRequest().getParameterMap();
 
-		assertEquals(3, map.size());
-		assertArrayEquals(new String[] {"p1", "q1"}, map.get("key1"));
-		assertArrayEquals(new String[] {"p2"}, map.get("key2"));
-		assertArrayEquals(new String[] {"q3"}, map.get("key3"));
+		assertThat(map.size()).isEqualTo(3);
+		assertThat(map.get("key1")).isEqualTo(new String[] {"p1", "q1"});
+		assertThat(map.get("key2")).isEqualTo(new String[] {"p2"});
+		assertThat(map.get("key3")).isEqualTo(new String[] {"q3"});
 	}
 
 	private DefaultMultipartHttpServletRequest createMultipartRequest() {

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -149,7 +149,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * <p>Note: Even if a given path starts with a slash, it will get
 	 * interpreted as relative to the current VM working directory.
 	 * This is consistent with the semantics in a Servlet container.
-	 * @param path path to the resource
+	 * @param path the path to the resource
 	 * @return the Resource handle
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
 	 */

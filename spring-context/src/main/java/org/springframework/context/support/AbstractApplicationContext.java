@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,6 +67,7 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -79,6 +80,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -92,29 +94,31 @@ import org.springframework.util.ReflectionUtils;
  * to detect special beans defined in its internal bean factory:
  * Therefore, this class automatically registers
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
- * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessors}
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessors},
  * and {@link org.springframework.context.ApplicationListener ApplicationListeners}
  * which are defined as beans in the context.
  *
  * <p>A {@link org.springframework.context.MessageSource} may also be supplied
  * as a bean in the context, with the name "messageSource"; otherwise, message
  * resolution is delegated to the parent context. Furthermore, a multicaster
- * for application events can be supplied as "applicationEventMulticaster" bean
+ * for application events can be supplied as an "applicationEventMulticaster" bean
  * of type {@link org.springframework.context.event.ApplicationEventMulticaster}
  * in the context; otherwise, a default multicaster of type
  * {@link org.springframework.context.event.SimpleApplicationEventMulticaster} will be used.
  *
- * <p>Implements resource loading through extending
+ * <p>Implements resource loading by extending
  * {@link org.springframework.core.io.DefaultResourceLoader}.
  * Consequently treats non-URL resource paths as class path resources
  * (supporting full class path resource names that include the package path,
  * e.g. "mypackage/myresource.dat"), unless the {@link #getResourceByPath}
- * method is overwritten in a subclass.
+ * method is overridden in a subclass.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Stephane Nicoll
+ * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since January 21, 2001
  * @see #refreshBeanFactory
  * @see #getBeanFactory
@@ -149,6 +153,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+	/**
+	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
+	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
+
+	/**
+	 * Whether this environment lives within a native image.
+	 * Exposed as a private static field rather than in a {@code NativeImageDetector.inNativeImage()} static method due to https://github.com/oracle/graal/issues/2594.
+	 * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
+	 */
+	private static final boolean IN_NATIVE_IMAGE = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
 
 
 	static {
@@ -390,7 +408,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		else {
 			applicationEvent = new PayloadApplicationEvent<>(this, event);
 			if (eventType == null) {
-				eventType = ((PayloadApplicationEvent) applicationEvent).getResolvableType();
+				eventType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
 			}
 		}
 
@@ -645,7 +663,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
-		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+		if (!shouldIgnoreSpel) {
+			beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+		}
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
@@ -668,7 +688,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
-		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+		if (!IN_NATIVE_IMAGE && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
 			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
@@ -713,7 +733,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Instantiate and invoke all registered BeanPostProcessor beans,
+	 * Instantiate and register all BeanPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before any instantiation of application beans.
 	 */
@@ -835,7 +855,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Publish early application events now that we finally have a multicaster...
 		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
 		this.earlyApplicationEvents = null;
-		if (earlyEventsToProcess != null) {
+		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {
 			for (ApplicationEvent earlyEvent : earlyEventsToProcess) {
 				getApplicationEventMulticaster().multicastEvent(earlyEvent);
 			}
@@ -896,7 +916,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		publishEvent(new ContextRefreshedEvent(this));
 
 		// Participate in LiveBeansView MBean, if active.
-		LiveBeansView.registerApplicationContext(this);
+		if (!IN_NATIVE_IMAGE) {
+			LiveBeansView.registerApplicationContext(this);
+		}
 	}
 
 	/**
@@ -927,10 +949,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 	/**
-	 * Register a shutdown hook with the JVM runtime, closing this context
-	 * on JVM shutdown unless it has already been closed at that time.
+	 * Register a shutdown hook {@linkplain Thread#getName() named}
+	 * {@code SpringContextShutdownHook} with the JVM runtime, closing this
+	 * context on JVM shutdown unless it has already been closed at that time.
 	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
 	 * @see Runtime#addShutdownHook
+	 * @see ConfigurableApplicationContext#SHUTDOWN_HOOK_THREAD_NAME
 	 * @see #close()
 	 * @see #doClose()
 	 */
@@ -938,7 +962,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void registerShutdownHook() {
 		if (this.shutdownHook == null) {
 			// No shutdown hook registered yet.
-			this.shutdownHook = new Thread() {
+			this.shutdownHook = new Thread(SHUTDOWN_HOOK_THREAD_NAME) {
 				@Override
 				public void run() {
 					synchronized (startupShutdownMonitor) {
@@ -1002,7 +1026,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.debug("Closing " + this);
 			}
 
-			LiveBeansView.unregisterApplicationContext(this);
+			if (!IN_NATIVE_IMAGE) {
+				LiveBeansView.unregisterApplicationContext(this);
+			}
 
 			try {
 				// Publish shutdown event.
@@ -1178,6 +1204,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	@Nullable
+	public Class<?> getType(String name, boolean allowFactoryBeanInit) throws NoSuchBeanDefinitionException {
+		assertBeanFactoryActive();
+		return getBeanFactory().getType(name, allowFactoryBeanInit);
+	}
+
+	@Override
 	public String[] getAliases(String name) {
 		return getBeanFactory().getAliases(name);
 	}
@@ -1206,6 +1239,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public String[] getBeanNamesForType(ResolvableType type) {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type);
+	}
+
+	@Override
+	public String[] getBeanNamesForType(ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 	}
 
 	@Override

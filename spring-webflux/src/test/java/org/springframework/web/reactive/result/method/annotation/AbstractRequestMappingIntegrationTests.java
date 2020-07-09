@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,12 +27,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-
-import static org.springframework.http.RequestEntity.*;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 
 /**
  * Base class for integration tests with {@code @RequestMapping methods}.
@@ -122,14 +120,14 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 
 	private RequestEntity<Void> prepareGet(String url, HttpHeaders headers) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.HeadersBuilder<?> builder = get(uri);
+		RequestEntity.HeadersBuilder<?> builder = RequestEntity.get(uri);
 		addHeaders(builder, headers);
 		return builder.build();
 	}
 
 	private RequestEntity<Void> prepareOptions(String url, HttpHeaders headers) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.HeadersBuilder<?> builder = options(uri);
+		RequestEntity.HeadersBuilder<?> builder = RequestEntity.options(uri);
 		addHeaders(builder, headers);
 		return builder.build();
 	}
@@ -144,7 +142,7 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 
 	private RequestEntity<?> preparePost(String url, HttpHeaders headers, Object body) throws Exception {
 		URI uri = new URI("http://localhost:" + this.port + url);
-		RequestEntity.BodyBuilder builder = post(uri);
+		RequestEntity.BodyBuilder builder = RequestEntity.post(uri);
 		addHeaders(builder, headers);
 		return builder.body(body);
 	}

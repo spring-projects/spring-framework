@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,6 +71,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Qimiao Chen
  * @see #setBasenames
  * @see ReloadableResourceBundleMessageSource
  * @see java.util.ResourceBundle
@@ -183,8 +184,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 
 	/**
-	 * Return a ResourceBundle for the given basename and code,
-	 * fetching already generated MessageFormats from the cache.
+	 * Return a ResourceBundle for the given basename and Locale,
+	 * fetching already generated ResourceBundle from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
 	 * @return the resulting ResourceBundle, or {@code null} if none
@@ -209,11 +210,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 			try {
 				ResourceBundle bundle = doGetBundle(basename, locale);
 				if (localeMap == null) {
-					localeMap = new ConcurrentHashMap<>();
-					Map<Locale, ResourceBundle> existing = this.cachedResourceBundles.putIfAbsent(basename, localeMap);
-					if (existing != null) {
-						localeMap = existing;
-					}
+					localeMap = this.cachedResourceBundles.computeIfAbsent(basename, bn -> new ConcurrentHashMap<>());
 				}
 				localeMap.put(locale, bundle);
 				return bundle;
@@ -335,19 +332,10 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		String msg = getStringOrNull(bundle, code);
 		if (msg != null) {
 			if (codeMap == null) {
-				codeMap = new ConcurrentHashMap<>();
-				Map<String, Map<Locale, MessageFormat>> existing =
-						this.cachedBundleMessageFormats.putIfAbsent(bundle, codeMap);
-				if (existing != null) {
-					codeMap = existing;
-				}
+				codeMap = this.cachedBundleMessageFormats.computeIfAbsent(bundle, b -> new ConcurrentHashMap<>());
 			}
 			if (localeMap == null) {
-				localeMap = new ConcurrentHashMap<>();
-				Map<Locale, MessageFormat> existing = codeMap.putIfAbsent(code, localeMap);
-				if (existing != null) {
-					localeMap = existing;
-				}
+				localeMap = codeMap.computeIfAbsent(code, c -> new ConcurrentHashMap<>());
 			}
 			MessageFormat result = createMessageFormat(msg, locale);
 			localeMap.put(locale, result);
@@ -461,7 +449,8 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		@Override
 		@Nullable
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
+			Locale defaultLocale = getDefaultLocale();
+			return (defaultLocale != null && !defaultLocale.equals(locale) ? defaultLocale : null);
 		}
 
 		@Override

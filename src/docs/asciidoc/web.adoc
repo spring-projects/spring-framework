@@ -8,9 +8,9 @@
 :docinfo1:
 
 This part of the documentation covers support for Servlet-stack web applications built on the
-Servlet API and deployed to Servlet containers. Individual chapters include <<mvc,Spring MVC>>,
-<<mvc-view,View Technologies>>, <<mvc-cors,CORS Support>>, and <<websocket,WebSocket Support>>.
-For reactive-stack web applications, see <<web-reactive.adoc#spring-web-reactive,Web on Reactive Stack>>.
+Servlet API and deployed to Servlet containers. Individual chapters include <<mvc, Spring MVC>>,
+<<mvc-view,View Technologies>>, <<mvc-cors,CORS Support>>, and <<websocket, WebSocket Support>>.
+For reactive-stack web applications, see <<web-reactive.adoc#spring-web-reactive, Web on Reactive Stack>>.
 
 include::web/webmvc.adoc[leveloffset=+1]
 

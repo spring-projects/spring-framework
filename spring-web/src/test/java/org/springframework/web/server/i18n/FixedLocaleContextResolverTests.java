@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,16 +20,18 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static java.util.Locale.*;
-import static org.junit.Assert.*;
+import static java.util.Locale.CANADA;
+import static java.util.Locale.FRANCE;
+import static java.util.Locale.US;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link FixedLocaleContextResolver}.
@@ -38,7 +40,7 @@ import static org.junit.Assert.*;
  */
 public class FixedLocaleContextResolverTests {
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Locale.setDefault(US);
 	}
@@ -46,15 +48,15 @@ public class FixedLocaleContextResolverTests {
 	@Test
 	public void resolveDefaultLocale() {
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver();
-		assertEquals(US, resolver.resolveLocaleContext(exchange()).getLocale());
-		assertEquals(US, resolver.resolveLocaleContext(exchange(CANADA)).getLocale());
+		assertThat(resolver.resolveLocaleContext(exchange()).getLocale()).isEqualTo(US);
+		assertThat(resolver.resolveLocaleContext(exchange(CANADA)).getLocale()).isEqualTo(US);
 	}
 
 	@Test
 	public void resolveCustomizedLocale() {
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE);
-		assertEquals(FRANCE, resolver.resolveLocaleContext(exchange()).getLocale());
-		assertEquals(FRANCE, resolver.resolveLocaleContext(exchange(CANADA)).getLocale());
+		assertThat(resolver.resolveLocaleContext(exchange()).getLocale()).isEqualTo(FRANCE);
+		assertThat(resolver.resolveLocaleContext(exchange(CANADA)).getLocale()).isEqualTo(FRANCE);
 	}
 
 	@Test
@@ -62,8 +64,8 @@ public class FixedLocaleContextResolverTests {
 		TimeZone timeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
 		FixedLocaleContextResolver resolver = new FixedLocaleContextResolver(FRANCE, timeZone);
 		TimeZoneAwareLocaleContext context = (TimeZoneAwareLocaleContext) resolver.resolveLocaleContext(exchange());
-		assertEquals(FRANCE, context.getLocale());
-		assertEquals(timeZone, context.getTimeZone());
+		assertThat(context.getLocale()).isEqualTo(FRANCE);
+		assertThat(context.getTimeZone()).isEqualTo(timeZone);
 	}
 
 	private ServerWebExchange exchange(Locale... locales) {

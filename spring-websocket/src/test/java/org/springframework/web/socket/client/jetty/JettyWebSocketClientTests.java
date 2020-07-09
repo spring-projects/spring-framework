@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,9 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
@@ -38,7 +38,7 @@ import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link JettyWebSocketClient}.
@@ -55,7 +55,7 @@ public class JettyWebSocketClientTests {
 	private WebSocketSession wsSession;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 
 		this.server = new TestJettyWebSocketServer(new TextWebSocketHandler());
@@ -67,7 +67,7 @@ public class JettyWebSocketClientTests {
 		this.wsUrl = "ws://localhost:" + this.server.getPort() + "/test";
 	}
 
-	@After
+	@AfterEach
 	public void teardown() throws Exception {
 		this.wsSession.close();
 		this.client.stop();
@@ -83,8 +83,8 @@ public class JettyWebSocketClientTests {
 
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
-		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
-		assertEquals("echo", this.wsSession.getAcceptedProtocol());
+		assertThat(this.wsSession.getUri().toString()).isEqualTo(this.wsUrl);
+		assertThat(this.wsSession.getAcceptedProtocol()).isEqualTo("echo");
 	}
 
 	@Test
@@ -96,8 +96,8 @@ public class JettyWebSocketClientTests {
 		this.client.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		this.wsSession = this.client.doHandshake(new TextWebSocketHandler(), headers, new URI(this.wsUrl)).get();
 
-		assertEquals(this.wsUrl, this.wsSession.getUri().toString());
-		assertEquals("echo", this.wsSession.getAcceptedProtocol());
+		assertThat(this.wsSession.getUri().toString()).isEqualTo(this.wsUrl);
+		assertThat(this.wsSession.getAcceptedProtocol()).isEqualTo("echo");
 	}
 
 

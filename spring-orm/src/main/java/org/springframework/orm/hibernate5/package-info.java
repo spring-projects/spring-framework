@@ -1,6 +1,6 @@
 /**
  * Package providing integration of
- * <a href="http://www.hibernate.org">Hibernate 5.x</a>
+ * <a href="https://hibernate.org/">Hibernate 5.x</a>
  * with Spring concepts.
  *
  * <p>Contains an implementation of Spring's transaction SPI for local Hibernate transactions.

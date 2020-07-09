@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,12 @@
 
 package org.springframework.web.server;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -72,10 +76,38 @@ public class ResponseStatusException extends NestedRuntimeException {
 
 
 	/**
-	 * The HTTP status that fits the exception (never {@code null}).
+	 * Return the HTTP status associated with this exception.
 	 */
 	public HttpStatus getStatus() {
 		return this.status;
+	}
+
+	/**
+	 * Return headers associated with the exception that should be added to the
+	 * error response, e.g. "Allow", "Accept", etc.
+	 * <p>The default implementation in this class returns an empty map.
+	 * @since 5.1.11
+	 * @deprecated as of 5.1.13 in favor of {@link #getResponseHeaders()}
+	 */
+	@Deprecated
+	public Map<String, String> getHeaders() {
+		return Collections.emptyMap();
+	}
+
+	/**
+	 * Return headers associated with the exception that should be added to the
+	 * error response, e.g. "Allow", "Accept", etc.
+	 * <p>The default implementation in this class returns empty headers.
+	 * @since 5.1.13
+	 */
+	public HttpHeaders getResponseHeaders() {
+		Map<String, String> headers = getHeaders();
+		if (headers.isEmpty()) {
+			return HttpHeaders.EMPTY;
+		}
+		HttpHeaders result = new HttpHeaders();
+		getHeaders().forEach(result::add);
+		return result;
 	}
 
 	/**
@@ -85,6 +117,7 @@ public class ResponseStatusException extends NestedRuntimeException {
 	public String getReason() {
 		return this.reason;
 	}
+
 
 	@Override
 	public String getMessage() {

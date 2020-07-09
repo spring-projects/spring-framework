@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,23 +19,24 @@ package org.springframework.core.codec;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.junit.Test;
-import org.reactivestreams.Publisher;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
+import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.nio.charset.StandardCharsets.*;
-import static org.junit.Assert.*;
+import static java.nio.charset.StandardCharsets.UTF_16BE;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link StringDecoder}.
@@ -44,12 +45,12 @@ import static org.junit.Assert.*;
  * @author Brian Clozel
  * @author Mark Paluch
  */
-public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
+class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
 
 
-	public StringDecoderTests() {
+	StringDecoderTests() {
 		super(StringDecoder.allMimeTypes());
 	}
 
@@ -57,14 +58,12 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	@Override
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON));
-		assertTrue(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8")));
-		assertFalse(this.decoder.canDecode(
-				ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(
-				ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.TEXT_HTML)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.APPLICATION_JSON)).isTrue();
+		assertThat(this.decoder.canDecode(TYPE, MimeTypeUtils.parseMimeType("text/plain;charset=utf-8"))).isTrue();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN)).isFalse();
+		assertThat(this.decoder.canDecode(ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON)).isFalse();
 	}
 
 	@Override
@@ -76,28 +75,18 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = toDataBuffers(s, 1, UTF_8);
 
-		testDecodeAll(input, ResolvableType.forClass(String.class), step -> step
-				.expectNext(u, e, o)
-				.verifyComplete(), null, null);
-	}
+		// TODO: temporarily replace testDecodeAll with explicit decode/cancel/empty
+		// see https://github.com/reactor/reactor-core/issues/2041
 
-	@Override
-	protected void testDecodeError(Publisher<DataBuffer> input, ResolvableType outputType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+//		testDecode(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
+//		testDecodeCancel(input, TYPE, null, null);
+//		testDecodeEmpty(TYPE, null, null);
 
-		input = Flux.concat(
-				Flux.from(input).take(1),
-				Flux.error(new InputException()));
-
-		Flux<String> result = this.decoder.decode(input, outputType, mimeType, hints);
-
-		StepVerifier.create(result)
-				.expectError(InputException.class)
-				.verify();
+		testDecodeAll(input, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), null, null);
 	}
 
 	@Test
-	public void decodeMultibyteCharacterUtf16() {
+	void decodeMultibyteCharacterUtf16() {
 		String u = "ü";
 		String e = "é";
 		String o = "ø";
@@ -105,25 +94,25 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		Flux<DataBuffer> source = toDataBuffers(s, 2, UTF_16BE);
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=utf-16be");
 
-		testDecode(source, TYPE, step -> step
-				.expectNext(u, e, o)
-				.verifyComplete(), mimeType, null);
+		testDecode(source, TYPE, step -> step.expectNext(u, e, o).verifyComplete(), mimeType, null);
 	}
 
 	private Flux<DataBuffer> toDataBuffers(String s, int length, Charset charset) {
 		byte[] bytes = s.getBytes(charset);
-
-		List<DataBuffer> dataBuffers = new ArrayList<>();
+		List<byte[]> chunks = new ArrayList<>();
 		for (int i = 0; i < bytes.length; i += length) {
-			DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
-			dataBuffer.write(bytes, i, length);
-			dataBuffers.add(dataBuffer);
+			chunks.add(Arrays.copyOfRange(bytes, i, i + length));
 		}
-		return Flux.fromIterable(dataBuffers);
+		return Flux.fromIterable(chunks)
+				.map(chunk -> {
+					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(length);
+					dataBuffer.write(chunk, 0, chunk.length);
+					return dataBuffer;
+				});
 	}
 
 	@Test
-	public void decodeNewLine() {
+	void decodeNewLine() {
 		Flux<DataBuffer> input = Flux.just(
 				stringBuffer("\r\nabc\n"),
 				stringBuffer("def"),
@@ -148,7 +137,34 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeNewLineIncludeDelimiters() {
+	void maxInMemoryLimit() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("abc\n"), stringBuffer("defg\n"), stringBuffer("hijkl\n"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step ->
+				step.expectNext("abc", "defg").verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24312
+	void maxInMemoryLimitReleaseUnprocessedLinesFromCurrentBuffer() {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("TOO MUCH DATA\nanother line\n\nand another\n"));
+
+		this.decoder.setMaxInMemorySize(5);
+		testDecode(input, String.class, step -> step.verifyError(DataBufferLimitException.class));
+	}
+
+	@Test // gh-24339
+	void maxInMemoryLimitReleaseUnprocessedLinesWhenUnlimited() {
+		Flux<DataBuffer> input = Flux.just(stringBuffer("Line 1\nLine 2\nLine 3\n"));
+
+		this.decoder.setMaxInMemorySize(-1);
+		testDecodeCancel(input, ResolvableType.forClass(String.class), null, Collections.emptyMap());
+	}
+
+	@Test
+	void decodeNewLineIncludeDelimiters() {
 		this.decoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
 		Flux<DataBuffer> input = Flux.just(
@@ -175,7 +191,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyFlux() {
+	void decodeEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecode(input, String.class, step -> step
@@ -184,7 +200,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeEmptyDataBuffer() {
+	void decodeEmptyDataBuffer() {
 		Flux<DataBuffer> input = Flux.just(stringBuffer(""));
 		Flux<String> output = this.decoder.decode(input,
 				TYPE, null, Collections.emptyMap());
@@ -210,7 +226,7 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 	}
 
 	@Test
-	public void decodeToMonoWithEmptyFlux() {
+	void decodeToMonoWithEmptyFlux() {
 		Flux<DataBuffer> input = Flux.empty();
 
 		testDecodeToMono(input, String.class, step -> step
@@ -224,6 +240,5 @@ public class StringDecoderTests extends AbstractDecoderTestCase<StringDecoder> {
 		buffer.write(bytes);
 		return buffer;
 	}
-
 
 }

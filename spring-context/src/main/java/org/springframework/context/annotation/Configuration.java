@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -344,15 +344,16 @@ import org.springframework.stereotype.Component;
  *
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
  * bootstrap time.  To avoid this, {@code @Configuration} may be used in conjunction with
- * the {@link Lazy @Lazy} annotation to indicate that all {@code @Bean} methods declared within
- * the class are by default lazily initialized. Note that {@code @Lazy} may be used on
- * individual {@code @Bean} methods as well.
+ * the {@link Lazy @Lazy} annotation to indicate that all {@code @Bean} methods declared
+ * within the class are by default lazily initialized. Note that {@code @Lazy} may be used
+ * on individual {@code @Bean} methods as well.
  *
  * <h2>Testing support for {@code @Configuration} classes</h2>
  *
  * <p>The Spring <em>TestContext framework</em> available in the {@code spring-test} module
  * provides the {@code @ContextConfiguration} annotation which can accept an array of
- * {@code @Configuration} {@code Class} objects:
+ * <em>component class</em> references &mdash; typically {@code @Configuration} or
+ * {@code @Component} classes.
  *
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)
@@ -391,7 +392,9 @@ import org.springframework.stereotype.Component;
  * <ul>
  * <li>Configuration classes must be provided as classes (i.e. not as instances returned
  * from factory methods), allowing for runtime enhancements through a generated subclass.
- * <li>Configuration classes must be non-final.
+ * <li>Configuration classes must be non-final (allowing for subclasses at runtime),
+ * unless the {@link #proxyBeanMethods() proxyBeanMethods} flag is set to {@code false}
+ * in which case no runtime-generated subclass is necessary.
  * <li>Configuration classes must be non-local (i.e. may not be declared within a method).
  * <li>Any nested configuration classes must be declared as {@code static}.
  * <li>{@code @Bean} methods may not in turn create further configuration classes
@@ -401,6 +404,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.0
  * @see Bean
  * @see Profile
@@ -430,9 +434,30 @@ public @interface Configuration {
 	 * is registered as a traditional XML bean definition, the name/id of the bean
 	 * element will take precedence.
 	 * @return the explicit component name, if any (or empty String otherwise)
-	 * @see org.springframework.beans.factory.support.DefaultBeanNameGenerator
+	 * @see AnnotationBeanNameGenerator
 	 */
 	@AliasFor(annotation = Component.class)
 	String value() default "";
+
+	/**
+	 * Specify whether {@code @Bean} methods should get proxied in order to enforce
+	 * bean lifecycle behavior, e.g. to return shared singleton bean instances even
+	 * in case of direct {@code @Bean} method calls in user code. This feature
+	 * requires method interception, implemented through a runtime-generated CGLIB
+	 * subclass which comes with limitations such as the configuration class and
+	 * its methods not being allowed to declare {@code final}.
+	 * <p>The default is {@code true}, allowing for 'inter-bean references' via direct
+	 * method calls within the configuration class as well as for external calls to
+	 * this configuration's {@code @Bean} methods, e.g. from another configuration class.
+	 * If this is not needed since each of this particular configuration's {@code @Bean}
+	 * methods is self-contained and designed as a plain factory method for container use,
+	 * switch this flag to {@code false} in order to avoid CGLIB subclass processing.
+	 * <p>Turning off bean method interception effectively processes {@code @Bean}
+	 * methods individually like when declared on non-{@code @Configuration} classes,
+	 * a.k.a. "@Bean Lite Mode" (see {@link Bean @Bean's javadoc}). It is therefore
+	 * behaviorally equivalent to removing the {@code @Configuration} stereotype.
+	 * @since 5.2
+	 */
+	boolean proxyBeanMethods() default true;
 
 }

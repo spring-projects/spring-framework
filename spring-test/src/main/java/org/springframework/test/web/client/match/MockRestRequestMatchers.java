@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.test.web.client.match;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
@@ -62,7 +63,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param method the HTTP method
 	 * @return the request matcher
 	 */
-	public static RequestMatcher method(final HttpMethod method) {
+	public static RequestMatcher method(HttpMethod method) {
 		Assert.notNull(method, "'method' must not be null");
 		return request -> assertEquals("Unexpected HttpMethod", method, request.getMethod());
 	}
@@ -72,7 +73,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param matcher the String matcher for the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestTo(final Matcher<String> matcher) {
+	public static RequestMatcher requestTo(Matcher<String> matcher) {
 		Assert.notNull(matcher, "'matcher' must not be null");
 		return request -> assertThat("Request URI", request.getURI().toString(), matcher);
 	}
@@ -82,7 +83,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param expectedUri the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestTo(final String expectedUri) {
+	public static RequestMatcher requestTo(String expectedUri) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		return request -> assertEquals("Request URI", expectedUri, request.getURI().toString());
 	}
@@ -95,7 +96,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param uriVars zero or more URI variables to populate the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestToUriTemplate(final String expectedUri, final Object... uriVars) {
+	public static RequestMatcher requestToUriTemplate(String expectedUri, Object... uriVars) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(expectedUri).buildAndExpand(uriVars).encode().toUri();
 		return requestTo(uri);
@@ -106,7 +107,7 @@ public abstract class MockRestRequestMatchers {
 	 * @param uri the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestTo(final URI uri) {
+	public static RequestMatcher requestTo(URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
 		return request -> assertEquals("Unexpected request", uri, request.getURI());
 	}
@@ -115,7 +116,7 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request query parameter values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
-	public static RequestMatcher queryParam(final String name, final Matcher<? super String>... matchers) {
+	public static RequestMatcher queryParam(String name, Matcher<? super String>... matchers) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
 			assertValueCount("query param", name, params, matchers.length);
@@ -128,7 +129,7 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert request query parameter values.
 	 */
-	public static RequestMatcher queryParam(final String name, final String... expectedValues) {
+	public static RequestMatcher queryParam(String name, String... expectedValues) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
 			assertValueCount("query param", name, params, expectedValues.length);
@@ -143,7 +144,7 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	private static void assertValueCount(
-			String valueType, final String name, MultiValueMap<String, String> map, int count) {
+			String valueType, String name, MultiValueMap<String, String> map, int count) {
 
 		List<String> values = map.get(name);
 		String message = "Expected " + valueType + " <" + name + ">";
@@ -159,7 +160,7 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request header values with the given Hamcrest matcher(s).
 	 */
 	@SafeVarargs
-	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
+	public static RequestMatcher header(String name, Matcher<? super String>... matchers) {
 		return request -> {
 			assertValueCount("header", name, request.getHeaders(), matchers.length);
 			List<String> headerValues = request.getHeaders().get(name);
@@ -173,13 +174,27 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert request header values.
 	 */
-	public static RequestMatcher header(final String name, final String... expectedValues) {
+	public static RequestMatcher header(String name, String... expectedValues) {
 		return request -> {
 			assertValueCount("header", name, request.getHeaders(), expectedValues.length);
 			List<String> headerValues = request.getHeaders().get(name);
 			Assert.state(headerValues != null, "No header values");
 			for (int i = 0; i < expectedValues.length; i++) {
 				assertEquals("Request header [" + name + "]", expectedValues[i], headerValues.get(i));
+			}
+		};
+	}
+
+	/**
+	 * Assert that the given request header does not exist.
+	 * @since 5.2
+	 */
+	public static RequestMatcher headerDoesNotExist(String name) {
+		return request -> {
+			List<String> headerValues = request.getHeaders().get(name);
+			if (headerValues != null) {
+				fail("Expected header <" + name + "> not to exist, but it exists with values: " +
+						headerValues);
 			}
 		};
 	}
@@ -234,7 +249,7 @@ public abstract class MockRestRequestMatchers {
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
 	 * @param expression the XPath optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathRequestMatchers xpath(String expression, Map<String, String> namespaces, Object... args)

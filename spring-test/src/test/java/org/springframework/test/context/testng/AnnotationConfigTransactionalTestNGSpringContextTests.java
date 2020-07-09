@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.testfixture.beans.Employee;
+import org.springframework.beans.testfixture.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -32,14 +34,13 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
-import org.springframework.tests.sample.beans.Employee;
-import org.springframework.tests.sample.beans.Pet;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.transaction.TransactionTestUtils.*;
-import static org.testng.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
+import static org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive;
 
 /**
  * Integration tests that verify support for
@@ -84,12 +85,13 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
-		assertEquals(countRowsInTable("person"), expectedNumRows, "the number of rows in the person table ("
-				+ testState + ").");
+		assertThat(countRowsInTable("person"))
+			.as("the number of rows in the person table (" + testState + ").")
+			.isEqualTo(expectedNumRows);
 	}
 
-	private void assertAddPerson(final String name) {
-		assertEquals(createPerson(name), 1, "Adding '" + name + "'");
+	private void assertAddPerson(String name) {
+		assertThat(createPerson(name)).as("Adding '%s'", name).isEqualTo(1);
 	}
 
 	@BeforeClass
@@ -102,20 +104,20 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 
 	@AfterClass
 	void afterClass() {
-		assertEquals(numSetUpCalls, NUM_TESTS, "number of calls to setUp().");
-		assertEquals(numSetUpCallsInTransaction, NUM_TX_TESTS, "number of calls to setUp() within a transaction.");
-		assertEquals(numTearDownCalls, NUM_TESTS, "number of calls to tearDown().");
-		assertEquals(numTearDownCallsInTransaction, NUM_TX_TESTS, "number of calls to tearDown() within a transaction.");
+		assertThat(numSetUpCalls).as("number of calls to setUp().").isEqualTo(NUM_TESTS);
+		assertThat(numSetUpCallsInTransaction).as("number of calls to setUp() within a transaction.").isEqualTo(NUM_TX_TESTS);
+		assertThat(numTearDownCalls).as("number of calls to tearDown().").isEqualTo(NUM_TESTS);
+		assertThat(numTearDownCallsInTransaction).as("number of calls to tearDown() within a transaction.").isEqualTo(NUM_TX_TESTS);
 	}
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	void autowiringFromConfigClass() {
-		assertNotNull(employee, "The employee should have been autowired.");
-		assertEquals(employee.getName(), "John Smith");
+		assertThat(employee).as("The employee should have been autowired.").isNotNull();
+		assertThat(employee.getName()).isEqualTo("John Smith");
 
-		assertNotNull(pet, "The pet should have been autowired.");
-		assertEquals(pet.getName(), "Fido");
+		assertThat(pet).as("The pet should have been autowired.").isNotNull();
+		assertThat(pet.getName()).isEqualTo("Fido");
 	}
 
 	@BeforeTransaction
@@ -127,15 +129,15 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@BeforeMethod
 	void setUp() throws Exception {
 		numSetUpCalls++;
-		if (inTransaction()) {
+		if (isActualTransactionActive()) {
 			numSetUpCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 2 : 1), "before a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 2 : 1), "before a test method");
 	}
 
 	@Test
 	void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
+		assertThatTransaction().isActive();
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);
 		assertNumRowsInPersonTable(4, "in modifyTestDataWithinTransaction()");
@@ -144,15 +146,15 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	@AfterMethod
 	void tearDown() throws Exception {
 		numTearDownCalls++;
-		if (inTransaction()) {
+		if (isActualTransactionActive()) {
 			numTearDownCallsInTransaction++;
 		}
-		assertNumRowsInPersonTable((inTransaction() ? 4 : 1), "after a test method");
+		assertNumRowsInPersonTable((isActualTransactionActive() ? 4 : 1), "after a test method");
 	}
 
 	@AfterTransaction
 	void afterTransaction() {
-		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
+		assertThat(deletePerson(YODA)).as("Deleting yoda").isEqualTo(1);
 		assertNumRowsInPersonTable(1, "after a transactional test method");
 	}
 

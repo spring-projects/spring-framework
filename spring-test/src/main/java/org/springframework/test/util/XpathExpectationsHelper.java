@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.test.util;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,7 +40,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
-
 
 /**
  * A helper class for applying assertions via XPath expressions.
@@ -95,11 +95,24 @@ public class XpathExpectationsHelper {
 	 * Parse the content, evaluate the XPath expression as a {@link Node},
 	 * and assert it with the given {@code Matcher<Node>}.
 	 */
-	public void assertNode(byte[] content, @Nullable String encoding, final Matcher<? super Node> matcher)
+	public void assertNode(byte[] content, @Nullable String encoding, Matcher<? super Node> matcher)
 			throws Exception {
 
 		Node node = evaluateXpath(content, encoding, Node.class);
 		MatcherAssert.assertThat("XPath " + this.expression, node, matcher);
+	}
+
+	/**
+	 * Parse the content, evaluate the XPath expression as a {@link NodeList},
+	 * and assert it with the given {@code Matcher<NodeList>}.
+	 * @since 5.2.2
+	 */
+	public void assertNodeList(byte[] content, @Nullable String encoding, Matcher<? super NodeList> matcher)
+			throws Exception {
+
+		Document document = parseXmlByteArray(content, encoding);
+		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
+		MatcherAssert.assertThat("XPath " + this.getXpathExpression(), nodeList, matcher);
 	}
 
 	/**
@@ -108,7 +121,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void exists(byte[] content, @Nullable String encoding) throws Exception {
 		Node node = evaluateXpath(content, encoding, Node.class);
-		AssertionErrors.assertTrue("XPath " + this.expression + " does not exist", node != null);
+		AssertionErrors.assertNotNull("XPath " + this.expression + " does not exist", node);
 	}
 
 	/**
@@ -117,7 +130,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void doesNotExist(byte[] content, @Nullable String encoding) throws Exception {
 		Node node = evaluateXpath(content, encoding, Node.class);
-		AssertionErrors.assertTrue("XPath " + this.expression + " exists", node == null);
+		AssertionErrors.assertNull("XPath " + this.expression + " exists", node);
 	}
 
 	/**

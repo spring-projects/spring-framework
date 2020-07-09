@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,12 @@
 package org.springframework.http.codec.xml;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -30,11 +33,15 @@ import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import org.reactivestreams.Publisher;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
@@ -42,7 +49,10 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -70,6 +80,8 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	private static final String JAXB_DEFAULT_ANNOTATION_VALUE = "##default";
 
+	private static final XMLInputFactory inputFactory = StaxUtils.createDefensiveInputFactory();
+
 
 	private final XmlEventDecoder xmlEventDecoder = new XmlEventDecoder();
 
@@ -77,9 +89,20 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	private Function<Unmarshaller, Unmarshaller> unmarshallerProcessor = Function.identity();
 
+	private int maxInMemorySize = 256 * 1024;
+
 
 	public Jaxb2XmlDecoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML, new MediaType("application", "*+xml"));
+	}
+
+	/**
+	 * Create a {@code Jaxb2XmlDecoder} with the specified MIME types.
+	 * @param supportedMimeTypes supported MIME types
+	 * @since 5.1.9
+	 */
+	public Jaxb2XmlDecoder(MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
 	}
 
 
@@ -98,6 +121,28 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 */
 	public Function<Unmarshaller, Unmarshaller> getUnmarshallerProcessor() {
 		return this.unmarshallerProcessor;
+	}
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder.
+	 * This is either the size of the entire input when decoding as a whole, or when
+	 * using async parsing with Aalto XML, it is the size of one top-level XML tree.
+	 * When the limit is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+		this.xmlEventDecoder.setMaxInMemorySize(byteCount);
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -130,10 +175,40 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return decode(inputStream, elementType, mimeType, hints).singleOrEmpty();
+		return DataBufferUtils.join(input, this.maxInMemorySize)
+				.map(dataBuffer -> decode(dataBuffer, elementType, mimeType, hints));
+	}
+
+	@Override
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})  // XMLEventReader is Iterator<Object> on JDK 9
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
+
+		try {
+			Iterator eventReader = inputFactory.createXMLEventReader(dataBuffer.asInputStream());
+			List<XMLEvent> events = new ArrayList<>();
+			eventReader.forEachRemaining(event -> events.add((XMLEvent) event));
+			return unmarshal(events, targetType.toClass());
+		}
+		catch (XMLStreamException ex) {
+			throw new DecodingException(ex.getMessage(), ex);
+		}
+		catch (Throwable ex) {
+			Throwable cause = ex.getCause();
+			if (cause instanceof XMLStreamException) {
+				throw new DecodingException(cause.getMessage(), cause);
+			}
+			else {
+				throw Exceptions.propagate(ex);
+			}
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
 	}
 
 	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
@@ -156,7 +231,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 		}
 	}
 
-	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws JAXBException {
+	private Unmarshaller initUnmarshaller(Class<?> outputClass) throws CodecException, JAXBException {
 		Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
 		return this.unmarshallerProcessor.apply(unmarshaller);
 	}
@@ -224,11 +299,11 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 	 * </ol>
 	 */
 	Flux<List<XMLEvent>> split(Flux<XMLEvent> xmlEventFlux, QName desiredName) {
-		return xmlEventFlux.flatMap(new SplitFunction(desiredName));
+		return xmlEventFlux.handle(new SplitHandler(desiredName));
 	}
 
 
-	private static class SplitFunction implements Function<XMLEvent, Publisher<? extends List<XMLEvent>>> {
+	private static class SplitHandler implements BiConsumer<XMLEvent, SynchronousSink<List<XMLEvent>>> {
 
 		private final QName desiredName;
 
@@ -239,12 +314,12 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 		private int barrier = Integer.MAX_VALUE;
 
-		public SplitFunction(QName desiredName) {
+		public SplitHandler(QName desiredName) {
 			this.desiredName = desiredName;
 		}
 
 		@Override
-		public Publisher<? extends List<XMLEvent>> apply(XMLEvent event) {
+		public void accept(XMLEvent event, SynchronousSink<List<XMLEvent>> sink) {
 			if (event.isStartElement()) {
 				if (this.barrier == Integer.MAX_VALUE) {
 					QName startElementName = event.asStartElement().getName();
@@ -264,10 +339,9 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 				if (this.elementDepth == this.barrier) {
 					this.barrier = Integer.MAX_VALUE;
 					Assert.state(this.events != null, "No XMLEvent List");
-					return Mono.just(this.events);
+					sink.next(this.events);
 				}
 			}
-			return Mono.empty();
 		}
 	}
 

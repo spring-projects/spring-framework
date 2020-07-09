@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,10 @@ package org.springframework.jms.support;
 
 import javax.jms.Session;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.
@@ -30,34 +31,33 @@ import static org.junit.Assert.*;
  */
 public class JmsAccessorTests {
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
-		accessor.afterPropertiesSet();
+		assertThatIllegalArgumentException().isThrownBy(
+				accessor::afterPropertiesSet);
 	}
 
 	@Test
 	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
-		assertFalse("The [sessionTransacted] property of JmsAccessor must default to " +
+		assertThat(accessor.isSessionTransacted()).as("The [sessionTransacted] property of JmsAccessor must default to " +
 				"false. Change this test (and the attendant Javadoc) if you have " +
-				"changed the default.",
-				accessor.isSessionTransacted());
+				"changed the default.").isFalse();
 	}
 
 	@Test
 	public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
 		JmsAccessor accessor = new StubJmsAccessor();
-		assertEquals("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
+		assertThat(accessor.getSessionAcknowledgeMode()).as("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
 				"[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant " +
-				"Javadoc) if you have changed the default.",
-				Session.AUTO_ACKNOWLEDGE,
-				accessor.getSessionAcknowledgeMode());
+				"Javadoc) if you have changed the default.").isEqualTo(Session.AUTO_ACKNOWLEDGE);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
-		new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!");
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!"));
 	}
 
 

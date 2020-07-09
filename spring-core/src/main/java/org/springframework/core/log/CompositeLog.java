@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,32 +74,32 @@ final class CompositeLog implements Log {
 
 	@Override
 	public boolean isFatalEnabled() {
-		return this.fatalLogger != NO_OP_LOG;
+		return (this.fatalLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isErrorEnabled() {
-		return this.errorLogger != NO_OP_LOG;
+		return (this.errorLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isWarnEnabled() {
-		return this.warnLogger != NO_OP_LOG;
+		return (this.warnLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isInfoEnabled() {
-		return this.infoLogger != NO_OP_LOG;
+		return (this.infoLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isDebugEnabled() {
-		return this.debugLogger != NO_OP_LOG;
+		return (this.debugLogger != NO_OP_LOG);
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-		return this.traceLogger != NO_OP_LOG;
+		return (this.traceLogger != NO_OP_LOG);
 	}
 
 	@Override

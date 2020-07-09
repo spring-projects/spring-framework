@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,13 @@ package org.springframework.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for SPR-3522. Arguments changed on a call to proceed should be
@@ -42,7 +42,7 @@ public class ProceedTests {
 	private ProceedTestingAspect secondTestAspect;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -55,28 +55,28 @@ public class ProceedTests {
 	@Test
 	public void testSimpleProceedWithChangedArgs() {
 		this.testBean.setName("abc");
-		assertEquals("Name changed in around advice", "ABC", this.testBean.getName());
+		assertThat(this.testBean.getName()).as("Name changed in around advice").isEqualTo("ABC");
 	}
 
 	@Test
 	public void testGetArgsIsDefensive() {
 		this.testBean.setAge(5);
-		assertEquals("getArgs is defensive", 5, this.testBean.getAge());
+		assertThat(this.testBean.getAge()).as("getArgs is defensive").isEqualTo(5);
 	}
 
 	@Test
 	public void testProceedWithArgsInSameAspect() {
 		this.testBean.setMyFloat(1.0F);
-		assertTrue("value changed in around advice", this.testBean.getMyFloat() > 1.9F);
-		assertTrue("changed value visible to next advice in chain", this.firstTestAspect.getLastBeforeFloatValue() > 1.9F);
+		assertThat(this.testBean.getMyFloat() > 1.9F).as("value changed in around advice").isTrue();
+		assertThat(this.firstTestAspect.getLastBeforeFloatValue() > 1.9F).as("changed value visible to next advice in chain").isTrue();
 	}
 
 	@Test
 	public void testProceedWithArgsAcrossAspects() {
 		this.testBean.setSex("male");
-		assertEquals("value changed in around advice","MALE", this.testBean.getSex());
-		assertEquals("changed value visible to next before advice in chain","MALE", this.secondTestAspect.getLastBeforeStringValue());
-		assertEquals("changed value visible to next around advice in chain","MALE", this.secondTestAspect.getLastAroundStringValue());
+		assertThat(this.testBean.getSex()).as("value changed in around advice").isEqualTo("MALE");
+		assertThat(this.secondTestAspect.getLastBeforeStringValue()).as("changed value visible to next before advice in chain").isEqualTo("MALE");
+		assertThat(this.secondTestAspect.getLastAroundStringValue()).as("changed value visible to next around advice in chain").isEqualTo("MALE");
 	}
 
 

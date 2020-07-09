@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import org.springframework.lang.Nullable;
 
@@ -53,6 +54,7 @@ public abstract class ObjectUtils {
 	private static final String ARRAY_END = "}";
 	private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
+	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 
 	/**
@@ -281,14 +283,14 @@ public abstract class ObjectUtils {
 			return (Object[]) source;
 		}
 		if (source == null) {
-			return new Object[0];
+			return EMPTY_OBJECT_ARRAY;
 		}
 		if (!source.getClass().isArray()) {
 			throw new IllegalArgumentException("Source is not an array: " + source);
 		}
 		int length = Array.getLength(source);
 		if (length == 0) {
-			return new Object[0];
+			return EMPTY_OBJECT_ARRAY;
 		}
 		Class<?> wrapperType = Array.get(source, 0).getClass();
 		Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);
@@ -609,7 +611,9 @@ public abstract class ObjectUtils {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
-		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
+		String className = obj.getClass().getName();
+		String identityHexString = getIdentityHexString(obj);
+		return className + '@' + identityHexString;
 	}
 
 	/**
@@ -639,7 +643,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Determine the class name for the given object.
-	 * <p>Returns {@code "null"} if {@code obj} is {@code null}.
+	 * <p>Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to introspect (may be {@code null})
 	 * @return the corresponding class name
 	 */
@@ -650,7 +654,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Return a String representation of the specified Object.
 	 * <p>Builds a String representation of the contents in case of an array.
-	 * Returns {@code "null"} if {@code obj} is {@code null}.
+	 * Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of {@code obj}
 	 */
@@ -696,8 +700,8 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -709,26 +713,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(String.valueOf(array[i]));
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (Object o : array) {
+			stringJoiner.add(String.valueOf(o));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -740,27 +737,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (boolean b : array) {
+			stringJoiner.add(String.valueOf(b));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -772,26 +761,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (byte b : array) {
+			stringJoiner.add(String.valueOf(b));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -803,26 +785,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append("'").append(array[i]).append("'");
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (char c : array) {
+			stringJoiner.add('\'' + String.valueOf(c) + '\'');
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -834,27 +809,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (double d : array) {
+			stringJoiner.add(String.valueOf(d));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -866,27 +833,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (float f : array) {
+			stringJoiner.add(String.valueOf(f));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -898,26 +857,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (int i : array) {
+			stringJoiner.add(String.valueOf(i));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -929,26 +881,19 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (long l : array) {
+			stringJoiner.add(String.valueOf(l));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
@@ -960,18 +905,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (short s : array) {
+			stringJoiner.add(String.valueOf(s));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 }

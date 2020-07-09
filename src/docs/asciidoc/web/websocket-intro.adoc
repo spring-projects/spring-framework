@@ -1,7 +1,7 @@
 [[websocket-intro]]
 = Introduction to WebSocket
 
-The WebSocket protocol, http://tools.ietf.org/html/rfc6455[RFC 6455], provides a standardized
+The WebSocket protocol, https://tools.ietf.org/html/rfc6455[RFC 6455], provides a standardized
 way to establish a full-duplex, two-way communication channel between client and server
 over a single TCP connection. It is a different TCP protocol from HTTP but is designed to
 work over HTTP, using ports 80 and 443 and allowing re-use of existing firewall rules.

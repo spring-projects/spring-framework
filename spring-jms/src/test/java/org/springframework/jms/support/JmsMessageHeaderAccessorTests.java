@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,16 +17,17 @@
 package org.springframework.jms.support;
 
 import java.util.Map;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTextMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
@@ -56,19 +57,20 @@ public class JmsMessageHeaderAccessorTests {
 		Map<String, Object> mappedHeaders = new SimpleJmsHeaderMapper().toHeaders(jmsMessage);
 		Message<String> message = MessageBuilder.withPayload("test").copyHeaders(mappedHeaders).build();
 		JmsMessageHeaderAccessor headerAccessor = JmsMessageHeaderAccessor.wrap(message);
-		assertEquals("correlation-1234", headerAccessor.getCorrelationId());
-		assertEquals(destination, headerAccessor.getDestination());
-		assertEquals(Integer.valueOf(1), headerAccessor.getDeliveryMode());
-		assertEquals(1234L, headerAccessor.getExpiration(), 0.0);
-		assertEquals("abcd-1234", headerAccessor.getMessageId());
-		assertEquals(Integer.valueOf(9), headerAccessor.getPriority());
-		assertEquals(replyTo, headerAccessor.getReplyTo());
-		assertEquals(true, headerAccessor.getRedelivered());
-		assertEquals("type", headerAccessor.getType());
-		assertEquals(4567L, headerAccessor.getTimestamp(), 0.0);
+		assertThat(headerAccessor.getCorrelationId()).isEqualTo("correlation-1234");
+		assertThat(headerAccessor.getDestination()).isEqualTo(destination);
+		assertThat(headerAccessor.getDeliveryMode()).isEqualTo(Integer.valueOf(1));
+		assertThat(headerAccessor.getExpiration()).isEqualTo(1234);
+
+		assertThat(headerAccessor.getMessageId()).isEqualTo("abcd-1234");
+		assertThat(headerAccessor.getPriority()).isEqualTo(Integer.valueOf(9));
+		assertThat(headerAccessor.getReplyTo()).isEqualTo(replyTo);
+		assertThat(headerAccessor.getRedelivered()).isEqualTo(true);
+		assertThat(headerAccessor.getType()).isEqualTo("type");
+		assertThat(headerAccessor.getTimestamp()).isEqualTo(4567);
 
 		// Making sure replyChannel is not mixed with replyTo
-		assertNull(headerAccessor.getReplyChannel());
+		assertThat(headerAccessor.getReplyChannel()).isNull();
 
 	}
 }

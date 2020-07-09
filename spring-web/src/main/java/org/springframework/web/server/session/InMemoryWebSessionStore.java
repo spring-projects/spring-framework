@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
@@ -111,9 +112,13 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 	@Override
 	public Mono<WebSession> createWebSession() {
+
+		// Opportunity to clean expired sessions
 		Instant now = this.clock.instant();
 		this.expiredSessionChecker.checkIfNecessary(now);
-		return Mono.fromSupplier(() -> new InMemoryWebSession(now));
+
+		return Mono.<WebSession>fromSupplier(() -> new InMemoryWebSession(now))
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 	@Override
@@ -140,6 +145,7 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		return Mono.empty();
 	}
 
+	@Override
 	public Mono<WebSession> updateLastAccessTime(WebSession session) {
 		return Mono.fromSupplier(() -> {
 			Assert.isInstanceOf(InMemoryWebSession.class, session);

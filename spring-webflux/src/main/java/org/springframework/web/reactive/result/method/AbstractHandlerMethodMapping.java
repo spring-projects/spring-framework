@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,9 +57,10 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 5.0
  * @param <T> the mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request.
+ * needed to match the handler method to an incoming request.
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
@@ -86,7 +87,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private static final CorsConfiguration ALLOW_CORS_CONFIG = new CorsConfiguration();
 
 	static {
-		ALLOW_CORS_CONFIG.addAllowedOrigin("*");
+		ALLOW_CORS_CONFIG.addAllowedOriginPattern("*");
 		ALLOW_CORS_CONFIG.addAllowedMethod("*");
 		ALLOW_CORS_CONFIG.addAllowedHeader("*");
 		ALLOW_CORS_CONFIG.setAllowCredentials(true);
@@ -207,8 +208,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
-			methods.forEach((key, mapping) -> {
-				Method invocableMethod = AopUtils.selectInvocableMethod(key, userType);
+			methods.forEach((method, mapping) -> {
+				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
 				registerHandlerMethod(handler, invocableMethod, mapping);
 			});
 		}
@@ -217,7 +218,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
 		String formattedType = Arrays.stream(ClassUtils.getPackageName(userType).split("\\."))
 				.map(p -> p.substring(0, 1))
-				.collect(Collectors.joining(".", "", ".")) + userType.getSimpleName();
+				.collect(Collectors.joining(".", "", "." + userType.getSimpleName()));
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
@@ -249,16 +250,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @return the created HandlerMethod
 	 */
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
-		HandlerMethod handlerMethod;
 		if (handler instanceof String) {
-			String beanName = (String) handler;
-			handlerMethod = new HandlerMethod(beanName,
+			return new HandlerMethod((String) handler,
 					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
-		else {
-			handlerMethod = new HandlerMethod(handler, method);
-		}
-		return handlerMethod;
+		return new HandlerMethod(handler, method);
 	}
 
 	/**
@@ -376,6 +372,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	@Override
+	protected boolean hasCorsConfigurationSource(Object handler) {
+		return super.hasCorsConfigurationSource(handler) ||
+				(handler instanceof HandlerMethod && this.mappingRegistry.getCorsConfiguration((HandlerMethod) handler) != null);
+	}
+
+	@Override
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		CorsConfiguration corsConfig = super.getCorsConfiguration(handler, exchange);
 		if (handler instanceof HandlerMethod) {
@@ -456,6 +458,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		/**
 		 * Return CORS configuration. Thread-safe for concurrent use.
 		 */
+		@Nullable
 		public CorsConfiguration getCorsConfiguration(HandlerMethod handlerMethod) {
 			HandlerMethod original = handlerMethod.getResolvedFromHandlerMethod();
 			return this.corsLookup.get(original != null ? original : handlerMethod);
@@ -479,13 +482,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
-				assertUniqueMethodMapping(handlerMethod, mapping);
-
+				validateMethodMapping(handlerMethod, mapping);
 				this.mappingLookup.put(mapping, handlerMethod);
 
-				CorsConfiguration corsConfig = initCorsConfiguration(handler, method, mapping);
-				if (corsConfig != null) {
-					this.corsLookup.put(handlerMethod, corsConfig);
+				CorsConfiguration config = initCorsConfiguration(handler, method, mapping);
+				if (config != null) {
+					config.validateAllowCredentials();
+					this.corsLookup.put(handlerMethod, config);
 				}
 
 				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod));
@@ -495,13 +498,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 		}
 
-		private void assertUniqueMethodMapping(HandlerMethod newHandlerMethod, T mapping) {
-			HandlerMethod handlerMethod = this.mappingLookup.get(mapping);
-			if (handlerMethod != null && !handlerMethod.equals(newHandlerMethod)) {
+		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
+			// Assert that the supplied mapping is unique.
+			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
+			if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
 				throw new IllegalStateException(
-						"Ambiguous mapping. Cannot map '" + newHandlerMethod.getBean() + "' method \n" +
-								newHandlerMethod + "\nto " + mapping + ": There is already '" +
-								handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
+						"Ambiguous mapping. Cannot map '" + handlerMethod.getBean() + "' method \n" +
+						handlerMethod + "\nto " + mapping + ": There is already '" +
+						existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
 			}
 		}
 

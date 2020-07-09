@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -383,7 +383,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemProperties() {
 		try {
 			return (Map) System.getProperties();
@@ -409,7 +409,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Map<String, Object> getSystemEnvironment() {
 		if (suppressGetenvAccess()) {
 			return Collections.emptyMap();
@@ -462,18 +462,14 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		String[] parentActiveProfiles = parent.getActiveProfiles();
 		if (!ObjectUtils.isEmpty(parentActiveProfiles)) {
 			synchronized (this.activeProfiles) {
-				for (String profile : parentActiveProfiles) {
-					this.activeProfiles.add(profile);
-				}
+				Collections.addAll(this.activeProfiles, parentActiveProfiles);
 			}
 		}
 		String[] parentDefaultProfiles = parent.getDefaultProfiles();
 		if (!ObjectUtils.isEmpty(parentDefaultProfiles)) {
 			synchronized (this.defaultProfiles) {
 				this.defaultProfiles.remove(RESERVED_DEFAULT_PROFILE_NAME);
-				for (String profile : parentDefaultProfiles) {
-					this.defaultProfiles.add(profile);
-				}
+				Collections.addAll(this.defaultProfiles, parentDefaultProfiles);
 			}
 		}
 	}

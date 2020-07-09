@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import javax.validation.Valid;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
@@ -31,24 +31,31 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Examples of expectations on the content of the model prepared by the controller.
  *
  * @author Rossen Stoyanchev
  */
-public class ModelAssertionTests {
+class ModelAssertionTests {
 
 	private MockMvc mockMvc;
 
 
-	@Before
-	public void setup() {
-
+	@BeforeEach
+	void setup() {
 		SampleController controller = new SampleController("a string value", 3, new Person("a name"));
 
 		this.mockMvc = standaloneSetup(controller)
@@ -59,7 +66,7 @@ public class ModelAssertionTests {
 	}
 
 	@Test
-	public void testAttributeEqualTo() throws Exception {
+	void attributeEqualTo() throws Exception {
 		mockMvc.perform(get("/"))
 			.andExpect(model().attribute("integer", 3))
 			.andExpect(model().attribute("string", "a string value"))
@@ -69,7 +76,7 @@ public class ModelAssertionTests {
 	}
 
 	@Test
-	public void testAttributeExists() throws Exception {
+	void attributeExists() throws Exception {
 		mockMvc.perform(get("/"))
 			.andExpect(model().attributeExists("integer", "string", "person"))
 			.andExpect(model().attribute("integer", notNullValue()))  // Hamcrest...
@@ -77,7 +84,7 @@ public class ModelAssertionTests {
 	}
 
 	@Test
-	public void testAttributeHamcrestMatchers() throws Exception {
+	void attributeHamcrestMatchers() throws Exception {
 		mockMvc.perform(get("/"))
 			.andExpect(model().attribute("integer", equalTo(3)))
 			.andExpect(model().attribute("string", allOf(startsWith("a string"), endsWith("value"))))
@@ -85,12 +92,12 @@ public class ModelAssertionTests {
 	}
 
 	@Test
-	public void testHasErrors() throws Exception {
+	void hasErrors() throws Exception {
 		mockMvc.perform(post("/persons")).andExpect(model().attributeHasErrors("person"));
 	}
 
 	@Test
-	public void testHasNoErrors() throws Exception {
+	void hasNoErrors() throws Exception {
 		mockMvc.perform(get("/")).andExpect(model().hasNoErrors());
 	}
 
@@ -100,12 +107,12 @@ public class ModelAssertionTests {
 
 		private final Object[] values;
 
-		public SampleController(Object... values) {
+		SampleController(Object... values) {
 			this.values = values;
 		}
 
 		@RequestMapping("/")
-		public String handle(Model model) {
+		String handle(Model model) {
 			for (Object value : this.values) {
 				model.addAttribute(value);
 			}
@@ -113,7 +120,7 @@ public class ModelAssertionTests {
 		}
 
 		@PostMapping("/persons")
-		public String create(@Valid Person person, BindingResult result, Model model) {
+		String create(@Valid Person person, BindingResult result, Model model) {
 			return "view";
 		}
 	}
@@ -122,7 +129,7 @@ public class ModelAssertionTests {
 	private static class ModelAttributeAdvice {
 
 		@ModelAttribute("globalAttrName")
-		public String getAttribute() {
+		String getAttribute() {
 			return "Global Attribute Value";
 		}
 	}

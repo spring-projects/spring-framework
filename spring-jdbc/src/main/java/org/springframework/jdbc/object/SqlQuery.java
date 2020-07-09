@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jdbc.object;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -29,7 +30,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.lang.Nullable;
 
 /**
- * Reusable operation object representing a SQL query.
+ * Reusable operation object representing an SQL query.
  *
  * <p>Subclasses must implement the {@link #newRowMapper} method to provide
  * an object that can extract the results of iterating over the
@@ -101,7 +102,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -214,7 +215,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant since they are supplied in a
 	 * SqlParameterMap which is an implementation of the Map interface.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -336,7 +337,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param paramMap a Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement.
 	 * Ordering is not significant.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -366,7 +367,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param parameters the parameters to the {@code execute()} method,
 	 * in case subclass is interested; may be {@code null} if there
 	 * were no parameters.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute

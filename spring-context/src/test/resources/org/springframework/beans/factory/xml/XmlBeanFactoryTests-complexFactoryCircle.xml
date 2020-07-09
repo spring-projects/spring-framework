@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
@@ -11,16 +11,16 @@
 	<bean id="target1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
 		autowire="constructor"/>
 
-	<bean id="toBeFoundByType" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="toBeFoundByType" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="proxy2" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="proxyInterfaces" value="org.springframework.tests.sample.beans.ITestBean"/>
+		<property name="proxyInterfaces" value="org.springframework.beans.testfixture.beans.ITestBean"/>
 		<property name="targetName" value="target2"/>
 	</bean>
 
-	<bean id="target2" class="org.springframework.tests.sample.beans.DependenciesBean">
+	<bean id="target2" class="org.springframework.beans.testfixture.beans.DependenciesBean">
 		<property name="spouse">
-			<bean class="org.springframework.tests.sample.beans.TestBean">
+			<bean class="org.springframework.beans.testfixture.beans.TestBean">
 				<property name="someSet">
 					<set>
 						<ref bean="proxy1"/>

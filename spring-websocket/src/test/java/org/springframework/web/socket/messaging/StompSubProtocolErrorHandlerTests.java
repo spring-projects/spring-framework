@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,10 +15,8 @@
  */
 package org.springframework.web.socket.messaging;
 
-import static org.junit.Assert.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -26,6 +24,8 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link StompSubProtocolErrorHandler}.
@@ -36,7 +36,7 @@ public class StompSubProtocolErrorHandlerTests {
 	private StompSubProtocolErrorHandler handler;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.handler = new StompSubProtocolErrorHandler();
 	}
@@ -49,10 +49,11 @@ public class StompSubProtocolErrorHandlerTests {
 		Message<byte[]> actual = this.handler.handleClientMessageProcessingError(null, ex);
 
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
-		assertNotNull(accessor);
-		assertEquals(StompCommand.ERROR, accessor.getCommand());
-		assertEquals(ex.getMessage(), accessor.getMessage());
-		assertArrayEquals(new byte[0], actual.getPayload());
+		assertThat(accessor).isNotNull();
+		assertThat(accessor.getCommand()).isEqualTo(StompCommand.ERROR);
+		assertThat(accessor.getMessage()).isEqualTo(ex.getMessage());
+		byte[] expecteds = new byte[0];
+		assertThat(actual.getPayload()).isEqualTo(expecteds);
 	}
 
 	@Test
@@ -66,8 +67,8 @@ public class StompSubProtocolErrorHandlerTests {
 		Message<byte[]> actual = this.handler.handleClientMessageProcessingError(clientMessage, new Exception());
 
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(actual, StompHeaderAccessor.class);
-		assertNotNull(accessor);
-		assertEquals(receiptId, accessor.getReceiptId());
+		assertThat(accessor).isNotNull();
+		assertThat(accessor.getReceiptId()).isEqualTo(receiptId);
 	}
 
 

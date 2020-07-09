@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,14 @@
 
 package org.springframework.web.servlet.view;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rick Evans
@@ -31,111 +33,99 @@ public class DefaultRequestToViewNameTranslatorTests {
 
 	private static final String VIEW_NAME = "apple";
 	private static final String EXTENSION = ".html";
-	private static final String CONTEXT_PATH = "/sundays";
 
-	private DefaultRequestToViewNameTranslator translator;
-	private MockHttpServletRequest request;
+	private final DefaultRequestToViewNameTranslator translator = new DefaultRequestToViewNameTranslator();
 
 
-	@Before
-	public void setUp() {
-		this.translator = new DefaultRequestToViewNameTranslator();
-		this.request = new MockHttpServletRequest();
-		this.request.setContextPath(CONTEXT_PATH);
+	@SuppressWarnings("unused")
+	private static Stream<Function<String, MockHttpServletRequest>> pathPatternsArguments() {
+		return PathPatternsTestUtils.requestArguments("/sundays");
 	}
 
 
-	@Test
-	public void testGetViewNameLeavesLeadingSlashIfSoConfigured() {
-		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + "/");
+	@PathPatternsParameterizedTest
+	void testGetViewNameLeavesLeadingSlashIfSoConfigured(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + "/");
 		this.translator.setStripLeadingSlash(false);
-		assertViewName("/" + VIEW_NAME);
+		assertViewName(request, "/" + VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameLeavesTrailingSlashIfSoConfigured() {
-		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + "/");
+	@PathPatternsParameterizedTest
+	void testGetViewNameLeavesTrailingSlashIfSoConfigured(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + "/");
 		this.translator.setStripTrailingSlash(false);
-		assertViewName(VIEW_NAME + "/");
+		assertViewName(request, VIEW_NAME + "/");
 	}
 
-	@Test
-	public void testGetViewNameLeavesExtensionIfSoConfigured() {
-		request.setRequestURI(CONTEXT_PATH + "/" + VIEW_NAME + EXTENSION);
+	@PathPatternsParameterizedTest
+	void testGetViewNameLeavesExtensionIfSoConfigured(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + EXTENSION);
 		this.translator.setStripExtension(false);
-		assertViewName(VIEW_NAME + EXTENSION);
+		assertViewName(request, VIEW_NAME + EXTENSION);
 	}
 
-	@Test
-	public void testGetViewNameWithDefaultConfiguration() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + EXTENSION);
-		assertViewName(VIEW_NAME);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithDefaultConfiguration(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + EXTENSION);
+		assertViewName(request, VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameWithCustomSeparator() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + "/fiona" + EXTENSION);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithCustomSeparator(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + "/fiona" + EXTENSION);
 		this.translator.setSeparator("_");
-		assertViewName(VIEW_NAME + "_fiona");
+		assertViewName(request, VIEW_NAME + "_fiona");
 	}
 
-	@Test
-	public void testGetViewNameWithNoExtension() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
-		assertViewName(VIEW_NAME);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithNoExtension(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
+		assertViewName(request, VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameWithSemicolonContent() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + ";a=A;b=B");
-		assertViewName(VIEW_NAME);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithSemicolonContent(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME + ";a=A;b=B");
+		assertViewName(request, VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameWithPrefix() {
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithPrefix(Function<String, MockHttpServletRequest> requestFactory) {
 		final String prefix = "fiona_";
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
 		this.translator.setPrefix(prefix);
-		assertViewName(prefix + VIEW_NAME);
+		assertViewName(request, prefix + VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameWithNullPrefix() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithNullPrefix(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
 		this.translator.setPrefix(null);
-		assertViewName(VIEW_NAME);
+		assertViewName(request, VIEW_NAME);
 	}
 
-	@Test
-	public void testGetViewNameWithSuffix() {
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithSuffix(Function<String, MockHttpServletRequest> requestFactory) {
 		final String suffix = ".fiona";
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
 		this.translator.setSuffix(suffix);
-		assertViewName(VIEW_NAME + suffix);
+		assertViewName(request, VIEW_NAME + suffix);
 	}
 
-	@Test
-	public void testGetViewNameWithNullSuffix() {
-		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);
+	@PathPatternsParameterizedTest
+	void testGetViewNameWithNullSuffix(Function<String, MockHttpServletRequest> requestFactory) {
+		MockHttpServletRequest request = requestFactory.apply(VIEW_NAME);
 		this.translator.setSuffix(null);
-		assertViewName(VIEW_NAME);
-	}
-
-	@Test
-	public void testTrySetUrlPathHelperToNull() {
-		try {
-			this.translator.setUrlPathHelper(null);
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertViewName(request, VIEW_NAME);
 	}
 
 
-	private void assertViewName(String expectedViewName) {
-		String actualViewName = this.translator.getViewName(this.request);
-		assertNotNull(actualViewName);
-		assertEquals("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)",
-				expectedViewName, actualViewName);
+	private void assertViewName(MockHttpServletRequest request, String expectedViewName) {
+		String actualViewName = this.translator.getViewName(request);
+		assertThat(actualViewName).isNotNull();
+		assertThat(actualViewName)
+				.as("Did not get the expected viewName from the DefaultRequestToViewNameTranslator.getViewName(..)")
+				.isEqualTo(expectedViewName);
 	}
 
 }

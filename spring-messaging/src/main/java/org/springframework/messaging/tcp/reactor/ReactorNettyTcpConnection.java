@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@
 package org.springframework.messaging.tcp.reactor;
 
 import io.netty.buffer.ByteBuf;
-import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
 
@@ -42,11 +42,11 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	private final ReactorNettyCodec<P> codec;
 
-	private final DirectProcessor<Void> closeProcessor;
+	private final MonoProcessor<Void> closeProcessor;
 
 
 	public ReactorNettyTcpConnection(NettyInbound inbound, NettyOutbound outbound,
-			ReactorNettyCodec<P> codec, DirectProcessor<Void> closeProcessor) {
+			ReactorNettyCodec<P> codec, MonoProcessor<Void> closeProcessor) {
 
 		this.inbound = inbound;
 		this.outbound = outbound;
@@ -64,13 +64,11 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
 		this.inbound.withConnection(conn -> conn.onReadIdle(inactivityDuration, runnable));
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
 		this.inbound.withConnection(conn -> conn.onWriteIdle(inactivityDuration, runnable));
 	}

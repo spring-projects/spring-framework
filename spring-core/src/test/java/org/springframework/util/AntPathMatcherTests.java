@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link AntPathMatcher}.
@@ -40,538 +38,547 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class AntPathMatcherTests {
+class AntPathMatcherTests {
 
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
 
 	@Test
-	public void match() {
+	void match() {
 		// test exact matching
-		assertTrue(pathMatcher.match("test", "test"));
-		assertTrue(pathMatcher.match("/test", "/test"));
-		assertTrue(pathMatcher.match("http://example.org", "http://example.org")); // SPR-14141
-		assertFalse(pathMatcher.match("/test.jpg", "test.jpg"));
-		assertFalse(pathMatcher.match("test", "/test"));
-		assertFalse(pathMatcher.match("/test", "test"));
+		assertThat(pathMatcher.match("test", "test")).isTrue();
+		assertThat(pathMatcher.match("/test", "/test")).isTrue();
+		// SPR-14141
+		assertThat(pathMatcher.match("https://example.org", "https://example.org")).isTrue();
+		assertThat(pathMatcher.match("/test.jpg", "test.jpg")).isFalse();
+		assertThat(pathMatcher.match("test", "/test")).isFalse();
+		assertThat(pathMatcher.match("/test", "test")).isFalse();
 
 		// test matching with ?'s
-		assertTrue(pathMatcher.match("t?st", "test"));
-		assertTrue(pathMatcher.match("??st", "test"));
-		assertTrue(pathMatcher.match("tes?", "test"));
-		assertTrue(pathMatcher.match("te??", "test"));
-		assertTrue(pathMatcher.match("?es?", "test"));
-		assertFalse(pathMatcher.match("tes?", "tes"));
-		assertFalse(pathMatcher.match("tes?", "testt"));
-		assertFalse(pathMatcher.match("tes?", "tsst"));
+		assertThat(pathMatcher.match("t?st", "test")).isTrue();
+		assertThat(pathMatcher.match("??st", "test")).isTrue();
+		assertThat(pathMatcher.match("tes?", "test")).isTrue();
+		assertThat(pathMatcher.match("te??", "test")).isTrue();
+		assertThat(pathMatcher.match("?es?", "test")).isTrue();
+		assertThat(pathMatcher.match("tes?", "tes")).isFalse();
+		assertThat(pathMatcher.match("tes?", "testt")).isFalse();
+		assertThat(pathMatcher.match("tes?", "tsst")).isFalse();
 
 		// test matching with *'s
-		assertTrue(pathMatcher.match("*", "test"));
-		assertTrue(pathMatcher.match("test*", "test"));
-		assertTrue(pathMatcher.match("test*", "testTest"));
-		assertTrue(pathMatcher.match("test/*", "test/Test"));
-		assertTrue(pathMatcher.match("test/*", "test/t"));
-		assertTrue(pathMatcher.match("test/*", "test/"));
-		assertTrue(pathMatcher.match("*test*", "AnothertestTest"));
-		assertTrue(pathMatcher.match("*test", "Anothertest"));
-		assertTrue(pathMatcher.match("*.*", "test."));
-		assertTrue(pathMatcher.match("*.*", "test.test"));
-		assertTrue(pathMatcher.match("*.*", "test.test.test"));
-		assertTrue(pathMatcher.match("test*aaa", "testblaaaa"));
-		assertFalse(pathMatcher.match("test*", "tst"));
-		assertFalse(pathMatcher.match("test*", "tsttest"));
-		assertFalse(pathMatcher.match("test*", "test/"));
-		assertFalse(pathMatcher.match("test*", "test/t"));
-		assertFalse(pathMatcher.match("test/*", "test"));
-		assertFalse(pathMatcher.match("*test*", "tsttst"));
-		assertFalse(pathMatcher.match("*test", "tsttst"));
-		assertFalse(pathMatcher.match("*.*", "tsttst"));
-		assertFalse(pathMatcher.match("test*aaa", "test"));
-		assertFalse(pathMatcher.match("test*aaa", "testblaaab"));
+		assertThat(pathMatcher.match("*", "test")).isTrue();
+		assertThat(pathMatcher.match("test*", "test")).isTrue();
+		assertThat(pathMatcher.match("test*", "testTest")).isTrue();
+		assertThat(pathMatcher.match("test/*", "test/Test")).isTrue();
+		assertThat(pathMatcher.match("test/*", "test/t")).isTrue();
+		assertThat(pathMatcher.match("test/*", "test/")).isTrue();
+		assertThat(pathMatcher.match("*test*", "AnothertestTest")).isTrue();
+		assertThat(pathMatcher.match("*test", "Anothertest")).isTrue();
+		assertThat(pathMatcher.match("*.*", "test.")).isTrue();
+		assertThat(pathMatcher.match("*.*", "test.test")).isTrue();
+		assertThat(pathMatcher.match("*.*", "test.test.test")).isTrue();
+		assertThat(pathMatcher.match("test*aaa", "testblaaaa")).isTrue();
+		assertThat(pathMatcher.match("test*", "tst")).isFalse();
+		assertThat(pathMatcher.match("test*", "tsttest")).isFalse();
+		assertThat(pathMatcher.match("test*", "test/")).isFalse();
+		assertThat(pathMatcher.match("test*", "test/t")).isFalse();
+		assertThat(pathMatcher.match("test/*", "test")).isFalse();
+		assertThat(pathMatcher.match("*test*", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("*test", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("*.*", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("test*aaa", "test")).isFalse();
+		assertThat(pathMatcher.match("test*aaa", "testblaaab")).isFalse();
 
 		// test matching with ?'s and /'s
-		assertTrue(pathMatcher.match("/?", "/a"));
-		assertTrue(pathMatcher.match("/?/a", "/a/a"));
-		assertTrue(pathMatcher.match("/a/?", "/a/b"));
-		assertTrue(pathMatcher.match("/??/a", "/aa/a"));
-		assertTrue(pathMatcher.match("/a/??", "/a/bb"));
-		assertTrue(pathMatcher.match("/?", "/a"));
+		assertThat(pathMatcher.match("/?", "/a")).isTrue();
+		assertThat(pathMatcher.match("/?/a", "/a/a")).isTrue();
+		assertThat(pathMatcher.match("/a/?", "/a/b")).isTrue();
+		assertThat(pathMatcher.match("/??/a", "/aa/a")).isTrue();
+		assertThat(pathMatcher.match("/a/??", "/a/bb")).isTrue();
+		assertThat(pathMatcher.match("/?", "/a")).isTrue();
 
 		// test matching with **'s
-		assertTrue(pathMatcher.match("/**", "/testing/testing"));
-		assertTrue(pathMatcher.match("/*/**", "/testing/testing"));
-		assertTrue(pathMatcher.match("/**/*", "/testing/testing"));
-		assertTrue(pathMatcher.match("/bla/**/bla", "/bla/testing/testing/bla"));
-		assertTrue(pathMatcher.match("/bla/**/bla", "/bla/testing/testing/bla/bla"));
-		assertTrue(pathMatcher.match("/**/test", "/bla/bla/test"));
-		assertTrue(pathMatcher.match("/bla/**/**/bla", "/bla/bla/bla/bla/bla/bla"));
-		assertTrue(pathMatcher.match("/bla*bla/test", "/blaXXXbla/test"));
-		assertTrue(pathMatcher.match("/*bla/test", "/XXXbla/test"));
-		assertFalse(pathMatcher.match("/bla*bla/test", "/blaXXXbl/test"));
-		assertFalse(pathMatcher.match("/*bla/test", "XXXblab/test"));
-		assertFalse(pathMatcher.match("/*bla/test", "XXXbl/test"));
+		assertThat(pathMatcher.match("/**", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.match("/*/**", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.match("/**/*", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.match("/bla/**/bla", "/bla/testing/testing/bla")).isTrue();
+		assertThat(pathMatcher.match("/bla/**/bla", "/bla/testing/testing/bla/bla")).isTrue();
+		assertThat(pathMatcher.match("/**/test", "/bla/bla/test")).isTrue();
+		assertThat(pathMatcher.match("/bla/**/**/bla", "/bla/bla/bla/bla/bla/bla")).isTrue();
+		assertThat(pathMatcher.match("/bla*bla/test", "/blaXXXbla/test")).isTrue();
+		assertThat(pathMatcher.match("/*bla/test", "/XXXbla/test")).isTrue();
+		assertThat(pathMatcher.match("/bla*bla/test", "/blaXXXbl/test")).isFalse();
+		assertThat(pathMatcher.match("/*bla/test", "XXXblab/test")).isFalse();
+		assertThat(pathMatcher.match("/*bla/test", "XXXbl/test")).isFalse();
 
-		assertFalse(pathMatcher.match("/????", "/bala/bla"));
-		assertFalse(pathMatcher.match("/**/*bla", "/bla/bla/bla/bbb"));
+		assertThat(pathMatcher.match("/????", "/bala/bla")).isFalse();
+		assertThat(pathMatcher.match("/**/*bla", "/bla/bla/bla/bbb")).isFalse();
 
-		assertTrue(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing/"));
-		assertTrue(pathMatcher.match("/*bla*/**/bla/*", "/XXXblaXXXX/testing/testing/bla/testing"));
-		assertTrue(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing"));
-		assertTrue(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing.jpg"));
+		assertThat(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing/")).isTrue();
+		assertThat(pathMatcher.match("/*bla*/**/bla/*", "/XXXblaXXXX/testing/testing/bla/testing")).isTrue();
+		assertThat(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing")).isTrue();
+		assertThat(pathMatcher.match("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing.jpg")).isTrue();
 
-		assertTrue(pathMatcher.match("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing/"));
-		assertTrue(pathMatcher.match("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing"));
-		assertTrue(pathMatcher.match("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing"));
-		assertFalse(pathMatcher.match("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing"));
+		assertThat(pathMatcher.match("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing/")).isTrue();
+		assertThat(pathMatcher.match("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing")).isTrue();
+		assertThat(pathMatcher.match("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing")).isTrue();
+		assertThat(pathMatcher.match("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing")).isFalse();
 
-		assertFalse(pathMatcher.match("/x/x/**/bla", "/x/x/x/"));
+		assertThat(pathMatcher.match("/x/x/**/bla", "/x/x/x/")).isFalse();
 
-		assertTrue(pathMatcher.match("/foo/bar/**", "/foo/bar")) ;
+		assertThat(pathMatcher.match("/foo/bar/**", "/foo/bar")).isTrue();
 
-		assertTrue(pathMatcher.match("", ""));
+		assertThat(pathMatcher.match("", "")).isTrue();
 
-		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
+		assertThat(pathMatcher.match("/{bla}.*", "/testing.html")).isTrue();
+	}
+
+	@Test
+	void matchWithNullPath() {
+		assertThat(pathMatcher.match("/test", null)).isFalse();
+		assertThat(pathMatcher.match("/", null)).isFalse();
+		assertThat(pathMatcher.match(null, null)).isFalse();
 	}
 
 	// SPR-14247
 	@Test
-	public void matchWithTrimTokensEnabled() throws Exception {
+	void matchWithTrimTokensEnabled() throws Exception {
 		pathMatcher.setTrimTokens(true);
 
-		assertTrue(pathMatcher.match("/foo/bar", "/foo /bar"));
+		assertThat(pathMatcher.match("/foo/bar", "/foo /bar")).isTrue();
 	}
 
 	@Test
-	public void withMatchStart() {
+	void matchStart() {
 		// test exact matching
-		assertTrue(pathMatcher.matchStart("test", "test"));
-		assertTrue(pathMatcher.matchStart("/test", "/test"));
-		assertFalse(pathMatcher.matchStart("/test.jpg", "test.jpg"));
-		assertFalse(pathMatcher.matchStart("test", "/test"));
-		assertFalse(pathMatcher.matchStart("/test", "test"));
+		assertThat(pathMatcher.matchStart("test", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("/test", "/test")).isTrue();
+		assertThat(pathMatcher.matchStart("/test.jpg", "test.jpg")).isFalse();
+		assertThat(pathMatcher.matchStart("test", "/test")).isFalse();
+		assertThat(pathMatcher.matchStart("/test", "test")).isFalse();
 
 		// test matching with ?'s
-		assertTrue(pathMatcher.matchStart("t?st", "test"));
-		assertTrue(pathMatcher.matchStart("??st", "test"));
-		assertTrue(pathMatcher.matchStart("tes?", "test"));
-		assertTrue(pathMatcher.matchStart("te??", "test"));
-		assertTrue(pathMatcher.matchStart("?es?", "test"));
-		assertFalse(pathMatcher.matchStart("tes?", "tes"));
-		assertFalse(pathMatcher.matchStart("tes?", "testt"));
-		assertFalse(pathMatcher.matchStart("tes?", "tsst"));
+		assertThat(pathMatcher.matchStart("t?st", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("??st", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("tes?", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("te??", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("?es?", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("tes?", "tes")).isFalse();
+		assertThat(pathMatcher.matchStart("tes?", "testt")).isFalse();
+		assertThat(pathMatcher.matchStart("tes?", "tsst")).isFalse();
 
 		// test matching with *'s
-		assertTrue(pathMatcher.matchStart("*", "test"));
-		assertTrue(pathMatcher.matchStart("test*", "test"));
-		assertTrue(pathMatcher.matchStart("test*", "testTest"));
-		assertTrue(pathMatcher.matchStart("test/*", "test/Test"));
-		assertTrue(pathMatcher.matchStart("test/*", "test/t"));
-		assertTrue(pathMatcher.matchStart("test/*", "test/"));
-		assertTrue(pathMatcher.matchStart("*test*", "AnothertestTest"));
-		assertTrue(pathMatcher.matchStart("*test", "Anothertest"));
-		assertTrue(pathMatcher.matchStart("*.*", "test."));
-		assertTrue(pathMatcher.matchStart("*.*", "test.test"));
-		assertTrue(pathMatcher.matchStart("*.*", "test.test.test"));
-		assertTrue(pathMatcher.matchStart("test*aaa", "testblaaaa"));
-		assertFalse(pathMatcher.matchStart("test*", "tst"));
-		assertFalse(pathMatcher.matchStart("test*", "test/"));
-		assertFalse(pathMatcher.matchStart("test*", "tsttest"));
-		assertFalse(pathMatcher.matchStart("test*", "test/"));
-		assertFalse(pathMatcher.matchStart("test*", "test/t"));
-		assertTrue(pathMatcher.matchStart("test/*", "test"));
-		assertTrue(pathMatcher.matchStart("test/t*.txt", "test"));
-		assertFalse(pathMatcher.matchStart("*test*", "tsttst"));
-		assertFalse(pathMatcher.matchStart("*test", "tsttst"));
-		assertFalse(pathMatcher.matchStart("*.*", "tsttst"));
-		assertFalse(pathMatcher.matchStart("test*aaa", "test"));
-		assertFalse(pathMatcher.matchStart("test*aaa", "testblaaab"));
+		assertThat(pathMatcher.matchStart("*", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("test*", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("test*", "testTest")).isTrue();
+		assertThat(pathMatcher.matchStart("test/*", "test/Test")).isTrue();
+		assertThat(pathMatcher.matchStart("test/*", "test/t")).isTrue();
+		assertThat(pathMatcher.matchStart("test/*", "test/")).isTrue();
+		assertThat(pathMatcher.matchStart("*test*", "AnothertestTest")).isTrue();
+		assertThat(pathMatcher.matchStart("*test", "Anothertest")).isTrue();
+		assertThat(pathMatcher.matchStart("*.*", "test.")).isTrue();
+		assertThat(pathMatcher.matchStart("*.*", "test.test")).isTrue();
+		assertThat(pathMatcher.matchStart("*.*", "test.test.test")).isTrue();
+		assertThat(pathMatcher.matchStart("test*aaa", "testblaaaa")).isTrue();
+		assertThat(pathMatcher.matchStart("test*", "tst")).isFalse();
+		assertThat(pathMatcher.matchStart("test*", "test/")).isFalse();
+		assertThat(pathMatcher.matchStart("test*", "tsttest")).isFalse();
+		assertThat(pathMatcher.matchStart("test*", "test/")).isFalse();
+		assertThat(pathMatcher.matchStart("test*", "test/t")).isFalse();
+		assertThat(pathMatcher.matchStart("test/*", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("test/t*.txt", "test")).isTrue();
+		assertThat(pathMatcher.matchStart("*test*", "tsttst")).isFalse();
+		assertThat(pathMatcher.matchStart("*test", "tsttst")).isFalse();
+		assertThat(pathMatcher.matchStart("*.*", "tsttst")).isFalse();
+		assertThat(pathMatcher.matchStart("test*aaa", "test")).isFalse();
+		assertThat(pathMatcher.matchStart("test*aaa", "testblaaab")).isFalse();
 
 		// test matching with ?'s and /'s
-		assertTrue(pathMatcher.matchStart("/?", "/a"));
-		assertTrue(pathMatcher.matchStart("/?/a", "/a/a"));
-		assertTrue(pathMatcher.matchStart("/a/?", "/a/b"));
-		assertTrue(pathMatcher.matchStart("/??/a", "/aa/a"));
-		assertTrue(pathMatcher.matchStart("/a/??", "/a/bb"));
-		assertTrue(pathMatcher.matchStart("/?", "/a"));
+		assertThat(pathMatcher.matchStart("/?", "/a")).isTrue();
+		assertThat(pathMatcher.matchStart("/?/a", "/a/a")).isTrue();
+		assertThat(pathMatcher.matchStart("/a/?", "/a/b")).isTrue();
+		assertThat(pathMatcher.matchStart("/??/a", "/aa/a")).isTrue();
+		assertThat(pathMatcher.matchStart("/a/??", "/a/bb")).isTrue();
+		assertThat(pathMatcher.matchStart("/?", "/a")).isTrue();
 
 		// test matching with **'s
-		assertTrue(pathMatcher.matchStart("/**", "/testing/testing"));
-		assertTrue(pathMatcher.matchStart("/*/**", "/testing/testing"));
-		assertTrue(pathMatcher.matchStart("/**/*", "/testing/testing"));
-		assertTrue(pathMatcher.matchStart("test*/**", "test/"));
-		assertTrue(pathMatcher.matchStart("test*/**", "test/t"));
-		assertTrue(pathMatcher.matchStart("/bla/**/bla", "/bla/testing/testing/bla"));
-		assertTrue(pathMatcher.matchStart("/bla/**/bla", "/bla/testing/testing/bla/bla"));
-		assertTrue(pathMatcher.matchStart("/**/test", "/bla/bla/test"));
-		assertTrue(pathMatcher.matchStart("/bla/**/**/bla", "/bla/bla/bla/bla/bla/bla"));
-		assertTrue(pathMatcher.matchStart("/bla*bla/test", "/blaXXXbla/test"));
-		assertTrue(pathMatcher.matchStart("/*bla/test", "/XXXbla/test"));
-		assertFalse(pathMatcher.matchStart("/bla*bla/test", "/blaXXXbl/test"));
-		assertFalse(pathMatcher.matchStart("/*bla/test", "XXXblab/test"));
-		assertFalse(pathMatcher.matchStart("/*bla/test", "XXXbl/test"));
+		assertThat(pathMatcher.matchStart("/**", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("/*/**", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("/**/*", "/testing/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("test*/**", "test/")).isTrue();
+		assertThat(pathMatcher.matchStart("test*/**", "test/t")).isTrue();
+		assertThat(pathMatcher.matchStart("/bla/**/bla", "/bla/testing/testing/bla")).isTrue();
+		assertThat(pathMatcher.matchStart("/bla/**/bla", "/bla/testing/testing/bla/bla")).isTrue();
+		assertThat(pathMatcher.matchStart("/**/test", "/bla/bla/test")).isTrue();
+		assertThat(pathMatcher.matchStart("/bla/**/**/bla", "/bla/bla/bla/bla/bla/bla")).isTrue();
+		assertThat(pathMatcher.matchStart("/bla*bla/test", "/blaXXXbla/test")).isTrue();
+		assertThat(pathMatcher.matchStart("/*bla/test", "/XXXbla/test")).isTrue();
+		assertThat(pathMatcher.matchStart("/bla*bla/test", "/blaXXXbl/test")).isFalse();
+		assertThat(pathMatcher.matchStart("/*bla/test", "XXXblab/test")).isFalse();
+		assertThat(pathMatcher.matchStart("/*bla/test", "XXXbl/test")).isFalse();
 
-		assertFalse(pathMatcher.matchStart("/????", "/bala/bla"));
-		assertTrue(pathMatcher.matchStart("/**/*bla", "/bla/bla/bla/bbb"));
+		assertThat(pathMatcher.matchStart("/????", "/bala/bla")).isFalse();
+		assertThat(pathMatcher.matchStart("/**/*bla", "/bla/bla/bla/bbb")).isTrue();
 
-		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing/"));
-		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/*", "/XXXblaXXXX/testing/testing/bla/testing"));
-		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing"));
-		assertTrue(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing.jpg"));
+		assertThat(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing/")).isTrue();
+		assertThat(pathMatcher.matchStart("/*bla*/**/bla/*", "/XXXblaXXXX/testing/testing/bla/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("/*bla*/**/bla/**", "/XXXblaXXXX/testing/testing/bla/testing/testing.jpg")).isTrue();
 
-		assertTrue(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing/"));
-		assertTrue(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing"));
-		assertTrue(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing"));
-		assertTrue(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing"));
+		assertThat(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing/")).isTrue();
+		assertThat(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("*bla*/**/bla/**", "XXXblaXXXX/testing/testing/bla/testing/testing")).isTrue();
+		assertThat(pathMatcher.matchStart("*bla*/**/bla/*", "XXXblaXXXX/testing/testing/bla/testing/testing")).isTrue();
 
-		assertTrue(pathMatcher.matchStart("/x/x/**/bla", "/x/x/x/"));
+		assertThat(pathMatcher.matchStart("/x/x/**/bla", "/x/x/x/")).isTrue();
 
-		assertTrue(pathMatcher.matchStart("", ""));
+		assertThat(pathMatcher.matchStart("", "")).isTrue();
 	}
 
 	@Test
-	public void uniqueDeliminator() {
+	void uniqueDeliminator() {
 		pathMatcher.setPathSeparator(".");
 
 		// test exact matching
-		assertTrue(pathMatcher.match("test", "test"));
-		assertTrue(pathMatcher.match(".test", ".test"));
-		assertFalse(pathMatcher.match(".test/jpg", "test/jpg"));
-		assertFalse(pathMatcher.match("test", ".test"));
-		assertFalse(pathMatcher.match(".test", "test"));
+		assertThat(pathMatcher.match("test", "test")).isTrue();
+		assertThat(pathMatcher.match(".test", ".test")).isTrue();
+		assertThat(pathMatcher.match(".test/jpg", "test/jpg")).isFalse();
+		assertThat(pathMatcher.match("test", ".test")).isFalse();
+		assertThat(pathMatcher.match(".test", "test")).isFalse();
 
 		// test matching with ?'s
-		assertTrue(pathMatcher.match("t?st", "test"));
-		assertTrue(pathMatcher.match("??st", "test"));
-		assertTrue(pathMatcher.match("tes?", "test"));
-		assertTrue(pathMatcher.match("te??", "test"));
-		assertTrue(pathMatcher.match("?es?", "test"));
-		assertFalse(pathMatcher.match("tes?", "tes"));
-		assertFalse(pathMatcher.match("tes?", "testt"));
-		assertFalse(pathMatcher.match("tes?", "tsst"));
+		assertThat(pathMatcher.match("t?st", "test")).isTrue();
+		assertThat(pathMatcher.match("??st", "test")).isTrue();
+		assertThat(pathMatcher.match("tes?", "test")).isTrue();
+		assertThat(pathMatcher.match("te??", "test")).isTrue();
+		assertThat(pathMatcher.match("?es?", "test")).isTrue();
+		assertThat(pathMatcher.match("tes?", "tes")).isFalse();
+		assertThat(pathMatcher.match("tes?", "testt")).isFalse();
+		assertThat(pathMatcher.match("tes?", "tsst")).isFalse();
 
 		// test matching with *'s
-		assertTrue(pathMatcher.match("*", "test"));
-		assertTrue(pathMatcher.match("test*", "test"));
-		assertTrue(pathMatcher.match("test*", "testTest"));
-		assertTrue(pathMatcher.match("*test*", "AnothertestTest"));
-		assertTrue(pathMatcher.match("*test", "Anothertest"));
-		assertTrue(pathMatcher.match("*/*", "test/"));
-		assertTrue(pathMatcher.match("*/*", "test/test"));
-		assertTrue(pathMatcher.match("*/*", "test/test/test"));
-		assertTrue(pathMatcher.match("test*aaa", "testblaaaa"));
-		assertFalse(pathMatcher.match("test*", "tst"));
-		assertFalse(pathMatcher.match("test*", "tsttest"));
-		assertFalse(pathMatcher.match("*test*", "tsttst"));
-		assertFalse(pathMatcher.match("*test", "tsttst"));
-		assertFalse(pathMatcher.match("*/*", "tsttst"));
-		assertFalse(pathMatcher.match("test*aaa", "test"));
-		assertFalse(pathMatcher.match("test*aaa", "testblaaab"));
+		assertThat(pathMatcher.match("*", "test")).isTrue();
+		assertThat(pathMatcher.match("test*", "test")).isTrue();
+		assertThat(pathMatcher.match("test*", "testTest")).isTrue();
+		assertThat(pathMatcher.match("*test*", "AnothertestTest")).isTrue();
+		assertThat(pathMatcher.match("*test", "Anothertest")).isTrue();
+		assertThat(pathMatcher.match("*/*", "test/")).isTrue();
+		assertThat(pathMatcher.match("*/*", "test/test")).isTrue();
+		assertThat(pathMatcher.match("*/*", "test/test/test")).isTrue();
+		assertThat(pathMatcher.match("test*aaa", "testblaaaa")).isTrue();
+		assertThat(pathMatcher.match("test*", "tst")).isFalse();
+		assertThat(pathMatcher.match("test*", "tsttest")).isFalse();
+		assertThat(pathMatcher.match("*test*", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("*test", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("*/*", "tsttst")).isFalse();
+		assertThat(pathMatcher.match("test*aaa", "test")).isFalse();
+		assertThat(pathMatcher.match("test*aaa", "testblaaab")).isFalse();
 
 		// test matching with ?'s and .'s
-		assertTrue(pathMatcher.match(".?", ".a"));
-		assertTrue(pathMatcher.match(".?.a", ".a.a"));
-		assertTrue(pathMatcher.match(".a.?", ".a.b"));
-		assertTrue(pathMatcher.match(".??.a", ".aa.a"));
-		assertTrue(pathMatcher.match(".a.??", ".a.bb"));
-		assertTrue(pathMatcher.match(".?", ".a"));
+		assertThat(pathMatcher.match(".?", ".a")).isTrue();
+		assertThat(pathMatcher.match(".?.a", ".a.a")).isTrue();
+		assertThat(pathMatcher.match(".a.?", ".a.b")).isTrue();
+		assertThat(pathMatcher.match(".??.a", ".aa.a")).isTrue();
+		assertThat(pathMatcher.match(".a.??", ".a.bb")).isTrue();
+		assertThat(pathMatcher.match(".?", ".a")).isTrue();
 
 		// test matching with **'s
-		assertTrue(pathMatcher.match(".**", ".testing.testing"));
-		assertTrue(pathMatcher.match(".*.**", ".testing.testing"));
-		assertTrue(pathMatcher.match(".**.*", ".testing.testing"));
-		assertTrue(pathMatcher.match(".bla.**.bla", ".bla.testing.testing.bla"));
-		assertTrue(pathMatcher.match(".bla.**.bla", ".bla.testing.testing.bla.bla"));
-		assertTrue(pathMatcher.match(".**.test", ".bla.bla.test"));
-		assertTrue(pathMatcher.match(".bla.**.**.bla", ".bla.bla.bla.bla.bla.bla"));
-		assertTrue(pathMatcher.match(".bla*bla.test", ".blaXXXbla.test"));
-		assertTrue(pathMatcher.match(".*bla.test", ".XXXbla.test"));
-		assertFalse(pathMatcher.match(".bla*bla.test", ".blaXXXbl.test"));
-		assertFalse(pathMatcher.match(".*bla.test", "XXXblab.test"));
-		assertFalse(pathMatcher.match(".*bla.test", "XXXbl.test"));
+		assertThat(pathMatcher.match(".**", ".testing.testing")).isTrue();
+		assertThat(pathMatcher.match(".*.**", ".testing.testing")).isTrue();
+		assertThat(pathMatcher.match(".**.*", ".testing.testing")).isTrue();
+		assertThat(pathMatcher.match(".bla.**.bla", ".bla.testing.testing.bla")).isTrue();
+		assertThat(pathMatcher.match(".bla.**.bla", ".bla.testing.testing.bla.bla")).isTrue();
+		assertThat(pathMatcher.match(".**.test", ".bla.bla.test")).isTrue();
+		assertThat(pathMatcher.match(".bla.**.**.bla", ".bla.bla.bla.bla.bla.bla")).isTrue();
+		assertThat(pathMatcher.match(".bla*bla.test", ".blaXXXbla.test")).isTrue();
+		assertThat(pathMatcher.match(".*bla.test", ".XXXbla.test")).isTrue();
+		assertThat(pathMatcher.match(".bla*bla.test", ".blaXXXbl.test")).isFalse();
+		assertThat(pathMatcher.match(".*bla.test", "XXXblab.test")).isFalse();
+		assertThat(pathMatcher.match(".*bla.test", "XXXbl.test")).isFalse();
 	}
 
 	@Test
-	public void extractPathWithinPattern() throws Exception {
-		assertEquals("", pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html"));
+	void extractPathWithinPattern() throws Exception {
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/commit.html", "/docs/commit.html")).isEqualTo("");
 
-		assertEquals("cvs/commit", pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit"));
-		assertEquals("commit.html", pathMatcher.extractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html"));
-		assertEquals("cvs/commit", pathMatcher.extractPathWithinPattern("/docs/**", "/docs/cvs/commit"));
-		assertEquals("cvs/commit.html",
-				pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/cvs/commit.html"));
-		assertEquals("commit.html", pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/commit.html"));
-		assertEquals("commit.html", pathMatcher.extractPathWithinPattern("/*.html", "/commit.html"));
-		assertEquals("docs/commit.html", pathMatcher.extractPathWithinPattern("/*.html", "/docs/commit.html"));
-		assertEquals("/commit.html", pathMatcher.extractPathWithinPattern("*.html", "/commit.html"));
-		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*.html", "/docs/commit.html"));
-		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("**/*.*", "/docs/commit.html"));
-		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*", "/docs/commit.html"));
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/*", "/docs/cvs/commit")).isEqualTo("cvs/commit");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html")).isEqualTo("commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/**", "/docs/cvs/commit")).isEqualTo("cvs/commit");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/cvs/commit.html")).isEqualTo("cvs/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/**/*.html", "/docs/commit.html")).isEqualTo("commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/*.html", "/commit.html")).isEqualTo("commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/*.html", "/docs/commit.html")).isEqualTo("docs/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("*.html", "/commit.html")).isEqualTo("/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("*.html", "/docs/commit.html")).isEqualTo("/docs/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("**/*.*", "/docs/commit.html")).isEqualTo("/docs/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("*", "/docs/commit.html")).isEqualTo("/docs/commit.html");
 		// SPR-10515
-		assertEquals("/docs/cvs/other/commit.html", pathMatcher.extractPathWithinPattern("**/commit.html", "/docs/cvs/other/commit.html"));
-		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/commit.html", "/docs/cvs/other/commit.html"));
-		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/**/**/**", "/docs/cvs/other/commit.html"));
+		assertThat(pathMatcher.extractPathWithinPattern("**/commit.html", "/docs/cvs/other/commit.html")).isEqualTo("/docs/cvs/other/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/**/commit.html", "/docs/cvs/other/commit.html")).isEqualTo("cvs/other/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/**/**/**/**", "/docs/cvs/other/commit.html")).isEqualTo("cvs/other/commit.html");
 
-		assertEquals("docs/cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/*", "/docs/cvs/commit"));
-		assertEquals("cvs/commit.html",
-				pathMatcher.extractPathWithinPattern("/docs/c?s/*.html", "/docs/cvs/commit.html"));
-		assertEquals("docs/cvs/commit", pathMatcher.extractPathWithinPattern("/d?cs/**", "/docs/cvs/commit"));
-		assertEquals("docs/cvs/commit.html",
-				pathMatcher.extractPathWithinPattern("/d?cs/**/*.html", "/docs/cvs/commit.html"));
+		assertThat(pathMatcher.extractPathWithinPattern("/d?cs/*", "/docs/cvs/commit")).isEqualTo("docs/cvs/commit");
+		assertThat(pathMatcher.extractPathWithinPattern("/docs/c?s/*.html", "/docs/cvs/commit.html")).isEqualTo("cvs/commit.html");
+		assertThat(pathMatcher.extractPathWithinPattern("/d?cs/**", "/docs/cvs/commit")).isEqualTo("docs/cvs/commit");
+		assertThat(pathMatcher.extractPathWithinPattern("/d?cs/**/*.html", "/docs/cvs/commit.html")).isEqualTo("docs/cvs/commit.html");
 	}
 
 	@Test
-	public void extractUriTemplateVariables() throws Exception {
+	void extractUriTemplateVariables() throws Exception {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}", "/hotels/1");
-		assertEquals(Collections.singletonMap("hotel", "1"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("hotel", "1"));
 
 		result = pathMatcher.extractUriTemplateVariables("/h?tels/{hotel}", "/hotels/1");
-		assertEquals(Collections.singletonMap("hotel", "1"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("hotel", "1"));
 
 		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}/bookings/{booking}", "/hotels/1/bookings/2");
 		Map<String, String> expected = new LinkedHashMap<>();
 		expected.put("hotel", "1");
 		expected.put("booking", "2");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
 		result = pathMatcher.extractUriTemplateVariables("/**/hotels/**/{hotel}", "/foo/hotels/bar/1");
-		assertEquals(Collections.singletonMap("hotel", "1"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("hotel", "1"));
 
 		result = pathMatcher.extractUriTemplateVariables("/{page}.html", "/42.html");
-		assertEquals(Collections.singletonMap("page", "42"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("page", "42"));
 
 		result = pathMatcher.extractUriTemplateVariables("/{page}.*", "/42.html");
-		assertEquals(Collections.singletonMap("page", "42"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("page", "42"));
 
 		result = pathMatcher.extractUriTemplateVariables("/A-{B}-C", "/A-b-C");
-		assertEquals(Collections.singletonMap("B", "b"), result);
+		assertThat(result).isEqualTo(Collections.singletonMap("B", "b"));
 
 		result = pathMatcher.extractUriTemplateVariables("/{name}.{extension}", "/test.html");
 		expected = new LinkedHashMap<>();
 		expected.put("name", "test");
 		expected.put("extension", "html");
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
-	public void extractUriTemplateVariablesRegex() {
+	void extractUriTemplateVariablesRegex() {
 		Map<String, String> result = pathMatcher
 				.extractUriTemplateVariables("{symbolicName:[\\w\\.]+}-{version:[\\w\\.]+}.jar",
 						"com.example-1.0.0.jar");
-		assertEquals("com.example", result.get("symbolicName"));
-		assertEquals("1.0.0", result.get("version"));
+		assertThat(result.get("symbolicName")).isEqualTo("com.example");
+		assertThat(result.get("version")).isEqualTo("1.0.0");
 
 		result = pathMatcher.extractUriTemplateVariables("{symbolicName:[\\w\\.]+}-sources-{version:[\\w\\.]+}.jar",
 				"com.example-sources-1.0.0.jar");
-		assertEquals("com.example", result.get("symbolicName"));
-		assertEquals("1.0.0", result.get("version"));
+		assertThat(result.get("symbolicName")).isEqualTo("com.example");
+		assertThat(result.get("version")).isEqualTo("1.0.0");
 	}
 
 	/**
 	 * SPR-7787
 	 */
 	@Test
-	public void extractUriTemplateVarsRegexQualifiers() {
+	void extractUriTemplateVarsRegexQualifiers() {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables(
 				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.]+}.jar",
 				"com.example-sources-1.0.0.jar");
-		assertEquals("com.example", result.get("symbolicName"));
-		assertEquals("1.0.0", result.get("version"));
+		assertThat(result.get("symbolicName")).isEqualTo("com.example");
+		assertThat(result.get("version")).isEqualTo("1.0.0");
 
 		result = pathMatcher.extractUriTemplateVariables(
 				"{symbolicName:[\\w\\.]+}-sources-{version:[\\d\\.]+}-{year:\\d{4}}{month:\\d{2}}{day:\\d{2}}.jar",
 				"com.example-sources-1.0.0-20100220.jar");
-		assertEquals("com.example", result.get("symbolicName"));
-		assertEquals("1.0.0", result.get("version"));
-		assertEquals("2010", result.get("year"));
-		assertEquals("02", result.get("month"));
-		assertEquals("20", result.get("day"));
+		assertThat(result.get("symbolicName")).isEqualTo("com.example");
+		assertThat(result.get("version")).isEqualTo("1.0.0");
+		assertThat(result.get("year")).isEqualTo("2010");
+		assertThat(result.get("month")).isEqualTo("02");
+		assertThat(result.get("day")).isEqualTo("20");
 
 		result = pathMatcher.extractUriTemplateVariables(
 				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.\\{\\}]+}.jar",
 				"com.example-sources-1.0.0.{12}.jar");
-		assertEquals("com.example", result.get("symbolicName"));
-		assertEquals("1.0.0.{12}", result.get("version"));
+		assertThat(result.get("symbolicName")).isEqualTo("com.example");
+		assertThat(result.get("version")).isEqualTo("1.0.0.{12}");
 	}
 
 	/**
 	 * SPR-8455
 	 */
 	@Test
-	public void extractUriTemplateVarsRegexCapturingGroups() {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(containsString("The number of capturing groups in the pattern"));
-		pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
+	void extractUriTemplateVarsRegexCapturingGroups() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar"))
+			.withMessageContaining("The number of capturing groups in the pattern");
 	}
 
 	@Test
-	public void combine() {
-		assertEquals("", pathMatcher.combine(null, null));
-		assertEquals("/hotels", pathMatcher.combine("/hotels", null));
-		assertEquals("/hotels", pathMatcher.combine(null, "/hotels"));
-		assertEquals("/hotels/booking", pathMatcher.combine("/hotels/*", "booking"));
-		assertEquals("/hotels/booking", pathMatcher.combine("/hotels/*", "/booking"));
-		assertEquals("/hotels/**/booking", pathMatcher.combine("/hotels/**", "booking"));
-		assertEquals("/hotels/**/booking", pathMatcher.combine("/hotels/**", "/booking"));
-		assertEquals("/hotels/booking", pathMatcher.combine("/hotels", "/booking"));
-		assertEquals("/hotels/booking", pathMatcher.combine("/hotels", "booking"));
-		assertEquals("/hotels/booking", pathMatcher.combine("/hotels/", "booking"));
-		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels/*", "{hotel}"));
-		assertEquals("/hotels/**/{hotel}", pathMatcher.combine("/hotels/**", "{hotel}"));
-		assertEquals("/hotels/{hotel}", pathMatcher.combine("/hotels", "{hotel}"));
-		assertEquals("/hotels/{hotel}.*", pathMatcher.combine("/hotels", "{hotel}.*"));
-		assertEquals("/hotels/*/booking/{booking}", pathMatcher.combine("/hotels/*/booking", "{booking}"));
-		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel.html"));
-		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel"));
-		assertEquals("/hotel.html", pathMatcher.combine("/*.html", "/hotel.*"));
-		assertEquals("/*.html", pathMatcher.combine("/**", "/*.html"));
-		assertEquals("/*.html", pathMatcher.combine("/*", "/*.html"));
-		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
-		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));    // SPR-8858
-		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));    // SPR-7970
-		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
-		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test")); // SPR-10554
-		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
-		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
+	void combine() {
+		assertThat(pathMatcher.combine(null, null)).isEqualTo("");
+		assertThat(pathMatcher.combine("/hotels", null)).isEqualTo("/hotels");
+		assertThat(pathMatcher.combine(null, "/hotels")).isEqualTo("/hotels");
+		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/*", "/booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/**", "booking")).isEqualTo("/hotels/**/booking");
+		assertThat(pathMatcher.combine("/hotels/**", "/booking")).isEqualTo("/hotels/**/booking");
+		assertThat(pathMatcher.combine("/hotels", "/booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels", "booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/", "booking")).isEqualTo("/hotels/booking");
+		assertThat(pathMatcher.combine("/hotels/*", "{hotel}")).isEqualTo("/hotels/{hotel}");
+		assertThat(pathMatcher.combine("/hotels/**", "{hotel}")).isEqualTo("/hotels/**/{hotel}");
+		assertThat(pathMatcher.combine("/hotels", "{hotel}")).isEqualTo("/hotels/{hotel}");
+		assertThat(pathMatcher.combine("/hotels", "{hotel}.*")).isEqualTo("/hotels/{hotel}.*");
+		assertThat(pathMatcher.combine("/hotels/*/booking", "{booking}")).isEqualTo("/hotels/*/booking/{booking}");
+		assertThat(pathMatcher.combine("/*.html", "/hotel.html")).isEqualTo("/hotel.html");
+		assertThat(pathMatcher.combine("/*.html", "/hotel")).isEqualTo("/hotel.html");
+		assertThat(pathMatcher.combine("/*.html", "/hotel.*")).isEqualTo("/hotel.html");
+		assertThat(pathMatcher.combine("/**", "/*.html")).isEqualTo("/*.html");
+		assertThat(pathMatcher.combine("/*", "/*.html")).isEqualTo("/*.html");
+		assertThat(pathMatcher.combine("/*.*", "/*.html")).isEqualTo("/*.html");
+		// SPR-8858
+		assertThat(pathMatcher.combine("/{foo}", "/bar")).isEqualTo("/{foo}/bar");
+		// SPR-7970
+		assertThat(pathMatcher.combine("/user", "/user")).isEqualTo("/user/user");
+		// SPR-10062
+		assertThat(pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")).isEqualTo("/{foo:.*[^0-9].*}/edit/");
+		// SPR-10554
+		assertThat(pathMatcher.combine("/1.0", "/foo/test")).isEqualTo("/1.0/foo/test");
+		// SPR-12975
+		assertThat(pathMatcher.combine("/", "/hotel")).isEqualTo("/hotel");
+		// SPR-12975
+		assertThat(pathMatcher.combine("/hotel/", "/booking")).isEqualTo("/hotel/booking");
 	}
 
 	@Test
-	public void combineWithTwoFileExtensionPatterns() {
-		exception.expect(IllegalArgumentException.class);
-		pathMatcher.combine("/*.html", "/*.txt");
+	void combineWithTwoFileExtensionPatterns() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				pathMatcher.combine("/*.html", "/*.txt"));
 	}
 
 	@Test
-	public void patternComparator() {
+	void patternComparator() {
 		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
 
-		assertEquals(0, comparator.compare(null, null));
-		assertEquals(1, comparator.compare(null, "/hotels/new"));
-		assertEquals(-1, comparator.compare("/hotels/new", null));
+		assertThat(comparator.compare(null, null)).isEqualTo(0);
+		assertThat(comparator.compare(null, "/hotels/new")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/new", null)).isEqualTo(-1);
 
-		assertEquals(0, comparator.compare("/hotels/new", "/hotels/new"));
+		assertThat(comparator.compare("/hotels/new", "/hotels/new")).isEqualTo(0);
 
-		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/*"));
-		assertEquals(1, comparator.compare("/hotels/*", "/hotels/new"));
-		assertEquals(0, comparator.compare("/hotels/*", "/hotels/*"));
+		assertThat(comparator.compare("/hotels/new", "/hotels/*")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/*", "/hotels/new")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/*", "/hotels/*")).isEqualTo(0);
 
-		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/{hotel}"));
-		assertEquals(1, comparator.compare("/hotels/{hotel}", "/hotels/new"));
-		assertEquals(0, comparator.compare("/hotels/{hotel}", "/hotels/{hotel}"));
-		assertEquals(-1, comparator.compare("/hotels/{hotel}/booking", "/hotels/{hotel}/bookings/{booking}"));
-		assertEquals(1, comparator.compare("/hotels/{hotel}/bookings/{booking}", "/hotels/{hotel}/booking"));
+		assertThat(comparator.compare("/hotels/new", "/hotels/{hotel}")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/new")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/{hotel}")).isEqualTo(0);
+		assertThat(comparator.compare("/hotels/{hotel}/booking", "/hotels/{hotel}/bookings/{booking}")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}", "/hotels/{hotel}/booking")).isEqualTo(1);
 
 		// SPR-10550
-		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**"));
-		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
-		assertEquals(0, comparator.compare("/**", "/**"));
+		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**")).isEqualTo(-1);
+		assertThat(comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}")).isEqualTo(1);
+		assertThat(comparator.compare("/**", "/**")).isEqualTo(0);
 
-		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
-		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
+		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/*")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/*", "/hotels/{hotel}")).isEqualTo(1);
 
-		assertEquals(-1, comparator.compare("/hotels/*", "/hotels/*/**"));
-		assertEquals(1, comparator.compare("/hotels/*/**", "/hotels/*"));
+		assertThat(comparator.compare("/hotels/*", "/hotels/*/**")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/*/**", "/hotels/*")).isEqualTo(1);
 
-		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
-		assertEquals(2, comparator.compare("/hotels/{hotel}", "/hotels/{hotel}.*"));
+		assertThat(comparator.compare("/hotels/new", "/hotels/new.*")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/{hotel}.*")).isEqualTo(2);
 
 		// SPR-6741
-		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**"));
-		assertEquals(1, comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
-		assertEquals(1, comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}"));
-		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/foo/bar/**"));
-		assertEquals(2, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
-		assertEquals(-2, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
+		assertThat(comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**")).isEqualTo(-1);
+		assertThat(comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}")).isEqualTo(1);
+		assertThat(comparator.compare("/hotels/{hotel}", "/hotels/foo/bar/**")).isEqualTo(-1);
+
+		// gh-23125
+		assertThat(comparator.compare("/hotels/*/bookings/**", "/hotels/**")).isEqualTo(-11);
 
 		// SPR-8683
-		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}"));
+		assertThat(comparator.compare("/**", "/hotels/{hotel}")).isEqualTo(1);
 
 		// longer is better
-		assertEquals(1, comparator.compare("/hotels", "/hotels2"));
+		assertThat(comparator.compare("/hotels", "/hotels2")).isEqualTo(1);
 
 		// SPR-13139
-		assertEquals(-1, comparator.compare("*", "*/**"));
-		assertEquals(1, comparator.compare("*/**", "*"));
+		assertThat(comparator.compare("*", "*/**")).isEqualTo(-1);
+		assertThat(comparator.compare("*/**", "*")).isEqualTo(1);
 	}
 
 	@Test
-	public void patternComparatorSort() {
+	void patternComparatorSort() {
 		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
 		List<String> paths = new ArrayList<>(3);
 
 		paths.add(null);
 		paths.add("/hotels/new");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertNull(paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isNull();
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add(null);
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertNull(paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isNull();
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/new");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertEquals("/hotels/*", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/*");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertEquals("/hotels/*", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/**");
 		paths.add("/hotels/*");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/*", paths.get(0));
-		assertEquals("/hotels/**", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/*");
+		assertThat(paths.get(1)).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/**");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/*", paths.get(0));
-		assertEquals("/hotels/**", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/*");
+		assertThat(paths.get(1)).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertEquals("/hotels/{hotel}", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/{hotel}");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertEquals("/hotels/{hotel}", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new", paths.get(0));
-		assertEquals("/hotels/{hotel}", paths.get(1));
-		assertEquals("/hotels/*", paths.get(2));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new");
+		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
+		assertThat(paths.get(2)).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/ne*");
 		paths.add("/hotels/n*");
 		Collections.shuffle(paths);
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/ne*", paths.get(0));
-		assertEquals("/hotels/n*", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/ne*");
+		assertThat(paths.get(1)).isEqualTo("/hotels/n*");
 		paths.clear();
 
 		comparator = pathMatcher.getPatternComparator("/hotels/new.html");
@@ -579,81 +586,81 @@ public class AntPathMatcherTests {
 		paths.add("/hotels/{hotel}");
 		Collections.shuffle(paths);
 		Collections.sort(paths, comparator);
-		assertEquals("/hotels/new.*", paths.get(0));
-		assertEquals("/hotels/{hotel}", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/hotels/new.*");
+		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		comparator = pathMatcher.getPatternComparator("/web/endUser/action/login.html");
 		paths.add("/**/login.*");
 		paths.add("/**/endUser/action/login.*");
 		Collections.sort(paths, comparator);
-		assertEquals("/**/endUser/action/login.*", paths.get(0));
-		assertEquals("/**/login.*", paths.get(1));
+		assertThat(paths.get(0)).isEqualTo("/**/endUser/action/login.*");
+		assertThat(paths.get(1)).isEqualTo("/**/login.*");
 		paths.clear();
 	}
 
 	@Test  // SPR-8687
-	public void trimTokensOff() {
+	void trimTokensOff() {
 		pathMatcher.setTrimTokens(false);
 
-		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
-		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
-		assertFalse(pathMatcher.match("/group/{groupName}/members", "/Group/  Sales/Members"));
+		assertThat(pathMatcher.match("/group/{groupName}/members", "/group/sales/members")).isTrue();
+		assertThat(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members")).isTrue();
+		assertThat(pathMatcher.match("/group/{groupName}/members", "/Group/  Sales/Members")).isFalse();
 	}
 
 	@Test  // SPR-13286
-	public void caseInsensitive() {
+	void caseInsensitive() {
 		pathMatcher.setCaseSensitive(false);
 
-		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
-		assertTrue(pathMatcher.match("/group/{groupName}/members", "/Group/Sales/Members"));
-		assertTrue(pathMatcher.match("/Group/{groupName}/Members", "/group/Sales/members"));
+		assertThat(pathMatcher.match("/group/{groupName}/members", "/group/sales/members")).isTrue();
+		assertThat(pathMatcher.match("/group/{groupName}/members", "/Group/Sales/Members")).isTrue();
+		assertThat(pathMatcher.match("/Group/{groupName}/Members", "/group/Sales/members")).isTrue();
 	}
 
 	@Test
-	public void defaultCacheSetting() {
+	void defaultCacheSetting() {
 		match();
-		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
+		assertThat(pathMatcher.stringMatcherCache.size() > 20).isTrue();
 
 		for (int i = 0; i < 65536; i++) {
 			pathMatcher.match("test" + i, "test");
 		}
 		// Cache turned off because it went beyond the threshold
-		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
+		assertThat(pathMatcher.stringMatcherCache.isEmpty()).isTrue();
 	}
 
 	@Test
-	public void cachePatternsSetToTrue() {
+	void cachePatternsSetToTrue() {
 		pathMatcher.setCachePatterns(true);
 		match();
-		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
+		assertThat(pathMatcher.stringMatcherCache.size() > 20).isTrue();
 
 		for (int i = 0; i < 65536; i++) {
 			pathMatcher.match("test" + i, "test" + i);
 		}
 		// Cache keeps being alive due to the explicit cache setting
-		assertTrue(pathMatcher.stringMatcherCache.size() > 65536);
+		assertThat(pathMatcher.stringMatcherCache.size() > 65536).isTrue();
 	}
 
 	@Test
-	public void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
+	void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
 		pathMatcher.setCachePatterns(true);
-		assertEquals(0, pathMatcher.stringMatcherCache.size());
+		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(0);
 
 		pathMatcher.match("test?", "test");
-		assertEquals(1, pathMatcher.stringMatcherCache.size());
+		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(1);
 
 		pathMatcher.match("test?", "best");
 		pathMatcher.match("test/*", "view/test.jpg");
 		pathMatcher.match("test/**/test.jpg", "view/test.jpg");
 		pathMatcher.match("test/{name}.jpg", "view/test.jpg");
-		assertEquals(1, pathMatcher.stringMatcherCache.size());
+		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(1);
 	}
 
 	@Test
-	public void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
+	void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
 		pathMatcher.setCachePatterns(true);
-		assertEquals(0, pathMatcher.stringMatcherCache.size());
+		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(0);
 
 		pathMatcher.match("test", "testian");
 		pathMatcher.match("test?", "testFf");
@@ -664,21 +671,36 @@ public class AntPathMatcherTests {
 		pathMatcher.match("/**/{name}.jpg", "/test/lorem.jpg");
 		pathMatcher.match("/*/dir/{name}.jpg", "/*/dir/lorem.jpg");
 
-		assertEquals(7, pathMatcher.stringMatcherCache.size());
+		assertThat(pathMatcher.stringMatcherCache.size()).isEqualTo(7);
 	}
 
 	@Test
-	public void cachePatternsSetToFalse() {
+	void cachePatternsSetToFalse() {
 		pathMatcher.setCachePatterns(false);
 		match();
-		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
+		assertThat(pathMatcher.stringMatcherCache.isEmpty()).isTrue();
 	}
 
 	@Test
-	public void extensionMappingWithDotPathSeparator() {
+	void extensionMappingWithDotPathSeparator() {
 		pathMatcher.setPathSeparator(".");
-		assertEquals("Extension mapping should be disabled with \".\" as path separator",
-				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
+		assertThat(pathMatcher.combine("/*.html", "hotel.*")).as("Extension mapping should be disabled with \".\" as path separator").isEqualTo("/*.html.hotel.*");
+	}
+
+	@Test // gh-22959
+	void isPattern() {
+		assertThat(pathMatcher.isPattern("/test/*")).isTrue();
+		assertThat(pathMatcher.isPattern("/test/**/name")).isTrue();
+		assertThat(pathMatcher.isPattern("/test?")).isTrue();
+		assertThat(pathMatcher.isPattern("/test/{name}")).isTrue();
+
+		assertThat(pathMatcher.isPattern("/test/name")).isFalse();
+		assertThat(pathMatcher.isPattern("/test/foo{bar")).isFalse();
+	}
+
+	@Test // gh-23297
+	void isPatternWithNullPath() {
+		assertThat(pathMatcher.isPattern(null)).isFalse();
 	}
 
 }
