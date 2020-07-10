@@ -40,7 +40,9 @@ import org.springframework.lang.Nullable;
  * @see HessianServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class HessianProxyFactoryBean extends HessianClientInterceptor implements FactoryBean<Object> {
 
 	@Nullable

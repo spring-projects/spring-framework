@@ -50,7 +50,9 @@ import org.springframework.lang.Nullable;
  * @see java.rmi.server.RMIClassLoader
  * @see RemoteInvocationSerializingExporter#createObjectInputStream
  * @see org.springframework.remoting.httpinvoker.HttpInvokerClientInterceptor#setCodebaseUrl
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStream {
 
 	private final String codebaseUrl;

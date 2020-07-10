@@ -60,7 +60,9 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 3.1
  * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerRequestExecutor
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
