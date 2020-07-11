@@ -45,11 +45,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 abstract class AbstractSchedulingTaskExecutorTests {
 
-	static final String THREAD_NAME_PREFIX = "test-";
-
 	private AsyncListenableTaskExecutor executor;
 
 	protected String testName;
+
+	protected String threadNamePrefix;
 
 	private volatile Object outcome;
 
@@ -57,6 +57,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	@BeforeEach
 	void setUp(TestInfo testInfo) {
 		this.testName = testInfo.getTestMethod().get().getName();
+		this.threadNamePrefix = this.testName + "-";
 		this.executor = buildExecutor();
 	}
 
@@ -173,7 +174,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 		TestCallable task = new TestCallable(this.testName, 1);
 		Future<String> future = executor.submit(task);
 		String result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertThat(result.substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+		assertThat(result.substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	@Test
@@ -216,7 +217,7 @@ abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertThat(outcome.toString().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+		assertThat(outcome.toString().substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	@Test
@@ -246,8 +247,8 @@ abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 
-	private void assertThreadNamePrefix(TestTask task) {
-		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+	protected void assertThreadNamePrefix(TestTask task) {
+		assertThat(task.lastThread.getName().substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	private void await(TestTask task) {
