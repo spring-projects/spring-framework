@@ -354,7 +354,7 @@ public class ByteVector {
   private void enlarge(final int size) {
     int doubleCapacity = 2 * data.length;
     int minimalCapacity = length + size;
-    byte[] newData = new byte[doubleCapacity > minimalCapacity ? doubleCapacity : minimalCapacity];
+    byte[] newData = new byte[Math.max(doubleCapacity, minimalCapacity)];
     System.arraycopy(data, 0, newData, 0, length);
     data = newData;
   }
