@@ -55,7 +55,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Unit tests for {@link DefaultRSocketRequesterBuilder}.
@@ -75,21 +74,9 @@ public class DefaultRSocketRequesterBuilderTests {
 	public void setup() {
 		this.transport = mock(ClientTransport.class);
 		given(this.transport.connect()).willReturn(Mono.just(this.connection));
+		given(this.transport.maxFrameLength()).willReturn(16777215);
 	}
 
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void rsocketConnectorConfigurerAppliesAtSubscription() {
-		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
-		RSocketRequester.builder()
-				.rsocketConnector(this.connectorConfigurer)
-				.rsocketStrategies(strategiesConfigurer)
-				.connect(this.transport);
-
-		verifyNoInteractions(this.transport);
-		assertThat(this.connectorConfigurer.connector()).isNull();
-	}
 
 	@Test
 	@SuppressWarnings({"unchecked", "deprecation"})
@@ -100,12 +87,10 @@ public class DefaultRSocketRequesterBuilderTests {
 				.rsocketConnector(this.connectorConfigurer)
 				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
 		// RSocketStrategies and RSocketConnector configurers should have been called
 
-		verify(this.transport).connect();
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
 		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
 		assertThat(this.connectorConfigurer.connector()).isNotNull();
@@ -113,9 +98,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@Test
 	public void defaultDataMimeType() {
-		RSocketRequester requester = RSocketRequester.builder()
-				.connect(this.transport)
-				.block();
+		RSocketRequester requester = RSocketRequester.builder().transport(this.transport);
 
 		assertThat(requester.dataMimeType())
 				.as("Default data MimeType, based on the first Decoder")
@@ -130,8 +113,7 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		RSocketRequester requester = RSocketRequester.builder()
 				.rsocketStrategies(strategies)
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
 		assertThat(requester.dataMimeType())
 				.as("Default data MimeType, based on the first configured, non-default Decoder")
@@ -142,12 +124,9 @@ public class DefaultRSocketRequesterBuilderTests {
 	public void dataMimeTypeExplicitlySet() {
 		RSocketRequester requester = RSocketRequester.builder()
 				.dataMimeType(MimeTypeUtils.APPLICATION_JSON)
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
-		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(DefaultConnectionSetupPayload::new)
-				.block();
+		ConnectionSetupPayload setupPayload = getConnectionSetupPayload(requester);
 
 		assertThat(setupPayload.dataMimeType()).isEqualTo("application/json");
 		assertThat(requester.dataMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
@@ -165,12 +144,9 @@ public class DefaultRSocketRequesterBuilderTests {
 					connector.metadataMimeType("text/plain");
 					connector.dataMimeType("application/xml");
 				})
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
-		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(DefaultConnectionSetupPayload::new)
-				.block();
+		ConnectionSetupPayload setupPayload = getConnectionSetupPayload(requester);
 
 		assertThat(setupPayload.dataMimeType()).isEqualTo(dataMimeType.toString());
 		assertThat(setupPayload.metadataMimeType()).isEqualTo(metaMimeType.toString());
@@ -180,17 +156,14 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@Test
 	public void setupRoute() {
-		RSocketRequester.builder()
+		RSocketRequester requester = RSocketRequester.builder()
 				.dataMimeType(MimeTypeUtils.TEXT_PLAIN)
 				.metadataMimeType(MimeTypeUtils.TEXT_PLAIN)
 				.setupRoute("toA")
 				.setupData("My data")
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
-		ConnectionSetupPayload setupPayload = Mono.from(this.connection.sentFrames())
-				.map(DefaultConnectionSetupPayload::new)
-				.block();
+		ConnectionSetupPayload setupPayload = getConnectionSetupPayload(requester);
 
 		assertThat(setupPayload.getMetadataUtf8()).isEqualTo("toA");
 		assertThat(setupPayload.getDataUtf8()).isEqualTo("My data");
@@ -203,18 +176,15 @@ public class DefaultRSocketRequesterBuilderTests {
 		Mono<String> asyncMeta2 = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async Metadata 2");
 		Mono<String> data = Mono.delay(Duration.ofMillis(1)).map(aLong -> "Async data");
 
-		RSocketRequester.builder()
+		RSocketRequester requester = RSocketRequester.builder()
 				.dataMimeType(MimeTypeUtils.TEXT_PLAIN)
 				.setupRoute("toA")
 				.setupMetadata(asyncMeta1, new MimeType("text", "x.test.metadata1"))
 				.setupMetadata(asyncMeta2, new MimeType("text", "x.test.metadata2"))
 				.setupData(data)
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
-		ConnectionSetupPayload payload = Mono.from(this.connection.sentFrames())
-				.map(DefaultConnectionSetupPayload::new)
-				.block();
+		ConnectionSetupPayload setupPayload = getConnectionSetupPayload(requester);
 
 		MimeType compositeMimeType =
 				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
@@ -222,17 +192,23 @@ public class DefaultRSocketRequesterBuilderTests {
 		DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(StringDecoder.allMimeTypes());
 		extractor.metadataToExtract(new MimeType("text", "x.test.metadata1"), String.class, "asyncMeta1");
 		extractor.metadataToExtract(new MimeType("text", "x.test.metadata2"), String.class, "asyncMeta2");
-		Map<String, Object> metadataValues = extractor.extract(payload, compositeMimeType);
+		Map<String, Object> metadataValues = extractor.extract(setupPayload, compositeMimeType);
 
 		assertThat(metadataValues.get("asyncMeta1")).isEqualTo("Async Metadata 1");
 		assertThat(metadataValues.get("asyncMeta2")).isEqualTo("Async Metadata 2");
-		assertThat(payload.getDataUtf8()).isEqualTo("Async data");
+		assertThat(setupPayload.getDataUtf8()).isEqualTo("Async data");
 	}
 
 	@Test
 	public void frameDecoderMatchesDataBufferFactory() throws Exception {
 		testPayloadDecoder(new NettyDataBufferFactory(ByteBufAllocator.DEFAULT), PayloadDecoder.ZERO_COPY);
 		testPayloadDecoder(DefaultDataBufferFactory.sharedInstance, PayloadDecoder.DEFAULT);
+	}
+
+	private ConnectionSetupPayload getConnectionSetupPayload(RSocketRequester requester) {
+		// Trigger connection and sending of SETUP frame
+		requester.route("any-route").data("any-data").send().block();
+		return new DefaultConnectionSetupPayload(this.connection.setupFrame());
 	}
 
 	private void testPayloadDecoder(DataBufferFactory bufferFactory, PayloadDecoder payloadDecoder)
@@ -245,8 +221,7 @@ public class DefaultRSocketRequesterBuilderTests {
 		RSocketRequester.builder()
 				.rsocketStrategies(strategies)
 				.rsocketConnector(this.connectorConfigurer)
-				.connect(this.transport)
-				.block();
+				.transport(this.transport);
 
 		RSocketConnector connector = this.connectorConfigurer.connector();
 		assertThat(connector).isNotNull();
@@ -260,16 +235,21 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	static class MockConnection implements DuplexConnection {
 
-		private Publisher<ByteBuf> sentFrames;
+		private ByteBuf setupFrame;
 
 
-		public Publisher<ByteBuf> sentFrames() {
-			return this.sentFrames;
+		public ByteBuf setupFrame() {
+			return this.setupFrame;
 		}
 
 		@Override
 		public Mono<Void> send(Publisher<ByteBuf> frames) {
-			this.sentFrames = frames;
+			return Mono.empty();
+		}
+
+		@Override
+		public Mono<Void> sendOne(ByteBuf frame) {
+			this.setupFrame = frame;
 			return Mono.empty();
 		}
 
@@ -285,11 +265,16 @@ public class DefaultRSocketRequesterBuilderTests {
 
 		@Override
 		public Mono<Void> onClose() {
-			return Mono.empty();
+			return Mono.never();
 		}
 
 		@Override
 		public void dispose() {
+		}
+
+		@Override
+		public boolean isDisposed() {
+			return false;
 		}
 	}
 

@@ -89,13 +89,12 @@ class RSocketBufferLeakTests {
 		requester = RSocketRequester.builder()
 				.rsocketConnector(conn -> conn.interceptors(registry -> registry.forRequester(payloadInterceptor)))
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
-				.connectTcp("localhost", 7000)
-				.block();
+				.tcp("localhost", 7000);
 	}
 
 	@AfterAll
 	void tearDownOnce() {
-		requester.rsocket().dispose();
+		requester.dispose();
 		server.dispose();
 		context.close();
 	}

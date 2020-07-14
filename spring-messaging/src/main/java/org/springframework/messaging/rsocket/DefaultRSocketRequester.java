@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.RSocketClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,8 +49,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
 
-
-	private final RSocket rsocket;
+	private final RSocketDelegate rsocketDelegate;
 
 	private final MimeType dataMimeType;
 
@@ -61,15 +61,15 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 
 	DefaultRSocketRequester(
-			RSocket rsocket, MimeType dataMimeType, MimeType metadataMimeType,
+			RSocketDelegate rsocketDelegate, MimeType dataMimeType, MimeType metadataMimeType,
 			RSocketStrategies strategies) {
 
-		Assert.notNull(rsocket, "RSocket is required");
+		Assert.notNull(rsocketDelegate, "RSocket or RSocketClient is required");
 		Assert.notNull(dataMimeType, "'dataMimeType' is required");
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
 
-		this.rsocket = rsocket;
+		this.rsocketDelegate = rsocketDelegate;
 		this.dataMimeType = dataMimeType;
 		this.metadataMimeType = metadataMimeType;
 		this.strategies = strategies;
@@ -77,9 +77,11 @@ final class DefaultRSocketRequester implements RSocketRequester {
 	}
 
 
+	@Nullable
 	@Override
 	public RSocket rsocket() {
-		return this.rsocket;
+		return (this.rsocketDelegate instanceof ConnectionRSocketDelegate ?
+				((ConnectionRSocketDelegate) this.rsocketDelegate).getRSocket() : null);
 	}
 
 	@Override
@@ -102,6 +104,10 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		return new DefaultRequestSpec(metadata, mimeType);
 	}
 
+	@Override
+	public void dispose() {
+		this.rsocketDelegate.dispose();
+	}
 
 	private static boolean isVoid(ResolvableType elementType) {
 		return (Void.class.equals(elementType.resolve()) || void.class.equals(elementType.resolve()));
@@ -250,12 +256,12 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		@Override
 		public Mono<Void> sendMetadata() {
-			return getPayloadMono().flatMap(rsocket::metadataPush);
+			return rsocketDelegate().metadataPush(getPayloadMono());
 		}
 
 		@Override
 		public Mono<Void> send() {
-			return getPayloadMono().flatMap(rsocket::fireAndForget);
+			return rsocketDelegate().fireAndForget(getPayloadMono());
 		}
 
 		@Override
@@ -270,7 +276,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 		@SuppressWarnings("unchecked")
 		private <T> Mono<T> retrieveMono(ResolvableType elementType) {
-			Mono<Payload> payloadMono = getPayloadMono().flatMap(rsocket::requestResponse);
+			Mono<Payload> payloadMono = rsocketDelegate().requestResponse(getPayloadMono());
 
 			if (isVoid(elementType)) {
 				return (Mono<T>) payloadMono.then();
@@ -295,8 +301,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private <T> Flux<T> retrieveFlux(ResolvableType elementType) {
 
 			Flux<Payload> payloadFlux = (this.payloadFlux != null ?
-					rsocket.requestChannel(this.payloadFlux) :
-					getPayloadMono().flatMapMany(rsocket::requestStream));
+					rsocketDelegate().requestChannel(this.payloadFlux) :
+					rsocketDelegate().requestStream(getPayloadMono()));
 
 			if (isVoid(elementType)) {
 				return payloadFlux.thenMany(Flux.empty());
@@ -305,6 +311,10 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			Decoder<?> decoder = strategies.decoder(elementType, dataMimeType);
 			return payloadFlux.map(this::retainDataAndReleasePayload).map(dataBuffer ->
 					(T) decoder.decode(dataBuffer, elementType, dataMimeType, EMPTY_HINTS));
+		}
+
+		private RSocketDelegate rsocketDelegate() {
+			return DefaultRSocketRequester.this.rsocketDelegate;
 		}
 
 		private Mono<Payload> getPayloadMono() {
@@ -316,4 +326,107 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			return PayloadUtils.retainDataAndReleasePayload(payload, bufferFactory());
 		}
 	}
+
+
+	// Contract to avoid a hard dependency on RSocketClient for now.
+
+	interface RSocketDelegate {
+
+		Mono<Void> fireAndForget(Mono<Payload> payloadMono);
+
+		Mono<Payload> requestResponse(Mono<Payload> payloadMono);
+
+		Flux<Payload> requestStream(Mono<Payload> payloadMono);
+
+		Flux<Payload> requestChannel(Publisher<Payload> payloadPublisher);
+
+		Mono<Void> metadataPush(Mono<Payload> payloadMono);
+
+		void dispose();
+	}
+
+	static class ConnectionRSocketDelegate implements RSocketDelegate {
+
+		private final RSocket rsocket;
+
+		public ConnectionRSocketDelegate(RSocket rsocket) {
+			Assert.notNull(rsocket, "RSocket is required");
+			this.rsocket = rsocket;
+		}
+
+		public RSocket getRSocket() {
+			return this.rsocket;
+		}
+
+		@Override
+		public Mono<Void> fireAndForget(Mono<Payload> payloadMono) {
+			return payloadMono.flatMap(this.rsocket::fireAndForget);
+		}
+
+		@Override
+		public Mono<Payload> requestResponse(Mono<Payload> payloadMono) {
+			return payloadMono.flatMap(this.rsocket::requestResponse);
+		}
+
+		@Override
+		public Flux<Payload> requestStream(Mono<Payload> payloadMono) {
+			return payloadMono.flatMapMany(this.rsocket::requestStream);
+		}
+
+		@Override
+		public Flux<Payload> requestChannel(Publisher<Payload> payloadPublisher) {
+			return this.rsocket.requestChannel(payloadPublisher);
+		}
+
+		@Override
+		public Mono<Void> metadataPush(Mono<Payload> payloadMono) {
+			return payloadMono.flatMap(this.rsocket::metadataPush);
+		}
+
+		@Override
+		public void dispose() {
+			this.rsocket.dispose();
+		}
+	}
+
+	static class ClientRSocketDelegate implements RSocketDelegate {
+
+		private final RSocketClient rsocketClient;
+
+		public ClientRSocketDelegate(RSocketClient rsocketClient) {
+			Assert.notNull(rsocketClient, "RSocketClient is required");
+			this.rsocketClient = rsocketClient;
+		}
+
+		@Override
+		public Mono<Void> fireAndForget(Mono<Payload> payloadMono) {
+			return this.rsocketClient.fireAndForget(payloadMono);
+		}
+
+		@Override
+		public Mono<Payload> requestResponse(Mono<Payload> payloadMono) {
+			return this.rsocketClient.requestResponse(payloadMono);
+		}
+
+		@Override
+		public Flux<Payload> requestStream(Mono<Payload> payloadMono) {
+			return this.rsocketClient.requestStream(payloadMono);
+		}
+
+		@Override
+		public Flux<Payload> requestChannel(Publisher<Payload> payloadPublisher) {
+			return this.rsocketClient.requestChannel(payloadPublisher);
+		}
+
+		@Override
+		public Mono<Void> metadataPush(Mono<Payload> payloadMono) {
+			return this.rsocketClient.metadataPush(payloadMono);
+		}
+
+		@Override
+		public void dispose() {
+			this.rsocketClient.dispose();
+		}
+	}
+
 }

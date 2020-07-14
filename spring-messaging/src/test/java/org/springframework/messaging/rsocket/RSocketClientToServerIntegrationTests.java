@@ -91,13 +91,12 @@ public class RSocketClientToServerIntegrationTests {
 		requester = RSocketRequester.builder()
 				.metadataMimeType(metadataMimeType)
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
-				.connectTcp("localhost", 7000)
-				.block();
+				.tcp("localhost", 7000);
 	}
 
 	@AfterAll
 	public static void tearDownOnce() {
-		requester.rsocket().dispose();
+		requester.dispose();
 		server.dispose();
 	}
 

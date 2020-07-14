@@ -39,6 +39,7 @@ class RSocketRequesterExtensionsTests {
 	private val stringTypeRefMatcher: (ParameterizedTypeReference<*>) -> Boolean  = { it.type == String::class.java }
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()
@@ -49,6 +50,7 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectTcpAndAwait() {
 		val host = "127.0.0.1"
 		val requester = mockk<RSocketRequester>()
@@ -60,6 +62,7 @@ class RSocketRequesterExtensionsTests {
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun connectWebSocketAndAwait() {
 		val requester = mockk<RSocketRequester>()
 		val builder = mockk<RSocketRequester.Builder>()

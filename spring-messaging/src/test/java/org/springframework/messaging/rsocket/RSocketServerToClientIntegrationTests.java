@@ -108,14 +108,16 @@ public class RSocketServerToClientIntegrationTests {
 					.setupRoute(connectionRoute)
 					.rsocketStrategies(strategies)
 					.rsocketConnector(connector -> connector.acceptor(responder))
-					.connectTcp("localhost", server.address().getPort())
-					.block();
+					.tcp("localhost", server.address().getPort());
+
+			// Make a request to cause a connection to be established.
+			requester.route("fnf").send().block();
 
 			context.getBean(ServerController.class).await(Duration.ofSeconds(5));
 		}
 		finally {
 			if (requester != null) {
-				requester.rsocket().dispose();
+				requester.dispose();
 			}
 		}
 	}
@@ -199,13 +201,16 @@ public class RSocketServerToClientIntegrationTests {
 			});
 		}
 
-
 		private void runTest(Runnable testEcho) {
 			Mono.fromRunnable(testEcho)
 					.doOnError(ex -> result.onError(ex))
 					.doOnSuccess(o -> result.onComplete())
 					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
 					.subscribe();
+		}
+
+		@MessageMapping("fnf")
+		void handleFireAndForget() {
 		}
 	}
 

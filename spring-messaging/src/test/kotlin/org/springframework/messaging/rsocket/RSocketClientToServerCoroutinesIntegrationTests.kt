@@ -265,14 +265,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			requester = RSocketRequester.builder()
 					.rsocketConnector { connector -> connector.payloadDecoder(PayloadDecoder.ZERO_COPY) }
 					.rsocketStrategies(context.getBean(RSocketStrategies::class.java))
-					.connectTcp("localhost", 7000)
-					.block()!!
+					.tcp("localhost", 7000)
 		}
 
 		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
-			requester.rsocket().dispose()
+			requester.dispose()
 			server.dispose()
 		}
 	}
