@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import io.rsocket.AbstractRSocket;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -59,7 +58,7 @@ import org.springframework.util.RouteMatcher;
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-class MessagingRSocket extends AbstractRSocket {
+class MessagingRSocket implements RSocket {
 
 	private final MimeType dataMimeType;
 
@@ -174,7 +173,7 @@ class MessagingRSocket extends AbstractRSocket {
 				.doFinally(s -> {
 					// Subscription should have happened by now due to ChannelSendOperator
 					if (!read.get()) {
-						buffers.subscribe(DataBufferUtils::release);
+						firstPayload.release();
 					}
 				})
 				.thenMany(Flux.defer(() -> replyMono.isTerminated() ?

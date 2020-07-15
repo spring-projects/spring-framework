@@ -51,7 +51,9 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @since 2.0
  * @see JmsInvokerClientInterceptor
  * @see JmsInvokerProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 		implements SessionAwareMessageListener<Message>, InitializingBean {
 

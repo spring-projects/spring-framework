@@ -71,7 +71,9 @@ import org.springframework.util.Assert;
  * @see #setQueueName
  * @see org.springframework.jms.remoting.JmsInvokerServiceExporter
  * @see org.springframework.jms.remoting.JmsInvokerProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class JmsInvokerClientInterceptor implements MethodInterceptor, InitializingBean {
 
 	@Nullable

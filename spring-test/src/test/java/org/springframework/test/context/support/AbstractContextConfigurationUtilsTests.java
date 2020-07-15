@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,14 +205,16 @@ abstract class AbstractContextConfigurationUtilsTests {
 	static class OverriddenClassesBar extends ClassesFoo {
 	}
 
-	@ContextConfiguration(locations = "/foo.properties", loader = GenericPropertiesContextLoader.class)
+	@SuppressWarnings("deprecation")
+	@ContextConfiguration(locations = "/foo.properties", loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 	@ActiveProfiles("foo")
 	static class PropertiesLocationsFoo {
 	}
 
 	// Combining @Configuration classes with a Properties based loader doesn't really make
 	// sense, but that's OK for unit testing purposes.
-	@ContextConfiguration(classes = FooConfig.class, loader = GenericPropertiesContextLoader.class)
+	@SuppressWarnings("deprecation")
+	@ContextConfiguration(classes = FooConfig.class, loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 	@ActiveProfiles("foo")
 	static class PropertiesClassesFoo {
 	}

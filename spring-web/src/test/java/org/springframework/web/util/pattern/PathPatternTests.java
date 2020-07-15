@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,10 @@ public class PathPatternTests {
 	public void hasPatternSyntax() {
 		PathPatternParser parser = new PathPatternParser();
 		assertThat(parser.parse("/foo/*").hasPatternSyntax()).isTrue();
-		assertThat(parser.parse("/foo/**/bar").hasPatternSyntax()).isTrue();
+		assertThat(parser.parse("/foo/**").hasPatternSyntax()).isTrue();
+		assertThat(parser.parse("/foo/{*elem}").hasPatternSyntax()).isTrue();
 		assertThat(parser.parse("/f?o").hasPatternSyntax()).isTrue();
+		assertThat(parser.parse("/f*").hasPatternSyntax()).isTrue();
 		assertThat(parser.parse("/foo/{bar}/baz").hasPatternSyntax()).isTrue();
 		assertThat(parser.parse("/foo/bar").hasPatternSyntax()).isFalse();
 	}
@@ -867,13 +869,10 @@ public class PathPatternTests {
 		assertThat(pathMatcher.combine("", "/hotels")).isEqualTo("/hotels");
 		assertThat(pathMatcher.combine("/hotels/*", "booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/*", "/booking")).isEqualTo("/hotels/booking");
-		assertThat(pathMatcher.combine("/hotels/**", "booking")).isEqualTo("/hotels/**/booking");
-		assertThat(pathMatcher.combine("/hotels/**", "/booking")).isEqualTo("/hotels/**/booking");
 		assertThat(pathMatcher.combine("/hotels", "/booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels", "booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/", "booking")).isEqualTo("/hotels/booking");
 		assertThat(pathMatcher.combine("/hotels/*", "{hotel}")).isEqualTo("/hotels/{hotel}");
-		assertThat(pathMatcher.combine("/hotels/**", "{hotel}")).isEqualTo("/hotels/**/{hotel}");
 		assertThat(pathMatcher.combine("/hotels", "{hotel}")).isEqualTo("/hotels/{hotel}");
 		assertThat(pathMatcher.combine("/hotels", "{hotel}.*")).isEqualTo("/hotels/{hotel}.*");
 		assertThat(pathMatcher.combine("/hotels/*/booking", "{booking}")).isEqualTo("/hotels/*/booking/{booking}");

@@ -25,7 +25,9 @@ import org.springframework.lang.Nullable;
  * @since 1.1
  * @see HttpInvokerRequestExecutor
  * @see HttpInvokerClientInterceptor
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public interface HttpInvokerClientConfiguration {
 
 	/**

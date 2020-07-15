@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertTagClosed(output);
 		assertContainsAttribute(output, "name", "myFloat");
 		assertContainsAttribute(output, "type", "radio");
-		assertContainsAttribute(output, "value", "F" + getFloat().toString());
+		assertContainsAttribute(output, "value", "F" + getFloat());
 		assertContainsAttribute(output, "checked", "checked");
 	}
 
@@ -185,7 +185,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement = document.getRootElement().elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
 		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");
@@ -208,7 +208,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement = document.getRootElement().elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
 		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");
@@ -236,7 +236,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
-		Element checkboxElement = (Element) document.getRootElement().elements().get(0);
+		Element checkboxElement = document.getRootElement().elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("radio");
 		assertThat(checkboxElement.attribute("name").getValue()).isEqualTo("pets");

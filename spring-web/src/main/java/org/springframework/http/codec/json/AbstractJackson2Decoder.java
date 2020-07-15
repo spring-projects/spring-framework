@@ -25,11 +25,9 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -138,8 +136,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	/**
 	 * Process the input publisher into a flux. Default implementation returns
-	 * {@link Flux#from(Publisher)}, but subclasses can choose to to customize
-	 * this behaviour.
+	 * {@link Flux#from(Publisher)}, but subclasses can choose to customize
+	 * this behavior.
 	 * @param input the {@code DataBuffer} input stream to process
 	 * @param elementType the expected type of elements in the output stream
 	 * @param mimeType the MIME type associated with the input stream (optional)
@@ -208,17 +206,9 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private CodecException processException(IOException ex) {
-		if (ex instanceof MismatchedInputException) {  // specific kind of JsonMappingException
-			String originalMessage = ((MismatchedInputException) ex).getOriginalMessage();
-			return new DecodingException("Invalid JSON input: " + originalMessage, ex);
-		}
-		if (ex instanceof InvalidDefinitionException) {  // another kind of JsonMappingException
+		if (ex instanceof InvalidDefinitionException) {
 			JavaType type = ((InvalidDefinitionException) ex).getType();
 			return new CodecException("Type definition error: " + type, ex);
-		}
-		if (ex instanceof JsonMappingException) {  // typically ValueInstantiationException
-			String originalMessage = ((JsonMappingException) ex).getOriginalMessage();
-			return new CodecException("JSON conversion problem: " + originalMessage, ex);
 		}
 		if (ex instanceof JsonProcessingException) {
 			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
@@ -58,8 +57,6 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	private final org.eclipse.jetty.websocket.client.WebSocketClient jettyClient;
 
 	private final boolean externallyManaged;
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	/**
@@ -157,7 +154,8 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	private Object createHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
 		return new JettyWebSocketHandlerAdapter(handler, session -> {
 			HandshakeInfo info = createHandshakeInfo(url, session);
-			return new JettyWebSocketSession(session, info, this.bufferFactory, completion);
+			return new JettyWebSocketSession(
+					session, info, DefaultDataBufferFactory.sharedInstance, completion);
 		});
 	}
 

@@ -21,16 +21,16 @@ configurations {
 }
 
 task cglibRepackJar(type: ShadowJar) {
-	baseName = 'spring-cglib-repack'
-	version = cglibVersion
+	archiveBaseName = 'spring-cglib-repack'
+	archiveVersion = cglibVersion
 	configurations = [project.configurations.cglib]
 	relocate 'net.sf.cglib', 'org.springframework.cglib'
 	relocate 'org.objectweb.asm', 'org.springframework.asm'
 }
 
 task objenesisRepackJar(type: ShadowJar) {
-	baseName = 'spring-objenesis-repack'
-	version = objenesisVersion
+	archiveBaseName = 'spring-objenesis-repack'
+	archiveVersion = objenesisVersion
 	configurations = [project.configurations.objenesis]
 	relocate 'org.objenesis', 'org.springframework.objenesis'
 }
@@ -52,6 +52,7 @@ dependencies {
 	optional("io.reactivex:rxjava")
 	optional("io.reactivex:rxjava-reactive-streams")
 	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("javax.annotation:javax.annotation-api")
@@ -72,6 +73,9 @@ dependencies {
 }
 
 jar {
+	reproducibleFileOrder = true
+	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
 	from(zipTree(cglibRepackJar.archivePath)) {
@@ -91,4 +95,10 @@ jar {
 	}
 
 	from configurations.coroutines
+}
+
+test {
+	// make sure the classes dir is used on the test classpath (required by ResourceTests)
+	// When test fixtures are involved, the JAR is used by default
+	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }

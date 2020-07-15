@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class SimpleNamingContextTests {
 		assertThat(context2.getEnvironment() != env2).as("Correct environment").isTrue();
 		assertThat("value1".equals(context2.getEnvironment().get("key1"))).as("Correct key1").isTrue();
 
-		Integer i = new Integer(0);
+		Integer i = 0;
 		context1.rebind("myinteger", i);
 		String s = "";
 		context2.bind("mystring", s);

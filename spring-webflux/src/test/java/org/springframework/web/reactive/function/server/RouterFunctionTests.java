@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +41,8 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> result = routerFunction1.and(routerFunction2);
 		assertThat(result).isNotNull();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
 
 		StepVerifier.create(resultHandlerFunction)
@@ -56,7 +62,8 @@ public class RouterFunctionTests {
 		RouterFunction<?> result = routerFunction1.andOther(routerFunction2);
 		assertThat(result).isNotNull();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
 
 		StepVerifier.create(resultHandlerFunction)
@@ -73,7 +80,8 @@ public class RouterFunctionTests {
 		RouterFunction<ServerResponse> result = routerFunction1.andRoute(requestPredicate, this::handlerMethod);
 		assertThat(result).isNotNull();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
 
 		StepVerifier.create(resultHandlerFunction)
@@ -101,7 +109,8 @@ public class RouterFunctionTests {
 		RouterFunction<EntityResponse<Mono<Integer>>> result = routerFunction.filter(filterFunction);
 		assertThat(result).isNotNull();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		Mono<EntityResponse<Mono<Integer>>> responseMono =
 				result.route(request).flatMap(hf -> hf.handle(request));
 

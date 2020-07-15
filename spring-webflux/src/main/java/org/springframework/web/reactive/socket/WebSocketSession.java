@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,13 @@ public interface WebSocketSession {
 	 */
 	Mono<Void> close(CloseStatus status);
 
+	/**
+	 * Provides access to the {@code CloseStatus} with which the session is
+	 * closed either locally or remotely, or completes empty if the session ended
+	 * without a status.
+	 * @since 5.3
+	 */
+	Mono<CloseStatus> closeStatus();
 
 	// WebSocketMessage factory methods
 

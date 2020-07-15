@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as well as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to {@code FlushMode.NEVER}. It assumes to be used
+ * with the flush mode set to {@code FlushMode.MANUAL}. It assumes to be used
  * in combination with service layer transactions that care for the flushing: The
  * active transaction manager will temporarily change the flush mode to
  * {@code FlushMode.AUTO} during a read-write transaction, with the flush
- * mode reset to {@code FlushMode.NEVER} at the end of each transaction.
+ * mode reset to {@code FlushMode.MANUAL} at the end of each transaction.
  *
  * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the

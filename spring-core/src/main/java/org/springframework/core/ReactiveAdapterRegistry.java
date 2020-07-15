@@ -24,8 +24,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
 import kotlinx.coroutines.CompletableDeferredKt;
 import kotlinx.coroutines.Deferred;
 import org.reactivestreams.Publisher;
@@ -46,8 +44,12 @@ import org.springframework.util.ReflectionUtils;
  * {@code Observable}, and others.
  *
  * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, Java 9+
- * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred} and {@code Flow}.
+ * for Reactor, RxJava 2/3, or RxJava 1 (+ RxJava Reactive Streams bridge),
+ * {@link CompletableFuture}, Java 9+ {@code Flow.Publisher}, and Kotlin
+ * Coroutines' {@code Deferred} and {@code Flow}.
+ *
+ * <p><strong>Note:</strong> As of Spring Framework 5.3, support for RxJava 1.x
+ * is deprecated in favor of RxJava 2 and 3.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -78,7 +80,7 @@ public class ReactiveAdapterRegistry {
 		}
 		this.reactorPresent = reactorRegistered;
 
-		// RxJava1
+		// RxJava1 (deprecated)
 		if (ClassUtils.isPresent("rx.Observable", classLoader) &&
 				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader)) {
 			new RxJava1Registrar().registerAdapters(this);
@@ -87,6 +89,11 @@ public class ReactiveAdapterRegistry {
 		// RxJava2
 		if (ClassUtils.isPresent("io.reactivex.Flowable", classLoader)) {
 			new RxJava2Registrar().registerAdapters(this);
+		}
+
+		// RxJava3
+		if (ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader)) {
+			new RxJava3Registrar().registerAdapters(this);
 		}
 
 		// Java 9+ Flow.Publisher
@@ -104,9 +111,7 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
-	 * Whether the registry has any adapters which would be the case if any of
-	 * Reactor, RxJava 2, or RxJava 1 (+ RxJava Reactive Streams bridge) are
-	 * present on the classpath.
+	 * Whether the registry has any adapters.
 	 */
 	public boolean hasAdapters() {
 		return !this.adapters.isEmpty();
@@ -218,7 +223,7 @@ public class ReactiveAdapterRegistry {
 					source -> source);
 
 			registry.registerReactiveType(
-					ReactiveTypeDescriptor.singleOptionalValue(CompletionStage.class, EmptyCompletableFuture::new),
+					ReactiveTypeDescriptor.nonDeferredAsyncValue(CompletionStage.class, EmptyCompletableFuture::new),
 					source -> Mono.fromCompletionStage((CompletionStage<?>) source),
 					source -> Mono.from(source).toFuture()
 			);
@@ -254,31 +259,78 @@ public class ReactiveAdapterRegistry {
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.multiValue(io.reactivex.Flowable.class, io.reactivex.Flowable::empty),
 					source -> (io.reactivex.Flowable<?>) source,
-					Flowable::fromPublisher
+					io.reactivex.Flowable::fromPublisher
 			);
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.multiValue(io.reactivex.Observable.class, io.reactivex.Observable::empty),
-					source -> ((io.reactivex.Observable<?>) source).toFlowable(BackpressureStrategy.BUFFER),
-					source -> io.reactivex.Flowable.fromPublisher(source).toObservable()
+					source -> ((io.reactivex.Observable<?>) source).toFlowable(io.reactivex.BackpressureStrategy.BUFFER),
+					source -> io.reactivex.Flowable.fromPublisher(source)
+							.toObservable()
 			);
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.singleRequiredValue(io.reactivex.Single.class),
 					source -> ((io.reactivex.Single<?>) source).toFlowable(),
-					source -> io.reactivex.Flowable.fromPublisher(source).toObservable().singleElement().toSingle()
+					source -> io.reactivex.Flowable.fromPublisher(source)
+							.toObservable().singleElement().toSingle()
 			);
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.singleOptionalValue(io.reactivex.Maybe.class, io.reactivex.Maybe::empty),
 					source -> ((io.reactivex.Maybe<?>) source).toFlowable(),
-					source -> io.reactivex.Flowable.fromPublisher(source).toObservable().singleElement()
+					source -> io.reactivex.Flowable.fromPublisher(source)
+							.toObservable().singleElement()
 			);
 			registry.registerReactiveType(
 					ReactiveTypeDescriptor.noValue(io.reactivex.Completable.class, io.reactivex.Completable::complete),
 					source -> ((io.reactivex.Completable) source).toFlowable(),
-					source -> io.reactivex.Flowable.fromPublisher(source).toObservable().ignoreElements()
+					source -> io.reactivex.Flowable.fromPublisher(source)
+							.toObservable().ignoreElements()
 			);
 		}
 	}
 
+	private static class RxJava3Registrar {
+
+		void registerAdapters(ReactiveAdapterRegistry registry) {
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(
+							io.reactivex.rxjava3.core.Flowable.class,
+							io.reactivex.rxjava3.core.Flowable::empty),
+					source -> (io.reactivex.rxjava3.core.Flowable<?>) source,
+					io.reactivex.rxjava3.core.Flowable::fromPublisher
+			);
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.multiValue(
+							io.reactivex.rxjava3.core.Observable.class,
+							io.reactivex.rxjava3.core.Observable::empty),
+					source -> ((io.reactivex.rxjava3.core.Observable<?>) source).toFlowable(
+							io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER),
+					source -> io.reactivex.rxjava3.core.Flowable.fromPublisher(source)
+							.toObservable()
+			);
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleRequiredValue(io.reactivex.rxjava3.core.Single.class),
+					source -> ((io.reactivex.rxjava3.core.Single<?>) source).toFlowable(),
+					source -> io.reactivex.rxjava3.core.Flowable.fromPublisher(source)
+							.toObservable().singleElement().toSingle()
+			);
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.singleOptionalValue(
+							io.reactivex.rxjava3.core.Maybe.class,
+							io.reactivex.rxjava3.core.Maybe::empty),
+					source -> ((io.reactivex.rxjava3.core.Maybe<?>) source).toFlowable(),
+					source -> io.reactivex.rxjava3.core.Flowable.fromPublisher(source)
+							.toObservable().singleElement()
+			);
+			registry.registerReactiveType(
+					ReactiveTypeDescriptor.noValue(
+							io.reactivex.rxjava3.core.Completable.class,
+							io.reactivex.rxjava3.core.Completable::complete),
+					source -> ((io.reactivex.rxjava3.core.Completable) source).toFlowable(),
+					source -> io.reactivex.rxjava3.core.Flowable.fromPublisher(source)
+							.toObservable().ignoreElements()
+			);
+		}
+	}
 
 	private static class ReactorJdkFlowAdapterRegistrar {
 
@@ -361,7 +413,7 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * {@code BlockHoundIntegration} for spring-core classes.
-	 * <p>Whitelists the following:
+	 * <p>Explicitly allow the following:
 	 * <ul>
 	 * <li>Reading class info via {@link LocalVariableTableParameterNameDiscoverer}.
 	 * <li>Locking within {@link ConcurrentReferenceHashMap}.

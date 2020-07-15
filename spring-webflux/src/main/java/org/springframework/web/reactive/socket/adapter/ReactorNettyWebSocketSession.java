@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,15 @@ public class ReactorNettyWebSocketSession
 
 	@Override
 	public Mono<Void> close(CloseStatus status) {
+		// this will notify WebSocketInbound.receiveCloseStatus()
 		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
+	@Override
+	public Mono<CloseStatus> closeStatus() {
+		return getDelegate().getInbound().receiveCloseStatus()
+				.map(status -> CloseStatus.create(status.code(), status.reasonText()));
+	}
 
 	/**
 	 * Simple container for {@link NettyInbound} and {@link NettyOutbound}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -658,8 +658,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body to the given {@code Object} value. This method invokes the
-		 * {@link WebClient.RequestBodySpec#bodyValue(Object) bodyValue} method
-		 * on the underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#bodyValue(Object)
+		 * bodyValue} method on the underlying {@code WebClient}.
 		 * @param body the value to write to the request body
 		 * @return spec for further declaration of the request
 		 * @since 5.2
@@ -693,8 +693,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(Object, Class)} method on the
-		 * underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, Class)
+		 * body(Object, Class)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
@@ -706,8 +706,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)}
-		 * method on the underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)
+		 * body(Object, ParameterizedTypeReference)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
@@ -720,8 +720,8 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(BodyInserter)} method on the
-		 * underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(BodyInserter)
+		 * body(BodyInserter)} method on the underlying {@code WebClient}.
 		 * @param inserter the body inserter to use
 		 * @return spec for further declaration of the request
 		 * @see org.springframework.web.reactive.function.BodyInserters
@@ -963,7 +963,7 @@ public interface WebTestClient {
 		 * <p>The XPath expression can be a parameterized string using
 		 * formatting specifiers as defined in {@link String#format}.
 		 * @param expression the XPath expression
-		 * @param namespaces namespaces to use
+		 * @param namespaces the namespaces to use
 		 * @param args arguments to parameterize the expression
 		 * @since 5.1
 		 */

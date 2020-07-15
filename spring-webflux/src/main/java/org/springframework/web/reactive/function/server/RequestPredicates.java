@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -70,9 +71,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
 public abstract class RequestPredicates {
 
 	private static final Log logger = LogFactory.getLog(RequestPredicates.class);
-
-	private static final PathPatternParser DEFAULT_PATTERN_PARSER = new PathPatternParser();
-
 
 	/**
 	 * Return a {@code RequestPredicate} that always matches.
@@ -114,7 +112,7 @@ public abstract class RequestPredicates {
 		if (!pattern.isEmpty() && !pattern.startsWith("/")) {
 			pattern = "/" + pattern;
 		}
-		return pathPredicates(DEFAULT_PATTERN_PARSER).apply(pattern);
+		return pathPredicates(PathPatternParser.defaultInstance).apply(pattern);
 	}
 
 	/**
@@ -280,7 +278,7 @@ public abstract class RequestPredicates {
 	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
 	 * against the given predicate.
 	 * @param name the name of the query parameter to test against
-	 * @param predicate predicate to test against the query parameter value
+	 * @param predicate the predicate to test against the query parameter value
 	 * @return a predicate that matches the given predicate against the query parameter of the given name
 	 * @see ServerRequest#queryParam(String)
 	 */
@@ -443,15 +441,27 @@ public abstract class RequestPredicates {
 
 		public HttpMethodPredicate(HttpMethod... httpMethods) {
 			Assert.notEmpty(httpMethods, "HttpMethods must not be empty");
-
 			this.httpMethods = EnumSet.copyOf(Arrays.asList(httpMethods));
 		}
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethods.contains(request.method());
-			traceMatch("Method", this.httpMethods, request.method(), match);
+			HttpMethod method = method(request);
+			boolean match = this.httpMethods.contains(method);
+			traceMatch("Method", this.httpMethods, method, match);
 			return match;
+		}
+
+		@Nullable
+		private static HttpMethod method(ServerRequest request) {
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				String accessControlRequestMethod =
+						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+				return HttpMethod.resolve(accessControlRequestMethod);
+			}
+			else {
+				return request.method();
+			}
 		}
 
 		@Override
@@ -471,9 +481,9 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class PathPatternPredicate implements RequestPredicate {
+	private static class PathPatternPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
-		private final PathPattern pattern;
+		private PathPattern pattern;
 
 		public PathPatternPredicate(PathPattern pattern) {
 			Assert.notNull(pattern, "'pattern' must not be null");
@@ -518,9 +528,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			String patternString = this.pattern.getPatternString();
+			this.pattern = parser.parse(patternString);
+		}
+
+		@Override
 		public String toString() {
 			return this.pattern.getPatternString();
 		}
+
 	}
 
 
@@ -535,7 +552,12 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			return this.headersPredicate.test(request.headers());
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				return true;
+			}
+			else {
+				return this.headersPredicate.test(request.headers());
+			}
 		}
 
 		@Override
@@ -733,7 +755,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
 	 * must match.
 	 */
-	static class AndRequestPredicate implements RequestPredicate {
+	static class AndRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -772,6 +794,16 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return String.format("(%s && %s)", this.left, this.right);
 		}
@@ -780,7 +812,8 @@ public abstract class RequestPredicates {
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
 	 */
-	static class NegateRequestPredicate implements RequestPredicate {
+	static class NegateRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+
 		private final RequestPredicate delegate;
 
 		public NegateRequestPredicate(RequestPredicate delegate) {
@@ -806,6 +839,13 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) delegate).changeParser(parser);
+			}
+		}
+
+		@Override
 		public String toString() {
 			return "!" + this.delegate.toString();
 		}
@@ -815,7 +855,7 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
-	static class OrRequestPredicate implements RequestPredicate {
+	static class OrRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
 
@@ -865,6 +905,15 @@ public abstract class RequestPredicates {
 			visitor.endOr();
 		}
 
+		@Override
+		public void changeParser(PathPatternParser parser) {
+			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) left).changeParser(parser);
+			}
+			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
+				((ChangePathPatternParserVisitor.Target) right).changeParser(parser);
+			}
+		}
 
 		@Override
 		public String toString() {

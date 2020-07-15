@@ -134,6 +134,7 @@ public class PersistenceExceptionTranslationInterceptor
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();

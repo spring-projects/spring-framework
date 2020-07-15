@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Ruslan Akhundov
  * @since 4.2
  * @see <a href="https://www.w3.org/TR/cors/">CORS spec</a>
  */
@@ -53,18 +55,29 @@ public class CorsConfiguration {
 	/** Wildcard representing <em>all</em> origins, methods, or headers. */
 	public static final String ALL = "*";
 
+	private static final List<String> ALL_LIST = Collections.unmodifiableList(
+			Collections.singletonList(ALL));
+
+	private static final OriginPattern ALL_PATTERN = new OriginPattern("*");
+
+	private static final List<OriginPattern> ALL_PATTERN_LIST = Collections.unmodifiableList(
+			Collections.singletonList(ALL_PATTERN));
+
+	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
+			Collections.singletonList(ALL));
+
 	private static final List<HttpMethod> DEFAULT_METHODS = Collections.unmodifiableList(
 			Arrays.asList(HttpMethod.GET, HttpMethod.HEAD));
 
 	private static final List<String> DEFAULT_PERMIT_METHODS = Collections.unmodifiableList(
 			Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
 
-	private static final List<String> DEFAULT_PERMIT_ALL = Collections.unmodifiableList(
-			Collections.singletonList(ALL));
-
 
 	@Nullable
 	private List<String> allowedOrigins;
+
+	@Nullable
+	private List<OriginPattern> allowedOriginPatterns;
 
 	@Nullable
 	private List<String> allowedMethods;
@@ -99,6 +112,7 @@ public class CorsConfiguration {
 	 */
 	public CorsConfiguration(CorsConfiguration other) {
 		this.allowedOrigins = other.allowedOrigins;
+		this.allowedOriginPatterns = other.allowedOriginPatterns;
 		this.allowedMethods = other.allowedMethods;
 		this.resolvedMethods = other.resolvedMethods;
 		this.allowedHeaders = other.allowedHeaders;
@@ -109,9 +123,19 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Set the origins to allow, e.g. {@code "https://domain1.com"}.
-	 * <p>The special value {@code "*"} allows all domains.
-	 * <p>By default this is not set.
+	 * A list of origins for which cross-origin requests are allowed. Values may
+	 * be a specific domain, e.g. {@code "https://domain1.com"}, or the CORS
+	 * defined special value {@code "*"} for all origins.
+	 * <p>For matched pre-flight and actual requests the
+	 * {@code Access-Control-Allow-Origin} response header is set either to the
+	 * matched domain value or to {@code "*"}. Keep in mind however that the
+	 * CORS spec does not allow {@code "*"} when {@link #setAllowCredentials
+	 * allowCredentials} is set to {@code true} and as of 5.3 that combination
+	 * is rejected in favor of using {@link #setAllowedOriginPatterns
+	 * allowedOriginPatterns} instead.
+	 * <p>By default this is not set which means that no origins are allowed.
+	 * However an instance of this class is often initialized further, e.g. for
+	 * {@code @CrossOrigin}, via {@link #applyPermitDefaultValues()}.
 	 */
 	public void setAllowedOrigins(@Nullable List<String> allowedOrigins) {
 		this.allowedOrigins = (allowedOrigins != null ? new ArrayList<>(allowedOrigins) : null);
@@ -119,8 +143,6 @@ public class CorsConfiguration {
 
 	/**
 	 * Return the configured origins to allow, or {@code null} if none.
-	 * @see #addAllowedOrigin(String)
-	 * @see #setAllowedOrigins(List)
 	 */
 	@Nullable
 	public List<String> getAllowedOrigins() {
@@ -128,16 +150,69 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Add an origin to allow.
+	 * Variant of {@link #setAllowedOrigins} for adding one origin at a time.
 	 */
 	public void addAllowedOrigin(String origin) {
 		if (this.allowedOrigins == null) {
 			this.allowedOrigins = new ArrayList<>(4);
 		}
-		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
+		else if (this.allowedOrigins == DEFAULT_PERMIT_ALL && CollectionUtils.isEmpty(this.allowedOriginPatterns)) {
 			setAllowedOrigins(DEFAULT_PERMIT_ALL);
 		}
 		this.allowedOrigins.add(origin);
+	}
+
+	/**
+	 * Alternative to {@link #setAllowedOrigins} that supports origins declared
+	 * via wildcard patterns. In contrast to {@link #setAllowedOrigins allowedOrigins}
+	 * which does support the special value {@code "*"}, this property allows
+	 * more flexible patterns, e.g. {@code "https://*.domain1.com"}. Furthermore
+	 * it always sets the {@code Access-Control-Allow-Origin} response header to
+	 * the matched origin and never to {@code "*"}, nor to any other pattern, and
+	 * therefore can be used in combination with {@link #setAllowCredentials}
+	 * set to {@code true}.
+	 * <p>By default this is not set.
+	 * @since 5.3
+	 */
+	public CorsConfiguration setAllowedOriginPatterns(@Nullable List<String> allowedOriginPatterns) {
+		if (allowedOriginPatterns == null) {
+			this.allowedOriginPatterns = null;
+		}
+		else {
+			this.allowedOriginPatterns = new ArrayList<>(allowedOriginPatterns.size());
+			for (String patternValue : allowedOriginPatterns) {
+				addAllowedOriginPattern(patternValue);
+			}
+		}
+		return this;
+	}
+
+	/**
+	 * Return the configured origins patterns to allow, or {@code null} if none.
+	 * @since 5.3
+	 */
+	@Nullable
+	public List<String> getAllowedOriginPatterns() {
+		if (this.allowedOriginPatterns == null) {
+			return null;
+		}
+		return this.allowedOriginPatterns.stream()
+				.map(OriginPattern::getDeclaredPattern)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Variant of {@link #setAllowedOriginPatterns} for adding one origin at a time.
+	 * @since 5.3
+	 */
+	public void addAllowedOriginPattern(String originPattern) {
+		if (this.allowedOriginPatterns == null) {
+			this.allowedOriginPatterns = new ArrayList<>(4);
+		}
+		this.allowedOriginPatterns.add(new OriginPattern(originPattern));
+		if (this.allowedOrigins == DEFAULT_PERMIT_ALL) {
+			this.allowedOrigins = null;
+		}
 	}
 
 	/**
@@ -335,23 +410,22 @@ public class CorsConfiguration {
 
 
 	/**
-	 * By default a newly created {@code CorsConfiguration} does not permit any
-	 * cross-origin requests and must be configured explicitly to indicate what
-	 * should be allowed.
-	 * <p>Use this method to flip the initialization model to start with open
-	 * defaults that permit all cross-origin requests for GET, HEAD, and POST
-	 * requests. Note however that this method will not override any existing
-	 * values already set.
-	 * <p>The following defaults are applied if not already set:
+	 * By default {@code CorsConfiguration} does not permit any cross-origin
+	 * requests and must be configured explicitly. Use this method to switch to
+	 * defaults that permit all cross-origin requests for GET, HEAD, and POST,
+	 * but not overriding any values that have already been set.
+	 * <p>The following defaults are applied for values that are not set:
 	 * <ul>
-	 * <li>Allow all origins.</li>
+	 * <li>Allow all origins with the special value {@code "*"} defined in the
+	 * CORS spec. This is set only if neither {@link #setAllowedOrigins origins}
+	 * nor {@link #setAllowedOriginPatterns originPatterns} are already set.</li>
 	 * <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
 	 * <li>Allow all headers.</li>
 	 * <li>Set max age to 1800 seconds (30 minutes).</li>
 	 * </ul>
 	 */
 	public CorsConfiguration applyPermitDefaultValues() {
-		if (this.allowedOrigins == null) {
+		if (this.allowedOrigins == null && this.allowedOriginPatterns == null) {
 			this.allowedOrigins = DEFAULT_PERMIT_ALL;
 		}
 		if (this.allowedMethods == null) {
@@ -369,6 +443,26 @@ public class CorsConfiguration {
 	}
 
 	/**
+	 * Validate that when {@link #setAllowCredentials allowCredentials} is true,
+	 * {@link #setAllowedOrigins allowedOrigins} does not contain the special
+	 * value {@code "*"} since in that case the "Access-Control-Allow-Origin"
+	 * cannot be set to {@code "*"}.
+	 * @throws IllegalArgumentException if the validation fails
+	 * @since 5.3
+	 */
+	public void validateAllowCredentials() {
+		if (this.allowCredentials == Boolean.TRUE &&
+				this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
+
+			throw new IllegalArgumentException(
+					"When allowCredentials is true, allowedOrigins cannot contain the special value \"*\"" +
+							"since that cannot be set on the \"Access-Control-Allow-Origin\" response header. " +
+							"To allow credentials to a set of origins, list them explicitly " +
+							"or consider using \"allowedOriginPatterns\" instead.");
+		}
+	}
+
+	/**
 	 * Combine the non-null properties of the supplied
 	 * {@code CorsConfiguration} with this one.
 	 * <p>When combining single values like {@code allowCredentials} or
@@ -377,12 +471,11 @@ public class CorsConfiguration {
 	 * <p>Combining lists like {@code allowedOrigins}, {@code allowedMethods},
 	 * {@code allowedHeaders} or {@code exposedHeaders} is done in an additive
 	 * way. For example, combining {@code ["GET", "POST"]} with
-	 * {@code ["PATCH"]} results in {@code ["GET", "POST", "PATCH"]}, but keep
-	 * in mind that combining {@code ["GET", "POST"]} with {@code ["*"]}
-	 * results in {@code ["*"]}.
-	 * <p>Notice that default permit values set by
+	 * {@code ["PATCH"]} results in {@code ["GET", "POST", "PATCH"]}. However,
+	 * combining {@code ["GET", "POST"]} with {@code ["*"]} results in
+	 * {@code ["*"]}. Note also that default permit values set by
 	 * {@link CorsConfiguration#applyPermitDefaultValues()} are overridden by
-	 * any value explicitly defined.
+	 * any explicitly defined values.
 	 * @return the combined {@code CorsConfiguration}, or {@code this}
 	 * configuration if the supplied configuration is {@code null}
 	 */
@@ -391,8 +484,12 @@ public class CorsConfiguration {
 		if (other == null) {
 			return this;
 		}
+		// Bypass setAllowedOrigins to avoid re-compiling patterns
 		CorsConfiguration config = new CorsConfiguration(this);
-		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
+		List<String> origins = combine(getAllowedOrigins(), other.getAllowedOrigins());
+		List<OriginPattern> patterns = combinePatterns(this.allowedOriginPatterns, other.allowedOriginPatterns);
+		config.allowedOrigins = (origins == DEFAULT_PERMIT_ALL && !CollectionUtils.isEmpty(patterns) ? null : origins);
+		config.allowedOriginPatterns = patterns;
 		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
 		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
 		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
@@ -421,12 +518,32 @@ public class CorsConfiguration {
 			return source;
 		}
 		if (source.contains(ALL) || other.contains(ALL)) {
-			return new ArrayList<>(Collections.singletonList(ALL));
+			return ALL_LIST;
 		}
-		Set<String> combined = new LinkedHashSet<>(source);
+		Set<String> combined = new LinkedHashSet<>(source.size() + other.size());
+		combined.addAll(source);
 		combined.addAll(other);
 		return new ArrayList<>(combined);
 	}
+
+	private List<OriginPattern> combinePatterns(
+			@Nullable List<OriginPattern> source, @Nullable List<OriginPattern> other) {
+
+		if (other == null) {
+			return (source != null ? source : Collections.emptyList());
+		}
+		if (source == null) {
+			return other;
+		}
+		if (source.contains(ALL_PATTERN) || other.contains(ALL_PATTERN)) {
+			return ALL_PATTERN_LIST;
+		}
+		Set<OriginPattern> combined = new LinkedHashSet<>(source.size() + other.size());
+		combined.addAll(source);
+		combined.addAll(other);
+		return new ArrayList<>(combined);
+	}
+
 
 	/**
 	 * Check the origin of the request against the configured allowed origins.
@@ -439,24 +556,24 @@ public class CorsConfiguration {
 		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
-		if (ObjectUtils.isEmpty(this.allowedOrigins)) {
-			return null;
-		}
-
-		if (this.allowedOrigins.contains(ALL)) {
-			if (this.allowCredentials != Boolean.TRUE) {
+		if (!ObjectUtils.isEmpty(this.allowedOrigins)) {
+			if (this.allowedOrigins.contains(ALL)) {
+				validateAllowCredentials();
 				return ALL;
 			}
-			else {
-				return requestOrigin;
+			for (String allowedOrigin : this.allowedOrigins) {
+				if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
+					return requestOrigin;
+				}
 			}
 		}
-		for (String allowedOrigin : this.allowedOrigins) {
-			if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
-				return requestOrigin;
+		if (!ObjectUtils.isEmpty(this.allowedOriginPatterns)) {
+			for (OriginPattern p : this.allowedOriginPatterns) {
+				if (p.getDeclaredPattern().equals(ALL) || p.getPattern().matcher(requestOrigin).matches()) {
+					return requestOrigin;
+				}
 			}
 		}
-
 		return null;
 	}
 
@@ -518,6 +635,59 @@ public class CorsConfiguration {
 			}
 		}
 		return (result.isEmpty() ? null : result);
+	}
+
+
+	/**
+	 * Contains both the user-declared pattern (e.g. "https://*.domain.com") and
+	 * the regex {@link Pattern} derived from it.
+	 */
+	private static class OriginPattern {
+
+		private final String declaredPattern;
+
+		private final Pattern pattern;
+
+		OriginPattern(String declaredPattern) {
+			this.declaredPattern = declaredPattern;
+			this.pattern = toPattern(declaredPattern);
+		}
+
+		private static Pattern toPattern(String patternValue) {
+			patternValue = "\\Q" + patternValue + "\\E";
+			patternValue = patternValue.replace("*", "\\E.*\\Q");
+			return Pattern.compile(patternValue);
+		}
+
+		public String getDeclaredPattern() {
+			return this.declaredPattern;
+		}
+
+		public Pattern getPattern() {
+			return this.pattern;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || !getClass().equals(other.getClass())) {
+				return false;
+			}
+			return ObjectUtils.nullSafeEquals(
+					this.declaredPattern, ((OriginPattern) other).declaredPattern);
+		}
+
+		@Override
+		public int hashCode() {
+			return this.declaredPattern.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return this.declaredPattern;
+		}
 	}
 
 }

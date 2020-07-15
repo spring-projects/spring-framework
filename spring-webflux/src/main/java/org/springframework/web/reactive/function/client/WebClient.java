@@ -650,20 +650,28 @@ public interface WebClient {
 	interface ResponseSpec {
 
 		/**
-		 * Register a custom error function that gets invoked when the given {@link HttpStatus}
-		 * predicate applies. Whatever exception is returned from the function (possibly using
-		 * {@link ClientResponse#createException()}) will also be returned as error signal
-		 * from {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is registered that returns a
-		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
-		 * To override this default (and return a non-error response from {@code bodyOn*}), register
-		 * an exception function that returns an {@linkplain Mono#empty() empty} mono.
-		 * <p><strong>NOTE:</strong> if the response is expected to have content,
-		 * the exceptionFunction should consume it. If not, the content will be
-		 * automatically drained to ensure resources are released.
-		 * @param statusPredicate a predicate that indicates whether {@code exceptionFunction}
-		 * applies
-		 * @param exceptionFunction the function that returns the exception
+		 * Provide a function to map specific error status codes to an error
+		 * signal to be propagated downstream instead of the response.
+		 * <p>By default, if there are no matching status handlers, responses
+		 * with status codes >= 400 are mapped to
+		 * {@link WebClientResponseException} which is created with
+		 * {@link ClientResponse#createException()}.
+		 * <p>To suppress the treatment of a status code as an error and process
+		 * it as a normal response, return {@code Mono.empty()} from the function.
+		 * The response will then propagate downstream to be processed.
+		 * <p>To ignore an error response completely, and propagate neither
+		 * response nor error, use a {@link ExchangeFilterFunction filter}, or
+		 * add {@code onErrorResume} downstream, for example:
+		 * <pre class="code">
+		 * webClient.get()
+		 *     .uri("https://abc.com/account/123")
+		 *     .retrieve()
+		 *     .bodyToMono(Account.class)
+		 *     .onErrorResume(WebClientResponseException.class,
+		 *          ex -> ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 * </pre>
+		 * @param statusPredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
 		 * @see ClientResponse#createException()
 		 */
@@ -671,17 +679,10 @@ public interface WebClient {
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
-		 * Register a custom error function that gets invoked when the given raw status code
-		 * predicate applies. The exception returned from the function will be returned from
-		 * {@link #bodyToMono(Class)} and {@link #bodyToFlux(Class)}.
-		 * <p>By default, an error handler is registered that throws a
-		 * {@link WebClientResponseException} when the response status code is 4xx or 5xx.
-		 * @param statusCodePredicate a predicate of the raw status code that indicates
-		 * whether {@code exceptionFunction} applies.
-		 * <p><strong>NOTE:</strong> if the response is expected to have content,
-		 * the exceptionFunction should consume it. If not, the content will be
-		 * automatically drained to ensure resources are released.
-		 * @param exceptionFunction the function that returns the exception
+		 * Variant of {@link #onStatus(Predicate, Function)} that works with
+		 * raw status code values. This is useful for custom status codes.
+		 * @param statusCodePredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
 		 * @since 5.1.9
 		 */

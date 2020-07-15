@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 public class HandlerMethodMappingTests {
 
-	private AbstractHandlerMethodMapping<String> mapping;
+	private MyHandlerMethodMapping mapping;
 
 	private MyHandler handler;
 
@@ -71,17 +75,18 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void directMatch() throws Exception {
-		String key = "foo";
-		this.mapping.registerMapping(key, this.handler, this.method1);
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(key));
+	public void directMatch() {
+		this.mapping.registerMapping("/foo", this.handler, this.method1);
+		this.mapping.registerMapping("/fo*", this.handler, this.method2);
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
 		Mono<Object> result = this.mapping.getHandler(exchange);
 
 		assertThat(((HandlerMethod) result.block()).getMethod()).isEqualTo(this.method1);
+		assertThat(this.mapping.getMatches()).containsExactly("/foo");
 	}
 
 	@Test
-	public void patternMatch() throws Exception {
+	public void patternMatch() {
 		this.mapping.registerMapping("/fo*", this.handler, this.method1);
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
@@ -91,7 +96,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void ambiguousMatch() throws Exception {
+	public void ambiguousMatch() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo"));
@@ -101,18 +106,17 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void registerMapping() throws Exception {
+	public void registerMapping() {
 		String key1 = "/foo";
 		String key2 = "/foo*";
 		this.mapping.registerMapping(key1, this.handler, this.method1);
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
-		assertThat(this.mapping.getMappingRegistry().getMappings())
-				.containsKeys(key1, key2);
+		assertThat(this.mapping.getMappingRegistry().getRegistrations()).containsKeys(key1, key2);
 	}
 
 	@Test
-	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
+	public void registerMappingWithSameMethodAndTwoHandlerInstances() {
 		String key1 = "foo";
 		String key2 = "bar";
 		MyHandler handler1 = new MyHandler();
@@ -120,12 +124,11 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key1, handler1, this.method1);
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
-		assertThat(this.mapping.getMappingRegistry().getMappings())
-				.containsKeys(key1, key2);
+		assertThat(this.mapping.getMappingRegistry().getRegistrations()).containsKeys(key1, key2);
 	}
 
 	@Test
-	public void unregisterMapping() throws Exception {
+	public void unregisterMapping() {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
@@ -136,13 +139,20 @@ public class HandlerMethodMappingTests {
 		result = this.mapping.getHandler(MockServerWebExchange.from(MockServerHttpRequest.get(key)));
 
 		assertThat(result.block()).isNull();
-		assertThat(this.mapping.getMappingRegistry().getMappings().keySet()).doesNotContain(key);
+		assertThat(this.mapping.getMappingRegistry().getRegistrations().keySet()).doesNotContain(key);
 	}
 
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
 		private PathPatternParser parser = new PathPatternParser();
+
+		private final List<String> matches = new ArrayList<>();
+
+
+		public List<String> getMatches() {
+			return this.matches;
+		}
 
 		@Override
 		protected boolean isHandler(Class<?> beanType) {
@@ -156,17 +166,26 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
+		protected Set<String> getDirectPaths(String mapping) {
+			return (parser.parse(mapping).hasPatternSyntax() ?
+					Collections.emptySet() : Collections.singleton(mapping));
+		}
+
+		@Override
 		protected String getMatchingMapping(String pattern, ServerWebExchange exchange) {
 			PathContainer lookupPath = exchange.getRequest().getPath().pathWithinApplication();
 			PathPattern parsedPattern = this.parser.parse(pattern);
-			return (parsedPattern.matches(lookupPath) ? pattern : null);
+			String match = parsedPattern.matches(lookupPath) ? pattern : null;
+			if (match != null) {
+				matches.add(match);
+			}
+			return match;
 		}
 
 		@Override
 		protected Comparator<String> getMappingComparator(ServerWebExchange exchange) {
 			return (o1, o2) -> PathPattern.SPECIFICITY_COMPARATOR.compare(parser.parse(o1), parser.parse(o2));
 		}
-
 	}
 
 	@Controller

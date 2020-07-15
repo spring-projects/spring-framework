@@ -8,7 +8,7 @@ dependencies {
 	optional(project(":spring-aop"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("javax.servlet:javax.servlet-api:3.1.0")
+	optional("javax.servlet:javax.servlet-api") // Servlet 4 for mapping type
 	optional("javax.servlet.jsp:javax.servlet.jsp-api")
 	optional("javax.el:javax.el-api")
 	optional("javax.faces:javax.faces-api")
@@ -18,9 +18,7 @@ dependencies {
 	optional("javax.xml.bind:jaxb-api")
 	optional("javax.xml.ws:jaxws-api")
 	optional("org.glassfish.main:javax.jws")
-	optional("io.reactivex:rxjava")
-	optional("io.reactivex:rxjava-reactive-streams")
-	optional("io.reactivex.rxjava2:rxjava")
+	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	optional("io.netty:netty-handler")
 	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
@@ -35,6 +33,8 @@ dependencies {
 		exclude group: "javax.servlet", module: "javax.servlet-api"
 	}
 	optional("org.eclipse.jetty:jetty-reactive-httpclient")
+	optional('org.apache.httpcomponents.client5:httpclient5:5.0')
+	optional('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	optional("com.squareup.okhttp3:okhttp")
 	optional("org.apache.httpcomponents:httpclient")
 	optional("org.apache.httpcomponents:httpasyncclient")
@@ -83,4 +83,7 @@ dependencies {
 	testFixturesImplementation("io.projectreactor:reactor-test")
 	testFixturesImplementation("org.apache.taglibs:taglibs-standard-jstlel")
 	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("org.bouncycastle:bcpkix-jdk15on") {
+		because("needed by Netty's SelfSignedCertificate on JDK 15+")
+	}
 }

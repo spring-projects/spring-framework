@@ -92,7 +92,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	 */
 	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
-		if (StringUtils.hasText(new UrlPathHelper().getPathWithinServletMapping(request))) {
+		if (StringUtils.hasText(UrlPathHelper.defaultInstance.getPathWithinServletMapping(request))) {
 			builder.path(request.getServletPath());
 		}
 		return builder;

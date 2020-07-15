@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +42,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 import static java.util.Comparator.naturalOrder;
@@ -54,7 +51,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link GenericConversionService}.
@@ -343,54 +339,6 @@ class GenericConversionServiceTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testPerformance2() throws Exception {
-		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
-		watch.start("convert 4,000,000 with conversion service");
-		List<String> source = new LinkedList<>();
-		source.add("1");
-		source.add("2");
-		source.add("3");
-		TypeDescriptor td = new TypeDescriptor(getClass().getField("list"));
-		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, TypeDescriptor.forObject(source), td);
-		}
-		watch.stop();
-		watch.start("convert 4,000,000 manually");
-		for (int i = 0; i < 4000000; i++) {
-			List<Integer> target = new ArrayList<>(source.size());
-			for (String element : source) {
-				target.add(Integer.valueOf(element));
-			}
-		}
-		watch.stop();
-		// System.out.println(watch.prettyPrint());
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testPerformance3() throws Exception {
-		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
-		watch.start("convert 4,000,000 with conversion service");
-		Map<String, String> source = new HashMap<>();
-		source.put("1", "1");
-		source.put("2", "2");
-		source.put("3", "3");
-		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));
-		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, TypeDescriptor.forObject(source), td);
-		}
-		watch.stop();
-		watch.start("convert 4,000,000 manually");
-		for (int i = 0; i < 4000000; i++) {
-			Map<String, Integer> target = new HashMap<>(source.size());
-			source.forEach((k, v) -> target.put(k, Integer.valueOf(v)));
-		}
-		watch.stop();
-		// System.out.println(watch.prettyPrint());
-	}
-
-	@Test
 	void emptyListToArray() {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
@@ -637,10 +585,6 @@ class GenericConversionServiceTests {
 
 	@ExampleAnnotation(active = false)
 	public Color inactiveColor;
-
-	public List<Integer> list;
-
-	public Map<String, Integer> map;
 
 	public Map<String, ?> wildcardMap;
 

@@ -102,7 +102,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -215,7 +215,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant since they are supplied in a
 	 * SqlParameterMap which is an implementation of the Map interface.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -337,7 +337,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param paramMap a Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement.
 	 * Ordering is not significant.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -367,7 +367,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param parameters the parameters to the {@code execute()} method,
 	 * in case subclass is interested; may be {@code null} if there
 	 * were no parameters.
-	 * @param context contextual information passed to the {@code mapRow}
+	 * @param context the contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute

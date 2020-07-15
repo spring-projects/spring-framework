@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -414,7 +414,7 @@ public class PropertyResourceConfigurerTests {
 		assertThat(tb2.getSomeSet().size()).isEqualTo(3);
 		assertThat(tb2.getSomeSet().contains("na98me")).isTrue();
 		assertThat(tb2.getSomeSet().contains(tb2)).isTrue();
-		assertThat(tb2.getSomeSet().contains(new Integer(98))).isTrue();
+		assertThat(tb2.getSomeSet().contains(98)).isTrue();
 		assertThat(tb2.getSomeMap().size()).isEqualTo(6);
 		assertThat(tb2.getSomeMap().get("key98")).isEqualTo("98");
 		assertThat(tb2.getSomeMap().get("key98ref")).isEqualTo(tb2);

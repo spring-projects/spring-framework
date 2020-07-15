@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,8 @@ public class JmsNamespaceHandlerTests {
 		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
 		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
 
-		Map<String, JmsListenerContainerFactory> containerFactories =
-				context.getBeansOfType(JmsListenerContainerFactory.class);
-		assertThat(containerFactories.size()).as("Context should contain 3 JmsListenerContainerFactory instances").isEqualTo(3);
+		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
+			.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
 	}
 
 	@Test

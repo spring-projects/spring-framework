@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -36,9 +38,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -46,16 +51,20 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
@@ -67,6 +76,8 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final ServletServerHttpRequest serverHttpRequest;
 
+	private final RequestPath requestPath;
+
 	private final Headers headers;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
@@ -77,9 +88,11 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final Map<String, Object> attributes;
 
+	@Nullable
+	private MultiValueMap<String, Part> parts;
 
-	public DefaultServerRequest(HttpServletRequest servletRequest,
-			List<HttpMessageConverter<?>> messageConverters) {
+
+	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
 		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
 		this.allSupportedMediaTypes = allSupportedMediaTypes(messageConverters);
@@ -87,6 +100,12 @@ class DefaultServerRequest implements ServerRequest {
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
 		this.attributes = new ServletAttributesMap(servletRequest);
+
+		// DispatcherServlet parses the path but for other scenarios (e.g. tests) we might need to
+
+		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
+				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :
+				ServletRequestPathUtils.parseAndCache(servletRequest));
 	}
 
 	private static List<MediaType> allSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
@@ -95,6 +114,7 @@ class DefaultServerRequest implements ServerRequest {
 				.sorted(MediaType.SPECIFICITY_COMPARATOR)
 				.collect(Collectors.toList());
 	}
+
 
 	@Override
 	public String methodName() {
@@ -113,12 +133,12 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public String path() {
-		String path = (String) servletRequest().getAttribute(HandlerMapping.LOOKUP_PATH);
-		if (path == null) {
-			UrlPathHelper helper = new UrlPathHelper();
-			path = helper.getLookupPathForRequest(servletRequest());
-		}
-		return path;
+		return pathContainer().value();
+	}
+
+	@Override
+	public PathContainer pathContainer() {
+		return this.requestPath.pathWithinApplication();
 	}
 
 	@Override
@@ -179,11 +199,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
-			throws ServletException, IOException {
-
-		MediaType contentType =
-				this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
+	private <T> T bodyInternal(Type bodyType, Class<?> bodyClass) throws ServletException, IOException {
+		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 			if (messageConverter instanceof GenericHttpMessageConverter) {
@@ -224,10 +241,23 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
+	public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
+		MultiValueMap<String, Part> result = this.parts;
+		if (result == null) {
+			result = servletRequest().getParts().stream()
+					.collect(Collectors.groupingBy(Part::getName,
+							LinkedMultiValueMap::new,
+							Collectors.toList()));
+			this.parts = result;
+		}
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public Map<String, String> pathVariables() {
-		@SuppressWarnings("unchecked")
-		Map<String, String> pathVariables = (Map<String, String>) servletRequest()
-				.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		Map<String, String> pathVariables = (Map<String, String>)
+				servletRequest().getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		if (pathVariables != null) {
 			return pathVariables;
 		}
@@ -246,75 +276,96 @@ class DefaultServerRequest implements ServerRequest {
 		return Optional.ofNullable(this.serverHttpRequest.getPrincipal());
 	}
 
+
+	static Optional<ServerResponse> checkNotModified(
+			HttpServletRequest servletRequest, @Nullable Instant lastModified, @Nullable String etag) {
+
+		long lastModifiedTimestamp = -1;
+		if (lastModified != null && lastModified.isAfter(Instant.EPOCH)) {
+			lastModifiedTimestamp = lastModified.toEpochMilli();
+		}
+
+		CheckNotModifiedResponse response = new CheckNotModifiedResponse();
+		WebRequest webRequest = new ServletWebRequest(servletRequest, response);
+		if (webRequest.checkNotModified(etag, lastModifiedTimestamp)) {
+			return Optional.of(ServerResponse.status(response.status).
+					headers(headers -> headers.addAll(response.headers))
+					.build());
+		}
+		else {
+			return Optional.empty();
+		}
+	}
+
+
 	/**
 	 * Default implementation of {@link Headers}.
 	 */
 	static class DefaultRequestHeaders implements Headers {
 
-		private final HttpHeaders delegate;
+		private final HttpHeaders httpHeaders;
 
-
-		public DefaultRequestHeaders(HttpHeaders delegate) {
-			this.delegate = delegate;
+		public DefaultRequestHeaders(HttpHeaders httpHeaders) {
+			this.httpHeaders = HttpHeaders.readOnlyHttpHeaders(httpHeaders);
 		}
 
 		@Override
 		public List<MediaType> accept() {
-			return this.delegate.getAccept();
+			return this.httpHeaders.getAccept();
 		}
 
 		@Override
 		public List<Charset> acceptCharset() {
-			return this.delegate.getAcceptCharset();
+			return this.httpHeaders.getAcceptCharset();
 		}
 
 		@Override
 		public List<Locale.LanguageRange> acceptLanguage() {
-			return this.delegate.getAcceptLanguage();
+			return this.httpHeaders.getAcceptLanguage();
 		}
 
 		@Override
 		public OptionalLong contentLength() {
-			long value = this.delegate.getContentLength();
+			long value = this.httpHeaders.getContentLength();
 			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 
 		@Override
 		public Optional<MediaType> contentType() {
-			return Optional.ofNullable(this.delegate.getContentType());
+			return Optional.ofNullable(this.httpHeaders.getContentType());
 		}
 
 		@Override
 		public InetSocketAddress host() {
-			return this.delegate.getHost();
+			return this.httpHeaders.getHost();
 		}
 
 		@Override
 		public List<HttpRange> range() {
-			return this.delegate.getRange();
+			return this.httpHeaders.getRange();
 		}
 
 		@Override
 		public List<String> header(String headerName) {
-			List<String> headerValues = this.delegate.get(headerName);
+			List<String> headerValues = this.httpHeaders.get(headerName);
 			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
-			return HttpHeaders.readOnlyHttpHeaders(this.delegate);
+			return this.httpHeaders;
 		}
 
 		@Override
 		public String toString() {
-			return this.delegate.toString();
+			return this.httpHeaders.toString();
 		}
 	}
+
 
 	private static final class ServletParametersMap extends AbstractMap<String, List<String>> {
 
 		private final HttpServletRequest servletRequest;
-
 
 		private ServletParametersMap(HttpServletRequest servletRequest) {
 			this.servletRequest = servletRequest;
@@ -361,7 +412,6 @@ class DefaultServerRequest implements ServerRequest {
 		public void clear() {
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
 
@@ -415,8 +465,214 @@ class DefaultServerRequest implements ServerRequest {
 			this.servletRequest.removeAttribute(name);
 			return value;
 		}
+	}
 
 
+	/**
+	 * Simple implementation of {@link HttpServletResponse} used by
+	 * {@link #checkNotModified(HttpServletRequest, Instant, String)} to record status and headers set by
+	 * {@link ServletWebRequest#checkNotModified(String, long)}. Throws an {@code UnsupportedOperationException}
+	 * for other methods.
+	 */
+	private static final class CheckNotModifiedResponse implements HttpServletResponse {
+
+		private final HttpHeaders headers = new HttpHeaders();
+
+		private int status = 200;
+
+		@Override
+		public boolean containsHeader(String name) {
+			return this.headers.containsKey(name);
+		}
+
+		@Override
+		public void setDateHeader(String name, long date) {
+			this.headers.setDate(name, date);
+		}
+
+		@Override
+		public void setHeader(String name, String value) {
+			this.headers.set(name, value);
+		}
+
+		@Override
+		public void addHeader(String name, String value) {
+			this.headers.add(name, value);
+		}
+
+		@Override
+		public void setStatus(int sc) {
+			this.status = sc;
+		}
+
+		@Override
+		@Deprecated
+		public void setStatus(int sc, String sm) {
+			this.status = sc;
+		}
+
+		@Override
+		public int getStatus() {
+			return this.status;
+		}
+
+		@Override
+		@Nullable
+		public String getHeader(String name) {
+			return this.headers.getFirst(name);
+		}
+
+		@Override
+		public Collection<String> getHeaders(String name) {
+			List<String> result = this.headers.get(name);
+			return (result != null ? result : Collections.emptyList());
+		}
+
+		@Override
+		public Collection<String> getHeaderNames() {
+			return this.headers.keySet();
+		}
+
+
+		// Unsupported
+
+		@Override
+		public void addCookie(Cookie cookie) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String encodeURL(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String encodeRedirectURL(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		@Deprecated
+		public String encodeUrl(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		@Deprecated
+		public String encodeRedirectUrl(String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void sendError(int sc, String msg) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void sendError(int sc) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void sendRedirect(String location) throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addDateHeader(String name, long date) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setIntHeader(String name, int value) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void addIntHeader(String name, int value) {
+			throw new UnsupportedOperationException();
+		}
+
+
+		@Override
+		public String getCharacterEncoding() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getContentType() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ServletOutputStream getOutputStream() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public PrintWriter getWriter() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setCharacterEncoding(String charset) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setContentLength(int len) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setContentLengthLong(long len) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setContentType(String type) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setBufferSize(int size) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getBufferSize() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void flushBuffer() throws IOException {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void resetBuffer() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isCommitted() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void reset() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setLocale(Locale loc) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Locale getLocale() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

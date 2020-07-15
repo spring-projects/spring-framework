@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -446,11 +446,11 @@ public @interface Configuration {
 	 * requires method interception, implemented through a runtime-generated CGLIB
 	 * subclass which comes with limitations such as the configuration class and
 	 * its methods not being allowed to declare {@code final}.
-	 * <p>The default is {@code true}, allowing for 'inter-bean references' within
-	 * the configuration class as well as for external calls to this configuration's
-	 * {@code @Bean} methods, e.g. from another configuration class. If this is not
-	 * needed since each of this particular configuration's {@code @Bean} methods
-	 * is self-contained and designed as a plain factory method for container use,
+	 * <p>The default is {@code true}, allowing for 'inter-bean references' via direct
+	 * method calls within the configuration class as well as for external calls to
+	 * this configuration's {@code @Bean} methods, e.g. from another configuration class.
+	 * If this is not needed since each of this particular configuration's {@code @Bean}
+	 * methods is self-contained and designed as a plain factory method for container use,
 	 * switch this flag to {@code false} in order to avoid CGLIB subclass processing.
 	 * <p>Turning off bean method interception effectively processes {@code @Bean}
 	 * methods individually like when declared on non-{@code @Configuration} classes,

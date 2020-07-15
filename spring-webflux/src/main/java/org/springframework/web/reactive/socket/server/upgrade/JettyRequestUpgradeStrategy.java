@@ -66,7 +66,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	@Nullable
 	private volatile ServletContext servletContext;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 

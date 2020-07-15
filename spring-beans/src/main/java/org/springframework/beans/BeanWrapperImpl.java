@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 	/**
 	 * Create a new BeanWrapperImpl for the given object.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) {
 		super(object);
@@ -114,7 +114,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param rootObject the root object at the top of the path
 	 */
@@ -125,7 +125,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	/**
 	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this BeanWrapper
+	 * @param object the object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
 	 * @param parent the containing BeanWrapper (must not be {@code null})
 	 */
@@ -289,15 +289,15 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		@Override
 		@Nullable
 		public Object getValue() throws Exception {
-			final Method readMethod = this.pd.getReadMethod();
+			Method readMethod = this.pd.getReadMethod();
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 					ReflectionUtils.makeAccessible(readMethod);
 					return null;
 				});
 				try {
-					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
+					return AccessController.doPrivileged((PrivilegedExceptionAction<Object>)
+							() -> readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
 				}
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
@@ -310,8 +310,8 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		}
 
 		@Override
-		public void setValue(final @Nullable Object value) throws Exception {
-			final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
+		public void setValue(@Nullable Object value) throws Exception {
+			Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
 					((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
 					this.pd.getWriteMethod());
 			if (System.getSecurityManager() != null) {
@@ -320,8 +320,8 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 					return null;
 				});
 				try {
-					AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-							writeMethod.invoke(getWrappedInstance(), value), acc);
+					AccessController.doPrivileged((PrivilegedExceptionAction<Object>)
+							() -> writeMethod.invoke(getWrappedInstance(), value), acc);
 				}
 				catch (PrivilegedActionException ex) {
 					throw ex.getException();

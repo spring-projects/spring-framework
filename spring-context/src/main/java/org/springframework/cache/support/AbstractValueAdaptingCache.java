@@ -123,5 +123,4 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 		return (storeValue != null ? new SimpleValueWrapper(fromStoreValue(storeValue)) : null);
 	}
 
-
 }

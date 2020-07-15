@@ -1,0 +1,23 @@
+description = "Spring R2DBC"
+
+apply plugin: "kotlin"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compile(project(":spring-tx"))
+	compile("io.r2dbc:r2dbc-spi")
+	compile("io.projectreactor:reactor-core")
+	compileOnly(project(":kotlin-coroutines"))
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile(project(":kotlin-coroutines"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile("io.projectreactor:reactor-test")
+	testCompile("io.r2dbc:r2dbc-h2")
+	testCompile("io.r2dbc:r2dbc-spi-test:0.8.1.RELEASE")
+}

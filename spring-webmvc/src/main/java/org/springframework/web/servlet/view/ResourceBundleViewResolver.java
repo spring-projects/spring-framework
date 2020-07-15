@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -59,7 +58,11 @@ import org.springframework.web.servlet.View;
  * @see java.util.ResourceBundle#getBundle
  * @see java.util.PropertyResourceBundle
  * @see UrlBasedViewResolver
+ * @see BeanNameViewResolver
+ * @deprecated as of 5.3, in favor of Spring's common view resolver variants
+ * and/or custom resolver implementations
  */
+@Deprecated
 public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
@@ -249,7 +252,8 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		factory.setServletContext(getServletContext());
 
 		// Load bean definitions from resource bundle.
-		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(factory);
+		org.springframework.beans.factory.support.PropertiesBeanDefinitionReader reader =
+				new org.springframework.beans.factory.support.PropertiesBeanDefinitionReader(factory);
 		reader.setDefaultParentBean(this.defaultParentView);
 		for (ResourceBundle bundle : bundles) {
 			reader.registerBeanDefinitions(bundle);

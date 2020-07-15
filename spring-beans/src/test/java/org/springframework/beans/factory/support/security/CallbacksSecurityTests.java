@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,14 +360,14 @@ public class CallbacksSecurityTests {
 	public void testCustomStaticFactoryMethod() throws Exception {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				beanFactory.getBean("custom-static-factory-method"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test
 	public void testCustomInstanceFactoryMethod() throws Exception {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				beanFactory.getBean("custom-factory-method"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test

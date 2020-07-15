@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -97,11 +98,33 @@ public class HeaderAssertionTests {
 		assertions.valueMatches("Content-Type", ".*UTF-8.*");
 
 		// Wrong pattern
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.valueMatches("Content-Type", ".*ISO-8859-1.*"))
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
-					"'Content-Type'=[application/json;charset=UTF-8] does not match " +
-					"[.*ISO-8859-1.*]"));
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.valueMatches("Content-Type", ".*ISO-8859-1.*"))
+				.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
+						"'Content-Type'=[application/json;charset=UTF-8] does not match " +
+						"[.*ISO-8859-1.*]"));
+	}
+
+	@Test
+	public void valuesMatch() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "value1");
+		headers.add("foo", "value2");
+		headers.add("foo", "value3");
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.valuesMatch("foo", "val.*1", "val.*2", "val.*3");
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.valuesMatch("foo", ".*", "val.*5"))
+				.satisfies(ex -> assertThat(ex.getCause()).hasMessage(
+						"Response header 'foo' has fewer or more values [value1, value2, value3] " +
+								"than number of patterns to match with [.*, val.*5]"));
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> assertions.valuesMatch("foo", ".*", "val.*5", ".*"))
+				.satisfies(ex -> assertThat(ex.getCause()).hasMessage(
+						"Response header 'foo'[1]='value2' does not match 'val.*5'"));
 	}
 
 	@Test
@@ -111,6 +134,16 @@ public class HeaderAssertionTests {
 		HeaderAssertions assertions = headerAssertions(headers);
 
 		assertions.value("foo", containsString("a"));
+	}
+
+	@Test
+	public void valuesMatcher() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("foo", "bar");
+		headers.add("foo", "baz");
+		HeaderAssertions assertions = headerAssertions(headers);
+
+		assertions.values("foo", hasItems("bar", "baz"));
 	}
 
 	@Test
@@ -154,10 +187,10 @@ public class HeaderAssertionTests {
 		assertions.contentTypeCompatibleWith(MediaType.parseMediaType("application/*"));
 
 		// MediaTypes not compatible
-		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
-				assertions.contentTypeCompatibleWith(MediaType.TEXT_XML))
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
-					"'Content-Type'=[application/xml] is not compatible with [text/xml]"));
+		assertThatExceptionOfType(AssertionError.class)
+			.isThrownBy(() -> assertions.contentTypeCompatibleWith(MediaType.TEXT_XML))
+			.havingCause()
+			.withMessage("Response header 'Content-Type'=[application/xml] is not compatible with [text/xml]");
 	}
 
 	@Test

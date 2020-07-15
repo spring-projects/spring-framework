@@ -1,6 +1,16 @@
 apply plugin: 'org.springframework.build.compile'
 apply plugin: 'org.springframework.build.optional-dependencies'
+apply plugin: 'me.champeau.gradle.jmh'
 apply from: "$rootDir/gradle/publications.gradle"
+
+dependencies {
+	jmh 'org.openjdk.jmh:jmh-core:1.23'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
+	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+}
+jmh {
+	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 jar {
 	manifest.attributes["Implementation-Title"] = project.name
@@ -63,9 +73,5 @@ publishing {
 }
 
 // Disable publication of test fixture artifacts.
-//
-// Once we upgrade to Gradle 6.x, we will need to delete the following line ...
-components.java.variants.removeAll { it.outgoingConfiguration.name.startsWith("testFixtures") }
-// ... and uncomment the following two lines.
-// components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
-// components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }

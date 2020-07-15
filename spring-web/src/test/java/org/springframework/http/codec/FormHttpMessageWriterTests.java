@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -28,13 +27,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -95,7 +94,7 @@ public class FormHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	private Consumer<DataBuffer> stringConsumer(String expected) {
 		return dataBuffer -> {
-			String value = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+			String value = dataBuffer.toString(UTF_8);
 			DataBufferUtils.release(dataBuffer);
 			assertThat(value).isEqualTo(expected);
 		};

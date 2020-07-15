@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * This is the central interface in Spring's reactive transaction infrastructure.
- * Applications can use this directly, but it is not primarily meant as API:
+ * Applications can use this directly, but it is not primarily meant as an API:
  * Typically, applications will work with either transactional operators or
  * declarative transaction demarcation through AOP.
  *
@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  * @since 5.2
  * @see org.springframework.transaction.reactive.TransactionalOperator
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
+ * @see org.springframework.transaction.PlatformTransactionManager
  */
 public interface ReactiveTransactionManager extends TransactionManager {
 

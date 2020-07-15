@@ -59,7 +59,7 @@ class- or method-level `@CrossOrigin` annotations (other handlers can implement
 
 The rules for combining global and local configuration are generally additive -- for example,
 all global and all local origins. For those attributes where only a single value can be
-accepted (such as `allowCredentials` and `maxAge`), the local overrides the global value. See
+accepted, e.g. `allowCredentials` and `maxAge`, the local overrides the global value. See
 {api-spring-framework}/web/cors/CorsConfiguration.html#combine-org.springframework.web.cors.CorsConfiguration-[`CorsConfiguration#combine(CorsConfiguration)`]
 for more details.
 
@@ -128,9 +128,11 @@ By default, `@CrossOrigin` allows:
 * All headers.
 * All HTTP methods to which the controller method is mapped.
 
-`allowedCredentials` is not enabled by default, since that establishes a trust level
+`allowCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information (such as cookies and CSRF tokens) and
-should only be used where appropriate.
+should only be used where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 
@@ -238,9 +240,11 @@ By default, global configuration enables the following:
 * `GET`, `HEAD`, and `POST` methods.
 
 
-`allowedCredentials` is not enabled by default, since that establishes a trust level
+`allowCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information (such as cookies and CSRF tokens) and
-should only be used where appropriate.
+should only be used where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 

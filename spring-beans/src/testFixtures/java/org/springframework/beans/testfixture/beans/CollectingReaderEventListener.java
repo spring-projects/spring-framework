@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	public ComponentDefinition[] getComponentDefinitions() {
 		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
-		return collection.toArray(new ComponentDefinition[collection.size()]);
+		return collection.toArray(new ComponentDefinition[0]);
 	}
 
 	@Override

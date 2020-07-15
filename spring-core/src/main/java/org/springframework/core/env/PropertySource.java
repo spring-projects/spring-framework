@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,8 @@ public abstract class PropertySource<T> {
 
 	/**
 	 * Create a new {@code PropertySource} with the given name and source object.
+	 * @param name the associated name
+	 * @param source the source object
 	 */
 	public PropertySource(String name, T source) {
 		Assert.hasText(name, "Property source name must contain at least one character");

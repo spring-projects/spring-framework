@@ -213,12 +213,12 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 * @param ignored ignored
+	 * @param stripDelimiter this flag is ignored
 	 * @deprecated as of Spring 5.0.4, in favor of {@link #textPlainOnly()} or
 	 * {@link #textPlainOnly(List, boolean)}
 	 */
 	@Deprecated
-	public static StringDecoder textPlainOnly(boolean ignored) {
+	public static StringDecoder textPlainOnly(boolean stripDelimiter) {
 		return textPlainOnly();
 	}
 
@@ -241,12 +241,12 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that supports all MIME types.
-	 * @param ignored ignored
+	 * @param stripDelimiter this flag is ignored
 	 * @deprecated as of Spring 5.0.4, in favor of {@link #allMimeTypes()} or
 	 * {@link #allMimeTypes(List, boolean)}
 	 */
 	@Deprecated
-	public static StringDecoder allMimeTypes(boolean ignored) {
+	public static StringDecoder allMimeTypes(boolean stripDelimiter) {
 		return allMimeTypes();
 	}
 
@@ -271,7 +271,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private static class EndFrameBuffer extends DataBufferWrapper {
 
-		private static final DataBuffer BUFFER = new DefaultDataBufferFactory().wrap(new byte[0]);
+		private static final DataBuffer BUFFER = DefaultDataBufferFactory.sharedInstance.wrap(new byte[0]);
 
 		private byte[] delimiter;
 

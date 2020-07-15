@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.*
-import org.springframework.web.reactive.function.server.MockServerRequest.builder
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.*
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
-import java.net.URI
 
 /**
  * Tests for [RouterFunctionDsl].
@@ -37,7 +37,9 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun header() {
-		val request = builder().header("bar", "bar").build()
+		val mockRequest = get("https://example.com")
+				.header("bar","bar").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -45,7 +47,9 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun accept() {
-		val request = builder().uri(URI("/content")).header(ACCEPT, APPLICATION_ATOM_XML_VALUE).build()
+		val mockRequest = get("https://example.com/content")
+				.header(ACCEPT, APPLICATION_ATOM_XML_VALUE).build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -53,11 +57,10 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun acceptAndPOST() {
-		val request = builder()
-				.method(POST)
-				.uri(URI("/api/foo/"))
+		val mockRequest = post("https://example.com/api/foo/")
 				.header(ACCEPT, APPLICATION_JSON_VALUE)
 				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -65,11 +68,10 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun acceptAndPOSTWithRequestPredicate() {
-		val request = builder()
-				.method(POST)
-				.uri(URI("/api/bar/"))
+		val mockRequest = post("https://example.com/api/bar/")
 				.header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
 				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -77,7 +79,10 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun contentType() {
-		val request = builder().uri(URI("/content")).header(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE).build()
+		val mockRequest = get("https://example.com/content/")
+				.header(CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE)
+				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -85,7 +90,9 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun resourceByPath() {
-		val request = builder().uri(URI("/org/springframework/web/reactive/function/response.txt")).build()
+		val mockRequest = get("https://example.com/org/springframework/web/reactive/function/response.txt")
+				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -93,7 +100,9 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun method() {
-		val request = builder().method(PATCH).build()
+		val mockRequest = patch("https://example.com/")
+				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -101,7 +110,8 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun path() {
-		val request = builder().uri(URI("/baz")).build()
+		val mockRequest = get("https://example.com/baz").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -109,7 +119,8 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun resource() {
-		val request = builder().uri(URI("/response.txt")).build()
+		val mockRequest = get("https://example.com/response.txt").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.expectNextCount(1)
 				.verifyComplete()
@@ -117,18 +128,19 @@ class RouterFunctionDslTests {
 
 	@Test
 	fun noRoute() {
-		val request = builder()
-				.uri(URI("/bar"))
+		val mockRequest = get("https://example.com/bar")
 				.header(ACCEPT, APPLICATION_PDF_VALUE)
 				.header(CONTENT_TYPE, APPLICATION_PDF_VALUE)
 				.build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request))
 				.verifyComplete()
 	}
 
 	@Test
 	fun rendering() {
-		val request = builder().uri(URI("/rendering")).build()
+		val mockRequest = get("https://example.com/rendering").build()
+		val request = DefaultServerRequest(MockServerWebExchange.from(mockRequest), emptyList())
 		StepVerifier.create(sampleRouter().route(request).flatMap { it.handle(request) })
 				.expectNextMatches { it is RenderingResponse}
 				.verifyComplete()

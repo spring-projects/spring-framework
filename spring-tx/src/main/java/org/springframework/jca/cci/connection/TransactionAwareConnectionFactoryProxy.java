@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,10 @@ import org.springframework.lang.Nullable;
  * @see javax.resource.cci.Connection#close
  * @see ConnectionFactoryUtils#doGetConnection
  * @see ConnectionFactoryUtils#doReleaseConnection
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class TransactionAwareConnectionFactoryProxy extends DelegatingConnectionFactory {
 
@@ -136,24 +139,23 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Connection interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("getLocalTransaction")) {
-				if (ConnectionFactoryUtils.isConnectionTransactional(this.target, this.connectionFactory)) {
-					throw new javax.resource.spi.IllegalStateException(
-							"Local transaction handling not allowed within a managed transaction");
-				}
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: only close if not within a transaction.
-				ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
-				return null;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Connection proxy.
+					return System.identityHashCode(proxy);
+				case "getLocalTransaction":
+					if (ConnectionFactoryUtils.isConnectionTransactional(this.target, this.connectionFactory)) {
+						throw new javax.resource.spi.IllegalStateException(
+								"Local transaction handling not allowed within a managed transaction");
+					}
+					return this.target.getLocalTransaction();
+				case "close":
+					// Handle close method: only close if not within a transaction.
+					ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
+					return null;
 			}
 
 			// Invoke method on target Connection.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.testng.ITestNGListener;
 import org.testng.TestNG;
 
 import org.springframework.test.context.ContextConfiguration;
@@ -97,7 +96,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 	public void runTestAndAssertCounters() throws Exception {
 		TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		TestNG testNG = new TestNG();
-		testNG.addListener((ITestNGListener) listener);
+		testNG.addListener(listener);
 		testNG.setTestClasses(new Class<?>[] {this.clazz});
 		testNG.setVerbose(0);
 		testNG.run();

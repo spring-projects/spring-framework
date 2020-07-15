@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Interceptor that places the configured {@link ConversionService} in request scope
@@ -36,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @since 3.0.1
  */
-public class ConversionServiceExposingInterceptor extends HandlerInterceptorAdapter {
+public class ConversionServiceExposingInterceptor implements HandlerInterceptor {
 
 	private final ConversionService conversionService;
 

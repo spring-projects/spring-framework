@@ -128,7 +128,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
+			new NamedThreadLocal<Set<EncodedResource>>("XML bean definition resources currently being loaded"){
+				@Override
+				protected Set<EncodedResource> initialValue() {
+					return new HashSet<>(4);
+				}
+			};
 
 
 	/**
@@ -319,10 +324,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
-		if (currentResources == null) {
-			currentResources = new HashSet<>(4);
-			this.resourcesCurrentlyBeingLoaded.set(currentResources);
-		}
+
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,8 +158,8 @@ public class BeanWrapperEnumTests {
 		map.put("VALUE_2", 2);
 		bw.setPropertyValue("standardEnumMap", map);
 		assertThat(gb.getStandardEnumMap().size()).isEqualTo(2);
-		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_1)).isEqualTo(new Integer(1));
-		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_2)).isEqualTo(new Integer(2));
+		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_1)).isEqualTo(1);
+		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_2)).isEqualTo(2);
 	}
 
 	@Test
@@ -170,7 +170,7 @@ public class BeanWrapperEnumTests {
 		assertThat(gb.getStandardEnumMap()).isNull();
 		bw.setPropertyValue("standardEnumMap[VALUE_1]", 1);
 		assertThat(gb.getStandardEnumMap().size()).isEqualTo(1);
-		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_1)).isEqualTo(new Integer(1));
+		assertThat(gb.getStandardEnumMap().get(CustomEnum.VALUE_1)).isEqualTo(1);
 	}
 
 	@Test

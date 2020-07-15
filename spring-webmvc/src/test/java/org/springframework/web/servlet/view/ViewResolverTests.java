@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link BeanNameViewResolver}, {@link UrlBasedViewResolver},
- * {@link InternalResourceViewResolver}, {@link XmlViewResolver}, and
- * {@link AbstractCachingViewResolver}.
+ * {@link InternalResourceViewResolver}, {@link org.springframework.web.servlet.view.XmlViewResolver},
+ * and {@link AbstractCachingViewResolver}.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -227,7 +227,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setApplicationContext(this.wac);
 
@@ -236,14 +236,14 @@ public class ViewResolverTests {
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example1");
 		Map<String, Object> attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertThat(attributes.get("key1")).isEqualTo("value1");
-		assertThat(attributes.get("key2")).isEqualTo(new Integer(2));
+		assertThat(attributes.get("key2")).isEqualTo(2);
 
 		view = vr.resolveViewName("example2", Locale.getDefault());
 		assertThat(view).isInstanceOf(JstlView.class);
 		assertThat(((InternalResourceView) view).getUrl()).as("Correct URL").isEqualTo("example2");
 		attributes = ((InternalResourceView) view).getStaticAttributes();
 		assertThat(attributes.get("key1")).isEqualTo("value1");
-		assertThat(attributes.get("key2")).isEqualTo(new Integer(2));
+		assertThat(attributes.get("key2")).isEqualTo(2);
 
 		this.request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.wac);
 		this.request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
@@ -255,7 +255,7 @@ public class ViewResolverTests {
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
 		assertThat(this.request.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 		assertThat(this.request.getAttribute("key1")).isEqualTo("value1");
-		assertThat(this.request.getAttribute("key2")).isEqualTo(new Integer(2));
+		assertThat(this.request.getAttribute("key2")).isEqualTo(2);
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setExposeContextBeansAsAttributes(true);
 		vr.setApplicationContext(this.wac);
@@ -281,7 +281,7 @@ public class ViewResolverTests {
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
-						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(new Integer(2));
+						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isSameAs(wac.getBean("myBean"));
 						assertThat(forwardRequest.getAttribute("myBean2")).isSameAs(wac.getBean("myBean2"));
 					}
@@ -304,7 +304,7 @@ public class ViewResolverTests {
 		props.setProperty("key1", "value1");
 		vr.setAttributes(props);
 		Map<String, Object> map = new HashMap<>();
-		map.put("key2", new Integer(2));
+		map.put("key2", 2);
 		vr.setAttributesMap(map);
 		vr.setExposedContextBeanNames(new String[] {"myBean2"});
 		vr.setApplicationContext(this.wac);
@@ -317,7 +317,7 @@ public class ViewResolverTests {
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
-						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(new Integer(2));
+						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isNull();
 						assertThat(forwardRequest.getAttribute("myBean2")).isSameAs(wac.getBean("myBean2"));
 					}
@@ -399,11 +399,12 @@ public class ViewResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void xmlViewResolver() throws Exception {
 		this.wac.registerSingleton("testBean", TestBean.class);
 		this.wac.refresh();
 		TestBean testBean = (TestBean) this.wac.getBean("testBean");
-		XmlViewResolver vr = new XmlViewResolver();
+		org.springframework.web.servlet.view.XmlViewResolver vr = new org.springframework.web.servlet.view.XmlViewResolver();
 		vr.setLocation(new ClassPathResource("org/springframework/web/servlet/view/views.xml"));
 		vr.setApplicationContext(this.wac);
 
@@ -438,33 +439,35 @@ public class ViewResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void xmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
-				assertThat(XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
+				assertThat(org.springframework.web.servlet.view.XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
 				return super.getResourceByPath(path);
 			}
 		};
 		wac.setServletContext(this.sc);
 		wac.refresh();
-		XmlViewResolver vr = new XmlViewResolver();
+		org.springframework.web.servlet.view.XmlViewResolver vr = new org.springframework.web.servlet.view.XmlViewResolver();
 		vr.setApplicationContext(wac);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(vr::afterPropertiesSet);
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void xmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
-				assertThat(XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
+				assertThat(org.springframework.web.servlet.view.XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
 				return super.getResourceByPath(path);
 			}
 		};
 		wac.setServletContext(this.sc);
 		wac.refresh();
-		XmlViewResolver vr = new XmlViewResolver();
+		org.springframework.web.servlet.view.XmlViewResolver vr = new org.springframework.web.servlet.view.XmlViewResolver();
 		vr.setCache(false);
 		vr.setApplicationContext(wac);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->

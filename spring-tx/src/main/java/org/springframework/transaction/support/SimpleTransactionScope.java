@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,7 @@ public class SimpleTransactionScope implements Scope {
 			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
-		Object scopedObject = scopedObjects.scopedInstances.get(name);
-		if (scopedObject == null) {
-			scopedObject = objectFactory.getObject();
-			scopedObjects.scopedInstances.put(name, scopedObject);
-		}
-		return scopedObject;
+		return scopedObjects.scopedInstances.computeIfAbsent(name, k -> objectFactory.getObject());
 	}
 
 	@Override
@@ -103,7 +98,7 @@ public class SimpleTransactionScope implements Scope {
 	}
 
 
-	private class CleanupSynchronization extends TransactionSynchronizationAdapter {
+	private class CleanupSynchronization implements TransactionSynchronization {
 
 		private final ScopedObjectsHolder scopedObjects;
 

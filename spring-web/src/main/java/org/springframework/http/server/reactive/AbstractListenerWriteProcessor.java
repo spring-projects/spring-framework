@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.core.log.LogDelegateFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for {@code Processor} implementations that bridge between
@@ -87,13 +88,13 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * @since 5.1
 	 */
 	public AbstractListenerWriteProcessor(String logPrefix) {
-		this.logPrefix = logPrefix;
+		this.logPrefix = (StringUtils.hasText(logPrefix) ? logPrefix : "");
 		this.resultPublisher = new WriteResultPublisher(logPrefix);
 	}
 
 
 	/**
-	 * Create an instance with the given log prefix.
+	 * Get the configured log prefix.
 	 * @since 5.1
 	 */
 	public String getLogPrefix() {
@@ -211,8 +212,9 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	 * data buffer associated with the item, once fully written, if pooled
 	 * buffers apply to the underlying container.
 	 * @param data the item to write
-	 * @return whether the current data item was written and another one
-	 * requested ({@code true}), or or otherwise if more writes are required.
+	 * @return {@code true} if the current data item was written completely and
+	 * a new item requested, or {@code false} if it was written partially and
+	 * we'll need more write callbacks before it is fully written
 	 */
 	protected abstract boolean write(T data) throws IOException;
 

@@ -30,12 +30,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,10 +69,18 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private static final Map<MediaType, byte[]> STREAM_SEPARATORS;
 
+	private static final Map<String, JsonEncoding> ENCODINGS;
+
 	static {
-		STREAM_SEPARATORS = new HashMap<>();
+		STREAM_SEPARATORS = new HashMap<>(4);
 		STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
 		STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
+
+		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		for (JsonEncoding encoding : JsonEncoding.values()) {
+			ENCODINGS.put(encoding.getJavaName(), encoding);
+		}
+		ENCODINGS.put("US-ASCII", JsonEncoding.UTF8);
 	}
 
 
@@ -105,7 +111,16 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		Class<?> clazz = elementType.toClass();
-		return supportsMimeType(mimeType) && (Object.class == clazz ||
+		if (!supportsMimeType(mimeType)) {
+			return false;
+		}
+		if (mimeType != null && mimeType.getCharset() != null) {
+			Charset charset = mimeType.getCharset();
+			if (!ENCODINGS.containsKey(charset.name())) {
+				return false;
+			}
+		}
+		return (Object.class == clazz ||
 				(!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
 	}
 
@@ -166,14 +181,8 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			writer.writeValue(generator, value);
 			generator.flush();
 		}
-		catch (MismatchedInputException ex) {  // specific kind of JsonMappingException
-			throw new EncodingException("Invalid JSON input: " + ex.getOriginalMessage(), ex);
-		}
-		catch (InvalidDefinitionException ex) {  // another kind of JsonMappingException
+		catch (InvalidDefinitionException ex) {
 			throw new CodecException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonMappingException ex) {  // typically ValueInstantiationException
-			throw new CodecException("JSON conversion problem: " + ex.getOriginalMessage(), ex);
 		}
 		catch (JsonProcessingException ex) {
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
@@ -278,10 +287,9 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	protected JsonEncoding getJsonEncoding(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			Charset charset = mimeType.getCharset();
-			for (JsonEncoding encoding : JsonEncoding.values()) {
-				if (charset.name().equals(encoding.getJavaName())) {
-					return encoding;
-				}
+			JsonEncoding result = ENCODINGS.get(charset.name());
+			if (result != null) {
+				return result;
 			}
 		}
 		return JsonEncoding.UTF8;

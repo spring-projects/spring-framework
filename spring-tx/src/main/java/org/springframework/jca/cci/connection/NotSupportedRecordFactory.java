@@ -38,7 +38,10 @@ import javax.resource.cci.RecordFactory;
  * @see org.springframework.jca.cci.core.CciTemplate#getRecordFactory(javax.resource.cci.ConnectionFactory)
  * @see javax.resource.cci.ConnectionFactory#getRecordFactory()
  * @see javax.resource.NotSupportedException
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public class NotSupportedRecordFactory implements RecordFactory {
 
 	@Override

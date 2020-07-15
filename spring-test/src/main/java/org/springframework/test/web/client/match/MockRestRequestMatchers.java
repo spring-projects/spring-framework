@@ -249,7 +249,7 @@ public abstract class MockRestRequestMatchers {
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
 	 * @param expression the XPath optionally parameterized with arguments
-	 * @param namespaces namespaces referenced in the XPath expression
+	 * @param namespaces the namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with
 	 */
 	public static XpathRequestMatchers xpath(String expression, Map<String, String> namespaces, Object... args)
