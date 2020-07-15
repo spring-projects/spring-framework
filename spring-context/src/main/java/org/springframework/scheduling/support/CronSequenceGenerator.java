@@ -53,7 +53,9 @@ import org.springframework.util.StringUtils;
  * @author Ruslan Sibgatullin
  * @since 3.0
  * @see CronTrigger
+ * @deprecated as of 5.3, in favor of {@link CronExpression}
  */
+@Deprecated
 public class CronSequenceGenerator {
 
 	private final String expression;
@@ -75,23 +77,27 @@ public class CronSequenceGenerator {
 
 
 	/**
-	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * Construct a {@code CronSequenceGenerator} from the pattern provided,
 	 * using the default {@link TimeZone}.
 	 * @param expression a space-separated list of time fields
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
 	 * @see java.util.TimeZone#getDefault()
+	 * @deprecated as of 5.3, in favor of {@link CronExpression#parse(String)}
 	 */
+	@Deprecated
 	public CronSequenceGenerator(String expression) {
 		this(expression, TimeZone.getDefault());
 	}
 
 	/**
-	 * Construct a {@link CronSequenceGenerator} from the pattern provided,
+	 * Construct a {@code CronSequenceGenerator} from the pattern provided,
 	 * using the specified {@link TimeZone}.
 	 * @param expression a space-separated list of time fields
 	 * @param timeZone the TimeZone to use for generated trigger times
 	 * @throws IllegalArgumentException if the pattern cannot be parsed
+	 * @deprecated as of 5.3, in favor of {@link CronExpression#parse(String)}
 	 */
+	@Deprecated
 	public CronSequenceGenerator(String expression, TimeZone timeZone) {
 		this.expression = expression;
 		this.timeZone = timeZone;
