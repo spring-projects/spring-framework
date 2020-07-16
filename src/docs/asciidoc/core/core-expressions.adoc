@@ -339,8 +339,12 @@ index into an array or collection and the element at the specified index is `nul
 you can automatically create the element. This is useful when using expressions made up of a
 chain of property references. If you index into an array or list
 and specifying an index that is beyond the end of the current size of the array or
-list, you can automatically grow the array or list to accommodate that index. The following
-example demonstrates how to automatically grow the list:
+list, you can automatically grow the array or list to accommodate that index. In order to add
+an element at the specified index, SpEL will try to create the element using a default
+constructor before setting the specified value. If the element type does not have a default
+constructor, `null` will be added. Note if there is no built-in or custom converter, that knows
+how to set the value, `null` will remain in the array or list at the specified index.
+The following example demonstrates how to automatically grow the list:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
