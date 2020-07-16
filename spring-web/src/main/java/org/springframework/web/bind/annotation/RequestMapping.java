@@ -202,7 +202,7 @@ public @interface RequestMapping {
 	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
 	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
-	 * "type=feed", type="entry") and if a compatible media type from the request
+	 * "type=feed", "type=entry") and if a compatible media type from the request
 	 * has that parameter too, then the parameter values must match. Otherwise
 	 * if the media type from the request does not contain the parameter, it is
 	 * assumed the client accepts any value.
