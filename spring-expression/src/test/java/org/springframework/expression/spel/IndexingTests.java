@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,22 +203,21 @@ public class IndexingTests {
 	public List<BigDecimal> decimals;
 
 	@Test
-	public void autoGrowWithoutDefaultConstructor() {
+	public void autoGrowListOfElementsWithoutDefaultConstructor() {
 		this.decimals = new ArrayList<>();
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		parser.parseExpression("decimals[0]").setValue(this, "123.4");
-		assertThat(decimals.get(0)).isEqualTo(BigDecimal.valueOf(123.4));
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(123.4));
 	}
 
 	@Test
-	public void indexIntoPropertyContainingNullList() {
+	public void indexIntoPropertyContainingListContainingNullElement() {
 		this.decimals = new ArrayList<>();
 		this.decimals.add(null);
 		this.decimals.add(BigDecimal.ONE);
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
-		assertThat(decimals.get(0)).isEqualTo(BigDecimal.valueOf(9876.5));
-		assertThat(decimals.get(1)).isEqualTo(BigDecimal.ONE);
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(9876.5), BigDecimal.ONE);
 	}
 
 	@Test
