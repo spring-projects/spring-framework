@@ -726,6 +726,7 @@ public class Indexer extends SpelNodeImpl {
 			}
 		}
 
+		@Nullable
 		private Constructor<?> getDefaultConstructor(Class<?> type) {
 			try {
 				return ReflectionUtils.accessibleConstructor(type);
