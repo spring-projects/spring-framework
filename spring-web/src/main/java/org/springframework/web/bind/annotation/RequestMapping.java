@@ -202,7 +202,7 @@ public @interface RequestMapping {
 	 * produces = "text/plain;charset=UTF-8"
 	 * </pre>
 	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
-	 * "type=feed", type="entry") and if a compatible media type from the request
+	 * "type=feed", "type=entry") and if a compatible media type from the request
 	 * has that parameter too, then the parameter values must match. Otherwise
 	 * if the media type from the request does not contain the parameter, it is
 	 * assumed the client accepts any value.
@@ -211,7 +211,6 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * If specified at both levels, the method level produces condition overrides
 	 * the type level condition.
-	 * @see org.springframework.http.MediaType
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] produces() default {};
