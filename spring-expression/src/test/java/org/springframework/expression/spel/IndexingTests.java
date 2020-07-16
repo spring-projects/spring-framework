@@ -211,6 +211,17 @@ public class IndexingTests {
 	}
 
 	@Test
+	public void indexIntoPropertyContainingNullList() {
+		this.decimals = new ArrayList<>();
+		this.decimals.add(null);
+		this.decimals.add(BigDecimal.ONE);
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
+		assertThat(decimals.get(0)).isEqualTo(BigDecimal.valueOf(9876.5));
+		assertThat(decimals.get(1)).isEqualTo(BigDecimal.ONE);
+	}
+
+	@Test
 	public void indexIntoPropertyContainingList() {
 		List<Integer> property = new ArrayList<>();
 		property.add(3);
