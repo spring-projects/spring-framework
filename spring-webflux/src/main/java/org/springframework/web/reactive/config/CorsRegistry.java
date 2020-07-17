@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,12 @@ public class CorsRegistry {
 
 
 	/**
-	 * Enable cross origin request handling for the specified path pattern.
-	 *
+	 * Enable cross-origin request handling for the specified path pattern.
 	 * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
 	 * well as Ant-style path patterns (such as {@code "/admin/**"}).
-	 *
-	 * <p>The following defaults are applied to the {@link CorsRegistration}:
-	 * <ul>
-	 *     <li>Allow all origins.</li>
-	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
-	 *     <li>Allow all headers.</li>
-	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
-	 * </ul>
+	 * <p>By default, the {@code CorsConfiguration} for this mapping is
+	 * initialized with default values as described in
+	 * {@link CorsConfiguration#applyPermitDefaultValues()}.
 	 */
 	public CorsRegistration addMapping(String pathPattern) {
 		CorsRegistration registration = new CorsRegistration(pathPattern);
@@ -56,6 +50,10 @@ public class CorsRegistry {
 		return registration;
 	}
 
+	/**
+	 * Return the registered {@link CorsConfiguration} objects,
+	 * keyed by path pattern.
+	 */
 	protected Map<String, CorsConfiguration> getCorsConfigurations() {
 		Map<String, CorsConfiguration> configs = new LinkedHashMap<>(this.registrations.size());
 		for (CorsRegistration registration : this.registrations) {
