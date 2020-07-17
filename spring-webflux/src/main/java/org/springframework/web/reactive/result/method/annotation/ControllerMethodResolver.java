@@ -83,7 +83,7 @@ class ControllerMethodResolver {
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
 
-	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
+	private static final Log logger = LogFactory.getLog(ControllerMethodResolver.class);
 
 	private final List<SyncHandlerMethodArgumentResolver> initBinderResolvers;
 
@@ -95,13 +95,11 @@ class ControllerMethodResolver {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache = new ConcurrentHashMap<>(64);
-
 
 	private final Map<ControllerAdviceBean, Set<Method>> initBinderAdviceCache = new LinkedHashMap<>(64);
 

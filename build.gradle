@@ -199,10 +199,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.10.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.41.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.42.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.41.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.42.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
@@ -333,7 +333,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.33"
+		toolVersion = "8.34"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
