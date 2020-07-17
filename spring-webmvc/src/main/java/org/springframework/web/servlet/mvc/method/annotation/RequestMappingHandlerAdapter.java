@@ -180,7 +180,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
-
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<>(64);
