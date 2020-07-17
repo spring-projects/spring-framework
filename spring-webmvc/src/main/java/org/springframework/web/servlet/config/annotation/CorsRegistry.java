@@ -39,10 +39,8 @@ public class CorsRegistry {
 
 	/**
 	 * Enable cross-origin request handling for the specified path pattern.
-	 *
 	 * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
 	 * well as Ant-style path patterns (such as {@code "/admin/**"}).
-	 *
 	 * <p>By default, the {@code CorsConfiguration} for this mapping is
 	 * initialized with default values as described in
 	 * {@link CorsConfiguration#applyPermitDefaultValues()}.
