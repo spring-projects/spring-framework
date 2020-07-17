@@ -71,9 +71,9 @@ public class CorsRegistration {
 
 	/**
 	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"}, etc.
-	 * The special value {@code "*"} allows all methods.
-	 * <p>By default "simple" methods, i.e. {@code GET}, {@code HEAD}, and
-	 * {@code POST} are allowed.
+	 * <p>The special value {@code "*"} allows all methods.
+	 * <p>By default "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
+	 * are allowed.
 	 */
 	public CorsRegistration allowedMethods(String... methods) {
 		this.config.setAllowedMethods(Arrays.asList(methods));
@@ -81,9 +81,9 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Set the list of headers that a preflight request can list as allowed
-	 * for use during an actual request. The special value {@code "*"} may be
-	 * used to allow all headers.
+	 * Set the list of headers that a pre-flight request can list as allowed
+	 * for use during an actual request.
+	 * <p>The special value {@code "*"} may be used to allow all headers.
 	 * <p>A header name is not required to be listed if it is one of:
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
 	 * {@code Last-Modified}, or {@code Pragma} as per the CORS spec.
