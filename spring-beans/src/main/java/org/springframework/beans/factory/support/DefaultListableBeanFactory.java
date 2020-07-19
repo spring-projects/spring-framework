@@ -558,6 +558,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					// Register exception, in case the bean was accidentally unresolvable.
 					onSuppressedException(ex);
 				}
+				catch (NoSuchBeanDefinitionException ex) {
+					// Bean definition got removed while we were iterating -> ignore.
+				}
 			}
 		}
 
@@ -649,7 +652,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
 		List<String> result = new ArrayList<>();
 		for (String beanName : this.beanDefinitionNames) {
-			BeanDefinition beanDefinition = getBeanDefinition(beanName);
+			BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
 			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
 				result.add(beanName);
 			}
@@ -1721,17 +1724,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	private void checkBeanNotOfRequiredType(Class<?> type, DependencyDescriptor descriptor) {
 		for (String beanName : this.beanDefinitionNames) {
-			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
-			Class<?> targetType = mbd.getTargetType();
-			if (targetType != null && type.isAssignableFrom(targetType) &&
-					isAutowireCandidate(beanName, mbd, descriptor, getAutowireCandidateResolver())) {
-				// Probably a proxy interfering with target type match -> throw meaningful exception.
-				Object beanInstance = getSingleton(beanName, false);
-				Class<?> beanType = (beanInstance != null && beanInstance.getClass() != NullBean.class ?
-						beanInstance.getClass() : predictBeanType(beanName, mbd));
-				if (beanType != null && !type.isAssignableFrom(beanType)) {
-					throw new BeanNotOfRequiredTypeException(beanName, type, beanType);
+			try {
+				RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+				Class<?> targetType = mbd.getTargetType();
+				if (targetType != null && type.isAssignableFrom(targetType) &&
+						isAutowireCandidate(beanName, mbd, descriptor, getAutowireCandidateResolver())) {
+					// Probably a proxy interfering with target type match -> throw meaningful exception.
+					Object beanInstance = getSingleton(beanName, false);
+					Class<?> beanType = (beanInstance != null && beanInstance.getClass() != NullBean.class ?
+							beanInstance.getClass() : predictBeanType(beanName, mbd));
+					if (beanType != null && !type.isAssignableFrom(beanType)) {
+						throw new BeanNotOfRequiredTypeException(beanName, type, beanType);
+					}
 				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// Bean definition got removed while we were iterating -> ignore.
 			}
 		}
 
