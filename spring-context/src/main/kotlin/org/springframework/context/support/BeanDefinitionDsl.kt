@@ -237,6 +237,42 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	}
 
 	/**
+	 * Declare a bean definition using the given callable reference with no parameter
+	 * for obtaining a new instance.
+	 *
+	 * @param f the callable reference
+	 * @param name the name of the bean
+	 * @param scope Override the target scope of this bean, specifying a new scope name.
+	 * @param isLazyInit Set whether this bean should be lazily initialized.
+	 * @param isPrimary Set whether this bean is a primary autowire candidate.
+	 * @param isAutowireCandidate Set whether this bean is a candidate for getting
+	 * autowired into some other bean.
+	 * @param initMethodName Set the name of the initializer method
+	 * @param destroyMethodName Set the name of the destroy method
+	 * @param description Set a human-readable description of this bean definition
+	 * @param role Set the role hint for this bean definition
+	 * @see GenericApplicationContext.registerBean
+	 * @see org.springframework.beans.factory.config.BeanDefinition
+	 * @since 5.2.3
+	 */
+	inline fun <reified T: Any>
+			bean(crossinline f: () -> T,
+				 name: String? = null,
+				 scope: BeanDefinitionDsl.Scope? = null,
+				 isLazyInit: Boolean? = null,
+				 isPrimary: Boolean? = null,
+				 isAutowireCandidate: Boolean? = null,
+				 initMethodName: String? = null,
+				 destroyMethodName: String? = null,
+				 description: String? = null,
+				 role: BeanDefinitionDsl.Role? = null) {
+
+		bean(name, scope, isLazyInit, isPrimary, isAutowireCandidate, initMethodName, destroyMethodName, description, role) {
+			f.invoke()
+		}
+	}
+
+	/**
 	 * Declare a bean definition using the given callable reference with 1 parameter
 	 * autowired by type for obtaining a new instance.
 	 *

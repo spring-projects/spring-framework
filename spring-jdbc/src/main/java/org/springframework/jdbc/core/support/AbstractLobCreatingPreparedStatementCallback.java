@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,9 @@ public abstract class AbstractLobCreatingPreparedStatementCallback implements Pr
 
 	@Override
 	public final Integer doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
-		LobCreator lobCreator = this.lobHandler.getLobCreator();
-		try {
+		try (LobCreator lobCreator = this.lobHandler.getLobCreator()) {
 			setValues(ps, lobCreator);
 			return ps.executeUpdate();
-		}
-		finally {
-			lobCreator.close();
 		}
 	}
 

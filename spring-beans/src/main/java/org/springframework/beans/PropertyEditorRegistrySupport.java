@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.beans.propertyeditors.UUIDEditor;
 import org.springframework.beans.propertyeditors.ZoneIdEditor;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceArrayPropertyEditor;
@@ -84,12 +85,21 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sebastien Deleuze
  * @since 1.2.6
  * @see java.beans.PropertyEditorManager
  * @see java.beans.PropertyEditorSupport#setAsText
  * @see java.beans.PropertyEditorSupport#setValue
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
+
 
 	@Nullable
 	private ConversionService conversionService;
@@ -208,7 +218,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(Currency.class, new CurrencyEditor());
 		this.defaultEditors.put(File.class, new FileEditor());
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
-		this.defaultEditors.put(InputSource.class, new InputSourceEditor());
+		if (!shouldIgnoreXml) {
+			this.defaultEditors.put(InputSource.class, new InputSourceEditor());
+		}
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
 		this.defaultEditors.put(Path.class, new PathEditor());
 		this.defaultEditors.put(Pattern.class, new PatternEditor());

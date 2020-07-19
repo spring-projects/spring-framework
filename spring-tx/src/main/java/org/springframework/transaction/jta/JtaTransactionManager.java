@@ -914,7 +914,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Apply the given transaction timeout. The default implementation will call
 	 * {@code UserTransaction.setTransactionTimeout} for a non-default timeout value.
 	 * @param txObject the JtaTransactionObject containing the UserTransaction
-	 * @param timeout timeout value taken from transaction definition
+	 * @param timeout the timeout value taken from transaction definition
 	 * @throws SystemException if thrown by the JTA implementation
 	 * @see #doJtaBegin
 	 * @see JtaTransactionObject#getUserTransaction()

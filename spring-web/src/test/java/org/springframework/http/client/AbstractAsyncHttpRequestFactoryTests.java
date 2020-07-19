@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		assertThat(request.getMethod()).as("Invalid HTTP method").isEqualTo(HttpMethod.GET);
 		assertThat(request.getURI()).as("Invalid HTTP URI").isEqualTo(uri);
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -102,12 +98,8 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 				throw new AssertionError(ex.getMessage(), ex);
 			}
 		});
-		ClientHttpResponse response = listenableFuture.get();
-		try {
+		try (ClientHttpResponse response = listenableFuture.get()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.NOT_FOUND);
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -132,16 +124,12 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		}
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try ( ClientHttpResponse response = futureResponse.get()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
 			assertThat(response.getHeaders().containsKey(headerName)).as("Header not found").isTrue();
 			assertThat(response.getHeaders().get(headerName)).as("Header value not found").isEqualTo(Arrays.asList(headerValue1, headerValue2));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
 			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -159,13 +147,9 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		}
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
-			assertThatIllegalStateException().isThrownBy(() ->
-					FileCopyUtils.copy(body, request.getBody()));
-		}
-		finally {
-			response.close();
+		try (ClientHttpResponse response = futureResponse.get()) {
+			assertThat(response).isNotNull();
+			assertThatIllegalStateException().isThrownBy(() -> FileCopyUtils.copy(body, request.getBody()));
 		}
 	}
 
@@ -177,13 +161,10 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		FileCopyUtils.copy(body, request.getBody());
 
 		Future<ClientHttpResponse> futureResponse = request.executeAsync();
-		ClientHttpResponse response = futureResponse.get();
-		try {
+		try (ClientHttpResponse response = futureResponse.get()) {
+			assertThat(response).isNotNull();
 			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 					request.getHeaders().add("MyHeader", "value"));
-		}
-		finally {
-			response.close();
 		}
 	}
 
@@ -198,22 +179,15 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 	}
 
 	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
-		ClientHttpResponse response = null;
-		try {
-			AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
-			if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
-				// requires a body
-				request.getBody().write(32);
-			}
-			Future<ClientHttpResponse> futureResponse = request.executeAsync();
-			response = futureResponse.get();
+		AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
+		if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+			// requires a body
+			request.getBody().write(32);
+		}
+		Future<ClientHttpResponse> futureResponse = request.executeAsync();
+		try (ClientHttpResponse response = futureResponse.get()) {
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
 			assertThat(request.getMethod().name()).as("Invalid method").isEqualTo(path.toUpperCase(Locale.ENGLISH));
-		}
-		finally {
-			if (response != null) {
-				response.close();
-			}
 		}
 	}
 
@@ -225,6 +199,5 @@ public abstract class AbstractAsyncHttpRequestFactoryTests extends AbstractMockW
 		futureResponse.cancel(true);
 		assertThat(futureResponse.isCancelled()).isTrue();
 	}
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -155,9 +155,9 @@ class EncoderHttpMessageWriterTests {
 
 	@Test
 	void setContentLengthForMonoBody() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+		DefaultDataBufferFactory factory = DefaultDataBufferFactory.sharedInstance;
 		DataBuffer buffer = factory.wrap("body".getBytes(StandardCharsets.UTF_8));
-		configureEncoder(buffer, MimeTypeUtils.TEXT_PLAIN);
+		configureEncoder(Flux.just(buffer), MimeTypeUtils.TEXT_PLAIN);
 		HttpMessageWriter<String> writer = new EncoderHttpMessageWriter<>(this.encoder);
 		writer.write(Mono.just("body"), forClass(String.class), TEXT_PLAIN, this.response, NO_HINTS).block();
 
@@ -208,13 +208,6 @@ class EncoderHttpMessageWriterTests {
 		given(this.encoder.getEncodableMimeTypes()).willReturn(typeList);
 		given(this.encoder.encode(any(), any(), any(), this.mediaTypeCaptor.capture(), any()))
 				.willReturn(encodedStream);
-	}
-
-	private void configureEncoder(DataBuffer dataBuffer, MimeType... mimeTypes) {
-		List<MimeType> typeList = Arrays.asList(mimeTypes);
-		given(this.encoder.getEncodableMimeTypes()).willReturn(typeList);
-		given(this.encoder.encodeValue(any(), any(), any(), this.mediaTypeCaptor.capture(), any()))
-				.willReturn(dataBuffer);
 	}
 
 }

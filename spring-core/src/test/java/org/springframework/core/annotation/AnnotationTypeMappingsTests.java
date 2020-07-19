@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link AnnotationTypeMappings} and {@link AnnotationTypeMapping}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class AnnotationTypeMappingsTests {
 
@@ -381,26 +382,28 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void resolveMirrorsWhenHasWithMulipleRoutesToAliasReturnsMirrors() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(MulipleRoutesToAliasA.class);
-		AnnotationTypeMapping mappingsA = getMapping(mappings, MulipleRoutesToAliasA.class);
+	void resolveMirrorsWhenHasWithMultipleRoutesToAliasReturnsMirrors() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
+				MultipleRoutesToAliasA.class);
+		AnnotationTypeMapping mappingsA = getMapping(mappings, MultipleRoutesToAliasA.class);
 		assertThat(mappingsA.getMirrorSets().size()).isZero();
-		AnnotationTypeMapping mappingsB = getMapping(mappings, MulipleRoutesToAliasB.class);
+		AnnotationTypeMapping mappingsB = getMapping(mappings, MultipleRoutesToAliasB.class);
 		assertThat(getNames(mappingsB.getMirrorSets().get(0))).containsExactly("b1", "b2", "b3");
-		AnnotationTypeMapping mappingsC = getMapping(mappings, MulipleRoutesToAliasC.class);
+		AnnotationTypeMapping mappingsC = getMapping(mappings, MultipleRoutesToAliasC.class);
 		assertThat(getNames(mappingsC.getMirrorSets().get(0))).containsExactly("c1", "c2");
 	}
 
 	@Test
-	void getAliasMappingWhenHasWithMulipleRoutesToAliasReturnsMappedAttributes() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(MulipleRoutesToAliasA.class);
-		AnnotationTypeMapping mappingsA = getMapping(mappings, MulipleRoutesToAliasA.class);
+	void getAliasMappingWhenHasWithMultipleRoutesToAliasReturnsMappedAttributes() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(
+				MultipleRoutesToAliasA.class);
+		AnnotationTypeMapping mappingsA = getMapping(mappings, MultipleRoutesToAliasA.class);
 		assertThat(getAliasMapping(mappingsA, 0)).isNull();
-		AnnotationTypeMapping mappingsB = getMapping(mappings, MulipleRoutesToAliasB.class);
+		AnnotationTypeMapping mappingsB = getMapping(mappings, MultipleRoutesToAliasB.class);
 		assertThat(getAliasMapping(mappingsB, 0).getName()).isEqualTo("a1");
 		assertThat(getAliasMapping(mappingsB, 1).getName()).isEqualTo("a1");
 		assertThat(getAliasMapping(mappingsB, 2).getName()).isEqualTo("a1");
-		AnnotationTypeMapping mappingsC = getMapping(mappings, MulipleRoutesToAliasC.class);
+		AnnotationTypeMapping mappingsC = getMapping(mappings, MultipleRoutesToAliasC.class);
 		assertThat(getAliasMapping(mappingsC, 0).getName()).isEqualTo("a1");
 		assertThat(getAliasMapping(mappingsC, 1).getName()).isEqualTo("a1");
 	}
@@ -440,10 +443,18 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Test
-	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsMap() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
 		Map<String, Object> value = Collections.singletonMap("value", "java.io.InputStream");
-		assertThat(mapping.isEquivalentToDefaultValue(0, value, this::extractFromMap)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation::extractFromMap)).isTrue();
+	}
+
+	@Test // gh-24375
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsTypeMappedAnnotation() {
+		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
+		Map<String, String> attributes = Collections.singletonMap("value", "java.io.InputStream");
+		MergedAnnotation<ClassValue> value = TypeMappedAnnotation.of(getClass().getClassLoader(), null, ClassValue.class, attributes);
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation::extractFromMap)).isTrue();
 	}
 
 	@Test
@@ -502,11 +513,6 @@ class AnnotationTypeMappingsTests {
 			names.add(mirrorSet.get(i).getName());
 		}
 		return names;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object extractFromMap(Method attribute, Object map) {
-		return map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null;
 	}
 
 
@@ -863,7 +869,7 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MulipleRoutesToAliasC {
+	@interface MultipleRoutesToAliasC {
 
 		@AliasFor("c2")
 		String c1() default "";
@@ -873,24 +879,24 @@ class AnnotationTypeMappingsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@MulipleRoutesToAliasC
-	@interface MulipleRoutesToAliasB {
+	@MultipleRoutesToAliasC
+	@interface MultipleRoutesToAliasB {
 
-		@AliasFor(annotation = MulipleRoutesToAliasC.class, attribute = "c2")
+		@AliasFor(annotation = MultipleRoutesToAliasC.class, attribute = "c2")
 		String b1() default "";
 
-		@AliasFor(annotation = MulipleRoutesToAliasC.class, attribute = "c2")
+		@AliasFor(annotation = MultipleRoutesToAliasC.class, attribute = "c2")
 		String b2() default "";
 
-		@AliasFor(annotation = MulipleRoutesToAliasC.class, attribute = "c1")
+		@AliasFor(annotation = MultipleRoutesToAliasC.class, attribute = "c1")
 		String b3() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@MulipleRoutesToAliasB
-	@interface MulipleRoutesToAliasA {
+	@MultipleRoutesToAliasB
+	@interface MultipleRoutesToAliasA {
 
-		@AliasFor(annotation = MulipleRoutesToAliasB.class, attribute = "b2")
+		@AliasFor(annotation = MultipleRoutesToAliasB.class, attribute = "b2")
 		String a1() default "";
 	}
 

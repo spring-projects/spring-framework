@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,14 +178,6 @@ public final class WebHttpHandlerBuilder {
 		try {
 			builder.codecConfigurer(
 					context.getBean(SERVER_CODEC_CONFIGURER_BEAN_NAME, ServerCodecConfigurer.class));
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Fall back on default
-		}
-
-		try {
-			builder.localeContextResolver(
-					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default

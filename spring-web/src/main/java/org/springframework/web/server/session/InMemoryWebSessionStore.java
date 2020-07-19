@@ -117,9 +117,8 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 		Instant now = this.clock.instant();
 		this.expiredSessionChecker.checkIfNecessary(now);
 
-		return Mono.fromSupplier(() -> new InMemoryWebSession(now))
-				.subscribeOn(Schedulers.boundedElastic())
-				.cast(WebSession.class);
+		return Mono.<WebSession>fromSupplier(() -> new InMemoryWebSession(now))
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 	@Override

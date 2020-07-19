@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -337,9 +338,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		byte[] bytes = source.getBytes(charset);
 		boolean original = true;
 		for (byte b : bytes) {
-			if (b < 0) {
-				b += 256;
-			}
 			if (!type.isAllowed(b)) {
 				original = false;
 				break;
@@ -349,23 +347,20 @@ final class HierarchicalUriComponents extends UriComponents {
 			return source;
 		}
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length);
 		for (byte b : bytes) {
-			if (b < 0) {
-				b += 256;
-			}
 			if (type.isAllowed(b)) {
-				bos.write(b);
+				baos.write(b);
 			}
 			else {
-				bos.write('%');
+				baos.write('%');
 				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-				bos.write(hex1);
-				bos.write(hex2);
+				baos.write(hex1);
+				baos.write(hex2);
 			}
 		}
-		return new String(bos.toByteArray(), charset);
+		return StreamUtils.copyToString(baos, charset);
 	}
 
 	private Type getHostType() {

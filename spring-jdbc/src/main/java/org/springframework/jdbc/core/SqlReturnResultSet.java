@@ -32,7 +32,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
-	 * @param name name of the parameter, as used in input and output maps
+	 * @param name the name of the parameter, as used in input and output maps
 	 * @param extractor the {@link ResultSetExtractor} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, ResultSetExtractor<?> extractor) {
@@ -41,7 +41,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
-	 * @param name name of the parameter, as used in input and output maps
+	 * @param name the name of the parameter, as used in input and output maps
 	 * @param handler the {@link RowCallbackHandler} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, RowCallbackHandler handler) {
@@ -50,7 +50,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 
 	/**
 	 * Create a new instance of the {@link SqlReturnResultSet} class.
-	 * @param name name of the parameter, as used in input and output maps
+	 * @param name the name of the parameter, as used in input and output maps
 	 * @param mapper the {@link RowMapper} to use for parsing the {@link java.sql.ResultSet}
 	 */
 	public SqlReturnResultSet(String name, RowMapper<?> mapper) {

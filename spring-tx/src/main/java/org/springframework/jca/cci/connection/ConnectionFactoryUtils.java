@@ -24,7 +24,6 @@ import javax.resource.cci.ConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -49,7 +48,10 @@ import org.springframework.util.Assert;
  * @see CciLocalTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class ConnectionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
@@ -68,7 +70,9 @@ public abstract class ConnectionFactoryUtils {
 	 * if the attempt to get a Connection failed
 	 * @see #releaseConnection
 	 */
-	public static Connection getConnection(ConnectionFactory cf) throws CannotGetCciConnectionException {
+	public static Connection getConnection(ConnectionFactory cf)
+			throws org.springframework.jca.cci.CannotGetCciConnectionException {
+
 		return getConnection(cf, null);
 	}
 
@@ -89,7 +93,7 @@ public abstract class ConnectionFactoryUtils {
 	 * @see #releaseConnection
 	 */
 	public static Connection getConnection(ConnectionFactory cf, @Nullable ConnectionSpec spec)
-			throws CannotGetCciConnectionException {
+			throws org.springframework.jca.cci.CannotGetCciConnectionException {
 		try {
 			if (spec != null) {
 				Assert.notNull(cf, "No ConnectionFactory specified");
@@ -100,7 +104,7 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		catch (ResourceException ex) {
-			throw new CannotGetCciConnectionException("Could not get CCI Connection", ex);
+			throw new org.springframework.jca.cci.CannotGetCciConnectionException("Could not get CCI Connection", ex);
 		}
 	}
 

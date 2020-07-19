@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -417,11 +417,10 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final IntPredicate STATUS_CODE_ERROR = value -> value >= 400;
+		private static final IntPredicate STATUS_CODE_ERROR = (value -> value >= 400);
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
-
 
 		private final Mono<ClientResponse> responseMono;
 
@@ -429,13 +428,11 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
-
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
-
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
@@ -546,35 +543,36 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response, handleBodyMono(response, response.bodyToMono(bodyClass))));
+					WebClientUtils.mapToEntity(response,
+							handleBodyMono(response, response.bodyToMono(bodyClass))));
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
+		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeRef) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response,
-							handleBodyMono(response, response.bodyToMono(bodyTypeReference))));
+					WebClientUtils.mapToEntity(response,
+							handleBodyMono(response, response.bodyToMono(bodyTypeRef))));
 		}
 
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntityList(response,
+					WebClientUtils.mapToEntityList(response,
 							handleBodyFlux(response, response.bodyToFlux(elementClass))));
 		}
 
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntityList(response,
+					WebClientUtils.mapToEntityList(response,
 							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
 		}
 
 		@Override
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
-					WebClientUtils.toEntity(response, handleBodyMono(response, Mono.<Void>empty()))
-							.doOnNext(entity -> response.releaseBody()) // body is drained in other cases
+					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
+							.flatMap(entity -> response.releaseBody().thenReturn(entity))
 			);
 		}
 

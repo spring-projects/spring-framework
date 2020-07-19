@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -106,7 +106,7 @@ public class ScopedProxyTests {
 		assertThat(scope.getMap().containsKey("testBeanTarget")).isTrue();
 		assertThat(scope.getMap().get("testBeanTarget").getClass()).isEqualTo(TestBean.class);
 
-		ITestBean deserialized = (ITestBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		ITestBean deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
 		assertThat(deserialized).isNotNull();
 		assertThat(AopUtils.isJdkDynamicProxy(deserialized)).isTrue();
 		assertThat(bean.getAge()).isEqualTo(101);

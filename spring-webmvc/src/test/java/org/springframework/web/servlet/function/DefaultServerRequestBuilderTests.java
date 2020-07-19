@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class DefaultServerRequestBuilderTests {
+class DefaultServerRequestBuilderTests {
 
-	private final List<HttpMessageConverter<?>> messageConverters = Collections.singletonList(
-			new StringHttpMessageConverter());
+	private final List<HttpMessageConverter<?>> messageConverters =
+			Collections.singletonList(new StringHttpMessageConverter());
+
 
 	@Test
-	public void from() throws ServletException, IOException {
-		MockHttpServletRequest request = new MockHttpServletRequest("POST", "https://example.com");
+	void from() throws ServletException, IOException {
+		MockHttpServletRequest request = PathPatternsTestUtils.initRequest("POST", "https://example.com", true);
 		request.addHeader("foo", "bar");
 
 		ServerRequest other = ServerRequest.create(request, messageConverters);
@@ -65,7 +67,7 @@ public class DefaultServerRequestBuilderTests {
 		assertThat(result.cookies().size()).isEqualTo(2);
 		assertThat(result.cookies().getFirst("foo").getValue()).isEqualTo("bar");
 		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("qux");
-		assertThat(result.attributes().size()).isEqualTo(2);
+		assertThat(result.attributes().size()).isEqualTo(other.attributes().size() + 2);
 		assertThat(result.attributes().get("foo")).isEqualTo("bar");
 		assertThat(result.attributes().get("baz")).isEqualTo("qux");
 

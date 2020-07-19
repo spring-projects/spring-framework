@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,9 @@ public interface Decoder<T> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
 
 	/**
-	 * Decode a data buffer to an Object of type T. This is useful when the input
-	 * stream consists of discrete messages (or events) and the content for each
-	 * can be decoded on its own.
+	 * Decode a data buffer to an Object of type T. This is useful for scenarios,
+	 * that distinct messages (or events) are decoded and handled individually,
+	 * in fully aggregated form.
 	 * @param buffer the {@code DataBuffer} to decode
 	 * @param targetType the expected output type
 	 * @param mimeType the MIME type associated with the data

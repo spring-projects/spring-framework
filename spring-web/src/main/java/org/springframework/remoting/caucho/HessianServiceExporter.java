@@ -44,7 +44,9 @@ import org.springframework.web.util.NestedServletException;
  * @see HessianProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiServiceExporter
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class HessianServiceExporter extends HessianExporter implements HttpRequestHandler {
 
 	/**

@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
 	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.2.8"
-	implementation "com.google.guava:guava:18.0" // required by japicmp-gradle-plugin
+	implementation "com.google.guava:guava:28.2-jre" // required by japicmp-gradle-plugin
 }
 
 gradlePlugin {
@@ -25,10 +25,6 @@ gradlePlugin {
 		optionalDependenciesPlugin {
 			id = "org.springframework.build.optional-dependencies"
 			implementationClass = "org.springframework.build.optional.OptionalDependenciesPlugin"
-		}
-		testSourcesPlugin {
-			id = "org.springframework.build.test-sources"
-			implementationClass = "org.springframework.build.testsources.TestSourcesPlugin"
 		}
 	}
 }

@@ -23,8 +23,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,7 +64,7 @@ class ExceptionHandlingAspect {
 
 	public IOException lastException;
 
-	@AfterThrowing(pointcut = "within(org.springframework.tests.sample.beans.ITestBean+)", throwing = "ex")
+	@AfterThrowing(pointcut = "within(org.springframework.beans.testfixture.beans.ITestBean+)", throwing = "ex")
 	public void handleIOException(IOException ex) {
 		handled++;
 		lastException = ex;

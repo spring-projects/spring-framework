@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
+	 * Specify the ClassLoader to load class path resources and bean classes with.
+	 * <p>This context class loader will be passed to the internal bean factory.
+	 * @since 5.2.7
+	 * @see org.springframework.core.io.DefaultResourceLoader#DefaultResourceLoader(ClassLoader)
+	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setBeanClassLoader
+	 */
+	void setClassLoader(ClassLoader classLoader);
+
+	/**
 	 * Register the given protocol resolver with this application context,
 	 * allowing for additional resource protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this context's standard
@@ -157,11 +166,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addProtocolResolver(ProtocolResolver resolver);
 
 	/**
-	 * Load or refresh the persistent representation of the configuration,
-	 * which might an XML file, properties file, or relational database schema.
+	 * Load or refresh the persistent representation of the configuration, which
+	 * might be from Java-based configuration, an XML file, a properties file, a
+	 * relational database schema, or some other format.
 	 * <p>As this is a startup method, it should destroy already created singletons
 	 * if it fails, to avoid dangling resources. In other words, after invocation
-	 * of that method, either all or no singletons at all should be instantiated.
+	 * of this method, either all or no singletons at all should be instantiated.
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported

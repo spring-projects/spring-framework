@@ -6,7 +6,7 @@ configurations {
 }
 
 dependencies {
-	jibx "org.jibx:jibx-bind:1.3.1"
+	jibx "org.jibx:jibx-bind:1.3.3"
 	jibx "org.apache.bcel:bcel:6.0"
 	xjc "javax.xml.bind:jaxb-api:2.3.1"
 	xjc "com.sun.xml.bind:jaxb-core:2.3.0.1"
@@ -62,6 +62,7 @@ dependencies {
 	optional("com.thoughtworks.xstream:xstream")
 	optional("org.jibx:jibx-run")
 	testCompile(project(":spring-context"))
+	testCompile(testFixtures(project(":spring-core")))
 	testCompile("org.ogce:xpp3")
 	testCompile("org.codehaus.jettison:jettison") {
 		exclude group: "stax", module: "stax-api"
@@ -73,8 +74,9 @@ dependencies {
 	testRuntime("com.sun.xml.bind:jaxb-impl")
 }
 
-// JiBX compiler is currently not compatible with JDK 9
-if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+// JiBX compiler is currently not compatible with JDK 9+.
+// If customJavaHome has been set, we assume the custom JDK version is 9+.
+if ((JavaVersion.current() == JavaVersion.VERSION_1_8) && !System.getProperty("customJavaSourceVersion")) {
 	compileTestJava {
 		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
 

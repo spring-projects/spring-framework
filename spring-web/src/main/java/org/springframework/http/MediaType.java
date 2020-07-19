@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -302,6 +302,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
 
 	/**
+	 * Public constant media type for {@code multipart/related}.
+	 * @since 5.2.5
+	 */
+	public static final MediaType MULTIPART_RELATED;
+
+	/**
+	 * A String equivalent of {@link MediaType#MULTIPART_RELATED}.
+	 * @since 5.2.5
+	 */
+	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
+
+	/**
 	 * Public constant media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
@@ -358,7 +370,6 @@ public class MediaType extends MimeType implements Serializable {
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
-
 	static {
 		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
@@ -381,13 +392,13 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = new MediaType("image", "png");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
 		MULTIPART_MIXED = new MediaType("multipart", "mixed");
+		MULTIPART_RELATED = new MediaType("multipart", "related");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
 	}
-
 
 	/**
 	 * Create a new {@code MediaType} for the given primary type.
@@ -464,6 +475,19 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public MediaType(String type, String subtype, @Nullable Map<String, String> parameters) {
 		super(type, subtype, parameters);
+	}
+
+	/**
+	 * Create a new {@code MediaType} for the given {@link MimeType}.
+	 * The type, subtype and parameters information is copied and {@code MediaType}-specific
+	 * checks on parameters are performed.
+	 * @param mimeType the MIME type
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @since 5.3.0
+	 */
+	public MediaType(MimeType mimeType) {
+		super(mimeType);
+		this.getParameters().forEach(this::checkParameters);
 	}
 
 
@@ -574,7 +598,7 @@ public class MediaType extends MimeType implements Serializable {
 			throw new InvalidMediaTypeException(ex);
 		}
 		try {
-			return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
+			return new MediaType(type);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new InvalidMediaTypeException(mediaType, ex.getMessage());
@@ -634,7 +658,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
 		List<MediaType> mediaTypes = new ArrayList<>(mimeTypes.size());
-		for(MimeType mimeType : mimeTypes) {
+		for (MimeType mimeType : mimeTypes) {
 			mediaTypes.add(MediaType.asMediaType(mimeType));
 		}
 		return mediaTypes;

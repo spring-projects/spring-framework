@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.core;
 
 /**
- * Common interface for managing aliases. Serves as super-interface for
+ * Common interface for managing aliases. Serves as a super-interface for
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
  *
  * @author Juergen Hoeller
@@ -42,7 +42,7 @@ public interface AliasRegistry {
 	void removeAlias(String alias);
 
 	/**
-	 * Determine whether this given name is defines as an alias
+	 * Determine whether the given name is defined as an alias
 	 * (as opposed to the name of an actually registered component).
 	 * @param name the name to check
 	 * @return whether the given name is an alias

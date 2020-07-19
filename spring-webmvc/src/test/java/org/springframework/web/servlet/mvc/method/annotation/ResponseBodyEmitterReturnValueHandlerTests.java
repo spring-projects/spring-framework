@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,18 +23,14 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
@@ -43,6 +38,9 @@ import org.springframework.web.context.request.async.StandardServletAsyncWebRequ
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +48,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.web.method.ResolvableMethod.on;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for ResponseBodyEmitterReturnValueHandler.
@@ -72,8 +70,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@BeforeEach
 	public void setup() throws Exception {
 
-		List<HttpMessageConverter<?>> converters = Arrays.asList(
-				new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter());
+		List<HttpMessageConverter<?>> converters =
+				Collections.singletonList(new MappingJackson2HttpMessageConverter());
 
 		this.handler = new ResponseBodyEmitterReturnValueHandler(converters);
 		this.request = new MockHttpServletRequest();
@@ -213,7 +211,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.send(SseEmitter.event().
 				comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo((":a test\n" +
 						"event:update\n" +
 						"id:1\n" +
@@ -229,18 +227,18 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		this.handler.handleReturnValue(processor, type, this.mavContainer, this.webRequest);
+		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		processor.onNext("foo");
-		processor.onNext("bar");
-		processor.onNext("baz");
-		processor.onComplete();
+		sink.next("foo");
+		sink.next("bar");
+		sink.next("baz");
+		sink.complete();
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 
@@ -250,14 +248,14 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		this.handler.handleReturnValue(processor, type, this.mavContainer, this.webRequest);
+		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 
 		IllegalStateException ex = new IllegalStateException("wah wah");
-		processor.onError(ex);
-		processor.onComplete();
+		sink.error(ex);
+		sink.complete();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
@@ -274,7 +272,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getHeader("foo")).isEqualTo("bar");
 	}
 
@@ -292,8 +290,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test
 	public void responseEntityFlux() throws Exception {
 
-		EmitterProcessor<String> processor = EmitterProcessor.create();
-		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(processor);
+		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, String.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
@@ -301,10 +299,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		processor.onNext("foo");
-		processor.onNext("bar");
-		processor.onNext("baz");
-		processor.onComplete();
+		sink.next("foo");
+		sink.next("bar");
+		sink.next("baz");
+		sink.complete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/plain");
 		assertThat(this.response.getContentAsString()).isEqualTo("foobarbaz");
@@ -313,8 +311,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test // SPR-17076
 	public void responseEntityFluxWithCustomHeader() throws Exception {
 
-		EmitterProcessor<SimpleBean> processor = EmitterProcessor.create();
-		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(processor);
+		Sinks.StandaloneFluxSink<SimpleBean> sink = Sinks.unicast();
+		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, SimpleBean.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);

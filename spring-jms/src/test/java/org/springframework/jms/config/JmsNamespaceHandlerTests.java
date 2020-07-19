@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ import org.springframework.beans.factory.parsing.EmptyReaderEventListener;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ReaderEventListener;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.Phased;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import org.springframework.jms.listener.endpoint.JmsMessageEndpointManager;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ErrorHandler;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
@@ -87,9 +87,8 @@ public class JmsNamespaceHandlerTests {
 		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
 		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
 
-		Map<String, JmsListenerContainerFactory> containerFactories =
-				context.getBeansOfType(JmsListenerContainerFactory.class);
-		assertThat(containerFactories.size()).as("Context should contain 3 JmsListenerContainerFactory instances").isEqualTo(3);
+		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
+			.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);
 	}
 
 	@Test

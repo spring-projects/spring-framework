@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,15 +51,15 @@ import org.springframework.context.annotation.ComponentScanParserTests.KustomAnn
 import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.tests.context.SimpleMapScope;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
@@ -212,7 +212,7 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat(AopUtils.isJdkDynamicProxy(bean)).isTrue();
 		// test serializability
 		assertThat(bean.foo(1)).isEqualTo("bar");
-		FooService deserialized = (FooService) SerializationTestUtils.serializeAndDeserialize(bean);
+		FooService deserialized = SerializationTestUtils.serializeAndDeserialize(bean);
 		assertThat(deserialized).isNotNull();
 		assertThat(deserialized.foo(1)).isEqualTo("bar");
 	}

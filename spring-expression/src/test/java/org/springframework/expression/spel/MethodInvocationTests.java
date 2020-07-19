@@ -148,8 +148,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 2);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> expr.getValue(context))
-			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(() -> expr.getValue(context))
+			.isNotInstanceOf(SpelEvaluationException.class);
 	}
 
 	@Test
@@ -221,8 +222,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		ctx.addMethodResolver(dummy);
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 
-		List<MethodResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getMethodResolvers());
+		List<MethodResolver> copy = new ArrayList<>(ctx.getMethodResolvers());
 		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
 		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);

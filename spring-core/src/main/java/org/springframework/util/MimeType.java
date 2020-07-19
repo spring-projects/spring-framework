@@ -191,13 +191,25 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
+	 * Copy-constructor that copies the type, subtype and parameters of the given {@code MimeType},
+	 * skipping checks performed in other constructors.
+	 * @param other the other MimeType
+	 */
+	protected MimeType(MimeType other) {
+		this.type = other.type;
+		this.subtype = other.subtype;
+		this.parameters = other.parameters;
+		this.toStringValue = other.toStringValue;
+	}
+
+	/**
 	 * Checks the given token string for illegal characters, as defined in RFC 2616,
 	 * section 2.2.
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
-		for (int i = 0; i < token.length(); i++ ) {
+		for (int i = 0; i < token.length(); i++) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
 				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");

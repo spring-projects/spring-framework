@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * or {@code null} if the type cannot be determined yet
 	 */
 	@Nullable
-	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
+	protected Class<?> getTypeForFactoryBean(FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged((PrivilegedAction<Class<?>>)
-						factoryBean::getObjectType, getAccessControlContext());
+				return AccessController.doPrivileged(
+						(PrivilegedAction<Class<?>>) factoryBean::getObjectType, getAccessControlContext());
 			}
 			else {
 				return factoryBean.getObjectType();
@@ -153,9 +153,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
-			throws BeanCreationException {
-
+	private Object doGetObjectFromFactoryBean(FactoryBean<?> factory, String beanName) throws BeanCreationException {
 		Object object;
 		try {
 			if (System.getSecurityManager() != null) {

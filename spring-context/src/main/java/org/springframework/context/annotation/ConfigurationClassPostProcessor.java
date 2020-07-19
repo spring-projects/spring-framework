@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
@@ -95,17 +95,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @since 5.2
 	 * @see #setBeanNameGenerator
 	 */
-	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR = new AnnotationBeanNameGenerator() {
-		@Override
-		protected String buildDefaultBeanName(BeanDefinition definition) {
-			String beanClassName = definition.getBeanClassName();
-			Assert.state(beanClassName != null, "No bean class name set");
-			return beanClassName;
-		}
-	};
+	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR =
+			new FullyQualifiedAnnotationBeanNameGenerator();
 
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
+
+	/**
+	 * Whether this environment lives within a native image.
+	 * Exposed as a private static field rather than in a {@code NativeImageDetector.inNativeImage()} static method due to https://github.com/oracle/graal/issues/2594.
+	 * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
+	 */
+	private static final boolean IN_NATIVE_IMAGE = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
 
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -418,6 +419,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// nothing to enhance -> return immediately
 			return;
 		}
+		if (IN_NATIVE_IMAGE) {
+			throw new BeanDefinitionStoreException("@Configuration classes need to be marked as proxyBeanMethods=false. Found: " + configBeanDefs.keySet());
+		}
 
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
@@ -438,7 +442,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
-	private static class ImportAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter {
+	private static class ImportAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
 
 		private final BeanFactory beanFactory;
 

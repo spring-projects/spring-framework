@@ -3,6 +3,6 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-	<bean id="usesScope" class="org.springframework.tests.sample.beans.TestBean" scope="myScope"/>
+	<bean id="usesScope" class="org.springframework.beans.testfixture.beans.TestBean" scope="myScope"/>
 
 </beans>

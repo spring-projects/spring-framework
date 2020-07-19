@@ -36,7 +36,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
@@ -172,7 +171,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {
 				HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 				Assert.notNull(request, "Expected HttpServletRequest");
-				ShallowEtagHeaderFilter.disableContentCaching(request);
 			}
 		}
 	}

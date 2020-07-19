@@ -3,9 +3,12 @@
 <suppressions>
 
 	<!-- global -->
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis" />
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
+
+	<!-- JMH benchmarks -->
+	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast" />
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
@@ -25,7 +28,7 @@
 	<suppress files="ByteArrayEncoder" checks="SpringLambda" />
 	<suppress files="SocketUtils" checks="HideUtilityClassConstructor" />
 	<suppress files="ResolvableType" checks="FinalClass" />
-	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]tests[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+	<suppress files="[\\/]src[\\/]testFixtures[\\/]java[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 
 	<!-- spring-expression -->
 	<suppress files="ExpressionException" checks="MutableException" />

@@ -32,7 +32,10 @@ import org.springframework.transaction.support.ResourceHolderSupport;
  * @since 1.2
  * @see CciLocalTransactionManager
  * @see ConnectionFactoryUtils
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public class ConnectionHolder extends ResourceHolderSupport {
 
 	private final Connection connection;

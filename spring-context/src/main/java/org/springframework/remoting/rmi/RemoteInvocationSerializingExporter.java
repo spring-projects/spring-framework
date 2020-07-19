@@ -45,7 +45,9 @@ import org.springframework.util.ClassUtils;
  * @see java.io.ObjectOutputStream
  * @see #doReadRemoteInvocation
  * @see #doWriteRemoteInvocationResult
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public abstract class RemoteInvocationSerializingExporter extends RemoteInvocationBasedExporter
 		implements InitializingBean {
 

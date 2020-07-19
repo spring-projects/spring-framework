@@ -54,7 +54,7 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 
 	private int flashMapTimeout = 180;
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
 
 	/**

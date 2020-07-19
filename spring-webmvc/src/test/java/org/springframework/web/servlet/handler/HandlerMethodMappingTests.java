@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -37,11 +37,11 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-
 
 /**
  * Test for {@link AbstractHandlerMethodMapping}.
@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 @SuppressWarnings("unused")
 public class HandlerMethodMappingTests {
 
-	private AbstractHandlerMethodMapping<String> mapping;
+	private MyHandlerMethodMapping mapping;
 
 	private MyHandler handler;
 
@@ -79,13 +79,15 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void directMatch() throws Exception {
-		String key = "foo";
-		this.mapping.registerMapping(key, this.handler, this.method1);
+		this.mapping.registerMapping("/foo", this.handler, this.method1);
+		this.mapping.registerMapping("/fo*", this.handler, this.method2);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", key);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod result = this.mapping.getHandlerInternal(request);
+
 		assertThat(result.getMethod()).isEqualTo(method1);
 		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(result);
+		assertThat(this.mapping.getMatches()).containsExactly("/foo");
 	}
 
 	@Test
@@ -100,7 +102,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void ambiguousMatch() throws Exception {
+	public void ambiguousMatch() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
@@ -128,7 +130,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void registerMapping() throws Exception {
+	public void registerMapping() {
 
 		String key1 = "/foo";
 		String key2 = "/foo*";
@@ -137,7 +139,7 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
 		assertThat(directUrlMatches).isNotNull();
 		assertThat(directUrlMatches.size()).isEqualTo(1);
 		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
@@ -171,7 +173,7 @@ public class HandlerMethodMappingTests {
 	}
 
 	@Test
-	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
+	public void registerMappingWithSameMethodAndTwoHandlerInstances() {
 
 		String key1 = "foo";
 		String key2 = "bar";
@@ -187,7 +189,7 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
 		assertThat(directUrlMatches).isNotNull();
 		assertThat(directUrlMatches.size()).isEqualTo(1);
 		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
@@ -223,7 +225,7 @@ public class HandlerMethodMappingTests {
 
 		this.mapping.unregisterMapping(key);
 		assertThat(mapping.getHandlerInternal(new MockHttpServletRequest("GET", key))).isNull();
-		assertThat(this.mapping.getMappingRegistry().getMappingsByUrl(key)).isNull();
+		assertThat(this.mapping.getMappingRegistry().getMappingsByDirectPath(key)).isNull();
 		assertThat(this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(this.method1.getName())).isNull();
 		assertThat(this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod)).isNull();
 	}
@@ -254,9 +256,14 @@ public class HandlerMethodMappingTests {
 
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
+		private final List<String> matches = new ArrayList<>();
 
 		public MyHandlerMethodMapping() {
 			setHandlerMethodMappingNamingStrategy(new SimpleMappingNamingStrategy());
+		}
+
+		public List<String> getMatches() {
+			return this.matches;
 		}
 
 		@Override
@@ -265,14 +272,14 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected String getMappingForMethod(Method method, Class<?> handlerType) {
-			String methodName = method.getName();
-			return methodName.startsWith("handler") ? methodName : null;
+		protected Set<String> getDirectPaths(String mapping) {
+			return (pathMatcher.isPattern(mapping) ? Collections.emptySet() : Collections.singleton(mapping));
 		}
 
 		@Override
-		protected Set<String> getMappingPathPatterns(String key) {
-			return (this.pathMatcher.isPattern(key) ? Collections.<String>emptySet() : Collections.singleton(key));
+		protected String getMappingForMethod(Method method, Class<?> handlerType) {
+			String methodName = method.getName();
+			return methodName.startsWith("handler") ? methodName : null;
 		}
 
 		@Override
@@ -285,7 +292,11 @@ public class HandlerMethodMappingTests {
 		@Override
 		protected String getMatchingMapping(String pattern, HttpServletRequest request) {
 			String lookupPath = this.pathHelper.getLookupPathForRequest(request);
-			return this.pathMatcher.match(pattern, lookupPath) ? pattern : null;
+			String match = (this.pathMatcher.match(pattern, lookupPath) ? pattern : null);
+			if (match != null) {
+				this.matches.add(match);
+			}
+			return match;
 		}
 
 		@Override

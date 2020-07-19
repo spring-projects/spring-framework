@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,12 @@ final class LogAdapter {
 		private final ExtendedLogger logger;
 
 		public Log4jLog(String name) {
-			this.logger = loggerContext.getLogger(name);
+			LoggerContext context = loggerContext;
+			if (context == null) {
+				// Circular call in early-init scenario -> static field not initialized yet
+				context = LogManager.getContext(Log4jLog.class.getClassLoader(), false);
+			}
+			this.logger = context.getLogger(name);
 		}
 
 		@Override
@@ -603,8 +608,8 @@ final class LogAdapter {
 				else {
 					rec = new LocationResolvingLogRecord(level, String.valueOf(message));
 					rec.setLoggerName(this.name);
-					rec.setResourceBundleName(logger.getResourceBundleName());
-					rec.setResourceBundle(logger.getResourceBundle());
+					rec.setResourceBundleName(this.logger.getResourceBundleName());
+					rec.setResourceBundle(this.logger.getResourceBundle());
 					rec.setThrown(exception);
 				}
 				logger.log(rec);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,7 +308,7 @@ class ResolvableTypeTests {
 	}
 
 	@Test
-	void paramaterizedType() throws Exception {
+	void parameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("parameterizedType"));
 		assertThat(type.getType()).isInstanceOf(ParameterizedType.class);
 	}
@@ -1620,7 +1620,7 @@ class ResolvableTypeTests {
 		public ResolvableTypeAssert isAssignableFrom(ResolvableType... types) {
 			for (ResolvableType type : types) {
 				if (!actual.isAssignableFrom(type)) {
-					throw new AssertionError("Expecting " + decribe(actual) + " to be assignable from " + decribe(type));
+					throw new AssertionError("Expecting " + describe(actual) + " to be assignable from " + describe(type));
 				}
 			}
 			return this;
@@ -1629,13 +1629,13 @@ class ResolvableTypeTests {
 		public ResolvableTypeAssert isNotAssignableFrom(ResolvableType... types) {
 			for (ResolvableType type : types) {
 				if (actual.isAssignableFrom(type)) {
-					throw new AssertionError("Expecting " + decribe(actual) + " to not be assignable from " + decribe(type));
+					throw new AssertionError("Expecting " + describe(actual) + " to not be assignable from " + describe(type));
 				}
 			}
 			return this;
 		}
 
-		private String decribe(ResolvableType type) {
+		private String describe(ResolvableType type) {
 			if (type == ResolvableType.NONE) {
 				return "NONE";
 			}

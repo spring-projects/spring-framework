@@ -241,7 +241,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
@@ -251,7 +251,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -262,7 +262,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -273,7 +273,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @param htmlEscape if the message should be HTML-escaped
@@ -289,7 +289,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -299,7 +299,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -310,7 +310,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -321,7 +321,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the message for the given code.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param htmlEscape if the message should be HTML-escaped
 	 * @return the message
@@ -357,7 +357,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the Errors instance for the given bind object, using the
 	 * "defaultHtmlEscape" setting.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @return the Errors instance, or {@code null} if not found
 	 */
 	@Nullable
@@ -367,7 +367,7 @@ public class RequestContext {
 
 	/**
 	 * Retrieve the Errors instance for the given bind object.
-	 * @param name name of the bind object
+	 * @param name the name of the bind object
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
 	 * @return the Errors instance, or {@code null} if not found
 	 */

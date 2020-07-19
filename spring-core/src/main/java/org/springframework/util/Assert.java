@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,12 @@ import org.springframework.lang.Nullable;
  * Assert.notNull(clazz, "The class must not be null");
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
- * <p>Mainly for internal use within the framework; consider
- * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
- * for a more comprehensive suite of {@code String} utilities.
+ * <p>Mainly for internal use within the framework; for a more comprehensive suite
+ * of assertion utilities consider {@code org.apache.commons.lang3.Validate} from
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a>,
+ * Google Guava's
+ * <a href="https://github.com/google/guava/wiki/PreconditionsExplained">Preconditions</a>,
+ * or similar third-party libraries.
  *
  * @author Keith Donald
  * @author Juergen Hoeller

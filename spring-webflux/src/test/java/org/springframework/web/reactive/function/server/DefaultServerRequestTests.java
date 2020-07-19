@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,18 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +36,8 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -43,18 +51,19 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -208,6 +217,8 @@ public class DefaultServerRequestTests {
 		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
 		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.header(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(headers.firstHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
 	}
 
@@ -228,9 +239,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void body() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -248,9 +258,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyToMono() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -267,9 +276,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyToMonoParameterizedTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -287,9 +295,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyToMonoDecodingException() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("{\"invalid\":\"json\" ".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "{\"invalid\":\"json\" ".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -309,9 +316,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyToFlux() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -328,9 +334,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyToFluxParameterizedTypeReference() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -348,9 +353,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void bodyUnacceptable() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -369,9 +373,8 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void formData() {
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap("foo=bar&baz=qux".getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = "foo=bar&baz=qux".getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -403,9 +406,8 @@ public class DefaultServerRequestTests {
 				"\r\n" +
 				"qux\r\n" +
 				"--12345--\r\n";
-		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
-		DefaultDataBuffer dataBuffer =
-				factory.wrap(ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8)));
+		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -434,6 +436,262 @@ public class DefaultServerRequestTests {
 					assertThat(formFieldPart.value()).isEqualTo("qux");
 				})
 				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedTimestamp(String method) throws Exception {
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfModifiedSince(now);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedTimestamp(String method) {
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfModifiedSince(oneMinuteAgo);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETag(String method) {
+		String eTag = "\"Foo\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagWithSeparatorChars(String method) {
+		String eTag = "\"Foo, Bar\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETag(String method) {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "Bar";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedUnpaddedETag(String method) {
+		String eTag = "Foo";
+		String paddedEtag = String.format("\"%s\"", eTag);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(paddedEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(paddedEtag);
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedUnpaddedETag(String method) {
+		String currentETag = "Foo";
+		String oldEtag = "Bar";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedWildcardIsIgnored(String method) {
+		String eTag = "\"Foo\"";
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch("*");
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(eTag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndTimestamp(String method) {
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		headers.setIfModifiedSince(now);
+
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedETagAndModifiedTimestamp(String method) {
+		String eTag = "\"Foo\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(eTag);
+		headers.setIfModifiedSince(oneMinuteAgo);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, eTag);
+
+		StepVerifier.create(result)
+				.assertNext(serverResponse -> {
+					assertThat(serverResponse.statusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
+					assertThat(serverResponse.headers().getETag()).isEqualTo(eTag);
+					assertThat(serverResponse.headers().getLastModified()).isEqualTo(now.toEpochMilli());
+				})
+				.verifyComplete();
+	}
+
+	@ParameterizedHttpMethodTest
+	void checkModifiedETagAndNotModifiedTimestamp(String method) throws Exception {
+		String currentETag = "\"Foo\"";
+		String oldEtag = "\"Bar\"";
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setIfNoneMatch(oldEtag);
+		headers.setIfModifiedSince(now);
+		MockServerHttpRequest mockRequest = MockServerHttpRequest
+				.method(HttpMethod.valueOf(method), "/")
+				.headers(headers)
+				.build();
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
+
+		Mono<ServerResponse> result = request.checkNotModified(now, currentETag);
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@ValueSource(strings = {"GET", "HEAD"})
+	@interface ParameterizedHttpMethodTest {
+
 	}
 
 }

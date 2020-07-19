@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -252,37 +253,6 @@ public class CallbacksSecurityTests {
 		});
 	}
 
-	private static class TestPrincipal implements Principal {
-
-		private String name;
-
-		public TestPrincipal(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj == this) {
-				return true;
-			}
-			if (!(obj instanceof TestPrincipal)) {
-				return false;
-			}
-			TestPrincipal p = (TestPrincipal) obj;
-			return this.name.equals(p.name);
-		}
-
-		@Override
-		public int hashCode() {
-			return this.name.hashCode();
-		}
-	}
-
 	public CallbacksSecurityTests() {
 		// setup security
 		if (System.getSecurityManager() == null) {
@@ -390,14 +360,14 @@ public class CallbacksSecurityTests {
 	public void testCustomStaticFactoryMethod() throws Exception {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				beanFactory.getBean("custom-static-factory-method"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test
 	public void testCustomInstanceFactoryMethod() throws Exception {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				beanFactory.getBean("custom-factory-method"))
-			.satisfies(ex -> assertThat(ex.getMostSpecificCause()).isInstanceOf(SecurityException.class));
+			.satisfies(mostSpecificCauseOf(SecurityException.class));
 	}
 
 	@Test

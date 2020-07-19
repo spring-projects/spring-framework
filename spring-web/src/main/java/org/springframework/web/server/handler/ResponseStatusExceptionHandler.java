@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,12 +88,14 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	private boolean updateResponse(ServerHttpResponse response, Throwable ex) {
 		boolean result = false;
-		HttpStatus status = determineStatus(ex);
-		if (status != null) {
-			if (response.setStatusCode(status)) {
+		HttpStatus httpStatus = determineStatus(ex);
+		int code = (httpStatus != null ? httpStatus.value() : determineRawStatusCode(ex));
+		if (code != -1) {
+			if (response.setRawStatusCode(code)) {
 				if (ex instanceof ResponseStatusException) {
-					((ResponseStatusException) ex).getHeaders()
-							.forEach((name, value) -> response.getHeaders().add(name, value));
+					((ResponseStatusException) ex).getResponseHeaders()
+							.forEach((name, values) ->
+									values.forEach(value -> response.getHeaders().add(name, value)));
 				}
 				result = true;
 			}
@@ -108,17 +110,30 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	}
 
 	/**
-	 * Determine the HTTP status implied by the given exception.
-	 * @param ex the exception to introspect
+	 * Determine the HTTP status for the given exception.
+	 * <p>As of 5.3 this method always returns {@code null} in which case
+	 * {@link #determineRawStatusCode(Throwable)} is used instead.
+	 * @param ex the exception to check
 	 * @return the associated HTTP status, if any
-	 * @since 5.0.5
+	 * @deprecated as of 5.3 in favor of {@link #determineRawStatusCode(Throwable)}.
 	 */
 	@Nullable
+	@Deprecated
 	protected HttpStatus determineStatus(Throwable ex) {
-		if (ex instanceof ResponseStatusException) {
-			return ((ResponseStatusException) ex).getStatus();
-		}
 		return null;
+	}
+
+	/**
+	 * Determine the raw status code for the given exception.
+	 * @param ex the exception to check
+	 * @return the associated HTTP status code, or -1 if it can't be derived.
+	 * @since 5.3
+	 */
+	protected int determineRawStatusCode(Throwable ex) {
+		if (ex instanceof ResponseStatusException) {
+			return ((ResponseStatusException) ex).getRawStatusCode();
+		}
+		return -1;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -59,6 +61,8 @@ import org.springframework.util.Assert;
  * @since 5.0
  */
 public abstract class DataBufferUtils {
+
+	private final static Log logger = LogFactory.getLog(DataBufferUtils.class);
 
 	private static final Consumer<DataBuffer> RELEASE_CONSUMER = DataBufferUtils::release;
 
@@ -315,7 +319,7 @@ public abstract class DataBufferUtils {
 	 * {@code Flux} is subscribed to.
 	 * @param source the stream of data buffers to be written
 	 * @param channel the channel to write to
-	 * @param position file position write write is to begin; must be non-negative
+	 * @param position the file position where writing is to begin; must be non-negative
 	 * @return a flux containing the same buffers as in {@code source}, that
 	 * starts the writing process when subscribed to, and that publishes any
 	 * writing errors and the completion signal
@@ -346,7 +350,7 @@ public abstract class DataBufferUtils {
 	 * {@link StandardOpenOption#WRITE WRITE}).
 	 * @param source the stream of data buffers to be written
 	 * @param destination the path to the file
-	 * @param options options specifying how the file is opened
+	 * @param options the options specifying how the file is opened
 	 * @return a {@link Mono} that indicates completion or error
 	 * @since 5.2
 	 */
@@ -494,7 +498,16 @@ public abstract class DataBufferUtils {
 		if (dataBuffer instanceof PooledDataBuffer) {
 			PooledDataBuffer pooledDataBuffer = (PooledDataBuffer) dataBuffer;
 			if (pooledDataBuffer.isAllocated()) {
-				return pooledDataBuffer.release();
+				try {
+					return pooledDataBuffer.release();
+				}
+				catch (IllegalStateException ex) {
+					// Avoid dependency on Netty: IllegalReferenceCountException
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to release PooledDataBuffer: " + dataBuffer, ex);
+					}
+					return false;
+				}
 			}
 		}
 		return false;
@@ -523,7 +536,6 @@ public abstract class DataBufferUtils {
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
-	@SuppressWarnings("unchecked")
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
 		return join(dataBuffers, -1);
 	}
@@ -547,13 +559,10 @@ public abstract class DataBufferUtils {
 			return (Mono<DataBuffer>) buffers;
 		}
 
-		// TODO: Drop doOnDiscard(LimitedDataBufferList.class, ...) (reactor-core#1924)
-
 		return Flux.from(buffers)
 				.collect(() -> new LimitedDataBufferList(maxByteCount), LimitedDataBufferList::add)
 				.filter(list -> !list.isEmpty())
 				.map(list -> list.get(0).factory().join(list))
-				.doOnDiscard(LimitedDataBufferList.class, LimitedDataBufferList::releaseAndClear)
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 	}
 

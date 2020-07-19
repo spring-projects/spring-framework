@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,6 @@ import org.springframework.web.util.UrlPathHelper;
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
-
-
 	private final String method;
 
 	private final URI url;
@@ -145,7 +142,14 @@ public class MockHttpServletRequestBuilder
 	 * @param vars zero or more URI variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod.name(), UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
+		this(httpMethod.name(), initUri(url, vars));
+	}
+
+	private static URI initUri(String url, Object[] vars) {
+		Assert.notNull(url, "'url' must not be null");
+		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
+				"'url' should start with a path or be a complete HTTP URL: " + url);
+		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
 
 	/**
@@ -774,7 +778,7 @@ public class MockHttpServletRequestBuilder
 			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
 			this.pathInfo = (StringUtils.hasText(extraPath) ?
-					urlPathHelper.decodeRequestString(request, extraPath) : null);
+					UrlPathHelper.defaultInstance.decodeRequestString(request, extraPath) : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}

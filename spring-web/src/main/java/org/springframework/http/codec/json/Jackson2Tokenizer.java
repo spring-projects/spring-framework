@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,15 +56,17 @@ final class Jackson2Tokenizer {
 
 	private final boolean tokenizeArrayElements;
 
-	private TokenBuffer tokenBuffer;
+	private final boolean forceUseOfBigDecimal;
+
+	private final int maxInMemorySize;
 
 	private int objectDepth;
 
 	private int arrayDepth;
 
-	private final int maxInMemorySize;
-
 	private int byteCount;
+
+	private TokenBuffer tokenBuffer;
 
 
 	// TODO: change to ByteBufferFeeder when supported by Jackson
@@ -73,15 +75,17 @@ final class Jackson2Tokenizer {
 
 
 	private Jackson2Tokenizer(JsonParser parser, DeserializationContext deserializationContext,
-			boolean tokenizeArrayElements, int maxInMemorySize) {
+			boolean tokenizeArrayElements, boolean forceUseOfBigDecimal, int maxInMemorySize) {
 
 		this.parser = parser;
 		this.deserializationContext = deserializationContext;
 		this.tokenizeArrayElements = tokenizeArrayElements;
-		this.tokenBuffer = new TokenBuffer(parser, deserializationContext);
+		this.forceUseOfBigDecimal = forceUseOfBigDecimal;
 		this.inputFeeder = (ByteArrayFeeder) this.parser.getNonBlockingInputFeeder();
 		this.maxInMemorySize = maxInMemorySize;
+		this.tokenBuffer = createToken();
 	}
+
 
 
 	private List<TokenBuffer> tokenize(DataBuffer dataBuffer) {
@@ -134,6 +138,9 @@ final class Jackson2Tokenizer {
 				previousNull = true;
 				continue;
 			}
+			else {
+				previousNull = false;
+			}
 			updateDepth(token);
 			if (!this.tokenizeArrayElements) {
 				processTokenNormal(token, result);
@@ -167,9 +174,8 @@ final class Jackson2Tokenizer {
 
 		if ((token.isStructEnd() || token.isScalarValue()) && this.objectDepth == 0 && this.arrayDepth == 0) {
 			result.add(this.tokenBuffer);
-			this.tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
+			this.tokenBuffer = createToken();
 		}
-
 	}
 
 	private void processTokenArray(JsonToken token, List<TokenBuffer> result) throws IOException {
@@ -180,8 +186,14 @@ final class Jackson2Tokenizer {
 		if (this.objectDepth == 0 && (this.arrayDepth == 0 || this.arrayDepth == 1) &&
 				(token == JsonToken.END_OBJECT || token.isScalarValue())) {
 			result.add(this.tokenBuffer);
-			this.tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
+			this.tokenBuffer = createToken();
 		}
+	}
+
+	private TokenBuffer createToken() {
+		TokenBuffer tokenBuffer = new TokenBuffer(this.parser, this.deserializationContext);
+		tokenBuffer.forceUseOfBigDecimal(this.forceUseOfBigDecimal);
+		return tokenBuffer;
 	}
 
 	private boolean isTopLevelArrayToken(JsonToken token) {
@@ -219,10 +231,13 @@ final class Jackson2Tokenizer {
 	 * @param objectMapper the current mapper instance
 	 * @param tokenizeArrays if {@code true} and the "top level" JSON object is
 	 * an array, each element is returned individually immediately after it is received
+	 * @param forceUseOfBigDecimal if {@code true}, any floating point values encountered
+	 * in source will use {@link java.math.BigDecimal}
+	 * @param maxInMemorySize maximum memory size
 	 * @return the resulting token buffers
 	 */
 	public static Flux<TokenBuffer> tokenize(Flux<DataBuffer> dataBuffers, JsonFactory jsonFactory,
-			ObjectMapper objectMapper, boolean tokenizeArrays, int maxInMemorySize) {
+			ObjectMapper objectMapper, boolean tokenizeArrays, boolean forceUseOfBigDecimal, int maxInMemorySize) {
 
 		try {
 			JsonParser parser = jsonFactory.createNonBlockingByteArrayParser();
@@ -231,7 +246,8 @@ final class Jackson2Tokenizer {
 				context = ((DefaultDeserializationContext) context).createInstance(
 						objectMapper.getDeserializationConfig(), parser, objectMapper.getInjectableValues());
 			}
-			Jackson2Tokenizer tokenizer = new Jackson2Tokenizer(parser, context, tokenizeArrays, maxInMemorySize);
+			Jackson2Tokenizer tokenizer =
+					new Jackson2Tokenizer(parser, context, tokenizeArrays, forceUseOfBigDecimal, maxInMemorySize);
 			return dataBuffers.concatMapIterable(tokenizer::tokenize).concatWith(tokenizer.endOfInput());
 		}
 		catch (IOException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,7 +218,8 @@ public abstract class BodyInserters {
 		return (outputMessage, context) -> {
 			ResolvableType elementType = RESOURCE_TYPE;
 			HttpMessageWriter<Resource> writer = findWriter(context, elementType, null);
-			return write(Mono.just(resource), elementType, null, outputMessage, context, writer);
+			MediaType contentType = outputMessage.getHeaders().getContentType();
+			return write(Mono.just(resource), elementType, contentType, outputMessage, context, writer);
 		};
 	}
 

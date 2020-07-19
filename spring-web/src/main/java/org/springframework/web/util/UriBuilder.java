@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,22 +77,69 @@ public interface UriBuilder {
 	UriBuilder port(@Nullable String port);
 
 	/**
-	 * Append the given path to the existing path of this builder.
-	 * The given path may contain URI template variables.
+	 * Append to the path of this builder.
+	 * <p>The given value is appended as-is without any checks for slashes other
+	 * than to clean up duplicates. For example:
+	 * <pre class="code">
+	 *
+	 * builder.path("/first-").path("value/").path("/{id}").build("123")
+	 *
+	 * // Results is "/first-value/123"
+	 * </pre>
+	 * <p>By contrast {@link #pathSegment(String...)} builds the path from
+	 * individual path segments and in that case slashes are inserted transparently.
+	 * In some cases you may use a combination of both {@code pathSegment} and
+	 * {@code path}. For example:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value").path("/")
+	 *
+	 * // Results is "/first-value/second-value/"
+	 *
+	 * </pre>
+	 * <p>If a URI variable value contains slashes, whether those are encoded or
+	 * not depends on the configured encoding mode. See
+	 * {@link UriComponentsBuilder#encode()}, or if using
+	 * {@code UriComponentsBuilder} via {@link DefaultUriBuilderFactory}
+	 * (e.g. {@code WebClient} or {@code RestTemplate}) see its
+	 * {@link DefaultUriBuilderFactory#setEncodingMode encodingMode} property.
+	 * Also see the <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#web-uri-encoding">
+	 * URI Encoding</a> section of the reference docs.
 	 * @param path the URI path
 	 */
 	UriBuilder path(String path);
 
 	/**
-	 * Set the path of this builder overriding the existing path values.
+	 * Override the existing path.
 	 * @param path the URI path, or {@code null} for an empty path
 	 */
 	UriBuilder replacePath(@Nullable String path);
 
 	/**
-	 * Append path segments to the existing path. Each path segment may contain
-	 * URI template variables and should not contain any slashes.
-	 * Use {@code path("/")} subsequently to ensure a trailing slash.
+	 * Append to the path using path segments. For example:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value", "{id}").build("123")
+	 *
+	 * // Results is "/first-value/second-value/123"
+	 *
+	 * </pre>
+	 * <p>If slashes are present in a path segment, they are encoded:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("ba/z", "{id}").build("a/b")
+	 *
+	 * // Results is "/ba%2Fz/a%2Fb"
+	 *
+	 * </pre>
+	 * To insert a trailing slash, use the {@link #path} builder method:
+	 * <pre class="code">
+	 *
+	 * builder.pathSegment("first-value", "second-value").path("/")
+	 *
+	 * // Results is "/first-value/second-value/"
+	 *
+	 * </pre>
 	 * @param pathSegments the URI path segments
 	 */
 	UriBuilder pathSegment(String... pathSegments) throws IllegalArgumentException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.mock.http.client.reactive.test.MockClientHttpRequest;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,7 +118,7 @@ public class DefaultClientRequestBuilderTests {
 		BodyInserter<String, ClientHttpRequest> inserter =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
-					DataBuffer buffer = new DefaultDataBufferFactory().wrap(bodyBytes);
+					DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bodyBytes);
 
 					return response.writeWith(Mono.just(buffer));
 				};

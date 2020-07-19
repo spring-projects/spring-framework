@@ -157,9 +157,9 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertThat(Proxy.isProxyClass(mbm.getClass())).isTrue();
-		assertThatExceptionOfType(RemoteException.class).isThrownBy(
-				mbm::getValue)
-			.satisfies(ex -> assertThat(ex).isSameAs(rex));
+		assertThatExceptionOfType(RemoteException.class)
+			.isThrownBy(mbm::getValue)
+			.isSameAs(rex);
 		verify(myEjb).remove();
 	}
 

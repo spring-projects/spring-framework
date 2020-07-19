@@ -30,7 +30,7 @@ public class SqlReturnUpdateCount extends SqlParameter {
 
 	/**
 	 * Create a new SqlReturnUpdateCount.
-	 * @param name name of the parameter, as used in input and output maps
+	 * @param name the name of the parameter, as used in input and output maps
 	 */
 	public SqlReturnUpdateCount(String name) {
 		super(name, Types.INTEGER);

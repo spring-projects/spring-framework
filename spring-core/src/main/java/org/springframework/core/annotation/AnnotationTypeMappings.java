@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +116,7 @@ final class AnnotationTypeMappings {
 			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann));
 		}
 		catch (Exception ex) {
-			if (ex instanceof AnnotationConfigurationException) {
-				throw (AnnotationConfigurationException) ex;
-			}
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
 			if (failureLogger.isEnabled()) {
 				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
 						(source != null ? source.getAnnotationType() : null), ex);

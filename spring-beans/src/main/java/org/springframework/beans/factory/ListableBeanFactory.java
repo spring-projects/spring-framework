@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * They will ignore any singleton beans that have been registered by other means like
  * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}'s
  * {@code registerSingleton} method, with the exception of
- * {@code getBeanNamesOfType} and {@code getBeansOfType} which will check
+ * {@code getBeanNamesForType} and {@code getBeansOfType} which will check
  * such manually registered singletons too. Of course, BeanFactory's {@code getBean}
  * does allow transparent access to such special beans as well. However, in typical
  * scenarios, all beans will be defined by external bean definitions anyway, so most

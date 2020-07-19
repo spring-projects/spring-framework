@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -34,12 +35,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -58,19 +59,19 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class BeanUtilsTests {
 
 	@Test
-	void testInstantiateClassGivenInterface() {
+	void instantiateClassGivenInterface() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(List.class));
 	}
 
 	@Test
-	void testInstantiateClassGivenClassWithoutDefaultConstructor() {
+	void instantiateClassGivenClassWithoutDefaultConstructor() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(CustomDateEditor.class));
 	}
 
 	@Test  // gh-22531
-	void testInstantiateClassWithOptionalNullableType() throws NoSuchMethodException {
+	void instantiateClassWithOptionalNullableType() throws NoSuchMethodException {
 		Constructor<BeanWithNullableTypes> ctor = BeanWithNullableTypes.class.getDeclaredConstructor(
 				Integer.class, Boolean.class, String.class);
 		BeanWithNullableTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
@@ -80,7 +81,7 @@ class BeanUtilsTests {
 	}
 
 	@Test  // gh-22531
-	void testInstantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
+	void instantiateClassWithOptionalPrimitiveType() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
 		BeanWithPrimitiveTypes bean = BeanUtils.instantiateClass(ctor, null, null, "foo");
 		assertThat(bean.getCounter()).isEqualTo(0);
@@ -88,15 +89,21 @@ class BeanUtilsTests {
 		assertThat(bean.getValue()).isEqualTo("foo");
 	}
 
-	@Test // gh-22531
-	void testInstantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
+	@Test  // gh-22531
+	void instantiateClassWithMoreArgsThanParameters() throws NoSuchMethodException {
 		Constructor<BeanWithPrimitiveTypes> ctor = BeanWithPrimitiveTypes.class.getDeclaredConstructor(int.class, boolean.class, String.class);
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				BeanUtils.instantiateClass(ctor, null, null, "foo", null));
 	}
 
 	@Test
-	void testGetPropertyDescriptors() throws Exception {
+	void instantiatePrivateClassWithPrivateConstructor() throws NoSuchMethodException {
+		Constructor<PrivateBeanWithPrivateConstructor> ctor = PrivateBeanWithPrivateConstructor.class.getDeclaredConstructor();
+		BeanUtils.instantiateClass(ctor);
+	}
+
+	@Test
+	void getPropertyDescriptors() throws Exception {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
 		assertThat(descriptors).as("Descriptors should not be null").isNotNull();
@@ -104,7 +111,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testBeanPropertyIsArray() {
+	void beanPropertyIsArray() {
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(ContainerBean.class);
 		for (PropertyDescriptor descriptor : descriptors) {
 			if ("containedBeans".equals(descriptor.getName())) {
@@ -115,12 +122,12 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testFindEditorByConvention() {
+	void findEditorByConvention() {
 		assertThat(BeanUtils.findEditorByConvention(Resource.class).getClass()).isEqualTo(ResourceEditor.class);
 	}
 
 	@Test
-	void testCopyProperties() throws Exception {
+	void copyProperties() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -136,7 +143,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithDifferentTypes1() throws Exception {
+	void copyPropertiesWithDifferentTypes1() throws Exception {
 		DerivedTestBean tb = new DerivedTestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -152,7 +159,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithDifferentTypes2() throws Exception {
+	void copyPropertiesWithDifferentTypes2() throws Exception {
 		TestBean tb = new TestBean();
 		tb.setName("rod");
 		tb.setAge(32);
@@ -168,7 +175,29 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithEditable() throws Exception {
+	void copyPropertiesHonorsGenericTypeMatches() {
+		IntegerListHolder1 integerListHolder1 = new IntegerListHolder1();
+		integerListHolder1.getList().add(42);
+		IntegerListHolder2 integerListHolder2 = new IntegerListHolder2();
+
+		BeanUtils.copyProperties(integerListHolder1, integerListHolder2);
+		assertThat(integerListHolder1.getList()).containsOnly(42);
+		assertThat(integerListHolder2.getList()).containsOnly(42);
+	}
+
+	@Test
+	void copyPropertiesDoesNotHonorGenericTypeMismatches() {
+		IntegerListHolder1 integerListHolder = new IntegerListHolder1();
+		integerListHolder.getList().add(42);
+		LongListHolder longListHolder = new LongListHolder();
+
+		BeanUtils.copyProperties(integerListHolder, longListHolder);
+		assertThat(integerListHolder.getList()).containsOnly(42);
+		assertThat(longListHolder.getList()).isEmpty();
+	}
+
+	@Test
+	void copyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
@@ -186,7 +215,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithIgnore() throws Exception {
+	void copyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
 		tb.setAge(32);
@@ -204,7 +233,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithIgnoredNonExistingProperty() {
+	void copyPropertiesWithIgnoredNonExistingProperty() {
 		NameAndSpecialProperty source = new NameAndSpecialProperty();
 		source.setName("name");
 		TestBean target = new TestBean();
@@ -213,7 +242,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testCopyPropertiesWithInvalidProperty() {
+	void copyPropertiesWithInvalidProperty() {
 		InvalidProperty source = new InvalidProperty();
 		source.setName("name");
 		source.setFlag1(true);
@@ -226,39 +255,39 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testResolveSimpleSignature() throws Exception {
+	void resolveSimpleSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething");
 		assertSignatureEquals(desiredMethod, "doSomething()");
 	}
 
 	@Test
-	void testResolveInvalidSignatureEndParen() {
+	void resolveInvalidSignatureEndParen() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				BeanUtils.resolveSignature("doSomething(", MethodSignatureBean.class));
 	}
 
 	@Test
-	void testResolveInvalidSignatureStartParen() {
+	void resolveInvalidSignatureStartParen() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				BeanUtils.resolveSignature("doSomething)", MethodSignatureBean.class));
 	}
 
 	@Test
-	void testResolveWithAndWithoutArgList() throws Exception {
+	void resolveWithAndWithoutArgList() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse");
 		assertThat(BeanUtils.resolveSignature("doSomethingElse()", MethodSignatureBean.class)).isNull();
 	}
 
 	@Test
-	void testResolveTypedSignature() throws Exception {
+	void resolveTypedSignature() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingElse", String.class, int.class);
 		assertSignatureEquals(desiredMethod, "doSomethingElse(java.lang.String, int)");
 	}
 
 	@Test
-	void testResolveOverloadedSignature() throws Exception {
+	void resolveOverloadedSignature() throws Exception {
 		// test resolve with no args
 		Method desiredMethod = MethodSignatureBean.class.getMethod("overloaded");
 		assertSignatureEquals(desiredMethod, "overloaded()");
@@ -273,7 +302,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testResolveSignatureWithArray() throws Exception {
+	void resolveSignatureWithArray() throws Exception {
 		Method desiredMethod = MethodSignatureBean.class.getMethod("doSomethingWithAnArray", String[].class);
 		assertSignatureEquals(desiredMethod, "doSomethingWithAnArray(java.lang.String[])");
 
@@ -282,7 +311,7 @@ class BeanUtilsTests {
 	}
 
 	@Test
-	void testSPR6063() {
+	void spr6063() {
 		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
 		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
@@ -329,6 +358,49 @@ class BeanUtilsTests {
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertThat(BeanUtils.resolveSignature(signature, MethodSignatureBean.class)).isEqualTo(desiredMethod);
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class IntegerListHolder1 {
+
+		private List<Integer> list = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class IntegerListHolder2 {
+
+		private List<Integer> list = new ArrayList<>();
+
+		public List<Integer> getList() {
+			return list;
+		}
+
+		public void setList(List<Integer> list) {
+			this.list = list;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class LongListHolder {
+
+		private List<Long> list = new ArrayList<>();
+
+		public List<Long> getList() {
+			return list;
+		}
+
+		public void setList(List<Long> list) {
+			this.list = list;
+		}
 	}
 
 
@@ -552,6 +624,12 @@ class BeanUtilsTests {
 
 		public String getValue() {
 			return value;
+		}
+	}
+
+	private static class PrivateBeanWithPrivateConstructor {
+
+		private PrivateBeanWithPrivateConstructor() {
 		}
 	}
 

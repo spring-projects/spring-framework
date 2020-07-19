@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Base class for interceptors proxying remote Stateless Session Beans.
@@ -45,7 +44,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	private boolean refreshHomeOnConnectFailure = false;
 
-	private volatile boolean homeAsComponent = false;
+	private volatile boolean homeAsComponent;
 
 
 
@@ -121,8 +120,9 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @return whether the exception should be treated as connect failure
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean isConnectFailure(RemoteException ex) {
-		return RmiClientInterceptorUtils.isConnectFailure(ex);
+		return org.springframework.remoting.rmi.RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
 	@Nullable

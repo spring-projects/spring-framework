@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@Nullable
 	private AbstractPropertyBindingResult bindingResult;
 
+	private boolean directFieldAccess = false;
+
 	@Nullable
 	private SimpleTypeConverter typeConverter;
 
@@ -249,7 +251,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	public void initBeanPropertyAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initBeanPropertyAccess before other configuration methods");
-		this.bindingResult = createBeanPropertyBindingResult();
+		this.directFieldAccess = false;
 	}
 
 	/**
@@ -280,7 +282,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	public void initDirectFieldAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initDirectFieldAccess before other configuration methods");
-		this.bindingResult = createDirectFieldBindingResult();
+		this.directFieldAccess = true;
 	}
 
 	/**
@@ -308,7 +310,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected AbstractPropertyBindingResult getInternalBindingResult() {
 		if (this.bindingResult == null) {
-			initBeanPropertyAccess();
+			this.bindingResult = (this.directFieldAccess ?
+					createDirectFieldBindingResult(): createBeanPropertyBindingResult());
 		}
 		return this.bindingResult;
 	}

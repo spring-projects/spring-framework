@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors
+ * Copyright 2002-2020 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @since 5.0
  */
 inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
-		queryForObject(sql, args, T::class.java) as T
+		queryForObject(sql, T::class.java, args) as T
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...")` variant.
@@ -87,7 +87,7 @@ inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out 
  * @since 5.0
  */
 inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
-		queryForList(sql, args, T::class.java)
+		queryForList(sql, T::class.java, args)
 
 /**
  * Extension for [JdbcOperations.query] providing a ResultSetExtractor-like function

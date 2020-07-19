@@ -369,6 +369,33 @@ shows:
 <2> Plug the connector into the `WebClient.Builder`.
 
 
+
+[[webflux-client-builder-http-components]]
+=== HttpComponents
+
+The following example shows how to customize Apache HttpComponents `HttpClient` settings:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
+	clientBuilder.setDefaultRequestConfig(...);
+	CloseableHttpAsyncClient client = clientBuilder.build();
+	ClientHttpConnector connector = new HttpComponentsClientHttpConnector(client);
+
+	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = HttpAsyncClients.custom().apply {
+		setDefaultRequestConfig(...)
+	}.build()
+	val connector = HttpComponentsClientHttpConnector(client)
+	val webClient = WebClient.builder().clientConnector(connector).build()
+----
+
+
 [[webflux-client-retrieve]]
 == `retrieve()`
 
@@ -496,7 +523,7 @@ Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error
 
 [CAUTION]
 ====
-Unlike `retrieve()`, when using `exchange(), it is the responsibility of the application
+Unlike `retrieve()`, when using `exchange()`, it is the responsibility of the application
 to consume any response content regardless of the scenario (success, error, unexpected
 data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
 all the available options for consuming the body. Generally prefer using `retrieve()`

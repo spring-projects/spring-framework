@@ -44,7 +44,10 @@ import org.springframework.dao.DataAccessException;
  * @see CciTemplate#createIndexedRecord(String)
  * @see CciTemplate#createMappedRecord(String)
  * @see CciTemplate#setOutputRecordCreator(RecordCreator)
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @FunctionalInterface
 public interface RecordCreator {
 

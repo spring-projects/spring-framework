@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 
 /**
  * Creates a {@code ContentNegotiationManager} and configures it with
@@ -50,15 +49,16 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  * <th>Enabled Or Not</th>
  * </tr>
  * <tr>
- * <td>{@link #favorPathExtension}</td>
- * <td>true</td>
- * <td>{@link PathExtensionContentNegotiationStrategy}</td>
- * <td>Enabled</td>
- * </tr>
- * <tr>
  * <td>{@link #favorParameter}</td>
  * <td>false</td>
  * <td>{@link ParameterContentNegotiationStrategy}</td>
+ * <td>Off</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #favorPathExtension}</td>
+ * <td>false (as of 5.3)</td>
+ * <td>{@link org.springframework.web.accept.PathExtensionContentNegotiationStrategy
+ * PathExtensionContentNegotiationStrategy}</td>
  * <td>Off</td>
  * </tr>
  * <tr>
@@ -124,12 +124,35 @@ public class ContentNegotiationConfigurer {
 	}
 
 	/**
+	 * Whether a request parameter ("format" by default) should be used to
+	 * determine the requested media type. For this option to work you must
+	 * register {@link #mediaType(String, MediaType) media type mappings}.
+	 * <p>By default this is set to {@code false}.
+	 * @see #parameterName(String)
+	 */
+	public ContentNegotiationConfigurer favorParameter(boolean favorParameter) {
+		this.factory.setFavorParameter(favorParameter);
+		return this;
+	}
+
+	/**
+	 * Set the query parameter name to use when {@link #favorParameter} is on.
+	 * <p>The default parameter name is {@code "format"}.
+	 */
+	public ContentNegotiationConfigurer parameterName(String parameterName) {
+		this.factory.setParameterName(parameterName);
+		return this;
+	}
+
+	/**
 	 * Whether the path extension in the URL path should be used to determine
 	 * the requested media type.
-	 * <p>By default this is set to {@code true} in which case a request
-	 * for {@code /hotels.pdf} will be interpreted as a request for
-	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * <p>By default this is set to {@code false} in which case path extensions
+	 * have no impact on content negotiation.
+	 * @deprecated as of 5.2.4. See deprecation note on
+	 * {@link ContentNegotiationManagerFactoryBean#setFavorPathExtension(boolean)}.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer favorPathExtension(boolean favorPathExtension) {
 		this.factory.setFavorPathExtension(favorPathExtension);
 		return this;
@@ -139,9 +162,9 @@ public class ContentNegotiationConfigurer {
 	 * Add a mapping from a key, extracted from a path extension or a query
 	 * parameter, to a MediaType. This is required in order for the parameter
 	 * strategy to work. Any extensions explicitly registered here are also
-	 * whitelisted for the purpose of Reflected File Download attack detection
-	 * (see Spring Framework reference documentation for more details on RFD
-	 * attack protection).
+	 * treated as safe for the purpose of Reflected File Download attack
+	 * detection (see Spring Framework reference documentation for more details
+	 * on RFD attack protection).
 	 * <p>The path extension strategy will also try to use
 	 * {@link ServletContext#getMimeType} and {@link MediaTypeFactory} to resolve path
 	 * extensions. To change this behavior see the {@link #useRegisteredExtensionsOnly} property.
@@ -183,7 +206,10 @@ public class ContentNegotiationConfigurer {
 	 * to any media type. Setting this to {@code false} will result in an
 	 * {@code HttpMediaTypeNotAcceptableException} if there is no match.
 	 * <p>By default this is set to {@code true}.
+	 * @deprecated as of 5.2.4. See deprecation note on
+	 * {@link ContentNegotiationManagerFactoryBean#setIgnoreUnknownPathExtensions(boolean)}.
 	 */
+	@Deprecated
 	public ContentNegotiationConfigurer ignoreUnknownPathExtensions(boolean ignore) {
 		this.factory.setIgnoreUnknownPathExtensions(ignore);
 		return this;
@@ -210,27 +236,6 @@ public class ContentNegotiationConfigurer {
 	 */
 	public ContentNegotiationConfigurer useRegisteredExtensionsOnly(boolean useRegisteredExtensionsOnly) {
 		this.factory.setUseRegisteredExtensionsOnly(useRegisteredExtensionsOnly);
-		return this;
-	}
-
-	/**
-	 * Whether a request parameter ("format" by default) should be used to
-	 * determine the requested media type. For this option to work you must
-	 * register {@link #mediaType(String, MediaType) media type mappings}.
-	 * <p>By default this is set to {@code false}.
-	 * @see #parameterName(String)
-	 */
-	public ContentNegotiationConfigurer favorParameter(boolean favorParameter) {
-		this.factory.setFavorParameter(favorParameter);
-		return this;
-	}
-
-	/**
-	 * Set the query parameter name to use when {@link #favorParameter} is on.
-	 * <p>The default parameter name is {@code "format"}.
-	 */
-	public ContentNegotiationConfigurer parameterName(String parameterName) {
-		this.factory.setParameterName(parameterName);
 		return this;
 	}
 

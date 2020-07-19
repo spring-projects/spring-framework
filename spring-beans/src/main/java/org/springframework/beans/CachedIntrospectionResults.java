@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public final class CachedIntrospectionResults {
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
 	/** Stores the BeanInfoFactory instances. */
-	private static List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
+	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);

@@ -698,7 +698,7 @@ rather than the method, level. You can only use introduction advice with the
 
 	public interface IntroductionInfo {
 
-		Class[] getInterfaces();
+		Class<?>[] getInterfaces();
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

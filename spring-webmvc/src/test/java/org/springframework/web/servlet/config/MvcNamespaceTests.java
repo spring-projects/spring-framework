@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,10 +63,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockRequestDispatcher;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.PathMatcher;
@@ -89,9 +85,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.RequestToViewNameTranslator;
+import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
@@ -139,6 +139,10 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockRequestDispatcher;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -154,6 +158,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Marten Deinum
  */
 public class MvcNamespaceTests {
 
@@ -221,6 +226,10 @@ public class MvcNamespaceTests {
 		assertThat(appContext.getBean(ConversionService.class)).isNotNull();
 		assertThat(appContext.getBean(LocalValidatorFactoryBean.class)).isNotNull();
 		assertThat(appContext.getBean(Validator.class)).isNotNull();
+		assertThat(appContext.getBean("themeResolver", ThemeResolver.class)).isNotNull();
+		assertThat(appContext.getBean("localeResolver", LocaleResolver.class)).isNotNull();
+		assertThat(appContext.getBean("flashMapManager", FlashMapManager.class)).isNotNull();
+		assertThat(appContext.getBean("viewNameTranslator", RequestToViewNameTranslator.class)).isNotNull();
 
 		// default web binding initializer behavior test
 		request = new MockHttpServletRequest("GET", "/");
@@ -341,6 +350,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testResources() throws Exception {
 		loadBeanDefinitions("mvc-config-resources.xml");
 
@@ -904,7 +914,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	public void testCors() throws Exception {
+	public void testCors() {
 		loadBeanDefinitions("mvc-config-cors.xml");
 
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
@@ -920,6 +930,7 @@ public class MvcNamespaceTests {
 			CorsConfiguration config = configs.get("/api/**");
 			assertThat(config).isNotNull();
 			assertThat(config.getAllowedOrigins().toArray()).isEqualTo(new String[]{"https://domain1.com", "https://domain2.com"});
+			assertThat(config.getAllowedOriginPatterns().toArray()).isEqualTo(new String[]{"http://*.domain.com"});
 			assertThat(config.getAllowedMethods().toArray()).isEqualTo(new String[]{"GET", "PUT"});
 			assertThat(config.getAllowedHeaders().toArray()).isEqualTo(new String[]{"header1", "header2", "header3"});
 			assertThat(config.getExposedHeaders().toArray()).isEqualTo(new String[]{"header1", "header2"});

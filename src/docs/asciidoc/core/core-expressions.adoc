@@ -11,8 +11,8 @@ EL, to name a few -- the Spring Expression Language was created to provide the S
 community with a single well supported expression language that can be used across all
 the products in the Spring portfolio. Its language features are driven by the
 requirements of the projects in the Spring portfolio, including tooling requirements
-for code completion support within the Eclipse-based Spring Tool Suite. That said,
-SpEL is based on a technology-agnostic API that lets other expression language
+for code completion support within the https://spring.io/tools[Spring Tools for Eclipse].
+That said, SpEL is based on a technology-agnostic API that lets other expression language
 implementations be integrated, should the need arise.
 
 While SpEL serves as the foundation for expression evaluation within the Spring
@@ -332,15 +332,20 @@ being placed in it. The following example shows how to do so:
 [[expressions-parser-configuration]]
 === Parser Configuration
 
-It is possible to configure the SpEL expression parser by using a parser configuration object
-(`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
+It is possible to configure the SpEL expression parser by using a parser configuration
+object (`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
 object controls the behavior of some of the expression components. For example, if you
-index into an array or collection and the element at the specified index is `null`,
-you can automatically create the element. This is useful when using expressions made up of a
-chain of property references. If you index into an array or list
-and specifying an index that is beyond the end of the current size of the array or
-list, you can automatically grow the array or list to accommodate that index. The following
-example demonstrates how to automatically grow the list:
+index into an array or collection and the element at the specified index is `null`, SpEL
+can automatically create the element. This is useful when using expressions made up of a
+chain of property references. If you index into an array or list and specify an index
+that is beyond the end of the current size of the array or list, SpEL can automatically
+grow the array or list to accommodate that index. In order to add an element at the
+specified index, SpEL will try to create the element using the element type's default
+constructor before setting the specified value. If the element type does not have a
+default constructor, `null` will be added to the array or list. If there is no built-in
+or custom converter that knows how to set the value, `null` will remain in the array or
+list at the specified index. The following example demonstrates how to automatically grow
+the list:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -539,8 +544,12 @@ example shows:
 	</bean>
 ----
 
-The `systemProperties` variable is predefined, so you can use it in your expressions, as
-the following example shows:
+All beans in the application context are available as predefined variables with their
+common bean name. This includes standard context beans such as `environment` (of type
+`org.springframework.core.env.Environment`) as well as `systemProperties` and
+`systemEnvironment` (of type `Map<String, Object>`) for access to the runtime environment.
+
+The following example shows access to the `systemProperties` bean as a SpEL variable:
 
 [source,xml,indent=0,subs="verbatim"]
 ----
@@ -551,8 +560,7 @@ the following example shows:
 	</bean>
 ----
 
-Note that you do not have to prefix the predefined variable with the `#`
-symbol in this context.
+Note that you do not have to prefix the predefined variable with the `#` symbol here.
 
 You can also refer to other bean properties by name, as the following example shows:
 
@@ -576,8 +584,8 @@ You can also refer to other bean properties by name, as the following example sh
 [[expressions-beandef-annotation-based]]
 === Annotation Configuration
 
-To specify a default value, you can place the `@Value` annotation on fields, methods, and method or constructor
-parameters.
+To specify a default value, you can place the `@Value` annotation on fields, methods,
+and method or constructor parameters.
 
 The following example sets the default value of a field variable:
 
@@ -1133,9 +1141,9 @@ All of the textual operators are case-insensitive.
 
 SpEL supports the following logical operators:
 
-* `and`
-* `or`
-* `not`
+* `and` (`&&`)
+* `or` (`||`)
+* `not` (`!`)
 
 The following example shows how to use the logical operators
 
@@ -1382,8 +1390,20 @@ example shows how to use the `new` operator to invoke constructors:
 === Variables
 
 You can reference variables in the expression by using the `#variableName` syntax. Variables
-are set by using the `setVariable` method on `EvaluationContext` implementations. The
-following example shows how to use variables:
+are set by using the `setVariable` method on `EvaluationContext` implementations.
+
+[NOTE]
+====
+Valid variable names must be composed of one or more of the following supported
+characters.
+
+* letters: `A` to `Z` and `a` to `z`
+* digits: `0` to `9`
+* underscore: `_`
+* dollar sign: `$`
+====
+
+The following example shows how to use variables.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1663,7 +1683,7 @@ The following example shows how to use the Elvis operator:
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1671,7 +1691,7 @@ The following example shows how to use the Elvis operator:
 ----
 	val parser = SpelExpressionParser()
 
-	val name = parser.parseExpression("name?:'Unknown'").getValue(String::class.java)
+	val name = parser.parseExpression("name?:'Unknown'").getValue(Inventor(), String::class.java)
 	println(name)  // 'Unknown'
 ----
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -400,9 +400,10 @@ class BeanDefinitionValueResolver {
 	private String adaptInnerBeanName(String innerBeanName) {
 		String actualInnerBeanName = innerBeanName;
 		int counter = 0;
+		String prefix = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 		while (this.beanFactory.isBeanNameInUse(actualInnerBeanName)) {
 			counter++;
-			actualInnerBeanName = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
+			actualInnerBeanName = prefix + counter;
 		}
 		return actualInnerBeanName;
 	}

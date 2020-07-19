@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ import static org.springframework.http.ContentDisposition.builder;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class ContentDispositionTests {
+class ContentDispositionTests {
 
 	private static DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 
 	@Test
-	public void parse() {
+	@SuppressWarnings("deprecation")
+	void parse() {
 		assertThat(parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123"))
 				.isEqualTo(builder("form-data")
 						.name("foo")
@@ -48,7 +49,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseFilenameUnquoted() {
+	void parseFilenameUnquoted() {
 		assertThat(parse("form-data; filename=unquoted"))
 				.isEqualTo(builder("form-data")
 						.filename("unquoted")
@@ -56,7 +57,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test  // SPR-16091
-	public void parseFilenameWithSemicolon() {
+	void parseFilenameWithSemicolon() {
 		assertThat(parse("attachment; filename=\"filename with ; semicolon.txt\""))
 				.isEqualTo(builder("attachment")
 						.filename("filename with ; semicolon.txt")
@@ -64,7 +65,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseEncodedFilename() {
+	void parseEncodedFilename() {
 		assertThat(parse("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt"))
 				.isEqualTo(builder("form-data")
 						.name("name")
@@ -73,7 +74,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test // gh-24112
-	public void parseEncodedFilenameWithPaddedCharset() {
+	void parseEncodedFilenameWithPaddedCharset() {
 		assertThat(parse("attachment; filename*= UTF-8''some-file.zip"))
 				.isEqualTo(builder("attachment")
 						.filename("some-file.zip", StandardCharsets.UTF_8)
@@ -81,7 +82,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseEncodedFilenameWithoutCharset() {
+	void parseEncodedFilenameWithoutCharset() {
 		assertThat(parse("form-data; name=\"name\"; filename*=test.txt"))
 				.isEqualTo(builder("form-data")
 						.name("name")
@@ -90,13 +91,13 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseEncodedFilenameWithInvalidCharset() {
+	void parseEncodedFilenameWithInvalidCharset() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-16''test.txt"));
 	}
 
 	@Test
-	public void parseEncodedFilenameWithInvalidName() {
+	void parseEncodedFilenameWithInvalidName() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> parse("form-data; name=\"name\"; filename*=UTF-8''%A"));
 
@@ -105,8 +106,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test // gh-23077
-	public void parseWithEscapedQuote() {
-
+	@SuppressWarnings("deprecation")
+	void parseWithEscapedQuote() {
 		BiConsumer<String, String> tester = (description, filename) ->
 			assertThat(parse("form-data; name=\"file\"; filename=\"" + filename + "\"; size=123"))
 					.as(description)
@@ -126,7 +127,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseWithExtraSemicolons() {
+	@SuppressWarnings("deprecation")
+	void parseWithExtraSemicolons() {
 		assertThat(parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123"))
 				.isEqualTo(builder("form-data")
 						.name("foo")
@@ -136,7 +138,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseDates() {
+	@SuppressWarnings("deprecation")
+	void parseDates() {
 		ZonedDateTime creationTime = ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter);
 		ZonedDateTime modificationTime = ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter);
 		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
@@ -154,7 +157,8 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseIgnoresInvalidDates() {
+	@SuppressWarnings("deprecation")
+	void parseIgnoresInvalidDates() {
 		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
 
 		assertThat(
@@ -168,17 +172,17 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void parseEmpty() {
+	void parseEmpty() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse(""));
 	}
 
 	@Test
-	public void parseNoType() {
+	void parseNoType() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse(";"));
 	}
 
 	@Test
-	public void parseInvalidParameter() {
+	void parseInvalidParameter() {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse("foo;bar"));
 	}
 
@@ -188,7 +192,8 @@ public class ContentDispositionTests {
 
 
 	@Test
-	public void format() {
+	@SuppressWarnings("deprecation")
+	void format() {
 		assertThat(
 				builder("form-data")
 						.name("foo")
@@ -199,7 +204,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void formatWithEncodedFilename() {
+	void formatWithEncodedFilename() {
 		assertThat(
 				builder("form-data")
 						.name("name")
@@ -209,7 +214,7 @@ public class ContentDispositionTests {
 	}
 
 	@Test
-	public void formatWithEncodedFilenameUsingUsAscii() {
+	void formatWithEncodedFilenameUsingUsAscii() {
 		assertThat(
 				builder("form-data")
 						.name("name")
@@ -220,11 +225,16 @@ public class ContentDispositionTests {
 	}
 
 	@Test // gh-24220
-	public void formatWithFilenameWithQuotes() {
+	void formatWithFilenameWithQuotes() {
 
-		BiConsumer<String, String> tester = (input, output) ->
+		BiConsumer<String, String> tester = (input, output) -> {
+
 			assertThat(builder("form-data").filename(input).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
+
+			assertThat(builder("form-data").filename(input, StandardCharsets.US_ASCII).build().toString())
+					.isEqualTo("form-data; filename=\"" + output + "\"");
+		};
 
 		String filename = "\"foo.txt";
 		tester.accept(filename, "\\" + filename);
@@ -243,10 +253,14 @@ public class ContentDispositionTests {
 
 		tester.accept("\"\"foo.txt", "\\\"\\\"foo.txt");
 		tester.accept("\"\"\"foo.txt", "\\\"\\\"\\\"foo.txt");
+
+		tester.accept("foo.txt\\", "foo.txt");
+		tester.accept("foo.txt\\\\", "foo.txt\\\\");
+		tester.accept("foo.txt\\\\\\", "foo.txt\\\\");
 	}
 
 	@Test
-	public void formatWithEncodedFilenameUsingInvalidCharset() {
+	void formatWithEncodedFilenameUsingInvalidCharset() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				builder("form-data")
 						.name("name")

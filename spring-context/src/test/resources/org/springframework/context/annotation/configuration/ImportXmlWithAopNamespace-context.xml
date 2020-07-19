@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd
 		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="proxiedXmlBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="proxiedXmlBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="anAspect" class="org.springframework.context.annotation.configuration.ImportResourceTests$AnAspect"/>
 

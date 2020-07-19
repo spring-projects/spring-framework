@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.PathContainer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
@@ -43,7 +43,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void handlerMappingJavaConfig() throws Exception {
+	void handlerMappingJavaConfig() {
 		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
 		wac.register(WebConfig.class);
 		wac.refresh();
@@ -61,7 +61,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void handlerMappingXmlConfig() throws Exception {
+	void handlerMappingXmlConfig() {
 		ClassPathXmlApplicationContext wac = new ClassPathXmlApplicationContext("map.xml", getClass());
 		wac.refresh();
 
@@ -98,7 +98,7 @@ public class SimpleUrlHandlerMappingTests {
 		testUrl("outofpattern*ye", null, handlerMapping, null);
 	}
 
-	private void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
+	void testUrl(String url, Object bean, HandlerMapping handlerMapping, String pathWithinMapping) {
 		MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.GET, URI.create(url)).build();
 		ServerWebExchange exchange = MockServerWebExchange.from(request);
 		Object actual = handlerMapping.getHandler(exchange).block();

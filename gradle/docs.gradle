@@ -1,3 +1,20 @@
+configurations {
+	asciidoctorExt
+}
+
+dependencies {
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.2.RELEASE")
+}
+
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+		mavenContent {
+			includeGroup "io.spring.asciidoctor"
+		}
+	}
+}
+
 /**
  * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
  */
@@ -48,39 +65,52 @@ dokka {
 	dependsOn {
 		tasks.getByName("api")
 	}
+
 	doFirst {
-		classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
-		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
-		sourceDirs = files(moduleProjects
-				.findAll {
-					it.pluginManager.hasPlugin("kotlin")
+		configuration {
+			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+
+			moduleProjects.findAll {
+				it.pluginManager.hasPlugin("kotlin")
+			}.each { project ->
+				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+				kotlinDirs -= project.sourceSets.main.java.srcDirs
+				kotlinDirs.each { dir ->
+					if (dir.exists()) {
+						sourceRoot {
+							path = dir.path
+						}
+					}
 				}
-				.collect { project ->
-					def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
-					kotlinDirs -= project.sourceSets.main.java.srcDirs
-				})
+			}
+		}
 	}
-	moduleName = "spring-framework"
+
 	outputFormat = "html"
 	outputDirectory = "$buildDir/docs/kdoc"
 
-	externalDocumentationLink {
-		url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
-		packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
-	}
-	externalDocumentationLink {
-		url = new URL("https://projectreactor.io/docs/core/release/api/")
-	}
-	externalDocumentationLink {
-		url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
-	}
-	externalDocumentationLink {
-		url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+	configuration {
+		moduleName = "spring-framework"
+
+		externalDocumentationLink {
+			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
+		}
+		externalDocumentationLink {
+			url = new URL("https://projectreactor.io/docs/core/release/api/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+		}
 	}
 }
 
 task downloadResources(type: Download) {
-	def version = "0.1.3.RELEASE"
+	def version = "0.2.2.RELEASE"
 	src "https://repo.spring.io/release/io/spring/docresources/" +
 			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
@@ -93,26 +123,35 @@ task extractDocResources(type: Copy, dependsOn: downloadResources) {
 	into "$buildDir/docs/spring-docs-resources/"
 }
 
+asciidoctorj {
+	modules {
+		pdf {
+			version '1.5.0-beta.8'
+		}
+	}
+	fatalWarnings ".*"
+}
+
 /**
  * Produce the Spring Framework Reference documentation
  * from "src/docs/asciidoc" into  "build/asciidoc/html5"
  */
 asciidoctor {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
 	sources {
 		include '*.adoc'
 	}
 	outputDir "$buildDir/docs/ref-docs/"
 	resources {
 		from(sourceDir) {
-			include 'images/*', 'css/**', 'js/**'
+			include 'images/*.png', 'css/**', 'js/**'
 		}
-		from "$buildDir/docs/spring-docs-resources/"
+		from extractDocResources
 	}
 	logDocuments = true
-	backends = ["html5"]
-	// only ouput PDF documentation for non-SNAPSHOT builds
-	if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
-		backends += "pdf"
+	outputOptions {
+		backends = ["html5", "pdf"]
 	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
@@ -125,14 +164,12 @@ asciidoctor {
 			sectnums: '',
 			'source-highlighter': 'highlight.js',
 			highlightjsdir: 'js/highlight',
-			'highlightjs-theme': 'github',
+			'highlightjs-theme': 'googlecode',
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
 	])
 }
-
-asciidoctor.dependsOn extractDocResources
 
 /**
  * Zip all docs (API and reference) into a single archive

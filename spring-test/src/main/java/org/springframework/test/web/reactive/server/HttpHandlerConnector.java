@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	}
 
 	private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {
-		Integer status = response.getStatusCodeValue();
+		Integer status = response.getRawStatusCode();
 		MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : 200);
 		clientResponse.getHeaders().putAll(response.getHeaders());
 		clientResponse.getCookies().putAll(response.getCookies());

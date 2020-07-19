@@ -46,6 +46,7 @@ import org.xmlunit.diff.DifferenceEvaluator;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.XmlMappingException;
@@ -53,7 +54,6 @@ import org.springframework.oxm.jaxb.test.FlightType;
 import org.springframework.oxm.jaxb.test.Flights;
 import org.springframework.oxm.jaxb.test.ObjectFactory;
 import org.springframework.oxm.mime.MimeContainer;
-import org.springframework.tests.XmlContent;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ReflectionUtils;
 

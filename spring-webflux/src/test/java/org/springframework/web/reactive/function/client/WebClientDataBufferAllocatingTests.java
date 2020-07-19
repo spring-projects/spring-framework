@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractDataBufferAllocatingTests;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +63,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 	@BeforeAll
 	void setUpReactorResourceFactory() {
+		this.factory.setShutdownQuietPeriod(Duration.ofMillis(100));
 		this.factory.afterPropertiesSet();
 	}
 
@@ -86,8 +87,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 		if (super.bufferFactory instanceof NettyDataBufferFactory) {
 			ByteBufAllocator allocator = ((NettyDataBufferFactory) super.bufferFactory).getByteBufAllocator();
-			return new ReactorClientHttpConnector(this.factory, httpClient ->
-					httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
+			return new ReactorClientHttpConnector(this.factory,
+					client -> client.option(ChannelOption.ALLOCATOR, allocator));
 		}
 		else {
 			return new ReactorClientHttpConnector();

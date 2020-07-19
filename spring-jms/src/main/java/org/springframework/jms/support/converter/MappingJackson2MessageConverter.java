@@ -123,7 +123,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	/**
 	 * Specify the encoding to use when converting to and from text-based
 	 * message body content. The default encoding will be "UTF-8".
-	 * <p>When reading from a a text-based message, an encoding may have been
+	 * <p>When reading from a text-based message, an encoding may have been
 	 * suggested through a special JMS property which will then be preferred
 	 * over the encoding set on this MessageConverter instance.
 	 * @see #setEncodingPropertyName

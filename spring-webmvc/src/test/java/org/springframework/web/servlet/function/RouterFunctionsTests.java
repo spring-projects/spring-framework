@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -32,12 +32,14 @@ import static org.mockito.Mockito.mock;
  */
 public class RouterFunctionsTests {
 
+	private final ServerRequest request = new DefaultServerRequest(
+			PathPatternsTestUtils.initRequest("GET", "", true), Collections.emptyList());
+
+
 	@Test
 	public void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.test(request)).willReturn(true);
 
@@ -54,8 +56,6 @@ public class RouterFunctionsTests {
 	public void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.test(request)).willReturn(false);
 
@@ -71,8 +71,6 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
@@ -89,8 +87,6 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 

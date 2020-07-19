@@ -42,10 +42,10 @@ import org.springframework.core.annotation.AnnotationUtilsTests.ExtendsBaseClass
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplementsInterfaceWithGenericAnnotatedMethod;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
+import org.springframework.core.testfixture.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Indexed;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.asList;

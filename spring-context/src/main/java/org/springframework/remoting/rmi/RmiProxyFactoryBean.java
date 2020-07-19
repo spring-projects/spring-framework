@@ -57,7 +57,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.remoting.RemoteAccessException
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	private Object serviceProxy;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static java.time.Duration.ofMillis;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,7 +117,7 @@ public class WebHttpHandlerBuilderTests {
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = new DefaultDataBufferFactory().wrap(bytes);
+		DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.wrap(bytes);
 		return exchange.getResponse().writeWith(Flux.just(buffer));
 	}
 

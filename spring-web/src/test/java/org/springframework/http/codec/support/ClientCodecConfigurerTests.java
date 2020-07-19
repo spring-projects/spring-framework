@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.NettyByteBufDecoder;
+import org.springframework.core.codec.NettyByteBufEncoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -79,10 +81,11 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(12);
+		assertThat(readers.size()).isEqualTo(13);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteBufferDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(DataBufferDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(NettyByteBufDecoder.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageReader.class);
 		assertStringDecoder(getNextDecoder(readers), true);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ProtobufDecoder.class);
@@ -98,10 +101,11 @@ public class ClientCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertThat(writers.size()).isEqualTo(11);
+		assertThat(writers.size()).isEqualTo(12);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteBufferEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(NettyByteBufEncoder.class);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageWriter.class);
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ProtobufHttpMessageWriter.class);
@@ -126,10 +130,11 @@ public class ClientCodecConfigurerTests {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(12);
+		assertThat(readers.size()).isEqualTo(13);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((NettyByteBufDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ResourceDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
@@ -140,6 +145,7 @@ public class ClientCodecConfigurerTests {
 		assertThat(((Jaxb2XmlDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 
 		ServerSentEventHttpMessageReader reader = (ServerSentEventHttpMessageReader) nextReader(readers);
+		assertThat(reader.getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((Jackson2JsonDecoder) reader.getDecoder()).getMaxInMemorySize()).isEqualTo(size);
 
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
@@ -181,7 +187,7 @@ public class ClientCodecConfigurerTests {
 		writers = findCodec(this.configurer.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
 
 		assertThat(sseDecoder).isNotSameAs(jackson2Decoder);
-		assertThat(writers).hasSize(10);
+		assertThat(writers).hasSize(11);
 	}
 
 	@Test // gh-24194
@@ -191,7 +197,7 @@ public class ClientCodecConfigurerTests {
 		List<HttpMessageWriter<?>> writers =
 				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
 
-		assertThat(writers).hasSize(10);
+		assertThat(writers).hasSize(11);
 	}
 
 	@Test
@@ -205,7 +211,7 @@ public class ClientCodecConfigurerTests {
 		List<HttpMessageWriter<?>> writers =
 				findCodec(clone.getWriters(), MultipartHttpMessageWriter.class).getPartWriters();
 
-		assertThat(writers).hasSize(10);
+		assertThat(writers).hasSize(11);
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
@@ -236,8 +242,9 @@ public class ClientCodecConfigurerTests {
 		Object expected = !textOnly;
 		assertThat(decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM)).isEqualTo(expected);
 
+		byte[] bytes = "line1\nline2".getBytes(StandardCharsets.UTF_8);
 		Flux<String> decoded = (Flux<String>) decoder.decode(
-				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
+				Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes)),
 				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
 
 		assertThat(decoded.collectList().block(Duration.ZERO)).isEqualTo(Arrays.asList("line1", "line2"));

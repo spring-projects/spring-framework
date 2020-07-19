@@ -159,9 +159,8 @@ The steps involved in using dynamic-language-backed beans are as follows:
   element in the XML configuration (you can define such beans programmatically by
   using the Spring API, although you will have to consult the source code for
   directions on how to do this, as this chapter does not cover this type of advanced configuration).
-  Note that this is an iterative step. You need at least one bean
-  definition for each dynamic language source file (although multiple bean definitions can reference the same dynamic language source
-  file).
+  Note that this is an iterative step. You need at least one bean definition for each dynamic
+  language source file (although multiple bean definitions can reference the same source file).
 
 The first two steps (testing and writing your dynamic language source files) are beyond
 the scope of this chapter. See the language specification and reference manual
@@ -578,9 +577,12 @@ If you do not use the Spring namespace support, you can still use the
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 ----
 
-NOTE: As of Spring Framework 4.3.3, you may also specify a Groovy `CompilationCustomizer`
-(such as an `ImportCustomizer`) or even a full Groovy `CompilerConfiguration` object
-in the same place as Spring's `GroovyObjectCustomizer`.
+NOTE: You may also specify a Groovy `CompilationCustomizer` (such as an `ImportCustomizer`)
+or even a full Groovy `CompilerConfiguration` object in the same place as Spring's
+`GroovyObjectCustomizer`. Furthermore, you may set a common `GroovyClassLoader` with custom
+configuration for your beans at the `ConfigurableApplicationContext.setClassLoader` level;
+this also leads to shared `GroovyClassLoader` usage and is therefore recommendable in case of
+a large number of scripted beans (avoiding an isolated `GroovyClassLoader` instance per bean).
 
 
 
@@ -589,12 +591,15 @@ in the same place as Spring's `GroovyObjectCustomizer`.
 
 This section describes how to use BeanShell beans in Spring.
 
-The BeanShell homepage includes the following description: {JB}
+The https://beanshell.github.io/intro.html[BeanShell homepage] includes the following
+description:
 
-"`BeanShell is a small, free, embeddable Java source interpreter with dynamic language
+----
+BeanShell is a small, free, embeddable Java source interpreter with dynamic language
 features, written in Java. BeanShell dynamically executes standard Java syntax and
 extends it with common scripting conveniences such as loose types, commands, and method
-closures like those in Perl and JavaScript.`"
+closures like those in Perl and JavaScript.
+----
 
 In contrast to Groovy, BeanShell-backed bean definitions require some (small) additional
 configuration. The implementation of the BeanShell dynamic language support in Spring is
@@ -875,6 +880,6 @@ the correct schema so that the tags in the `lang` namespace are available to you
 The following links go to further resources about the various dynamic languages referenced
 in this chapter:
 
-* The http://www.groovy-lang.org/[Groovy] homepage
-* The http://www.beanshell.org/[BeanShell] homepage
+* The https://www.groovy-lang.org/[Groovy] homepage
+* The https://beanshell.github.io/intro.html[BeanShell] homepage
 * The https://www.jruby.org[JRuby] homepage

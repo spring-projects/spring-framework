@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,13 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.
  *
+ * <p>All beans in the containing {@code BeanFactory} are made available as
+ * predefined variables with their common bean name, including standard context
+ * beans such as "environment", "systemProperties" and "systemEnvironment".
+ *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see BeanExpressionContext#getBeanFactory()
  * @see org.springframework.expression.ExpressionParser
  * @see org.springframework.expression.spel.standard.SpelExpressionParser
  * @see org.springframework.expression.spel.support.StandardEvaluationContext

@@ -28,19 +28,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
-import org.springframework.tests.EnabledForTestGroups;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -61,7 +61,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 		ctx.register(Config.class, JdkProxyTxConfig.class, RepoConfigA.class);
 		assertThatExceptionOfType(BeanCreationException.class)
 			.isThrownBy(ctx::refresh)
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IllegalStateException.class));
+			.withCauseInstanceOf(IllegalStateException.class);
 	}
 
 	@Test

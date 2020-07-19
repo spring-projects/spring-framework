@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,23 @@ import javax.script.ScriptEngine;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.condition.JRE.JAVA_15;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -55,6 +57,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Sebastien Deleuze
  */
+@DisabledForJreRange(min = JAVA_15) // Nashorn JavaScript engine removed in Java 15
 public class ScriptTemplateViewTests {
 
 	private ScriptTemplateView view;
@@ -301,7 +304,6 @@ public class ScriptTemplateViewTests {
 		assertThat(accessor.getPropertyValue("sharedEngine")).isEqualTo(true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test  // gh-23258
 	public void engineSupplierWithNonSharedEngine() {
 		this.configurer.setEngineSupplier(() -> mock(InvocableScriptEngine.class));

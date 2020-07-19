@@ -1,5 +1,7 @@
 [[webtestclient]]
 = WebTestClient
+:doc-root: https://docs.spring.io
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
 
 `WebTestClient` is a thin shell around <<web-reactive.adoc#webflux-client, WebClient>>,
 using it to perform requests and exposing a dedicated, fluent API for verifying responses.

@@ -23,8 +23,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get
-import org.springframework.mock.web.test.server.MockServerWebExchange
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.reactive.BindingContext
 import org.springframework.web.reactive.HandlerResult

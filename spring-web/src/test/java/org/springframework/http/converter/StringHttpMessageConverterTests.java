@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,16 @@ public class StringHttpMessageConverterTests {
 		assertThat(result).as("Invalid result").isEqualTo(body);
 	}
 
+	@Test // gh-25328
+	public void readJsonApi() throws IOException {
+		String body = "{\"result\":\"\u0414\u0410\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "vnd.api.v1+json"));
+		String result = this.converter.read(String.class, inputMessage);
+
+		assertThat(result).as("Invalid result").isEqualTo(body);
+	}
+
 	@Test
 	public void writeDefaultCharset() throws IOException {
 		String body = "H\u00e9llo W\u00f6rld";
@@ -94,12 +104,25 @@ public class StringHttpMessageConverterTests {
 
 	@Test // gh-24123
 	public void writeJson() throws IOException {
-		String body = "{\"foo\":\"bar\"}";
+		String body = "{\"føø\":\"bår\"}";
 		this.converter.write(body, MediaType.APPLICATION_JSON, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
 		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
 		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
+	}
+
+	@Test // gh-25328
+	public void writeJsonApi() throws IOException {
+		String body = "{\"føø\":\"bår\"}";
+		MediaType contentType = new MediaType("application", "vnd.api.v1+json");
+		this.converter.write(body, contentType, this.outputMessage);
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(contentType);
 		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
@@ -128,6 +151,18 @@ public class StringHttpMessageConverterTests {
 		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEqualTo(body);
 		assertThat(headers.getContentType()).isEqualTo(TEXT_PLAIN_UTF_8);
 		assertThat(headers.getContentLength()).isEqualTo(body.getBytes(StandardCharsets.UTF_8).length);
+		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
+	}
+
+	@Test // gh-24283
+	public void writeWithWildCardMediaType() throws IOException {
+		String body = "Hello World";
+		this.converter.write(body, MediaType.ALL, this.outputMessage);
+
+		HttpHeaders headers = this.outputMessage.getHeaders();
+		assertThat(this.outputMessage.getBodyAsString(StandardCharsets.US_ASCII)).isEqualTo(body);
+		assertThat(headers.getContentType()).isEqualTo(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
+		assertThat(headers.getContentLength()).isEqualTo(body.getBytes().length);
 		assertThat(headers.getAcceptCharset().isEmpty()).isTrue();
 	}
 

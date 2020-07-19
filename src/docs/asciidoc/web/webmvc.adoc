@@ -736,23 +736,11 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | ViewResolver| Description
 
 | `AbstractCachingViewResolver`
-| Sub-classes of `AbstractCachingViewResolver` cache view instances that they resolve.
+| Subclasses of `AbstractCachingViewResolver` cache view instances that they resolve.
   Caching improves performance of certain view technologies. You can turn off the
-  cache by setting the `cache` property to `false`. Furthermore, if you must refresh a
-  certain view at runtime (for example, when a FreeMarker template is modified), you can use
-  the `removeFromCache(String viewName, Locale loc)` method.
-
-| `XmlViewResolver`
-| Implementation of `ViewResolver` that accepts a configuration file written in XML with
-  the same DTD as Spring's XML bean factories. The default configuration file is
-  `/WEB-INF/views.xml`.
-
-| `ResourceBundleViewResolver`
-| Implementation of `ViewResolver` that uses bean definitions in a `ResourceBundle`,
-  specified by the bundle base name. For each view it is supposed to resolve, it uses
-  the value of the property `[viewname].(class)` as the view class and the value of the
-  property `[viewname].url` as the view URL. You can find examples in the chapter on
-  <<mvc-view>>.
+  cache by setting the `cache` property to `false`. Furthermore, if you must refresh
+  a certain view at runtime (for example, when a FreeMarker template is modified),
+  you can use the `removeFromCache(String viewName, Locale loc)` method.
 
 | `UrlBasedViewResolver`
 | Simple implementation of the `ViewResolver` interface that affects the direct
@@ -774,6 +762,12 @@ The following table provides more details on the `ViewResolver` hierarchy:
 | `ContentNegotiatingViewResolver`
 | Implementation of the `ViewResolver` interface that resolves a view based on the
   request file name or `Accept` header. See <<mvc-multiple-representations>>.
+
+| `BeanNameViewResolver`
+| Implementation of the `ViewResolver` interface that interprets a view name as a
+  bean name in the current application context. This is a very flexible variant which
+  allows for mixing and matching different view types based on distinct view names.
+  Each such `View` can be defined as a bean e.g. in XML or in configuration classes.
 |===
 
 
@@ -1535,14 +1529,39 @@ The following example has type and method level mappings:
 ==== URI patterns
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-uri-templates, WebFlux>>#
 
-You can map requests by using the following global patterns and wildcards:
+`@RequestMapping` methods can be mapped using URL patterns. There are two alternatives:
 
-* `?` matches one character
-* `*` matches zero or more characters within a path segment
-* `**` match zero or more path segments
+* `PathPattern` -- a pre-parsed pattern matched against the URL path also pre-parsed as
+`PathContainer`. Designed for web use, this solution deals effectively with encoding and
+path parameters, and matches efficiently.
+* `AntPathMatcher` -- match String patterns against a String path. This is the original
+solution also used in Spring configuration to select resources on the classpath, on the
+filesystem, and other locations. It is less efficient and the String path input is a
+challenge for dealing effectively with encoding and other issues with URLs.
 
-You can also declare URI variables and access their values with `@PathVariable`,
-as the following example shows:
+`PathPattern` is the recommended solution for web applications and it is the only choice in
+Spring WebFlux. Prior to version 5.3, `AntPathMatcher` was the only choice in Spring MVC
+and continues to be the default. However `PathPattern` can be enabled in the
+<<mvc-config-path-matching, MVC config>>.
+
+`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition it also
+supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
+at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
+path segments such that it's only allowed at the end of a pattern. This eliminates many
+cases of ambiguity when choosing the best matching pattern for a given request.
+For full pattern syntax please refer to
+{api-spring-framework}/web/util/pattern/PathPattern.html[PathPattern] and
+{api-spring-framework}/util/AntPathMatcher.html[AntPathMatcher].
+
+Some example patterns:
+
+* `+"/resources/ima?e.png"+` - match one character in a path segment
+* `+"/resources/*.png"+` - match zero or more characters in a path segment
+* `+"/resources/**"+` - match multiple path segments
+* `+"/projects/{project}/versions"+` - match a path segment and capture it as a variable
+* `+"/projects/{project:[a-z]+}/versions"+` - match and capture a variable with a regex
+
+Captured URI variables can be accessed with `@PathVariable`. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1608,7 +1627,7 @@ extracts the name, version, and file extension:
 .Java
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
-	public void handle(@PathVariable String version, @PathVariable String ext) {
+	public void handle(@PathVariable String name, @PathVariable String version, @PathVariable String ext) {
 		// ...
 	}
 ----
@@ -1616,7 +1635,7 @@ extracts the name, version, and file extension:
 .Kotlin
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
-	fun handle(@PathVariable version: String, @PathVariable ext: String) {
+	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
 		// ...
 	}
 ----
@@ -1626,42 +1645,39 @@ by using `PropertyPlaceHolderConfigurer` against local, system, environment, and
 sources. You can use this, for example, to parameterize a base URL based on some external
 configuration.
 
-NOTE: Spring MVC uses the `PathMatcher` contract and the `AntPathMatcher` implementation from
-`spring-core` for URI path matching.
-
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
 ==== Pattern Comparison
 [.small]#<<web-reactive.adoc#webflux-ann-requestmapping-pattern-comparison, WebFlux>>#
 
-When multiple patterns match a URL, they must be compared to find the best match. This is done
-by using `AntPathMatcher.getPatternComparator(String path)`, which looks for patterns that are more
-specific.
+When multiple patterns match a URL, the best match must be selected. This is done with
+one of the following depending on whether parsed `PathPattern`'s are enabled for use or not:
 
-A pattern is less specific if it has a lower count of URI variables (counted as 1), single
-wildcards (counted as 1), and double wildcards (counted as 2). Given an equal score, the
-longer pattern is chosen. Given the same score and length, the pattern with more URI variables
-than wildcards is chosen.
+* {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
+* {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
+
+Both help to sorts patterns with more specific ones on top. A pattern is less specific if
+it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
+and double wildcards (counted as 2). Given an equal score, the longer pattern is chosen.
+Given the same score and length, the pattern with more URI variables than wildcards is
+chosen.
 
 The default mapping pattern (`/{asterisk}{asterisk}`) is excluded from scoring and always
 sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are considered less
 specific than other pattern that do not have double wildcards.
 
-For the full details, see {api-spring-framework}/util/AntPathMatcher.AntPatternComparator.html[`AntPatternComparator`]
-in {api-spring-framework}/util/AntPathMatcher.html[`AntPathMatcher`] and also keep in mind that
-you can customize the {api-spring-framework}/util/PathMatcher.html[`PathMatcher`] implementation.
-See <<mvc-config-path-matching>> in the configuration section.
+For the full details, follow the above links to the pattern Comparators.
 
 
 [[mvc-ann-requestmapping-suffix-pattern-match]]
 ==== Suffix Match
 
-By default, Spring MVC performs `.{asterisk}` suffix pattern matching so that a
-controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-The file extension is then used to interpret the requested content type to use for
-the response (that is, instead of the `Accept` header) -- for example, `/person.pdf`,
-`/person.xml`, and others.
+Starting in 5.3, by default Spring MVC no longer performs `.{asterisk}` suffix pattern
+matching where a controller mapped to `/person` is also implicitly mapped to
+`/person.{asterisk}`. As a consequence path extensions are no longer used to interpret
+the requested content type for the response -- for example, `/person.pdf`, `/person.xml`,
+and so on.
 
 Using file extensions in this way was necessary when browsers used to send `Accept` headers
 that were hard to interpret consistently. At present, that is no longer a necessity and
@@ -1672,16 +1688,16 @@ It can cause ambiguity when overlain with the use of URI variables, path paramet
 URI encoding. Reasoning about URL-based authorization
 and security (see next section for more details) also become more difficult.
 
-To completely disable the use of file extensions, you must set both of the following:
+To completely disable the use of path extensions in versions prior to 5.3, set the following:
 
 * `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching, PathMatchConfigurer>>
 * `favorPathExtension(false)`, see <<mvc-config-content-negotiation, ContentNegotiationConfigurer>>
 
-URL-based content negotiation can still be useful (for example, when typing a URL in a
-browser). To enable that, we recommend a query parameter-based strategy to avoid most of
-the issues that come with file extensions. Alternatively, if you must use file extensions, consider
-restricting them to a list of explicitly registered extensions through the
-`mediaTypes` property of <<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
+Having a way to request content types other than through the `"Accept"` header can still
+be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+to use the query parameter strategy. If you must use file extensions, consider restricting
+them to a list of explicitly registered extensions through the `mediaTypes` property of
+<<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
 
 
 [[mvc-ann-requestmapping-rfd]]
@@ -1699,11 +1715,11 @@ lower the risk but are not sufficient to prevent RFD attacks.
 
 To prevent RFD attacks, prior to rendering the response body, Spring MVC adds a
 `Content-Disposition:inline;filename=f.txt` header to suggest a fixed and safe download
-file. This is done only if the URL path contains a file extension that is neither whitelisted
-nor explicitly registered for content negotiation. However, it can potentially have
-side effects when URLs are typed directly into a browser.
+file. This is done only if the URL path contains a file extension that is neither
+allowed as safe nor explicitly registered for content negotiation. However, it can
+potentially have side effects when URLs are typed directly into a browser.
 
-Many common path extensions are whitelisted by default. Applications with custom
+Many common path extensions are allowed as safe by default. Applications with custom
 `HttpMessageConverter` implementations can explicitly register file extensions for content
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
 See <<mvc-config-content-negotiation>>.
@@ -4797,7 +4813,7 @@ as the following example shows:
 .Java
 ----
 	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
+	public String myHandleMethod(WebRequest request, Model model) {
 
 		long eTag = ... // <1>
 
@@ -4817,7 +4833,7 @@ as the following example shows:
 .Kotlin
 ----
 	@RequestMapping
-	fun myHandleMethod(webRequest: WebRequest, model: Model): String? {
+	fun myHandleMethod(request: WebRequest, model: Model): String? {
 
 		val eTag: Long = ... // <1>
 
@@ -4965,12 +4981,10 @@ sub-elements are available.
 === Type Conversion
 [.small]#<<web-reactive.adoc#webflux-config-conversion, WebFlux>>#
 
-By default formatters, for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
-formatting library is also installed if Joda-Time is present on the classpath.
+By default, formatters for various number and date types are installed, along with support
+for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
 
-In Java configuration, you can register custom formatters and converters, as the
-following example shows:
+To register custom formatters and converters in Java config, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -4998,7 +5012,7 @@ following example shows:
 	}
 ----
 
-The following example shows how to achieve the same configuration in XML:
+To do the same in XML config, use the following:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -5035,6 +5049,41 @@ The following example shows how to achieve the same configuration in XML:
 		</bean>
 
 	</beans>
+----
+
+By default Spring MVC considers the request Locale when parsing and formatting date
+values. This works for forms where dates are represented as Strings with "input" form
+fields. For "date" and "time" form fields, however, browsers use a fixed format defined
+in the HTML spec. For such cases date and time formatting can be customized as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
+
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setUseIsoFormat(true);
+			registrar.registerFormatters(registry);
+      	}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			val registrar = DateTimeFormatterRegistrar()
+			registrar.setUseIsoFormat(true)
+			registrar.registerFormatters(registry)
+		}
+	}
 ----
 
 NOTE: See <<core.adoc#format-FormatterRegistrar-SPI, the `FormatterRegistrar` SPI>>
@@ -5398,6 +5447,13 @@ using the `<mvc:view-controller>` element:
 ----
 	<mvc:view-controller path="/" view-name="home"/>
 ----
+
+If an `@RequestMapping` method is mapped to a URL for any HTTP method then a view
+controller cannot be used to handle the same URL. This is because a match by URL to an
+annotated controller is considered a strong enough indication of endpoint ownership so
+that a 405 (METHOD_NOT_ALLOWED), a 415 (UNSUPPORTED_MEDIA_TYPE), or similar response can
+be sent to the client to help with debugging. For this reason it is recommended to avoid
+splitting URL handling across an annotated controller and a view controller.
 
 
 
@@ -5772,23 +5828,12 @@ The following example shows how to customize path matching in Java configuration
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
 			configurer
-				.setUseSuffixPatternMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
-				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper())
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController.class));
+				.setPatternParser(new PathPatternParser())
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
 		}
 
-		@Bean
-		public UrlPathHelper urlPathHelper() {
-			//...
-		}
-
-		@Bean
-		public PathMatcher antPathMatcher() {
-			//...
+		private PathPatternParser patternParser() {
+			// ...
 		}
 	}
 ----
@@ -5801,22 +5846,11 @@ The following example shows how to customize path matching in Java configuration
 
 		override fun configurePathMatch(configurer: PathMatchConfigurer) {
 			configurer
-				.setUseSuffixPatternMatch(true)
-				.setUseTrailingSlashMatch(false)
-				.setUseRegisteredSuffixPatternMatch(true)
-				.setPathMatcher(antPathMatcher())
-				.setUrlPathHelper(urlPathHelper())
-				.addPathPrefix("/api",
-						HandlerTypePredicate.forAnnotation(RestController::class.java))
+				.setPatternParser(patternParser)
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
 		}
 
-		@Bean
-		fun urlPathHelper(): UrlPathHelper {
-			//...
-		}
-
-		@Bean
-		fun antPathMatcher(): PathMatcher {
+		fun patternParser(): PathPatternParser {
 			//...
 		}
 	}
@@ -5828,9 +5862,7 @@ The following example shows how to achieve the same configuration in XML:
 ----
 	<mvc:annotation-driven>
 		<mvc:path-matching
-			suffix-pattern="true"
 			trailing-slash="false"
-			registered-suffixes-only="true"
 			path-helper="pathHelper"
 			path-matcher="pathMatcher"/>
 	</mvc:annotation-driven>

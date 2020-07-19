@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -229,6 +230,20 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	@Override
+	public <T> Stream<T> queryForStream(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
+			throws DataAccessException {
+
+		return getJdbcOperations().queryForStream(getPreparedStatementCreator(sql, paramSource), rowMapper);
+	}
+
+	@Override
+	public <T> Stream<T> queryForStream(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
+			throws DataAccessException {
+
+		return queryForStream(sql, new MapSqlParameterSource(paramMap), rowMapper);
+	}
+
+	@Override
 	@Nullable
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
@@ -430,12 +445,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 			return NamedParameterUtils.parseSqlStatement(sql);
 		}
 		synchronized (this.parsedSqlCache) {
-			ParsedSql parsedSql = this.parsedSqlCache.get(sql);
-			if (parsedSql == null) {
-				parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-				this.parsedSqlCache.put(sql, parsedSql);
-			}
-			return parsedSql;
+			return this.parsedSqlCache.computeIfAbsent(sql, NamedParameterUtils::parseSqlStatement);
 		}
 	}
 
