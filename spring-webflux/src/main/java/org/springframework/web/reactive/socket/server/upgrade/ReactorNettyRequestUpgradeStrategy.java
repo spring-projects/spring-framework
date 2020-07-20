@@ -57,7 +57,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @since 5.2.6
 	 */
 	public ReactorNettyRequestUpgradeStrategy() {
-		this(WebsocketServerSpec.builder());
+		this(WebsocketServerSpec::builder);
 	}
 
 
@@ -83,7 +83,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return buildSpec(null);
 	}
 
-	private WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
+	WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
 		WebsocketServerSpec.Builder builder = this.specBuilderSupplier.get();
 		if (subProtocol != null) {
 			builder.protocols(subProtocol);
