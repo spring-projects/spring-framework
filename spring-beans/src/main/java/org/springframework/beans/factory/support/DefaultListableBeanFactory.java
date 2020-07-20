@@ -543,8 +543,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType) {
 		List<String> result = new ArrayList<>();
 		for (String beanName : this.beanDefinitionNames) {
-			BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-			if (!beanDefinition.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
+			BeanDefinition bd = this.beanDefinitionMap.get(beanName);
+			if (bd != null && !bd.isAbstract() && findAnnotationOnBean(beanName, annotationType) != null) {
 				result.add(beanName);
 			}
 		}
@@ -911,6 +911,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (String bdName : this.beanDefinitionNames) {
 			if (!beanName.equals(bdName)) {
 				BeanDefinition bd = this.beanDefinitionMap.get(bdName);
+				// Ensure bd is non-null due to potential concurrent modification of beanDefinitionMap.
 				if (bd != null && beanName.equals(bd.getParentName())) {
 					resetBeanDefinition(bdName);
 				}
