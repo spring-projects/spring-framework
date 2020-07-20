@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,5 +90,21 @@ public interface ConversionService {
 	 */
 	@Nullable
 	Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	/**
+	 * Convenience operation for converting a source object to the specified targetType,
+	 * where the target type is a descriptor that provides additional conversion context.
+	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and
+	 * encapsulates the construction of the source type descriptor using
+	 * {@link TypeDescriptor#forObject(Object)}.
+	 * @param source the source object
+	 * @param targetType the target type
+	 * @return the converted value
+	 * @throws ConversionException if a conversion exception occurred
+	 * @throws IllegalArgumentException if targetType is {@code null},
+	 * or sourceType is {@code null} but source is not {@code null}
+	 */
+	@Nullable
+	Object convert(@Nullable Object source, TypeDescriptor targetType);
 
 }
