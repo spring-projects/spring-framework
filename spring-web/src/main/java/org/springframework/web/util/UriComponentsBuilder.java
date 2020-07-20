@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private CompositePathComponentBuilder pathBuilder;
 
-	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+	private LinkedMultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
 	private String fragment;
 
@@ -135,7 +135,7 @@ public class UriComponentsBuilder implements Cloneable {
 		this.host = other.host;
 		this.port = other.port;
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
-		this.queryParams.putAll(other.queryParams);
+		this.queryParams = other.queryParams.deepCopy();
 		this.fragment = other.fragment;
 	}
 

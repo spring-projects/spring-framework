@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link org.springframework.web.util.UriComponentsBuilder}.
+ * Unit tests for {@link UriComponentsBuilder}.
  *
  * @author Arjen Poutsma
  * @author Phillip Webb
@@ -557,7 +557,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-12398
-	public void pathWithDuplicateSlashes() throws URISyntaxException {
+	public void pathWithDuplicateSlashes() {
 		UriComponents uriComponents = UriComponentsBuilder.fromPath("/foo/////////bar").build();
 		assertEquals("/foo/bar", uriComponents.getPath());
 	}
@@ -727,26 +727,28 @@ public class UriComponentsBuilderTests {
 		assertThat(components.toString(), equalTo(""));
 	}
 
-	@Test
-	public void testClone() throws URISyntaxException {
+	@Test  // gh-25243
+	public void testCloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
-		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1");
+		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1");
 
-		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		UriComponentsBuilder builder2 = builder1.cloneBuilder();
 		builder2.scheme("https").host("e2.com").path("p2").pathSegment("ps2").queryParam("q2").fragment("f2");
+
+		builder1.queryParam("q1", "y");  // one more entry for an existing parameter
 
 		UriComponents result1 = builder1.build();
 		assertEquals("http", result1.getScheme());
 		assertEquals("e1.com", result1.getHost());
 		assertEquals("/p1/ps1", result1.getPath());
-		assertEquals("q1", result1.getQuery());
+		assertEquals("q1=x&q1=y", result1.getQuery());
 		assertEquals("f1", result1.getFragment());
 
-		UriComponents result2 = builder2.build();
+		UriComponents result2 = builder2.buildAndExpand("ps2;a");
 		assertEquals("https", result2.getScheme());
 		assertEquals("e2.com", result2.getHost());
 		assertEquals("/p1/ps1/p2/ps2", result2.getPath());
-		assertEquals("q1&q2", result2.getQuery());
+		assertEquals("q1=x&q2", result2.getQuery());
 		assertEquals("f2", result2.getFragment());
 	}
 
