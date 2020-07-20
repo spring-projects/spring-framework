@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -752,30 +752,32 @@ public class UriComponentsBuilderTests {
 		assertThat(components.toString(), equalTo(""));
 	}
 
-	@Test
+	@Test  // gh-25243
 	public void testCloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
-		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1").encode();
+		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
 
-		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		UriComponentsBuilder builder2 = builder1.cloneBuilder();
 		builder2.scheme("https").host("e2.com").path("p2").pathSegment("{ps2}").queryParam("q2").fragment("f2");
+
+		builder1.queryParam("q1", "y");  // one more entry for an existing parameter
 
 		UriComponents result1 = builder1.build();
 		assertEquals("http", result1.getScheme());
 		assertEquals("e1.com", result1.getHost());
 		assertEquals("/p1/ps1", result1.getPath());
-		assertEquals("q1", result1.getQuery());
+		assertEquals("q1=x&q1=y", result1.getQuery());
 		assertEquals("f1", result1.getFragment());
 
 		UriComponents result2 = builder2.buildAndExpand("ps2;a");
 		assertEquals("https", result2.getScheme());
 		assertEquals("e2.com", result2.getHost());
 		assertEquals("/p1/ps1/p2/ps2%3Ba", result2.getPath());
-		assertEquals("q1&q2", result2.getQuery());
+		assertEquals("q1=x&q2", result2.getQuery());
 		assertEquals("f2", result2.getFragment());
 	}
 
-	@Test // gh-24772
+	@Test  // gh-24772
 	public void testDeepClone() {
 		HashMap<String, Object> vars = new HashMap<>();
 		vars.put("ps1", "foo");
@@ -785,7 +787,7 @@ public class UriComponentsBuilderTests {
 		builder1.scheme("http").host("e1.com").userInfo("user:pwd").path("/p1").pathSegment("{ps1}")
 				.pathSegment("{ps2}").queryParam("q1").fragment("f1").uriVariables(vars).encode();
 
-		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		UriComponentsBuilder builder2 = builder1.cloneBuilder();
 
 		UriComponents result1 = builder1.build();
 		assertEquals("http", result1.getScheme());
