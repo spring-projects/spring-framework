@@ -42,7 +42,6 @@ import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator
  */
 public class StandardWebSocketHandlerAdapter extends Endpoint {
 
-	private static final Log logger = LogFactory.getLog(StandardWebSocketHandlerAdapter.class);
 
 	private final WebSocketHandler handler;
 
@@ -104,7 +103,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.afterConnectionEstablished(this.wsSession);
 		}
 		catch (Exception ex) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, LogFactory.getLog(getClass()));
 		}
 	}
 
@@ -114,7 +113,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.handleMessage(this.wsSession, textMessage);
 		}
 		catch (Exception ex) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, LogFactory.getLog(getClass()));
 		}
 	}
 
@@ -124,7 +123,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.handleMessage(this.wsSession, binaryMessage);
 		}
 		catch (Exception ex) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, LogFactory.getLog(getClass()));
 		}
 	}
 
@@ -134,7 +133,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.handleMessage(this.wsSession, pongMessage);
 		}
 		catch (Exception ex) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, LogFactory.getLog(getClass()));
 		}
 	}
 
@@ -145,6 +144,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.afterConnectionClosed(this.wsSession, closeStatus);
 		}
 		catch (Exception ex) {
+			Log logger = LogFactory.getLog(getClass());
 			if (logger.isWarnEnabled()) {
 				logger.warn("Unhandled on-close exception for " + this.wsSession, ex);
 			}
@@ -157,7 +157,7 @@ public class StandardWebSocketHandlerAdapter extends Endpoint {
 			this.handler.handleTransportError(this.wsSession, exception);
 		}
 		catch (Exception ex) {
-			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, logger);
+			ExceptionWebSocketHandlerDecorator.tryCloseWithError(this.wsSession, ex, LogFactory.getLog(getClass()));
 		}
 	}
 
