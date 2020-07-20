@@ -146,12 +146,14 @@ abstract class AnnotationsScanner {
 			Class<?> root = source;
 			while (source != null && source != Object.class && remaining > 0 &&
 					!hasPlainJavaAnnotationsOnly(source)) {
+				if (isFiltered(source, context, classFilter)) {
+					source = source.getSuperclass();
+					aggregateIndex++;
+					continue;
+				}
 				R result = processor.doWithAggregate(context, aggregateIndex);
 				if (result != null) {
 					return result;
-				}
-				if (isFiltered(source, context, classFilter)) {
-					continue;
 				}
 				Annotation[] declaredAnnotations =
 						getDeclaredAnnotations(context, source, classFilter, true);
