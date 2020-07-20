@@ -151,6 +151,8 @@ abstract class AnnotationsScanner {
 					return result;
 				}
 				if (isFiltered(source, context, classFilter)) {
+					source = source.getSuperclass();
+					aggregateIndex++;
 					continue;
 				}
 				Annotation[] declaredAnnotations =

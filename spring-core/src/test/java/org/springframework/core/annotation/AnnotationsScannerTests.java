@@ -499,6 +499,22 @@ class AnnotationsScannerTests {
 		assertThat(result).isEqualTo("OK");
 	}
 
+	@Test
+	void scanWithFilteredAll() {
+		List<Integer> indexes = new ArrayList<>();
+		String result = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
+				SearchStrategy.INHERITED_ANNOTATIONS,
+				(context, aggregateIndex, source, annotations) -> {
+					indexes.add(aggregateIndex);
+					return "";
+				},
+				(context,cls)->{
+					return true;
+				}
+				);
+		assertThat(result).isNull();
+	}
+
 
 	private Method methodFrom(Class<?> type) {
 		return ReflectionUtils.findMethod(type, "method");
