@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 import org.junit.Before;
@@ -53,8 +53,13 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for {@link CrossOrigin @CrossOrigin} annotated methods.
@@ -123,7 +128,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());
@@ -151,8 +156,8 @@ public class CrossOriginTests {
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
-		assertEquals(Arrays.asList("https://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertEquals(Collections.singletonList("https://example.com"), config.getAllowedOrigins());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -162,8 +167,8 @@ public class CrossOriginTests {
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
-		assertEquals(Arrays.asList("https://example.com"), config.getAllowedOrigins());
-		assertTrue(config.getAllowCredentials());
+		assertEquals(Collections.singletonList("https://example.com"), config.getAllowedOrigins());
+		assertNull(config.getAllowCredentials());
 	}
 
 	@Test
@@ -240,7 +245,7 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertNull(config.getAllowCredentials());
 		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
 		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
 		assertEquals(new Long(1800), config.getMaxAge());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,9 +122,10 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Whether user credentials are supported.
-	 * <p>By default this is set to {@code true} in which case user credentials
-	 * are supported.
+	 * Whether user credentials are supported in which case the browser should
+	 * include any cookies associated with the domain of the request being
+	 * annotated.
+	 * <p>By default this is {@code false} and user credentials are not allowed.
 	 */
 	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);

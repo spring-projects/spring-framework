@@ -11,7 +11,7 @@
 
 		<mvc:mapping path="/api/**" allowed-origins="https://domain1.com, https://domain2.com"
 					 allowed-methods="GET, PUT" allowed-headers="header1, header2, header3"
-					 exposed-headers="header1, header2" allow-credentials="false" max-age="123" />
+					 exposed-headers="header1, header2" allow-credentials="true" max-age="123" />
 
 		<mvc:mapping path="/resources/**" allowed-origins="https://domain1.com" />
 

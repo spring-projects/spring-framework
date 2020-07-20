@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.cors.CorsConfiguration;
 /**
  * Marks the annotated method or type as permitting cross origin requests.
  *
- * <p>By default all origins and headers are permitted, credentials are allowed,
+ * <p>By default all origins and headers are permitted, credentials are not allowed,
  * and the maximum age is set to 1800 seconds (30 minutes). The list of HTTP
  * methods is set to the methods on the {@code @RequestMapping} if not
  * explicitly set on {@code @CrossOrigin}.
@@ -67,7 +67,7 @@ public @interface CrossOrigin {
 	 * @deprecated as of Spring 4.3.4, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
-	boolean DEFAULT_ALLOW_CREDENTIALS = true;
+	boolean DEFAULT_ALLOW_CREDENTIALS = false;
 
 	/**
 	 * @deprecated as of Spring 4.3.4, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
@@ -133,7 +133,8 @@ public @interface CrossOrigin {
 	 * An empty string ({@code ""}) means <em>undefined</em>.
 	 * {@code "true"} means that the pre-flight response will include the header
 	 * {@code Access-Control-Allow-Credentials=true}.
-	 * <p>If undefined, credentials are allowed.
+	 * <p>If undefined, this is set to {@code "false"} in which case credentials
+	 * are not allowed.
 	 */
 	String allowCredentials() default "";
 

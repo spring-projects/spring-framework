@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -920,13 +920,13 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
-			assertTrue(config.getAllowCredentials());
+			assertNull(config.getAllowCredentials());
 			assertEquals(new Long(1800), config.getMaxAge());
 		}
 	}
 
 	@Test
-	public void testCors() throws Exception {
+	public void testCors() {
 		loadBeanDefinitions("mvc-config-cors.xml");
 
 		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
@@ -943,14 +943,14 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"GET", "PUT"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
 			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
-			assertFalse(config.getAllowCredentials());
+			assertTrue(config.getAllowCredentials());
 			assertEquals(Long.valueOf(123), config.getMaxAge());
 			config = configs.get("/resources/**");
 			assertArrayEquals(new String[]{"https://domain1.com"}, config.getAllowedOrigins().toArray());
 			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
-			assertTrue(config.getAllowCredentials());
+			assertNull(config.getAllowCredentials());
 			assertEquals(Long.valueOf(1800), config.getMaxAge());
 		}
 	}
