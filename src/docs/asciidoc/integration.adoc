@@ -1969,7 +1969,7 @@ MapMessage={
 While the send operations cover many common usage scenarios, you might sometimes
 want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
 `SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
-`MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` execute
+`MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
 these callback methods.
 
 
@@ -4596,8 +4596,8 @@ callback interface. In the following example, the `mailSender` property is of ty
 ----
 
 NOTE: The mail code is a crosscutting concern and could well be a candidate for
-refactoring into a <<core.adoc#aop, custom Spring AOP aspect>>, which then could
-be executed at appropriate joinpoints on the `OrderManager` target.
+refactoring into a <<core.adoc#aop, custom Spring AOP aspect>>, which could then
+be run at appropriate joinpoints on the `OrderManager` target.
 
 The Spring Framework's mail support ships with the standard JavaMail implementation.
 See the relevant javadoc for more information.
@@ -4771,7 +4771,7 @@ In all likelihood, you should never need to implement your own.
 The variants that Spring provides are as follows:
 
 * `SyncTaskExecutor`:
-  This implementation does not execute invocations asynchronously. Instead, each
+  This implementation does not run invocations asynchronously. Instead, each
   invocation takes place in the calling thread. It is primarily used in situations
   where multi-threading is not necessary, such as in simple test cases.
 * `SimpleAsyncTaskExecutor`:
@@ -4843,7 +4843,7 @@ out a set of messages:
 
 As you can see, rather than retrieving a thread from the pool and executing it yourself,
 you add your `Runnable` to the queue. Then the `TaskExecutor` uses its internal rules to
-decide when the task gets executed.
+decide when the task gets run.
 
 To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
 
@@ -5057,7 +5057,7 @@ invocation:
 ----
 	@Scheduled(fixedDelay=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
@@ -5070,7 +5070,7 @@ successive start times of each invocation):
 ----
 	@Scheduled(fixedRate=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
@@ -5083,19 +5083,19 @@ number of milliseconds to wait before the first execution of the method, as the 
 ----
 	@Scheduled(initialDelay=1000, fixedRate=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
 If simple periodic scheduling is not expressive enough, you can provide a cron expression.
-For example, the following executes only on weekdays:
+The following example runs only on weekdays:
 
 [source,java,indent=0]
 [subs="verbatim"]
 ----
 	@Scheduled(cron="*/5 * * * * MON-FRI")
 	public void doSomething() {
-		// something that should execute on weekdays only
+		// something that should run on weekdays only
 	}
 ----
 
@@ -5134,7 +5134,7 @@ to a method that returns `void`, as the following example shows:
 ----
 	@Async
 	void doSomething() {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -5148,7 +5148,7 @@ a legitimate application of the `@Async` annotation:
 ----
 	@Async
 	void doSomething(String s) {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -5163,7 +5163,7 @@ that returns a value:
 ----
 	@Async
 	Future<String> returnSomething(int i) {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -5226,7 +5226,7 @@ used when executing a given method. The following example shows how to do so:
 ----
 	@Async("otherExecutor")
 	void doSomething(String s) {
-		// this will be executed asynchronously by "otherExecutor"
+		// this will be run asynchronously by "otherExecutor"
 	}
 ----
 
@@ -5370,9 +5370,9 @@ various behaviors:
 ----
 
 Finally, the `keep-alive` setting determines the time limit (in seconds) for which threads
-may remain idle before being terminated. If there are more than the core number of threads
+may remain idle before being stopped. If there are more than the core number of threads
 currently in the pool, after waiting this amount of time without processing a task, excess
-threads get terminated. A time value of zero causes excess threads to terminate
+threads get stopped. A time value of zero causes excess threads to stop
 immediately after executing a task without remaining follow-up work in the task queue.
 The following example sets the `keep-alive` value to two minutes:
 
@@ -5410,7 +5410,7 @@ The scheduler is referenced by the outer element, and each individual
 task includes the configuration of its trigger metadata. In the preceding example, that
 metadata defines a periodic trigger with a fixed delay indicating the number of
 milliseconds to wait after each task execution has completed. Another option is
-`fixed-rate`, indicating how often the method should be executed regardless of how long
+`fixed-rate`, indicating how often the method should be run regardless of how long
 any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate` tasks, you can specify an
 'initial-delay' parameter, indicating the number of milliseconds to wait
 before the first execution of the method. For more control, you can instead provide a `cron` attribute.
@@ -5657,17 +5657,17 @@ https://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_an
 At its core, the cache abstraction applies caching to Java methods, thus reducing the
 number of executions based on the information available in the cache. That is, each time
 a targeted method is invoked, the abstraction applies a caching behavior that checks
-whether the method has been already executed for the given arguments. If it has been
-executed, the cached result is returned without having to execute the actual method.
-If the method has not been executed, then it is executed, and the result is cached and
+whether the method has been already invoked for the given arguments. If it has been
+invoked, the cached result is returned without having to invoke the actual method.
+If the method has not been invoked, then it is invoked, and the result is cached and
 returned to the user so that, the next time the method is invoked, the cached result is
-returned. This way, expensive methods (whether CPU- or IO-bound) can be executed only
+returned. This way, expensive methods (whether CPU- or IO-bound) can be invoked only
 once for a given set of parameters and the result reused without having to actually
-execute the method again. The caching logic is applied transparently without any
+invoke the method again. The caching logic is applied transparently without any
 interference to the invoker.
 
 IMPORTANT: This approach works only for methods that are guaranteed to return the same
-output (result) for a given input (or arguments) no matter how many times it is executed.
+output (result) for a given input (or arguments) no matter how many times it is invoked.
 
 The caching abstraction provides other cache-related operations, such as the ability
 to update the content of the cache or to remove one or all entries. These are useful if
@@ -5725,7 +5725,7 @@ For caching declaration, Spring's caching abstraction provides a set of Java ann
 As the name implies, you can use `@Cacheable` to demarcate methods that are cacheable --
 that is, methods for which the result is stored in the cache so that, on subsequent
 invocations (with the same arguments), the value in the cache is returned without
-having to actually execute the method. In its simplest form, the annotation declaration
+having to actually invoke the method. In its simplest form, the annotation declaration
 requires the name of the cache associated with the annotated method, as the following
 example shows:
 
@@ -5738,13 +5738,13 @@ example shows:
 
 In the preceding snippet, the `findBook` method is associated with the cache named `books`.
 Each time the method is called, the cache is checked to see whether the invocation has
-already been executed and does not have to be repeated. While in most cases, only one
+already been run and does not have to be repeated. While in most cases, only one
 cache is declared, the annotation lets multiple names be specified so that more than one
-cache is being used. In this case, each of the caches is checked before executing the
+cache is being used. In this case, each of the caches is checked before invoking the
 method -- if at least one cache is hit, the associated value is returned.
 
 NOTE: All the other caches that do not contain the value are also updated, even though
-the cached method was not actually executed.
+the cached method was not actually invoked.
 
 The following example uses `@Cacheable` on the `findBook` method:
 
@@ -5932,13 +5932,13 @@ documentation of your cache provider for more details.
 [[cache-annotations-cacheable-condition]]
 ===== Conditional Caching
 
-Sometimes, a method might not be suitable for caching all the time (for example, it
-might depend on the given arguments). The cache annotations support such functionality
-through the `condition` parameter, which takes a `SpEL` expression that is evaluated to
-either `true` or `false`. If `true`, the method is cached. If not, it behaves as if the
-method is not cached (that is, the method is executed every time no matter what values are in the cache
-or what arguments are used). For example, the following method is cached only
-if the argument `name` has a length shorter than 32:
+Sometimes, a method might not be suitable for caching all the time (for example, it might
+depend on the given arguments). The cache annotations support such use cases through the
+`condition` parameter, which takes a `SpEL` expression that is evaluated to either `true`
+or `false`. If `true`, the method is cached. If not, it behaves as if the method is not
+cached (that is, the method is invoked every time no matter what values are in the cache
+or what arguments are used). For example, the following method is cached only if the
+argument `name` has a length shorter than 32:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5951,8 +5951,8 @@ if the argument `name` has a length shorter than 32:
 
 In addition to the `condition` parameter, you can use the `unless` parameter to veto the
 adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
-after the method has been called. To expand on the previous example, perhaps we
-only want to cache paperback books, as the following example does:
+after the method has been invoked. To expand on the previous example, perhaps we only
+want to cache paperback books, as the following example does:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -6017,7 +6017,7 @@ available to the context so that you can use them for key and conditional comput
 
 | `caches`
 | Root object
-| Collection of caches against which the current method is executed
+| Collection of caches against which the current method is run
 | `#root.caches[0].name`
 
 | Argument name
@@ -6041,7 +6041,7 @@ available to the context so that you can use them for key and conditional comput
 ==== The `@CachePut` Annotation
 
 When the cache needs to be updated without interfering with the method execution,
-you can use the `@CachePut` annotation. That is, the method is always executed and its
+you can use the `@CachePut` annotation. That is, the method is always invoked and its
 result is placed into the cache (according to the `@CachePut` options). It supports
 the same options as `@Cacheable` and should be used for cache population rather than
 method flow optimization. The following example uses the `@CachePut` annotation:
@@ -6055,8 +6055,8 @@ method flow optimization. The following example uses the `@CachePut` annotation:
 
 IMPORTANT: Using `@CachePut` and `@Cacheable` annotations on the same method is generally
 strongly discouraged because they have different behaviors. While the latter causes the
-method execution to be skipped by using the cache, the former forces the execution in
-order to execute a cache update. This leads to unexpected behavior and, with the exception
+method invocation to be skipped by using the cache, the former forces the invocation in
+order to run a cache update. This leads to unexpected behavior and, with the exception
 of specific corner-cases (such as annotations having conditions that exclude them from each
 other), such declarations should be avoided. Note also that such conditions should not rely
 on the result object (that is, the `#result` variable), as these are validated up-front to
@@ -6093,17 +6093,18 @@ Note that the framework ignores any key specified in this scenario as it does no
 (the entire cache is evicted, not only one entry).
 
 You can also indicate whether the eviction should occur after (the default) or before
-the method executes by using the `beforeInvocation` attribute. The former provides the
+the method is invoked by using the `beforeInvocation` attribute. The former provides the
 same semantics as the rest of the annotations: Once the method completes successfully,
-an action (in this case, eviction) on the cache is executed. If the method does not
-execute (as it might be cached) or an exception is thrown, the eviction does not occur.
+an action (in this case, eviction) on the cache is run. If the method does not
+run (as it might be cached) or an exception is thrown, the eviction does not occur.
 The latter (`beforeInvocation=true`) causes the eviction to always occur before the
 method is invoked. This is useful in cases where the eviction does not need to be tied
 to the method outcome.
 
-Note that `void` methods can be used with `@CacheEvict` - as the methods act as a trigger,
-the return values are ignored (as they do not interact with the cache). This is not the case
-with `@Cacheable` which adds or updates data into the cache and, thus, requires a result.
+Note that `void` methods can be used with `@CacheEvict` - as the methods act as a
+trigger, the return values are ignored (as they do not interact with the cache). This is
+not the case with `@Cacheable` which adds data to the cache or updates data in the cache
+and, thus, requires a result.
 
 
 [[cache-annotations-caching]]
@@ -6688,7 +6689,7 @@ declarations without having an actual backing cache configured. As this is an in
 configuration, an exception is thrown at runtime, since the caching infrastructure
 is unable to find a suitable store. In situations like this, rather than removing the
 cache declarations (which can prove tedious), you can wire in a simple dummy cache that
-performs no caching -- that is, it forces the cached methods to be executed every time.
+performs no caching -- that is, it forces the cached methods to be invoked every time.
 The following example shows how to do so:
 
 [source,xml,indent=0]
@@ -6710,7 +6711,7 @@ through the `fallbackToNoOpCache` flag, adds a no-op cache for all the definitio
 handled by the configured cache managers. That is, every cache definition not found in
 either `jdkCache` or `gemfireCache` (configured earlier in the example) is handled by
 the no-op cache, which does not store any information, causing the target method to be
-executed every time.
+invoked every time.
 
 
 

@@ -573,14 +573,13 @@ RouterFunction<ServerResponse> route = route()
 
 === Nested Routes
 
-It is common for a group of router functions to have a shared predicate, for instance a shared
-path.
-In the example above, the shared predicate would be a path predicate that matches `/person`,
-used by three of the routes.
-When using annotations, you would remove this duplication by using a type-level `@RequestMapping`
- annotation that maps to `/person`.
-In WebFlux.fn, path predicates can be shared through the `path` method on the router function builder.
-For instance, the last few lines of the example above can be improved in the following way by using nested routes:
+It is common for a group of router functions to have a shared predicate, for instance a
+shared path. In the example above, the shared predicate would be a path predicate that
+matches `/person`, used by three of the routes. When using annotations, you would remove
+this duplication by using a type-level `@RequestMapping` annotation that maps to
+`/person`. In WebFlux.fn, path predicates can be shared through the `path` method on the
+router function builder. For instance, the last few lines of the example above can be
+improved in the following way by using nested routes:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -848,7 +847,7 @@ The following example shows how to do so:
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
-We allow only the handler function to be executed when access is allowed.
+We only let the handler function be run when access is allowed.
 
 Besides using the `filter` method on the router function builder, it is possible to apply a
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.

@@ -781,7 +781,7 @@ The following example shows how to do so:
 ----
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
-We allow only the handler function to be executed when access is allowed.
+We only let the handler function be run when access is allowed.
 
 Besides using the `filter` method on the router function builder, it is possible to apply a
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
