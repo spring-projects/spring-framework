@@ -71,7 +71,7 @@ final class PatternMappingFilterProxy implements Filter {
 	private void addUrlPattern(String urlPattern) {
 		Assert.notNull(urlPattern, "Found null URL Pattern");
 		if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
-			this.endsWithMatches.add(urlPattern.substring(1, urlPattern.length()));
+			this.endsWithMatches.add(urlPattern.substring(1));
 		}
 		else if (urlPattern.equals(PATH_MAPPING_PATTERN)) {
 			this.startsWithMatches.add("");

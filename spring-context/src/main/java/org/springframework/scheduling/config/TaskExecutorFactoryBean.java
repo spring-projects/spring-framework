@@ -107,7 +107,7 @@ public class TaskExecutorFactoryBean implements
 				int separatorIndex = this.poolSize.indexOf('-');
 				if (separatorIndex != -1) {
 					corePoolSize = Integer.parseInt(this.poolSize.substring(0, separatorIndex));
-					maxPoolSize = Integer.parseInt(this.poolSize.substring(separatorIndex + 1, this.poolSize.length()));
+					maxPoolSize = Integer.parseInt(this.poolSize.substring(separatorIndex + 1));
 					if (corePoolSize > maxPoolSize) {
 						throw new IllegalArgumentException(
 								"Lower bound of pool-size range must not exceed the upper bound");

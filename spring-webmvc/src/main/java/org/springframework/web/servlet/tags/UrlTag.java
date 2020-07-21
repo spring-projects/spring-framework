@@ -278,7 +278,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			}
 			else {
 				if (this.context.endsWith("/")) {
-					url.append(this.context.substring(0, this.context.length() - 1));
+					url.append(this.context, 0, this.context.length() - 1);
 				}
 				else {
 					url.append(this.context);

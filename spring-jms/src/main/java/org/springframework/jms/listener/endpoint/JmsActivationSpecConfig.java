@@ -226,7 +226,7 @@ public class JmsActivationSpecConfig {
 		try {
 			int separatorIndex = concurrency.indexOf('-');
 			if (separatorIndex != -1) {
-				setMaxConcurrency(Integer.parseInt(concurrency.substring(separatorIndex + 1, concurrency.length())));
+				setMaxConcurrency(Integer.parseInt(concurrency.substring(separatorIndex + 1)));
 			}
 			else {
 				setMaxConcurrency(Integer.parseInt(concurrency));
