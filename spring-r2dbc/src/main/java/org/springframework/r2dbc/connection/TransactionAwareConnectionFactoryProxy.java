@@ -58,7 +58,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link ConnectionFactory}, avoiding the need to define such a proxy in the first place.
  *
  * <p><b>NOTE:</b> This {@link ConnectionFactory} proxy needs to return wrapped
- * {@link Connection}s (which implement the {@link ConnectionProxy} interface) in order
+ * {@link Connection}s (which implement the {@link org.springframework.jdbc.datasource.ConnectionProxy} interface) in order
  * to handle close calls properly. Use {@link Wrapped#unwrap()} to retrieve
  * the native R2DBC Connection.
  *
@@ -86,12 +86,12 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	/**
 	 * Delegates to {@link ConnectionFactoryUtils} for automatically participating in Spring-managed transactions.
 	 * <p>
-	 * The returned {@link ConnectionFactory} handle implements the {@link ConnectionProxy} interface, allowing to
+	 * The returned {@link ConnectionFactory} handle implements the {@link org.springframework.jdbc.datasource.ConnectionProxy} interface, allowing to
 	 * retrieve the underlying target {@link Connection}.
 	 *
 	 * @return a transactional {@link Connection} if any, a new one else.
 	 * @see ConnectionFactoryUtils#doGetConnection
-	 * @see ConnectionProxy#getTargetConnection
+	 * @see org.springframework.jdbc.datasource.ConnectionProxy#getTargetConnection
 	 */
 	@Override
 	public Mono<Connection> create() {
