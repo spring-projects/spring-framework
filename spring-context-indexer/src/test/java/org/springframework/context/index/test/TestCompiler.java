@@ -63,8 +63,7 @@ public class TestCompiler {
 
 
 	public TestCompilationTask getTask(Class<?>... types) {
-		List<String> names = Arrays.stream(types).map(Class::getName).collect(Collectors.toList());
-		return getTask(names.toArray(new String[names.size()]));
+		return getTask(Arrays.stream(types).map(Class::getName).toArray(String[]::new));
 	}
 
 	public TestCompilationTask getTask(String... types) {
