@@ -185,7 +185,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 */
 	protected HttpURLConnection openConnection(URL url, @Nullable Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
-		if (!HttpURLConnection.class.isInstance(urlConnection)) {
+		if (!(urlConnection instanceof HttpURLConnection)) {
 			throw new IllegalStateException("HttpURLConnection required for [" + url + "] but got: " + urlConnection);
 		}
 		return (HttpURLConnection) urlConnection;

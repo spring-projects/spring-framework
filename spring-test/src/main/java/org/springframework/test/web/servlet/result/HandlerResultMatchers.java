@@ -69,7 +69,7 @@ public class HandlerResultMatchers {
 			assertNotNull("No handler", handler);
 			if (handler != null) {
 				Class<?> actual = handler.getClass();
-				if (HandlerMethod.class.isInstance(handler)) {
+				if (handler instanceof HandlerMethod) {
 					actual = ((HandlerMethod) handler).getBeanType();
 				}
 				assertEquals("Handler type", type, ClassUtils.getUserClass(actual));

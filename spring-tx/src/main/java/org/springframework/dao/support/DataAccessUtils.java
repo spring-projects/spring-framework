@@ -169,7 +169,7 @@ public abstract class DataAccessUtils {
 			if (String.class == requiredType) {
 				result = result.toString();
 			}
-			else if (Number.class.isAssignableFrom(requiredType) && Number.class.isInstance(result)) {
+			else if (Number.class.isAssignableFrom(requiredType) && result instanceof Number) {
 				try {
 					result = NumberUtils.convertNumberToTargetClass(((Number) result), (Class<? extends Number>) requiredType);
 				}

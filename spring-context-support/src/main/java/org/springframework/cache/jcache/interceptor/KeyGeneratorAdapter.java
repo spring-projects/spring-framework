@@ -87,7 +87,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
-		if (!(AbstractJCacheKeyOperation.class.isInstance(operation))) {
+		if (!(operation instanceof AbstractJCacheKeyOperation)) {
 			throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
 		}
 		CacheKeyInvocationContext<?> invocationContext = createCacheKeyInvocationContext(target, operation, params);
