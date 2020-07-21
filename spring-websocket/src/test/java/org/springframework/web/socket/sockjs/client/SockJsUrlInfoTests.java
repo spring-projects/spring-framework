@@ -34,7 +34,7 @@ public class SockJsUrlInfoTests {
 	@Test
 	public void serverId() throws Exception {
 		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
-		int serverId = Integer.valueOf(info.getServerId());
+		int serverId = Integer.parseInt(info.getServerId());
 		assertThat(serverId >= 0 && serverId < 1000).as("Invalid serverId: " + serverId).isTrue();
 	}
 

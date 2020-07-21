@@ -195,7 +195,7 @@ public class EnableCachingIntegrationTests {
 
 		@Bean
 		public Bar bar() {
-			return new Bar(Boolean.valueOf(env.getProperty("bar.enabled")));
+			return new Bar(Boolean.parseBoolean(env.getProperty("bar.enabled")));
 		}
 
 

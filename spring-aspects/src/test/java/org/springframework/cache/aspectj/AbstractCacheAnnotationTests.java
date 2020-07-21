@@ -416,11 +416,11 @@ public abstract class AbstractCacheAnnotationTests {
 		Integer three = 3;
 
 		Cache cache = this.cm.getCache("testCache");
-		assertThat((int) Integer.valueOf(service.conditionalUpdate(one).toString())).isEqualTo((int) one);
+		assertThat(Integer.parseInt(service.conditionalUpdate(one).toString())).isEqualTo((int) one);
 		assertThat(cache.get(one)).isNull();
 
-		assertThat((int) Integer.valueOf(service.conditionalUpdate(three).toString())).isEqualTo((int) three);
-		assertThat((int) Integer.valueOf(cache.get(three).get().toString())).isEqualTo((int) three);
+		assertThat(Integer.parseInt(service.conditionalUpdate(three).toString())).isEqualTo((int) three);
+		assertThat(Integer.parseInt(cache.get(three).get().toString())).isEqualTo((int) three);
 	}
 
 	protected void testMultiCache(CacheableService<?> service) {
