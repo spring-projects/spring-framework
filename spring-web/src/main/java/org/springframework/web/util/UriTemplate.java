@@ -225,7 +225,7 @@ public class UriTemplate implements Serializable {
 								throw new IllegalArgumentException(
 										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
-							String regex = variable.substring(idx + 1, variable.length());
+							String regex = variable.substring(idx + 1);
 							pattern.append('(');
 							pattern.append(regex);
 							pattern.append(')');

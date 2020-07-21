@@ -386,7 +386,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			if (value == null) {
 				throw new IllegalArgumentException("Model has no value for key '" + name + "'");
 			}
-			result.append(targetUrl.substring(endLastMatch, matcher.start()));
+			result.append(targetUrl, endLastMatch, matcher.start());
 			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
 			endLastMatch = matcher.end();
 		}
