@@ -510,7 +510,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	protected void addCacheHeaders(ServerHttpResponse response) {
 		response.getHeaders().setCacheControl("public, max-age=" + ONE_YEAR);
-		response.getHeaders().setExpires(new Date().getTime() + ONE_YEAR * 1000);
+		response.getHeaders().setExpires(System.currentTimeMillis() + ONE_YEAR * 1000);
 	}
 
 	protected void addNoCacheHeaders(ServerHttpResponse response) {
