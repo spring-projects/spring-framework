@@ -645,9 +645,14 @@ public class CodeFlow implements Opcodes {
 		if (descriptor.length() == 1) {
 			return "DFIJ".contains(descriptor);
 		}
-		if (descriptor.startsWith("Ljava/lang/")) {
-			String name = descriptor.substring("Ljava/lang/".length());
-			if (name.equals("Double") || name.equals("Float") || name.equals("Integer") || name.equals("Long")) {
+		final String lJavaLangString = "Ljava/lang/";
+		if (descriptor.startsWith(lJavaLangString)) {
+			final int lJavaLangStringLength = lJavaLangString.length();
+			if (descriptor.regionMatches(lJavaLangStringLength, "Double", 0, "Double".length())
+					|| descriptor.regionMatches(lJavaLangStringLength, "Float", 0, "Float".length())
+					|| descriptor.regionMatches(lJavaLangStringLength, "Integer", 0, "Integer".length())
+					|| descriptor.regionMatches(lJavaLangStringLength, "Long", 0, "Long".length())
+			) {
 				return true;
 			}
 		}
