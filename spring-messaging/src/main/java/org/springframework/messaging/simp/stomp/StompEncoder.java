@@ -212,7 +212,7 @@ public class StompEncoder  {
 	private StringBuilder getStringBuilder(@Nullable StringBuilder sb, String inString, int i) {
 		if (sb == null) {
 			sb = new StringBuilder(inString.length());
-			sb.append(inString.substring(0, i));
+			sb.append(inString, 0, i);
 		}
 		return sb;
 	}

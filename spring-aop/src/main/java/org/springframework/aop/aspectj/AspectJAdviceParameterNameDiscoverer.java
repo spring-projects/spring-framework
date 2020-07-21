@@ -648,7 +648,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				}
 
 				if (tokens[currentIndex].endsWith(")")) {
-					sb.append(tokens[currentIndex].substring(0, tokens[currentIndex].length() - 1));
+					sb.append(tokens[currentIndex], 0, tokens[currentIndex].length() - 1);
 					return new PointcutBody(numTokensConsumed, sb.toString().trim());
 				}
 
