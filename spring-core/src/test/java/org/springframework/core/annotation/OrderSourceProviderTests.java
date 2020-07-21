@@ -43,7 +43,7 @@ class OrderSourceProviderTests {
 		C c2 = new C(-5);
 		items.add(c);
 		items.add(c2);
-		Collections.sort(items, comparator);
+		items.sort(comparator);
 		assertOrder(items, c2, c);
 	}
 
@@ -54,7 +54,7 @@ class OrderSourceProviderTests {
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		Collections.sort(items, comparator.withSourceProvider(obj -> null));
+		items.sort(comparator.withSourceProvider(obj -> null));
 		assertOrder(items, c, a, b);
 	}
 
@@ -65,7 +65,7 @@ class OrderSourceProviderTests {
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		Collections.sort(items, comparator.withSourceProvider(obj -> {
+		items.sort(comparator.withSourceProvider(obj -> {
 			if (obj == a) {
 				return new C(4);
 			}
@@ -84,7 +84,7 @@ class OrderSourceProviderTests {
 		C c2 = new C(-5);
 
 		List<?> items = Arrays.asList(a, c, c2);
-		Collections.sort(items, comparator.withSourceProvider(obj -> {
+		items.sort(comparator.withSourceProvider(obj -> {
 			if (obj == a) {
 				return 4;
 			}
