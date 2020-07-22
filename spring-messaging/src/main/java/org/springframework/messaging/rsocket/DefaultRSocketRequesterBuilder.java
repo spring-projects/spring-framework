@@ -184,8 +184,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 				metaMimeType, dataMimeType, setupPayload, strategies);
 
 		return new DefaultRSocketRequester(
-				new DefaultRSocketRequester.ClientRSocketDelegate(connector.toRSocketClient(transport)),
-				dataMimeType, metaMimeType, strategies);
+				connector.toRSocketClient(transport), null, dataMimeType, metaMimeType, strategies);
 	}
 
 	@Override
@@ -219,9 +218,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 				metaMimeType, dataMimeType, setupPayload, rsocketStrategies);
 
 		return connector.connect(transport).map(rsocket ->
-				new DefaultRSocketRequester(
-						new DefaultRSocketRequester.ConnectionRSocketDelegate(rsocket),
-						dataMimeType, metaMimeType, rsocketStrategies));
+				new DefaultRSocketRequester(null, rsocket, dataMimeType, metaMimeType, rsocketStrategies));
 	}
 
 	private RSocketStrategies getRSocketStrategies() {
