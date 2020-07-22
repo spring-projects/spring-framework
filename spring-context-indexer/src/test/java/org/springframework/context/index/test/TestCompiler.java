@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.processing.Processor;
 import javax.tools.JavaCompiler;
