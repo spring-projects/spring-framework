@@ -341,12 +341,13 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void updateAfterRemovedSubscription(String sessionId, Subscription subscription) {
 			if (subscription.isPattern()) {
-				String patternDestination = subscription.getDestination();
-				for (String destination : this.destinationCache.keySet()) {
-					if (pathMatcher.match(patternDestination, destination)) {
-						removeInternal(destination, sessionId, subscription.getId());
+				String subscriptionId = subscription.getId();
+				this.destinationCache.forEach((destination, sessionIdToSubscriptionIds) -> {
+					List<String> subscriptionIds = sessionIdToSubscriptionIds.get(sessionId);
+					if (subscriptionIds != null && subscriptionIds.contains(subscriptionId)) {
+						removeInternal(destination, sessionId, subscriptionId);
 					}
-				}
+				});
 			}
 			else {
 				removeInternal(subscription.getDestination(), sessionId, subscription.getId());
