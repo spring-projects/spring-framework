@@ -167,8 +167,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			if (elem instanceof CaptureTheRestPathElement || elem instanceof WildcardTheRestPathElement) {
 				this.catchAll = true;
 			}
-			if (elem instanceof SeparatorPathElement && elem.next != null &&
-					elem.next instanceof WildcardPathElement && elem.next.next == null) {
+			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
 				this.endsWithSeparatorWildcard = true;
 			}
 			elem = elem.next;
