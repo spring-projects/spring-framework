@@ -95,8 +95,7 @@ import org.springframework.util.StringUtils;
  * operating on pre-resolved bean definition metadata objects.
  *
  * <p>Note that readers for specific bean definition formats are typically
- * implemented separately rather than as bean factory subclasses:
- * see for example {@link PropertiesBeanDefinitionReader} and
+ * implemented separately rather than as bean factory subclasses: see for example
  * {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
  *
  * <p>For an alternative implementation of the
@@ -1104,6 +1103,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	protected boolean allowAliasOverriding() {
 		return isAllowBeanDefinitionOverriding();
+	}
+
+	/**
+	 * Also checks for an alias overriding a bean definition of the same name.
+	 */
+	@Override
+	protected void checkForAliasCircle(String name, String alias) {
+		super.checkForAliasCircle(name, alias);
+		if (!isAllowBeanDefinitionOverriding() && containsBeanDefinition(alias)) {
+			throw new IllegalStateException("Cannot register alias '" + alias +
+					"' for name '" + name + "': Alias would override bean definition '" + alias + "'");
+		}
 	}
 
 	@Override

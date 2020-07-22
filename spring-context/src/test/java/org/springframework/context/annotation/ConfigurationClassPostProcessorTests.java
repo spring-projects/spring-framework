@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -373,6 +375,18 @@ public class ConfigurationClassPostProcessorTests {
 			.withMessageContaining("bar")
 			.withMessageContaining("SingletonBeanConfig")
 			.withMessageContaining(TestBean.class.getName());
+	}
+
+	@Test  // gh-25430
+	public void detectAliasOverride() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		DefaultListableBeanFactory beanFactory = context.getDefaultListableBeanFactory();
+		beanFactory.setAllowBeanDefinitionOverriding(false);
+		context.register(FirstConfiguration.class, SecondConfiguration.class);
+		assertThatIllegalStateException().isThrownBy(context::refresh)
+				.withMessageContaining("alias 'taskExecutor'")
+				.withMessageContaining("name 'applicationTaskExecutor'")
+				.withMessageContaining("bean definition 'taskExecutor'");
 	}
 
 	@Test
@@ -1263,6 +1277,24 @@ public class ConfigurationClassPostProcessorTests {
 
 		public @Bean Bar bar() {
 			return new Bar(new Foo());
+		}
+	}
+
+	@Configuration
+	static class FirstConfiguration {
+
+		@Bean
+		SyncTaskExecutor taskExecutor() {
+			return new SyncTaskExecutor();
+		}
+	}
+
+	@Configuration
+	static class SecondConfiguration {
+
+		@Bean(name = {"applicationTaskExecutor", "taskExecutor"})
+		SimpleAsyncTaskExecutor simpleAsyncTaskExecutor() {
+			return new SimpleAsyncTaskExecutor();
 		}
 	}
 
