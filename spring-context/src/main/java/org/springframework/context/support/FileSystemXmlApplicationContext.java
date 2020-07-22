@@ -151,6 +151,7 @@ public class FileSystemXmlApplicationContext extends AbstractXmlApplicationConte
 	 * This is consistent with the semantics in a Servlet container.
 	 * @param path the path to the resource
 	 * @return the Resource handle
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext#getResourceByPath
 	 */
 	@Override
 	protected Resource getResourceByPath(String path) {
