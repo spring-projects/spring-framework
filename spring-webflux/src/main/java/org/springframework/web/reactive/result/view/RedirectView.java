@@ -220,10 +220,9 @@ public class RedirectView extends AbstractUrlBasedView {
 		return (processor != null ? processor.processUrl(exchange, result) : result);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttributeOrDefault(name, Collections.<String, String>emptyMap());
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 	/**
@@ -250,7 +249,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			endLastMatch = matcher.end();
 			found = matcher.find();
 		}
-		result.append(targetUrl.substring(endLastMatch));
+		result.append(targetUrl, endLastMatch, targetUrl.length());
 		return result;
 	}
 
