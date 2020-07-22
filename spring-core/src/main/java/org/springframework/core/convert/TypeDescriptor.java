@@ -21,10 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
@@ -292,7 +289,7 @@ public class TypeDescriptor implements Serializable {
 		}
 		else if (isMap() && typeDescriptor.isMap()) {
 			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
-				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
+					isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
 		}
 		else {
 			return true;
@@ -300,7 +297,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	private boolean isNestedAssignable(@Nullable TypeDescriptor nestedTypeDescriptor,
-			@Nullable TypeDescriptor otherNestedTypeDescriptor) {
+									   @Nullable TypeDescriptor otherNestedTypeDescriptor) {
 
 		return (nestedTypeDescriptor == null || otherNestedTypeDescriptor == null ||
 				nestedTypeDescriptor.isAssignableTo(otherNestedTypeDescriptor));
@@ -574,6 +571,18 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
+	 * Create a new type descriptor from a {@link java.util.List} type.
+	 * <p>Useful for converting to typed List.
+	 * The method call would look something
+	 * like: {@code listOf(EmailAddress.class);}
+	 * @param type the list type.
+	 * @return the collection type descriptor
+	 */
+	public static TypeDescriptor listOf(Class<?> type) {
+		return collection(List.class, TypeDescriptor.valueOf(type));
+	}
+
+	/**
 	 * Create a new type descriptor from a {@link java.util.Map} type.
 	 * <p>Useful for converting to typed Maps.
 	 * <p>For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt;
@@ -588,7 +597,7 @@ public class TypeDescriptor implements Serializable {
 	 * @return the map type descriptor
 	 */
 	public static TypeDescriptor map(Class<?> mapType, @Nullable TypeDescriptor keyTypeDescriptor,
-			@Nullable TypeDescriptor valueTypeDescriptor) {
+									 @Nullable TypeDescriptor valueTypeDescriptor) {
 
 		Assert.notNull(mapType, "Map type must not be null");
 		if (!Map.class.isAssignableFrom(mapType)) {
