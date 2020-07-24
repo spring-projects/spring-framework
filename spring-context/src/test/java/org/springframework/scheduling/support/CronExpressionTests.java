@@ -431,4 +431,17 @@ class CronExpressionTests {
 		assertThat(expression.next(last)).isEqualTo(expected);
 	}
 
+	@Test
+	public void fixedDays() {
+		CronExpression expression = CronExpression.parse("0 0 0 29 2 WED");
+
+		LocalDateTime last = LocalDateTime.of(2012, 2, 29, 1, 0);
+		assertThat(last.getDayOfWeek()).isEqualTo(WEDNESDAY);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual.getDayOfMonth()).isEqualTo(29);
+		assertThat(actual.getDayOfWeek()).isEqualTo(WEDNESDAY);
+	}
+
 }
