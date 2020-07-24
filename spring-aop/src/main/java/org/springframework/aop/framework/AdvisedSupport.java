@@ -564,14 +564,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getName());
-		sb.append(": ").append(this.interfaces.size()).append(" interfaces ");
-		sb.append(ClassUtils.classNamesToString(this.interfaces)).append("; ");
-		sb.append(this.advisors.size()).append(" advisors ");
-		sb.append(this.advisors).append("; ");
-		sb.append("targetSource [").append(this.targetSource).append("]; ");
-		sb.append(super.toString());
-		return sb.toString();
+		return getClass().getName() + ": " + this.interfaces.size() + " interfaces " +
+				ClassUtils.classNamesToString(this.interfaces) + "; " +
+				this.advisors.size() + " advisors " +
+				this.advisors + "; " +
+				"targetSource [" + this.targetSource + "]; " +
+				super.toString();
 	}
 
 
