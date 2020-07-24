@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
+import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.DayOfWeek.WEDNESDAY;
@@ -442,6 +443,23 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual.getDayOfMonth()).isEqualTo(29);
 		assertThat(actual.getDayOfWeek()).isEqualTo(WEDNESDAY);
+	}
+
+	@Test
+	void friday13th() {
+		CronExpression expression = CronExpression.parse("0 0 0 13 * FRI");
+
+		LocalDateTime last = LocalDateTime.of(2018, 7, 31, 11, 47, 14);
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+		assertThat(actual.getDayOfMonth()).isEqualTo(13);
+
+		last = actual;
+		actual = expression.next(last);
+		assertThat(actual).isNotNull();
+		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
+		assertThat(actual.getDayOfMonth()).isEqualTo(13);
 	}
 
 }
