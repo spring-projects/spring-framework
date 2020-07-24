@@ -413,6 +413,18 @@ public interface ServerResponse {
 		 * @return the built response
 		 */
 		ServerResponse render(String name, Map<String, ?> model);
+
+		/**
+		 * Create an asynchronous ServerResponse that writes when the completion stage completes.
+		 * This can be used to determine status headers and cookies, in the future.
+		 * In contrast with {@link org.springframework.web.servlet.function.DefaultEntityResponseBuilder}
+		 * CompletionStageEntityResponse where only the entity (body) can be create async,
+		 * where status headers and cookies are created and are final, in advance.
+		 *
+		 * @param responseCompletionStage a completion stage for a {@link ServerResponse}
+		 * @return a built response
+		 */
+		ServerResponse whenComplete(CompletionStage<ServerResponse> responseCompletionStage);
 	}
 
 

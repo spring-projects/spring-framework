@@ -29,10 +29,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -225,6 +227,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				.build();
 	}
 
+	@Override
+	public ServerResponse whenComplete(CompletionStage<ServerResponse> responseCompletionStage) {
+		return new CompletionStageWrappingResponse(responseCompletionStage);
+	}
 
 	/**
 	 * Abstract base class for {@link ServerResponse} implementations.
@@ -413,7 +419,41 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	}
 
 
+	private static class CompletionStageWrappingResponse extends AbstractServerResponse {
+		private static final HttpHeaders EMPTY_HTTP_HEADERS = new HttpHeaders();
+		private static final LinkedMultiValueMap<String, Cookie> EMPTY_COOKIES = new LinkedMultiValueMap<>();
+		private final CompletionStage<ServerResponse> entity;
 
+		public CompletionStageWrappingResponse(CompletionStage<ServerResponse> entity) {
+			super(200, EMPTY_HTTP_HEADERS, EMPTY_COOKIES);
+			this.entity = entity;
+		}
 
+		@Override
+		public ModelAndView writeTo(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+									Context context) throws ServletException, IOException {
+			AsyncContext asyncContext = servletRequest.startAsync(servletRequest, servletResponse);
+			entity.whenComplete((entity, throwable) -> {
+				try {
+					if (entity != null) {
+						entity.writeTo(servletRequest, servletResponse, context);
+					} else if (throwable != null) {
+						handleError(throwable, servletRequest, servletResponse, context);
+					}
+				} catch (Throwable t) {
+					handleError(t, servletRequest, servletResponse, context);
+				} finally {
+					asyncContext.complete();
+				}
+			});
+			return null;
+		}
+
+		@Override
+		protected ModelAndView writeToInternal(HttpServletRequest request, HttpServletResponse response, Context context) throws ServletException, IOException {
+			// unreachable
+			return null;
+		}
+	}
 
 }
