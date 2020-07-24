@@ -41,6 +41,16 @@ public final class CronExpression {
 
 	static final int MAX_ATTEMPTS = 366;
 
+	private static final String[] MACROS = new String[] {
+			"@yearly", "0 0 0 1 1 *",
+			"@annually", "0 0 0 1 1 *",
+			"@monthly", "0 0 0 1 * *",
+			"@weekly", "0 0 0 * * 0",
+			"@daily", "0 0 0 * * *",
+			"@midnight", "0 0 0 * * *",
+			"@hourly", "0 0 * * * *"
+	};
+
 
 	private final CronField[] fields;
 
@@ -111,6 +121,15 @@ public final class CronExpression {
 	 * <li>{@code "0 0 0 25 12 ?"} = every Christmas Day at midnight</li>
 	 * </ul>
 	 *
+	 * <p>The following macros are also supported:
+	 * <ul>
+	 * <li>{@code "@yearly"} (or {@code "@annually"}) to run un once a year, i.e. {@code "0 0 0 1 1 *"},</li>
+	 * <li>{@code "@monthly"} to run once a month, i.e. {@code "0 0 0 1 * *"},</li>
+	 * <li>{@code "@weekly"} to run once a week, i.e. {@code "0 0 0 * * 0"},</li>
+	 * <li>{@code "@daily"} (or {@code "@midnight"}) to run once a day, i.e. {@code "0 0 0 * * *"},</li>
+	 * <li>{@code "@hourly"} to run once an hour, i.e. {@code "0 0 * * * *"}.</li>
+	 * </ul>
+	 *
 	 * @param expression the expression string to parse
 	 * @return the parsed {@code CronExpression} object
 	 * @throws IllegalArgumentException in the expression does not conform to
@@ -118,6 +137,8 @@ public final class CronExpression {
 	 */
 	public static CronExpression parse(String expression) {
 		Assert.hasLength(expression, "Expression string must not be empty");
+
+		expression = resolveMacros(expression);
 
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
 		if (fields.length != 6) {
@@ -138,6 +159,17 @@ public final class CronExpression {
 			String msg = ex.getMessage() + " in cron expression \"" + expression + "\"";
 			throw new IllegalArgumentException(msg, ex);
 		}
+	}
+
+
+	private static String resolveMacros(String expression) {
+		expression = expression.trim();
+		for (int i = 0; i < MACROS.length; i = i + 2) {
+			if (MACROS[i].equalsIgnoreCase(expression)) {
+				return MACROS[i + 1];
+			}
+		}
+		return expression;
 	}
 
 

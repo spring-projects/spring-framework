@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
+import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.DayOfWeek.WEDNESDAY;
 import static java.time.temporal.TemporalAdjusters.next;
@@ -461,5 +462,125 @@ class CronExpressionTests {
 		assertThat(actual.getDayOfWeek()).isEqualTo(FRIDAY);
 		assertThat(actual.getDayOfMonth()).isEqualTo(13);
 	}
+
+	@Test
+	void yearly() {
+		CronExpression expression = CronExpression.parse("@yearly");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 1 1 *"));
+
+		LocalDateTime last = LocalDateTime.now().withMonth(10).withDayOfMonth(10);
+		LocalDateTime expected = LocalDateTime.of(last.getYear() + 1, 1, 1, 0, 0);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusYears(1);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusYears(1);
+		assertThat(expression.next(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void annually() {
+		CronExpression expression = CronExpression.parse("@annually");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 1 1 *"));
+		assertThat(expression).isEqualTo(CronExpression.parse("@yearly"));
+	}
+
+	@Test
+	void monthly() {
+		CronExpression expression = CronExpression.parse("@monthly");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 1 * *"));
+
+		LocalDateTime last = LocalDateTime.now().withMonth(10).withDayOfMonth(10);
+		LocalDateTime expected = LocalDateTime.of(last.getYear(), 11, 1, 0, 0);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusMonths(1);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusMonths(1);
+		assertThat(expression.next(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void weekly() {
+		CronExpression expression = CronExpression.parse("@weekly");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 * * 0"));
+
+		LocalDateTime last = LocalDateTime.now();
+		LocalDateTime expected = last.with(next(SUNDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusWeeks(1);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusWeeks(1);
+		assertThat(expression.next(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void daily() {
+		CronExpression expression = CronExpression.parse("@daily");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 * * *"));
+
+		LocalDateTime last = LocalDateTime.now();
+		LocalDateTime expected = last.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusDays(1);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusDays(1);
+		assertThat(expression.next(last)).isEqualTo(expected);
+	}
+
+	@Test
+	void midnight() {
+		CronExpression expression = CronExpression.parse("@midnight");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 0 * * *"));
+		assertThat(expression).isEqualTo(CronExpression.parse("@daily"));
+	}
+
+	@Test
+	void hourly() {
+		CronExpression expression = CronExpression.parse("@hourly");
+		assertThat(expression).isEqualTo(CronExpression.parse("0 0 * * * *"));
+
+		LocalDateTime last = LocalDateTime.now();
+		LocalDateTime expected = last.plusHours(1).withMinute(0).withSecond(0).withNano(0);
+
+		LocalDateTime actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusHours(1);
+		actual = expression.next(last);
+		assertThat(actual).isEqualTo(expected);
+
+		last = actual;
+		expected = expected.plusHours(1);
+		assertThat(expression.next(last)).isEqualTo(expected);
+	}
+
 
 }
