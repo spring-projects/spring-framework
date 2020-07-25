@@ -20,79 +20,69 @@ import java.time.DateTimeException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
-import java.util.BitSet;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * A single field in a cron pattern. Created using the {@code parse*} methods,
+ * Single field in a cron pattern. Created using the {@code parse*} methods,
  * main and only entry point is {@link #nextOrSame(Temporal)}.
  *
  * @author Arjen Poutsma
  * @since 5.3
  */
-final class CronField {
+abstract class CronField {
 
 	private static final String[] MONTHS = new String[]{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP",
 			"OCT", "NOV", "DEC"};
 
 	private static final String[] DAYS = new String[]{"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
 
-	private static final CronField ZERO_NANOS;
-
-
-	static {
-		ZERO_NANOS = new CronField(Type.NANO);
-		ZERO_NANOS.bits.set(0);
-	}
-
-
 	private final Type type;
 
-	private final BitSet bits;
 
-
-	private CronField(Type type) {
+	protected CronField(Type type) {
 		this.type = type;
-		this.bits = new BitSet((int) type.range().getMaximum());
 	}
-
 
 	/**
 	 * Return a {@code CronField} enabled for 0 nano seconds.
 	 */
 	public static CronField zeroNanos() {
-		return ZERO_NANOS;
+		return BitsCronField.zeroNanos();
 	}
 
 	/**
 	 * Parse the given value into a seconds {@code CronField}, the first entry of a cron expression.
 	 */
 	public static CronField parseSeconds(String value) {
-		return parseField(value, Type.SECOND);
+		return BitsCronField.parseSeconds(value);
 	}
 
 	/**
 	 * Parse the given value into a minutes {@code CronField}, the second entry of a cron expression.
 	 */
 	public static CronField parseMinutes(String value) {
-		return parseField(value, Type.MINUTE);
+		return BitsCronField.parseMinutes(value);
 	}
 
 	/**
 	 * Parse the given value into a hours {@code CronField}, the third entry of a cron expression.
 	 */
 	public static CronField parseHours(String value) {
-		return parseField(value, Type.HOUR);
+		return BitsCronField.parseHours(value);
 	}
 
 	/**
 	 * Parse the given value into a days of months {@code CronField}, the fourth entry of a cron expression.
 	 */
 	public static CronField parseDaysOfMonth(String value) {
-		return parseDate(value, Type.DAY_OF_MONTH);
+		if (value.contains("L") || value.contains("W")) {
+			return QuartzCronField.parseDaysOfMonth(value);
+		}
+		else {
+			return BitsCronField.parseDaysOfMonth(value);
+		}
 	}
 
 	/**
@@ -100,7 +90,7 @@ final class CronField {
 	 */
 	public static CronField parseMonth(String value) {
 		value = replaceOrdinals(value, MONTHS);
-		return parseField(value, Type.MONTH);
+		return BitsCronField.parseMonth(value);
 	}
 
 	/**
@@ -108,76 +98,14 @@ final class CronField {
 	 */
 	public static CronField parseDaysOfWeek(String value) {
 		value = replaceOrdinals(value, DAYS);
-		CronField result = parseDate(value, Type.DAY_OF_WEEK);
-		if (result.bits.get(0)) {
-			// cron supports 0 for Sunday; we use 7 like java.time
-			result.bits.set(7);
-			result.bits.clear(0);
-		}
-		return result;
-	}
-
-
-	private static CronField parseDate(String value, Type type) {
-		if (value.indexOf('?') != -1) {
-			value = "*";
-		}
-		return parseField(value, type);
-	}
-
-	private static CronField parseField(String value, Type type) {
-		Assert.hasLength(value, "Value must not be empty");
-		Assert.notNull(type, "Type must not be null");
-		try {
-			CronField result = new CronField(type);
-			String[] fields = StringUtils.delimitedListToStringArray(value, ",");
-			for (String field : fields) {
-				int slashPos = field.indexOf('/');
-				if (slashPos == -1) {
-					ValueRange range = parseRange(field, type);
-					result.setBits(range);
-				}
-				else {
-					String rangeStr = value.substring(0, slashPos);
-					String deltaStr = value.substring(slashPos + 1);
-					ValueRange range = parseRange(rangeStr, type);
-					if (rangeStr.indexOf('-') == -1) {
-						range = ValueRange.of(range.getMinimum(), type.range().getMaximum());
-					}
-					int delta = Integer.parseInt(deltaStr);
-					if (delta <= 0) {
-						throw new IllegalArgumentException("Incrementer delta must be 1 or higher");
-					}
-					result.setBits(range, delta);
-				}
-			}
-			return result;
-		}
-		catch (DateTimeException | IllegalArgumentException ex) {
-			String msg = ex.getMessage() + " '" + value + "'";
-			throw new IllegalArgumentException(msg, ex);
-		}
-	}
-
-	private static ValueRange parseRange(String value, Type type) {
-		if (value.indexOf('*') != -1) {
-			return type.range();
+		if (value.contains("L") || value.contains("#")) {
+			return QuartzCronField.parseDaysOfWeek(value);
 		}
 		else {
-			int hyphenPos = value.indexOf('-');
-			if (hyphenPos == -1) {
-				int result = type.checkValidValue(Integer.parseInt(value));
-				return ValueRange.of(result, result);
-			}
-			else {
-				int min = Integer.parseInt(value.substring(0, hyphenPos));
-				int max = Integer.parseInt(value.substring(hyphenPos + 1));
-				min = type.checkValidValue(min);
-				max = type.checkValidValue(max);
-				return ValueRange.of(min, max);
-			}
+			return BitsCronField.parseDaysOfWeek(value);
 		}
 	}
+
 
 	private static String replaceOrdinals(String value, String[] list) {
 		value = value.toUpperCase();
@@ -196,67 +124,11 @@ final class CronField {
 	 * @return the next or same temporal matching the pattern
 	 */
 	@Nullable
-	public <T extends Temporal> T nextOrSame(T temporal) {
-		int current = this.type.get(temporal);
-		int next = this.bits.nextSetBit(current);
-		if (next == -1) {
-			temporal = this.type.rollForward(temporal);
-			next = this.bits.nextSetBit(0);
-		}
-		if (next == current) {
-			return temporal;
-		}
-		else {
-			int count = 0;
-			current = this.type.get(temporal);
-			while (current != next && count++ < CronExpression.MAX_ATTEMPTS) {
-				temporal = this.type.elapseUntil(temporal, next);
-				current = this.type.get(temporal);
-			}
-			if (count >= CronExpression.MAX_ATTEMPTS) {
-				return null;
-			}
-			return this.type.reset(temporal);
-		}
-	}
+	public abstract <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal);
 
 
-	BitSet bits() {
-		return this.bits;
-	}
-
-	private void setBits(ValueRange range) {
-		this.bits.set((int) range.getMinimum(), (int) range.getMaximum() + 1);
-	}
-
-	private void setBits(ValueRange range, int delta) {
-		for (int i = (int) range.getMinimum(); i <= range.getMaximum(); i += delta) {
-			this.bits.set(i);
-		}
-	}
-
-
-	@Override
-	public int hashCode() {
-		return this.bits.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (!(o instanceof CronField)) {
-			return false;
-		}
-		CronField other = (CronField) o;
-		return this.type == other.type &&
-				this.bits.equals(other.bits);
-	}
-
-	@Override
-	public String toString() {
-		return this.type + " " + this.bits;
+	protected Type type() {
+		return this.type;
 	}
 
 
@@ -264,7 +136,7 @@ final class CronField {
 	 * Represents the type of cron field, i.e. seconds, minutes, hours,
 	 * day-of-month, month, day-of-week.
 	 */
-	private enum Type {
+	protected enum Type {
 		NANO(ChronoField.NANO_OF_SECOND),
 		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
 		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
@@ -336,7 +208,7 @@ final class CronField {
 		 * @return the elapsed temporal, typically with {@code goal} as value
 		 * for this type.
 		 */
-		public <T extends Temporal> T elapseUntil(T temporal, int goal) {
+		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
 			if (current < goal) {
 				return this.field.getBaseUnit().addTo(temporal, goal - current);
@@ -357,7 +229,7 @@ final class CronField {
 		 * @param <T> the type of temporal
 		 * @return the rolled forward temporal
 		 */
-		public <T extends Temporal> T rollForward(T temporal) {
+		public <T extends Temporal & Comparable<? super T>> T rollForward(T temporal) {
 			int current = get(temporal);
 			ValueRange range = temporal.range(this.field);
 			long amount = range.getMaximum() - current + 1;
