@@ -39,6 +39,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.util.NestedServletException;
@@ -344,6 +346,22 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(mav).as("Exception was not handled").isNotNull();
 		assertThat(mav.isEmpty()).isTrue();
 		assertThat(this.response.getContentAsString()).isEqualTo("BasePackageTestExceptionResolver: IllegalStateException");
+	}
+
+	@Test // gh-22619
+	void resolveExceptionViaMappedHandler() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setMappedHandlerClasses(HttpRequestHandler.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		IllegalStateException ex = new IllegalStateException();
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handler, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("DefaultTestExceptionResolver: IllegalStateException");
 	}
 
 
