@@ -21,6 +21,7 @@ import java.io.Closeable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.metrics.ApplicationStartup;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
@@ -88,6 +89,12 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
 
 	/**
+	 * Name of the {@link ApplicationStartup} bean in the factory.
+	 * @since 5.3.0
+	 */
+	String APPLICATION_STARTUP_BEAN_NAME = "applicationStartup";
+
+	/**
 	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
 	 * shutdown hook} thread: {@value}.
 	 * @since 5.2
@@ -126,6 +133,21 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	@Override
 	ConfigurableEnvironment getEnvironment();
+
+	/**
+	 * Set the {@link ApplicationStartup} for this application context.
+	 * <p>This allows the application context to record metrics
+	 * during startup.
+	 * @param applicationStartup the new context event factory
+	 * @since 5.3.0
+	 */
+	void setApplicationStartup(ApplicationStartup applicationStartup);
+
+	/**
+	 * Return the {@link ApplicationStartup} for this application context.
+	 * @since 5.3.0
+	 */
+	ApplicationStartup getApplicationStartup();
 
 	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal

@@ -11027,7 +11027,75 @@ location path as a classpath location. You can also use location paths (resource
 with special prefixes to force loading of definitions from the classpath or a URL,
 regardless of the actual context type.
 
+[[context-functionality-startup]]
+=== Application Startup tracking
 
+The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
+programming model around components. As a result, complex applications can have equally
+complex component graphs and startup phases.
+
+Tracking the application startup steps with specific metrics can help understand where
+time is being spent during the startup phase, but it can also be used as a way to better
+understand the context lifecycle as a whole.
+
+The `AbstractApplicationContext` (and its subclasses) is instrumented with an
+`ApplicationStartup`, which collects `StartupStep` data about various startup phases:
+
+* application context lifecycle (base packages scanning, config classes management)
+* beans lifecycle (instantiation, smart initialization, post processing)
+* application events processing
+
+Here is an example of instrumentation in the `AnnotationConfigApplicationContext`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// create a startup step and start recording
+	StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// create a startup step and start recording
+	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+
+The application context is already instrumented with multiple steps.
+Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.
+For a complete list of existing startup steps, you can check out the
+<<application-startup-steps, dedicated appendix section>>.
+
+The default `ApplicationStartup` implementation is a no-op variant, for minimal overhead.
+This means no metrics will be collected during application startup by default.
+Spring Framework ships with an implementation for tracking startup steps with Java Flight Recorder:
+`FlightRecorderApplicationStartup`. To use this variant, you must configure an instance of it
+to the `ApplicationContext` as soon as it's been created.
+
+Developers can also use the `ApplicationStartup` infrastructure if they're providing their own
+`AbstractApplicationContext` subclass, or if they wish to collect more precise data.
+
+WARNING: `ApplicationStartup` is meant to be only used during application startup and for
+the core container; this is by no means a replacement for Java profilers or
+metrics libraries like https://micrometer.io[Micrometer].
+
+To start collecting custom `StartupStep`, components can either get the `ApplicationStartup`
+instance from the application context directly, make their component implement `ApplicationStartupAware`,
+or ask for the `ApplicationStartup` type on any injection point.
+
+NOTE: Developers should not use the `"spring.*"` namespace when creating custom startup steps.
+This namespace is reserved for internal Spring usage and is subject to change.
 
 [[context-create]]
 === Convenient ApplicationContext Instantiation for Web Applications
