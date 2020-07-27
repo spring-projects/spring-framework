@@ -49,7 +49,6 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	@SuppressWarnings("rawtypes")
 	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator<>(false);
 
-
 	private final Comparator<T> nonNullComparator;
 
 	private final boolean nullsLow;
@@ -71,7 +70,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	private NullSafeComparator(boolean nullsLow) {
-		this.nonNullComparator = ComparableComparator.INSTANCE;
+		this.nonNullComparator = (Comparator<T>) Comparator.naturalOrder();
 		this.nullsLow = nullsLow;
 	}
 
@@ -92,17 +91,10 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 
 	@Override
-	public int compare(@Nullable T o1, @Nullable T o2) {
-		if (o1 == o2) {
-			return 0;
-		}
-		if (o1 == null) {
-			return (this.nullsLow ? -1 : 1);
-		}
-		if (o2 == null) {
-			return (this.nullsLow ? 1 : -1);
-		}
-		return this.nonNullComparator.compare(o1, o2);
+	public int compare(@Nullable T left, @Nullable T right) {
+		Comparator<T> comparator = nullsLow ? Comparator.nullsFirst(nonNullComparator) :
+								   Comparator.nullsLast(nonNullComparator);
+		return comparator.compare(left, right);
 	}
 
 
@@ -121,7 +113,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	public int hashCode() {
-		return this.nonNullComparator.hashCode() * (this.nullsLow ? -1 : 1);
+		return Boolean.hashCode(nullsLow);
 	}
 
 	@Override
