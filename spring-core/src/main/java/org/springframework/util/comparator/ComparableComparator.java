@@ -23,15 +23,18 @@ import java.util.Comparator;
  * Mainly for internal use in other Comparators, when supposed
  * to work on Comparables.
  *
+ * @deprecated use jdk-8 Comparator::naturalOrder
  * @author Keith Donald
  * @since 1.2.2
  * @param <T> the type of comparable objects that may be compared by this comparator
  * @see Comparable
  */
+@Deprecated
 public class ComparableComparator<T extends Comparable<T>> implements Comparator<T> {
 
 	/**
 	 * A shared instance of this default comparator.
+	 *
 	 * @see Comparators#comparable()
 	 */
 	@SuppressWarnings("rawtypes")

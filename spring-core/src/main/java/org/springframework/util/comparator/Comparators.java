@@ -29,49 +29,44 @@ public abstract class Comparators {
 
 	/**
 	 * Return a {@link Comparable} adapter.
-	 * @see ComparableComparator#INSTANCE
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> comparable() {
-		return ComparableComparator.INSTANCE;
+		return (Comparator<T>) Comparator.naturalOrder();
 	}
 
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see NullSafeComparator#NULLS_LOW
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> nullsLow() {
-		return NullSafeComparator.NULLS_LOW;
+		return (Comparator<T>) Comparator.nullsLast(Comparator.naturalOrder());
 	}
 
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them lower than non-null values.
-	 * @see NullSafeComparator#NullSafeComparator(boolean)
 	 */
 	public static <T> Comparator<T> nullsLow(Comparator<T> comparator) {
-		return new NullSafeComparator<>(comparator, true);
+		return Comparator.nullsLast(comparator);
 	}
 
 	/**
 	 * Return a {@link Comparable} adapter which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see NullSafeComparator#NULLS_HIGH
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Comparator<T> nullsHigh() {
-		return NullSafeComparator.NULLS_HIGH;
+		return (Comparator<T>) Comparator.nullsFirst(Comparator.naturalOrder());
 	}
 
 	/**
 	 * Return a decorator for the given comparator which accepts
 	 * null values and sorts them higher than non-null values.
-	 * @see NullSafeComparator#NullSafeComparator(boolean)
 	 */
 	public static <T> Comparator<T> nullsHigh(Comparator<T> comparator) {
-		return new NullSafeComparator<>(comparator, false);
+		return Comparator.nullsFirst(comparator);
 	}
 
 }
