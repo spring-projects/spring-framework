@@ -906,11 +906,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the first {@link Locale} of the content languages,
-	 * as specified by the {@literal Content-Language} header.
-	 * <p>Returns {@code null} when the content language is unknown.
-	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
-	 * to get multiple content languages.</p>
+	 * Get the first {@link Locale} of the content languages, as specified by the
+	 * {@code Content-Language} header.
+	 * <p>Use {@link #getValuesAsList(String)} if you need to get multiple content
+	 * languages.
+	 * @return the first {@code Locale} of the content languages, or {@code null}
+	 * if unknown
 	 * @since 5.0
 	 */
 	@Nullable
