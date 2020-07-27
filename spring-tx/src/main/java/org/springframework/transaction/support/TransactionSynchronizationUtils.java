@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.core.InfrastructureProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -124,10 +125,10 @@ public abstract class TransactionSynchronizationUtils {
 	/**
 	 * Actually invoke the {@code afterCommit} methods of the
 	 * given Spring TransactionSynchronization objects.
-	 * @param synchronizations List of TransactionSynchronization objects
+	 * @param synchronizations a List of TransactionSynchronization objects
 	 * @see TransactionSynchronization#afterCommit()
 	 */
-	public static void invokeAfterCommit(List<TransactionSynchronization> synchronizations) {
+	public static void invokeAfterCommit(@Nullable List<TransactionSynchronization> synchronizations) {
 		if (synchronizations != null) {
 			for (TransactionSynchronization synchronization : synchronizations) {
 				synchronization.afterCommit();
@@ -137,9 +138,9 @@ public abstract class TransactionSynchronizationUtils {
 
 	/**
 	 * Trigger {@code afterCompletion} callbacks on all currently registered synchronizations.
-	 * @see TransactionSynchronizationManager#getSynchronizations()
 	 * @param completionStatus the completion status according to the
 	 * constants in the TransactionSynchronization interface
+	 * @see TransactionSynchronizationManager#getSynchronizations()
 	 * @see TransactionSynchronization#afterCompletion(int)
 	 * @see TransactionSynchronization#STATUS_COMMITTED
 	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
@@ -153,7 +154,7 @@ public abstract class TransactionSynchronizationUtils {
 	/**
 	 * Actually invoke the {@code afterCompletion} methods of the
 	 * given Spring TransactionSynchronization objects.
-	 * @param synchronizations List of TransactionSynchronization objects
+	 * @param synchronizations a List of TransactionSynchronization objects
 	 * @param completionStatus the completion status according to the
 	 * constants in the TransactionSynchronization interface
 	 * @see TransactionSynchronization#afterCompletion(int)
@@ -161,7 +162,9 @@ public abstract class TransactionSynchronizationUtils {
 	 * @see TransactionSynchronization#STATUS_ROLLED_BACK
 	 * @see TransactionSynchronization#STATUS_UNKNOWN
 	 */
-	public static void invokeAfterCompletion(List<TransactionSynchronization> synchronizations, int completionStatus) {
+	public static void invokeAfterCompletion(@Nullable List<TransactionSynchronization> synchronizations,
+			int completionStatus) {
+
 		if (synchronizations != null) {
 			for (TransactionSynchronization synchronization : synchronizations) {
 				try {

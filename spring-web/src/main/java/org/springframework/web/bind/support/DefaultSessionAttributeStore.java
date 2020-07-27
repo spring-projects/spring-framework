@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,13 +16,13 @@
 
 package org.springframework.web.bind.support;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequest;
 
 /**
  * Default implementation of the {@link SessionAttributeStore} interface,
- * storing the attributes in the WebRequest session (i.e. HttpSession
- * or PortletSession).
+ * storing the attributes in the WebRequest session (i.e. HttpSession).
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -41,7 +41,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	 * <p>Default is to use no prefix, storing the session attributes with the
 	 * same name as in the model.
 	 */
-	public void setAttributeNamePrefix(String attributeNamePrefix) {
+	public void setAttributeNamePrefix(@Nullable String attributeNamePrefix) {
 		this.attributeNamePrefix = (attributeNamePrefix != null ? attributeNamePrefix : "");
 	}
 
@@ -56,6 +56,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 	@Override
+	@Nullable
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

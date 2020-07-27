@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.response;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
 
 /**
@@ -43,28 +46,31 @@ public abstract class MockRestResponseCreators {
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) with String body.
 	 * @param body the response body, a "UTF-8" string
-	 * @param mediaType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(String body, MediaType mediaType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(mediaType);
+	public static DefaultResponseCreator withSuccess(String body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) with byte[] body.
 	 * @param body the response body
-	 * @param contentType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(byte[] body, MediaType contentType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);
+	public static DefaultResponseCreator withSuccess(byte[] body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) content with {@link Resource}-based body.
 	 * @param body the response body
-	 * @param contentType the type of the content, may be {@code null}
+	 * @param contentType the type of the content (may be {@code null})
 	 */
-	public static DefaultResponseCreator withSuccess(Resource body, MediaType contentType) {
-		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);
+	public static DefaultResponseCreator withSuccess(Resource body, @Nullable MediaType contentType) {
+		DefaultResponseCreator creator = new DefaultResponseCreator(HttpStatus.OK).body(body);
+		return (contentType != null ? creator.contentType(contentType) : creator);
 	}
 
 	/**
@@ -109,6 +115,18 @@ public abstract class MockRestResponseCreators {
 	 */
 	public static DefaultResponseCreator withStatus(HttpStatus status) {
 		return new DefaultResponseCreator(status);
+	}
+
+	/**
+	 * {@code ResponseCreator} with an internal application {@code IOException}.
+	 * <p>For example, one could use this to simulate a {@code SocketTimeoutException}.
+	 * @param ex the {@code Exception} to be thrown at HTTP call time
+	 * @since 5.2.2
+	 */
+	public static ResponseCreator withException(IOException ex) {
+		return request -> {
+			throw ex;
+		};
 	}
 
 }

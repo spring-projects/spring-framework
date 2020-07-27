@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.google.gson.Gson;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link GsonFactoryBean} tests.
@@ -44,7 +43,7 @@ public class GsonFactoryBeanTests {
 		Gson gson = this.factory.getObject();
 		StringBean bean = new StringBean();
 		String result = gson.toJson(bean);
-		assertEquals("{\"name\":null}", result);
+		assertThat(result).isEqualTo("{\"name\":null}");
 	}
 
 	@Test
@@ -54,7 +53,7 @@ public class GsonFactoryBeanTests {
 		Gson gson = this.factory.getObject();
 		StringBean bean = new StringBean();
 		String result = gson.toJson(bean);
-		assertEquals("{}", result);
+		assertThat(result).isEqualTo("{}");
 	}
 
 	@Test
@@ -65,7 +64,7 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Jason");
 		String result = gson.toJson(bean);
-		assertTrue(result.contains("  \"name\": \"Jason\""));
+		assertThat(result.contains("  \"name\": \"Jason\"")).isTrue();
 	}
 
 	@Test
@@ -76,7 +75,7 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Jason");
 		String result = gson.toJson(bean);
-		assertEquals("{\"name\":\"Jason\"}", result);
+		assertThat(result).isEqualTo("{\"name\":\"Jason\"}");
 	}
 
 	@Test
@@ -87,7 +86,7 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Bob=Bob");
 		String result = gson.toJson(bean);
-		assertEquals("{\"name\":\"Bob=Bob\"}", result);
+		assertThat(result).isEqualTo("{\"name\":\"Bob=Bob\"}");
 	}
 
 	@Test
@@ -98,7 +97,7 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Bob=Bob");
 		String result = gson.toJson(bean);
-		assertEquals("{\"name\":\"Bob\\u003dBob\"}", result);
+		assertThat(result).isEqualTo("{\"name\":\"Bob\\u003dBob\"}");
 	}
 
 	@Test
@@ -115,7 +114,7 @@ public class GsonFactoryBeanTests {
 		Date date = cal.getTime();
 		bean.setDate(date);
 		String result = gson.toJson(bean);
-		assertEquals("{\"date\":\"2014-01-01\"}", result);
+		assertThat(result).isEqualTo("{\"date\":\"2014-01-01\"}");
 	}
 
 	@Test
@@ -131,8 +130,8 @@ public class GsonFactoryBeanTests {
 		Date date = cal.getTime();
 		bean.setDate(date);
 		String result = gson.toJson(bean);
-		assertTrue(result.startsWith("{\"date\":\"Jan 1, 2014"));
-		assertTrue(result.endsWith("12:00:00 AM\"}"));
+		assertThat(result.startsWith("{\"date\":\"Jan 1, 2014")).isTrue();
+		assertThat(result.endsWith("12:00:00 AM\"}")).isTrue();
 	}
 
 	@Test
@@ -143,7 +142,7 @@ public class GsonFactoryBeanTests {
 		ByteArrayBean bean = new ByteArrayBean();
 		bean.setBytes(new byte[] {0x1, 0x2});
 		String result = gson.toJson(bean);
-		assertEquals("{\"bytes\":\"AQI\\u003d\"}", result);
+		assertThat(result).isEqualTo("{\"bytes\":\"AQI\\u003d\"}");
 	}
 
 	@Test
@@ -155,7 +154,7 @@ public class GsonFactoryBeanTests {
 		ByteArrayBean bean = new ByteArrayBean();
 		bean.setBytes(new byte[] {0x1, 0x2});
 		String result = gson.toJson(bean);
-		assertEquals("{\"bytes\":\"AQI=\"}", result);
+		assertThat(result).isEqualTo("{\"bytes\":\"AQI=\"}");
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class GsonFactoryBeanTests {
 		ByteArrayBean bean = new ByteArrayBean();
 		bean.setBytes(new byte[] {0x1, 0x2});
 		String result = gson.toJson(bean);
-		assertEquals("{\"bytes\":[1,2]}", result);
+		assertThat(result).isEqualTo("{\"bytes\":[1,2]}");
 	}
 
 

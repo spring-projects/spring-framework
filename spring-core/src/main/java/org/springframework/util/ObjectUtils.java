@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous object utility methods.
@@ -51,6 +54,7 @@ public abstract class ObjectUtils {
 	private static final String ARRAY_END = "}";
 	private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
+	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 
 	/**
@@ -73,7 +77,7 @@ public abstract class ObjectUtils {
 	 * @param declaredExceptions the exception types declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>... declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(Throwable ex, @Nullable Class<?>... declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
@@ -92,7 +96,7 @@ public abstract class ObjectUtils {
 	 * either an Object array or a primitive array.
 	 * @param obj the object to check
 	 */
-	public static boolean isArray(Object obj) {
+	public static boolean isArray(@Nullable Object obj) {
 		return (obj != null && obj.getClass().isArray());
 	}
 
@@ -102,7 +106,7 @@ public abstract class ObjectUtils {
 	 * @param array the array to check
 	 * @see #isEmpty(Object)
 	 */
-	public static boolean isEmpty(Object[] array) {
+	public static boolean isEmpty(@Nullable Object[] array) {
 		return (array == null || array.length == 0);
 	}
 
@@ -129,7 +133,7 @@ public abstract class ObjectUtils {
 	 * @see CollectionUtils#isEmpty(java.util.Map)
 	 */
 	@SuppressWarnings("rawtypes")
-	public static boolean isEmpty(Object obj) {
+	public static boolean isEmpty(@Nullable Object obj) {
 		if (obj == null) {
 			return true;
 		}
@@ -137,11 +141,11 @@ public abstract class ObjectUtils {
 		if (obj instanceof Optional) {
 			return !((Optional) obj).isPresent();
 		}
-		if (obj.getClass().isArray()) {
-			return Array.getLength(obj) == 0;
-		}
 		if (obj instanceof CharSequence) {
 			return ((CharSequence) obj).length() == 0;
+		}
+		if (obj.getClass().isArray()) {
+			return Array.getLength(obj) == 0;
 		}
 		if (obj instanceof Collection) {
 			return ((Collection) obj).isEmpty();
@@ -161,7 +165,8 @@ public abstract class ObjectUtils {
 	 * if the {@code Optional} is empty, or simply the given object as-is
 	 * @since 5.0
 	 */
-	public static Object unwrapOptional(Object obj) {
+	@Nullable
+	public static Object unwrapOptional(@Nullable Object obj) {
 		if (obj instanceof Optional) {
 			Optional<?> optional = (Optional<?>) obj;
 			if (!optional.isPresent()) {
@@ -181,7 +186,7 @@ public abstract class ObjectUtils {
 	 * @param element the element to check for
 	 * @return whether the element has been found in the given array
 	 */
-	public static boolean containsElement(Object[] array, Object element) {
+	public static boolean containsElement(@Nullable Object[] array, Object element) {
 		if (array == null) {
 			return false;
 		}
@@ -196,7 +201,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Check whether the given array of enum constants contains a constant with the given name,
 	 * ignoring case when determining a match.
-	 * @param enumValues the enum values to check, typically the product of a call to MyEnum.values()
+	 * @param enumValues the enum values to check, typically obtained via {@code MyEnum.values()}
 	 * @param constant the constant name to find (must not be null or empty string)
 	 * @return whether the constant has been found in the given array
 	 */
@@ -206,15 +211,14 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Check whether the given array of enum constants contains a constant with the given name.
-	 * @param enumValues the enum values to check, typically the product of a call to MyEnum.values()
+	 * @param enumValues the enum values to check, typically obtained via {@code MyEnum.values()}
 	 * @param constant the constant name to find (must not be null or empty string)
 	 * @param caseSensitive whether case is significant in determining a match
 	 * @return whether the constant has been found in the given array
 	 */
 	public static boolean containsConstant(Enum<?>[] enumValues, String constant, boolean caseSensitive) {
 		for (Enum<?> candidate : enumValues) {
-			if (caseSensitive ?
-					candidate.toString().equals(constant) :
+			if (caseSensitive ? candidate.toString().equals(constant) :
 					candidate.toString().equalsIgnoreCase(constant)) {
 				return true;
 			}
@@ -225,7 +229,7 @@ public abstract class ObjectUtils {
 	/**
 	 * Case insensitive alternative to {@link Enum#valueOf(Class, String)}.
 	 * @param <E> the concrete Enum type
-	 * @param enumValues the array of all Enum constants in question, usually per Enum.values()
+	 * @param enumValues the array of all Enum constants in question, usually per {@code Enum.values()}
 	 * @param constant the constant to get the enum value of
 	 * @throws IllegalArgumentException if the given constant is not found in the given array
 	 * of enum values. Use {@link #containsConstant(Enum[], String)} as a guard to avoid this exception.
@@ -236,9 +240,8 @@ public abstract class ObjectUtils {
 				return candidate;
 			}
 		}
-		throw new IllegalArgumentException(
-				String.format("constant [%s] does not exist in enum type %s",
-						constant, enumValues.getClass().getComponentType().getName()));
+		throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " +
+				enumValues.getClass().getComponentType().getName());
 	}
 
 	/**
@@ -248,7 +251,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to append
 	 * @return the new array (of the same component type; never {@code null})
 	 */
-	public static <A, O extends A> A[] addObjectToArray(A[] array, O obj) {
+	public static <A, O extends A> A[] addObjectToArray(@Nullable A[] array, @Nullable O obj) {
 		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();
@@ -275,19 +278,19 @@ public abstract class ObjectUtils {
 	 * @return the corresponding object array (never {@code null})
 	 * @throws IllegalArgumentException if the parameter is not an array
 	 */
-	public static Object[] toObjectArray(Object source) {
+	public static Object[] toObjectArray(@Nullable Object source) {
 		if (source instanceof Object[]) {
 			return (Object[]) source;
 		}
 		if (source == null) {
-			return new Object[0];
+			return EMPTY_OBJECT_ARRAY;
 		}
 		if (!source.getClass().isArray()) {
 			throw new IllegalArgumentException("Source is not an array: " + source);
 		}
 		int length = Array.getLength(source);
 		if (length == 0) {
-			return new Object[0];
+			return EMPTY_OBJECT_ARRAY;
 		}
 		Class<?> wrapperType = Array.get(source, 0).getClass();
 		Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);
@@ -313,7 +316,7 @@ public abstract class ObjectUtils {
 	 * @see Object#equals(Object)
 	 * @see java.util.Arrays#equals
 	 */
-	public static boolean nullSafeEquals(Object o1, Object o2) {
+	public static boolean nullSafeEquals(@Nullable Object o1, @Nullable Object o2) {
 		if (o1 == o2) {
 			return true;
 		}
@@ -386,7 +389,7 @@ public abstract class ObjectUtils {
 	 * @see #nullSafeHashCode(long[])
 	 * @see #nullSafeHashCode(short[])
 	 */
-	public static int nullSafeHashCode(Object obj) {
+	public static int nullSafeHashCode(@Nullable Object obj) {
 		if (obj == null) {
 			return 0;
 		}
@@ -426,7 +429,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(Object[] array) {
+	public static int nullSafeHashCode(@Nullable Object[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -441,13 +444,13 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(boolean[] array) {
+	public static int nullSafeHashCode(@Nullable boolean[] array) {
 		if (array == null) {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
 		for (boolean element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Boolean.hashCode(element);
 		}
 		return hash;
 	}
@@ -456,7 +459,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(byte[] array) {
+	public static int nullSafeHashCode(@Nullable byte[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -471,7 +474,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(char[] array) {
+	public static int nullSafeHashCode(@Nullable char[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -486,13 +489,13 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(double[] array) {
+	public static int nullSafeHashCode(@Nullable double[] array) {
 		if (array == null) {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
 		for (double element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Double.hashCode(element);
 		}
 		return hash;
 	}
@@ -501,13 +504,13 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(float[] array) {
+	public static int nullSafeHashCode(@Nullable float[] array) {
 		if (array == null) {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
 		for (float element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Float.hashCode(element);
 		}
 		return hash;
 	}
@@ -516,7 +519,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(int[] array) {
+	public static int nullSafeHashCode(@Nullable int[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -531,13 +534,13 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(long[] array) {
+	public static int nullSafeHashCode(@Nullable long[] array) {
 		if (array == null) {
 			return 0;
 		}
 		int hash = INITIAL_HASH;
 		for (long element : array) {
-			hash = MULTIPLIER * hash + hashCode(element);
+			hash = MULTIPLIER * hash + Long.hashCode(element);
 		}
 		return hash;
 	}
@@ -546,7 +549,7 @@ public abstract class ObjectUtils {
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
 	 */
-	public static int nullSafeHashCode(short[] array) {
+	public static int nullSafeHashCode(@Nullable short[] array) {
 		if (array == null) {
 			return 0;
 		}
@@ -558,35 +561,39 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Return the same value as {@link Boolean#hashCode()}}.
-	 * @see Boolean#hashCode()
+	 * Return the same value as {@link Boolean#hashCode(boolean)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(boolean bool) {
-		return (bool ? 1231 : 1237);
+		return Boolean.hashCode(bool);
 	}
 
 	/**
-	 * Return the same value as {@link Double#hashCode()}}.
-	 * @see Double#hashCode()
+	 * Return the same value as {@link Double#hashCode(double)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(double dbl) {
-		return hashCode(Double.doubleToLongBits(dbl));
+		return Double.hashCode(dbl);
 	}
 
 	/**
-	 * Return the same value as {@link Float#hashCode()}}.
-	 * @see Float#hashCode()
+	 * Return the same value as {@link Float#hashCode(float)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(float flt) {
-		return Float.floatToIntBits(flt);
+		return Float.hashCode(flt);
 	}
 
 	/**
-	 * Return the same value as {@link Long#hashCode()}}.
-	 * @see Long#hashCode()
+	 * Return the same value as {@link Long#hashCode(long)}}.
+	 * @deprecated as of Spring Framework 5.0, in favor of the native JDK 8 variant
 	 */
+	@Deprecated
 	public static int hashCode(long lng) {
-		return (int) (lng ^ (lng >>> 32));
+		return Long.hashCode(lng);
 	}
 
 
@@ -600,11 +607,13 @@ public abstract class ObjectUtils {
 	 * @return the object's identity as String representation,
 	 * or an empty String if the object was {@code null}
 	 */
-	public static String identityToString(Object obj) {
+	public static String identityToString(@Nullable Object obj) {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
-		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
+		String className = obj.getClass().getName();
+		String identityHexString = getIdentityHexString(obj);
+		return className + '@' + identityHexString;
 	}
 
 	/**
@@ -625,7 +634,7 @@ public abstract class ObjectUtils {
 	 * @return a display String representation of {@code obj}
 	 * @see #nullSafeToString(Object)
 	 */
-	public static String getDisplayString(Object obj) {
+	public static String getDisplayString(@Nullable Object obj) {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
@@ -634,22 +643,22 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Determine the class name for the given object.
-	 * <p>Returns {@code "null"} if {@code obj} is {@code null}.
+	 * <p>Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to introspect (may be {@code null})
 	 * @return the corresponding class name
 	 */
-	public static String nullSafeClassName(Object obj) {
+	public static String nullSafeClassName(@Nullable Object obj) {
 		return (obj != null ? obj.getClass().getName() : NULL_STRING);
 	}
 
 	/**
 	 * Return a String representation of the specified Object.
 	 * <p>Builds a String representation of the contents in case of an array.
-	 * Returns {@code "null"} if {@code obj} is {@code null}.
+	 * Returns a {@code "null"} String if {@code obj} is {@code null}.
 	 * @param obj the object to build a String representation for
 	 * @return a String representation of {@code obj}
 	 */
-	public static String nullSafeToString(Object obj) {
+	public static String nullSafeToString(@Nullable Object obj) {
 		if (obj == null) {
 			return NULL_STRING;
 		}
@@ -691,12 +700,12 @@ public abstract class ObjectUtils {
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(Object[] array) {
+	public static String nullSafeToString(@Nullable Object[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -704,30 +713,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(String.valueOf(array[i]));
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (Object o : array) {
+			stringJoiner.add(String.valueOf(o));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(boolean[] array) {
+	public static String nullSafeToString(@Nullable boolean[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -735,31 +737,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (boolean b : array) {
+			stringJoiner.add(String.valueOf(b));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(byte[] array) {
+	public static String nullSafeToString(@Nullable byte[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -767,30 +761,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (byte b : array) {
+			stringJoiner.add(String.valueOf(b));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(char[] array) {
+	public static String nullSafeToString(@Nullable char[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -798,30 +785,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append("'").append(array[i]).append("'");
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (char c : array) {
+			stringJoiner.add('\'' + String.valueOf(c) + '\'');
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(double[] array) {
+	public static String nullSafeToString(@Nullable double[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -829,31 +809,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (double d : array) {
+			stringJoiner.add(String.valueOf(d));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(float[] array) {
+	public static String nullSafeToString(@Nullable float[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -861,31 +833,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (float f : array) {
+			stringJoiner.add(String.valueOf(f));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(int[] array) {
+	public static String nullSafeToString(@Nullable int[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -893,30 +857,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (int i : array) {
+			stringJoiner.add(String.valueOf(i));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(long[] array) {
+	public static String nullSafeToString(@Nullable long[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -924,30 +881,23 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (long l : array) {
+			stringJoiner.add(String.valueOf(l));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
 	 * enclosed in curly braces ({@code "{}"}). Adjacent elements are separated
-	 * by the characters {@code ", "} (a comma followed by a space). Returns
-	 * {@code "null"} if {@code array} is {@code null}.
+	 * by the characters {@code ", "} (a comma followed by a space).
+	 * Returns a {@code "null"} String if {@code array} is {@code null}.
 	 * @param array the array to build a String representation for
 	 * @return a String representation of {@code array}
 	 */
-	public static String nullSafeToString(short[] array) {
+	public static String nullSafeToString(@Nullable short[] array) {
 		if (array == null) {
 			return NULL_STRING;
 		}
@@ -955,18 +905,11 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return EMPTY_ARRAY;
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			if (i == 0) {
-				sb.append(ARRAY_START);
-			}
-			else {
-				sb.append(ARRAY_ELEMENT_SEPARATOR);
-			}
-			sb.append(array[i]);
+		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
+		for (short s : array) {
+			stringJoiner.add(String.valueOf(s));
 		}
-		sb.append(ARRAY_END);
-		return sb.toString();
+		return stringJoiner.toString();
 	}
 
 }

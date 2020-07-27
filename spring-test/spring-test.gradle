@@ -1,0 +1,115 @@
+description = "Spring TestContext Framework"
+
+apply plugin: "kotlin"
+
+dependencies {
+	compile(project(":spring-core"))
+	optional(project(":spring-aop"))
+	optional(project(":spring-beans"))
+	optional(project(":spring-context"))
+	optional(project(":spring-jdbc"))
+	optional(project(":spring-orm"))
+	optional(project(":spring-tx"))
+	optional(project(":spring-web"))
+	optional(project(":spring-webflux"))
+	optional(project(":spring-webmvc"))
+	optional(project(":spring-websocket"))
+	optional("javax.activation:javax.activation-api")
+	optional("javax.el:javax.el-api")
+	optional("javax.inject:javax.inject")
+	optional("javax.servlet:javax.servlet-api")
+	optional("javax.servlet.jsp:javax.servlet.jsp-api")
+	optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("javax.websocket:javax.websocket-api")
+	optional("junit:junit")
+	optional("org.junit.jupiter:junit-jupiter-api")
+	optional("org.testng:testng")
+	optional("org.aspectj:aspectjweaver")
+	optional("org.codehaus.groovy:groovy")
+	optional("org.hamcrest:hamcrest")
+	optional("org.apache.taglibs:taglibs-standard-jstlel")
+	optional("net.sourceforge.htmlunit:htmlunit")
+	optional("org.seleniumhq.selenium:htmlunit-driver")
+	optional("org.seleniumhq.selenium:selenium-java")
+	optional("org.xmlunit:xmlunit-matchers")
+	optional("org.skyscreamer:jsonassert")
+	optional("com.jayway.jsonpath:json-path")
+	optional("commons-fileupload:commons-fileupload")
+	optional("org.jetbrains.kotlin:kotlin-reflect")
+	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("io.projectreactor:reactor-test")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile(project(":spring-context-support"))
+	testCompile(project(":spring-oxm"))
+	testCompile(testFixtures(project(":spring-beans")))
+	testCompile(testFixtures(project(":spring-context")))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile(testFixtures(project(":spring-tx")))
+	testCompile(testFixtures(project(":spring-web")))
+	testCompile("javax.annotation:javax.annotation-api")
+	testCompile("javax.cache:cache-api")
+	testCompile("javax.ejb:javax.ejb-api")
+	testCompile("javax.interceptor:javax.interceptor-api")
+	testCompile("javax.mail:javax.mail-api")
+	testCompile("org.hibernate:hibernate-core")
+	testCompile("org.hibernate:hibernate-validator")
+	testCompile("javax.validation:validation-api")
+	testCompile("org.junit.platform:junit-platform-runner") {
+		exclude group: "junit", module: "junit"
+	}
+	testCompile("org.junit.platform:junit-platform-testkit")
+	testCompile("com.fasterxml.jackson.core:jackson-databind")
+	testCompile("com.thoughtworks.xstream:xstream")
+	testCompile("com.rometools:rome")
+	testCompile("org.apache.tiles:tiles-api")
+	testCompile("org.apache.tiles:tiles-core")
+	testCompile("org.apache.tiles:tiles-servlet")
+	testCompile("org.hsqldb:hsqldb")
+	testCompile("org.apache.httpcomponents:httpclient")
+	testCompile("io.projectreactor.netty:reactor-netty")
+	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner")
+	testRuntime("org.junit.vintage:junit-vintage-engine") {
+		exclude group: "junit", module: "junit"
+	}
+	testRuntime("org.glassfish:javax.el")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+}
+
+task junit(type: Test) {
+	description = "Runs JUnit 4 and JUnit Jupiter tests."
+	useJUnitPlatform {
+		excludeTags "failing-test-case"
+	}
+	include(["**/*Tests.class", "**/*Test.class"])
+	exclude(["**/testng/**/*.*"])
+	systemProperty("testGroups", project.properties.get("testGroups"))
+	// Java Util Logging for the JUnit Platform.
+	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
+}
+
+task testNG(type: Test) {
+	description = "Runs TestNG tests."
+	useTestNG()
+	include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
+	systemProperty("testGroups", project.properties.get("testGroups"))
+	// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
+	// testLogging.showStandardStreams = true
+	// forkEvery 1
+}
+
+test {
+	description = "Runs all tests."
+	dependsOn junit, testNG
+	exclude(["**/*.*"])
+}
+
+task aggregateTestReports(type: TestReport) {
+	description = "Aggregates JUnit and TestNG test reports."
+	destinationDir = test.reports.html.destination
+	reportOn junit, testNG
+}
+
+check.dependsOn aggregateTestReports

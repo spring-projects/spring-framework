@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,21 +18,20 @@ package org.springframework.validation.beanvalidation;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.validation.Configuration;
 import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
 import javax.validation.ParameterNameProvider;
 import javax.validation.TraversableResolver;
 import javax.validation.Validation;
+import javax.validation.ValidationException;
 import javax.validation.ValidationProviderResolver;
 import javax.validation.Validator;
 import javax.validation.ValidatorContext;
@@ -50,8 +49,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -68,8 +67,12 @@ import org.springframework.util.ReflectionUtils;
  * you will almost always use the default Validator anyway. This can also be injected directly
  * into any target dependency of type {@link org.springframework.validation.Validator}!
  *
- * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1, with special support
+ * <p><b>As of Spring 5.0, this class requires Bean Validation 1.1+, with special support
  * for Hibernate Validator 5.x</b> (see {@link #setValidationMessageSource}).
+ * This class is also runtime-compatible with Bean Validation 2.0 and Hibernate Validator 6.0,
+ * with one special note: If you'd like to call BV 2.0's {@code getClockProvider()} method,
+ * obtain the native {@code ValidatorFactory} through {@code #unwrap(ValidatorFactory.class)}
+ * and call the {@code getClockProvider()} method on the returned native reference there.
  *
  * <p>This class is also being used by Spring's MVC configuration namespace, in case of the
  * {@code javax.validation} API being present but no explicit Validator having been configured.
@@ -85,24 +88,33 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean, DisposableBean {
 
 	@SuppressWarnings("rawtypes")
+	@Nullable
 	private Class providerClass;
 
+	@Nullable
 	private ValidationProviderResolver validationProviderResolver;
 
+	@Nullable
 	private MessageInterpolator messageInterpolator;
 
+	@Nullable
 	private TraversableResolver traversableResolver;
 
+	@Nullable
 	private ConstraintValidatorFactory constraintValidatorFactory;
 
+	@Nullable
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+	@Nullable
 	private Resource[] mappingLocations;
 
 	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
+	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
 	private ValidatorFactory validatorFactory;
 
 
@@ -146,6 +158,11 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * not both. If you would like to build a custom MessageInterpolator, consider deriving from
 	 * Hibernate Validator's {@link ResourceBundleMessageInterpolator} and passing in a
 	 * Spring-based {@code ResourceBundleLocator} when constructing your interpolator.
+	 * <p>In order for Hibernate's default validation messages to be resolved still, your
+	 * {@link MessageSource} must be configured for optional resolution (usually the default).
+	 * In particular, the {@code MessageSource} instance specified here should not apply
+	 * {@link org.springframework.context.support.AbstractMessageSource#setUseCodeAsDefaultMessage
+	 * "useCodeAsDefaultMessage"} behavior. Please double-check your setup accordingly.
 	 * @see ResourceBundleMessageInterpolator
 	 */
 	public void setValidationMessageSource(MessageSource messageSource) {
@@ -200,7 +217,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.validation.Configuration#addProperty(String, String)
 	 */
-	public void setValidationPropertyMap(Map<String, String> validationProperties) {
+	public void setValidationPropertyMap(@Nullable Map<String, String> validationProperties) {
 		if (validationProperties != null) {
 			this.validationPropertyMap.putAll(validationProperties);
 		}
@@ -271,7 +288,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		}
 
 		if (this.parameterNameDiscoverer != null) {
-			configureParameterNameProviderIfPossible(configuration);
+			configureParameterNameProvider(this.parameterNameDiscoverer, configuration);
 		}
 
 		if (this.mappingLocations != null) {
@@ -285,9 +302,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 			}
 		}
 
-		for (Map.Entry<String, String> entry : this.validationPropertyMap.entrySet()) {
-			configuration.addProperty(entry.getKey(), entry.getValue());
-		}
+		this.validationPropertyMap.forEach(configuration::addProperty);
 
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
 		postProcessConfiguration(configuration);
@@ -296,9 +311,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		setTargetValidator(this.validatorFactory.getValidator());
 	}
 
-	private void configureParameterNameProviderIfPossible(Configuration<?> configuration) {
-		// TODO: inner class
-		final ParameterNameDiscoverer discoverer = this.parameterNameDiscoverer;
+	private void configureParameterNameProvider(ParameterNameDiscoverer discoverer, Configuration<?> configuration) {
 		final ParameterNameProvider defaultProvider = configuration.getDefaultParameterNameProvider();
 		configuration.parameterNameProvider(new ParameterNameProvider() {
 			@Override
@@ -359,9 +372,50 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@Override
 	public ParameterNameProvider getParameterNameProvider() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
 		return this.validatorFactory.getParameterNameProvider();
 	}
 
+	// Bean Validation 2.0: currently not implemented here since it would imply
+	// a hard dependency on the new javax.validation.ClockProvider interface.
+	// To be resolved once Spring Framework requires Bean Validation 2.0+.
+	// Obtain the native ValidatorFactory through unwrap(ValidatorFactory.class)
+	// instead which will fully support a getClockProvider() call as well.
+	/*
+	@Override
+	public javax.validation.ClockProvider getClockProvider() {
+		Assert.notNull(this.validatorFactory, "No target ValidatorFactory set");
+		return this.validatorFactory.getClockProvider();
+	}
+	*/
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(@Nullable Class<T> type) {
+		if (type == null || !ValidatorFactory.class.isAssignableFrom(type)) {
+			try {
+				return super.unwrap(type);
+			}
+			catch (ValidationException ex) {
+				// ignore - we'll try ValidatorFactory unwrapping next
+			}
+		}
+		if (this.validatorFactory != null) {
+			try {
+				return this.validatorFactory.unwrap(type);
+			}
+			catch (ValidationException ex) {
+				// ignore if just being asked for ValidatorFactory
+				if (ValidatorFactory.class == type) {
+					return (T) this.validatorFactory;
+				}
+				throw ex;
+			}
+		}
+		throw new ValidationException("Cannot unwrap to " + type);
+	}
+
+	@Override
 	public void close() {
 		if (this.validatorFactory != null) {
 			this.validatorFactory.close();

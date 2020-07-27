@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import javax.transaction.UserTransaction;
 import org.hibernate.TransactionException;
 import org.hibernate.engine.transaction.jta.platform.spi.JtaPlatform;
 
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.util.Assert;
 
@@ -44,6 +45,7 @@ class ConfigurableJtaPlatform implements JtaPlatform {
 
 	private final UserTransaction userTransaction;
 
+	@Nullable
 	private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
 
@@ -54,7 +56,9 @@ class ConfigurableJtaPlatform implements JtaPlatform {
 	 * @param ut the JTA UserTransaction reference (optional)
 	 * @param tsr the JTA 1.1 TransactionSynchronizationRegistry (optional)
 	 */
-	public ConfigurableJtaPlatform(TransactionManager tm, UserTransaction ut, TransactionSynchronizationRegistry tsr) {
+	public ConfigurableJtaPlatform(TransactionManager tm, @Nullable UserTransaction ut,
+			@Nullable TransactionSynchronizationRegistry tsr) {
+
 		Assert.notNull(tm, "TransactionManager reference must not be null");
 		this.transactionManager = tm;
 		this.userTransaction = (ut != null ? ut : new UserTransactionAdapter(tm));

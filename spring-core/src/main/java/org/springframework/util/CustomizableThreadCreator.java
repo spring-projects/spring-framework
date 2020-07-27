@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.util;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Simple customizable helper class for creating new {@link Thread} instances.
@@ -39,6 +41,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	private boolean daemon = false;
 
+	@Nullable
 	private ThreadGroup threadGroup;
 
 	private final AtomicInteger threadCount = new AtomicInteger(0);
@@ -55,7 +58,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Create a new CustomizableThreadCreator with the given thread name prefix.
 	 * @param threadNamePrefix the prefix to use for the names of newly created threads
 	 */
-	public CustomizableThreadCreator(String threadNamePrefix) {
+	public CustomizableThreadCreator(@Nullable String threadNamePrefix) {
 		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : getDefaultThreadNamePrefix());
 	}
 
@@ -64,7 +67,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Specify the prefix to use for the names of newly created threads.
 	 * Default is "SimpleAsyncTaskExecutor-".
 	 */
-	public void setThreadNamePrefix(String threadNamePrefix) {
+	public void setThreadNamePrefix(@Nullable String threadNamePrefix) {
 		this.threadNamePrefix = (threadNamePrefix != null ? threadNamePrefix : getDefaultThreadNamePrefix());
 	}
 
@@ -125,7 +128,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Specify the thread group that threads should be created in.
 	 * @see #setThreadGroupName
 	 */
-	public void setThreadGroup(ThreadGroup threadGroup) {
+	public void setThreadGroup(@Nullable ThreadGroup threadGroup) {
 		this.threadGroup = threadGroup;
 	}
 
@@ -133,6 +136,7 @@ public class CustomizableThreadCreator implements Serializable {
 	 * Return the thread group that threads should be created in
 	 * (or {@code null} for the default group).
 	 */
+	@Nullable
 	public ThreadGroup getThreadGroup() {
 		return this.threadGroup;
 	}

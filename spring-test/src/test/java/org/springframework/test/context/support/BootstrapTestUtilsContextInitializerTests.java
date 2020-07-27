@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,10 +36,10 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @since 3.1
  */
 @SuppressWarnings("unchecked")
-public class BootstrapTestUtilsContextInitializerTests extends AbstractContextConfigurationUtilsTests {
+class BootstrapTestUtilsContextInitializerTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
-	public void buildMergedConfigWithSingleLocalInitializer() {
+	void buildMergedConfigWithSingleLocalInitializer() {
 		Class<?> testClass = SingleInitializer.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -49,7 +48,7 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 	}
 
 	@Test
-	public void buildMergedConfigWithLocalInitializerAndConfigClass() {
+	void buildMergedConfigWithLocalInitializerAndConfigClass() {
 		Class<?> testClass = InitializersFoo.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -58,7 +57,7 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 	}
 
 	@Test
-	public void buildMergedConfigWithLocalAndInheritedInitializer() {
+	void buildMergedConfigWithLocalAndInheritedInitializer() {
 		Class<?> testClass = InitializersBar.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -67,7 +66,7 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 	}
 
 	@Test
-	public void buildMergedConfigWithOverriddenInitializers() {
+	void buildMergedConfigWithOverriddenInitializers() {
 		Class<?> testClass = OverriddenInitializersBar.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -76,7 +75,7 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 	}
 
 	@Test
-	public void buildMergedConfigWithOverriddenInitializersAndClasses() {
+	void buildMergedConfigWithOverriddenInitializersAndClasses() {
 		Class<?> testClass = OverriddenInitializersAndClassesBar.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
@@ -84,8 +83,8 @@ public class BootstrapTestUtilsContextInitializerTests extends AbstractContextCo
 			initializers(BarInitializer.class), DelegatingSmartContextLoader.class);
 	}
 
-	private Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializers(
-			Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>... classes) {
+	private Set<Class<? extends ApplicationContextInitializer<?>>> initializers(
+			Class<? extends ApplicationContextInitializer<?>>... classes) {
 
 		return new HashSet<>(Arrays.asList(classes));
 	}

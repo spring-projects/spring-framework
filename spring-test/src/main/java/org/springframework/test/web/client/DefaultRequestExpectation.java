@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +38,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 	private final List<RequestMatcher> requestMatchers = new LinkedList<>();
 
+	@Nullable
 	private ResponseCreator responseCreator;
 
 
@@ -61,6 +63,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		return this.requestMatchers;
 	}
 
+	@Nullable
 	protected ResponseCreator getResponseCreator() {
 		return this.responseCreator;
 	}
@@ -85,17 +88,27 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		}
 	}
 
+	/**
+	 * Note that as of 5.0.3, the creation of the response, which may block
+	 * intentionally, is separated from request count tracking, and this
+	 * method no longer increments the count transparently. Instead
+	 * {@link #incrementAndValidate()} must be invoked independently.
+	 */
 	@Override
-	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
+	public ClientHttpResponse createResponse(@Nullable ClientHttpRequest request) throws IOException {
 		ResponseCreator responseCreator = getResponseCreator();
 		Assert.state(responseCreator != null, "createResponse() called before ResponseCreator was set");
-		getRequestCount().incrementAndValidate();
 		return responseCreator.createResponse(request);
 	}
 
 	@Override
 	public boolean hasRemainingCount() {
 		return getRequestCount().hasRemainingCount();
+	}
+
+	@Override
+	public void incrementAndValidate() {
+		getRequestCount().incrementAndValidate();
 	}
 
 	@Override
@@ -137,6 +150,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		}
 
 		public boolean isSatisfied() {
+			// Only validate min count since max count is checked on every request...
 			return (getMatchedRequestCount() >= getExpectedCount().getMinCount());
 		}
 	}

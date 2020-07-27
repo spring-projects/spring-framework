@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,13 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
 /**
@@ -44,12 +46,13 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
 
+	@Nullable
 	private ServletOutputStream outputStream;
 
+	@Nullable
 	private PrintWriter writer;
 
-	private int statusCode = HttpServletResponse.SC_OK;
-
+	@Nullable
 	private Integer contentLength;
 
 
@@ -63,19 +66,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 
 	@Override
-	public void setStatus(int sc) {
-		super.setStatus(sc);
-		this.statusCode = sc;
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public void setStatus(int sc, String sm) {
-		super.setStatus(sc, sm);
-		this.statusCode = sc;
-	}
-
-	@Override
 	public void sendError(int sc) throws IOException {
 		copyBodyToResponse(false);
 		try {
@@ -85,7 +75,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			// Possibly on Tomcat when called too late: fall back to silent setStatus
 			super.setStatus(sc);
 		}
-		this.statusCode = sc;
 	}
 
 	@Override
@@ -99,7 +88,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			// Possibly on Tomcat when called too late: fall back to silent setStatus
 			super.setStatus(sc, msg);
 		}
-		this.statusCode = sc;
 	}
 
 	@Override
@@ -140,6 +128,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
+	@Override
 	public void setContentLengthLong(long len) {
 		if (len > Integer.MAX_VALUE) {
 			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
@@ -172,9 +161,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Return the status code as specified on the response.
+	 * @deprecated as of 5.2 in favor of {@link HttpServletResponse#getStatus()}
 	 */
+	@Deprecated
 	public int getStatusCode() {
-		return this.statusCode;
+		return getStatus();
 	}
 
 	/**
@@ -267,7 +258,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		}
 
 		@Override
-		public void write(char buf[], int off, int len) {
+		public void write(char[] buf, int off, int len) {
 			super.write(buf, off, len);
 			super.flush();
 		}

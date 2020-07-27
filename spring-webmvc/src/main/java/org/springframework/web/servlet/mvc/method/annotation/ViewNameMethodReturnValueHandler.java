@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -32,10 +33,10 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  * as the actual return value is left as-is allowing the configured
  * {@link RequestToViewNameTranslator} to select a view name by convention.
  *
- * <p>A String return value can be interpreted in more than one ways depending
- * on the presence of annotations like {@code @ModelAttribute} or
- * {@code @ResponseBody}. Therefore this handler should be configured after
- * the handlers that support these annotations.
+ * <p>A String return value can be interpreted in more than one ways depending on
+ * the presence of annotations like {@code @ModelAttribute} or {@code @ResponseBody}.
+ * Therefore this handler should be configured after the handlers that support these
+ * annotations.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -43,25 +44,25 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  */
 public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Nullable
 	private String[] redirectPatterns;
 
 
 	/**
-	 * Configure one more simple patterns (as described in
-	 * {@link PatternMatchUtils#simpleMatch}) to use in order to recognize
-	 * custom redirect prefixes in addition to "redirect:".
-	 * <p>Note that simply configuring this property will not make a custom
-	 * redirect prefix work. There must be a custom View that recognizes the
-	 * prefix as well.
+	 * Configure one more simple patterns (as described in {@link PatternMatchUtils#simpleMatch})
+	 * to use in order to recognize custom redirect prefixes in addition to "redirect:".
+	 * <p>Note that simply configuring this property will not make a custom redirect prefix work.
+	 * There must be a custom View that recognizes the prefix as well.
 	 * @since 4.1
 	 */
-	public void setRedirectPatterns(String... redirectPatterns) {
+	public void setRedirectPatterns(@Nullable String... redirectPatterns) {
 		this.redirectPatterns = redirectPatterns;
 	}
 
 	/**
 	 * The configured redirect patterns, if any.
 	 */
+	@Nullable
 	public String[] getRedirectPatterns() {
 		return this.redirectPatterns;
 	}
@@ -74,7 +75,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue instanceof CharSequence) {
@@ -84,7 +85,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 				mavContainer.setRedirectModelScenario(true);
 			}
 		}
-		else if (returnValue != null){
+		else if (returnValue != null) {
 			// should not happen
 			throw new UnsupportedOperationException("Unexpected return type: " +
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());

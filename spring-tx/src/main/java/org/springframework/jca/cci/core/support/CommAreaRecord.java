@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.jca.cci.core.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.resource.cci.Record;
 import javax.resource.cci.Streamable;
 
@@ -31,15 +32,18 @@ import org.springframework.util.FileCopyUtils;
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.jca.cci.object.MappingCommAreaOperation
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class CommAreaRecord implements Record, Streamable {
 
-	private byte[] bytes;
+	private byte[] bytes = new byte[0];
 
-	private String recordName;
+	private String recordName = "";
 
-	private String recordShortDescription;
+	private String recordShortDescription = "";
 
 
 	/**
@@ -60,22 +64,22 @@ public class CommAreaRecord implements Record, Streamable {
 
 	@Override
 	public void setRecordName(String recordName) {
-		this.recordName=recordName;
+		this.recordName = recordName;
 	}
 
 	@Override
 	public String getRecordName() {
-		return recordName;
+		return this.recordName;
 	}
 
 	@Override
 	public void setRecordShortDescription(String recordShortDescription) {
-		this.recordShortDescription=recordShortDescription;
+		this.recordShortDescription = recordShortDescription;
 	}
 
 	@Override
 	public String getRecordShortDescription() {
-		return recordShortDescription;
+		return this.recordShortDescription;
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ import org.springframework.core.annotation.AliasFor;
  * {@code @DisabledOnMac} annotation can be created as follows.
  *
  * <pre style="code">
- * {@literal @}Target({ ElementType.TYPE, ElementType.METHOD })
+ * {@literal @}Target({ElementType.TYPE, ElementType.METHOD})
  * {@literal @}Retention(RetentionPolicy.RUNTIME)
  * {@literal @}DisabledIf(
  *     expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
@@ -54,17 +54,18 @@ import org.springframework.core.annotation.AliasFor;
  * @author Tadaya Tsuyukubo
  * @since 5.0
  * @see SpringExtension
+ * @see EnabledIf
  * @see org.junit.jupiter.api.Disabled
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @ExtendWith(DisabledIfCondition.class)
 public @interface DisabledIf {
 
 	/**
-	 * Alias for {@link #expression}; only intended to be used if an
-	 * explicit {@link #reason} is not provided.
+	 * Alias for {@link #expression}; only intended to be used if {@link #reason}
+	 * and {@link #loadContext} are not specified.
 	 *
 	 * @see #expression
 	 */
@@ -85,7 +86,7 @@ public @interface DisabledIf {
 	 * <pre style="code">@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
 	 * <li>Placeholder for a property available in the Spring
 	 * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
-	 * <pre style="code">@DisabledIf("${smoke.tests.enabled}")</pre>
+	 * <pre style="code">@DisabledIf("${smoke.tests.disabled}")</pre>
 	 * <li>Text literal &mdash; for example:
 	 * <pre style="code">@DisabledIf("true")</pre>
 	 * </ul>
@@ -96,6 +97,7 @@ public @interface DisabledIf {
 	 * and {@code @DisabledIf("false")} is logically meaningless.
 	 *
 	 * @see #reason
+	 * @see #loadContext
 	 * @see #value
 	 */
 	@AliasFor("value")
@@ -107,5 +109,20 @@ public @interface DisabledIf {
 	 * @see #expression
 	 */
 	String reason() default "";
+
+	/**
+	 * Whether the {@code ApplicationContext} associated with the current test
+	 * should be eagerly loaded in order to evaluate the {@link #expression}.
+	 *
+	 * <p>Defaults to {@code false} so that test application contexts are not
+	 * eagerly loaded unnecessarily. If an expression is based solely on system
+	 * properties or environment variables or does not interact with beans in
+	 * the test's application context, there is no need to load the context
+	 * prematurely since doing so would be a waste of time if the test ends up
+	 * being disabled.
+	 *
+	 * @see #expression
+	 */
+	boolean loadContext() default false;
 
 }

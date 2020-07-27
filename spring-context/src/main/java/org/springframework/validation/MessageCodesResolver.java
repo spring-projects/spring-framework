@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.validation;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Strategy interface for building message codes from validation error codes.
@@ -50,6 +52,6 @@ public interface MessageCodesResolver {
 	 * @param fieldType the field type (may be {@code null} if not determinable)
 	 * @return the message codes to use
 	 */
-	String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType);
+	String[] resolveMessageCodes(String errorCode, String objectName, String field, @Nullable Class<?> fieldType);
 
 }

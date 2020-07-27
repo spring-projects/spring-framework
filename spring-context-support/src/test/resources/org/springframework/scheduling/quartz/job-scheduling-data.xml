@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <job-scheduling-data xmlns="http://www.quartz-scheduler.org/xml/JobSchedulingData"
 					 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-					 xsi:schemaLocation="http://www.quartz-scheduler.org/xml/JobSchedulingData http://www.quartz-scheduler.org/xml/job_scheduling_data_1_8.xsd"
+					 xsi:schemaLocation="http://www.quartz-scheduler.org/xml/JobSchedulingData https://www.quartz-scheduler.org/xml/job_scheduling_data_1_8.xsd"
 					 version="1.8">
 	<schedule>
 		<job>

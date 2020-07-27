@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,8 +74,8 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	 * @param target the bean instance to destroy
 	 */
 	protected void destroyPrototypeInstance(Object target) {
-		if (this.logger.isDebugEnabled()) {
-			this.logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Destroying instance of bean '" + getTargetBeanName() + "'");
 		}
 		if (getBeanFactory() instanceof ConfigurableBeanFactory) {
 			((ConfigurableBeanFactory) getBeanFactory()).destroyBean(getTargetBeanName(), target);
@@ -85,7 +85,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 				((DisposableBean) target).destroy();
 			}
 			catch (Throwable ex) {
-				logger.error("Couldn't invoke destroy method of bean with name '" + getTargetBeanName() + "'", ex);
+				logger.warn("Destroy method on bean with name '" + getTargetBeanName() + "' threw an exception", ex);
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
 		throw new NotSerializableException("A prototype-based TargetSource itself is not deserializable - " +
-				"just a disconnected SingletonTargetSource is");
+				"just a disconnected SingletonTargetSource or EmptyTargetSource is");
 	}
 
 	/**
@@ -113,13 +113,15 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 			logger.debug("Disconnecting TargetSource [" + this + "]");
 		}
 		try {
-			// Create disconnected SingletonTargetSource.
-			return new SingletonTargetSource(getTarget());
+			// Create disconnected SingletonTargetSource/EmptyTargetSource.
+			Object target = getTarget();
+			return (target != null ? new SingletonTargetSource(target) :
+					EmptyTargetSource.forClass(getTargetClass()));
 		}
 		catch (Exception ex) {
-			logger.error("Cannot get target for disconnecting TargetSource [" + this + "]", ex);
-			throw new NotSerializableException(
-					"Cannot get target for disconnecting TargetSource [" + this + "]: " + ex);
+			String msg = "Cannot get target for disconnecting TargetSource [" + this + "]";
+			logger.error(msg, ex);
+			throw new NotSerializableException(msg + ": " + ex);
 		}
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,10 +28,14 @@ import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
 import javax.jms.TopicSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Juergen Hoeller
@@ -279,7 +283,7 @@ public class SingleConnectionFactoryTests {
 		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
 		scf.setExceptionListener(listener);
 		Connection con1 = scf.createConnection();
-		assertEquals(listener, con1.getExceptionListener());
+		assertThat(con1.getExceptionListener()).isEqualTo(listener);
 		con1.start();
 		con1.stop();
 		con1.close();
@@ -304,15 +308,15 @@ public class SingleConnectionFactoryTests {
 		SingleConnectionFactory scf = new SingleConnectionFactory(cf);
 		scf.setReconnectOnException(true);
 		Connection con1 = scf.createConnection();
-		assertNull(con1.getExceptionListener());
+		assertThat(con1.getExceptionListener()).isNull();
 		con1.start();
 		con.getExceptionListener().onException(new JMSException(""));
 		Connection con2 = scf.createConnection();
 		con2.start();
 		scf.destroy();  // should trigger actual close
 
-		assertEquals(2, con.getStartCount());
-		assertEquals(2, con.getCloseCount());
+		assertThat(con.getStartCount()).isEqualTo(2);
+		assertThat(con.getCloseCount()).isEqualTo(2);
 	}
 
 	@Test
@@ -326,16 +330,16 @@ public class SingleConnectionFactoryTests {
 		scf.setExceptionListener(listener);
 		scf.setReconnectOnException(true);
 		Connection con1 = scf.createConnection();
-		assertSame(listener, con1.getExceptionListener());
+		assertThat(con1.getExceptionListener()).isSameAs(listener);
 		con1.start();
 		con.getExceptionListener().onException(new JMSException(""));
 		Connection con2 = scf.createConnection();
 		con2.start();
 		scf.destroy();  // should trigger actual close
 
-		assertEquals(2, con.getStartCount());
-		assertEquals(2, con.getCloseCount());
-		assertEquals(1, listener.getCount());
+		assertThat(con.getStartCount()).isEqualTo(2);
+		assertThat(con.getCloseCount()).isEqualTo(2);
+		assertThat(listener.getCount()).isEqualTo(1);
 	}
 
 	@Test
@@ -358,10 +362,10 @@ public class SingleConnectionFactoryTests {
 		scf.setExceptionListener(listener0);
 		Connection con1 = scf.createConnection();
 		con1.setExceptionListener(listener1);
-		assertSame(listener1, con1.getExceptionListener());
+		assertThat(con1.getExceptionListener()).isSameAs(listener1);
 		Connection con2 = scf.createConnection();
 		con2.setExceptionListener(listener2);
-		assertSame(listener2, con2.getExceptionListener());
+		assertThat(con2.getExceptionListener()).isSameAs(listener2);
 		con.getExceptionListener().onException(new JMSException(""));
 		con2.close();
 		con.getExceptionListener().onException(new JMSException(""));
@@ -369,11 +373,11 @@ public class SingleConnectionFactoryTests {
 		con.getExceptionListener().onException(new JMSException(""));
 		scf.destroy();  // should trigger actual close
 
-		assertEquals(0, con.getStartCount());
-		assertEquals(1, con.getCloseCount());
-		assertEquals(3, listener0.getCount());
-		assertEquals(2, listener1.getCount());
-		assertEquals(1, listener2.getCount());
+		assertThat(con.getStartCount()).isEqualTo(0);
+		assertThat(con.getCloseCount()).isEqualTo(1);
+		assertThat(listener0.getCount()).isEqualTo(3);
+		assertThat(listener1.getCount()).isEqualTo(2);
+		assertThat(listener2.getCount()).isEqualTo(1);
 	}
 
 	@Test
@@ -391,11 +395,11 @@ public class SingleConnectionFactoryTests {
 		scf.setExceptionListener(listener0);
 		Connection con1 = scf.createConnection();
 		con1.setExceptionListener(listener1);
-		assertSame(listener1, con1.getExceptionListener());
+		assertThat(con1.getExceptionListener()).isSameAs(listener1);
 		con1.start();
 		Connection con2 = scf.createConnection();
 		con2.setExceptionListener(listener2);
-		assertSame(listener2, con2.getExceptionListener());
+		assertThat(con2.getExceptionListener()).isSameAs(listener2);
 		con.getExceptionListener().onException(new JMSException(""));
 		con2.close();
 		con1.getMetaData();
@@ -403,11 +407,11 @@ public class SingleConnectionFactoryTests {
 		con1.close();
 		scf.destroy();  // should trigger actual close
 
-		assertEquals(2, con.getStartCount());
-		assertEquals(2, con.getCloseCount());
-		assertEquals(2, listener0.getCount());
-		assertEquals(2, listener1.getCount());
-		assertEquals(1, listener2.getCount());
+		assertThat(con.getStartCount()).isEqualTo(2);
+		assertThat(con.getCloseCount()).isEqualTo(2);
+		assertThat(listener0.getCount()).isEqualTo(2);
+		assertThat(listener1.getCount()).isEqualTo(2);
+		assertThat(listener2.getCount()).isEqualTo(1);
 	}
 
 	@Test

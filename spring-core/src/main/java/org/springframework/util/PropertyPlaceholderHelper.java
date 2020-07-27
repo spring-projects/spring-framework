@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Utility class for working with Strings that have placeholder values in them. A placeholder takes the form
@@ -54,6 +56,7 @@ public class PropertyPlaceholderHelper {
 
 	private final String simplePrefix;
 
+	@Nullable
 	private final String valueSeparator;
 
 	private final boolean ignoreUnresolvablePlaceholders;
@@ -79,7 +82,7 @@ public class PropertyPlaceholderHelper {
 	 * be ignored ({@code true}) or cause an exception ({@code false})
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
 
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
@@ -106,12 +109,7 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, final Properties properties) {
 		Assert.notNull(properties, "'properties' must not be null");
-		return replacePlaceholders(value, new PlaceholderResolver() {
-			@Override
-			public String resolvePlaceholder(String placeholderName) {
-				return properties.getProperty(placeholderName);
-			}
-		});
+		return replacePlaceholders(value, properties::getProperty);
 	}
 
 	/**
@@ -123,20 +121,26 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
-		return parseStringValue(value, placeholderResolver, new HashSet<>());
+		return parseStringValue(value, placeholderResolver, null);
 	}
 
 	protected String parseStringValue(
-			String strVal, PlaceholderResolver placeholderResolver, Set<String> visitedPlaceholders) {
+			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
-		StringBuilder result = new StringBuilder(strVal);
+		int startIndex = value.indexOf(this.placeholderPrefix);
+		if (startIndex == -1) {
+			return value;
+		}
 
-		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		StringBuilder result = new StringBuilder(value);
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
 				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholder = placeholder;
+				if (visitedPlaceholders == null) {
+					visitedPlaceholders = new HashSet<>(4);
+				}
 				if (!visitedPlaceholders.add(originalPlaceholder)) {
 					throw new IllegalArgumentException(
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
@@ -172,7 +176,7 @@ public class PropertyPlaceholderHelper {
 				}
 				else {
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in string value \"" + strVal + "\"");
+							placeholder + "'" + " in value \"" + value + "\"");
 				}
 				visitedPlaceholders.remove(originalPlaceholder);
 			}
@@ -180,7 +184,6 @@ public class PropertyPlaceholderHelper {
 				startIndex = -1;
 			}
 		}
-
 		return result.toString();
 	}
 
@@ -220,6 +223,7 @@ public class PropertyPlaceholderHelper {
 		 * @param placeholderName the name of the placeholder to resolve
 		 * @return the replacement value, or {@code null} if no replacement is to be made
 		 */
+		@Nullable
 		String resolvePlaceholder(String placeholderName);
 	}
 

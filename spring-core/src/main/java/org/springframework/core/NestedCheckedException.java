@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Handy class for wrapping checked {@code Exceptions} with a root cause.
@@ -36,7 +38,7 @@ package org.springframework.core;
  */
 public abstract class NestedCheckedException extends Exception {
 
-	/** Use serialVersionUID from Spring 1.2 for interoperability */
+	/** Use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 7100714597678207546L;
 
 	static {
@@ -60,7 +62,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param msg the detail message
 	 * @param cause the nested exception
 	 */
-	public NestedCheckedException(String msg, Throwable cause) {
+	public NestedCheckedException(@Nullable String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -70,6 +72,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * if there is one.
 	 */
 	@Override
+	@Nullable
 	public String getMessage() {
 		return NestedExceptionUtils.buildMessage(super.getMessage(), getCause());
 	}
@@ -79,14 +82,9 @@ public abstract class NestedCheckedException extends Exception {
 	 * Retrieve the innermost cause of this exception, if any.
 	 * @return the innermost exception, or {@code null} if none
 	 */
+	@Nullable
 	public Throwable getRootCause() {
-		Throwable rootCause = null;
-		Throwable cause = getCause();
-		while (cause != null && cause != rootCause) {
-			rootCause = cause;
-			cause = cause.getCause();
-		}
-		return rootCause;
+		return NestedExceptionUtils.getRootCause(this);
 	}
 
 	/**
@@ -109,7 +107,7 @@ public abstract class NestedCheckedException extends Exception {
 	 * @param exType the exception type to look for
 	 * @return whether there is a nested exception of the specified type
 	 */
-	public boolean contains(Class<?> exType) {
+	public boolean contains(@Nullable Class<?> exType) {
 		if (exType == null) {
 			return false;
 		}

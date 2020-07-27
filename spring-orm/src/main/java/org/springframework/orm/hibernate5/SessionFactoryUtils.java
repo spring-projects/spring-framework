@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -63,6 +64,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -110,7 +112,7 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 		// Check that it is the Hibernate FlushMode type, not JPA's...
-		Assert.state(FlushMode.class == getFlushMode.getReturnType());
+		Assert.state(FlushMode.class == getFlushMode.getReturnType(), "Could not find Hibernate getFlushMode method");
 	}
 
 
@@ -121,7 +123,9 @@ public abstract class SessionFactoryUtils {
 	 * @since 4.3
 	 */
 	static FlushMode getFlushMode(Session session) {
-		return (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+		Assert.state(flushMode != null, "No FlushMode from Session");
+		return flushMode;
 	}
 
 	/**
@@ -130,7 +134,7 @@ public abstract class SessionFactoryUtils {
 	 * {@link PersistenceException} wrappers accordingly.
 	 * @param session the Hibernate Session to flush
 	 * @param synch whether this flush is triggered by transaction synchronization
-	 * @throws DataAccessException
+	 * @throws DataAccessException in case of flush failures
 	 * @since 4.3.2
 	 */
 	static void flush(Session session, boolean synch) throws DataAccessException {
@@ -161,16 +165,13 @@ public abstract class SessionFactoryUtils {
 	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @see Session#close()
 	 */
-	public static void closeSession(Session session) {
+	public static void closeSession(@Nullable Session session) {
 		if (session != null) {
 			try {
 				session.close();
 			}
-			catch (HibernateException ex) {
-				logger.debug("Could not close Hibernate Session", ex);
-			}
 			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing Hibernate Session", ex);
+				logger.error("Failed to release Hibernate Session", ex);
 			}
 		}
 	}
@@ -181,13 +182,16 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
+	@Nullable
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
 		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
 		if (getProperties != null) {
 			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
-			Object dataSourceValue = props.get(Environment.DATASOURCE);
-			if (dataSourceValue instanceof DataSource) {
-				return (DataSource) dataSourceValue;
+			if (props != null) {
+				Object dataSourceValue = props.get(Environment.DATASOURCE);
+				if (dataSourceValue instanceof DataSource) {
+					return (DataSource) dataSourceValue;
+				}
 			}
 		}
 		if (sessionFactory instanceof SessionFactoryImplementor) {
@@ -210,7 +214,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Convert the given HibernateException to an appropriate exception
 	 * from the {@code org.springframework.dao} hierarchy.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateExceptionTranslator#convertHibernateAccessException
 	 * @see HibernateTransactionManager#convertHibernateAccessException

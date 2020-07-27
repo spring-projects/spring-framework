@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -75,9 +77,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 */
 	@SuppressWarnings("rawtypes")
 	public CustomMapEditor(Class<? extends Map> mapType, boolean nullAsEmptyMap) {
-		if (mapType == null) {
-			throw new IllegalArgumentException("Map type is required");
-		}
+		Assert.notNull(mapType, "Map type is required");
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException(
 					"Map type [" + mapType.getName() + "] does not implement [java.util.Map]");
@@ -99,7 +99,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * Convert the given value to a Map of the target type.
 	 */
 	@Override
-	public void setValue(Object value) {
+	public void setValue(@Nullable Object value) {
 		if (value == null && this.nullAsEmptyMap) {
 			super.setValue(createMap(this.mapType, 0));
 		}
@@ -111,9 +111,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 			// Convert Map elements.
 			Map<?, ?> source = (Map<?, ?>) value;
 			Map<Object, Object> target = createMap(this.mapType, source.size());
-			for (Map.Entry<?, ?> entry : source.entrySet()) {
-				target.put(convertKey(entry.getKey()), convertValue(entry.getValue()));
-			}
+			source.forEach((key, val) -> target.put(convertKey(key), convertValue(val)));
 			super.setValue(target);
 		}
 		else {
@@ -128,7 +126,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * @param initialCapacity the initial capacity
 	 * @return the new Map instance
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected Map<Object, Object> createMap(Class<? extends Map> mapType, int initialCapacity) {
 		if (!mapType.isInterface()) {
 			try {
@@ -199,6 +197,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * there is no appropriate text representation.
 	 */
 	@Override
+	@Nullable
 	public String getAsText() {
 		return null;
 	}

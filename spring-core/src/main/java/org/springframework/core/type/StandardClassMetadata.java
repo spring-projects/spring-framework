@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,9 @@ package org.springframework.core.type;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClassMetadata} implementation that uses standard reflection
@@ -36,7 +38,9 @@ public class StandardClassMetadata implements ClassMetadata {
 	/**
 	 * Create a new StandardClassMetadata wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
+	 * @deprecated since 5.2 in favor of {@link StandardAnnotationMetadata}
 	 */
+	@Deprecated
 	public StandardClassMetadata(Class<?> introspectedClass) {
 		Assert.notNull(introspectedClass, "Class must not be null");
 		this.introspectedClass = introspectedClass;
@@ -71,11 +75,6 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
-	public boolean isConcrete() {
-		return !(isInterface() || isAbstract());
-	}
-
-	@Override
 	public boolean isFinal() {
 		return Modifier.isFinal(this.introspectedClass.getModifiers());
 	}
@@ -88,22 +87,14 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	@Override
-	public boolean hasEnclosingClass() {
-		return (this.introspectedClass.getEnclosingClass() != null);
-	}
-
-	@Override
+	@Nullable
 	public String getEnclosingClassName() {
 		Class<?> enclosingClass = this.introspectedClass.getEnclosingClass();
 		return (enclosingClass != null ? enclosingClass.getName() : null);
 	}
 
 	@Override
-	public boolean hasSuperClass() {
-		return (this.introspectedClass.getSuperclass() != null);
-	}
-
-	@Override
+	@Nullable
 	public String getSuperClassName() {
 		Class<?> superClass = this.introspectedClass.getSuperclass();
 		return (superClass != null ? superClass.getName() : null);
@@ -121,11 +112,11 @@ public class StandardClassMetadata implements ClassMetadata {
 
 	@Override
 	public String[] getMemberClassNames() {
-		LinkedHashSet<String> memberClassNames = new LinkedHashSet<>();
+		LinkedHashSet<String> memberClassNames = new LinkedHashSet<>(4);
 		for (Class<?> nestedClass : this.introspectedClass.getDeclaredClasses()) {
 			memberClassNames.add(nestedClass.getName());
 		}
-		return memberClassNames.toArray(new String[memberClassNames.size()]);
+		return StringUtils.toStringArray(memberClassNames);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @since 3.2
+ * @deprecated as of 5.0 where DeferredResultProcessingInterceptor has default methods
  */
+@Deprecated
 public abstract class DeferredResultProcessingInterceptorAdapter implements DeferredResultProcessingInterceptor {
 
 	/**
@@ -57,6 +59,16 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	 */
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+		return true;
+	}
+
+	/**
+	 * This implementation returns {@code true} by default allowing other interceptors
+	 * to be given a chance to handle the error.
+	 */
+	@Override
+	public <T> boolean handleError(NativeWebRequest request, DeferredResult<T> deferredResult, Throwable t)
+			throws Exception {
 		return true;
 	}
 

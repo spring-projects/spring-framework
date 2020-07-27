@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,14 @@ package org.springframework.mock.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpOutputMessage;
+import org.springframework.util.Assert;
 
 /**
  * Mock implementation of {@link ClientHttpRequest}.
@@ -37,6 +40,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 
 	private URI uri;
 
+	@Nullable
 	private ClientHttpResponse clientHttpResponse;
 
 	private boolean executed = false;
@@ -46,6 +50,13 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	 * Default constructor.
 	 */
 	public MockClientHttpRequest() {
+		this.httpMethod = HttpMethod.GET;
+		try {
+			this.uri = new URI("/");
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	/**
@@ -64,6 +75,11 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	@Override
 	public HttpMethod getMethod() {
 		return this.httpMethod;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.httpMethod.name();
 	}
 
 	public void setURI(URI uri) {
@@ -101,6 +117,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	 * potentially different than the configured response.
 	 */
 	protected ClientHttpResponse executeInternal() throws IOException {
+		Assert.state(this.clientHttpResponse != null, "No ClientHttpResponse");
 		return this.clientHttpResponse;
 	}
 
@@ -108,12 +125,8 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (this.httpMethod != null) {
-			sb.append(this.httpMethod);
-		}
-		if (this.uri != null) {
-			sb.append(" ").append(this.uri);
-		}
+		sb.append(this.httpMethod);
+		sb.append(" ").append(this.uri);
 		if (!getHeaders().isEmpty()) {
 			sb.append(", headers: ").append(getHeaders());
 		}

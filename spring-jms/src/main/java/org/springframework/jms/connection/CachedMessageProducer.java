@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,8 @@ import javax.jms.QueueSender;
 import javax.jms.Topic;
 import javax.jms.TopicPublisher;
 
+import org.springframework.lang.Nullable;
+
 /**
  * JMS MessageProducer decorator that adapts calls to a shared MessageProducer
  * instance underneath, managing QoS settings locally within the decorator.
@@ -37,10 +39,13 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 
 	private final MessageProducer target;
 
+	@Nullable
 	private Boolean originalDisableMessageID;
 
+	@Nullable
 	private Boolean originalDisableMessageTimestamp;
 
+	@Nullable
 	private Long originalDeliveryDelay;
 
 	private int deliveryMode;
@@ -84,6 +89,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		return this.target.getDisableMessageTimestamp();
 	}
 
+	@Override
 	public void setDeliveryDelay(long deliveryDelay) throws JMSException {
 		if (this.originalDeliveryDelay == null) {
 			this.originalDeliveryDelay = this.target.getDeliveryDelay();
@@ -91,6 +97,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		this.target.setDeliveryDelay(deliveryDelay);
 	}
 
+	@Override
 	public long getDeliveryDelay() throws JMSException {
 		return this.target.getDeliveryDelay();
 	}

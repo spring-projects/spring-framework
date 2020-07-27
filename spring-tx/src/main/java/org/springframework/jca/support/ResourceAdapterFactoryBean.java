@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that bootstraps
@@ -50,12 +50,16 @@ import org.springframework.util.Assert;
  */
 public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>, InitializingBean, DisposableBean {
 
+	@Nullable
 	private ResourceAdapter resourceAdapter;
 
+	@Nullable
 	private BootstrapContext bootstrapContext;
 
+	@Nullable
 	private WorkManager workManager;
 
+	@Nullable
 	private XATerminator xaTerminator;
 
 
@@ -66,9 +70,8 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 * through the "resourceAdapter" property.
 	 * @see #setResourceAdapter
 	 */
-	public void setResourceAdapterClass(Class<?> resourceAdapterClass) {
-		Assert.isAssignable(ResourceAdapter.class, resourceAdapterClass);
-		this.resourceAdapter = (ResourceAdapter) BeanUtils.instantiateClass(resourceAdapterClass);
+	public void setResourceAdapterClass(Class<? extends ResourceAdapter> resourceAdapterClass) {
+		this.resourceAdapter = BeanUtils.instantiateClass(resourceAdapterClass);
 	}
 
 	/**
@@ -126,6 +129,7 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 
 
 	@Override
+	@Nullable
 	public ResourceAdapter getObject() {
 		return this.resourceAdapter;
 	}
@@ -147,7 +151,9 @@ public class ResourceAdapterFactoryBean implements FactoryBean<ResourceAdapter>,
 	 */
 	@Override
 	public void destroy() {
-		this.resourceAdapter.stop();
+		if (this.resourceAdapter != null) {
+			this.resourceAdapter.stop();
+		}
 	}
 
 }

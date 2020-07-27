@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
@@ -65,9 +66,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
+	@Nullable
 	private String[] autowireCandidatePatterns;
 
-	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
+	private BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
@@ -132,22 +134,46 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @since 3.1
 	 * @see #setResourceLoader
 	 */
-	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters, Environment environment) {
-		super(useDefaultFilters, environment);
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
+			Environment environment) {
+
+		this(registry, useDefaultFilters, environment,
+				(registry instanceof ResourceLoader ? (ResourceLoader) registry : null));
+	}
+
+	/**
+	 * Create a new {@code ClassPathBeanDefinitionScanner} for the given bean factory and
+	 * using the given {@link Environment} when evaluating bean definition profile metadata.
+	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
+	 * of a {@code BeanDefinitionRegistry}
+	 * @param useDefaultFilters whether to include the default filters for the
+	 * {@link org.springframework.stereotype.Component @Component},
+	 * {@link org.springframework.stereotype.Repository @Repository},
+	 * {@link org.springframework.stereotype.Service @Service}, and
+	 * {@link org.springframework.stereotype.Controller @Controller} stereotype annotations
+	 * @param environment the Spring {@link Environment} to use when evaluating bean
+	 * definition profile metadata
+	 * @param resourceLoader the {@link ResourceLoader} to use
+	 * @since 4.3.6
+	 */
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
+			Environment environment, @Nullable ResourceLoader resourceLoader) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
 
-		// Determine ResourceLoader to use.
-		if (this.registry instanceof ResourceLoader) {
-			setResourceLoader((ResourceLoader) this.registry);
+		if (useDefaultFilters) {
+			registerDefaultFilters();
 		}
+		setEnvironment(environment);
+		setResourceLoader(resourceLoader);
 	}
 
 
 	/**
 	 * Return the BeanDefinitionRegistry that this scanner operates on.
 	 */
+	@Override
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.registry;
 	}
@@ -156,7 +182,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the defaults to use for detected beans.
 	 * @see BeanDefinitionDefaults
 	 */
-	public void setBeanDefinitionDefaults(BeanDefinitionDefaults beanDefinitionDefaults) {
+	public void setBeanDefinitionDefaults(@Nullable BeanDefinitionDefaults beanDefinitionDefaults) {
 		this.beanDefinitionDefaults =
 				(beanDefinitionDefaults != null ? beanDefinitionDefaults : new BeanDefinitionDefaults());
 	}
@@ -173,7 +199,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the name-matching patterns for determining autowire candidates.
 	 * @param autowireCandidatePatterns the patterns to match against
 	 */
-	public void setAutowireCandidatePatterns(String... autowireCandidatePatterns) {
+	public void setAutowireCandidatePatterns(@Nullable String... autowireCandidatePatterns) {
 		this.autowireCandidatePatterns = autowireCandidatePatterns;
 	}
 
@@ -181,8 +207,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * Set the BeanNameGenerator to use for detected bean classes.
 	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
 	 */
-	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
+	public void setBeanNameGenerator(@Nullable BeanNameGenerator beanNameGenerator) {
+		this.beanNameGenerator =
+				(beanNameGenerator != null ? beanNameGenerator : AnnotationBeanNameGenerator.INSTANCE);
 	}
 
 	/**
@@ -191,8 +218,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 * @see #setScopedProxyMode
 	 */
-	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = (scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
+	public void setScopeMetadataResolver(@Nullable ScopeMetadataResolver scopeMetadataResolver) {
+		this.scopeMetadataResolver =
+				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
 
 	/**
@@ -258,7 +286,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 				}
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-					definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					definitionHolder =
+							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
@@ -333,7 +362,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected boolean isCompatible(BeanDefinition newDefinition, BeanDefinition existingDefinition) {
 		return (!(existingDefinition instanceof ScannedGenericBeanDefinition) ||  // explicitly registered overriding bean
-				newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
+				(newDefinition.getSource() != null && newDefinition.getSource().equals(existingDefinition.getSource())) ||  // scanned same file twice
 				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
 	}
 

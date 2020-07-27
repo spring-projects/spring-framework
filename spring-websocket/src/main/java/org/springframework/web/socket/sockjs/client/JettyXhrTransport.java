@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,9 @@ import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.CloseStatus;
@@ -83,7 +85,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to start " + this, ex);
+			throw new SockJsException("Failed to start JettyXhrTransport", ex);
 		}
 	}
 
@@ -95,7 +97,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			}
 		}
 		catch (Exception ex) {
-			throw new SockJsException("Failed to stop " + this, ex);
+			throw new SockJsException("Failed to stop JettyXhrTransport", ex);
 		}
 	}
 
@@ -134,7 +136,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
 	}
 
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, String body) {
+	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method,
+			HttpHeaders headers, @Nullable String body) {
+
 		Request httpRequest = this.httpClient.newRequest(url).method(method);
 		addHttpHeaders(httpRequest, headers);
 		if (body != null) {
@@ -156,11 +160,11 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
-		for (String name : headers.keySet()) {
-			for (String value : headers.get(name)) {
-				request.header(name, value);
+		headers.forEach((key, values) -> {
+			for (String value : values) {
+				request.header(key, value);
 			}
-		}
+		});
 	}
 
 	private static HttpHeaders toHttpHeaders(HttpFields httpFields) {
@@ -244,14 +248,13 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		}
 
 		private void handleFrame() {
-			byte[] bytes = this.outputStream.toByteArray();
+			String content = StreamUtils.copyToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
-			String content = new String(bytes, SockJsFrame.CHARSET);
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);
 			}
 			if (!PRELUDE.equals(content)) {
-				this.sockJsSession.handleFrame(new String(bytes, SockJsFrame.CHARSET));
+				this.sockJsSession.handleFrame(content);
 			}
 		}
 
@@ -268,7 +271,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		@Override
 		public void onFailure(Response response, Throwable failure) {
-			if (connectFuture.setException(failure)) {
+			if (this.connectFuture.setException(failure)) {
 				return;
 			}
 			if (this.sockJsSession.isDisconnected()) {

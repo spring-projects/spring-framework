@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,15 +47,15 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class for {@link SpringHandlerInstantiatorTests}.
@@ -69,7 +69,7 @@ public class SpringHandlerInstantiatorTests {
 	private ObjectMapper objectMapper;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
@@ -85,34 +85,34 @@ public class SpringHandlerInstantiatorTests {
 	public void autowiredSerializer() throws JsonProcessingException {
 		User user = new User("bob");
 		String json = this.objectMapper.writeValueAsString(user);
-		assertEquals("{\"username\":\"BOB\"}", json);
+		assertThat(json).isEqualTo("{\"username\":\"BOB\"}");
 	}
 
 	@Test
 	public void autowiredDeserializer() throws IOException {
 		String json = "{\"username\":\"bob\"}";
 		User user = this.objectMapper.readValue(json, User.class);
-		assertEquals(user.getUsername(), "BOB");
+		assertThat(user.getUsername()).isEqualTo("BOB");
 	}
 
 	@Test
 	public void autowiredKeyDeserializer() throws IOException {
 		String json = "{\"credentials\":{\"bob\":\"admin\"}}";
 		SecurityRegistry registry = this.objectMapper.readValue(json, SecurityRegistry.class);
-		assertTrue(registry.getCredentials().keySet().contains("BOB"));
-		assertFalse(registry.getCredentials().keySet().contains("bob"));
+		assertThat(registry.getCredentials().keySet().contains("BOB")).isTrue();
+		assertThat(registry.getCredentials().keySet().contains("bob")).isFalse();
 	}
 
 	@Test
 	public void applicationContextAwaretypeResolverBuilder() throws JsonProcessingException {
 		this.objectMapper.writeValueAsString(new Group());
-		assertTrue(CustomTypeResolverBuilder.isAutowiredFiledInitialized);
+		assertThat(CustomTypeResolverBuilder.isAutowiredFiledInitialized).isTrue();
 	}
 
 	@Test
 	public void applicationContextAwareTypeIdResolver() throws JsonProcessingException {
 		this.objectMapper.writeValueAsString(new Group());
-		assertTrue(CustomTypeIdResolver.isAutowiredFiledInitialized);
+		assertThat(CustomTypeIdResolver.isAutowiredFiledInitialized).isTrue();
 	}
 
 
@@ -136,7 +136,9 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public void serialize(User user, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+		public void serialize(User user, JsonGenerator jsonGenerator,
+				SerializerProvider serializerProvider) throws IOException {
+
 			jsonGenerator.writeStartObject();
 			jsonGenerator.writeStringField("username", this.capitalizer.capitalize(user.getUsername()));
 			jsonGenerator.writeEndObject();
@@ -150,7 +152,7 @@ public class SpringHandlerInstantiatorTests {
 		private Capitalizer capitalizer;
 
 		@Override
-		public Object deserializeKey(String key, DeserializationContext context) throws IOException, JsonProcessingException {
+		public Object deserializeKey(String key, DeserializationContext context) throws IOException {
 			return this.capitalizer.capitalize(key);
 		}
 	}
@@ -164,13 +166,17 @@ public class SpringHandlerInstantiatorTests {
 		public static boolean isAutowiredFiledInitialized = false;
 
 		@Override
-		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeSerializer buildTypeSerializer(SerializationConfig config, JavaType baseType,
+				Collection<NamedType> subtypes) {
+
 			isAutowiredFiledInitialized = (this.capitalizer != null);
 			return super.buildTypeSerializer(config, baseType, subtypes);
 		}
 
 		@Override
-		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config, JavaType baseType, Collection<NamedType> subtypes) {
+		public TypeDeserializer buildTypeDeserializer(DeserializationConfig config,
+				JavaType baseType, Collection<NamedType> subtypes) {
+
 			return super.buildTypeDeserializer(config, baseType, subtypes);
 		}
 	}
@@ -222,6 +228,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		// New in Jackson 2.7
+		@Override
 		public String getDescForKnownTypeIds() {
 			return null;
 		}

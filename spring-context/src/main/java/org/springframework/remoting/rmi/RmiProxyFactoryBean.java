@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.remoting.rmi;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.util.Assert;
 
 /**
  * {@link FactoryBean} for RMI proxies, supporting both conventional RMI services
@@ -56,7 +57,9 @@ import org.springframework.beans.factory.FactoryBean;
  * @see org.springframework.remoting.RemoteAccessException
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean<Object>, BeanClassLoaderAware {
 
 	private Object serviceProxy;
@@ -65,10 +68,9 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
-		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
+		Class<?> ifc = getServiceInterface();
+		Assert.notNull(ifc, "Property 'serviceInterface' is required");
+		this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
 	}
 
 

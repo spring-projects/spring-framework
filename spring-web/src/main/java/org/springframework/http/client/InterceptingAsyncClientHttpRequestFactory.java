@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,15 +21,18 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 
 /**
  * Wrapper for a {@link AsyncClientHttpRequestFactory} that has support for
- * {@link AsyncClientHttpRequestInterceptor}s.
+ * {@link AsyncClientHttpRequestInterceptor AsyncClientHttpRequestInterceptors}.
  *
  * @author Jakub Narloch
  * @since 4.3
  * @see InterceptingAsyncClientHttpRequest
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHttpRequestFactory {
 
 	private AsyncClientHttpRequestFactory delegate;
@@ -44,10 +47,10 @@ public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHtt
 	 * @param interceptors the list of interceptors to use
 	 */
 	public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate,
-			List<AsyncClientHttpRequestInterceptor> interceptors) {
+			@Nullable List<AsyncClientHttpRequestInterceptor> interceptors) {
 
 		this.delegate = delegate;
-		this.interceptors = (interceptors != null ? interceptors : Collections.<AsyncClientHttpRequestInterceptor>emptyList());
+		this.interceptors = (interceptors != null ? interceptors : Collections.emptyList());
 	}
 
 

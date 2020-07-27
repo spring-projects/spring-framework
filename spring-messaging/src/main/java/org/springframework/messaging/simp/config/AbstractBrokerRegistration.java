@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
@@ -42,7 +43,7 @@ public abstract class AbstractBrokerRegistration {
 
 
 	public AbstractBrokerRegistration(SubscribableChannel clientInboundChannel,
-			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
+			MessageChannel clientOutboundChannel, @Nullable String[] destinationPrefixes) {
 
 		Assert.notNull(clientOutboundChannel, "'clientInboundChannel' must not be null");
 		Assert.notNull(clientOutboundChannel, "'clientOutboundChannel' must not be null");
@@ -50,8 +51,8 @@ public abstract class AbstractBrokerRegistration {
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 
-		this.destinationPrefixes = (destinationPrefixes != null)
-				? Arrays.<String>asList(destinationPrefixes) : Collections.<String>emptyList();
+		this.destinationPrefixes = (destinationPrefixes != null ?
+				Arrays.asList(destinationPrefixes) : Collections.emptyList());
 	}
 
 
@@ -66,6 +67,7 @@ public abstract class AbstractBrokerRegistration {
 	protected Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}
+
 
 	protected abstract AbstractBrokerMessageHandler getMessageHandler(SubscribableChannel brokerChannel);
 

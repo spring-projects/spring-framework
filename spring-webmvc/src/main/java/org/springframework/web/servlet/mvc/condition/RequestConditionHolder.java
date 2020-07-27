@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,10 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 import java.util.Collections;
+
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A holder for a {@link RequestCondition} useful when the type of the request
@@ -36,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public final class RequestConditionHolder extends AbstractRequestCondition<RequestConditionHolder> {
 
+	@Nullable
 	private final RequestCondition<Object> condition;
 
 
@@ -44,7 +48,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * @param requestCondition the condition to hold, may be {@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	public RequestConditionHolder(RequestCondition<?> requestCondition) {
+	public RequestConditionHolder(@Nullable RequestCondition<?> requestCondition) {
 		this.condition = (RequestCondition<Object>) requestCondition;
 	}
 
@@ -52,6 +56,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	/**
 	 * Return the held request condition, or {@code null} if not holding one.
 	 */
+	@Nullable
 	public RequestCondition<?> getCondition() {
 		return this.condition;
 	}
@@ -83,7 +88,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return this;
 		}
 		else {
-			assertEqualConditionTypes(other);
+			assertEqualConditionTypes(this.condition, other.condition);
 			RequestCondition<?> combined = (RequestCondition<?>) this.condition.combine(other.condition);
 			return new RequestConditionHolder(combined);
 		}
@@ -92,9 +97,9 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	/**
 	 * Ensure the held request conditions are of the same type.
 	 */
-	private void assertEqualConditionTypes(RequestConditionHolder other) {
-		Class<?> clazz = this.condition.getClass();
-		Class<?> otherClazz = other.condition.getClass();
+	private void assertEqualConditionTypes(RequestCondition<?> thisCondition, RequestCondition<?> otherCondition) {
+		Class<?> clazz = thisCondition.getClass();
+		Class<?> otherClazz = otherCondition.getClass();
 		if (!clazz.equals(otherClazz)) {
 			throw new ClassCastException("Incompatible request conditions: " + clazz + " and " + otherClazz);
 		}
@@ -106,6 +111,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	@Override
+	@Nullable
 	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
 		if (this.condition == null) {
 			return this;
@@ -131,7 +137,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return -1;
 		}
 		else {
-			assertEqualConditionTypes(other);
+			assertEqualConditionTypes(this.condition, other.condition);
 			return this.condition.compareTo(other.condition, request);
 		}
 	}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -32,7 +33,11 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @deprecated as of 5.0 {@link WebMvcConfigurer} has default methods (made
+ * possible by a Java 8 baseline) and can be implemented directly without the
+ * need for this adapter
  */
+@Deprecated
 public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
 	/**
@@ -168,6 +173,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public Validator getValidator() {
 		return null;
 	}
@@ -177,6 +183,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation returns {@code null}.
 	 */
 	@Override
+	@Nullable
 	public MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}

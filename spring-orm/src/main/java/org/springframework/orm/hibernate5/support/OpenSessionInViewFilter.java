@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate5.support;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import org.springframework.orm.hibernate5.SessionFactoryUtils;
 import org.springframework.orm.hibernate5.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -49,11 +51,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as well as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to {@code FlushMode.NEVER}. It assumes to be used
+ * with the flush mode set to {@code FlushMode.MANUAL}. It assumes to be used
  * in combination with service layer transactions that care for the flushing: The
  * active transaction manager will temporarily change the flush mode to
  * {@code FlushMode.AUTO} during a read-write transaction, with the flush
- * mode reset to {@code FlushMode.NEVER} at the end of each transaction.
+ * mode reset to {@code FlushMode.MANUAL} at the end of each transaction.
  *
  * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the
@@ -76,6 +78,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class OpenSessionInViewFilter extends OncePerRequestFilter {
 
+	/**
+	 * The default bean name used for the session factory.
+	 */
 	public static final String DEFAULT_SESSION_FACTORY_BEAN_NAME = "sessionFactory";
 
 	private String sessionFactoryBeanName = DEFAULT_SESSION_FACTORY_BEAN_NAME;
@@ -212,10 +217,11 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	private boolean applySessionBindingInterceptor(WebAsyncManager asyncManager, String key) {
-		if (asyncManager.getCallableInterceptor(key) == null) {
+		CallableProcessingInterceptor cpi = asyncManager.getCallableInterceptor(key);
+		if (cpi == null) {
 			return false;
 		}
-		((AsyncRequestInterceptor) asyncManager.getCallableInterceptor(key)).bindSession();
+		((AsyncRequestInterceptor) cpi).bindSession();
 		return true;
 	}
 

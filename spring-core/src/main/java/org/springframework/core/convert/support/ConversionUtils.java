@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,9 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Internal utilities for the conversion package.
@@ -31,8 +33,10 @@ import org.springframework.util.Assert;
  */
 abstract class ConversionUtils {
 
-	public static Object invokeConverter(GenericConverter converter, Object source, TypeDescriptor sourceType,
-			TypeDescriptor targetType) {
+	@Nullable
+	public static Object invokeConverter(GenericConverter converter, @Nullable Object source,
+			TypeDescriptor sourceType, TypeDescriptor targetType) {
+
 		try {
 			return converter.convert(source, sourceType, targetType);
 		}
@@ -44,7 +48,9 @@ abstract class ConversionUtils {
 		}
 	}
 
-	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
+	public static boolean canConvertElements(@Nullable TypeDescriptor sourceElementType,
+			@Nullable TypeDescriptor targetElementType, ConversionService conversionService) {
+
 		if (targetElementType == null) {
 			// yes
 			return true;
@@ -57,14 +63,12 @@ abstract class ConversionUtils {
 			// yes
 			return true;
 		}
-		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
-			// maybe;
+		if (ClassUtils.isAssignable(sourceElementType.getType(), targetElementType.getType())) {
+			// maybe
 			return true;
 		}
-		else {
-			// no;
-			return false;
-		}
+		// no
+		return false;
 	}
 
 	public static Class<?> getEnumType(Class<?> targetType) {

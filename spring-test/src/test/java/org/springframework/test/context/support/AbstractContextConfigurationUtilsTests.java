@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import java.util.Set;
 import org.mockito.Mockito;
 
 import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapContext;
@@ -39,7 +38,7 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract base class for tests involving {@link ContextLoaderUtils},
@@ -54,8 +53,8 @@ abstract class AbstractContextConfigurationUtilsTests {
 
 	static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-	static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>
-			EMPTY_INITIALIZER_CLASSES = Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
+	static final Set<Class<? extends ApplicationContextInitializer<?>>>
+			EMPTY_INITIALIZER_CLASSES = Collections.<Class<? extends ApplicationContextInitializer<?>>> emptySet();
 
 
 	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
@@ -69,11 +68,11 @@ abstract class AbstractContextConfigurationUtilsTests {
 			String[] expectedLocations, Class<?>[] expectedClasses,
 			Class<? extends ContextLoader> expectedContextLoaderClass, boolean expectedInheritLocations) {
 
-		assertEquals("declaring class", expectedDeclaringClass, attributes.getDeclaringClass());
-		assertArrayEquals("locations", expectedLocations, attributes.getLocations());
-		assertArrayEquals("classes", expectedClasses, attributes.getClasses());
-		assertEquals("inherit locations", expectedInheritLocations, attributes.isInheritLocations());
-		assertEquals("context loader", expectedContextLoaderClass, attributes.getContextLoaderClass());
+		assertThat(attributes.getDeclaringClass()).as("declaring class").isEqualTo(expectedDeclaringClass);
+		assertThat(attributes.getLocations()).as("locations").isEqualTo(expectedLocations);
+		assertThat(attributes.getClasses()).as("classes").isEqualTo(expectedClasses);
+		assertThat(attributes.isInheritLocations()).as("inherit locations").isEqualTo(expectedInheritLocations);
+		assertThat(attributes.getContextLoaderClass()).as("context loader").isEqualTo(expectedContextLoaderClass);
 	}
 
 	void assertMergedConfig(MergedContextConfiguration mergedConfig, Class<?> expectedTestClass,
@@ -89,24 +88,29 @@ abstract class AbstractContextConfigurationUtilsTests {
 			Class<?> expectedTestClass,
 			String[] expectedLocations,
 			Class<?>[] expectedClasses,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> expectedInitializerClasses,
+			Set<Class<? extends ApplicationContextInitializer<?>>> expectedInitializerClasses,
 			Class<? extends ContextLoader> expectedContextLoaderClass) {
 
-		assertNotNull(mergedConfig);
-		assertEquals(expectedTestClass, mergedConfig.getTestClass());
-		assertNotNull(mergedConfig.getLocations());
-		assertArrayEquals(expectedLocations, mergedConfig.getLocations());
-		assertNotNull(mergedConfig.getClasses());
-		assertArrayEquals(expectedClasses, mergedConfig.getClasses());
-		assertNotNull(mergedConfig.getActiveProfiles());
+		assertThat(mergedConfig).isNotNull();
+		assertThat(mergedConfig.getTestClass()).isEqualTo(expectedTestClass);
+		assertThat(mergedConfig.getLocations()).isNotNull();
+		assertThat(mergedConfig.getLocations()).isEqualTo(expectedLocations);
+		assertThat(mergedConfig.getClasses()).isNotNull();
+		assertThat(mergedConfig.getClasses()).isEqualTo(expectedClasses);
+		assertThat(mergedConfig.getActiveProfiles()).isNotNull();
 		if (expectedContextLoaderClass == null) {
-			assertNull(mergedConfig.getContextLoader());
+			assertThat(mergedConfig.getContextLoader()).isNull();
 		}
 		else {
-			assertEquals(expectedContextLoaderClass, mergedConfig.getContextLoader().getClass());
+			assertThat(mergedConfig.getContextLoader().getClass()).isEqualTo(expectedContextLoaderClass);
 		}
-		assertNotNull(mergedConfig.getContextInitializerClasses());
-		assertEquals(expectedInitializerClasses, mergedConfig.getContextInitializerClasses());
+		assertThat(mergedConfig.getContextInitializerClasses()).isNotNull();
+		assertThat(mergedConfig.getContextInitializerClasses()).isEqualTo(expectedInitializerClasses);
+	}
+
+	@SafeVarargs
+	static <T> T[] array(T... objects) {
+		return objects;
 	}
 
 
@@ -201,14 +205,16 @@ abstract class AbstractContextConfigurationUtilsTests {
 	static class OverriddenClassesBar extends ClassesFoo {
 	}
 
-	@ContextConfiguration(locations = "/foo.properties", loader = GenericPropertiesContextLoader.class)
+	@SuppressWarnings("deprecation")
+	@ContextConfiguration(locations = "/foo.properties", loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 	@ActiveProfiles("foo")
 	static class PropertiesLocationsFoo {
 	}
 
 	// Combining @Configuration classes with a Properties based loader doesn't really make
 	// sense, but that's OK for unit testing purposes.
-	@ContextConfiguration(classes = FooConfig.class, loader = GenericPropertiesContextLoader.class)
+	@SuppressWarnings("deprecation")
+	@ContextConfiguration(classes = FooConfig.class, loader = org.springframework.test.context.support.GenericPropertiesContextLoader.class)
 	@ActiveProfiles("foo")
 	static class PropertiesClassesFoo {
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,17 +20,25 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import org.springframework.jdbc.core.test.ConcretePerson;
+import org.springframework.jdbc.core.test.DatePerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Mock object based abstract class for RowMapper tests.
@@ -41,27 +49,36 @@ import static org.mockito.BDDMockito.*;
 public abstract class AbstractRowMapperTests {
 
 	protected void verifyPerson(Person bean) throws Exception {
-		assertEquals("Bubba", bean.getName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+		assertThat(bean.getName()).isEqualTo("Bubba");
+		assertThat(bean.getAge()).isEqualTo(22L);
+		assertThat(bean.getBirth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(bean.getBalance()).isEqualTo(new BigDecimal("1234.56"));
 	}
 
-	protected void verifyConcretePerson(ConcretePerson bean) throws Exception {
-		assertEquals("Bubba", bean.getName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirth_date());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	protected void verifyPerson(ConcretePerson bean) throws Exception {
+		assertThat(bean.getName()).isEqualTo("Bubba");
+		assertThat(bean.getAge()).isEqualTo(22L);
+		assertThat(bean.getBirth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(bean.getBalance()).isEqualTo(new BigDecimal("1234.56"));
 	}
 
-	protected void verifySpacePerson(SpacePerson bean) {
-		assertEquals("Bubba", bean.getLastName());
-		assertEquals(22L, bean.getAge());
-		assertEquals(new java.util.Date(1221222L), bean.getBirthDate());
-		assertEquals(new BigDecimal("1234.56"), bean.getBalance());
+	protected void verifyPerson(SpacePerson bean) {
+		assertThat(bean.getLastName()).isEqualTo("Bubba");
+		assertThat(bean.getAge()).isEqualTo(22L);
+		assertThat(bean.getBirthDate()).isEqualTo(new Timestamp(1221222L).toLocalDateTime());
+		assertThat(bean.getBalance()).isEqualTo(new BigDecimal("1234.56"));
 	}
 
-	protected static enum MockType {ONE,TWO,THREE};
+	protected void verifyPerson(DatePerson bean) {
+		assertThat(bean.getLastName()).isEqualTo("Bubba");
+		assertThat(bean.getAge()).isEqualTo(22L);
+		assertThat(bean.getBirthDate()).isEqualTo(new java.sql.Date(1221222L).toLocalDate());
+		assertThat(bean.getBalance()).isEqualTo(new BigDecimal("1234.56"));
+	}
+
+
+	protected enum MockType {ONE, TWO, THREE};
+
 
 	protected static class Mock {
 
@@ -79,8 +96,8 @@ public abstract class AbstractRowMapperTests {
 			this(MockType.ONE);
 		}
 
-		public Mock(MockType type)
-				throws Exception {
+		@SuppressWarnings("unchecked")
+		public Mock(MockType type) throws Exception {
 			connection = mock(Connection.class);
 			statement = mock(Statement.class);
 			resultSet = mock(ResultSet.class);
@@ -94,8 +111,10 @@ public abstract class AbstractRowMapperTests {
 			given(resultSet.getString(1)).willReturn("Bubba");
 			given(resultSet.getLong(2)).willReturn(22L);
 			given(resultSet.getTimestamp(3)).willReturn(new Timestamp(1221222L));
+			given(resultSet.getObject(anyInt(), any(Class.class))).willThrow(new SQLFeatureNotSupportedException());
+			given(resultSet.getDate(3)).willReturn(new java.sql.Date(1221222L));
 			given(resultSet.getBigDecimal(4)).willReturn(new BigDecimal("1234.56"));
-			given(resultSet.wasNull()).willReturn(type == MockType.TWO ? true : false);
+			given(resultSet.wasNull()).willReturn(type == MockType.TWO);
 
 			given(resultSetMetaData.getColumnCount()).willReturn(4);
 			given(resultSetMetaData.getColumnLabel(1)).willReturn(
@@ -119,4 +138,5 @@ public abstract class AbstractRowMapperTests {
 			verify(statement).close();
 		}
 	}
+
 }

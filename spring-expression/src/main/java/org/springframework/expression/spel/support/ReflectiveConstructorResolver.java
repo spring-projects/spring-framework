@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
@@ -30,6 +29,7 @@ import org.springframework.expression.ConstructorResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
+import org.springframework.lang.Nullable;
 
 /**
  * A constructor resolver that uses reflection to locate the constructor that should be invoked.
@@ -50,6 +50,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 * </ol>
 	 */
 	@Override
+	@Nullable
 	public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 
@@ -58,26 +59,23 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Class<?> type = context.getTypeLocator().findType(typeName);
 			Constructor<?>[] ctors = type.getConstructors();
 
-			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
-				@Override
-				public int compare(Constructor<?> c1, Constructor<?> c2) {
-					int c1pl = c1.getParameterCount();
-					int c2pl = c2.getParameterCount();
-					return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
-				}
+			Arrays.sort(ctors, (c1, c2) -> {
+				int c1pl = c1.getParameterCount();
+				int c2pl = c2.getParameterCount();
+				return Integer.compare(c1pl, c2pl);
 			});
 
 			Constructor<?> closeMatch = null;
 			Constructor<?> matchRequiringConversion = null;
 
 			for (Constructor<?> ctor : ctors) {
-				Class<?>[] paramTypes = ctor.getParameterTypes();
-				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
-				for (int i = 0; i < paramTypes.length; i++) {
+				int paramCount = ctor.getParameterCount();
+				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
+				for (int i = 0; i < paramCount; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
 				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-				if (ctor.isVarArgs() && argumentTypes.size() >= paramTypes.length - 1) {
+				if (ctor.isVarArgs() && argumentTypes.size() >= paramCount - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
 					// being provided should be
@@ -86,7 +84,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					// we are supplied does match exactly (it is an array already).
 					matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 				}
-				else if (paramTypes.length == argumentTypes.size()) {
+				else if (paramCount == argumentTypes.size()) {
 					// worth a closer look
 					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}

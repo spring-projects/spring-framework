@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 
 import org.springframework.http.HttpRequest;
-import org.springframework.http.client.support.InterceptingAsyncHttpAccessor;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -36,8 +35,11 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @author Rossen Stoyanchev
  * @since 4.3
  * @see org.springframework.web.client.AsyncRestTemplate
- * @see InterceptingAsyncHttpAccessor
+ * @see org.springframework.http.client.support.InterceptingAsyncHttpAccessor
+ * @deprecated as of Spring 5.0, in favor of
+ * {@link org.springframework.web.reactive.function.client.ExchangeFilterFunction}
  */
+@Deprecated
 public interface AsyncClientHttpRequestInterceptor {
 
 	/**

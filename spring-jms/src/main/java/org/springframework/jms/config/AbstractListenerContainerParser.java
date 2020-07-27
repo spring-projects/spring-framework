@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -102,13 +103,14 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 
 	@Override
+	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
 		parserContext.pushContainingComponent(compositeDef);
 
-		PropertyValues commonProperties = parseCommonContainerProperties(element, parserContext);
-		PropertyValues specificProperties = parseSpecificContainerProperties(element, parserContext);
+		MutablePropertyValues commonProperties = parseCommonContainerProperties(element, parserContext);
+		MutablePropertyValues specificProperties = parseSpecificContainerProperties(element, parserContext);
 
 		String factoryId = element.getAttribute(FACTORY_ID_ATTRIBUTE);
 		if (StringUtils.hasText(factoryId)) {
@@ -136,7 +138,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	}
 
 	private void parseListener(Element containerEle, Element listenerEle, ParserContext parserContext,
-			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
+			MutablePropertyValues commonContainerProperties, PropertyValues specificContainerProperties) {
 
 		RootBeanDefinition listenerDef = new RootBeanDefinition();
 		listenerDef.setSource(parserContext.extractSource(listenerEle));
@@ -151,15 +153,14 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			listenerDef.getPropertyValues().add("delegate", new RuntimeBeanReference(ref));
 		}
 
-		String method = null;
 		if (listenerEle.hasAttribute(METHOD_ATTRIBUTE)) {
-			method = listenerEle.getAttribute(METHOD_ATTRIBUTE);
+			String method = listenerEle.getAttribute(METHOD_ATTRIBUTE);
 			if (!StringUtils.hasText(method)) {
 				parserContext.getReaderContext().error(
 						"Listener 'method' attribute contains empty value.", listenerEle);
 			}
+			listenerDef.getPropertyValues().add("defaultListenerMethod", method);
 		}
-		listenerDef.getPropertyValues().add("defaultListenerMethod", method);
 
 		PropertyValue messageConverterPv = commonContainerProperties.getPropertyValue("messageConverter");
 		if (messageConverterPv != null) {
@@ -172,12 +173,15 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 		if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
 			String responseDestination = listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
-			Boolean pubSubDomain = (Boolean) commonContainerProperties.getPropertyValue("replyPubSubDomain").getValue();
+			Boolean pubSubDomain = (Boolean) commonContainerProperties.get("replyPubSubDomain");
+			if (pubSubDomain == null) {
+				pubSubDomain = false;
+			}
 			listenerDef.getPropertyValues().add(
 					pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName", responseDestination);
-			if (containerDef.getPropertyValues().contains("destinationResolver")) {
-				listenerDef.getPropertyValues().add("destinationResolver",
-						containerDef.getPropertyValues().getPropertyValue("destinationResolver").getValue());
+			PropertyValue destinationResolver = containerDef.getPropertyValues().getPropertyValue("destinationResolver");
+			if (destinationResolver != null) {
+				listenerDef.getPropertyValues().addPropertyValue(destinationResolver);
 			}
 		}
 
@@ -264,16 +268,13 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 		boolean replyPubSubDomain = false;
 		String replyDestinationType = containerEle.getAttribute(RESPONSE_DESTINATION_TYPE_ATTRIBUTE);
-		if (DESTINATION_TYPE_TOPIC.equals(replyDestinationType)) {
+		if (!StringUtils.hasText(replyDestinationType)) {
+			replyPubSubDomain = pubSubDomain;  // the default: same value as pubSubDomain
+		}
+		else if (DESTINATION_TYPE_TOPIC.equals(replyDestinationType)) {
 			replyPubSubDomain = true;
 		}
-		else if (DESTINATION_TYPE_QUEUE.equals(replyDestinationType)) {
-			replyPubSubDomain = false;
-		}
-		else if (!StringUtils.hasText(replyDestinationType)) {
-			replyPubSubDomain = pubSubDomain; // the default: same value as pubSubDomain
-		}
-		else if (StringUtils.hasText(replyDestinationType)) {
+		else if (!DESTINATION_TYPE_QUEUE.equals(replyDestinationType)) {
 			parserContext.getReaderContext().error("Invalid listener container 'response-destination-type': only " +
 					"\"queue\", \"topic\" supported.", containerEle);
 		}
@@ -313,6 +314,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	 * Create the {@link BeanDefinition} for the container factory using the specified
 	 * shared property values.
 	 */
+	@Nullable
 	protected abstract RootBeanDefinition createContainerFactory(String factoryId, Element containerEle, ParserContext parserContext,
 			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties);
 
@@ -323,6 +325,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 			PropertyValues commonContainerProperties, PropertyValues specificContainerProperties);
 
 
+	@Nullable
 	protected Integer parseAcknowledgeMode(Element ele, ParserContext parserContext) {
 		String acknowledge = ele.getAttribute(ACKNOWLEDGE_ATTRIBUTE);
 		if (StringUtils.hasText(acknowledge)) {

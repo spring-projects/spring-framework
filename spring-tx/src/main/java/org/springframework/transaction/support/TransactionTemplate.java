@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,11 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.util.Assert;
 
 /**
  * Template class that simplifies programmatic transaction demarcation and
@@ -63,9 +65,10 @@ import org.springframework.transaction.TransactionSystemException;
 public class TransactionTemplate extends DefaultTransactionDefinition
 		implements TransactionOperations, InitializingBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private PlatformTransactionManager transactionManager;
 
 
@@ -102,13 +105,14 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	/**
 	 * Set the transaction management strategy to be used.
 	 */
-	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+	public void setTransactionManager(@Nullable PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
 
 	/**
 	 * Return the transaction management strategy to be used.
 	 */
+	@Nullable
 	public PlatformTransactionManager getTransactionManager() {
 		return this.transactionManager;
 	}
@@ -122,7 +126,10 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 
 	@Override
+	@Nullable
 	public <T> T execute(TransactionCallback<T> action) throws TransactionException {
+		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
+
 		if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
 			return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
 		}
@@ -132,15 +139,10 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			try {
 				result = action.doInTransaction(status);
 			}
-			catch (RuntimeException ex) {
+			catch (RuntimeException | Error ex) {
 				// Transactional code threw application exception -> rollback
 				rollbackOnException(status, ex);
 				throw ex;
-			}
-			catch (Error err) {
-				// Transactional code threw error -> rollback
-				rollbackOnException(status, err);
-				throw err;
 			}
 			catch (Throwable ex) {
 				// Transactional code threw unexpected exception -> rollback
@@ -159,6 +161,8 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	 * @throws TransactionException in case of a rollback error
 	 */
 	private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
+		Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
+
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		try {
 			this.transactionManager.rollback(status);
@@ -168,14 +172,17 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 			ex2.initApplicationException(ex);
 			throw ex2;
 		}
-		catch (RuntimeException ex2) {
+		catch (RuntimeException | Error ex2) {
 			logger.error("Application exception overridden by rollback exception", ex);
 			throw ex2;
 		}
-		catch (Error err) {
-			logger.error("Application exception overridden by rollback error", ex);
-			throw err;
-		}
+	}
+
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (super.equals(other) && (!(other instanceof TransactionTemplate) ||
+				getTransactionManager() == ((TransactionTemplate) other).getTransactionManager())));
 	}
 
 }

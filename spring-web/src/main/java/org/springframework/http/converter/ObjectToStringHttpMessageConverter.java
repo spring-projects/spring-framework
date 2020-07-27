@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -80,8 +81,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	/**
-	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
-	 * <p>Default is {@code true}.
+	 * Delegates to {@link StringHttpMessageConverter#setWriteAcceptCharset(boolean)}.
 	 */
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.stringHttpMessageConverter.setWriteAcceptCharset(writeAcceptCharset);
@@ -89,13 +89,13 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	@Override
-	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return this.conversionService.canConvert(String.class, clazz) && canRead(mediaType);
+	public boolean canRead(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canRead(mediaType) && this.conversionService.canConvert(String.class, clazz);
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return this.conversionService.canConvert(clazz, String.class) && canWrite(mediaType);
+	public boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType) {
+		return canWrite(mediaType) && this.conversionService.canConvert(clazz, String.class);
 	}
 
 	@Override
@@ -105,20 +105,33 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException {
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
 		String value = this.stringHttpMessageConverter.readInternal(String.class, inputMessage);
-		return this.conversionService.convert(value, clazz);
+		Object result = this.conversionService.convert(value, clazz);
+		if (result == null) {
+			throw new HttpMessageNotReadableException(
+					"Unexpected null conversion result for '" + value + "' to " + clazz,
+					inputMessage);
+		}
+		return result;
 	}
 
 	@Override
 	protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException {
 		String value = this.conversionService.convert(obj, String.class);
-		this.stringHttpMessageConverter.writeInternal(value, outputMessage);
+		if (value != null) {
+			this.stringHttpMessageConverter.writeInternal(value, outputMessage);
+		}
 	}
 
 	@Override
-	protected Long getContentLength(Object obj, MediaType contentType) {
+	protected Long getContentLength(Object obj, @Nullable MediaType contentType) {
 		String value = this.conversionService.convert(obj, String.class);
+		if (value == null) {
+			return 0L;
+		}
 		return this.stringHttpMessageConverter.getContentLength(value, contentType);
 	}
 

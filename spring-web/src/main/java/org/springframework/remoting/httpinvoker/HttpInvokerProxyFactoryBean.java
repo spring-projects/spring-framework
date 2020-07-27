@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.remoting.httpinvoker;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link FactoryBean} for HTTP invoker proxies. Exposes the proxied service
@@ -40,6 +42,7 @@ import org.springframework.beans.factory.FactoryBean;
  * Manipulated input streams could lead to unwanted code execution on the server
  * during the deserialization step. As a consequence, do not expose HTTP invoker
  * endpoints to untrusted clients but rather just between your own services.</b>
+ * In general, we strongly recommend any other message format (e.g. JSON) instead.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -50,24 +53,26 @@ import org.springframework.beans.factory.FactoryBean;
  * @see HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
+ * @deprecated as of 5.3.0 with no replacement.
  */
-public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor
-		implements FactoryBean<Object> {
+@Deprecated
+public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {
 
+	@Nullable
 	private Object serviceProxy;
 
 
 	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
-		if (getServiceInterface() == null) {
-			throw new IllegalArgumentException("Property 'serviceInterface' is required");
-		}
-		this.serviceProxy = new ProxyFactory(getServiceInterface(), this).getProxy(getBeanClassLoader());
+		Class<?> ifc = getServiceInterface();
+		Assert.notNull(ifc, "Property 'serviceInterface' is required");
+		this.serviceProxy = new ProxyFactory(ifc, this).getProxy(getBeanClassLoader());
 	}
 
 
 	@Override
+	@Nullable
 	public Object getObject() {
 		return this.serviceProxy;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -30,6 +31,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.2
+ * @param <V> the value type
  */
 public class WebAsyncTask<V> implements BeanFactoryAware {
 
@@ -44,6 +46,8 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	private BeanFactory beanFactory;
 
 	private Callable<V> timeoutCallback;
+
+	private Callable<V> errorCallback;
 
 	private Runnable completionCallback;
 
@@ -69,11 +73,11 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 
 	/**
 	 * Create a {@code WebAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
-	 * @param timeout timeout value in milliseconds; ignored if {@code null}
+	 * @param timeout the timeout value in milliseconds; ignored if {@code null}
 	 * @param executorName the name of an executor bean to use
 	 * @param callable the callable for concurrent handling
 	 */
-	public WebAsyncTask(Long timeout, String executorName, Callable<V> callable) {
+	public WebAsyncTask(@Nullable Long timeout, String executorName, Callable<V> callable) {
 		this(callable);
 		Assert.notNull(executorName, "Executor name must not be null");
 		this.executorName = executorName;
@@ -82,11 +86,11 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 
 	/**
 	 * Create a {@code WebAsyncTask} with a timeout value, an executor instance, and a Callable.
-	 * @param timeout timeout value in milliseconds; ignored if {@code null}
+	 * @param timeout the timeout value in milliseconds; ignored if {@code null}
 	 * @param executor the executor to use
 	 * @param callable the callable for concurrent handling
 	 */
-	public WebAsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
+	public WebAsyncTask(@Nullable Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
 		this(callable);
 		Assert.notNull(executor, "Executor must not be null");
 		this.executor = executor;
@@ -104,6 +108,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	/**
 	 * Return the timeout value in milliseconds, or {@code null} if no timeout is set.
 	 */
+	@Nullable
 	public Long getTimeout() {
 		return this.timeout;
 	}
@@ -113,6 +118,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * <p>This factory reference will automatically be set when
 	 * {@code WebAsyncTask} is used within a Spring MVC controller.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -121,6 +127,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	 * Return the AsyncTaskExecutor to use for concurrent handling,
 	 * or {@code null} if none specified.
 	 */
+	@Nullable
 	public AsyncTaskExecutor getExecutor() {
 		if (this.executor != null) {
 			return this.executor;
@@ -148,6 +155,20 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	}
 
 	/**
+	 * Register code to invoke for an error during async request processing.
+	 * <p>This method is called from a container thread when an error occurred
+	 * while processing an async request before the {@code Callable} has
+	 * completed. The callback is executed in the same thread and therefore
+	 * should return without blocking. It may return an alternative value to
+	 * use, including an {@link Exception} or return
+	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 * @since 5.0
+	 */
+	public void onError(Callable<V> callback) {
+		this.errorCallback = callback;
+	}
+
+	/**
 	 * Register code to invoke when the async request completes.
 	 * <p>This method is called from a container thread when an async request
 	 * completed for any reason, including timeout and network error.
@@ -157,10 +178,14 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	}
 
 	CallableProcessingInterceptor getInterceptor() {
-		return new CallableProcessingInterceptorAdapter() {
+		return new CallableProcessingInterceptor() {
 			@Override
 			public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 				return (timeoutCallback != null ? timeoutCallback.call() : CallableProcessingInterceptor.RESULT_NONE);
+			}
+			@Override
+			public <T> Object handleError(NativeWebRequest request, Callable<T> task, Throwable t) throws Exception {
+				return (errorCallback != null ? errorCallback.call() : CallableProcessingInterceptor.RESULT_NONE);
 			}
 			@Override
 			public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {

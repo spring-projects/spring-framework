@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -40,10 +39,12 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.lang.Nullable;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests to reproduce raised caching issues.
@@ -54,11 +55,8 @@ import static org.mockito.Mockito.*;
  */
 public class CacheReproTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	@Test
-	public void spr11124() throws Exception {
+	public void spr11124MultipleAnnotations() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11124Config.class);
 		Spr11124Service bean = context.getBean(Spr11124Service.class);
 		bean.single(2);
@@ -69,11 +67,11 @@ public class CacheReproTests {
 	}
 
 	@Test
-	public void spr11249() throws Exception {
+	public void spr11249PrimitiveVarargs() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr11249Config.class);
 		Spr11249Service bean = context.getBean(Spr11249Service.class);
 		Object result = bean.doSomething("op", 2, 3);
-		assertSame(result, bean.doSomething("op", 2, 3));
+		assertThat(bean.doSomething("op", 2, 3)).isSameAs(result);
 		context.close();
 	}
 
@@ -88,7 +86,7 @@ public class CacheReproTests {
 		verify(cache, times(1)).get(key);  // first call: cache miss
 
 		Object cachedResult = bean.getSimple("1");
-		assertSame(result, cachedResult);
+		assertThat(cachedResult).isSameAs(result);
 		verify(cache, times(2)).get(key);  // second call: cache hit
 
 		context.close();
@@ -105,7 +103,7 @@ public class CacheReproTests {
 		verify(cache, times(0)).get(key);  // no cache hit at all, caching disabled
 
 		Object cachedResult = bean.getNeverCache("1");
-		assertNotSame(result, cachedResult);
+		assertThat(cachedResult).isNotSameAs(result);
 		verify(cache, times(0)).get(key);  // caching disabled
 
 		context.close();
@@ -117,9 +115,9 @@ public class CacheReproTests {
 		MyCacheResolver cacheResolver = context.getBean(MyCacheResolver.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-		assertNull(cacheResolver.getCache("foo").get("foo"));
+		assertThat(cacheResolver.getCache("foo").get("foo")).isNull();
 		Object result = bean.getSimple("foo");  // cache name = id
-		assertEquals(result, cacheResolver.getCache("foo").get("foo").get());
+		assertThat(cacheResolver.getCache("foo").get("foo").get()).isEqualTo(result);
 	}
 
 	@Test
@@ -127,9 +125,9 @@ public class CacheReproTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-		this.thrown.expect(IllegalStateException.class);
-		this.thrown.expectMessage(MyCacheResolver.class.getName());
-		bean.getSimple(null);
+		assertThatIllegalStateException().isThrownBy(() ->
+				bean.getSimple(null))
+			.withMessageContaining(MyCacheResolver.class.getName());
 	}
 
 	@Test
@@ -140,13 +138,54 @@ public class CacheReproTests {
 
 		TestBean tb = new TestBean("tb1");
 		bean.insertItem(tb);
-		assertSame(tb, bean.findById("tb1").get());
-		assertSame(tb, cache.get("tb1").get());
+		assertThat(bean.findById("tb1").get()).isSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
 		cache.clear();
 		TestBean tb2 = bean.findById("tb1").get();
-		assertNotSame(tb, tb2);
-		assertSame(tb2, cache.get("tb1").get());
+		assertThat(tb2).isNotSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb2);
+	}
+
+	@Test
+	public void spr14853AdaptsToOptionalWithSync() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr14853Config.class);
+		Spr14853Service bean = context.getBean(Spr14853Service.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		TestBean tb = new TestBean("tb1");
+		bean.insertItem(tb);
+		assertThat(bean.findById("tb1").get()).isSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb);
+
+		cache.clear();
+		TestBean tb2 = bean.findById("tb1").get();
+		assertThat(tb2).isNotSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb2);
+	}
+
+	@Test
+	public void spr15271FindsOnInterfaceWithInterfaceProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr15271ConfigA.class);
+		Spr15271Interface bean = context.getBean(Spr15271Interface.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		TestBean tb = new TestBean("tb1");
+		bean.insertItem(tb);
+		assertThat(bean.findById("tb1").get()).isSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb);
+	}
+
+	@Test
+	public void spr15271FindsOnInterfaceWithCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr15271ConfigB.class);
+		Spr15271Interface bean = context.getBean(Spr15271Interface.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		TestBean tb = new TestBean("tb1");
+		bean.insertItem(tb);
+		assertThat(bean.findById("tb1").get()).isSameAs(tb);
+		assertThat(cache.get("tb1").get()).isSameAs(tb);
 	}
 
 
@@ -182,7 +221,7 @@ public class CacheReproTests {
 		@Cacheable("smallCache")
 		public List<String> single(int id) {
 			if (this.multipleCount > 0) {
-				fail("Called too many times");
+				throw new AssertionError("Called too many times");
 			}
 			this.multipleCount++;
 			return Collections.emptyList();
@@ -194,7 +233,7 @@ public class CacheReproTests {
 				@Cacheable(cacheNames = "smallCache", unless = "#result.size() > 3")})
 		public List<String> multiple(int id) {
 			if (this.multipleCount > 0) {
-				fail("Called too many times");
+				throw new AssertionError("Called too many times");
 			}
 			this.multipleCount++;
 			return Collections.emptyList();
@@ -289,6 +328,7 @@ public class CacheReproTests {
 		}
 
 		@Override
+		@Nullable
 		protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
 			String cacheName = (String) context.getArgs()[0];
 			if (cacheName != null) {
@@ -338,6 +378,92 @@ public class CacheReproTests {
 		@Bean
 		public Spr14230Service service() {
 			return new Spr14230Service();
+		}
+	}
+
+
+	public static class Spr14853Service {
+
+		@Cacheable(value = "itemCache", sync = true)
+		public Optional<TestBean> findById(String id) {
+			return Optional.of(new TestBean(id));
+		}
+
+		@CachePut(cacheNames = "itemCache", key = "#item.name")
+		public TestBean insertItem(TestBean item) {
+			return item;
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching
+	public static class Spr14853Config {
+
+		@Bean
+		public CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		public Spr14853Service service() {
+			return new Spr14853Service();
+		}
+	}
+
+
+	public interface Spr15271Interface {
+
+		@Cacheable(value = "itemCache", sync = true)
+		Optional<TestBean> findById(String id);
+
+		@CachePut(cacheNames = "itemCache", key = "#item.name")
+		TestBean insertItem(TestBean item);
+	}
+
+
+	public static class Spr15271Service implements Spr15271Interface {
+
+		@Override
+		public Optional<TestBean> findById(String id) {
+			return Optional.of(new TestBean(id));
+		}
+
+		@Override
+		public TestBean insertItem(TestBean item) {
+			return item;
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching
+	public static class Spr15271ConfigA {
+
+		@Bean
+		public CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		public Spr15271Interface service() {
+			return new Spr15271Service();
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching(proxyTargetClass = true)
+	public static class Spr15271ConfigB {
+
+		@Bean
+		public CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		public Spr15271Interface service() {
+			return new Spr15271Service();
 		}
 	}
 

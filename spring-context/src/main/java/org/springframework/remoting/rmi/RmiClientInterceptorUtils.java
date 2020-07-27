@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
@@ -43,7 +44,9 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 1.1
+ * @deprecated as of 5.3.0 with no replacement.
  */
+@Deprecated
 public abstract class RmiClientInterceptorUtils {
 
 	private static final Log logger = LogFactory.getLog(RmiClientInterceptorUtils.class);
@@ -57,6 +60,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * @return the invocation result, if any
 	 * @throws InvocationTargetException if thrown by reflection
 	 */
+	@Nullable
 	public static Object invokeRemoteMethod(MethodInvocation invocation, Object stub)
 			throws InvocationTargetException {
 

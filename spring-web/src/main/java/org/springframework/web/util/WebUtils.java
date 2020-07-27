@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,13 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -33,12 +35,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,43 +57,125 @@ import org.springframework.util.StringUtils;
 public abstract class WebUtils {
 
 	/**
-	 * Standard Servlet 2.3+ spec request attributes for include URI and paths.
-	 * <p>If included via a RequestDispatcher, the current resource will see the
-	 * originating request. Its own URI and paths are exposed as request attributes.
+	 * Standard Servlet 2.3+ spec request attribute for include request URI.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating request. Its own request URI is exposed as a request attribute.
 	 */
 	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include context path.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating context path. Its own context path is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.include.context_path";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include servlet path.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating servlet path. Its own servlet path is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include path info.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating path info. Its own path info is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for include query string.
+	 * <p>If included via a {@code RequestDispatcher}, the current resource will see the
+	 * originating query string. Its own query string is exposed as a request attribute.
+	 */
 	public static final String INCLUDE_QUERY_STRING_ATTRIBUTE = "javax.servlet.include.query_string";
 
 	/**
-	 * Standard Servlet 2.4+ spec request attributes for forward URI and paths.
+	 * Standard Servlet 2.4+ spec request attribute for forward request URI.
 	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
-	 * own URI and paths. The originating URI and paths are exposed as request attributes.
+	 * own request URI. The originating request URI is exposed as a request attribute.
 	 */
 	public static final String FORWARD_REQUEST_URI_ATTRIBUTE = "javax.servlet.forward.request_uri";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward context path.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own context path. The originating context path is exposed as a request attribute.
+	 */
 	public static final String FORWARD_CONTEXT_PATH_ATTRIBUTE = "javax.servlet.forward.context_path";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward servlet path.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own servlet path. The originating servlet path is exposed as a request attribute.
+	 */
 	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward path info.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own path ingo. The originating path info is exposed as a request attribute.
+	 */
 	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
+
+	/**
+	 * Standard Servlet 2.4+ spec request attribute for forward query string.
+	 * <p>If forwarded to via a RequestDispatcher, the current resource will see its
+	 * own query string. The originating query string is exposed as a request attribute.
+	 */
 	public static final String FORWARD_QUERY_STRING_ATTRIBUTE = "javax.servlet.forward.query_string";
 
 	/**
-	 * Standard Servlet 2.3+ spec request attributes for error pages.
+	 * Standard Servlet 2.3+ spec request attribute for error page status code.
 	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
 	 * to them directly rather than through the servlet container's error page
 	 * resolution mechanism.
 	 */
 	public static final String ERROR_STATUS_CODE_ATTRIBUTE = "javax.servlet.error.status_code";
-	public static final String ERROR_EXCEPTION_TYPE_ATTRIBUTE = "javax.servlet.error.exception_type";
-	public static final String ERROR_MESSAGE_ATTRIBUTE = "javax.servlet.error.message";
-	public static final String ERROR_EXCEPTION_ATTRIBUTE = "javax.servlet.error.exception";
-	public static final String ERROR_REQUEST_URI_ATTRIBUTE = "javax.servlet.error.request_uri";
-	public static final String ERROR_SERVLET_NAME_ATTRIBUTE = "javax.servlet.error.servlet_name";
-
 
 	/**
-	 * Prefix of the charset clause in a content type String: ";charset="
+	 * Standard Servlet 2.3+ spec request attribute for error page exception type.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_EXCEPTION_TYPE_ATTRIBUTE = "javax.servlet.error.exception_type";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page message.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_MESSAGE_ATTRIBUTE = "javax.servlet.error.message";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page exception.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_EXCEPTION_ATTRIBUTE = "javax.servlet.error.exception";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page request URI.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_REQUEST_URI_ATTRIBUTE = "javax.servlet.error.request_uri";
+
+	/**
+	 * Standard Servlet 2.3+ spec request attribute for error page servlet name.
+	 * <p>To be exposed to JSPs that are marked as error pages, when forwarding
+	 * to them directly rather than through the servlet container's error page
+	 * resolution mechanism.
+	 */
+	public static final String ERROR_SERVLET_NAME_ATTRIBUTE = "javax.servlet.error.servlet_name";
+
+	/**
+	 * Prefix of the charset clause in a content type String: ";charset=".
 	 */
 	public static final String CONTENT_TYPE_CHARSET_PREFIX = ";charset=";
 
@@ -124,13 +211,13 @@ public abstract class WebUtils {
 	 */
 	public static final String WEB_APP_ROOT_KEY_PARAM = "webAppRootKey";
 
-	/** Default web app root key: "webapp.root" */
+	/** Default web app root key: "webapp.root". */
 	public static final String DEFAULT_WEB_APP_ROOT_KEY = "webapp.root";
 
-	/** Name suffixes in case of image buttons */
+	/** Name suffixes in case of image buttons. */
 	public static final String[] SUBMIT_IMAGE_SUFFIXES = {".x", ".y"};
 
-	/** Key for the mutex session attribute */
+	/** Key for the mutex session attribute. */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
 
@@ -152,16 +239,15 @@ public abstract class WebUtils {
 		String root = servletContext.getRealPath("/");
 		if (root == null) {
 			throw new IllegalStateException(
-				"Cannot set web app root system property when WAR file is not expanded");
+					"Cannot set web app root system property when WAR file is not expanded");
 		}
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		String oldValue = System.getProperty(key);
 		if (oldValue != null && !StringUtils.pathEquals(oldValue, root)) {
-			throw new IllegalStateException(
-				"Web app root system property already set to different value: '" +
-				key + "' = [" + oldValue + "] instead of [" + root + "] - " +
-				"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
+			throw new IllegalStateException("Web app root system property already set to different value: '" +
+					key + "' = [" + oldValue + "] instead of [" + root + "] - " +
+					"Choose unique values for the 'webAppRootKey' context-param in your web.xml files!");
 		}
 		System.setProperty(key, root);
 		servletContext.log("Set web app root system property: '" + key + "' = [" + root + "]");
@@ -191,7 +277,8 @@ public abstract class WebUtils {
 	 * @return whether default HTML escaping is enabled for the given application
 	 * ({@code null} = no explicit default)
 	 */
-	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
+	@Nullable
+	public static Boolean getDefaultHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -213,7 +300,8 @@ public abstract class WebUtils {
 	 * ({@code null} = no explicit default)
 	 * @since 4.1.2
 	 */
-	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
+	@Nullable
+	public static Boolean getResponseEncodedHtmlEscape(@Nullable ServletContext servletContext) {
 		if (servletContext == null) {
 			return null;
 		}
@@ -265,6 +353,7 @@ public abstract class WebUtils {
 	 * @param request current HTTP request
 	 * @return the session id, or {@code null} if none
 	 */
+	@Nullable
 	public static String getSessionId(HttpServletRequest request) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
@@ -279,6 +368,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @return the value of the session attribute, or {@code null} if not found
 	 */
+	@Nullable
 	public static Object getSessionAttribute(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
 		HttpSession session = request.getSession(false);
@@ -312,7 +402,7 @@ public abstract class WebUtils {
 	 * @param name the name of the session attribute
 	 * @param value the value of the session attribute
 	 */
-	public static void setSessionAttribute(HttpServletRequest request, String name, Object value) {
+	public static void setSessionAttribute(HttpServletRequest request, String name, @Nullable Object value) {
 		Assert.notNull(request, "Request must not be null");
 		if (value != null) {
 			request.getSession().setAttribute(name, value);
@@ -364,7 +454,8 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getNativeRequest(ServletRequest request, Class<T> requiredType) {
+	@Nullable
+	public static <T> T getNativeRequest(ServletRequest request, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(request)) {
 				return (T) request;
@@ -385,7 +476,8 @@ public abstract class WebUtils {
 	 * of that type is available
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getNativeResponse(ServletResponse response, Class<T> requiredType) {
+	@Nullable
+	public static <T> T getNativeResponse(ServletResponse response, @Nullable Class<T> requiredType) {
 		if (requiredType != null) {
 			if (requiredType.isInstance(response)) {
 				return (T) response;
@@ -428,13 +520,17 @@ public abstract class WebUtils {
 	 * @param ex the exception encountered
 	 * @param servletName the name of the offending servlet
 	 */
-	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex, String servletName) {
+	public static void exposeErrorRequestAttributes(HttpServletRequest request, Throwable ex,
+			@Nullable String servletName) {
+
 		exposeRequestAttributeIfNotPresent(request, ERROR_STATUS_CODE_ATTRIBUTE, HttpServletResponse.SC_OK);
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_TYPE_ATTRIBUTE, ex.getClass());
 		exposeRequestAttributeIfNotPresent(request, ERROR_MESSAGE_ATTRIBUTE, ex.getMessage());
 		exposeRequestAttributeIfNotPresent(request, ERROR_EXCEPTION_ATTRIBUTE, ex);
 		exposeRequestAttributeIfNotPresent(request, ERROR_REQUEST_URI_ATTRIBUTE, request.getRequestURI());
-		exposeRequestAttributeIfNotPresent(request, ERROR_SERVLET_NAME_ATTRIBUTE, servletName);
+		if (servletName != null) {
+			exposeRequestAttributeIfNotPresent(request, ERROR_SERVLET_NAME_ATTRIBUTE, servletName);
+		}
 	}
 
 	/**
@@ -476,9 +572,10 @@ public abstract class WebUtils {
 	 * @param name cookie name
 	 * @return the first cookie with the given name, or {@code null} if none is found
 	 */
+	@Nullable
 	public static Cookie getCookie(HttpServletRequest request, String name) {
 		Assert.notNull(request, "Request must not be null");
-		Cookie cookies[] = request.getCookies();
+		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
 				if (name.equals(cookie.getName())) {
@@ -494,7 +591,7 @@ public abstract class WebUtils {
 	 * either via a button (directly with name) or via an image (name + ".x" or
 	 * name + ".y").
 	 * @param request current HTTP request
-	 * @param name name of the parameter
+	 * @param name the name of the parameter
 	 * @return if the parameter was sent
 	 * @see #SUBMIT_IMAGE_SUFFIXES
 	 */
@@ -520,6 +617,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
+	@Nullable
 	public static String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}
@@ -547,6 +645,7 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
+	@Nullable
 	public static String findParameterValue(Map<String, ?> parameters, String name) {
 		// First try to get it as a normal name=value parameter
 		Object value = parameters.get(name);
@@ -579,7 +678,7 @@ public abstract class WebUtils {
 	 * Maps single values to String and multiple values to String array.
 	 * <p>For example, with a prefix of "spring_", "spring_param1" and
 	 * "spring_param2" result in a Map with "param1" and "param2" as keys.
-	 * @param request HTTP request in which to look for parameters
+	 * @param request the HTTP request in which to look for parameters
 	 * @param prefix the beginning of parameter names
 	 * (if this is null or the empty string, all parameters will match)
 	 * @return map containing request parameters <b>without the prefix</b>,
@@ -588,7 +687,7 @@ public abstract class WebUtils {
 	 * @see javax.servlet.ServletRequest#getParameterValues
 	 * @see javax.servlet.ServletRequest#getParameterMap
 	 */
-	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
+	public static Map<String, Object> getParametersStartingWith(ServletRequest request, @Nullable String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration<String> paramNames = request.getParameterNames();
 		Map<String, Object> params = new TreeMap<>();
@@ -597,7 +696,7 @@ public abstract class WebUtils {
 		}
 		while (paramNames != null && paramNames.hasMoreElements()) {
 			String paramName = paramNames.nextElement();
-			if ("".equals(prefix) || paramName.startsWith(prefix)) {
+			if (prefix.isEmpty() || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
 				if (values == null || values.length == 0) {
@@ -650,6 +749,12 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
+	 *
 	 * @return {@code true} if the request origin is valid, {@code false} otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
@@ -672,41 +777,54 @@ public abstract class WebUtils {
 
 	/**
 	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
-	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
+	 * {@code Forwarded}, {@code X-Forwarded-Proto}, {@code X-Forwarded-Host} and
+	 * {@code X-Forwarded-Port} headers.
+	 *
+	 * <p><strong>Note:</strong> as of 5.1 this method ignores
+	 * {@code "Forwarded"} and {@code "X-Forwarded-*"} headers that specify the
+	 * client-originated address. Consider using the {@code ForwardedHeaderFilter}
+	 * to extract and use, or to discard such headers.
+
 	 * @return {@code true} if the request is a same-origin one, {@code false} in case
-	 * of cross-origin request.
+	 * of cross-origin request
 	 * @since 4.2
 	 */
 	public static boolean isSameOrigin(HttpRequest request) {
-		String origin = request.getHeaders().getOrigin();
+		HttpHeaders headers = request.getHeaders();
+		String origin = headers.getOrigin();
 		if (origin == null) {
 			return true;
 		}
-		UriComponentsBuilder urlBuilder;
+
+		String scheme;
+		String host;
+		int port;
 		if (request instanceof ServletServerHttpRequest) {
 			// Build more efficiently if we can: we only need scheme, host, port for origin comparison
 			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-			urlBuilder = new UriComponentsBuilder().
-					scheme(servletRequest.getScheme()).
-					host(servletRequest.getServerName()).
-					port(servletRequest.getServerPort()).
-					adaptFromForwardedHeaders(request.getHeaders());
+			scheme = servletRequest.getScheme();
+			host = servletRequest.getServerName();
+			port = servletRequest.getServerPort();
 		}
 		else {
-			urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
+			URI uri = request.getURI();
+			scheme = uri.getScheme();
+			host = uri.getHost();
+			port = uri.getPort();
 		}
-		UriComponents actualUrl = urlBuilder.build();
+
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+		return (ObjectUtils.nullSafeEquals(scheme, originUrl.getScheme()) &&
+				ObjectUtils.nullSafeEquals(host, originUrl.getHost()) &&
+				getPort(scheme, port) == getPort(originUrl.getScheme(), originUrl.getPort()));
 	}
 
-	private static int getPort(UriComponents uri) {
-		int port = uri.getPort();
+	private static int getPort(@Nullable String scheme, int port) {
 		if (port == -1) {
-			if ("http".equals(uri.getScheme()) || "ws".equals(uri.getScheme())) {
+			if ("http".equals(scheme) || "ws".equals(scheme)) {
 				port = 80;
 			}
-			else if ("https".equals(uri.getScheme()) || "wss".equals(uri.getScheme())) {
+			else if ("https".equals(scheme) || "wss".equals(scheme)) {
 				port = 443;
 			}
 		}

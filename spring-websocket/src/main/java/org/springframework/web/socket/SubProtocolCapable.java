@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import java.util.List;
  * @author Rossen Stoyanchev
  * @since 4.0
  * @see WebSocketHandler
- * @see <a href="http://tools.ietf.org/html/rfc6455#section-1.9">RFC-6455 section 1.9</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6455#section-1.9">RFC-6455 section 1.9</a>
  */
 public interface SubProtocolCapable {
 

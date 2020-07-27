@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,14 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
@@ -44,22 +48,22 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * 	if 0, the condition will match to every request.
 	 */
 	public ParamsRequestCondition(String... params) {
-		this(parseExpressions(params));
+		this.expressions = parseExpressions(params);
 	}
 
-	private ParamsRequestCondition(Collection<ParamExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
-	}
-
-
-	private static Collection<ParamExpression> parseExpressions(String... params) {
-		Set<ParamExpression> expressions = new LinkedHashSet<>();
-		if (params != null) {
-			for (String param : params) {
-				expressions.add(new ParamExpression(param));
-			}
+	private static Set<ParamExpression> parseExpressions(String... params) {
+		if (ObjectUtils.isEmpty(params)) {
+			return Collections.emptySet();
+		}
+		Set<ParamExpression> expressions = new LinkedHashSet<>(params.length);
+		for (String param : params) {
+			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
+	}
+
+	private ParamsRequestCondition(Set<ParamExpression> conditions) {
+		this.expressions = conditions;
 	}
 
 
@@ -86,6 +90,15 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
+		if (isEmpty() && other.isEmpty()) {
+			return this;
+		}
+		else if (other.isEmpty()) {
+			return this;
+		}
+		else if (isEmpty()) {
+			return other;
+		}
 		Set<ParamExpression> set = new LinkedHashSet<>(this.expressions);
 		set.addAll(other.expressions);
 		return new ParamsRequestCondition(set);
@@ -96,8 +109,9 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		for (ParamExpression expression : expressions) {
+		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(request)) {
 				return null;
 			}
@@ -106,19 +120,33 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * <li>0 if the two conditions have the same number of parameter expressions
-	 * <li>Less than 0 if "this" instance has more parameter expressions
-	 * <li>Greater than 0 if the "other" instance has more parameter expressions
-	 * </ul>
+	 * Compare to another condition based on parameter expressions. A condition
+	 * is considered to be a more specific match, if it has:
+	 * <ol>
+	 * <li>A greater number of expressions.
+	 * <li>A greater number of non-negated expressions with a concrete value.
+	 * </ol>
 	 * <p>It is assumed that both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
 	@Override
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
-		return (other.expressions.size() - this.expressions.size());
+		int result = other.expressions.size() - this.expressions.size();
+		if (result != 0) {
+			return result;
+		}
+		return (int) (getValueMatchCount(other.expressions) - getValueMatchCount(this.expressions));
+	}
+
+	private long getValueMatchCount(Set<ParamExpression> expressions) {
+		long count = 0;
+		for (ParamExpression e : expressions) {
+			if (e.getValue() != null && !e.isNegated()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 
@@ -127,8 +155,15 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	static class ParamExpression extends AbstractNameValueExpression<String> {
 
+		private final Set<String> namesToMatch = new HashSet<>(WebUtils.SUBMIT_IMAGE_SUFFIXES.length + 1);
+
+
 		ParamExpression(String expression) {
 			super(expression);
+			this.namesToMatch.add(getName());
+			for (String suffix : WebUtils.SUBMIT_IMAGE_SUFFIXES) {
+				this.namesToMatch.add(getName() + suffix);
+			}
 		}
 
 		@Override
@@ -143,12 +178,17 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 
 		@Override
 		protected boolean matchName(HttpServletRequest request) {
-			return WebUtils.hasSubmitParameter(request, name);
+			for (String current : this.namesToMatch) {
+				if (request.getParameterMap().get(current) != null) {
+					return true;
+				}
+			}
+			return request.getParameterMap().containsKey(this.name);
 		}
 
 		@Override
 		protected boolean matchValue(HttpServletRequest request) {
-			return value.equals(request.getParameter(name));
+			return ObjectUtils.nullSafeEquals(this.value, request.getParameter(this.name));
 		}
 	}
 

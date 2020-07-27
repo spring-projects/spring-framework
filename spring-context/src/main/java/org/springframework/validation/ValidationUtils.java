@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.validation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -44,44 +45,50 @@ public abstract class ValidationUtils {
 	/**
 	 * Invoke the given {@link Validator} for the supplied object and
 	 * {@link Errors} instance.
-	 * @param validator the {@code Validator} to be invoked (must not be {@code null})
-	 * @param obj the object to bind the parameters to
-	 * @param errors the {@link Errors} instance that should store the errors (must not be {@code null})
-	 * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors} arguments is
-	 * {@code null}, or if the supplied {@code Validator} does not {@link Validator#supports(Class) support}
-	 * the validation of the supplied object's type
+	 * @param validator the {@code Validator} to be invoked
+	 * @param target the object to bind the parameters to
+	 * @param errors the {@link Errors} instance that should store the errors
+	 * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors}
+	 * arguments is {@code null}, or if the supplied {@code Validator} does not
+	 * {@link Validator#supports(Class) support} the validation of the supplied object's type
 	 */
-	public static void invokeValidator(Validator validator, Object obj, Errors errors) {
-		invokeValidator(validator, obj, errors, (Object[]) null);
+	public static void invokeValidator(Validator validator, Object target, Errors errors) {
+		invokeValidator(validator, target, errors, (Object[]) null);
 	}
 
 	/**
 	 * Invoke the given {@link Validator}/{@link SmartValidator} for the supplied object and
 	 * {@link Errors} instance.
-	 * @param validator the {@code Validator} to be invoked (must not be {@code null})
-	 * @param obj the object to bind the parameters to
-	 * @param errors the {@link Errors} instance that should store the errors (must not be {@code null})
+	 * @param validator the {@code Validator} to be invoked
+	 * @param target the object to bind the parameters to
+	 * @param errors the {@link Errors} instance that should store the errors
 	 * @param validationHints one or more hint objects to be passed to the validation engine
-	 * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors} arguments is
-	 * {@code null}, or if the supplied {@code Validator} does not {@link Validator#supports(Class) support}
-	 * the validation of the supplied object's type
+	 * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors}
+	 * arguments is {@code null}, or if the supplied {@code Validator} does not
+	 * {@link Validator#supports(Class) support} the validation of the supplied object's type
 	 */
-	public static void invokeValidator(Validator validator, Object obj, Errors errors, Object... validationHints) {
+	public static void invokeValidator(
+			Validator validator, Object target, Errors errors, @Nullable Object... validationHints) {
+
 		Assert.notNull(validator, "Validator must not be null");
+		Assert.notNull(target, "Target object must not be null");
 		Assert.notNull(errors, "Errors object must not be null");
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking validator [" + validator + "]");
 		}
-		if (obj != null && !validator.supports(obj.getClass())) {
+		if (!validator.supports(target.getClass())) {
 			throw new IllegalArgumentException(
-					"Validator [" + validator.getClass() + "] does not support [" + obj.getClass() + "]");
+					"Validator [" + validator.getClass() + "] does not support [" + target.getClass() + "]");
 		}
+
 		if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-			((SmartValidator) validator).validate(obj, errors, validationHints);
+			((SmartValidator) validator).validate(target, errors, validationHints);
 		}
 		else {
-			validator.validate(obj, errors);
+			validator.validate(target, errors);
 		}
+
 		if (logger.isDebugEnabled()) {
 			if (errors.hasErrors()) {
 				logger.debug("Validator found " + errors.getErrorCount() + " errors");
@@ -126,7 +133,7 @@ public abstract class ValidationUtils {
 	}
 
 	/**
-	 * Reject the given field with the given error codea nd error arguments
+	 * Reject the given field with the given error code and error arguments
 	 * if the value is empty.
 	 * <p>An 'empty' value in this context means either {@code null} or
 	 * the empty string "".
@@ -158,8 +165,8 @@ public abstract class ValidationUtils {
 	 * (can be {@code null})
 	 * @param defaultMessage fallback default message
 	 */
-	public static void rejectIfEmpty(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+	public static void rejectIfEmpty(Errors errors, String field, String errorCode,
+			@Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);
@@ -218,7 +225,7 @@ public abstract class ValidationUtils {
 	 * (can be {@code null})
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs) {
 
 		rejectIfEmptyOrWhitespace(errors, field, errorCode, errorArgs, null);
 	}
@@ -239,7 +246,7 @@ public abstract class ValidationUtils {
 	 * @param defaultMessage fallback default message
 	 */
 	public static void rejectIfEmptyOrWhitespace(
-			Errors errors, String field, String errorCode, Object[] errorArgs, String defaultMessage) {
+			Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {
 
 		Assert.notNull(errors, "Errors object must not be null");
 		Object value = errors.getFieldValue(field);

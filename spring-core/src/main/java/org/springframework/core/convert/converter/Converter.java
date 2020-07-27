@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.core.convert.converter;
+
+import org.springframework.lang.Nullable;
 
 /**
  * A converter converts a source object of type {@code S} to a target of type {@code T}.
@@ -37,6 +39,7 @@ public interface Converter<S, T> {
 	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
 	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
+	@Nullable
 	T convert(S source);
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,11 +54,16 @@ public interface ParserContext {
 
 
 	/**
-	 * The default ParserContext implementation that enables template expression parsing
-	 * mode. The expression prefix is #{ and the expression suffix is }.
+	 * The default ParserContext implementation that enables template expression
+	 * parsing mode. The expression prefix is "#{" and the expression suffix is "}".
 	 * @see #isTemplate()
 	 */
-	public static final ParserContext TEMPLATE_EXPRESSION = new ParserContext() {
+	ParserContext TEMPLATE_EXPRESSION = new ParserContext() {
+
+		@Override
+		public boolean isTemplate() {
+			return true;
+		}
 
 		@Override
 		public String getExpressionPrefix() {
@@ -69,12 +74,6 @@ public interface ParserContext {
 		public String getExpressionSuffix() {
 			return "}";
 		}
-
-		@Override
-		public boolean isTemplate() {
-			return true;
-		}
-
 	};
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -39,12 +42,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.test.util.MetaAnnotationUtils.*;
 
 /**
  * Utility methods for working with {@link TestPropertySource @TestPropertySource}
@@ -53,6 +53,8 @@ import static org.springframework.test.util.MetaAnnotationUtils.*;
  * <p>Primarily intended for use within the framework.
  *
  * @author Sam Brannen
+ * @author Anatoliy Korovin
+ * @author Phillip Webb
  * @since 4.1
  * @see TestPropertySource
  */
@@ -69,45 +71,40 @@ public abstract class TestPropertySourceUtils {
 
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-		Class<TestPropertySource> annotationType = TestPropertySource.class;
-		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
-		if (descriptor == null) {
-			return new MergedTestPropertySources();
-		}
-
-		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(testClass);
-		String[] locations = mergeLocations(attributesList);
-		String[] properties = mergeProperties(attributesList);
-		return new MergedTestPropertySources(locations, properties);
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass, SearchStrategy.TYPE_HIERARCHY);
+		return (mergedAnnotations.isPresent(TestPropertySource.class) ? mergeTestPropertySources(mergedAnnotations) :
+				MergedTestPropertySources.empty());
 	}
 
-	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
-		Assert.notNull(testClass, "Class must not be null");
+	private static MergedTestPropertySources mergeTestPropertySources(MergedAnnotations mergedAnnotations) {
+		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(mergedAnnotations);
+		return new MergedTestPropertySources(mergeLocations(attributesList), mergeProperties(attributesList));
+	}
+
+	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(
+			MergedAnnotations mergedAnnotations) {
+
 		List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
-		Class<TestPropertySource> annotationType = TestPropertySource.class;
-
-		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
-		Assert.notNull(descriptor, String.format(
-				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-				annotationType.getName(), testClass.getName()));
-
-		while (descriptor != null) {
-			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
-			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @TestPropertySource [%s] for declaring class [%s].",
-					testPropertySource, rootDeclaringClass.getName()));
-			}
-			TestPropertySourceAttributes attributes =
-					new TestPropertySourceAttributes(rootDeclaringClass, testPropertySource);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved TestPropertySource attributes: " + attributes);
-			}
-			attributesList.add(attributes);
-			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
-		}
-
+		mergedAnnotations.stream(TestPropertySource.class)
+				.forEach(annotation -> addOrMergeTestPropertySourceAttributes(attributesList, annotation));
 		return attributesList;
+	}
+
+	private static void addOrMergeTestPropertySourceAttributes(List<TestPropertySourceAttributes> attributesList,
+			MergedAnnotation<TestPropertySource> current) {
+
+		if (attributesList.isEmpty()) {
+			attributesList.add(new TestPropertySourceAttributes(current));
+		}
+		else {
+			TestPropertySourceAttributes previous = attributesList.get(attributesList.size() - 1);
+			if (previous.canMergeWith(current)) {
+				previous.mergeWith(current);
+			}
+			else {
+				attributesList.add(new TestPropertySourceAttributes(current));
+			}
+		}
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
@@ -117,7 +114,7 @@ public abstract class TestPropertySourceUtils {
 				logger.trace(String.format("Processing locations for TestPropertySource attributes %s", attrs));
 			}
 			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
-					attrs.getDeclaringClass(), attrs.getLocations());
+					attrs.getDeclaringClass(), true, attrs.getLocations());
 			locations.addAll(0, Arrays.asList(locationsArray));
 			if (!attrs.isInheritLocations()) {
 				break;
@@ -132,7 +129,8 @@ public abstract class TestPropertySourceUtils {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-			properties.addAll(0, Arrays.<String>asList(attrs.getProperties()));
+			String[] attrProps = attrs.getProperties();
+			properties.addAll(0, Arrays.asList(attrProps));
 			if (!attrs.isInheritProperties()) {
 				break;
 			}
@@ -149,11 +147,11 @@ public abstract class TestPropertySourceUtils {
 	 * never {@code null}
 	 * @param locations the resource locations of {@code Properties} files to add
 	 * to the environment; potentially empty but never {@code null}
+	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 * @since 4.1.5
 	 * @see ResourcePropertySource
 	 * @see TestPropertySource#locations
 	 * @see #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)
-	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
 		Assert.notNull(context, "'context' must not be null");
@@ -175,11 +173,11 @@ public abstract class TestPropertySourceUtils {
 	 * never {@code null}
 	 * @param locations the resource locations of {@code Properties} files to add
 	 * to the environment; potentially empty but never {@code null}
+	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 * @since 4.3
 	 * @see ResourcePropertySource
 	 * @see TestPropertySource#locations
 	 * @see #addPropertiesFilesToEnvironment(ConfigurableApplicationContext, String...)
-	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, String... locations) {
@@ -264,9 +262,9 @@ public abstract class TestPropertySourceUtils {
 	 * @param inlinedProperties the inlined properties to convert; potentially empty
 	 * but never {@code null}
 	 * @return a new, ordered map containing the converted properties
-	 * @since 4.1.5
 	 * @throws IllegalStateException if a given key-value pair cannot be parsed, or if
 	 * a given inlined property contains multiple key-value pairs
+	 * @since 4.1.5
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
@@ -284,7 +282,7 @@ public abstract class TestPropertySourceUtils {
 			catch (Exception ex) {
 				throw new IllegalStateException("Failed to load test environment property from [" + pair + "]", ex);
 			}
-			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "]");
+			Assert.state(props.size() == 1, () -> "Failed to load exactly one test environment property from [" + pair + "]");
 			for (String name : props.stringPropertyNames()) {
 				map.put(name, props.getProperty(name));
 			}

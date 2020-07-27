@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.Constants;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -57,36 +58,46 @@ import org.springframework.util.Assert;
  */
 public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNameAware, InitializingBean {
 
-	/** Constants for the CronTrigger class */
+	/** Constants for the CronTrigger class. */
 	private static final Constants constants = new Constants(CronTrigger.class);
 
 
+	@Nullable
 	private String name;
 
+	@Nullable
 	private String group;
 
+	@Nullable
 	private JobDetail jobDetail;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
+	@Nullable
 	private Date startTime;
 
 	private long startDelay = 0;
 
+	@Nullable
 	private String cronExpression;
 
+	@Nullable
 	private TimeZone timeZone;
 
+	@Nullable
 	private String calendarName;
 
 	private int priority;
 
 	private int misfireInstruction;
 
+	@Nullable
 	private String description;
 
+	@Nullable
 	private String beanName;
 
+	@Nullable
 	private CronTrigger cronTrigger;
 
 
@@ -130,7 +141,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 * Register objects in the JobDataMap via a given Map.
 	 * <p>These objects will be available to this Trigger only,
 	 * in contrast to objects in the JobDetail's data map.
-	 * @param jobDataAsMap Map with String keys and any objects as values
+	 * @param jobDataAsMap a Map with String keys and any objects as values
 	 * (for example Spring-managed beans)
 	 */
 	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
@@ -218,6 +229,8 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	@Override
 	public void afterPropertiesSet() throws ParseException {
+		Assert.notNull(this.cronExpression, "Property 'cronExpression' is required");
+
 		if (this.name == null) {
 			this.name = this.beanName;
 		}
@@ -235,7 +248,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		}
 
 		CronTriggerImpl cti = new CronTriggerImpl();
-		cti.setName(this.name);
+		cti.setName(this.name != null ? this.name : toString());
 		cti.setGroup(this.group);
 		if (this.jobDetail != null) {
 			cti.setJobKey(this.jobDetail.getKey());
@@ -253,6 +266,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 
 	@Override
+	@Nullable
 	public CronTrigger getObject() {
 		return this.cronTrigger;
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.core.test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * @author Thomas Risberg
@@ -27,7 +28,7 @@ public class SpacePerson {
 
 	private long age;
 
-	private java.util.Date birthDate;
+	private LocalDateTime birthDate;
 
 	private BigDecimal balance;
 
@@ -47,11 +48,11 @@ public class SpacePerson {
 		this.age = age;
 	}
 
-	public java.util.Date getBirthDate() {
+	public LocalDateTime getBirthDate() {
 		return birthDate;
 	}
 
-	public void setBirth_date(java.util.Date birthDate) {
+	public void setBirthDate(LocalDateTime birthDate) {
 		this.birthDate = birthDate;
 	}
 

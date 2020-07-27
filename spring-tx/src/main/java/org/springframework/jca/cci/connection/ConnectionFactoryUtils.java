@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import javax.resource.cci.ConnectionSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jca.cci.CannotGetCciConnectionException;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
@@ -48,7 +48,10 @@ import org.springframework.util.Assert;
  * @see CciLocalTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class ConnectionFactoryUtils {
 
 	private static final Log logger = LogFactory.getLog(ConnectionFactoryUtils.class);
@@ -67,7 +70,9 @@ public abstract class ConnectionFactoryUtils {
 	 * if the attempt to get a Connection failed
 	 * @see #releaseConnection
 	 */
-	public static Connection getConnection(ConnectionFactory cf) throws CannotGetCciConnectionException {
+	public static Connection getConnection(ConnectionFactory cf)
+			throws org.springframework.jca.cci.CannotGetCciConnectionException {
+
 		return getConnection(cf, null);
 	}
 
@@ -87,8 +92,8 @@ public abstract class ConnectionFactoryUtils {
 	 * if the attempt to get a Connection failed
 	 * @see #releaseConnection
 	 */
-	public static Connection getConnection(ConnectionFactory cf, ConnectionSpec spec)
-			throws CannotGetCciConnectionException {
+	public static Connection getConnection(ConnectionFactory cf, @Nullable ConnectionSpec spec)
+			throws org.springframework.jca.cci.CannotGetCciConnectionException {
 		try {
 			if (spec != null) {
 				Assert.notNull(cf, "No ConnectionFactory specified");
@@ -99,7 +104,7 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		catch (ResourceException ex) {
-			throw new CannotGetCciConnectionException("Could not get CCI Connection", ex);
+			throw new org.springframework.jca.cci.CannotGetCciConnectionException("Could not get CCI Connection", ex);
 		}
 	}
 
@@ -127,7 +132,6 @@ public abstract class ConnectionFactoryUtils {
 		Connection con = cf.getConnection();
 
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			logger.debug("Registering transaction synchronization for CCI Connection");
 			conHolder = new ConnectionHolder(con);
 			conHolder.setSynchronizedWithTransaction(true);
 			TransactionSynchronizationManager.registerSynchronization(new ConnectionSynchronization(conHolder, cf));
@@ -145,7 +149,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
-	public static boolean isConnectionTransactional(Connection con, ConnectionFactory cf) {
+	public static boolean isConnectionTransactional(Connection con, @Nullable ConnectionFactory cf) {
 		if (cf == null) {
 			return false;
 		}
@@ -162,7 +166,7 @@ public abstract class ConnectionFactoryUtils {
 	 * (can be {@code null})
 	 * @see #getConnection
 	 */
-	public static void releaseConnection(Connection con, ConnectionFactory cf) {
+	public static void releaseConnection(@Nullable Connection con, @Nullable ConnectionFactory cf) {
 		try {
 			doReleaseConnection(con, cf);
 		}
@@ -186,7 +190,9 @@ public abstract class ConnectionFactoryUtils {
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #doGetConnection
 	 */
-	public static void doReleaseConnection(Connection con, ConnectionFactory cf) throws ResourceException {
+	public static void doReleaseConnection(@Nullable Connection con, @Nullable ConnectionFactory cf)
+			throws ResourceException {
+
 		if (con == null || isConnectionTransactional(con, cf)) {
 			return;
 		}

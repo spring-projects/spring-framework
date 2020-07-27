@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -47,9 +48,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private static final String UNKNOWN = "unknown";
 
+	@Nullable
 	private final Class<? extends Annotation> annotationType;
 
-	private final String displayName;
+	final String displayName;
 
 	boolean validated = false;
 
@@ -112,6 +114,22 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
+	 * Create a possibly already validated new, empty
+	 * {@link AnnotationAttributes} instance for the specified
+	 * {@code annotationType}.
+	 * @param annotationType the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param validated if the attributes are considered already validated
+	 * @since 5.2
+	 */
+	AnnotationAttributes(Class<? extends Annotation> annotationType, boolean validated) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = annotationType;
+		this.displayName = annotationType.getName();
+		this.validated = validated;
+	}
+
+	/**
 	 * Create a new, empty {@link AnnotationAttributes} instance for the
 	 * specified {@code annotationType}.
 	 * @param annotationType the annotation type name represented by this
@@ -120,14 +138,15 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * or {@code null} to just store the annotation type name
 	 * @since 4.3.2
 	 */
-	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
+	public AnnotationAttributes(String annotationType, @Nullable ClassLoader classLoader) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
 		this.annotationType = getAnnotationType(annotationType, classLoader);
 		this.displayName = annotationType;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
+	@Nullable
+	private static Class<? extends Annotation> getAnnotationType(String annotationType, @Nullable ClassLoader classLoader) {
 		if (classLoader != null) {
 			try {
 				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
@@ -141,20 +160,19 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 
 	/**
-	 * Get the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance.
+	 * Get the type of annotation represented by this {@code AnnotationAttributes}.
 	 * @return the annotation type, or {@code null} if unknown
 	 * @since 4.2
 	 */
+	@Nullable
 	public Class<? extends Annotation> annotationType() {
 		return this.annotationType;
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as a
-	 * string.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * Get the value stored under the specified {@code attributeName} as a string.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -169,8 +187,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If the value stored under the specified {@code attributeName} is
 	 * a string, it will be wrapped in a single-element array before
 	 * returning it.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -180,10 +198,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as a
-	 * boolean.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * Get the value stored under the specified {@code attributeName} as a boolean.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -193,10 +210,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as a
-	 * number.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * Get the value stored under the specified {@code attributeName} as a number.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -207,10 +223,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as an
-	 * enum.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * Get the value stored under the specified {@code attributeName} as an enum.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -221,10 +236,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the value stored under the specified {@code attributeName} as a
-	 * class.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * Get the value stored under the specified {@code attributeName} as a class.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -237,11 +251,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	/**
 	 * Get the value stored under the specified {@code attributeName} as an
 	 * array of classes.
-	 * <p>If the value stored under the specified {@code attributeName} is
-	 * a class, it will be wrapped in a single-element array before
-	 * returning it.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * <p>If the value stored under the specified {@code attributeName} is a class,
+	 * it will be wrapped in a single-element array before returning it.
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -255,8 +268,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * {@code attributeName}.
 	 * <p>Note: if you expect an actual annotation, invoke
 	 * {@link #getAnnotation(String, Class)} instead.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the {@code AnnotationAttributes}
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -268,8 +281,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	/**
 	 * Get the annotation of type {@code annotationType} stored under the
 	 * specified {@code attributeName}.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @param annotationType the expected annotation type; never {@code null}
 	 * @return the annotation
 	 * @throws IllegalArgumentException if the attribute does not exist or
@@ -288,8 +301,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * a single-element array before returning it.
 	 * <p>Note: if you expect an actual array of annotations, invoke
 	 * {@link #getAnnotationArray(String, Class)} instead.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @return the array of {@code AnnotationAttributes}
 	 * @throws IllegalArgumentException if the attribute does not exist or
 	 * if it is not of the expected type
@@ -304,8 +317,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If the value stored under the specified {@code attributeName} is
 	 * an {@code Annotation}, it will be wrapped in a single-element array
 	 * before returning it.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @param annotationType the expected annotation type; never {@code null}
 	 * @return the annotation array
 	 * @throws IllegalArgumentException if the attribute does not exist or
@@ -326,8 +339,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * component type of the expected array type, the single element will be
 	 * wrapped in a single-element array of the appropriate type before
 	 * returning it.
-	 * @param attributeName the name of the attribute to get; never
-	 * {@code null} or empty
+	 * @param attributeName the name of the attribute to get;
+	 * never {@code null} or empty
 	 * @param expectedType the expected type; never {@code null}
 	 * @return the value
 	 * @throws IllegalArgumentException if the attribute does not exist or
@@ -356,40 +369,20 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertNotException(String attributeName, Object attributeValue) {
-		if (attributeValue instanceof Exception) {
+		if (attributeValue instanceof Throwable) {
 			throw new IllegalArgumentException(String.format(
 					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
-					attributeName, this.displayName, attributeValue), (Exception) attributeValue);
+					attributeName, this.displayName, attributeValue), (Throwable) attributeValue);
 		}
 	}
 
 	private void assertAttributeType(String attributeName, Object attributeValue, Class<?> expectedType) {
 		if (!expectedType.isInstance(attributeValue)) {
 			throw new IllegalArgumentException(String.format(
-					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
+					"Attribute '%s' is of type %s, but %s was expected in attributes for annotation [%s]",
 					attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
 					this.displayName));
 		}
-	}
-
-	/**
-	 * Store the supplied {@code value} in this map under the specified
-	 * {@code key}, unless a value is already stored under the key.
-	 * @param key the key under which to store the value
-	 * @param value the value to store
-	 * @return the current value stored in this map, or {@code null} if no
-	 * value was previously stored in this map
-	 * @see #get
-	 * @see #put
-	 * @since 4.2
-	 */
-	@Override
-	public Object putIfAbsent(String key, Object value) {
-		Object obj = get(key);
-		if (obj == null) {
-			obj = put(key, value);
-		}
-		return obj;
 	}
 
 	@Override
@@ -426,7 +419,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * to the {@link #AnnotationAttributes(Map)} constructor.
 	 * @param map original source of annotation attribute <em>key-value</em> pairs
 	 */
-	public static AnnotationAttributes fromMap(Map<String, Object> map) {
+	@Nullable
+	public static AnnotationAttributes fromMap(@Nullable Map<String, Object> map) {
 		if (map == null) {
 			return null;
 		}

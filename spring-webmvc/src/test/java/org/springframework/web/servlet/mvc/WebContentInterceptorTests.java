@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,160 +16,152 @@
 
 package org.springframework.web.servlet.mvc;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
+ * Unit tests for {@link WebContentInterceptor}.
  * @author Rick Evans
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  */
-public class WebContentInterceptorTests {
+class WebContentInterceptorTests {
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private MockHttpServletResponse response;
+	private final WebContentInterceptor interceptor = new WebContentInterceptor();
+
+	private final Object handler = new Object();
 
 
-	@Before
-	public void setUp() throws Exception {
-		request = new MockHttpServletRequest();
-		request.setMethod(WebContentGenerator.METHOD_GET);
-		response = new MockHttpServletResponse();
+	@SuppressWarnings("unused")
+	private static Stream<Function<String, MockHttpServletRequest>> pathPatternsArguments() {
+		return PathPatternsTestUtils.requestArguments();
 	}
 
 
-	@Test
-	public void cacheResourcesConfiguration() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
+	@PathPatternsParameterizedTest
+	void cacheResourcesConfiguration(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		interceptor.setCacheSeconds(10);
-
-		interceptor.preHandle(request, response, null);
+		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
-	@Test
-	public void mappedCacheConfigurationOverridesGlobal() throws Exception {
+	@PathPatternsParameterizedTest
+	void mappedCacheConfigurationOverridesGlobal(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		Properties mappings = new Properties();
-		mappings.setProperty("**/*handle.vm", "-1");
+		mappings.setProperty("/*/*handle.vm", "-1");
 
-		WebContentInterceptor interceptor = new WebContentInterceptor();
 		interceptor.setCacheSeconds(10);
 		interceptor.setCacheMappings(mappings);
 
-		request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
-		interceptor.preHandle(request, response, null);
+		MockHttpServletRequest request = requestFactory.apply("/example/adminhandle.vm");
+		interceptor.preHandle(request, response, handler);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 
-		request.setRequestURI("http://localhost:7070/example/bingo.html");
-		interceptor.preHandle(request, response, null);
+		request = requestFactory.apply("/example/bingo.html");
+		interceptor.preHandle(request, response, handler);
 
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.hasItem("max-age=10"));
+		assertThat(cacheControlHeaders).contains("max-age=10");
 	}
 
-	@Test
-	public void preventCacheConfiguration() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
+	@PathPatternsParameterizedTest
+	void preventCacheConfiguration(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		interceptor.setCacheSeconds(0);
-
-		interceptor.preHandle(request, response, null);
+		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-store"));
+		assertThat(cacheControlHeaders).contains("no-store");
 	}
 
-	@Test
-	public void emptyCacheConfiguration() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
+	@PathPatternsParameterizedTest
+	void emptyCacheConfiguration(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		interceptor.setCacheSeconds(-1);
-
-		interceptor.preHandle(request, response, null);
+		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.emptyIterable());
+		assertThat(expiresHeaders).isEmpty();
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.emptyIterable());
+		assertThat(cacheControlHeaders).isEmpty();
 	}
 
-	// SPR-13252, SPR-14053
-	@Test
-	public void cachingConfigAndPragmaHeader() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
-		interceptor.setCacheSeconds(10);
+	@PathPatternsParameterizedTest // SPR-13252, SPR-14053
+	void cachingConfigAndPragmaHeader(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		response.setHeader("Pragma", "no-cache");
 		response.setHeader("Expires", "0");
 
-		interceptor.preHandle(request, response, null);
+		interceptor.setCacheSeconds(10);
+		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
-	// SPR-13252, SPR-14053
 	@SuppressWarnings("deprecation")
-	@Test
-	public void http10CachingConfigAndPragmaHeader() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
+	@PathPatternsParameterizedTest // SPR-13252, SPR-14053
+	void http10CachingConfigAndPragmaHeader(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
+		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Expires", "0");
+
 		interceptor.setCacheSeconds(10);
 		interceptor.setAlwaysMustRevalidate(true);
-		response.setHeader("Pragma", "no-cache");
-		response.setHeader("Expires", "0");
+		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
-		interceptor.preHandle(request, response, null);
-
-		assertThat(response.getHeader("Pragma"), is(""));
-		assertThat(response.getHeader("Expires"), is(""));
+		assertThat(response.getHeader("Pragma")).isEqualTo("");
+		assertThat(response.getHeader("Expires")).isEqualTo("");
 	}
 
 	@SuppressWarnings("deprecation")
-	@Test
-	public void http10CachingConfigAndSpecificMapping() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
+	@PathPatternsParameterizedTest
+	void http10CachingConfigAndSpecificMapping(Function<String, MockHttpServletRequest> requestFactory) throws Exception {
 		interceptor.setCacheSeconds(0);
 		interceptor.setUseExpiresHeader(true);
 		interceptor.setAlwaysMustRevalidate(true);
 		Properties mappings = new Properties();
-		mappings.setProperty("**/*.cache.html", "10");
+		mappings.setProperty("/*/*.cache.html", "10");
 		interceptor.setCacheMappings(mappings);
 
-		request.setRequestURI("http://example.org/foo/page.html");
-		interceptor.preHandle(request, response, null);
+		MockHttpServletRequest request = requestFactory.apply("/foo/page.html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		interceptor.preHandle(request, response, handler);
 
 		Iterable<String> expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		Iterable<String> cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("no-cache", "no-store"));
+		assertThat(cacheControlHeaders).containsExactly("no-cache", "no-store");
 		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders, Matchers.contains("no-cache"));
+		assertThat(pragmaHeaders).containsExactly("no-cache");
 
+		request = requestFactory.apply("/foo/page.cache.html");
 		response = new MockHttpServletResponse();
-		request.setRequestURI("http://example.org/page.cache.html");
-		interceptor.preHandle(request, response, null);
+		interceptor.preHandle(request, response, handler);
 
 		expiresHeaders = response.getHeaders("Expires");
-		assertThat(expiresHeaders, Matchers.iterableWithSize(1));
+		assertThat(expiresHeaders).hasSize(1);
 		cacheControlHeaders = response.getHeaders("Cache-Control");
-		assertThat(cacheControlHeaders, Matchers.contains("max-age=10, must-revalidate"));
+		assertThat(cacheControlHeaders).containsExactly("max-age=10, must-revalidate");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void throwsExceptionWithNullPathMatcher() throws Exception {
-		WebContentInterceptor interceptor = new WebContentInterceptor();
-		interceptor.setPathMatcher(null);
+	@Test
+	void throwsExceptionWithNullPathMatcher() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new WebContentInterceptor().setPathMatcher(null));
 	}
 
 }

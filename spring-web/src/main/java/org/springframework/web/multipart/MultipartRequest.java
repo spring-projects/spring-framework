@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -47,6 +48,7 @@ public interface MultipartRequest {
 	 * @param name a String specifying the parameter name of the multipart file
 	 * @return the uploaded content in the form of a {@link MultipartFile} object
 	 */
+	@Nullable
 	MultipartFile getFile(String name);
 
 	/**
@@ -79,6 +81,7 @@ public interface MultipartRequest {
 	 * @return the associated content type, or {@code null} if not defined
 	 * @since 3.1
 	 */
+	@Nullable
 	String getMultipartContentType(String paramOrFileName);
 
 }

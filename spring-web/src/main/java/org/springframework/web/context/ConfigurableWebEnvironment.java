@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.lang.Nullable;
 
 /**
  * Specialization of {@link ConfigurableEnvironment} allowing initialization of
@@ -43,6 +44,6 @@ public interface ConfigurableWebEnvironment extends ConfigurableEnvironment {
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(
 	 * org.springframework.core.env.MutablePropertySources, ServletContext, ServletConfig)
 	 */
-	void initPropertySources(ServletContext servletContext, ServletConfig servletConfig);
+	void initPropertySources(@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig);
 
 }

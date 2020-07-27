@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link AsyncClientHttpRequest} implementation that uses OkHttp 3.x to execute requests.
+ * {@link AsyncClientHttpRequest} implementation based on OkHttp 3.x.
  *
  * <p>Created via the {@link OkHttp3ClientHttpRequestFactory}.
  *
@@ -39,7 +39,9 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @author Arjen Poutsma
  * @author Roy Clarkson
  * @since 4.3
+ * @deprecated as of Spring 5.0, with no direct replacement
  */
+@Deprecated
 class OkHttp3AsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final OkHttpClient client;
@@ -59,6 +61,11 @@ class OkHttp3AsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequ
 	@Override
 	public HttpMethod getMethod() {
 		return this.method;
+	}
+
+	@Override
+	public String getMethodValue() {
+		return this.method.name();
 	}
 
 	@Override

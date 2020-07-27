@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -30,6 +31,7 @@ import org.springframework.util.ObjectUtils;
  * methods being handled by a transaction interceptor.
  *
  * @author Colin Sampaleanu
+ * @author Juergen Hoeller
  * @since 15.10.2003
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
@@ -43,22 +45,26 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 	/**
 	 * Allows a transaction attribute to be specified, using the String form, for
 	 * example, "PROPAGATION_REQUIRED".
-	 * @param transactionAttribute The String form of the transactionAttribute to use.
+	 * @param transactionAttribute the String form of the transactionAttribute to use.
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
 	 */
 	public void setTransactionAttribute(TransactionAttribute transactionAttribute) {
+		if (transactionAttribute instanceof DefaultTransactionAttribute) {
+			((DefaultTransactionAttribute) transactionAttribute).resolveAttributeStrings(null);
+		}
 		this.transactionAttribute = transactionAttribute;
 	}
 
 
 	@Override
-	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
-		return (method == null || ClassUtils.isUserLevelMethod(method) ? this.transactionAttribute : null);
+	@Nullable
+	public TransactionAttribute getTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
+		return (ClassUtils.isUserLevelMethod(method) ? this.transactionAttribute : null);
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

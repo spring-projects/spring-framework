@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,15 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInvocation;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Invoker for a local Stateless Session Bean.
@@ -49,7 +52,7 @@ import org.aopalliance.intercept.MethodInvocation;
  */
 public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	private volatile boolean homeAsComponent = false;
+	private volatile boolean homeAsComponent;
 
 
 	/**
@@ -60,6 +63,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * for example to hold a single shared EJB instance.
 	 */
 	@Override
+	@Nullable
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {
@@ -161,7 +165,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 	 * @param ejb the EJB instance to remove
 	 * @see javax.ejb.EJBLocalObject#remove()
 	 */
-	protected void removeSessionBeanInstance(EJBLocalObject ejb) {
+	protected void removeSessionBeanInstance(@Nullable EJBLocalObject ejb) {
 		if (ejb != null && !this.homeAsComponent) {
 			try {
 				ejb.remove();

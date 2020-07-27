@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,11 +17,13 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -44,6 +46,7 @@ import org.springframework.util.Assert;
  */
 public class CharacterEncodingFilter extends OncePerRequestFilter {
 
+	@Nullable
 	private String encoding;
 
 	private boolean forceRequestEncoding = false;
@@ -109,14 +112,15 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * (and whether it will be applied as default response encoding as well)
 	 * depends on the {@link #setForceEncoding "forceEncoding"} flag.
 	 */
-	public void setEncoding(String encoding) {
+	public void setEncoding(@Nullable String encoding) {
 		this.encoding = encoding;
 	}
 
 	/**
-	 * Return the configured encoding for requests and/or responses
+	 * Return the configured encoding for requests and/or responses.
 	 * @since 4.3
 	 */
+	@Nullable
 	public String getEncoding() {
 		return this.encoding;
 	}
@@ -152,7 +156,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * Return whether the encoding should be forced on requests
+	 * Return whether the encoding should be forced on requests.
 	 * @since 4.3
 	 */
 	public boolean isForceRequestEncoding() {

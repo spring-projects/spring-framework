@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,12 @@ package org.springframework.transaction.interceptor;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for the {@link RollbackRuleAttribute} class.
@@ -39,50 +39,68 @@ public class RollbackRuleTests {
 	@Test
 	public void foundImmediatelyWithString() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void foundImmediatelyWithClass() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
-		assertEquals(0, rr.getDepth(new Exception()));
+		assertThat(rr.getDepth(new Exception())).isEqualTo(0);
 	}
 
 	@Test
 	public void notFound() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
-		assertEquals(-1, rr.getDepth(new MyRuntimeException("")));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(-1);
 	}
 
 	@Test
 	public void ancestry() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException
-		assertThat(rr.getDepth(new MyRuntimeException("")), equalTo(3));
+		assertThat(rr.getDepth(new MyRuntimeException(""))).isEqualTo(3);
 	}
 
 	@Test
 	public void alwaysTrueForThrowable() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Throwable.class.getName());
-		assertTrue(rr.getDepth(new MyRuntimeException("")) > 0);
-		assertTrue(rr.getDepth(new IOException()) > 0);
-		assertTrue(rr.getDepth(new FatalBeanException(null,null)) > 0);
-		assertTrue(rr.getDepth(new RuntimeException()) > 0);
+		assertThat(rr.getDepth(new MyRuntimeException("")) > 0).isTrue();
+		assertThat(rr.getDepth(new IOException()) > 0).isTrue();
+		assertThat(rr.getDepth(new FatalBeanException(null,null)) > 0).isTrue();
+		assertThat(rr.getDepth(new RuntimeException()) > 0).isTrue();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNonThrowableType() {
-		new RollbackRuleAttribute(StringBuffer.class);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute(StringBuffer.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgMustBeAThrowableClassWithNullThrowableType() {
-		new RollbackRuleAttribute((Class<?>) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((Class<?>) null));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorArgExceptionStringNameVersionWithNull() {
-		new RollbackRuleAttribute((String) null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new RollbackRuleAttribute((String) null));
+	}
+
+	@Test
+	public void foundEnclosedExceptionWithEnclosingException() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(EnclosingException.class);
+		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
+	}
+
+	@SuppressWarnings("serial")
+	static class EnclosingException extends RuntimeException {
+
+		@SuppressWarnings("serial")
+		static class EnclosedException extends RuntimeException {
+
+		}
 	}
 
 }

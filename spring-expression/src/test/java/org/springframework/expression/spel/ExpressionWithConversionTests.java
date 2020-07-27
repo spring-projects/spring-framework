@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
@@ -33,7 +33,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.TypeConverter;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Expression evaluation where the TypeConverter plugged in is the
@@ -58,7 +58,7 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 		listOfInteger.add(6);
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		ExpressionWithConversionTests.typeDescriptorForListOfString = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfString"));
 		ExpressionWithConversionTests.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionWithConversionTests.class.getDeclaredField("listOfInteger"));
@@ -74,29 +74,30 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementTypeDescriptor().getType();
-		assertEquals(String.class,clazz);
+		assertThat(clazz).isEqualTo(String.class);
 		List<?> l = (List<?>) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
-		assertNotNull(l);
+		assertThat(l).isNotNull();
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementTypeDescriptor().getType();
-		assertEquals(Integer.class,clazz);
+		assertThat(clazz).isEqualTo(Integer.class);
 
 		l = (List<?>) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
-		assertNotNull(l);
+		assertThat(l).isNotNull();
 	}
 
 	@Test
 	public void testSetParameterizedList() throws Exception {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parser.parseExpression("listOfInteger.size()");
-		assertEquals(0,e.getValue(context,Integer.class).intValue());
+		assertThat(e.getValue(context, Integer.class).intValue()).isEqualTo(0);
 		context.setTypeConverter(new TypeConvertorUsingConversionService());
 		// Assign a List<String> to the List<Integer> field - the component elements should be converted
 		parser.parseExpression("listOfInteger").setValue(context,listOfString);
-		assertEquals(3,e.getValue(context,Integer.class).intValue()); // size now 3
+		// size now 3
+		assertThat(e.getValue(context, Integer.class).intValue()).isEqualTo(3);
 		Class<?> clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context, Class.class); // element type correctly Integer
-		assertEquals(Integer.class,clazz);
+		assertThat(clazz).isEqualTo(Integer.class);
 	}
 
 	@Test
@@ -118,17 +119,17 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 		TypeDescriptor collectionType = new TypeDescriptor(new MethodParameter(TestTarget.class.getDeclaredMethod(
 				"sum", Collection.class), 0));
 		// The type conversion is possible
-		assertTrue(evaluationContext.getTypeConverter()
-				.canConvert(TypeDescriptor.valueOf(String.class), collectionType));
+		assertThat(evaluationContext.getTypeConverter()
+				.canConvert(TypeDescriptor.valueOf(String.class), collectionType)).isTrue();
 		// ... and it can be done successfully
-		assertEquals("[1, 2, 3, 4]", evaluationContext.getTypeConverter().convertValue("1,2,3,4", TypeDescriptor.valueOf(String.class), collectionType).toString());
+		assertThat(evaluationContext.getTypeConverter().convertValue("1,2,3,4", TypeDescriptor.valueOf(String.class), collectionType).toString()).isEqualTo("[1, 2, 3, 4]");
 
 		evaluationContext.setVariable("target", new TestTarget());
 
 		// OK up to here, so the evaluation should be fine...
 		// ... but this fails
 		int result = (Integer) parser.parseExpression("#target.sum(#root)").getValue(evaluationContext, "1,2,3,4");
-		assertEquals("Wrong result: " + result, 10, result);
+		assertThat(result).as("Wrong result: " + result).isEqualTo(10);
 
 	}
 
@@ -143,26 +144,26 @@ public class ExpressionWithConversionTests extends AbstractExpressionTests {
 		Expression expression = parser.parseExpression("foos");
 		expression.setValue(context, foos);
 		Foo baz = root.getFoos().iterator().next();
-		assertEquals("baz", baz.value);
+		assertThat(baz.value).isEqualTo("baz");
 
 		// method call
 		expression = parser.parseExpression("setFoos(#foos)");
 		context.setVariable("foos", foos);
 		expression.getValue(context);
 		baz = root.getFoos().iterator().next();
-		assertEquals("baz", baz.value);
+		assertThat(baz.value).isEqualTo("baz");
 
 		// method call with result from method call
 		expression = parser.parseExpression("setFoos(getFoosAsStrings())");
 		expression.getValue(context);
 		baz = root.getFoos().iterator().next();
-		assertEquals("baz", baz.value);
+		assertThat(baz.value).isEqualTo("baz");
 
 		// method call with result from method call
 		expression = parser.parseExpression("setFoos(getFoosAsObjects())");
 		expression.getValue(context);
 		baz = root.getFoos().iterator().next();
-		assertEquals("baz", baz.value);
+		assertThat(baz.value).isEqualTo("baz");
 	}
 
 

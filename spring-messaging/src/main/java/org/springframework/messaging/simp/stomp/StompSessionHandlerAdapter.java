@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract adapter class for {@link StompSessionHandler} with mostly empty
  * implementation methods except for {@link #getPayloadType} which returns String
@@ -27,13 +29,6 @@ import java.lang.reflect.Type;
  * @since 4.2
  */
 public abstract class StompSessionHandlerAdapter implements StompSessionHandler {
-
-	/**
-	 * This implementation is empty.
-	 */
-	@Override
-	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-	}
 
 	/**
 	 * This implementation returns String as the expected payload type
@@ -48,15 +43,22 @@ public abstract class StompSessionHandlerAdapter implements StompSessionHandler 
 	 * This implementation is empty.
 	 */
 	@Override
-	public void handleFrame(StompHeaders headers, Object payload) {
+	public void handleFrame(StompHeaders headers, @Nullable Object payload) {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
 	@Override
-	public void handleException(StompSession session, StompCommand command, StompHeaders headers,
-			byte[] payload, Throwable exception) {
+	public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+	}
+
+	/**
+	 * This implementation is empty.
+	 */
+	@Override
+	public void handleException(StompSession session, @Nullable StompCommand command,
+			StompHeaders headers, byte[] payload, Throwable exception) {
 	}
 
 	/**

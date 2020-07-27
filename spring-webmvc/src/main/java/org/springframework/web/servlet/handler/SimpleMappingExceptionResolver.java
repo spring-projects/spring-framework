@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,11 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
@@ -47,16 +49,21 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 
 
+	@Nullable
 	private Properties exceptionMappings;
 
+	@Nullable
 	private Class<?>[] excludedExceptions;
 
+	@Nullable
 	private String defaultErrorView;
 
+	@Nullable
 	private Integer defaultStatusCode;
 
 	private Map<String, Integer> statusCodes = new HashMap<>();
 
+	@Nullable
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
 
@@ -127,7 +134,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * Keys are view names; values are status codes.
 	 */
 	public Map<String, Integer> getStatusCodesAsMap() {
-		return Collections.unmodifiableMap(statusCodes);
+		return Collections.unmodifiableMap(this.statusCodes);
 	}
 
 	/**
@@ -138,7 +145,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * from within an include.
 	 * <p>If not specified, no status code will be applied, either leaving this to the
 	 * controller or view, or keeping the servlet engine's default of 200 (OK).
-	 * @param defaultStatusCode HTTP status code value, for example 500
+	 * @param defaultStatusCode the HTTP status code value, for example 500
 	 * ({@link HttpServletResponse#SC_INTERNAL_SERVER_ERROR}) or 404 ({@link HttpServletResponse#SC_NOT_FOUND})
 	 * @see #setStatusCodes(Properties)
 	 */
@@ -153,7 +160,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * for not exposing an exception attribute at all.
 	 * @see #DEFAULT_EXCEPTION_ATTRIBUTE
 	 */
-	public void setExceptionAttribute(String exceptionAttribute) {
+	public void setExceptionAttribute(@Nullable String exceptionAttribute) {
 		this.exceptionAttribute = exceptionAttribute;
 	}
 
@@ -170,11 +177,13 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @param handler the executed handler, or {@code null} if none chosen at the time
 	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
+	 * @return a corresponding {@code ModelAndView} to forward to,
+	 * or {@code null} for default processing in the resolution chain
 	 */
 	@Override
-	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
-			Object handler, Exception ex) {
+	@Nullable
+	protected ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		// Expose ModelAndView for chosen error view.
 		String viewName = determineViewName(ex, request);
@@ -201,6 +210,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @return the resolved view name, or {@code null} if excluded or none found
 	 */
+	@Nullable
 	protected String determineViewName(Exception ex, HttpServletRequest request) {
 		String viewName = null;
 		if (this.excludedExceptions != null) {
@@ -217,8 +227,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		// Return default error view else, if defined.
 		if (viewName == null && this.defaultErrorView != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving to default view '" + this.defaultErrorView + "' for exception of type [" +
-						ex.getClass().getName() + "]");
+				logger.debug("Resolving to default view '" + this.defaultErrorView + "'");
 			}
 			viewName = this.defaultErrorView;
 		}
@@ -232,6 +241,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @return the view name, or {@code null} if none found
 	 * @see #setExceptionMappings
 	 */
+	@Nullable
 	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
 		String viewName = null;
 		String dominantMapping = null;
@@ -247,8 +257,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 			}
 		}
 		if (viewName != null && logger.isDebugEnabled()) {
-			logger.debug("Resolving to view '" + viewName + "' for exception of type [" + ex.getClass().getName() +
-					"], based on exception mapping [" + dominantMapping + "]");
+			logger.debug("Resolving to view '" + viewName + "' based on mapping [" + dominantMapping + "]");
 		}
 		return viewName;
 	}
@@ -287,6 +296,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @see #setDefaultStatusCode
 	 * @see #applyStatusCodeIfPossible
 	 */
+	@Nullable
 	protected Integer determineStatusCode(HttpServletRequest request, String viewName) {
 		if (this.statusCodes.containsKey(viewName)) {
 			return this.statusCodes.get(viewName);
@@ -307,7 +317,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	protected void applyStatusCodeIfPossible(HttpServletRequest request, HttpServletResponse response, int statusCode) {
 		if (!WebUtils.isIncludeRequest(request)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Applying HTTP status code " + statusCode);
+				logger.debug("Applying HTTP status " + statusCode);
 			}
 			response.setStatus(statusCode);
 			request.setAttribute(WebUtils.ERROR_STATUS_CODE_ATTRIBUTE, statusCode);
@@ -338,9 +348,6 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	protected ModelAndView getModelAndView(String viewName, Exception ex) {
 		ModelAndView mv = new ModelAndView(viewName);
 		if (this.exceptionAttribute != null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Exposing Exception as model attribute '" + this.exceptionAttribute + "'");
-			}
 			mv.addObject(this.exceptionAttribute, ex);
 		}
 		return mv;

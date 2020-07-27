@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -41,23 +42,23 @@ public abstract class ResourcePatternUtils {
 	 * @see org.springframework.util.ResourceUtils#isUrl(String)
 	 * @see java.net.URL
 	 */
-	public static boolean isUrl(String resourceLocation) {
+	public static boolean isUrl(@Nullable String resourceLocation) {
 		return (resourceLocation != null &&
 				(resourceLocation.startsWith(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX) ||
 						ResourceUtils.isUrl(resourceLocation)));
 	}
 
 	/**
-	 * Return a default ResourcePatternResolver for the given ResourceLoader.
-	 * <p>This might be the ResourceLoader itself, if it implements the
-	 * ResourcePatternResolver extension, or a PathMatchingResourcePatternResolver
-	 * built on the given ResourceLoader.
+	 * Return a default {@link ResourcePatternResolver} for the given {@link ResourceLoader}.
+	 * <p>This might be the {@code ResourceLoader} itself, if it implements the
+	 * {@code ResourcePatternResolver} extension, or a default
+	 * {@link PathMatchingResourcePatternResolver} built on the given {@code ResourceLoader}.
 	 * @param resourceLoader the ResourceLoader to build a pattern resolver for
 	 * (may be {@code null} to indicate a default ResourceLoader)
 	 * @return the ResourcePatternResolver
 	 * @see PathMatchingResourcePatternResolver
 	 */
-	public static ResourcePatternResolver getResourcePatternResolver(ResourceLoader resourceLoader) {
+	public static ResourcePatternResolver getResourcePatternResolver(@Nullable ResourceLoader resourceLoader) {
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			return (ResourcePatternResolver) resourceLoader;
 		}

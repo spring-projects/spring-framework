@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,17 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Proxy for a target CCI {@link javax.resource.cci.ConnectionFactory}, adding
  * awareness of Spring-managed transactions. Similar to a transactional JNDI
- * ConnectionFactory as provided by a J2EE server.
+ * ConnectionFactory as provided by a Java EE server.
  *
  * <p>Data access code that should remain unaware of Spring's data access support
  * can work with this proxy to seamlessly participate in Spring-managed transactions.
@@ -47,7 +50,7 @@ import javax.resource.cci.ConnectionFactory;
  * Connection. If not within a transaction, normal ConnectionFactory behavior applies.
  *
  * <p>This proxy allows data access code to work with the plain JCA CCI API and still
- * participate in Spring-managed transactions, similar to CCI code in a J2EE/JTA
+ * participate in Spring-managed transactions, similar to CCI code in a Java EE/JTA
  * environment. However, if possible, use Spring's ConnectionFactoryUtils, CciTemplate or
  * CCI operation objects to get transaction participation even without a proxy for
  * the target ConnectionFactory, avoiding the need to define such a proxy in the first place.
@@ -62,7 +65,10 @@ import javax.resource.cci.ConnectionFactory;
  * @see javax.resource.cci.Connection#close
  * @see ConnectionFactoryUtils#doGetConnection
  * @see ConnectionFactoryUtils#doReleaseConnection
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class TransactionAwareConnectionFactoryProxy extends DelegatingConnectionFactory {
 
@@ -91,15 +97,16 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	 */
 	@Override
 	public Connection getConnection() throws ResourceException {
-		Connection con = ConnectionFactoryUtils.doGetConnection(getTargetConnectionFactory());
-		return getTransactionAwareConnectionProxy(con, getTargetConnectionFactory());
+		ConnectionFactory targetConnectionFactory = obtainTargetConnectionFactory();
+		Connection con = ConnectionFactoryUtils.doGetConnection(targetConnectionFactory);
+		return getTransactionAwareConnectionProxy(con, targetConnectionFactory);
 	}
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
 	 * but delegates {@code close} calls to ConnectionFactoryUtils.
 	 * @param target the original Connection to wrap
-	 * @param cf ConnectionFactory that the Connection came from
+	 * @param cf the ConnectionFactory that the Connection came from
 	 * @return the wrapped Connection
 	 * @see javax.resource.cci.Connection#close()
 	 * @see ConnectionFactoryUtils#doReleaseConnection
@@ -128,27 +135,27 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Connection interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("getLocalTransaction")) {
-				if (ConnectionFactoryUtils.isConnectionTransactional(this.target, this.connectionFactory)) {
-					throw new javax.resource.spi.IllegalStateException(
-							"Local transaction handling not allowed within a managed transaction");
-				}
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: only close if not within a transaction.
-				ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
-				return null;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Connection proxy.
+					return System.identityHashCode(proxy);
+				case "getLocalTransaction":
+					if (ConnectionFactoryUtils.isConnectionTransactional(this.target, this.connectionFactory)) {
+						throw new javax.resource.spi.IllegalStateException(
+								"Local transaction handling not allowed within a managed transaction");
+					}
+					return this.target.getLocalTransaction();
+				case "close":
+					// Handle close method: only close if not within a transaction.
+					ConnectionFactoryUtils.doReleaseConnection(this.target, this.connectionFactory);
+					return null;
 			}
 
 			// Invoke method on target Connection.

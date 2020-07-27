@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.parsing.AbstractComponentDefinition;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,31 +39,28 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 
 	private final BeanDefinition advisorDefinition;
 
-	private String description;
+	private final String description;
 
-	private BeanReference[] beanReferences;
+	private final BeanReference[] beanReferences;
 
-	private BeanDefinition[] beanDefinitions;
+	private final BeanDefinition[] beanDefinitions;
 
 
 	public AdvisorComponentDefinition(String advisorBeanName, BeanDefinition advisorDefinition) {
-		 this(advisorBeanName, advisorDefinition, null);
+		this(advisorBeanName, advisorDefinition, null);
 	}
 
 	public AdvisorComponentDefinition(
-			String advisorBeanName, BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
+			String advisorBeanName, BeanDefinition advisorDefinition, @Nullable BeanDefinition pointcutDefinition) {
 
 		Assert.notNull(advisorBeanName, "'advisorBeanName' must not be null");
 		Assert.notNull(advisorDefinition, "'advisorDefinition' must not be null");
 		this.advisorBeanName = advisorBeanName;
 		this.advisorDefinition = advisorDefinition;
-		unwrapDefinitions(advisorDefinition, pointcutDefinition);
-	}
 
-
-	private void unwrapDefinitions(BeanDefinition advisorDefinition, BeanDefinition pointcutDefinition) {
 		MutablePropertyValues pvs = advisorDefinition.getPropertyValues();
-		BeanReference adviceReference = (BeanReference) pvs.getPropertyValue("adviceBeanName").getValue();
+		BeanReference adviceReference = (BeanReference) pvs.get("adviceBeanName");
+		Assert.state(adviceReference != null, "Missing 'adviceBeanName' property");
 
 		if (pointcutDefinition != null) {
 			this.beanReferences = new BeanReference[] {adviceReference};
@@ -70,7 +68,8 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 			this.description = buildDescription(adviceReference, pointcutDefinition);
 		}
 		else {
-			BeanReference pointcutReference = (BeanReference) pvs.getPropertyValue("pointcut").getValue();
+			BeanReference pointcutReference = (BeanReference) pvs.get("pointcut");
+			Assert.state(pointcutReference != null, "Missing 'pointcut' property");
 			this.beanReferences = new BeanReference[] {adviceReference, pointcutReference};
 			this.beanDefinitions = new BeanDefinition[] {advisorDefinition};
 			this.description = buildDescription(adviceReference, pointcutReference);
@@ -78,16 +77,15 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	private String buildDescription(BeanReference adviceReference, BeanDefinition pointcutDefinition) {
-		return new StringBuilder("Advisor <advice(ref)='").
-				append(adviceReference.getBeanName()).append("', pointcut(expression)=[").
-				append(pointcutDefinition.getPropertyValues().getPropertyValue("expression").getValue()).
-				append("]>").toString();
+		return "Advisor <advice(ref)='" +
+				adviceReference.getBeanName() + "', pointcut(expression)=[" +
+				pointcutDefinition.getPropertyValues().get("expression") + "]>";
 	}
 
 	private String buildDescription(BeanReference adviceReference, BeanReference pointcutReference) {
-		return new StringBuilder("Advisor <advice(ref)='").
-				append(adviceReference.getBeanName()).append("', pointcut(ref)='").
-				append(pointcutReference.getBeanName()).append("'>").toString();
+		return "Advisor <advice(ref)='" +
+				adviceReference.getBeanName() + "', pointcut(ref)='" +
+				pointcutReference.getBeanName() + "'>";
 	}
 
 
@@ -112,6 +110,7 @@ public class AdvisorComponentDefinition extends AbstractComponentDefinition {
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.advisorDefinition.getSource();
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.jndi;
 
 import javax.naming.NamingException;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -26,7 +27,7 @@ import org.springframework.util.Assert;
  * bean properties.
  *
  * <p>JNDI names may or may not include the "java:comp/env/" prefix expected
- * by J2EE applications when accessing a locally mapped (ENC - Environmental
+ * by Java EE applications when accessing a locally mapped (ENC - Environmental
  * Naming Context) resource. If it doesn't, the "java:comp/env/" prefix will
  * be prepended if the "resourceRef" property is true (the default is
  * <strong>false</strong>) and no other scheme (e.g. "java:") is given.
@@ -39,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public abstract class JndiLocatorSupport extends JndiAccessor {
 
-	/** JNDI prefix used in a J2EE container */
+	/** JNDI prefix used in a Java EE container. */
 	public static final String CONTAINER_PREFIX = "java:comp/env/";
 
 
@@ -47,7 +48,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 
 
 	/**
-	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. Default is "false".
 	 * <p>Note: Will only get applied if no other scheme (e.g. "java:") is given.
@@ -57,7 +58,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	}
 
 	/**
-	 * Return whether the lookup occurs in a J2EE container.
+	 * Return whether the lookup occurs in a Java EE container.
 	 */
 	public boolean isResourceRef() {
 		return this.resourceRef;
@@ -87,7 +88,7 @@ public abstract class JndiLocatorSupport extends JndiAccessor {
 	 * @throws NamingException if the JNDI lookup failed
 	 * @see #setResourceRef
 	 */
-	protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
+	protected <T> T lookup(String jndiName, @Nullable Class<T> requiredType) throws NamingException {
 		Assert.notNull(jndiName, "'jndiName' must not be null");
 		String convertedName = convertJndiName(jndiName);
 		T jndiObject;

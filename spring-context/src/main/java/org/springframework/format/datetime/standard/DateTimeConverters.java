@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
-import java.time.chrono.ChronoZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -43,6 +42,10 @@ import org.springframework.format.datetime.DateFormatterRegistrar;
  * @since 4.0.1
  */
 final class DateTimeConverters {
+
+	private DateTimeConverters() {
+	}
+
 
 	/**
 	 * Install the converters into the converter registry.
@@ -141,8 +144,7 @@ final class DateTimeConverters {
 
 		@Override
 		public Instant convert(ZonedDateTime source) {
-			// Explicit cast to interface necessary in order to call Java 8 default method from -source 1.6
-			return ((ChronoZonedDateTime) source).toInstant();
+			return source.toInstant();
 		}
 	}
 
@@ -241,8 +243,7 @@ final class DateTimeConverters {
 
 		@Override
 		public Instant convert(Calendar source) {
-			// Explicit cast to interface necessary in order to call Java 8 default method from -source 1.6
-			return ((ChronoZonedDateTime) calendarToZonedDateTime(source)).toInstant();
+			return calendarToZonedDateTime(source).toInstant();
 		}
 	}
 

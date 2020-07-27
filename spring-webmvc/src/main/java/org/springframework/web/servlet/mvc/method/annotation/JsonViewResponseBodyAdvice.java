@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.Assert;
 
 /**
  * A {@link ResponseBodyAdvice} implementation that adds support for Jackson's
@@ -54,12 +55,15 @@ public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBo
 	protected void beforeBodyWriteInternal(MappingJacksonValue bodyContainer, MediaType contentType,
 			MethodParameter returnType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
-		Class<?>[] classes = annotation.value();
+		JsonView ann = returnType.getMethodAnnotation(JsonView.class);
+		Assert.state(ann != null, "No JsonView annotation");
+
+		Class<?>[] classes = ann.value();
 		if (classes.length != 1) {
 			throw new IllegalArgumentException(
 					"@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
 		}
+
 		bodyContainer.setSerializationView(classes[0]);
 	}
 

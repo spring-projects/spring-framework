@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,8 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Generic interface for a web request. Mainly intended for generic web
@@ -39,6 +41,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
 	 */
+	@Nullable
 	String getHeader(String headerName);
 
 	/**
@@ -48,6 +51,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
+	@Nullable
 	String[] getHeaderValues(String headerName);
 
 	/**
@@ -62,6 +66,7 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
+	@Nullable
 	String getParameter(String paramName);
 
 	/**
@@ -70,12 +75,13 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */
+	@Nullable
 	String[] getParameterValues(String paramName);
 
 	/**
 	 * Return a Iterator over request parameter names.
-	 * @see javax.servlet.http.HttpServletRequest#getParameterNames()
 	 * @since 3.0
+	 * @see javax.servlet.http.HttpServletRequest#getParameterNames()
 	 */
 	Iterator<String> getParameterNames();
 
@@ -104,12 +110,14 @@ public interface WebRequest extends RequestAttributes {
 	 * Return the remote user for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
 	 */
+	@Nullable
 	String getRemoteUser();
 
 	/**
 	 * Return the user principal for this request, if any.
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
+	@Nullable
 	Principal getUserPrincipal();
 
 	/**
@@ -132,7 +140,7 @@ public interface WebRequest extends RequestAttributes {
 	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   long lastModified = // application-specific calculation
 	 *   if (request.checkNotModified(lastModified)) {
 	 *     // shortcut exit - no further processing necessary
@@ -169,7 +177,7 @@ public interface WebRequest extends RequestAttributes {
 	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   String eTag = // application-specific calculation
 	 *   if (request.checkNotModified(eTag)) {
 	 *     // shortcut exit - no further processing necessary
@@ -200,7 +208,7 @@ public interface WebRequest extends RequestAttributes {
 	 * response headers, and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   String eTag = // application-specific calculation
 	 *   long lastModified = // application-specific calculation
 	 *   if (request.checkNotModified(eTag, lastModified)) {
@@ -226,7 +234,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @return true if the request does not require further processing.
 	 * @since 4.2
 	 */
-	boolean checkNotModified(String etag, long lastModifiedTimestamp);
+	boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp);
 
 	/**
 	 * Get a short description of this request,

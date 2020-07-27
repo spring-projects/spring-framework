@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,11 @@ import org.springframework.web.context.request.WebRequest;
  */
 public abstract class WebAsyncUtils {
 
-	public static final String WEB_ASYNC_MANAGER_ATTRIBUTE = WebAsyncManager.class.getName() + ".WEB_ASYNC_MANAGER";
+	/**
+	 * The name attribute containing the {@link WebAsyncManager}.
+	 */
+	public static final String WEB_ASYNC_MANAGER_ATTRIBUTE =
+			WebAsyncManager.class.getName() + ".WEB_ASYNC_MANAGER";
 
 
 	/**
@@ -40,7 +44,11 @@ public abstract class WebAsyncUtils {
 	 * found, create and associate it with the request.
 	 */
 	public static WebAsyncManager getAsyncManager(ServletRequest servletRequest) {
-		WebAsyncManager asyncManager = (WebAsyncManager) servletRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE);
+		WebAsyncManager asyncManager = null;
+		Object asyncManagerAttr = servletRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE);
+		if (asyncManagerAttr instanceof WebAsyncManager) {
+			asyncManager = (WebAsyncManager) asyncManagerAttr;
+		}
 		if (asyncManager == null) {
 			asyncManager = new WebAsyncManager();
 			servletRequest.setAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, asyncManager);
@@ -54,7 +62,11 @@ public abstract class WebAsyncUtils {
 	 */
 	public static WebAsyncManager getAsyncManager(WebRequest webRequest) {
 		int scope = RequestAttributes.SCOPE_REQUEST;
-		WebAsyncManager asyncManager = (WebAsyncManager) webRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, scope);
+		WebAsyncManager asyncManager = null;
+		Object asyncManagerAttr = webRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, scope);
+		if (asyncManagerAttr instanceof WebAsyncManager) {
+			asyncManager = (WebAsyncManager) asyncManagerAttr;
+		}
 		if (asyncManager == null) {
 			asyncManager = new WebAsyncManager();
 			webRequest.setAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, asyncManager, scope);

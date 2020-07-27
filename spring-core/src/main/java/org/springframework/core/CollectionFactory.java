@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,24 +29,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for collections that is aware of Java 5, Java 6, and Spring
- * collection types.
+ * Factory for collections that is aware of common Java and Spring collection types.
+ *
  * <p>Mainly for internal use within the framework.
- * <p>The goal of this class is to avoid runtime dependencies on a specific
- * Java version, while nevertheless using the best collection implementation
- * that is available at runtime.
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -54,11 +53,11 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @since 1.1.1
  */
-public abstract class CollectionFactory {
+public final class CollectionFactory {
 
-	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>(11);
+	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
 
-	private static final Set<Class<?>> approximableMapTypes = new HashSet<>(7);
+	private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
 
 
 	static {
@@ -86,13 +85,17 @@ public abstract class CollectionFactory {
 	}
 
 
+	private CollectionFactory() {
+	}
+
+
 	/**
 	 * Determine whether the given collection type is an <em>approximable</em> type,
 	 * i.e. a type that {@link #createApproximateCollection} can approximate.
 	 * @param collectionType the collection type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableCollectionType(Class<?> collectionType) {
+	public static boolean isApproximableCollectionType(@Nullable Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
 	}
 
@@ -116,8 +119,8 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
-	public static <E> Collection<E> createApproximateCollection(Object collection, int capacity) {
+	@SuppressWarnings({"rawtypes", "unchecked", "cast"})
+	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
 			return new LinkedList<>();
 		}
@@ -142,7 +145,7 @@ public abstract class CollectionFactory {
 	 * Create the most appropriate collection for the given collection type.
 	 * <p>Delegates to {@link #createCollection(Class, Class, int)} with a
 	 * {@code null} element type.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param capacity the initial capacity
 	 * @return a new collection instance
 	 * @throws IllegalArgumentException if the supplied {@code collectionType}
@@ -161,7 +164,7 @@ public abstract class CollectionFactory {
 	 * supplied {@code elementType} is an enum type matching type {@code E}.
 	 * As an alternative, the caller may wish to treat the return value as a
 	 * raw collection or collection of {@link Object}.
-	 * @param collectionType the desired type of the target collection; never {@code null}
+	 * @param collectionType the desired type of the target collection (never {@code null})
 	 * @param elementType the collection's element type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumSet} creation)
 	 * @param capacity the initial capacity
@@ -175,8 +178,8 @@ public abstract class CollectionFactory {
 	 * {@code null}; or if the desired {@code collectionType} is {@link EnumSet} and
 	 * the supplied {@code elementType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({ "unchecked", "cast" })
-	public static <E> Collection<E> createCollection(Class<?> collectionType, Class<?> elementType, int capacity) {
+	@SuppressWarnings({"unchecked", "cast"})
+	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
 			if (Set.class == collectionType || Collection.class == collectionType) {
@@ -192,7 +195,7 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
 			}
 		}
-		else if (EnumSet.class == collectionType) {
+		else if (EnumSet.class.isAssignableFrom(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// Cast is necessary for compilation in Eclipse 4.4.1.
 			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
@@ -217,7 +220,7 @@ public abstract class CollectionFactory {
 	 * @param mapType the map type to check
 	 * @return {@code true} if the type is <em>approximable</em>
 	 */
-	public static boolean isApproximableMapType(Class<?> mapType) {
+	public static boolean isApproximableMapType(@Nullable Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
 	}
 
@@ -238,8 +241,8 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <K, V> Map<K, V> createApproximateMap(Object map, int capacity) {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public static <K, V> Map<K, V> createApproximateMap(@Nullable Object map, int capacity) {
 		if (map instanceof EnumMap) {
 			EnumMap enumMap = new EnumMap((EnumMap) map);
 			enumMap.clear();
@@ -277,7 +280,7 @@ public abstract class CollectionFactory {
 	 * may wish to treat the return value as a raw map or map keyed by
 	 * {@link Object}. Similarly, type safety cannot be enforced if the
 	 * desired {@code mapType} is {@link MultiValueMap}.
-	 * @param mapType the desired type of the target map; never {@code null}
+	 * @param mapType the desired type of the target map (never {@code null})
 	 * @param keyType the map's key type, or {@code null} if unknown
 	 * (note: only relevant for {@link EnumMap} creation)
 	 * @param capacity the initial capacity
@@ -291,8 +294,8 @@ public abstract class CollectionFactory {
 	 * {@code null}; or if the desired {@code mapType} is {@link EnumMap} and
 	 * the supplied {@code keyType} is not a subtype of {@link Enum}
 	 */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static <K, V> Map<K, V> createMap(Class<?> mapType, Class<?> keyType, int capacity) {
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
 			if (Map.class == mapType) {
@@ -323,6 +326,69 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that automatically adapts
+	 * non-String values to String representations in {@link Properties#getProperty}.
+	 * <p>In addition, the returned {@code Properties} instance sorts properties
+	 * alphanumerically based on their keys.
+	 * @return a new {@code Properties} instance
+	 * @since 4.3.4
+	 * @see #createSortedProperties(boolean)
+	 * @see #createSortedProperties(Properties, boolean)
+	 */
+	@SuppressWarnings("serial")
+	public static Properties createStringAdaptingProperties() {
+		return new SortedProperties(false) {
+			@Override
+			@Nullable
+			public String getProperty(String key) {
+				Object value = get(key);
+				return (value != null ? value.toString() : null);
+			}
+		};
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 * <p>This can be useful when storing the {@link Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
+	 * @see #createSortedProperties(Properties, boolean)
+	 */
+	public static Properties createSortedProperties(boolean omitComments) {
+		return new SortedProperties(omitComments);
+	}
+
+	/**
+	 * Create a variant of {@link java.util.Properties} that sorts properties
+	 * alphanumerically based on their keys.
+	 * <p>This can be useful when storing the {@code Properties} instance in a
+	 * properties file, since it allows such files to be generated in a repeatable
+	 * manner with consistent ordering of properties. Comments in generated
+	 * properties files can also be optionally omitted.
+	 * <p>The returned {@code Properties} instance will be populated with
+	 * properties from the supplied {@code properties} object, but default
+	 * properties from the supplied {@code properties} object will not be copied.
+	 * @param properties the {@code Properties} object from which to copy the
+	 * initial properties
+	 * @param omitComments {@code true} if comments should be omitted when
+	 * storing properties in a file
+	 * @return a new {@code Properties} instance
+	 * @since 5.2
+	 * @see #createStringAdaptingProperties()
+	 * @see #createSortedProperties(boolean)
+	 */
+	public static Properties createSortedProperties(Properties properties, boolean omitComments) {
+		return new SortedProperties(properties, omitComments);
 	}
 
 	/**

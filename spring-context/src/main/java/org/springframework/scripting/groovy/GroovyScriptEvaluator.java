@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.lang.Nullable;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.ScriptSource;
@@ -40,6 +41,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
  */
 public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware {
 
+	@Nullable
 	private ClassLoader classLoader;
 
 	private CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
@@ -55,7 +57,7 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	 * Construct a new GroovyScriptEvaluator.
 	 * @param classLoader the ClassLoader to use as a parent for the {@link GroovyShell}
 	 */
-	public GroovyScriptEvaluator(ClassLoader classLoader) {
+	public GroovyScriptEvaluator(@Nullable ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -65,7 +67,7 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	 * @since 4.3.3
 	 * @see #setCompilationCustomizers
 	 */
-	public void setCompilerConfiguration(CompilerConfiguration compilerConfiguration) {
+	public void setCompilerConfiguration(@Nullable CompilerConfiguration compilerConfiguration) {
 		this.compilerConfiguration =
 				(compilerConfiguration != null ? compilerConfiguration : new CompilerConfiguration());
 	}
@@ -96,12 +98,14 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 
 
 	@Override
+	@Nullable
 	public Object evaluate(ScriptSource script) {
 		return evaluate(script, null);
 	}
 
 	@Override
-	public Object evaluate(ScriptSource script, Map<String, Object> arguments) {
+	@Nullable
+	public Object evaluate(ScriptSource script, @Nullable Map<String, Object> arguments) {
 		GroovyShell groovyShell = new GroovyShell(
 				this.classLoader, new Binding(arguments), this.compilerConfiguration);
 		try {

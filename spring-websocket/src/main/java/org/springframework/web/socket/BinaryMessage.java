@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,7 +65,7 @@ public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(byte[] payload, boolean isLast) {
-		this(payload, 0, ((payload == null) ? 0 : payload.length), isLast);
+		this(payload, 0, payload.length, isLast);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public final class BinaryMessage extends AbstractWebSocketMessage<ByteBuffer> {
 	 * @param isLast if the message is the last of a series of partial messages
 	 */
 	public BinaryMessage(byte[] payload, int offset, int length, boolean isLast) {
-		super(payload != null ? ByteBuffer.wrap(payload, offset, length) : null, isLast);
+		super(ByteBuffer.wrap(payload, offset, length), isLast);
 	}
 
 

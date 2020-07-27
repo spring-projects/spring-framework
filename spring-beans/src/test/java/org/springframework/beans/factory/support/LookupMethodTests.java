@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Karl Pietrzak
@@ -34,7 +35,7 @@ public class LookupMethodTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
@@ -45,59 +46,55 @@ public class LookupMethodTests {
 	@Test
 	public void testWithoutConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		Object expected = bean.get();
-		assertEquals(TestBean.class, expected.getClass());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
 	}
 
 	@Test
 	public void testWithOverloadedArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.get("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
 	}
 
 	@Test
 	public void testWithOneConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
 	}
 
 	@Test
 	public void testWithTwoConstructorArg() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getTwoArguments("haha", 72);
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertEquals(72, expected.getAge());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
+		assertThat(expected.getAge()).isEqualTo(72);
 	}
 
 	@Test
 	public void testWithThreeArgsShouldFail() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("abstractBean");
-		assertNotNull(bean);
-		try {
-			bean.getThreeArguments("name", 1, 2);
-			fail("TestBean does not have a three arg constructor so this should not have worked");
-		}
-		catch (AbstractMethodError ex) {
-		}
+		assertThat(bean).isNotNull();
+		assertThatExceptionOfType(AbstractMethodError.class).as("does not have a three arg constructor").isThrownBy(() ->
+			bean.getThreeArguments("name", 1, 2));
 	}
 
 	@Test
 	public void testWithOverriddenLookupMethod() {
 		AbstractBean bean = (AbstractBean) beanFactory.getBean("extendedBean");
-		assertNotNull(bean);
+		assertThat(bean).isNotNull();
 		TestBean expected = bean.getOneArgument("haha");
-		assertEquals(TestBean.class, expected.getClass());
-		assertEquals("haha", expected.getName());
-		assertTrue(expected.isJedi());
+		assertThat(expected.getClass()).isEqualTo(TestBean.class);
+		assertThat(expected.getName()).isEqualTo("haha");
+		assertThat(expected.isJedi()).isTrue();
 	}
 
 

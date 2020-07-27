@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -48,11 +49,13 @@ import org.springframework.util.ClassUtils;
  */
 public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean, DisposableBean {
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private volatile BeanWiringInfoResolver beanWiringInfoResolver;
 
+	@Nullable
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
 
@@ -75,7 +78,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
-				 "Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
+				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
 		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
 		if (this.beanWiringInfoResolver == null) {
@@ -89,6 +92,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
 	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
+	@Nullable
 	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
 	}
@@ -128,31 +132,36 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 			return;
 		}
 
-		BeanWiringInfo bwi = this.beanWiringInfoResolver.resolveWiringInfo(beanInstance);
+		BeanWiringInfoResolver bwiResolver = this.beanWiringInfoResolver;
+		Assert.state(bwiResolver != null, "No BeanWiringInfoResolver available");
+		BeanWiringInfo bwi = bwiResolver.resolveWiringInfo(beanInstance);
 		if (bwi == null) {
 			// Skip the bean if no wiring info given.
 			return;
 		}
 
+
+		ConfigurableListableBeanFactory beanFactory = this.beanFactory;
+		Assert.state(beanFactory != null, "No BeanFactory available");
 		try {
-			if (bwi.indicatesAutowiring() ||
-					(bwi.isDefaultBeanName() && !this.beanFactory.containsBean(bwi.getBeanName()))) {
+			String beanName = bwi.getBeanName();
+			if (bwi.indicatesAutowiring() || (bwi.isDefaultBeanName() && beanName != null &&
+					!beanFactory.containsBean(beanName))) {
 				// Perform autowiring (also applying standard factory / post-processor callbacks).
-				this.beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
-				Object result = this.beanFactory.initializeBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				beanFactory.autowireBeanProperties(beanInstance, bwi.getAutowireMode(), bwi.getDependencyCheck());
+				beanFactory.initializeBean(beanInstance, (beanName != null ? beanName : ""));
 			}
 			else {
 				// Perform explicit wiring based on the specified bean definition.
-				Object result = this.beanFactory.configureBean(beanInstance, bwi.getBeanName());
-				checkExposedObject(result, beanInstance);
+				beanFactory.configureBean(beanInstance, (beanName != null ? beanName : ""));
 			}
 		}
 		catch (BeanCreationException ex) {
 			Throwable rootCause = ex.getMostSpecificCause();
 			if (rootCause instanceof BeanCurrentlyInCreationException) {
 				BeanCreationException bce = (BeanCreationException) rootCause;
-				if (this.beanFactory.isCurrentlyInCreation(bce.getBeanName())) {
+				String bceBeanName = bce.getBeanName();
+				if (bceBeanName != null && beanFactory.isCurrentlyInCreation(bceBeanName)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Failed to create target bean '" + bce.getBeanName() +
 								"' while configuring object of type [" + beanInstance.getClass().getName() +
@@ -163,14 +172,6 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 				}
 			}
 			throw ex;
-		}
-	}
-
-	private void checkExposedObject(Object exposedObject, Object originalBeanInstance) {
-		if (exposedObject != originalBeanInstance) {
-			throw new IllegalStateException("Post-processor tried to replace bean instance of type [" +
-					originalBeanInstance.getClass().getName() + "] with (proxy) object of type [" +
-					exposedObject.getClass().getName() + "] - not supported for aspect-configured classes!");
 		}
 	}
 

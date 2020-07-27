@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import org.springframework.core.Ordered;
 /**
  * Default {@link EventListenerFactory} implementation that supports the
  * regular {@link EventListener} annotation.
+ *
  * <p>Used as "catch-all" implementation by default.
  *
  * @author Stephane Nicoll
@@ -33,15 +34,18 @@ public class DefaultEventListenerFactory implements EventListenerFactory, Ordere
 
 	private int order = LOWEST_PRECEDENCE;
 
-	@Override
-	public int getOrder() {
-		return order;
-	}
 
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+
+	@Override
 	public boolean supportsMethod(Method method) {
 		return true;
 	}

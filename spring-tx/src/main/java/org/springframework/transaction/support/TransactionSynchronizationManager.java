@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -133,6 +134,7 @@ public abstract class TransactionSynchronizationManager {
 	 * resource object), or {@code null} if none
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
+	@Nullable
 	public static Object getResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		Object value = doGetResource(actualKey);
@@ -146,6 +148,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Actually check the value of the resource that is bound for the given key.
 	 */
+	@Nullable
 	private static Object doGetResource(Object actualKey) {
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
@@ -217,6 +220,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @param key the key to unbind (usually the resource factory)
 	 * @return the previously bound value, or {@code null} if none bound
 	 */
+	@Nullable
 	public static Object unbindResourceIfPossible(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
 		return doUnbindResource(actualKey);
@@ -225,6 +229,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Actually remove the value of the resource that is bound for the given key.
 	 */
+	@Nullable
 	private static Object doUnbindResource(Object actualKey) {
 		Map<Object, Object> map = resources.get();
 		if (map == null) {
@@ -287,10 +292,11 @@ public abstract class TransactionSynchronizationManager {
 			throws IllegalStateException {
 
 		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
-		if (!isSynchronizationActive()) {
+		Set<TransactionSynchronization> synchs = synchronizations.get();
+		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		synchronizations.get().add(synchronization);
+		synchs.add(synchronization);
 	}
 
 	/**
@@ -343,7 +349,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @param name the name of the transaction, or {@code null} to reset it
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
-	public static void setCurrentTransactionName(String name) {
+	public static void setCurrentTransactionName(@Nullable String name) {
 		currentTransactionName.set(name);
 	}
 
@@ -353,6 +359,7 @@ public abstract class TransactionSynchronizationManager {
 	 * for example to optimize fetch strategies for specific named transactions.
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
+	@Nullable
 	public static String getCurrentTransactionName() {
 		return currentTransactionName.get();
 	}
@@ -376,7 +383,7 @@ public abstract class TransactionSynchronizationManager {
 	 * as argument for the {@code beforeCommit} callback, to be able
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks, for example to set the
-	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
+	 * flush mode of a Hibernate Session to "FlushMode.MANUAL" upfront.
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 * @see TransactionSynchronization#beforeCommit(boolean)
 	 */
@@ -400,7 +407,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
-	public static void setCurrentTransactionIsolationLevel(Integer isolationLevel) {
+	public static void setCurrentTransactionIsolationLevel(@Nullable Integer isolationLevel) {
 		currentTransactionIsolationLevel.set(isolationLevel);
 	}
 
@@ -421,6 +428,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.transaction.TransactionDefinition#ISOLATION_SERIALIZABLE
 	 * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel()
 	 */
+	@Nullable
 	public static Integer getCurrentTransactionIsolationLevel() {
 		return currentTransactionIsolationLevel.get();
 	}
@@ -443,7 +451,7 @@ public abstract class TransactionSynchronizationManager {
 	 * between active transaction synchronization (with or without backing
 	 * resource transaction; also on PROPAGATION_SUPPORTS) and an actual
 	 * transaction being active (with backing resource transaction;
-	 * on PROPAGATION_REQUIRES, PROPAGATION_REQUIRES_NEW, etc).
+	 * on PROPAGATION_REQUIRED, PROPAGATION_REQUIRES_NEW, etc).
 	 * @see #isSynchronizationActive()
 	 */
 	public static boolean isActualTransactionActive() {
@@ -461,11 +469,11 @@ public abstract class TransactionSynchronizationManager {
 	 * @see #setActualTransactionActive
 	 */
 	public static void clear() {
-		clearSynchronization();
-		setCurrentTransactionName(null);
-		setCurrentTransactionReadOnly(false);
-		setCurrentTransactionIsolationLevel(null);
-		setActualTransactionActive(false);
+		synchronizations.remove();
+		currentTransactionName.remove();
+		currentTransactionReadOnly.remove();
+		currentTransactionIsolationLevel.remove();
+		actualTransactionActive.remove();
 	}
 
 }

@@ -1,0 +1,274 @@
+configurations {
+	asciidoctorExt
+}
+
+dependencies {
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.2.RELEASE")
+}
+
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+		mavenContent {
+			includeGroup "io.spring.asciidoctor"
+		}
+	}
+}
+
+/**
+ * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
+ */
+task api(type: Javadoc) {
+	group = "Documentation"
+	description = "Generates aggregated Javadoc API documentation."
+	title = "${rootProject.description} ${version} API"
+
+	dependsOn {
+		moduleProjects.collect {
+			it.tasks.getByName("jar")
+		}
+	}
+	doFirst {
+		classpath = files(
+				// ensure the javadoc process can resolve types compiled from .aj sources
+				project(":spring-aspects").sourceSets.main.output
+		)
+		classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+	}
+
+	options {
+		encoding = "UTF-8"
+		memberLevel = JavadocMemberLevel.PROTECTED
+		author = true
+		header = rootProject.description
+		use = true
+		overview = "src/docs/api/overview.html"
+		stylesheetFile = file("src/docs/api/stylesheet.css")
+		splitIndex = true
+		links(project.ext.javadocLinks)
+		addStringOption('Xdoclint:none', '-quiet')
+		if(JavaVersion.current().isJava9Compatible()) {
+			addBooleanOption('html5', true)
+		}
+	}
+	source moduleProjects.collect { project ->
+		project.sourceSets.main.allJava
+	}
+	maxMemory = "1024m"
+	destinationDir = file("$buildDir/docs/javadoc")
+}
+
+/**
+ * Produce KDoc for all Spring Framework modules in "build/docs/kdoc"
+ */
+dokka {
+	dependsOn {
+		tasks.getByName("api")
+	}
+
+	doFirst {
+		configuration {
+			classpath = moduleProjects.collect { project -> project.jar.outputs.files.getFiles() }.flatten()
+			classpath += files(moduleProjects.collect { it.sourceSets.main.compileClasspath })
+
+			moduleProjects.findAll {
+				it.pluginManager.hasPlugin("kotlin")
+			}.each { project ->
+				def kotlinDirs = project.sourceSets.main.kotlin.srcDirs.collect()
+				kotlinDirs -= project.sourceSets.main.java.srcDirs
+				kotlinDirs.each { dir ->
+					if (dir.exists()) {
+						sourceRoot {
+							path = dir.path
+						}
+					}
+				}
+			}
+		}
+	}
+
+	outputFormat = "html"
+	outputDirectory = "$buildDir/docs/kdoc"
+
+	configuration {
+		moduleName = "spring-framework"
+
+		externalDocumentationLink {
+			url = new URL("https://docs.spring.io/spring-framework/docs/$version/javadoc-api/")
+			packageListUrl = new File(buildDir, "docs/javadoc/package-list").toURI().toURL()
+		}
+		externalDocumentationLink {
+			url = new URL("https://projectreactor.io/docs/core/release/api/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/")
+		}
+		externalDocumentationLink {
+			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+		}
+	}
+}
+
+task downloadResources(type: Download) {
+	def version = "0.2.2.RELEASE"
+	src "https://repo.spring.io/release/io/spring/docresources/" +
+			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
+	dest project.file("$buildDir/docs/spring-doc-resources.zip")
+	onlyIfModified true
+	useETag "all"
+}
+
+task extractDocResources(type: Copy, dependsOn: downloadResources) {
+	from project.zipTree(downloadResources.dest);
+	into "$buildDir/docs/spring-docs-resources/"
+}
+
+asciidoctorj {
+	modules {
+		pdf {
+			version '1.5.0-beta.8'
+		}
+	}
+	fatalWarnings ".*"
+}
+
+/**
+ * Produce the Spring Framework Reference documentation
+ * from "src/docs/asciidoc" into  "build/asciidoc/html5"
+ */
+asciidoctor {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
+	sources {
+		include '*.adoc'
+	}
+	outputDir "$buildDir/docs/ref-docs/"
+	resources {
+		from(sourceDir) {
+			include 'images/*.png', 'css/**', 'js/**'
+		}
+		from extractDocResources
+	}
+	logDocuments = true
+	outputOptions {
+		backends = ["html5", "pdf"]
+	}
+	options doctype: 'book', eruby: 'erubis'
+	attributes([
+			icons: 'font',
+			idprefix: '',
+			idseparator: '-',
+			docinfo: 'shared',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'highlight.js',
+			highlightjsdir: 'js/highlight',
+			'highlightjs-theme': 'googlecode',
+			stylesdir: 'css/',
+			stylesheet: 'stylesheet.css',
+			'spring-version': project.version
+	])
+}
+
+/**
+ * Zip all docs (API and reference) into a single archive
+ */
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
+	group = "Distribution"
+	description = "Builds -${archiveClassifier} archive containing api and reference " +
+			"for deployment at https://docs.spring.io/spring-framework/docs."
+
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("docs")
+	from("src/dist") {
+		include "changelog.txt"
+	}
+	from (api) {
+		into "javadoc-api"
+	}
+	from ("$asciidoctor.outputDir/html5") {
+		into "spring-framework-reference"
+	}
+	from ("$asciidoctor.outputDir/pdf") {
+		into "spring-framework-reference/pdf"
+	}
+	from (dokka) {
+		into "kdoc-api"
+	}
+}
+
+/**
+ * Zip all Spring Framework schemas into a single archive
+ */
+task schemaZip(type: Zip) {
+	group = "Distribution"
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("schema")
+	description = "Builds -${archiveClassifier} archive containing all " +
+			"XSDs for deployment at https://springframework.org/schema."
+	duplicatesStrategy DuplicatesStrategy.EXCLUDE
+	moduleProjects.each { module ->
+		def Properties schemas = new Properties();
+
+		module.sourceSets.main.resources.find {
+			(it.path.endsWith("META-INF/spring.schemas") || it.path.endsWith("META-INF\\spring.schemas"))
+		}?.withInputStream { schemas.load(it) }
+
+		for (def key : schemas.keySet()) {
+			def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+			assert shortName != key
+			File xsdFile = module.sourceSets.main.resources.find {
+				(it.path.endsWith(schemas.get(key)) || it.path.endsWith(schemas.get(key).replaceAll('\\/','\\\\')))
+			}
+			assert xsdFile != null
+			into (shortName) {
+				from xsdFile.path
+			}
+		}
+	}
+}
+
+/**
+ * Create a distribution zip with everything:
+ * docs, schemas, jars, source jars, javadoc jars
+ */
+task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+	group = "Distribution"
+	archiveBaseName.set("spring-framework")
+	archiveClassifier.set("dist")
+	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
+			"suitable for community download page."
+
+	ext.baseDir = "spring-framework-${project.version}";
+
+	from("src/docs/dist") {
+		include "readme.txt"
+		include "license.txt"
+		include "notice.txt"
+		into "${baseDir}"
+		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+
+	from(zipTree(docsZip.archivePath)) {
+		into "${baseDir}/docs"
+	}
+
+	from(zipTree(schemaZip.archivePath)) {
+		into "${baseDir}/schema"
+	}
+
+	moduleProjects.each { module ->
+		into ("${baseDir}/libs") {
+			from module.jar
+			if (module.tasks.findByPath("sourcesJar")) {
+				from module.sourcesJar
+			}
+			if (module.tasks.findByPath("javadocJar")) {
+				from module.javadocJar
+			}
+		}
+	}
+}
+
+distZip.mustRunAfter moduleProjects.check

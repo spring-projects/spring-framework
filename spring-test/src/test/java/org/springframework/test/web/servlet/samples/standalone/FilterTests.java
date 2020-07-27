@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,33 +18,52 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.concurrent.CompletableFuture;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.validation.Valid;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Tests with {@link Filter}'s.
- *
  * @author Rob Winch
  */
 public class FilterTests {
@@ -107,10 +126,29 @@ public class FilterTests {
 				.andExpect(model().attribute("principal", WrappingRequestResponseFilter.PRINCIPAL_NAME));
 	}
 
+	@Test // SPR-16067, SPR-16695
+	public void filterWrapsRequestResponseAndPerformsAsyncDispatch() throws Exception {
+		MockMvc mockMvc = standaloneSetup(new PersonController())
+				.addFilters(new WrappingRequestResponseFilter(), new ShallowEtagHeaderFilter())
+				.build();
+
+		MvcResult mvcResult = mockMvc.perform(get("/persons/1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(request().asyncStarted())
+				.andExpect(request().asyncResult(new Person("Lukas")))
+				.andReturn();
+
+		mockMvc.perform(asyncDispatch(mvcResult))
+				.andExpect(status().isOk())
+				.andExpect(header().longValue("Content-Length", 53))
+				.andExpect(header().string("ETag", "\"0e37becb4f0c90709cb2e1efcc61eaa00\""))
+				.andExpect(content().string("{\"name\":\"Lukas\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
 
 	@Controller
 	private static class PersonController {
-		@RequestMapping(value="/persons", method=RequestMethod.POST)
+
+		@PostMapping(path="/persons")
 		public String save(@Valid Person person, Errors errors, RedirectAttributes redirectAttrs) {
 			if (errors.hasErrors()) {
 				return "person/add";
@@ -120,18 +158,25 @@ public class FilterTests {
 			return "redirect:/person/{id}";
 		}
 
-		@RequestMapping(value="/user")
+		@PostMapping("/user")
 		public ModelAndView user(Principal principal) {
 			return new ModelAndView("user/view", "principal", principal.getName());
 		}
 
-		@RequestMapping(value="/forward")
+		@GetMapping("/forward")
 		public String forward() {
 			return "forward:/persons";
+		}
+
+		@GetMapping("persons/{id}")
+		@ResponseBody
+		public CompletableFuture<Person> getPerson() {
+			return CompletableFuture.completedFuture(new Person("Lukas"));
 		}
 	}
 
 	private class ContinueFilter extends OncePerRequestFilter {
+
 		@Override
 		protected void doFilterInternal(HttpServletRequest request,
 				HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -144,30 +189,112 @@ public class FilterTests {
 
 		public static final String PRINCIPAL_NAME = "WrapRequestResponseFilterPrincipal";
 
+
 		@Override
-		protected void doFilterInternal(HttpServletRequest request,
-				HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+				FilterChain filterChain) throws ServletException, IOException {
 
 			filterChain.doFilter(new HttpServletRequestWrapper(request) {
+
 				@Override
 				public Principal getUserPrincipal() {
-					return new Principal() {
-						@Override
-						public String getName() {
-							return PRINCIPAL_NAME;
-						}
-					};
+					return () -> PRINCIPAL_NAME;
 				}
+
+				// Like Spring Security does in HttpServlet3RequestFactory..
+
+				@Override
+				public AsyncContext getAsyncContext() {
+					return super.getAsyncContext() != null ?
+							new AsyncContextWrapper(super.getAsyncContext()) : null;
+				}
+
 			}, new HttpServletResponseWrapper(response));
 		}
 	}
 
 	private class RedirectFilter extends OncePerRequestFilter {
+
 		@Override
-		protected void doFilterInternal(HttpServletRequest request,
-				HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+				FilterChain filterChain) throws ServletException, IOException {
 
 			response.sendRedirect("/login");
+		}
+	}
+
+
+	private static class AsyncContextWrapper implements AsyncContext {
+
+		private final AsyncContext delegate;
+
+		public AsyncContextWrapper(AsyncContext delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public ServletRequest getRequest() {
+			return this.delegate.getRequest();
+		}
+
+		@Override
+		public ServletResponse getResponse() {
+			return this.delegate.getResponse();
+		}
+
+		@Override
+		public boolean hasOriginalRequestAndResponse() {
+			return this.delegate.hasOriginalRequestAndResponse();
+		}
+
+		@Override
+		public void dispatch() {
+			this.delegate.dispatch();
+		}
+
+		@Override
+		public void dispatch(String path) {
+			this.delegate.dispatch(path);
+		}
+
+		@Override
+		public void dispatch(ServletContext context, String path) {
+			this.delegate.dispatch(context, path);
+		}
+
+		@Override
+		public void complete() {
+			this.delegate.complete();
+		}
+
+		@Override
+		public void start(Runnable run) {
+			this.delegate.start(run);
+		}
+
+		@Override
+		public void addListener(AsyncListener listener) {
+			this.delegate.addListener(listener);
+		}
+
+		@Override
+		public void addListener(AsyncListener listener, ServletRequest req, ServletResponse res) {
+			this.delegate.addListener(listener, req, res);
+		}
+
+		@Override
+		public <T extends AsyncListener> T createListener(Class<T> clazz) throws ServletException {
+			return this.delegate.createListener(clazz);
+		}
+
+		@Override
+		public void setTimeout(long timeout) {
+			this.delegate.setTimeout(timeout);
+		}
+
+		@Override
+		public long getTimeout() {
+			return this.delegate.getTimeout();
 		}
 	}
 }

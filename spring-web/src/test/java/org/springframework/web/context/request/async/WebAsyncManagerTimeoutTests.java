@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,21 +17,26 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-import javax.servlet.AsyncEvent;
-import javax.servlet.DispatcherType;
+import java.util.concurrent.Future;
 
-import org.junit.Before;
-import org.junit.Test;
+import javax.servlet.AsyncEvent;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.mock.web.test.MockAsyncContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.testfixture.servlet.MockAsyncContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.web.context.request.async.CallableProcessingInterceptor.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.web.context.request.async.CallableProcessingInterceptor.RESULT_NONE;
 
 /**
  * {@link WebAsyncManager} tests where container-triggered timeout/completion
@@ -51,8 +56,9 @@ public class WebAsyncManagerTimeoutTests {
 
 	private MockHttpServletResponse servletResponse;
 
-	@Before
-	public void setUp() {
+
+	@BeforeEach
+	public void setup() {
 		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);
 		this.servletResponse = new MockHttpServletResponse();
@@ -65,9 +71,9 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
 	}
 
+
 	@Test
 	public void startCallableProcessingTimeoutAndComplete() throws Exception {
-
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
@@ -79,9 +85,8 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 		this.asyncWebRequest.onComplete(ASYNC_EVENT);
 
-		assertFalse(this.asyncManager.hasConcurrentResult());
-		assertEquals(DispatcherType.REQUEST, this.servletRequest.getDispatcherType());
-		assertEquals(503, this.servletResponse.getStatus());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult().getClass()).isEqualTo(AsyncRequestTimeoutException.class);
 
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, callable);
 		verify(interceptor).afterCompletion(this.asyncWebRequest, callable);
@@ -103,9 +108,9 @@ public class WebAsyncManagerTimeoutTests {
 
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(7, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(7);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 	}
 
 	@Test
@@ -121,9 +126,9 @@ public class WebAsyncManagerTimeoutTests {
 
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(22, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(22);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, callable);
 	}
@@ -142,11 +147,32 @@ public class WebAsyncManagerTimeoutTests {
 
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(exception, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(exception);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, callable);
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void startCallableProcessingTimeoutAndCheckThreadInterrupted() throws Exception {
+
+		StubCallable callable = new StubCallable();
+		Future future = mock(Future.class);
+
+		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
+		given(executor.submit(any(Runnable.class))).willReturn(future);
+
+		this.asyncManager.setTaskExecutor(executor);
+		this.asyncManager.startCallableProcessing(callable);
+
+		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
+
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+
+		verify(future).cancel(true);
+		verifyNoMoreInteractions(future);
 	}
 
 	@Test
@@ -163,9 +189,8 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 		this.asyncWebRequest.onComplete(ASYNC_EVENT);
 
-		assertFalse(this.asyncManager.hasConcurrentResult());
-		assertEquals(DispatcherType.REQUEST, this.servletRequest.getDispatcherType());
-		assertEquals(503, this.servletResponse.getStatus());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult().getClass()).isEqualTo(AsyncRequestTimeoutException.class);
 
 		verify(interceptor).beforeConcurrentHandling(this.asyncWebRequest, deferredResult);
 		verify(interceptor).preProcess(this.asyncWebRequest, deferredResult);
@@ -181,30 +206,25 @@ public class WebAsyncManagerTimeoutTests {
 		AsyncEvent event = null;
 		this.asyncWebRequest.onTimeout(event);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(23, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(23);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 	}
 
 	@Test
 	public void startDeferredResultProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		final DeferredResult<Integer> deferredResult = new DeferredResult<>();
-		deferredResult.onTimeout(new Runnable() {
-			@Override
-			public void run() {
-				deferredResult.setResult(23);
-			}
-		});
+		deferredResult.onTimeout(() -> deferredResult.setResult(23));
 
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 
 		AsyncEvent event = null;
 		this.asyncWebRequest.onTimeout(event);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(23, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(23);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 	}
 
 	@Test
@@ -212,7 +232,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
-		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptor() {
 			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				result.setErrorResult(23);
@@ -226,9 +246,9 @@ public class WebAsyncManagerTimeoutTests {
 		AsyncEvent event = null;
 		this.asyncWebRequest.onTimeout(event);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(23, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(23);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 	}
 
 	@Test
@@ -237,7 +257,7 @@ public class WebAsyncManagerTimeoutTests {
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		final Exception exception = new Exception();
 
-		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptor() {
 			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				throw exception;
@@ -250,9 +270,9 @@ public class WebAsyncManagerTimeoutTests {
 		AsyncEvent event = null;
 		this.asyncWebRequest.onTimeout(event);
 
-		assertTrue(this.asyncManager.hasConcurrentResult());
-		assertEquals(exception, this.asyncManager.getConcurrentResult());
-		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
+		assertThat(this.asyncManager.hasConcurrentResult()).isTrue();
+		assertThat(this.asyncManager.getConcurrentResult()).isEqualTo(exception);
+		assertThat(((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath()).isEqualTo("/test");
 	}
 
 

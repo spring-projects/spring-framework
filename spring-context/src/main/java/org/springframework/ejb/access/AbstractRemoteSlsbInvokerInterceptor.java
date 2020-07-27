@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,16 @@ package org.springframework.ejb.access;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
 
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Base class for interceptors proxying remote Stateless Session Beans.
@@ -41,30 +42,11 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
 
-	private Class<?> homeInterface;
-
 	private boolean refreshHomeOnConnectFailure = false;
 
-	private volatile boolean homeAsComponent = false;
+	private volatile boolean homeAsComponent;
 
 
-
-	/**
-	 * Set a home interface that this invoker will narrow to before performing
-	 * the parameterless SLSB {@code create()} call that returns the actual
-	 * SLSB proxy.
-	 * <p>Default is none, which will work on all J2EE servers that are not based
-	 * on CORBA. A plain {@code javax.ejb.EJBHome} interface is known to be
-	 * sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
-	 * the specific home interface for the target SLSB might be necessary.
-	 */
-	public void setHomeInterface(Class<?> homeInterface) {
-		if (homeInterface != null && !homeInterface.isInterface()) {
-			throw new IllegalArgumentException(
-					"Home interface class [" + homeInterface.getClass() + "] is not an interface");
-		}
-		this.homeInterface = homeInterface;
-	}
 
 	/**
 	 * Set whether to refresh the EJB home on connect failure.
@@ -113,6 +95,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #refreshAndRetry
 	 */
 	@Override
+	@Nullable
 	public Object invokeInContext(MethodInvocation invocation) throws Throwable {
 		try {
 			return doInvoke(invocation);
@@ -137,10 +120,12 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @return whether the exception should be treated as connect failure
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean isConnectFailure(RemoteException ex) {
-		return RmiClientInterceptorUtils.isConnectFailure(ex);
+		return org.springframework.remoting.rmi.RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
+	@Nullable
 	private Object handleRemoteConnectFailure(MethodInvocation invocation, Exception ex) throws Throwable {
 		if (this.refreshHomeOnConnectFailure) {
 			if (logger.isDebugEnabled()) {
@@ -164,6 +149,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @throws Throwable in case of invocation failure
 	 * @see #invoke
 	 */
+	@Nullable
 	protected Object refreshAndRetry(MethodInvocation invocation) throws Throwable {
 		try {
 			refreshHome();
@@ -184,6 +170,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @see #getHome
 	 * @see #newSessionBeanInstance
 	 */
+	@Nullable
 	protected abstract Object doInvoke(MethodInvocation invocation) throws Throwable;
 
 
@@ -212,7 +199,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @param ejb the EJB instance to remove
 	 * @see javax.ejb.EJBObject#remove
 	 */
-	protected void removeSessionBeanInstance(EJBObject ejb) {
+	protected void removeSessionBeanInstance(@Nullable EJBObject ejb) {
 		if (ejb != null && !this.homeAsComponent) {
 			try {
 				ejb.remove();

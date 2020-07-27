@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel.standard;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Holder for a kind of token, the associated data and its position in the input data
@@ -27,6 +29,7 @@ class Token {
 
 	TokenKind kind;
 
+	@Nullable
 	String data;
 
 	int startPos;  // index of first character
@@ -56,18 +59,6 @@ class Token {
 		return this.kind;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder s = new StringBuilder();
-		s.append("[").append(this.kind.toString());
-		if (this.kind.hasPayload()) {
-			s.append(":").append(this.data);
-		}
-		s.append("]");
-		s.append("(").append(this.startPos).append(",").append(this.endPos).append(")");
-		return s.toString();
-	}
-
 	public boolean isIdentifier() {
 		return (this.kind == TokenKind.IDENTIFIER);
 	}
@@ -78,7 +69,7 @@ class Token {
 	}
 
 	public String stringValue() {
-		return this.data;
+		return (this.data != null ? this.data : "");
 	}
 
 	public Token asInstanceOfToken() {
@@ -91,6 +82,19 @@ class Token {
 
 	public Token asBetweenToken() {
 		return new Token(TokenKind.BETWEEN, this.startPos, this.endPos);
+	}
+
+
+	@Override
+	public String toString() {
+		StringBuilder s = new StringBuilder();
+		s.append("[").append(this.kind.toString());
+		if (this.kind.hasPayload()) {
+			s.append(":").append(this.data);
+		}
+		s.append("]");
+		s.append("(").append(this.startPos).append(",").append(this.endPos).append(")");
+		return s.toString();
 	}
 
 }

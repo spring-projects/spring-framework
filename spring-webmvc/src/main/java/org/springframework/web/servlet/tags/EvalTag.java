@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
@@ -33,13 +34,65 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.JavaScriptUtils;
 import org.springframework.web.util.TagUtils;
 
 /**
- * JSP tag for evaluating expressions with the Spring Expression Language (SpEL).
- * Supports the standard JSP evaluation context consisting of implicit variables and scoped attributes.
+ * The {@code <eval>} tag evaluates a Spring expression (SpEL) and either prints
+ * the result or assigns it to a variable. Supports the standard JSP evaluation
+ * context consisting of implicit variables and scoped attributes.
+ *
+ * <table>
+ * <caption>Attribute Summary</caption>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Required?</th>
+ * <th>Runtime Expression?</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead>
+ * <tbody>
+ * <tr>
+ * <td>expression</td>
+ * <td>true</td>
+ * <td>true</td>
+ * <td>The expression to evaluate.</td>
+ * </tr>
+ * <tr>
+ * <td>htmlEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set HTML escaping for this tag, as a boolean value.
+ * Overrides the default HTML escaping setting for the current page.</td>
+ * </tr>
+ * <tr>
+ * <td>javaScriptEscape</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>Set JavaScript escaping for this tag, as a boolean value.
+ * Default is false.</td>
+ * </tr>
+ * <tr>
+ * <td>scope</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The scope for the var. 'application', 'session', 'request' and 'page'
+ * scopes are supported. Defaults to page scope. This attribute has no effect
+ * unless the var attribute is also defined.</td>
+ * </tr>
+ * <tr>
+ * <td>var</td>
+ * <td>false</td>
+ * <td>true</td>
+ * <td>The name of the variable to export the evaluation result to.
+ * If not specified the evaluation result is converted to a String and written
+ * as output.</td>
+ * </tr>
+ * </tbody>
+ * </table>
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -58,8 +111,10 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 	private final ExpressionParser expressionParser = new SpelExpressionParser();
 
+	@Nullable
 	private Expression expression;
 
+	@Nullable
 	private String var;
 
 	private int scope = PageContext.PAGE_SCOPE;
@@ -113,12 +168,13 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			this.pageContext.setAttribute(EVALUATION_CONTEXT_PAGE_ATTRIBUTE, evaluationContext);
 		}
 		if (this.var != null) {
-			Object result = this.expression.getValue(evaluationContext);
+			Object result = (this.expression != null ? this.expression.getValue(evaluationContext) : null);
 			this.pageContext.setAttribute(this.var, result, this.scope);
 		}
 		else {
 			try {
-				String result = this.expression.getValue(evaluationContext, String.class);
+				String result = (this.expression != null ?
+						this.expression.getValue(evaluationContext, String.class) : null);
 				result = ObjectUtils.getDisplayString(result);
 				result = htmlEscape(result);
 				result = (this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(result) : result);
@@ -144,6 +200,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		return context;
 	}
 
+	@Nullable
 	private ConversionService getConversionService(PageContext pageContext) {
 		return (ConversionService) pageContext.getRequest().getAttribute(ConversionService.class.getName());
 	}
@@ -154,6 +211,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 
 		private final PageContext pageContext;
 
+		@Nullable
 		private final javax.servlet.jsp.el.VariableResolver variableResolver;
 
 		public JspPropertyAccessor(PageContext pageContext) {
@@ -162,18 +220,19 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		@Override
+		@Nullable
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
 		@Override
-		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+		public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 			return (target == null &&
 					(resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null));
 		}
 
 		@Override
-		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+		public TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
 			Object implicitVar = resolveImplicitVariable(name);
 			if (implicitVar != null) {
 				return new TypedValue(implicitVar);
@@ -182,15 +241,16 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 
 		@Override
-		public boolean canWrite(EvaluationContext context, Object target, String name) {
+		public boolean canWrite(EvaluationContext context, @Nullable Object target, String name) {
 			return false;
 		}
 
 		@Override
-		public void write(EvaluationContext context, Object target, String name, Object newValue) {
+		public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nullable
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.variableResolver == null) {
 				return null;

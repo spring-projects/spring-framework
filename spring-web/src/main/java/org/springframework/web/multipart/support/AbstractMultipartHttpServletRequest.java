@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +44,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public abstract class AbstractMultipartHttpServletRequest extends HttpServletRequestWrapper
 		implements MultipartHttpServletRequest {
 
+	@Nullable
 	private MultiValueMap<String, MultipartFile> multipartFiles;
 
 
@@ -104,6 +107,18 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return getMultipartFiles();
+	}
+
+	/**
+	 * Determine whether the underlying multipart request has been resolved.
+	 * @return {@code true} when eagerly initialized or lazily triggered,
+	 * {@code false} in case of a lazy-resolution request that got aborted
+	 * before any parameters or multipart files have been accessed
+	 * @since 4.3.15
+	 * @see #getMultipartFiles()
+	 */
+	public boolean isResolved() {
+		return (this.multipartFiles != null);
 	}
 
 

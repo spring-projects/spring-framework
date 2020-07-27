@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeanMetadataElement;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -36,12 +37,16 @@ import org.springframework.util.ObjectUtils;
  */
 public class TypedStringValue implements BeanMetadataElement {
 
+	@Nullable
 	private String value;
 
+	@Nullable
 	private volatile Object targetType;
 
+	@Nullable
 	private Object source;
 
+	@Nullable
 	private String specifiedTypeName;
 
 	private volatile boolean dynamic;
@@ -51,7 +56,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Create a new {@link TypedStringValue} for the given String value.
 	 * @param value the String value
 	 */
-	public TypedStringValue(String value) {
+	public TypedStringValue(@Nullable String value) {
 		setValue(value);
 	}
 
@@ -61,7 +66,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @param value the String value
 	 * @param targetType the type to convert to
 	 */
-	public TypedStringValue(String value, Class<?> targetType) {
+	public TypedStringValue(@Nullable String value, Class<?> targetType) {
 		setValue(value);
 		setTargetType(targetType);
 	}
@@ -72,7 +77,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @param value the String value
 	 * @param targetTypeName the type to convert to
 	 */
-	public TypedStringValue(String value, String targetTypeName) {
+	public TypedStringValue(@Nullable String value, String targetTypeName) {
 		setValue(value);
 		setTargetTypeName(targetTypeName);
 	}
@@ -82,15 +87,15 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Set the String value.
 	 * <p>Only necessary for manipulating a registered value,
 	 * for example in BeanFactoryPostProcessors.
-	 * @see PropertyPlaceholderConfigurer
 	 */
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 
 	/**
 	 * Return the String value.
 	 */
+	@Nullable
 	public String getValue() {
 		return this.value;
 	}
@@ -99,7 +104,6 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Set the type to convert to.
 	 * <p>Only necessary for manipulating a registered value,
 	 * for example in BeanFactoryPostProcessors.
-	 * @see PropertyPlaceholderConfigurer
 	 */
 	public void setTargetType(Class<?> targetType) {
 		Assert.notNull(targetType, "'targetType' must not be null");
@@ -120,14 +124,14 @@ public class TypedStringValue implements BeanMetadataElement {
 	/**
 	 * Specify the type to convert to.
 	 */
-	public void setTargetTypeName(String targetTypeName) {
-		Assert.notNull(targetTypeName, "'targetTypeName' must not be null");
+	public void setTargetTypeName(@Nullable String targetTypeName) {
 		this.targetType = targetTypeName;
 	}
 
 	/**
 	 * Return the type to convert to.
 	 */
+	@Nullable
 	public String getTargetTypeName() {
 		Object targetTypeValue = this.targetType;
 		if (targetTypeValue instanceof Class) {
@@ -153,11 +157,13 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * @return the resolved type to convert to
 	 * @throws ClassNotFoundException if the type cannot be resolved
 	 */
-	public Class<?> resolveTargetType(ClassLoader classLoader) throws ClassNotFoundException {
-		if (this.targetType == null) {
+	@Nullable
+	public Class<?> resolveTargetType(@Nullable ClassLoader classLoader) throws ClassNotFoundException {
+		String typeName = getTargetTypeName();
+		if (typeName == null) {
 			return null;
 		}
-		Class<?> resolvedClass = ClassUtils.forName(getTargetTypeName(), classLoader);
+		Class<?> resolvedClass = ClassUtils.forName(typeName, classLoader);
 		this.targetType = resolvedClass;
 		return resolvedClass;
 	}
@@ -167,11 +173,12 @@ public class TypedStringValue implements BeanMetadataElement {
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setSource(Object source) {
+	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}
@@ -179,13 +186,14 @@ public class TypedStringValue implements BeanMetadataElement {
 	/**
 	 * Set the type name as actually specified for this particular value, if any.
 	 */
-	public void setSpecifiedTypeName(String specifiedTypeName) {
+	public void setSpecifiedTypeName(@Nullable String specifiedTypeName) {
 		this.specifiedTypeName = specifiedTypeName;
 	}
 
 	/**
 	 * Return the type name as actually specified for this particular value, if any.
 	 */
+	@Nullable
 	public String getSpecifiedTypeName() {
 		return this.specifiedTypeName;
 	}
@@ -207,7 +215,7 @@ public class TypedStringValue implements BeanMetadataElement {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

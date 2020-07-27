@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.context.expression;
 
 import java.lang.reflect.AnnotatedElement;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -34,6 +35,7 @@ public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey
 
 	private final AnnotatedElement element;
 
+	@Nullable
 	private final Class<?> targetClass;
 
 
@@ -41,7 +43,7 @@ public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey
 	 * Create a new instance with the specified {@link AnnotatedElement} and
 	 * optional target {@link Class}.
 	 */
-	public AnnotatedElementKey(AnnotatedElement element, Class<?> targetClass) {
+	public AnnotatedElementKey(AnnotatedElement element, @Nullable Class<?> targetClass) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		this.element = element;
 		this.targetClass = targetClass;
@@ -49,7 +51,7 @@ public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -75,6 +77,9 @@ public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey
 	public int compareTo(AnnotatedElementKey other) {
 		int result = this.element.toString().compareTo(other.element.toString());
 		if (result == 0 && this.targetClass != null) {
+			if (other.targetClass == null) {
+				return 1;
+			}
 			result = this.targetClass.getName().compareTo(other.targetClass.getName());
 		}
 		return result;

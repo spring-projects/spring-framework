@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -43,32 +45,33 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 	private final Class<?> beanClass;
 
+	@Nullable
 	private final Method readMethod;
 
+	@Nullable
 	private final Method writeMethod;
 
+	@Nullable
 	private volatile Set<Method> ambiguousWriteMethods;
 
+	@Nullable
 	private MethodParameter writeMethodParameter;
 
+	@Nullable
 	private Class<?> propertyType;
 
 	private final Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
-			Method readMethod, Method writeMethod, Class<?> propertyEditorClass)
+			@Nullable Method readMethod, @Nullable Method writeMethod, Class<?> propertyEditorClass)
 			throws IntrospectionException {
 
 		super(propertyName, null, null);
-
-		if (beanClass == null)  {
-			throw new IntrospectionException("Bean class must not be null");
-		}
 		this.beanClass = beanClass;
 
-		Method readMethodToUse = BridgeMethodResolver.findBridgedMethod(readMethod);
-		Method writeMethodToUse = BridgeMethodResolver.findBridgedMethod(writeMethod);
+		Method readMethodToUse = (readMethod != null ? BridgeMethodResolver.findBridgedMethod(readMethod) : null);
+		Method writeMethodToUse = (writeMethod != null ? BridgeMethodResolver.findBridgedMethod(writeMethod) : null);
 		if (writeMethodToUse == null && readMethodToUse != null) {
 			// Fallback: Original JavaBeans introspection might not have found matching setter
 			// method due to lack of bridge method resolution, in case of the getter using a
@@ -99,8 +102,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 					this.ambiguousWriteMethods = ambiguousCandidates;
 				}
 			}
-			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
-			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
+			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0).withContainingClass(this.beanClass);
 		}
 
 		if (this.readMethod != null) {
@@ -119,16 +121,19 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
+	@Nullable
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
 
 	@Override
+	@Nullable
 	public Method getWriteMethod() {
 		return this.writeMethod;
 	}
 
 	public Method getWriteMethodForActualAccess() {
+		Assert.state(this.writeMethod != null, "No write method available");
 		Set<Method> ambiguousCandidates = this.ambiguousWriteMethods;
 		if (ambiguousCandidates != null) {
 			this.ambiguousWriteMethods = null;
@@ -140,10 +145,12 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	public MethodParameter getWriteMethodParameter() {
+		Assert.state(this.writeMethodParameter != null, "No write method available");
 		return this.writeMethodParameter;
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getPropertyType() {
 		return this.propertyType;
 	}
@@ -155,7 +162,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

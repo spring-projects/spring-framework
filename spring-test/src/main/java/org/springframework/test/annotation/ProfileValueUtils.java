@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -53,7 +54,7 @@ public abstract class ProfileValueUtils {
 	 * &#064;ProfileValueSourceConfiguration} is not present on the specified
 	 * class or if a custom {@link ProfileValueSource} is not declared, the
 	 * default {@link SystemProfileValueSource} will be returned instead.
-	 * @param testClass The test class for which the ProfileValueSource should
+	 * @param testClass the test class for which the ProfileValueSource should
 	 * be retrieved
 	 * @return the configured (or default) ProfileValueSource for the specified
 	 * class
@@ -76,6 +77,7 @@ public abstract class ProfileValueUtils {
 		}
 		else {
 			profileValueSourceType = (Class<? extends ProfileValueSource>) AnnotationUtils.getDefaultValue(annotationType);
+			Assert.state(profileValueSourceType != null, "No default ProfileValueSource class");
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Retrieved ProfileValueSource type [" + profileValueSourceType + "] for class [" +
@@ -176,7 +178,7 @@ public abstract class ProfileValueUtils {
 	 * {@code null}
 	 */
 	private static boolean isTestEnabledInThisEnvironment(ProfileValueSource profileValueSource,
-			IfProfileValue ifProfileValue) {
+			@Nullable IfProfileValue ifProfileValue) {
 
 		if (ifProfileValue == null) {
 			return true;

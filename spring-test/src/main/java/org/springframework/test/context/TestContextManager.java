@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,18 @@
 
 package org.springframework.test.context;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.Assert;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -32,9 +35,8 @@ import org.springframework.util.ReflectionUtils;
  * TestContext Framework</em>.
  *
  * <p>Specifically, a {@code TestContextManager} is responsible for managing a
- * single {@link TestContext} and signaling events to all registered
- * {@link TestExecutionListener TestExecutionListeners} at the following test
- * execution points:
+ * single {@link TestContext} and signaling events to each registered
+ * {@link TestExecutionListener} at the following test execution points.
  *
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
@@ -64,10 +66,9 @@ import org.springframework.util.ReflectionUtils;
  * dependency injection of test instances,
  * {@linkplain org.springframework.transaction.annotation.Transactional transactional}
  * execution of test methods, etc. is provided by
- * {@link SmartContextLoader ContextLoaders} and {@link TestExecutionListener
- * TestExecutionListeners}, which are configured via
- * {@link ContextConfiguration @ContextConfiguration} and
- * {@link TestExecutionListeners @TestExecutionListeners}.
+ * {@link SmartContextLoader ContextLoaders} and {@code TestExecutionListeners},
+ * which are configured via {@link ContextConfiguration @ContextConfiguration} and
+ * {@link TestExecutionListeners @TestExecutionListeners}, respectively.
  *
  * <p>Bootstrapping of the {@code TestContext}, the default {@code ContextLoader},
  * default {@code TestExecutionListeners}, and their collaborators is performed
@@ -91,6 +92,16 @@ public class TestContextManager {
 	private static final Log logger = LogFactory.getLog(TestContextManager.class);
 
 	private final TestContext testContext;
+
+	private final ThreadLocal<TestContext> testContextHolder = ThreadLocal.withInitial(
+			// Implemented as an anonymous inner class instead of a lambda expression due to a bug
+			// in Eclipse IDE: "The blank final field testContext may not have been initialized"
+			new Supplier<TestContext>() {
+				@Override
+				public TestContext get() {
+					return copyTestContext(TestContextManager.this.testContext);
+				}
+			});
 
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
 
@@ -131,7 +142,7 @@ public class TestContextManager {
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
 	 */
 	public final TestContext getTestContext() {
-		return this.testContext;
+		return this.testContextHolder.get();
 	}
 
 	/**
@@ -140,7 +151,7 @@ public class TestContextManager {
 	 * @see #registerTestExecutionListeners(TestExecutionListener...)
 	 */
 	public void registerTestExecutionListeners(List<TestExecutionListener> testExecutionListeners) {
-		registerTestExecutionListeners(testExecutionListeners.toArray(new TestExecutionListener[testExecutionListeners.size()]));
+		registerTestExecutionListeners(testExecutionListeners.toArray(new TestExecutionListener[0]));
 	}
 
 	/**
@@ -223,7 +234,6 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 */
 	public void prepareTestInstance(Object testInstance) throws Exception {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace("prepareTestInstance(): instance [" + testInstance + "]");
 		}
@@ -355,11 +365,13 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestExecution(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestExecution(Object testInstance, Method testMethod, @Nullable Throwable exception)
+			throws Exception {
+
 		String callbackName = "afterTestExecution";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
-
 		Throwable afterTestExecutionException = null;
+
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
@@ -376,6 +388,7 @@ public class TestContextManager {
 				}
 			}
 		}
+
 		if (afterTestExecutionException != null) {
 			ReflectionUtils.rethrowException(afterTestExecutionException);
 		}
@@ -405,9 +418,8 @@ public class TestContextManager {
 	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
-	 * @param exception the exception that was thrown during execution of the
-	 * test method or by a TestExecutionListener, or {@code null} if none
-	 * was thrown
+	 * @param exception the exception that was thrown during execution of the test
+	 * method or by a TestExecutionListener, or {@code null} if none was thrown
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @see #beforeTestMethod
 	 * @see #beforeTestExecution
@@ -415,11 +427,13 @@ public class TestContextManager {
 	 * @see #getTestExecutionListeners()
 	 * @see Throwable#addSuppressed(Throwable)
 	 */
-	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
+	public void afterTestMethod(Object testInstance, Method testMethod, @Nullable Throwable exception)
+			throws Exception {
+
 		String callbackName = "afterTestMethod";
 		prepareForAfterCallback(callbackName, testInstance, testMethod, exception);
-
 		Throwable afterTestMethodException = null;
+
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
@@ -436,6 +450,7 @@ public class TestContextManager {
 				}
 			}
 		}
+
 		if (afterTestMethodException != null) {
 			ReflectionUtils.rethrowException(afterTestMethodException);
 		}
@@ -482,13 +497,15 @@ public class TestContextManager {
 				}
 			}
 		}
+
+		this.testContextHolder.remove();
+
 		if (afterTestClassException != null) {
 			ReflectionUtils.rethrowException(afterTestClassException);
 		}
 	}
 
 	private void prepareForBeforeCallback(String callbackName, Object testInstance, Method testMethod) {
-		Assert.notNull(testInstance, "Test instance must not be null");
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("%s(): instance [%s], method [%s]", callbackName, testInstance, testMethod));
 		}
@@ -496,37 +513,67 @@ public class TestContextManager {
 	}
 
 	private void prepareForAfterCallback(String callbackName, Object testInstance, Method testMethod,
-			Throwable exception) {
-		Assert.notNull(testInstance, "Test instance must not be null");
+			@Nullable Throwable exception) {
+
 		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("%s(): instance [%s], method [%s], exception [%s]", callbackName, testInstance,
-					testMethod, exception));
+			logger.trace(String.format("%s(): instance [%s], method [%s], exception [%s]",
+					callbackName, testInstance, testMethod, exception));
 		}
 		getTestContext().updateState(testInstance, testMethod, exception);
 	}
 
 	private void handleBeforeException(Throwable ex, String callbackName, TestExecutionListener testExecutionListener,
 			Object testInstance, Method testMethod) throws Exception {
+
 		logException(ex, callbackName, testExecutionListener, testInstance, testMethod);
 		ReflectionUtils.rethrowException(ex);
 	}
 
-	private void logException(Throwable ex, String callbackName, TestExecutionListener testExecutionListener,
-			Class<?> testClass) {
+	private void logException(
+			Throwable ex, String callbackName, TestExecutionListener testExecutionListener, Class<?> testClass) {
+
 		if (logger.isWarnEnabled()) {
 			logger.warn(String.format("Caught exception while invoking '%s' callback on " +
-						"TestExecutionListener [%s] for test class [%s]", callbackName, testExecutionListener,
-						testClass), ex);
+					"TestExecutionListener [%s] for test class [%s]", callbackName, testExecutionListener,
+					testClass), ex);
 		}
 	}
 
 	private void logException(Throwable ex, String callbackName, TestExecutionListener testExecutionListener,
 			Object testInstance, Method testMethod) {
+
 		if (logger.isWarnEnabled()) {
 			logger.warn(String.format("Caught exception while invoking '%s' callback on " +
-						"TestExecutionListener [%s] for test method [%s] and test instance [%s]",
-						callbackName, testExecutionListener, testMethod, testInstance), ex);
+					"TestExecutionListener [%s] for test method [%s] and test instance [%s]",
+					callbackName, testExecutionListener, testMethod, testInstance), ex);
 		}
+	}
+
+
+	/**
+	 * Attempt to create a copy of the supplied {@code TestContext} using its
+	 * <em>copy constructor</em>.
+	 */
+	private static TestContext copyTestContext(TestContext testContext) {
+		Constructor<? extends TestContext> constructor =
+				ClassUtils.getConstructorIfAvailable(testContext.getClass(), testContext.getClass());
+
+		if (constructor != null) {
+			try {
+				ReflectionUtils.makeAccessible(constructor);
+				return constructor.newInstance(testContext);
+			}
+			catch (Exception ex) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("Failed to invoke copy constructor for [%s]; " +
+							"concurrent test execution is therefore likely not supported.",
+							testContext), ex);
+				}
+			}
+		}
+
+		// Fallback to original instance
+		return testContext;
 	}
 
 }

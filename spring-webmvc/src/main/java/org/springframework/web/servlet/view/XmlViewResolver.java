@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.xml.ResourceEntityResolver;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
@@ -50,31 +52,27 @@ import org.springframework.web.servlet.View;
  * @author Juergen Hoeller
  * @since 18.06.2003
  * @see org.springframework.context.ApplicationContext#getResource
- * @see ResourceBundleViewResolver
  * @see UrlBasedViewResolver
+ * @see BeanNameViewResolver
+ * @deprecated as of 5.3, in favor of Spring's common view resolver variants
+ * and/or custom resolver implementations
  */
+@Deprecated
 public class XmlViewResolver extends AbstractCachingViewResolver
 		implements Ordered, InitializingBean, DisposableBean {
 
-	/** Default if no other location is supplied */
-	public final static String DEFAULT_LOCATION = "/WEB-INF/views.xml";
+	/** Default if no other location is supplied. */
+	public static final String DEFAULT_LOCATION = "/WEB-INF/views.xml";
 
 
-	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
-
+	@Nullable
 	private Resource location;
 
+	@Nullable
 	private ConfigurableApplicationContext cachedFactory;
 
+	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
 
 	/**
 	 * Set the location of the XML file that defines the view beans.
@@ -83,6 +81,20 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	 */
 	public void setLocation(Resource location) {
 		this.location = location;
+	}
+
+	/**
+	 * Specify the order value for this ViewResolver bean.
+	 * <p>The default value is {@code Ordered.LOWEST_PRECEDENCE}, meaning non-ordered.
+	 * @see org.springframework.core.Ordered#getOrder()
+	 */
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 	/**
@@ -128,20 +140,22 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 			return this.cachedFactory;
 		}
 
+		ApplicationContext applicationContext = obtainApplicationContext();
+
 		Resource actualLocation = this.location;
 		if (actualLocation == null) {
-			actualLocation = getApplicationContext().getResource(DEFAULT_LOCATION);
+			actualLocation = applicationContext.getResource(DEFAULT_LOCATION);
 		}
 
 		// Create child ApplicationContext for views.
 		GenericWebApplicationContext factory = new GenericWebApplicationContext();
-		factory.setParent(getApplicationContext());
+		factory.setParent(applicationContext);
 		factory.setServletContext(getServletContext());
 
 		// Load XML resource with context-aware entity resolver.
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
-		reader.setEnvironment(getApplicationContext().getEnvironment());
-		reader.setEntityResolver(new ResourceEntityResolver(getApplicationContext()));
+		reader.setEnvironment(applicationContext.getEnvironment());
+		reader.setEntityResolver(new ResourceEntityResolver(applicationContext));
 		reader.loadBeanDefinitions(actualLocation);
 
 		factory.refresh();

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,12 @@ package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -35,47 +31,49 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * an event to a {@link TransactionalEventListener} annotated method. Supports
  * the exact same features as any regular {@link EventListener} annotated method
  * but is aware of the transactional context of the event publisher.
- * <p>
- * Processing of {@link TransactionalEventListener} is enabled automatically when
- * Spring's transaction management is enabled. For other cases, registering a
- * bean of type {@link TransactionalEventListenerFactory} is required.
+ *
+ * <p>Processing of {@link TransactionalEventListener} is enabled automatically
+ * when Spring's transaction management is enabled. For other cases, registering
+ * a bean of type {@link TransactionalEventListenerFactory} is required.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.2
  * @see ApplicationListenerMethodAdapter
  * @see TransactionalEventListener
  */
 class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerMethodAdapter {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
 	private final TransactionalEventListener annotation;
 
 
 	public ApplicationListenerMethodTransactionalAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		this.annotation = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
-		if (this.annotation == null) {
-			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
+		TransactionalEventListener ann = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		if (ann == null) {
+			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
+		this.annotation = ann;
 	}
 
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+		if (TransactionSynchronizationManager.isSynchronizationActive() &&
+				TransactionSynchronizationManager.isActualTransactionActive()) {
 			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
 			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
 		}
 		else if (this.annotation.fallbackExecution()) {
-			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK) {
-				logger.warn("Processing '" + event + "' as a fallback execution on AFTER_ROLLBACK phase.");
+			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
+				logger.warn("Processing " + event + " as a fallback execution on AFTER_ROLLBACK phase");
 			}
 			processEvent(event);
 		}
 		else {
+			// No transactional event execution at all
 			if (logger.isDebugEnabled()) {
-				logger.debug("No transaction is running, skipping '" + event + "' for '" + this + "'");
+				logger.debug("No transaction is active - skipping " + event);
 			}
 		}
 	}
@@ -85,8 +83,7 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 	}
 
 
-
-	private static class TransactionSynchronizationEventAdapter extends TransactionSynchronizationAdapter {
+	private static class TransactionSynchronizationEventAdapter implements TransactionSynchronization {
 
 		private final ApplicationListenerMethodAdapter listener;
 
@@ -103,6 +100,11 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 		}
 
 		@Override
+		public int getOrder() {
+			return this.listener.getOrder();
+		}
+
+		@Override
 		public void beforeCommit(boolean readOnly) {
 			if (this.phase == TransactionPhase.BEFORE_COMMIT) {
 				processEvent();
@@ -111,20 +113,15 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 		@Override
 		public void afterCompletion(int status) {
-			if (this.phase == TransactionPhase.AFTER_COMPLETION) {
-				processEvent();
-			}
-			else if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
+			if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
 				processEvent();
 			}
 			else if (this.phase == TransactionPhase.AFTER_ROLLBACK && status == STATUS_ROLLED_BACK) {
 				processEvent();
 			}
-		}
-
-		@Override
-		public int getOrder() {
-			return this.listener.getOrder();
+			else if (this.phase == TransactionPhase.AFTER_COMPLETION) {
+				processEvent();
+			}
 		}
 
 		protected void processEvent() {

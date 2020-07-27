@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -46,17 +47,16 @@ import org.springframework.util.NumberUtils;
  */
 public class OpMinus extends Operator {
 
-	public OpMinus(int pos, SpelNodeImpl... operands) {
-		super("-", pos, operands);
+	public OpMinus(int startPos, int endPos, SpelNodeImpl... operands) {
+		super("-", startPos, endPos, operands);
 	}
 
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
-		SpelNodeImpl rightOp = getRightOperand();
 
-		if (rightOp == null) {  // if only one operand, then this is unary minus
+		if (this.children.length < 2) {  // if only one operand, then this is unary minus
 			Object operand = leftOp.getValueInternal(state).getValue();
 			if (operand instanceof Number) {
 				if (operand instanceof BigDecimal) {
@@ -96,7 +96,7 @@ public class OpMinus extends Operator {
 		}
 
 		Object left = leftOp.getValueInternal(state).getValue();
-		Object right = rightOp.getValueInternal(state).getValue();
+		Object right = getRightOperand().getValueInternal(state).getValue();
 
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
@@ -146,7 +146,7 @@ public class OpMinus extends Operator {
 
 	@Override
 	public String toStringAST() {
-		if (getRightOperand() == null) {  // unary minus
+		if (this.children.length < 2) {  // unary minus
 			return "-" + getLeftOperand().toStringAST();
 		}
 		return super.toStringAST();
@@ -155,7 +155,7 @@ public class OpMinus extends Operator {
 	@Override
 	public SpelNodeImpl getRightOperand() {
 		if (this.children.length < 2) {
-			return null;
+			throw new IllegalStateException("No right operand");
 		}
 		return this.children[1];
 	}
@@ -177,14 +177,17 @@ public class OpMinus extends Operator {
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
 		String leftDesc = getLeftOperand().exitTypeDescriptor;
-		CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, this.exitTypeDescriptor.charAt(0));
+		String exitDesc = this.exitTypeDescriptor;
+		Assert.state(exitDesc != null, "No exit type descriptor");
+		char targetDesc = exitDesc.charAt(0);
+		CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, leftDesc, targetDesc);
 		if (this.children.length > 1) {
 			cf.enterCompilationScope();
 			getRightOperand().generateCode(mv, cf);
 			String rightDesc = getRightOperand().exitTypeDescriptor;
 			cf.exitCompilationScope();
-			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, this.exitTypeDescriptor.charAt(0));
-			switch (this.exitTypeDescriptor.charAt(0)) {
+			CodeFlow.insertNumericUnboxOrPrimitiveTypeCoercion(mv, rightDesc, targetDesc);
+			switch (targetDesc) {
 				case 'I':
 					mv.visitInsn(ISUB);
 					break;
@@ -203,7 +206,7 @@ public class OpMinus extends Operator {
 			}
 		}
 		else {
-			switch (this.exitTypeDescriptor.charAt(0)) {
+			switch (targetDesc) {
 				case 'I':
 					mv.visitInsn(INEG);
 					break;

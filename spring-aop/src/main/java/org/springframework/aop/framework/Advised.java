@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -142,7 +142,7 @@ public interface Advised extends TargetClassAware {
 
 	/**
 	 * Remove the advisor at the given index.
-	 * @param index index of advisor to remove
+	 * @param index the index of advisor to remove
 	 * @throws AopConfigException if the index is invalid
 	 */
 	void removeAdvisor(int index) throws AopConfigException;
@@ -177,7 +177,7 @@ public interface Advised extends TargetClassAware {
 	 * <p>Note that the given advice will apply to all invocations on the proxy,
 	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
-	 * @param advice advice to add to the tail of the chain
+	 * @param advice the advice to add to the tail of the chain
 	 * @throws AopConfigException in case of invalid advice
 	 * @see #addAdvice(int, Advice)
 	 * @see org.springframework.aop.support.DefaultPointcutAdvisor
@@ -193,7 +193,7 @@ public interface Advised extends TargetClassAware {
 	 * even to the {@code toString()} method! Use appropriate advice implementations
 	 * or specify appropriate pointcuts to apply to a narrower set of methods.
 	 * @param pos index from 0 (head)
-	 * @param advice advice to add at the specified position in the advice chain
+	 * @param advice the advice to add at the specified position in the advice chain
 	 * @throws AopConfigException in case of invalid advice
 	 */
 	void addAdvice(int pos, Advice advice) throws AopConfigException;
@@ -211,7 +211,7 @@ public interface Advised extends TargetClassAware {
 	 * or -1 if no such advice is an advice for this proxy.
 	 * <p>The return value of this method can be used to index into
 	 * the advisors array.
-	 * @param advice AOP Alliance advice to search for
+	 * @param advice the AOP Alliance advice to search for
 	 * @return index from 0 of this advice, or -1 if there's no such advice
 	 */
 	int indexOf(Advice advice);

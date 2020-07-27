@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,11 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
@@ -37,11 +39,10 @@ import org.springframework.web.context.ServletContextAware;
 /**
  * Subclass of {@link GenericApplicationContext}, suitable for web environments.
  *
- * <p>Implements the
- * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * but is not intended for declarative setup in {@code web.xml}. Instead,
- * it is designed for programmatic setup, for example for building nested contexts or
- * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
+ * <p>Implements {@link org.springframework.web.context.ConfigurableWebApplicationContext},
+ * but is not intended for declarative setup in {@code web.xml}. Instead, it is designed
+ * for programmatic setup, for example for building nested contexts or for use within
+ * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializers}.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
@@ -63,8 +64,10 @@ import org.springframework.web.context.ServletContextAware;
 public class GenericWebApplicationContext extends GenericApplicationContext
 		implements ConfigurableWebApplicationContext, ThemeSource {
 
+	@Nullable
 	private ServletContext servletContext;
 
+	@Nullable
 	private ThemeSource themeSource;
 
 
@@ -116,11 +119,12 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
 	@Override
-	public void setServletContext(ServletContext servletContext) {
+	public void setServletContext(@Nullable ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
 	@Override
+	@Nullable
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -144,9 +148,10 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
-		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
-
+		if (this.servletContext != null) {
+			beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
+			beanFactory.ignoreDependencyInterface(ServletContextAware.class);
+		}
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
@@ -157,6 +162,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	 */
 	@Override
 	protected Resource getResourceByPath(String path) {
+		Assert.state(this.servletContext != null, "No ServletContext available");
 		return new ServletContextResource(this.servletContext, path);
 	}
 
@@ -190,7 +196,9 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	@Override
+	@Nullable
 	public Theme getTheme(String themeName) {
+		Assert.state(this.themeSource != null, "No ThemeSource available");
 		return this.themeSource.getTheme(themeName);
 	}
 
@@ -200,22 +208,24 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	// ---------------------------------------------------------------------
 
 	@Override
-	public void setServletConfig(ServletConfig servletConfig) {
+	public void setServletConfig(@Nullable ServletConfig servletConfig) {
 		// no-op
 	}
 
 	@Override
+	@Nullable
 	public ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
 	}
 
 	@Override
-	public void setNamespace(String namespace) {
+	public void setNamespace(@Nullable String namespace) {
 		// no-op
 	}
 
 	@Override
+	@Nullable
 	public String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");

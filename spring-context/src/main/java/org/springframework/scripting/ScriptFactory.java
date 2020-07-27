@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.springframework.scripting;
 
 import java.io.IOException;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Script definition interface, encapsulating the configuration
@@ -49,6 +51,7 @@ public interface ScriptFactory {
 	 * its Java interfaces (such as in the case of Groovy).
 	 * @return the interfaces for the script
 	 */
+	@Nullable
 	Class<?>[] getScriptInterfaces();
 
 	/**
@@ -75,7 +78,8 @@ public interface ScriptFactory {
 	 * @throws IOException if script retrieval failed
 	 * @throws ScriptCompilationException if script compilation failed
 	 */
-	Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
+	@Nullable
+	Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException;
 
 	/**
@@ -91,6 +95,7 @@ public interface ScriptFactory {
 	 * @throws ScriptCompilationException if script compilation failed
 	 * @since 2.0.3
 	 */
+	@Nullable
 	Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,43 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.handler;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.StringUtils;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.ServerWebExchange;
 
 /**
- * WebHandler that can invoke a target {@link WebHandler} and then apply
- * exception handling with one or more {@link WebExceptionHandler} instances.
+ * WebHandler decorator that invokes one or more {@link WebExceptionHandler WebExceptionHandlers}
+ * after the delegate {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
-	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
-
-
 	private final List<WebExceptionHandler> exceptionHandlers;
 
 
-	public ExceptionHandlingWebHandler(WebHandler delegate, WebExceptionHandler... exceptionHandlers) {
+	/**
+	 * Create an {@code ExceptionHandlingWebHandler} for the given delegate.
+	 * @param delegate the WebHandler delegate
+	 * @param handlers the WebExceptionHandlers to apply
+	 */
+	public ExceptionHandlingWebHandler(WebHandler delegate, List<WebExceptionHandler> handlers) {
 		super(delegate);
-		this.exceptionHandlers = initList(exceptionHandlers);
-	}
-
-	private static List<WebExceptionHandler> initList(WebExceptionHandler[] list) {
-		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)): Collections.emptyList());
+		List<WebExceptionHandler> handlersToUse = new ArrayList<>();
+		handlersToUse.add(new CheckpointInsertingHandler());
+		handlersToUse.addAll(handlers);
+		this.exceptionHandlers = Collections.unmodifiableList(handlersToUse);
 	}
 
 
@@ -63,25 +65,38 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-		Mono<Void> mono;
+		Mono<Void> completion;
 		try {
-			mono = getDelegate().handle(exchange);
+			completion = super.handle(exchange);
 		}
 		catch (Throwable ex) {
-			mono = Mono.error(ex);
+			completion = Mono.error(ex);
 		}
-		for (WebExceptionHandler exceptionHandler : this.exceptionHandlers) {
-			mono = mono.otherwise(ex -> exceptionHandler.handle(exchange, ex));
+
+		for (WebExceptionHandler handler : this.exceptionHandlers) {
+			completion = completion.onErrorResume(ex -> handler.handle(exchange, ex));
 		}
-		return mono.otherwise(ex -> handleUnresolvedException(exchange, ex));
+		return completion;
 	}
 
-	private Mono<? extends Void> handleUnresolvedException(ServerWebExchange exchange, Throwable ex) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Could not complete request", ex);
+
+	/**
+	 * WebExceptionHandler to insert a checkpoint with current URL information.
+	 * Must be the first in order to ensure we catch the error signal before
+	 * the exception is handled and e.g. turned into an error response.
+	 * @since 5.2
+ 	 */
+	private static class CheckpointInsertingHandler implements WebExceptionHandler {
+
+		@Override
+		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+			ServerHttpRequest request = exchange.getRequest();
+			String rawQuery = request.getURI().getRawQuery();
+			String query = StringUtils.hasText(rawQuery) ? "?" + rawQuery : "";
+			HttpMethod httpMethod = request.getMethod();
+			String description = "HTTP " + httpMethod + " \"" + request.getPath() + query + "\"";
+			return Mono.<Void>error(ex).checkpoint(description + " [ExceptionHandlingWebHandler]");
 		}
-		exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-		return Mono.empty();
 	}
 
 }

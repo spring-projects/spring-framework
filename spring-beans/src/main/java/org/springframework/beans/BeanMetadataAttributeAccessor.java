@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.beans;
 
 import org.springframework.core.AttributeAccessorSupport;
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of {@link org.springframework.core.AttributeAccessorSupport},
@@ -29,6 +30,7 @@ import org.springframework.core.AttributeAccessorSupport;
 @SuppressWarnings("serial")
 public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport implements BeanMetadataElement {
 
+	@Nullable
 	private Object source;
 
 
@@ -36,11 +38,12 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
-	public void setSource(Object source) {
+	public void setSource(@Nullable Object source) {
 		this.source = source;
 	}
 
 	@Override
+	@Nullable
 	public Object getSource() {
 		return this.source;
 	}
@@ -60,22 +63,25 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	 * @return the corresponding BeanMetadataAttribute object,
 	 * or {@code null} if no such attribute defined
 	 */
+	@Nullable
 	public BeanMetadataAttribute getMetadataAttribute(String name) {
 		return (BeanMetadataAttribute) super.getAttribute(name);
 	}
 
 	@Override
-	public void setAttribute(String name, Object value) {
+	public void setAttribute(String name, @Nullable Object value) {
 		super.setAttribute(name, new BeanMetadataAttribute(name, value));
 	}
 
 	@Override
+	@Nullable
 	public Object getAttribute(String name) {
 		BeanMetadataAttribute attribute = (BeanMetadataAttribute) super.getAttribute(name);
 		return (attribute != null ? attribute.getValue() : null);
 	}
 
 	@Override
+	@Nullable
 	public Object removeAttribute(String name) {
 		BeanMetadataAttribute attribute = (BeanMetadataAttribute) super.removeAttribute(name);
 		return (attribute != null ? attribute.getValue() : null);

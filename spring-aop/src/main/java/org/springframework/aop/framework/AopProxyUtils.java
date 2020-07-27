@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.core.DecoratingProxy;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -44,6 +45,26 @@ import org.springframework.util.ObjectUtils;
 public abstract class AopProxyUtils {
 
 	/**
+	 * Obtain the singleton target object behind the given proxy, if any.
+	 * @param candidate the (potential) proxy to check
+	 * @return the singleton target object managed in a {@link SingletonTargetSource},
+	 * or {@code null} in any other case (not a proxy, not an existing singleton target)
+	 * @since 4.3.8
+	 * @see Advised#getTargetSource()
+	 * @see SingletonTargetSource#getTarget()
+	 */
+	@Nullable
+	public static Object getSingletonTarget(Object candidate) {
+		if (candidate instanceof Advised) {
+			TargetSource targetSource = ((Advised) candidate).getTargetSource();
+			if (targetSource instanceof SingletonTargetSource) {
+				return ((SingletonTargetSource) targetSource).getTarget();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
@@ -59,14 +80,7 @@ public abstract class AopProxyUtils {
 		Class<?> result = null;
 		while (current instanceof TargetClassAware) {
 			result = ((TargetClassAware) current).getTargetClass();
-			Object nested = null;
-			if (current instanceof Advised) {
-				TargetSource targetSource = ((Advised) current).getTargetSource();
-				if (targetSource instanceof SingletonTargetSource) {
-					nested = ((SingletonTargetSource) targetSource).getTarget();
-				}
-			}
-			current = nested;
+			current = getSingletonTarget(current);
 		}
 		if (result == null) {
 			result = (AopUtils.isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
@@ -166,8 +180,7 @@ public abstract class AopProxyUtils {
 		if (proxy instanceof DecoratingProxy) {
 			nonUserIfcCount++;
 		}
-		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];
-		System.arraycopy(proxyInterfaces, 0, userInterfaces, 0, userInterfaces.length);
+		Class<?>[] userInterfaces = Arrays.copyOf(proxyInterfaces, proxyInterfaces.length - nonUserIfcCount);
 		Assert.notEmpty(userInterfaces, "JDK proxy must implement one or more interfaces");
 		return userInterfaces;
 	}
@@ -206,10 +219,13 @@ public abstract class AopProxyUtils {
 	 * @return a cloned argument array, or the original if no adaptation is needed
 	 * @since 4.2.3
 	 */
-	static Object[] adaptArgumentsIfNecessary(Method method, Object... arguments) {
-		if (method.isVarArgs() && !ObjectUtils.isEmpty(arguments)) {
-			Class<?>[] paramTypes = method.getParameterTypes();
-			if (paramTypes.length == arguments.length) {
+	static Object[] adaptArgumentsIfNecessary(Method method, @Nullable Object[] arguments) {
+		if (ObjectUtils.isEmpty(arguments)) {
+			return new Object[0];
+		}
+		if (method.isVarArgs()) {
+			if (method.getParameterCount() == arguments.length) {
+				Class<?>[] paramTypes = method.getParameterTypes();
 				int varargIndex = paramTypes.length - 1;
 				Class<?> varargType = paramTypes[varargIndex];
 				if (varargType.isArray()) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.beans.PropertyEditorSupport;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -69,7 +70,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(@Nullable String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasLength(text)) {
 			// Treat empty String as null value.
 			setValue(null);
@@ -81,7 +82,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 			setAsUnicode(text);
 		}
 		else if (text.length() == 1) {
-			setValue(Character.valueOf(text.charAt(0)));
+			setValue(text.charAt(0));
 		}
 		else {
 			throw new IllegalArgumentException("String [" + text + "] with length " +
@@ -102,7 +103,7 @@ public class CharacterEditor extends PropertyEditorSupport {
 
 	private void setAsUnicode(String text) {
 		int code = Integer.parseInt(text.substring(UNICODE_PREFIX.length()), 16);
-		setValue(Character.valueOf((char) code));
+		setValue((char) code);
 	}
 
 }

@@ -1,0 +1,4252 @@
+[[aop]]
+= Aspect Oriented Programming with Spring
+
+Aspect-oriented Programming (AOP) complements Object-oriented Programming (OOP) by
+providing another way of thinking about program structure. The key unit of modularity
+in OOP is the class, whereas in AOP the unit of modularity is the aspect. Aspects
+enable the modularization of concerns (such as transaction management) that cut across
+multiple types and objects. (Such concerns are often termed "`crosscutting`" concerns
+in AOP literature.)
+
+One of the key components of Spring is the AOP framework. While the Spring IoC
+container does not depend on AOP (meaning you do not need to use AOP if you don't want
+to), AOP complements Spring IoC to provide a very capable middleware solution.
+
+.Spring AOP with AspectJ pointcuts
+****
+Spring provides simple and powerful ways of writing custom aspects by using either a
+<<aop-schema, schema-based approach>> or the <<aop-ataspectj, @AspectJ annotation style>>.
+Both of these styles offer fully typed advice and use of the AspectJ pointcut language
+while still using Spring AOP for weaving.
+
+This chapter discusses the schema- and @AspectJ-based AOP support.
+The lower-level AOP support is discussed in <<aop-api, the following chapter>>.
+****
+
+AOP is used in the Spring Framework to:
+
+* Provide declarative enterprise services. The most important such service is
+  <<data-access.adoc#transaction-declarative, declarative transaction management>>.
+* Let users implement custom aspects, complementing their use of OOP with AOP.
+
+NOTE: If you are interested only in generic declarative services or other pre-packaged
+declarative middleware services such as pooling, you do not need to work directly with
+Spring AOP, and can skip most of this chapter.
+
+
+
+
+[[aop-introduction-defn]]
+== AOP Concepts
+
+Let us begin by defining some central AOP concepts and terminology. These terms are not
+Spring-specific. Unfortunately, AOP terminology is not particularly intuitive.
+However, it would be even more confusing if Spring used its own terminology.
+
+* Aspect: A modularization of a concern that cuts across multiple classes.
+  Transaction management is a good example of a crosscutting concern in enterprise Java
+  applications. In Spring AOP, aspects are implemented by using regular classes
+  (the <<aop-schema, schema-based approach>>) or regular classes annotated with the
+  `@Aspect` annotation (the <<aop-ataspectj, @AspectJ style>>).
+* Join point: A point during the execution of a program, such as the execution of a
+  method or the handling of an exception. In Spring AOP, a join point always
+  represents a method execution.
+* Advice: Action taken by an aspect at a particular join point. Different types of
+  advice include "`around`", "`before`" and "`after`" advice. (Advice types are discussed
+  later.) Many AOP frameworks, including Spring, model an advice as an interceptor and
+  maintain a chain of interceptors around the join point.
+* Pointcut: A predicate that matches join points. Advice is associated with a
+  pointcut expression and runs at any join point matched by the pointcut (for example,
+  the execution of a method with a certain name). The concept of join points as matched
+  by pointcut expressions is central to AOP, and Spring uses the AspectJ pointcut
+  expression language by default.
+* Introduction: Declaring additional methods or fields on behalf of a type. Spring
+  AOP lets you introduce new interfaces (and a corresponding implementation) to any
+  advised object. For example, you could use an introduction to make a bean implement an
+  `IsModified` interface, to simplify caching. (An introduction is known as an
+  inter-type declaration in the AspectJ community.)
+* Target object: An object being advised by one or more aspects. Also referred to as
+  the "`advised object`". Since Spring AOP is implemented by using runtime proxies, this
+  object is always a proxied object.
+* AOP proxy: An object created by the AOP framework in order to implement the aspect
+  contracts (advise method executions and so on). In the Spring Framework, an AOP proxy
+  is a JDK dynamic proxy or a CGLIB proxy.
+* Weaving: linking aspects with other application types or objects to create an
+  advised object. This can be done at compile time (using the AspectJ compiler, for
+  example), load time, or at runtime. Spring AOP, like other pure Java AOP frameworks,
+  performs weaving at runtime.
+
+Spring AOP includes the following types of advice:
+
+* Before advice: Advice that runs before a join point but that does not have
+  the ability to prevent execution flow proceeding to the join point (unless it throws
+  an exception).
+* After returning advice: Advice to be run after a join point completes
+  normally (for example, if a method returns without throwing an exception).
+* After throwing advice: Advice to be run if a method exits by throwing an
+  exception.
+* After (finally) advice: Advice to be run regardless of the means by which a
+  join point exits (normal or exceptional return).
+* Around advice: Advice that surrounds a join point such as a method invocation.
+  This is the most powerful kind of advice. Around advice can perform custom behavior
+  before and after the method invocation. It is also responsible for choosing whether to
+  proceed to the join point or to shortcut the advised method execution by returning its
+  own return value or throwing an exception.
+
+Around advice is the most general kind of advice. Since Spring AOP, like AspectJ,
+provides a full range of advice types, we recommend that you use the least powerful
+advice type that can implement the required behavior. For example, if you need only to
+update a cache with the return value of a method, you are better off implementing an
+after returning advice than an around advice, although an around advice can accomplish
+the same thing. Using the most specific advice type provides a simpler programming model
+with less potential for errors. For example, you do not need to invoke the `proceed()`
+method on the `JoinPoint` used for around advice, and, hence, you cannot fail to invoke it.
+
+All advice parameters are statically typed so that you work with advice parameters of
+the appropriate type (e.g. the type of the return value from a method execution) rather
+than `Object` arrays.
+
+The concept of join points matched by pointcuts is the key to AOP, which distinguishes
+it from older technologies offering only interception. Pointcuts enable advice to be
+targeted independently of the object-oriented hierarchy. For example, you can apply an
+around advice providing declarative transaction management to a set of methods that span
+multiple objects (such as all business operations in the service layer).
+
+
+
+
+[[aop-introduction-spring-defn]]
+== Spring AOP Capabilities and Goals
+
+Spring AOP is implemented in pure Java. There is no need for a special compilation
+process. Spring AOP does not need to control the class loader hierarchy and is thus
+suitable for use in a servlet container or application server.
+
+Spring AOP currently supports only method execution join points (advising the execution
+of methods on Spring beans). Field interception is not implemented, although support for
+field interception could be added without breaking the core Spring AOP APIs. If you need
+to advise field access and update join points, consider a language such as AspectJ.
+
+Spring AOP's approach to AOP differs from that of most other AOP frameworks. The aim is
+not to provide the most complete AOP implementation (although Spring AOP is quite
+capable). Rather, the aim is to provide a close integration between AOP implementation and
+Spring IoC, to help solve common problems in enterprise applications.
+
+Thus, for example, the Spring Framework's AOP functionality is normally used in
+conjunction with the Spring IoC container. Aspects are configured by using normal bean
+definition syntax (although this allows powerful "`auto-proxying`" capabilities). This is a
+crucial difference from other AOP implementations. You cannot do some things
+easily or efficiently with Spring AOP, such as advise very fine-grained objects (typically,
+domain objects). AspectJ is the best choice in such cases. However, our
+experience is that Spring AOP provides an excellent solution to most problems in
+enterprise Java applications that are amenable to AOP.
+
+Spring AOP never strives to compete with AspectJ to provide a comprehensive AOP
+solution. We believe that both proxy-based frameworks such as Spring AOP and full-blown
+frameworks such as AspectJ are valuable and that they are complementary, rather than in
+competition. Spring seamlessly integrates Spring AOP and IoC with AspectJ, to enable
+all uses of AOP within a consistent Spring-based application
+architecture. This integration does not affect the Spring AOP API or the AOP Alliance
+API. Spring AOP remains backward-compatible. See <<aop-api, the following chapter>>
+for a discussion of the Spring AOP APIs.
+
+[NOTE]
+====
+One of the central tenets of the Spring Framework is that of non-invasiveness. This
+is the idea that you should not be forced to introduce framework-specific classes and
+interfaces into your business or domain model. However, in some places, the Spring Framework
+does give you the option to introduce Spring Framework-specific dependencies into your
+codebase. The rationale in giving you such options is because, in certain scenarios, it
+might be just plain easier to read or code some specific piece of functionality in such
+a way. However, the Spring Framework (almost) always offers you the choice: You have the
+freedom to make an informed decision as to which option best suits your particular use
+case or scenario.
+
+One such choice that is relevant to this chapter is that of which AOP framework (and
+which AOP style) to choose. You have the choice of AspectJ, Spring AOP, or both. You
+also have the choice of either the @AspectJ annotation-style approach or the Spring XML
+configuration-style approach. The fact that this chapter chooses to introduce the
+@AspectJ-style approach first should not be taken as an indication that the Spring team
+favors the @AspectJ annotation-style approach over the Spring XML configuration-style.
+
+See <<aop-choosing>> for a more complete discussion of the "`whys and wherefores`" of
+each style.
+====
+
+
+
+
+[[aop-introduction-proxies]]
+== AOP Proxies
+
+Spring AOP defaults to using standard JDK dynamic proxies for AOP proxies. This
+enables any interface (or set of interfaces) to be proxied.
+
+Spring AOP can also use CGLIB proxies. This is necessary to proxy classes rather than
+interfaces. By default, CGLIB is used if a business object does not implement an
+interface. As it is good practice to program to interfaces rather than classes, business
+classes normally implement one or more business interfaces. It is possible to
+<<aop-proxying, force the use of CGLIB>>, in those (hopefully rare) cases where you
+need to advise a method that is not declared on an interface or where you need to
+pass a proxied object to a method as a concrete type.
+
+It is important to grasp the fact that Spring AOP is proxy-based. See
+<<aop-understanding-aop-proxies>> for a thorough examination of exactly what this
+implementation detail actually means.
+
+
+
+
+[[aop-ataspectj]]
+== @AspectJ support
+
+@AspectJ refers to a style of declaring aspects as regular Java classes annotated with
+annotations. The @AspectJ style was introduced by the
+https://www.eclipse.org/aspectj[AspectJ project] as part of the AspectJ 5 release. Spring
+interprets the same annotations as AspectJ 5, using a library supplied by AspectJ
+for pointcut parsing and matching. The AOP runtime is still pure Spring AOP, though, and
+there is no dependency on the AspectJ compiler or weaver.
+
+NOTE: Using the AspectJ compiler and weaver enables use of the full AspectJ language and
+is discussed in <<aop-using-aspectj>>.
+
+
+
+[[aop-aspectj-support]]
+=== Enabling @AspectJ Support
+
+To use @AspectJ aspects in a Spring configuration, you need to enable Spring support for
+configuring Spring AOP based on @AspectJ aspects and auto-proxying beans based on
+whether or not they are advised by those aspects. By auto-proxying, we mean that, if Spring
+determines that a bean is advised by one or more aspects, it automatically generates
+a proxy for that bean to intercept method invocations and ensures that advice is run
+as needed.
+
+The @AspectJ support can be enabled with XML- or Java-style configuration. In either
+case, you also need to ensure that AspectJ's `aspectjweaver.jar` library is on the
+classpath of your application (version 1.8 or later). This library is available in the
+`lib` directory of an AspectJ distribution or from the Maven Central repository.
+
+
+[[aop-enable-aspectj-java]]
+==== Enabling @AspectJ Support with Java Configuration
+
+To enable @AspectJ support with Java `@Configuration`, add the `@EnableAspectJAutoProxy`
+annotation, as the following example shows:
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableAspectJAutoProxy
+	public class AppConfig {
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableAspectJAutoProxy
+	class AppConfig
+----
+
+[[aop-enable-aspectj-xml]]
+==== Enabling @AspectJ Support with XML Configuration
+
+To enable @AspectJ support with XML-based configuration, use the `aop:aspectj-autoproxy`
+element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspectj-autoproxy/>
+----
+
+This assumes that you use schema support as described in
+<<core.adoc#xsd-schemas, XML Schema-based configuration>>.
+See <<core.adoc#xsd-schemas-aop, the AOP schema>> for how to
+import the tags in the `aop` namespace.
+
+
+
+[[aop-at-aspectj]]
+=== Declaring an Aspect
+
+With @AspectJ support enabled, any bean defined in your application context with a
+class that is an @AspectJ aspect (has the `@Aspect` annotation) is automatically
+detected by Spring and used to configure Spring AOP. The next two examples show the
+minimal definition required for a not-very-useful aspect.
+
+The first of the two example shows a regular bean definition in the application
+context that points to a bean class that has the `@Aspect` annotation:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myAspect" class="org.xyz.NotVeryUsefulAspect">
+		<!-- configure properties of the aspect here -->
+	</bean>
+----
+
+The second of the two examples shows the `NotVeryUsefulAspect` class definition,
+which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package org.xyz;
+	import org.aspectj.lang.annotation.Aspect;
+
+	@Aspect
+	public class NotVeryUsefulAspect {
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package org.xyz
+
+	import org.aspectj.lang.annotation.Aspect;
+
+	@Aspect
+	class NotVeryUsefulAspect
+----
+
+Aspects (classes annotated with `@Aspect`) can have methods and fields, the same as any
+other class. They can also contain pointcut, advice, and introduction (inter-type)
+declarations.
+
+.Autodetecting aspects through component scanning
+NOTE: You can register aspect classes as regular beans in your Spring XML configuration or
+autodetect them through classpath scanning -- the same as any other Spring-managed bean.
+However, note that the `@Aspect` annotation is not sufficient for autodetection in
+the classpath. For that purpose, you need to add a separate `@Component` annotation
+(or, alternatively, a custom stereotype annotation that qualifies, as per the rules of
+Spring's component scanner).
+
+.Advising aspects with other aspects?
+NOTE: In Spring AOP, aspects themselves cannot be the targets of advice
+from other aspects. The `@Aspect` annotation on a class marks it as an aspect and,
+hence, excludes it from auto-proxying.
+
+
+
+[[aop-pointcuts]]
+=== Declaring a Pointcut
+
+Pointcuts determine join points of interest and thus enable us to control
+when advice runs. Spring AOP only supports method execution join points for Spring
+beans, so you can think of a pointcut as matching the execution of methods on Spring
+beans. A pointcut declaration has two parts: a signature comprising a name and any
+parameters and a pointcut expression that determines exactly which method
+executions we are interested in. In the @AspectJ annotation-style of AOP, a pointcut
+signature is provided by a regular method definition, and the pointcut expression is
+indicated by using the `@Pointcut` annotation (the method serving as the pointcut signature
+must have a `void` return type).
+
+An example may help make this distinction between a pointcut signature and a pointcut
+expression clear. The following example defines a pointcut named `anyOldTransfer` that
+matches the execution of any method named `transfer`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Pointcut("execution(* transfer(..))") // the pointcut expression
+	private void anyOldTransfer() {} // the pointcut signature
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Pointcut("execution(* transfer(..))") // the pointcut expression
+	private fun anyOldTransfer() {} // the pointcut signature
+----
+
+The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
+AspectJ 5 pointcut expression. For a full discussion of AspectJ's pointcut language, see
+the https://www.eclipse.org/aspectj/doc/released/progguide/index.html[AspectJ
+Programming Guide] (and, for extensions, the
+https://www.eclipse.org/aspectj/doc/released/adk15notebook/index.html[AspectJ 5
+Developer's Notebook]) or one of the books on AspectJ (such as _Eclipse AspectJ_, by Colyer
+et. al., or _AspectJ in Action_, by Ramnivas Laddad).
+
+
+[[aop-pointcuts-designators]]
+==== Supported Pointcut Designators
+
+Spring AOP supports the following AspectJ pointcut designators (PCD) for use in pointcut
+expressions:
+
+* `execution`: For matching method execution join points. This is the primary
+  pointcut designator to use when working with Spring AOP.
+* `within`: Limits matching to join points within certain types (the execution
+  of a method declared within a matching type when using Spring AOP).
+* `this`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the bean reference (Spring AOP proxy) is an instance of the given type.
+* `target`: Limits matching to join points (the execution of methods when using
+  Spring AOP) where the target object (application object being proxied) is an instance
+  of the given type.
+* `args`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the arguments are instances of the given types.
+* `@target`: Limits matching to join points (the execution of methods when using
+  Spring AOP) where the class of the executing object has an annotation of the given type.
+* `@args`: Limits matching to join points (the execution of methods when using Spring
+  AOP) where the runtime type of the actual arguments passed have annotations of the
+  given types.
+* `@within`: Limits matching to join points within types that have the given
+  annotation (the execution of methods declared in types with the given annotation when
+  using Spring AOP).
+* `@annotation`: Limits matching to join points where the subject of the join point
+  (the method being run in Spring AOP) has the given annotation.
+
+.Other pointcut types
+****
+The full AspectJ pointcut language supports additional pointcut designators that are not
+supported in Spring: `call`, `get`, `set`, `preinitialization`,
+`staticinitialization`, `initialization`, `handler`, `adviceexecution`, `withincode`, `cflow`,
+`cflowbelow`, `if`, `@this`, and `@withincode`. Use of these pointcut designators in pointcut
+expressions interpreted by Spring AOP results in an `IllegalArgumentException` being
+thrown.
+
+The set of pointcut designators supported by Spring AOP may be extended in future
+releases to support more of the AspectJ pointcut designators.
+****
+
+Because Spring AOP limits matching to only method execution join points, the preceding discussion
+of the pointcut designators gives a narrower definition than you can find in the
+AspectJ programming guide. In addition, AspectJ itself has type-based semantics and, at
+an execution join point, both `this` and `target` refer to the same object: the
+object executing the method. Spring AOP is a proxy-based system and differentiates
+between the proxy object itself (which is bound to `this`) and the target object behind the
+proxy (which is bound to `target`).
+
+[NOTE]
+====
+Due to the proxy-based nature of Spring's AOP framework, calls within the target object
+are, by definition, not intercepted. For JDK proxies, only public interface method
+calls on the proxy can be intercepted. With CGLIB, public and protected method calls on
+the proxy are intercepted (and even package-visible methods, if necessary). However,
+common interactions through proxies should always be designed through public signatures.
+
+Note that pointcut definitions are generally matched against any intercepted method.
+If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenario with
+potential non-public interactions through proxies, it needs to be defined accordingly.
+
+If your interception needs include method calls or even constructors within the target
+class, consider the use of Spring-driven <<aop-aj-ltw, native AspectJ weaving>> instead
+of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
+with different characteristics, so be sure to make yourself familiar with weaving
+before making a decision.
+====
+
+Spring AOP also supports an additional PCD named `bean`. This PCD lets you limit
+the matching of join points to a particular named Spring bean or to a set of named
+Spring beans (when using wildcards). The `bean` PCD has the following form:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	bean(idOrNameOfBean)
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	bean(idOrNameOfBean)
+----
+
+The `idOrNameOfBean` token can be the name of any Spring bean. Limited wildcard
+support that uses the `*` character is provided, so, if you establish some naming
+conventions for your Spring beans, you can write a `bean` PCD expression
+to select them. As is the case with other pointcut designators, the `bean` PCD can
+be used with the `&&` (and), `||` (or), and `!` (negation) operators, too.
+
+[NOTE]
+====
+The `bean` PCD is supported only in Spring AOP and not in
+native AspectJ weaving. It is a Spring-specific extension to the standard PCDs that
+AspectJ defines and is, therefore, not available for aspects declared in the `@Aspect` model.
+
+The `bean` PCD operates at the instance level (building on the Spring bean name
+concept) rather than at the type level only (to which weaving-based AOP is limited).
+Instance-based pointcut designators are a special capability of Spring's
+proxy-based AOP framework and its close integration with the Spring bean factory, where
+it is natural and straightforward to identify specific beans by name.
+====
+
+
+[[aop-pointcuts-combining]]
+==== Combining Pointcut Expressions
+
+You can combine pointcut expressions by using `&&,` `||` and `!`. You can also refer to
+pointcut expressions by name. The following example shows three pointcut expressions:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Pointcut("execution(public * \*(..))")
+	private void anyPublicOperation() {} // <1>
+
+	@Pointcut("within(com.xyz.myapp.trading..*)")
+	private void inTrading() {} // <2>
+
+	@Pointcut("anyPublicOperation() && inTrading()")
+	private void tradingOperation() {} // <3>
+----
+<1> `anyPublicOperation` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Pointcut("execution(public * \*(..))")
+	private fun anyPublicOperation() {} // <1>
+
+	@Pointcut("within(com.xyz.myapp.trading..*)")
+	private fun inTrading() {} // <2>
+
+	@Pointcut("anyPublicOperation() && inTrading()")
+	private fun tradingOperation() {} // <3>
+----
+<1> `anyPublicOperation` matches if a method execution join point represents the execution
+of any public method.
+<2> `inTrading` matches if a method execution is in the trading module.
+<3> `tradingOperation` matches if a method execution represents any public method in the
+trading module.
+
+It is a best practice to build more complex pointcut expressions out of smaller named
+components, as shown earlier. When referring to pointcuts by name, normal Java visibility
+rules apply (you can see private pointcuts in the same type, protected pointcuts in the
+hierarchy, public pointcuts anywhere, and so on). Visibility does not affect pointcut
+matching.
+
+
+[[aop-common-pointcuts]]
+==== Sharing Common Pointcut Definitions
+
+When working with enterprise applications, developers often want to refer to modules of
+the application and particular sets of operations from within several aspects. We
+recommend defining a `CommonPointcuts` aspect that captures common pointcut expressions
+for this purpose. Such an aspect typically resembles the following example:
+
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
+----
+	package com.xyz.myapp;
+
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Pointcut;
+
+	@Aspect
+	public class CommonPointcuts {
+
+		/**
+		 * A join point is in the web layer if the method is defined
+		 * in a type in the com.xyz.myapp.web package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.myapp.web..*)")
+		public void inWebLayer() {}
+
+		/**
+		 * A join point is in the service layer if the method is defined
+		 * in a type in the com.xyz.myapp.service package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.myapp.service..*)")
+		public void inServiceLayer() {}
+
+		/**
+		 * A join point is in the data access layer if the method is defined
+		 * in a type in the com.xyz.myapp.dao package or any sub-package
+		 * under that.
+		 */
+		@Pointcut("within(com.xyz.myapp.dao..*)")
+		public void inDataAccessLayer() {}
+
+		/**
+		 * A business service is the execution of any method defined on a service
+		 * interface. This definition assumes that interfaces are placed in the
+		 * "service" package, and that implementation types are in sub-packages.
+		 *
+		 * If you group service interfaces by functional area (for example,
+		 * in packages com.xyz.myapp.abc.service and com.xyz.myapp.def.service) then
+		 * the pointcut expression "execution(* com.xyz.myapp..service.*.*(..))"
+		 * could be used instead.
+		 *
+		 * Alternatively, you can write the expression using the 'bean'
+		 * PCD, like so "bean(*Service)". (This assumes that you have
+		 * named your Spring service beans in a consistent fashion.)
+		 */
+		@Pointcut("execution(* com.xyz.myapp..service.*.*(..))")
+		public void businessService() {}
+
+		/**
+		 * A data access operation is the execution of any method defined on a
+		 * dao interface. This definition assumes that interfaces are placed in the
+		 * "dao" package, and that implementation types are in sub-packages.
+		 */
+		@Pointcut("execution(* com.xyz.myapp.dao.*.*(..))")
+		public void dataAccessOperation() {}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	package com.xyz.myapp
+
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Pointcut
+
+	@Aspect
+	class CommonPointcuts {
+
+		/**
+		* A join point is in the web layer if the method is defined
+		* in a type in the com.xyz.myapp.web package or any sub-package
+		* under that.
+		*/
+		@Pointcut("within(com.xyz.myapp.web..*)")
+		fun inWebLayer() {
+		}
+
+		/**
+		* A join point is in the service layer if the method is defined
+		* in a type in the com.xyz.myapp.service package or any sub-package
+		* under that.
+		*/
+		@Pointcut("within(com.xyz.myapp.service..*)")
+		fun inServiceLayer() {
+		}
+
+		/**
+		* A join point is in the data access layer if the method is defined
+		* in a type in the com.xyz.myapp.dao package or any sub-package
+		* under that.
+		*/
+		@Pointcut("within(com.xyz.myapp.dao..*)")
+		fun inDataAccessLayer() {
+		}
+
+		/**
+		* A business service is the execution of any method defined on a service
+		* interface. This definition assumes that interfaces are placed in the
+		* "service" package, and that implementation types are in sub-packages.
+		*
+		* If you group service interfaces by functional area (for example,
+		* in packages com.xyz.myapp.abc.service and com.xyz.myapp.def.service) then
+		* the pointcut expression "execution(* com.xyz.myapp..service.*.*(..))"
+		* could be used instead.
+		*
+		* Alternatively, you can write the expression using the 'bean'
+		* PCD, like so "bean(*Service)". (This assumes that you have
+		* named your Spring service beans in a consistent fashion.)
+		*/
+		@Pointcut("execution(* com.xyz.myapp..service.*.*(..))")
+		fun businessService() {
+		}
+
+		/**
+		* A data access operation is the execution of any method defined on a
+		* dao interface. This definition assumes that interfaces are placed in the
+		* "dao" package, and that implementation types are in sub-packages.
+		*/
+		@Pointcut("execution(* com.xyz.myapp.dao.*.*(..))")
+		fun dataAccessOperation() {
+		}
+
+	}
+----
+
+You can refer to the pointcuts defined in such an aspect anywhere you need a
+pointcut expression. For example, to make the service layer transactional, you could
+write the following:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:config>
+		<aop:advisor
+			pointcut="com.xyz.myapp.CommonPointcuts.businessService()"
+			advice-ref="tx-advice"/>
+	</aop:config>
+
+	<tx:advice id="tx-advice">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+The `<aop:config>` and `<aop:advisor>` elements are discussed in <<aop-schema>>. The
+transaction elements are discussed in <<data-access.adoc#transaction, Transaction Management>>.
+
+
+[[aop-pointcuts-examples]]
+==== Examples
+
+Spring AOP users are likely to use the `execution` pointcut designator the most often.
+The format of an execution expression follows:
+
+[literal,subs="verbatim,quotes"]
+----
+	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
+				throws-pattern?)
+----
+
+All parts except the returning type pattern (`ret-type-pattern` in the preceding snippet),
+the name pattern, and the parameters pattern are optional. The returning type pattern determines
+what the return type of the method must be in order for a join point to be matched.
+`{asterisk}` is most frequently used as the returning type pattern. It matches any return
+type. A fully-qualified type name matches only when the method returns the given
+type. The name pattern matches the method name. You can use the `{asterisk}` wildcard as all or
+part of a name pattern. If you specify a declaring type pattern,
+include a trailing `.` to join it to the name pattern component.
+The parameters pattern is slightly more complex: `()` matches a
+method that takes no parameters, whereas `(..)` matches any number (zero or more) of parameters.
+The `({asterisk})` pattern matches a method that takes one parameter of any type.
+`(*,String)` matches a method that takes two parameters. The first can be of any type, while the
+second must be a `String`. Consult the
+https://www.eclipse.org/aspectj/doc/released/progguide/semantics-pointcuts.html[Language
+Semantics] section of the AspectJ Programming Guide for more information.
+
+The following examples show some common pointcut expressions:
+
+* The execution of any public method:
++
+[literal,subs="verbatim,quotes"]
+----
+	execution(public * *(..))
+----
+
+* The execution of any method with a name that begins with `set`:
++
+[literal,subs="verbatim,quotes"]
+----
+	execution(* set*(..))
+----
+
+* The execution of any method defined by the `AccountService` interface:
++
+[literal,subs="verbatim,quotes"]
+----
+	execution(* com.xyz.service.AccountService.*(..))
+----
+
+* The execution of any method defined in the `service` package:
++
+[literal,subs="verbatim,quotes"]
+----
+	execution(* com.xyz.service.\*.*(..))
+----
+
+* The execution of any method defined in the service package or one of its sub-packages:
++
+[literal,subs="verbatim,quotes"]
+----
+	execution(* com.xyz.service..\*.*(..))
+----
+
+* Any join point (method execution only in Spring AOP) within the service package:
++
+[literal,subs="verbatim,quotes"]
+----
+	within(com.xyz.service.*)
+----
+
+* Any join point (method execution only in Spring AOP) within the service package or one of its
+sub-packages:
++
+[literal,subs="verbatim,quotes"]
+----
+	within(com.xyz.service..*)
+----
+
+* Any join point (method execution only in Spring AOP) where the proxy implements the
+`AccountService` interface:
++
+[literal,subs="verbatim,quotes"]
+----
+	this(com.xyz.service.AccountService)
+----
++
+NOTE: 'this' is more commonly used in a binding form. See the section on <<aop-advice>>
+for how to make the proxy object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the target object
+implements the `AccountService` interface:
++
+[literal,subs="verbatim,quotes"]
+----
+	target(com.xyz.service.AccountService)
+----
++
+NOTE: 'target' is more commonly used in a binding form. See the <<aop-advice>> section
+for how to make the target object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) that takes a single parameter
+and where the argument passed at runtime is `Serializable`:
++
+[literal,subs="verbatim,quotes"]
+----
+	args(java.io.Serializable)
+----
++
+NOTE: 'args' is more commonly used in a binding form. See the <<aop-advice>> section
+for how to make the method arguments available in the advice body.
++
+Note that the pointcut given in this example is different from `execution(*
+*(java.io.Serializable))`. The args version matches if the argument passed at runtime is
+`Serializable`, and the execution version matches if the method signature declares a single
+parameter of type `Serializable`.
+
+* Any join point (method execution only in Spring AOP) where the target object has a
+`@Transactional` annotation:
++
+[literal,subs="verbatim,quotes"]
+----
+	@target(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use '@target' in a binding form. See the <<aop-advice>> section for
+how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the declared type of the
+target object has an `@Transactional` annotation:
++
+[literal,subs="verbatim,quotes"]
+----
+	@within(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use '@within' in a binding form. See the <<aop-advice>> section for
+how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) where the executing method has an
+`@Transactional` annotation:
++
+[literal,subs="verbatim,quotes"]
+----
+	@annotation(org.springframework.transaction.annotation.Transactional)
+----
++
+NOTE: You can also use '@annotation' in a binding form. See the <<aop-advice>> section
+for how to make the annotation object available in the advice body.
+
+* Any join point (method execution only in Spring AOP) which takes a single parameter,
+and where the runtime type of the argument passed has the `@Classified` annotation:
++
+[literal,subs="verbatim,quotes"]
+----
+	@args(com.xyz.security.Classified)
+----
++
+NOTE: You can also use '@args' in a binding form. See the <<aop-advice>> section
+how to make the annotation object(s) available in the advice body.
+
+* Any join point (method execution only in Spring AOP) on a Spring bean named
+`tradeService`:
++
+[literal,subs="verbatim,quotes"]
+----
+	bean(tradeService)
+----
+
+* Any join point (method execution only in Spring AOP) on Spring beans having names that
+match the wildcard expression `*Service`:
++
+[literal,subs="verbatim,quotes"]
+----
+	bean(*Service)
+----
+
+
+[[writing-good-pointcuts]]
+==== Writing Good Pointcuts
+
+During compilation, AspectJ processes pointcuts in order to optimize matching
+performance. Examining code and determining if each join point matches (statically or
+dynamically) a given pointcut is a costly process. (A dynamic match means the match
+cannot be fully determined from static analysis and that a test is placed in the code to
+determine if there is an actual match when the code is running). On first encountering a
+pointcut declaration, AspectJ rewrites it into an optimal form for the matching
+process. What does this mean? Basically, pointcuts are rewritten in DNF (Disjunctive
+Normal Form) and the components of the pointcut are sorted such that those components
+that are cheaper to evaluate are checked first. This means you do not have to worry
+about understanding the performance of various pointcut designators and may supply them
+in any order in a pointcut declaration.
+
+However, AspectJ can work only with what it is told. For optimal performance of
+matching, you should think about what they are trying to achieve and narrow the search
+space for matches as much as possible in the definition. The existing designators
+naturally fall into one of three groups: kinded, scoping, and contextual:
+
+* Kinded designators select a particular kind of join point:
+`execution`, `get`, `set`, `call`, and `handler`.
+* Scoping designators select a group of join points of interest
+(probably of many kinds): `within` and `withincode`
+* Contextual designators match (and optionally bind) based on context:
+`this`, `target`, and `@annotation`
+
+A well written pointcut should include at least the first two types (kinded and
+scoping). You can include the contextual designators to match based on
+join point context or bind that context for use in the advice. Supplying only a
+kinded designator or only a contextual designator works but could affect weaving
+performance (time and memory used), due to extra processing and analysis. Scoping
+designators are very fast to match, and using them usage means AspectJ can very quickly
+dismiss groups of join points that should not be further processed. A good
+pointcut should always include one if possible.
+
+
+
+[[aop-advice]]
+=== Declaring Advice
+
+Advice is associated with a pointcut expression and runs before, after, or around
+method executions matched by the pointcut. The pointcut expression may be either a
+simple reference to a named pointcut or a pointcut expression declared in place.
+
+
+[[aop-advice-before]]
+==== Before Advice
+
+You can declare before advice in an aspect by using the `@Before` annotation:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Before;
+
+	@Aspect
+	public class BeforeExample {
+
+		@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		public void doAccessCheck() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Before
+
+	@Aspect
+	class BeforeExample {
+
+		@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		fun doAccessCheck() {
+			// ...
+		}
+
+	}
+----
+
+If we use an in-place pointcut expression, we could rewrite the preceding example as the
+following example:
+
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Before;
+
+	@Aspect
+	public class BeforeExample {
+
+		@Before("execution(* com.xyz.myapp.dao.*.*(..))")
+		public void doAccessCheck() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Before
+
+	@Aspect
+	class BeforeExample {
+
+		@Before("execution(* com.xyz.myapp.dao.*.*(..))")
+		fun doAccessCheck() {
+			// ...
+		}
+
+	}
+----
+
+
+[[aop-advice-after-returning]]
+==== After Returning Advice
+
+After returning advice runs when a matched method execution returns normally. You can
+declare it by using the `@AfterReturning` annotation:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterReturning;
+
+	@Aspect
+	public class AfterReturningExample {
+
+		@AfterReturning("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		public void doAccessCheck() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterReturning
+
+	@Aspect
+	class AfterReturningExample {
+
+		@AfterReturning("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		fun doAccessCheck() {
+			// ...
+		}
+
+----
+
+NOTE: You can have multiple advice declarations (and other members
+as well), all inside the same aspect. We show only a single advice declaration in
+these examples to focus the effect of each one.
+
+Sometimes, you need access in the advice body to the actual value that was returned. You
+can use the form of `@AfterReturning` that binds the return value to get that access, as
+the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterReturning;
+
+	@Aspect
+	public class AfterReturningExample {
+
+		@AfterReturning(
+			pointcut="com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
+			returning="retVal")
+		public void doAccessCheck(Object retVal) {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterReturning
+
+	@Aspect
+	class AfterReturningExample {
+
+		@AfterReturning(
+			pointcut = "com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
+			returning = "retVal")
+		fun doAccessCheck(retVal: Any) {
+			// ...
+		}
+
+	}
+----
+
+The name used in the `returning` attribute must correspond to the name of a parameter in
+the advice method. When a method execution returns, the return value is passed to
+the advice method as the corresponding argument value. A `returning` clause also
+restricts matching to only those method executions that return a value of the specified
+type (in this case, `Object`, which matches any return value).
+
+Please note that it is not possible to return a totally different reference when
+using after returning advice.
+
+
+[[aop-advice-after-throwing]]
+==== After Throwing Advice
+
+After throwing advice runs when a matched method execution exits by throwing an
+exception. You can declare it by using the `@AfterThrowing` annotation, as the following
+example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterThrowing;
+
+	@Aspect
+	public class AfterThrowingExample {
+
+		@AfterThrowing("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		public void doRecoveryActions() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterThrowing
+
+	@Aspect
+	class AfterThrowingExample {
+
+		@AfterThrowing("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		fun doRecoveryActions() {
+			// ...
+		}
+
+	}
+----
+
+Often, you want the advice to run only when exceptions of a given type are thrown, and
+you also often need access to the thrown exception in the advice body. You can use the
+`throwing` attribute to both restrict matching (if desired -- use `Throwable` as the
+exception type otherwise) and bind the thrown exception to an advice parameter. The
+following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterThrowing;
+
+	@Aspect
+	public class AfterThrowingExample {
+
+		@AfterThrowing(
+			pointcut="com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
+			throwing="ex")
+		public void doRecoveryActions(DataAccessException ex) {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterThrowing
+
+	@Aspect
+	class AfterThrowingExample {
+
+		@AfterThrowing(
+			pointcut = "com.xyz.myapp.CommonPointcuts.dataAccessOperation()",
+			throwing = "ex")
+		fun doRecoveryActions(ex: DataAccessException) {
+			// ...
+		}
+
+	}
+----
+
+The name used in the `throwing` attribute must correspond to the name of a parameter in
+the advice method. When a method execution exits by throwing an exception, the exception
+is passed to the advice method as the corresponding argument value. A `throwing`
+clause also restricts matching to only those method executions that throw an exception
+of the specified type ( `DataAccessException`, in this case).
+
+
+[[aop-advice-after-finally]]
+==== After (Finally) Advice
+
+After (finally) advice runs when a matched method execution exits. It is declared by
+using the `@After` annotation. After advice must be prepared to handle both normal and
+exception return conditions. It is typically used for releasing resources and similar purposes.
+The following example shows how to use after finally advice:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.After;
+
+	@Aspect
+	public class AfterFinallyExample {
+
+		@After("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		public void doReleaseLock() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.After
+
+	@Aspect
+	class AfterFinallyExample {
+
+		@After("com.xyz.myapp.CommonPointcuts.dataAccessOperation()")
+		fun doReleaseLock() {
+			// ...
+		}
+
+	}
+----
+
+
+[[aop-ataspectj-around-advice]]
+==== Around Advice
+
+The last kind of advice is around advice. Around advice runs "`around`" a matched method's
+execution. It has the opportunity to do work both before and after the method runs
+and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used if you need to share state before and after a method
+execution in a thread-safe manner (starting and stopping a timer, for example). Always
+use the least powerful form of advice that meets your requirements (that is, do not use
+around advice if before advice would do).
+
+Around advice is declared by using the `@Around` annotation. The first parameter of the
+advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
+calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
+run. The `proceed` method can also pass in an `Object[]`. The values
+in the array are used as the arguments to the method execution when it proceeds.
+
+NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than the
+behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
+advice written using the traditional AspectJ language, the number of arguments passed to
+`proceed` must match the number of arguments passed to the around advice (not the number
+of arguments taken by the underlying join point), and the value passed to proceed in a
+given argument position supplants the original value at the join point for the entity
+the value was bound to (do not worry if this does not make sense right now). The approach
+taken by Spring is simpler and a better match to its proxy-based, execution-only
+semantics. You only need to be aware of this difference if you compile @AspectJ
+aspects written for Spring and use `proceed` with arguments with the AspectJ compiler
+and weaver. There is a way to write such aspects that is 100% compatible across both
+Spring AOP and AspectJ, and this is discussed in the
+<<aop-ataspectj-advice-params, following section on advice parameters>>.
+
+The following example shows how to use around advice:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Around;
+	import org.aspectj.lang.ProceedingJoinPoint;
+
+	@Aspect
+	public class AroundExample {
+
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
+		public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+			// start stopwatch
+			Object retVal = pjp.proceed();
+			// stop stopwatch
+			return retVal;
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Around
+	import org.aspectj.lang.ProceedingJoinPoint
+
+	@Aspect
+	class AroundExample {
+
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
+		fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
+			// start stopwatch
+			val retVal = pjp.proceed()
+			// stop stopwatch
+			return retVal
+		}
+
+	}
+----
+
+The value returned by the around advice is the return value seen by the caller of
+the method. For example, a simple caching aspect could return a value from a cache if it
+has one and invoke `proceed()` if it does not. Note that `proceed` may be invoked once,
+many times, or not at all within the body of the around advice. All of these are
+legal.
+
+
+[[aop-ataspectj-advice-params]]
+==== Advice Parameters
+
+Spring offers fully typed advice, meaning that you declare the parameters you need
+in the advice signature (as we saw earlier for the returning and throwing examples) rather
+than work with `Object[]` arrays all the time. We see how to make argument and other
+contextual values available to the advice body later in this section. First, we take a look at
+how to write generic advice that can find out about the method the advice is currently
+advising.
+
+[[aop-ataspectj-advice-params-the-joinpoint]]
+===== Access to the Current `JoinPoint`
+
+Any advice method may declare, as its first parameter, a parameter of type
+`org.aspectj.lang.JoinPoint` (note that around advice is required to declare
+a first parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoint`. The
+`JoinPoint` interface provides a number of useful methods:
+
+* `getArgs()`: Returns the method arguments.
+* `getThis()`: Returns the proxy object.
+* `getTarget()`: Returns the target object.
+* `getSignature()`: Returns a description of the method that is being advised.
+* `toString()`: Prints a useful description of the method being advised.
+
+See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lang/JoinPoint.html[javadoc] for more detail.
+
+[[aop-ataspectj-advice-params-passing]]
+===== Passing Parameters to Advice
+
+We have already seen how to bind the returned value or exception value (using after
+returning and after throwing advice). To make argument values available to the advice
+body, you can use the binding form of `args`. If you use a parameter name in place of a
+type name in an args expression, the value of the corresponding argument is
+passed as the parameter value when the advice is invoked. An example should make this
+clearer. Suppose you want to advise the execution of DAO operations that take an `Account`
+object as the first parameter, and you need access to the account in the advice body.
+You could write the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
+	public void validateAccount(Account account) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
+	fun validateAccount(account: Account) {
+		// ...
+	}
+----
+
+The `args(account,..)` part of the pointcut expression serves two purposes. First, it
+restricts matching to only those method executions where the method takes at least one
+parameter, and the argument passed to that parameter is an instance of `Account`.
+Second, it makes the actual `Account` object available to the advice through the `account`
+parameter.
+
+Another way of writing this is to declare a pointcut that "`provides`" the `Account`
+object value when it matches a join point, and then refer to the named pointcut
+from the advice. This would look as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Pointcut("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
+	private void accountDataAccessOperation(Account account) {}
+
+	@Before("accountDataAccessOperation(account)")
+	public void validateAccount(Account account) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Pointcut("com.xyz.myapp.CommonPointcuts.dataAccessOperation() && args(account,..)")
+	private fun accountDataAccessOperation(account: Account) {
+	}
+
+	@Before("accountDataAccessOperation(account)")
+	fun validateAccount(account: Account) {
+		// ...
+	}
+----
+
+See the AspectJ programming guide for more
+details.
+
+The proxy object ( `this`), target object ( `target`), and annotations ( `@within`,
+`@target`, `@annotation`, and `@args`) can all be bound in a similar fashion. The next two
+examples show how to match the execution of methods annotated with an
+`@Auditable` annotation and extract the audit code:
+
+The first of the two examples shows the definition of the `@Auditable` annotation:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public @interface Auditable {
+		AuditCode value();
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Retention(AnnotationRetention.RUNTIME)
+	@Target(AnnotationTarget.FUNCTION)
+	annotation class Auditable(val value: AuditCode)
+----
+
+The second of the two examples shows the advice that matches the execution of `@Auditable` methods:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before("com.xyz.lib.Pointcuts.anyPublicMethod() && @annotation(auditable)")
+	public void audit(Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before("com.xyz.lib.Pointcuts.anyPublicMethod() && @annotation(auditable)")
+	fun audit(auditable: Auditable) {
+		val code = auditable.value()
+		// ...
+	}
+----
+
+[[aop-ataspectj-advice-params-generics]]
+===== Advice Parameters and Generics
+
+Spring AOP can handle generics used in class declarations and method parameters. Suppose
+you have a generic type like the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public interface Sample<T> {
+		void sampleGenericMethod(T param);
+		void sampleGenericCollectionMethod(Collection<T> param);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Sample<T> {
+		fun sampleGenericMethod(param: T)
+		fun sampleGenericCollectionMethod(param: Collection<T>)
+	}
+----
+
+You can restrict interception of method types to certain parameter types by
+typing the advice parameter to the parameter type for which you want to intercept the method:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
+	public void beforeSampleMethod(MyType param) {
+		// Advice implementation
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
+	fun beforeSampleMethod(param: MyType) {
+		// Advice implementation
+	}
+----
+
+This approach does not work for generic collections. So you cannot define a
+pointcut as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
+	public void beforeSampleMethod(Collection<MyType> param) {
+		// Advice implementation
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
+	fun beforeSampleMethod(param: Collection<MyType>) {
+		// Advice implementation
+	}
+----
+
+To make this work, we would have to inspect every element of the collection, which is not
+reasonable, as we also cannot decide how to treat `null` values in general. To achieve
+something similar to this, you have to type the parameter to `Collection<?>` and manually
+check the type of the elements.
+
+[[aop-ataspectj-advice-params-names]]
+===== Determining Argument Names
+
+The parameter binding in advice invocations relies on matching names used in pointcut
+expressions to declared parameter names in advice and pointcut method signatures.
+Parameter names are not available through Java reflection, so Spring AOP uses the
+following strategy to determine parameter names:
+
+* If the parameter names have been explicitly specified by the user, the specified
+  parameter names are used. Both the advice and the pointcut annotations have
+  an optional `argNames` attribute that you can use to specify the argument names of
+  the annotated method. These argument names are available at runtime. The following example
+  shows how to use the `argNames` attribute:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before(value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
+			argNames="bean,auditable")
+	public void audit(Object bean, Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ... use code and bean
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before(value = "com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)", argNames = "bean,auditable")
+	fun audit(bean: Any, auditable: Auditable) {
+		val code = auditable.value()
+		// ... use code and bean
+	}
+----
+
+
+If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
+`JoinPoint.StaticPart` type, you can leave out the name of the parameter from the value
+of the `argNames` attribute. For example, if you modify the preceding advice to receive
+the join point object, the `argNames` attribute need not include it:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before(value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
+			argNames="bean,auditable")
+	public void audit(JoinPoint jp, Object bean, Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ... use code, bean, and jp
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before(value = "com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)", argNames = "bean,auditable")
+	fun audit(jp: JoinPoint, bean: Any, auditable: Auditable) {
+		val code = auditable.value()
+		// ... use code, bean, and jp
+	}
+----
+
+The special treatment given to the first parameter of the `JoinPoint`,
+`ProceedingJoinPoint`, and `JoinPoint.StaticPart` types is particularly convenient for
+advice instances that do not collect any other join point context. In such situations, you may
+omit the `argNames` attribute. For example, the following advice need not declare
+the `argNames` attribute:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Before("com.xyz.lib.Pointcuts.anyPublicMethod()")
+	public void audit(JoinPoint jp) {
+		// ... use jp
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Before("com.xyz.lib.Pointcuts.anyPublicMethod()")
+	fun audit(jp: JoinPoint) {
+		// ... use jp
+	}
+----
+
+* Using the `'argNames'` attribute is a little clumsy, so if the `'argNames'` attribute
+  has not been specified,  Spring AOP looks at the debug information for the
+  class and tries to determine the parameter names from the local variable table. This
+  information is present as long as the classes have been compiled with debug
+  information ( `'-g:vars'` at a minimum). The consequences of compiling with this flag
+  on are: (1) your code is slightly easier to understand (reverse engineer), (2)
+  the class file sizes are very slightly bigger (typically inconsequential), (3) the
+  optimization to remove unused local variables is not  applied by your compiler. In
+  other words, you should encounter no difficulties by building with this flag on.
++
+NOTE: If an @AspectJ aspect has been compiled by the AspectJ compiler (ajc) even without the
+debug information, you need not add the `argNames` attribute, as the compiler
+retain the needed information.
+
+* If the code has been compiled without the necessary debug information, Spring AOP
+  tries to deduce the pairing of binding variables to parameters (for example, if
+  only one variable is bound in the pointcut expression, and the advice method
+  takes only one parameter, the pairing is obvious). If the binding of variables is
+  ambiguous given the available information, an `AmbiguousBindingException` is
+  thrown.
+* If all of the above strategies fail, an `IllegalArgumentException` is thrown.
+
+[[aop-ataspectj-advice-proceeding-with-the-call]]
+===== Proceeding with Arguments
+
+We remarked earlier that we would describe how to write a `proceed` call with
+arguments that works consistently across Spring AOP and AspectJ. The solution is
+to ensure that the advice signature binds each of the method parameters in order.
+The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Around("execution(List<Account> find*(..)) && " +
+			"com.xyz.myapp.CommonPointcuts.inDataAccessLayer() && " +
+			"args(accountHolderNamePattern)")
+	public Object preProcessQueryPattern(ProceedingJoinPoint pjp,
+			String accountHolderNamePattern) throws Throwable {
+		String newPattern = preProcess(accountHolderNamePattern);
+		return pjp.proceed(new Object[] {newPattern});
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Around("execution(List<Account> find*(..)) && " +
+			"com.xyz.myapp.CommonPointcuts.inDataAccessLayer() && " +
+			"args(accountHolderNamePattern)")
+	fun preProcessQueryPattern(pjp: ProceedingJoinPoint,
+							accountHolderNamePattern: String): Any {
+		val newPattern = preProcess(accountHolderNamePattern)
+		return pjp.proceed(arrayOf<Any>(newPattern))
+	}
+----
+
+In many cases, you do this binding anyway (as in the preceding example).
+
+
+[[aop-ataspectj-advice-ordering]]
+==== Advice Ordering
+
+What happens when multiple pieces of advice all want to run at the same join point?
+Spring AOP follows the same precedence rules as AspectJ to determine the order of advice
+execution. The highest precedence advice runs first "on the way in" (so, given two pieces
+of before advice, the one with highest precedence runs first). "On the way out" from a
+join point, the highest precedence advice runs last (so, given two pieces of after
+advice, the one with the highest precedence will run second).
+
+When two pieces of advice defined in different aspects both need to run at the same
+join point, unless you specify otherwise, the order of execution is undefined. You can
+control the order of execution by specifying precedence. This is done in the normal
+Spring way by either implementing the `org.springframework.core.Ordered` interface in
+the aspect class or annotating it with the `@Order` annotation. Given two aspects, the
+aspect returning the lower value from `Ordered.getValue()` (or the annotation value) has
+the higher precedence.
+
+[NOTE]
+====
+As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+need to run at the same join point are assigned precedence based on their advice type in
+the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
+`@AfterReturning`, `@AfterThrowing`. Note, however, that due to the implementation style
+in Spring's `AspectJAfterAdvice`, an `@After` advice method will effectively be invoked
+after any `@AfterReturning` or `@AfterThrowing` advice methods in the same aspect.
+
+When two pieces of the same type of advice (for example, two `@After` advice methods)
+defined in the same `@Aspect` class both need to run at the same join point, the ordering
+is undefined (since there is no way to retrieve the source code declaration order through
+reflection for javac-compiled classes). Consider collapsing such advice methods into one
+advice method per join point in each `@Aspect` class or refactor the pieces of advice
+into separate `@Aspect` classes that you can order at the aspect level via `Ordered` or
+`@Order`.
+====
+
+
+[[aop-introductions]]
+=== Introductions
+
+Introductions (known as inter-type declarations in AspectJ) enable an aspect to declare
+that advised objects implement a given interface, and to provide an implementation of
+that interface on behalf of those objects.
+
+You can make an introduction by using the `@DeclareParents` annotation. This annotation is used
+to declare that matching types have a new parent (hence the name). For example, given an
+interface named `UsageTracked` and an implementation of that interface named `DefaultUsageTracked`,
+the following aspect declares that all implementors of service interfaces also implement
+the `UsageTracked` interface (to expose statistics via JMX for example):
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Aspect
+	public class UsageTracking {
+
+		@DeclareParents(value="com.xzy.myapp.service.*+", defaultImpl=DefaultUsageTracked.class)
+		public static UsageTracked mixin;
+
+		@Before("com.xyz.myapp.CommonPointcuts.businessService() && this(usageTracked)")
+		public void recordUsage(UsageTracked usageTracked) {
+			usageTracked.incrementUseCount();
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Aspect
+	class UsageTracking {
+
+		companion object {
+			@DeclareParents(value = "com.xzy.myapp.service.*+", defaultImpl = DefaultUsageTracked::class)
+			lateinit var mixin: UsageTracked
+		}
+
+		@Before("com.xyz.myapp.CommonPointcuts.businessService() && this(usageTracked)")
+		fun recordUsage(usageTracked: UsageTracked) {
+			usageTracked.incrementUseCount()
+		}
+	}
+----
+
+The interface to be implemented is determined by the type of the annotated field. The
+`value` attribute of the `@DeclareParents` annotation is an AspectJ type pattern. Any
+bean of a matching type implements the `UsageTracked` interface. Note that, in the
+before advice of the preceding example, service beans can be directly used as
+implementations of the `UsageTracked` interface. If accessing a bean programmatically,
+you would write the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	UsageTracked usageTracked = (UsageTracked) context.getBean("myService");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val usageTracked = context.getBean("myService") as UsageTracked
+----
+
+
+[[aop-instantiation-models]]
+=== Aspect Instantiation Models
+
+NOTE: This is an advanced topic. If you are just starting out with AOP, you can safely skip
+it until later.
+
+By default, there is a single instance of each aspect within the application
+context. AspectJ calls this the singleton instantiation model. It is possible to define
+aspects with alternate lifecycles. Spring supports AspectJ's `perthis` and `pertarget`
+instantiation models; `percflow`, `percflowbelow`, and `pertypewithin` are not currently
+supported.
+
+You can declare a `perthis` aspect by specifying a `perthis` clause in the `@Aspect`
+annotation. Consider the following example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
+	public class MyAspect {
+
+		private int someState;
+
+		@Before("com.xyz.myapp.CommonPointcuts.businessService()")
+		public void recordServiceUsage() {
+			// ...
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
+	class MyAspect {
+
+		private val someState: Int = 0
+
+		@Before("com.xyz.myapp.CommonPointcuts.businessService()")
+		fun recordServiceUsage() {
+			// ...
+		}
+
+	}
+----
+
+In the preceding example, the effect of the `perthis` clause is that one aspect instance
+is created for each unique service object that performs a business service (each unique
+object bound to `this` at join points matched by the pointcut expression). The aspect
+instance is created the first time that a method is invoked on the service object. The
+aspect goes out of scope when the service object goes out of scope. Before the aspect
+instance is created, none of the advice within it runs. As soon as the aspect instance
+has been created, the advice declared within it runs at matched join points, but only
+when the service object is the one with which this aspect is associated. See the AspectJ
+Programming Guide for more information on `per` clauses.
+
+The `pertarget` instantiation model works in exactly the same way as `perthis`, but it
+creates one aspect instance for each unique target object at matched join points.
+
+
+
+[[aop-ataspectj-example]]
+=== An AOP Example
+
+Now that you have seen how all the constituent parts work, we can put them together to do
+something useful.
+
+The execution of business services can sometimes fail due to concurrency issues (for
+example, a deadlock loser). If the operation is retried, it is likely to succeed
+on the next try. For business services where it is appropriate to retry in such
+conditions (idempotent operations that do not need to go back to the user for conflict
+resolution), we want to transparently retry the operation to avoid the client seeing a
+`PessimisticLockingFailureException`. This is a requirement that clearly cuts across
+multiple services in the service layer and, hence, is ideal for implementing through an
+aspect.
+
+Because we want to retry the operation, we need to use around advice so that we can
+call `proceed` multiple times. The following listing shows the basic aspect implementation:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Aspect
+	public class ConcurrentOperationExecutor implements Ordered {
+
+		private static final int DEFAULT_MAX_RETRIES = 2;
+
+		private int maxRetries = DEFAULT_MAX_RETRIES;
+		private int order = 1;
+
+		public void setMaxRetries(int maxRetries) {
+			this.maxRetries = maxRetries;
+		}
+
+		public int getOrder() {
+			return this.order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
+		public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+			int numAttempts = 0;
+			PessimisticLockingFailureException lockFailureException;
+			do {
+				numAttempts++;
+				try {
+					return pjp.proceed();
+				}
+				catch(PessimisticLockingFailureException ex) {
+					lockFailureException = ex;
+				}
+			} while(numAttempts <= this.maxRetries);
+			throw lockFailureException;
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Aspect
+	class ConcurrentOperationExecutor : Ordered {
+
+		private val DEFAULT_MAX_RETRIES = 2
+		private var maxRetries = DEFAULT_MAX_RETRIES
+		private var order = 1
+
+		fun setMaxRetries(maxRetries: Int) {
+			this.maxRetries = maxRetries
+		}
+
+		override fun getOrder(): Int {
+			return this.order
+		}
+
+		fun setOrder(order: Int) {
+			this.order = order
+		}
+
+		@Around("com.xyz.myapp.CommonPointcuts.businessService()")
+		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+			var numAttempts = 0
+			var lockFailureException: PessimisticLockingFailureException
+			do {
+				numAttempts++
+				try {
+					return pjp.proceed()
+				} catch (ex: PessimisticLockingFailureException) {
+					lockFailureException = ex
+				}
+
+			} while (numAttempts <= this.maxRetries)
+			throw lockFailureException
+		}
+	}
+----
+
+Note that the aspect implements the `Ordered` interface so that we can set the precedence of
+the aspect higher than the transaction advice (we want a fresh transaction each time we
+retry). The `maxRetries` and `order` properties are both configured by Spring. The
+main action happens in the `doConcurrentOperation` around advice. Notice that, for the
+moment, we apply the retry logic to each `businessService()`. We try to proceed,
+and if we fail with a `PessimisticLockingFailureException`, we try again, unless
+we have exhausted all of our retry attempts.
+
+The corresponding Spring configuration follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspectj-autoproxy/>
+
+	<bean id="concurrentOperationExecutor" class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor">
+		<property name="maxRetries" value="3"/>
+		<property name="order" value="100"/>
+	</bean>
+----
+
+To refine the aspect so that it retries only idempotent operations, we might define the following
+`Idempotent` annotation:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface Idempotent {
+		// marker annotation
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Retention(AnnotationRetention.RUNTIME)
+	annotation class Idempotent// marker annotation
+----
+
+We can then use the annotation to annotate the implementation of service operations. The change
+to the aspect to retry only idempotent operations involves refining the pointcut
+expression so that only `@Idempotent` operations match, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Around("com.xyz.myapp.CommonPointcuts.businessService() && " +
+			"@annotation(com.xyz.myapp.service.Idempotent)")
+	public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Around("com.xyz.myapp.CommonPointcuts.businessService() && " +
+			"@annotation(com.xyz.myapp.service.Idempotent)")
+	fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+		// ...
+	}
+----
+
+
+
+[[aop-schema]]
+== Schema-based AOP Support
+
+If you prefer an XML-based format, Spring also offers support for defining aspects
+using the `aop` namespace tags. The exact same pointcut expressions and advice kinds
+as when using the @AspectJ style are supported. Hence, in this section we focus on
+that syntax and refer the reader to the discussion in the previous section
+(<<aop-ataspectj>>) for an understanding of writing pointcut expressions and the binding
+of advice parameters.
+
+To use the aop namespace tags described in this section, you need to import the
+`spring-aop` schema, as described in <<core.adoc#xsd-schemas,
+XML Schema-based configuration>>. See <<core.adoc#xsd-schemas-aop, the AOP schema>>
+for how to import the tags in the `aop` namespace.
+
+Within your Spring configurations, all aspect and advisor elements must be placed within
+an `<aop:config>` element (you can have more than one `<aop:config>` element in an
+application context configuration). An `<aop:config>` element can contain pointcut,
+advisor, and aspect elements (note that these must be declared in that order).
+
+WARNING: The `<aop:config>` style of configuration makes heavy use of Spring's
+<<aop-autoproxy, auto-proxying>> mechanism. This can cause issues (such as advice
+not being woven) if you already use explicit auto-proxying through the use of
+`BeanNameAutoProxyCreator` or something similar. The recommended usage pattern is to
+use either only the `<aop:config>` style or only the `AutoProxyCreator` style and
+never mix them.
+
+
+
+[[aop-schema-declaring-an-aspect]]
+=== Declaring an Aspect
+
+When you use the schema support, an aspect is a regular Java object defined as a bean in
+your Spring application context. The state and behavior are captured in the fields and
+methods of the object, and the pointcut and advice information are captured in the XML.
+
+You can declare an aspect by using the `<aop:aspect>` element, and reference the backing bean
+by using the `ref` attribute, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:config>
+		<aop:aspect id="myAspect" ref="aBean">
+			...
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="aBean" class="...">
+		...
+	</bean>
+----
+
+The bean that backs the aspect (`aBean` in this case) can of course be configured and
+dependency injected just like any other Spring bean.
+
+
+
+[[aop-schema-pointcuts]]
+=== Declaring a Pointcut
+
+You can declare a named pointcut inside an `<aop:config>` element, letting the pointcut
+definition be shared across several aspects and advisors.
+
+A pointcut that represents the execution of any business service in the service layer can
+be defined as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+	</aop:config>
+----
+
+Note that the pointcut expression itself is using the same AspectJ pointcut expression
+language as described in <<aop-ataspectj>>. If you use the schema based declaration
+style, you can refer to named pointcuts defined in types (@Aspects) within the
+pointcut expression. Another way of defining the above pointcut would be as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="com.xyz.myapp.CommonPointcuts.businessService()"/>
+
+	</aop:config>
+----
+
+Assume that you have a `CommonPointcuts` aspect as described in <<aop-common-pointcuts>>.
+
+Then declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+			...
+
+		</aop:aspect>
+
+	</aop:config>
+----
+
+In much the same way as an @AspectJ aspect, pointcuts declared by using the schema based
+definition style can collect join point context. For example, the following pointcut
+collects the `this` object as the join point context and passes it to the advice:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.myapp.service.*.*(..)) &amp;&amp; this(service)"/>
+
+			<aop:before pointcut-ref="businessService" method="monitor"/>
+
+			...
+
+		</aop:aspect>
+
+	</aop:config>
+----
+
+The advice must be declared to receive the collected join point context by including
+parameters of the matching names, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public void monitor(Object service) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun monitor(service: Any) {
+		// ...
+	}
+----
+
+When combining pointcut sub-expressions, `+&amp;&amp;+` is awkward within an XML
+document, so you can use the `and`, `or`, and `not` keywords in place of `+&amp;&amp;+`,
+`||`, and `!`, respectively. For example, the previous pointcut can be better written as
+follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="myAspect" ref="aBean">
+
+			<aop:pointcut id="businessService"
+				expression="execution(* com.xyz.myapp.service.*.*(..)) and this(service)"/>
+
+			<aop:before pointcut-ref="businessService" method="monitor"/>
+
+			...
+		</aop:aspect>
+	</aop:config>
+----
+
+Note that pointcuts defined in this way are referred to by their XML `id` and cannot be
+used as named pointcuts to form composite pointcuts. The named pointcut support in the
+schema-based definition style is thus more limited than that offered by the @AspectJ
+style.
+
+
+
+[[aop-schema-advice]]
+=== Declaring Advice
+
+The schema-based AOP support uses the same five kinds of advice as the @AspectJ style, and they have
+exactly the same semantics.
+
+
+[[aop-schema-advice-before]]
+==== Before Advice
+
+Before advice runs before a matched method execution. It is declared inside an
+`<aop:aspect>` by using the `<aop:before>` element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="beforeExample" ref="aBean">
+
+		<aop:before
+			pointcut-ref="dataAccessOperation"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+Here, `dataAccessOperation` is the `id` of a pointcut defined at the top (`<aop:config>`)
+level. To define the pointcut inline instead, replace the `pointcut-ref` attribute with
+a `pointcut` attribute, as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:aspect id="beforeExample" ref="aBean">
+
+		<aop:before
+			pointcut="execution(* com.xyz.myapp.dao.*.*(..))"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+As we noted in the discussion of the @AspectJ style, using named pointcuts can
+significantly improve the readability of your code.
+
+The `method` attribute identifies a method (`doAccessCheck`) that provides the body of
+the advice. This method must be defined for the bean referenced by the aspect element
+that contains the advice. Before a data access operation is performed (a method execution
+join point matched by the pointcut expression), the `doAccessCheck` method on the aspect
+bean is invoked.
+
+
+[[aop-schema-advice-after-returning]]
+==== After Returning Advice
+
+After returning advice runs when a matched method execution completes normally. It is
+declared inside an `<aop:aspect>` in the same way as before advice. The following example
+shows how to declare it:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="afterReturningExample" ref="aBean">
+
+		<aop:after-returning
+			pointcut-ref="dataAccessOperation"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+As in the @AspectJ style, you can get the return value within the advice body.
+To do so, use the `returning` attribute to specify the name of the parameter to which
+the return value should be passed, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="afterReturningExample" ref="aBean">
+
+		<aop:after-returning
+			pointcut-ref="dataAccessOperation"
+			returning="retVal"
+			method="doAccessCheck"/>
+
+		...
+
+	</aop:aspect>
+----
+
+The `doAccessCheck` method must declare a parameter named `retVal`. The type of this
+parameter constrains matching in the same way as described for `@AfterReturning`. For
+example, you can declare the method signature as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public void doAccessCheck(Object retVal) {...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun doAccessCheck(retVal: Any) {...
+----
+
+
+[[aop-schema-advice-after-throwing]]
+==== After Throwing Advice
+
+After throwing advice runs when a matched method execution exits by throwing an
+exception. It is declared inside an `<aop:aspect>` by using the `after-throwing` element,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="afterThrowingExample" ref="aBean">
+
+		<aop:after-throwing
+			pointcut-ref="dataAccessOperation"
+			method="doRecoveryActions"/>
+
+		...
+
+	</aop:aspect>
+----
+
+As in the @AspectJ style, you can get the thrown exception within the advice body.
+To do so, use the `throwing` attribute to specify the name of the parameter to
+which the exception should be passed as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="afterThrowingExample" ref="aBean">
+
+		<aop:after-throwing
+			pointcut-ref="dataAccessOperation"
+			throwing="dataAccessEx"
+			method="doRecoveryActions"/>
+
+		...
+
+	</aop:aspect>
+----
+
+The `doRecoveryActions` method must declare a parameter named `dataAccessEx`. The type of
+this parameter constrains matching in the same way as described for `@AfterThrowing`. For
+example, the method signature may be declared as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public void doRecoveryActions(DataAccessException dataAccessEx) {...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun doRecoveryActions(dataAccessEx: DataAccessException) {...
+----
+
+
+[[aop-schema-advice-after-finally]]
+==== After (Finally) Advice
+
+After (finally) advice runs no matter how a matched method execution exits. You can declare it
+by using the `after` element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="afterFinallyExample" ref="aBean">
+
+		<aop:after
+			pointcut-ref="dataAccessOperation"
+			method="doReleaseLock"/>
+
+		...
+
+	</aop:aspect>
+----
+
+
+[[aop-schema-advice-around]]
+==== Around Advice
+
+The last kind of advice is around advice. Around advice runs "around" a matched method
+execution. It has the opportunity to do work both before and after the method runs
+and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used to share state before and after a method
+execution in a thread-safe manner (starting and stopping a timer, for example). Always
+use the least powerful form of advice that meets your requirements. Do not use around
+advice if before advice can do the job.
+
+You can declare around advice by using the `aop:around` element. The first parameter of the
+advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
+calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
+run. The `proceed` method may also be called with an `Object[]`. The values
+in the array are used as the arguments to the method execution when it proceeds. See
+<<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
+The following example shows how to declare around advice in XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="aroundExample" ref="aBean">
+
+		<aop:around
+			pointcut-ref="businessService"
+			method="doBasicProfiling"/>
+
+		...
+
+	</aop:aspect>
+----
+
+The implementation of the `doBasicProfiling` advice can be exactly the same as in the
+@AspectJ example (minus the annotation, of course), as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+		// start stopwatch
+		Object retVal = pjp.proceed();
+		// stop stopwatch
+		return retVal;
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
+		// start stopwatch
+		val retVal = pjp.proceed()
+		// stop stopwatch
+		return pjp.proceed()
+	}
+----
+
+
+[[aop-schema-params]]
+==== Advice Parameters
+
+The schema-based declaration style supports fully typed advice in the same way as
+described for the @AspectJ support -- by matching pointcut parameters by name against
+advice method parameters. See <<aop-ataspectj-advice-params>> for details. If you wish
+to explicitly specify argument names for the advice methods (not relying on the
+detection strategies previously described), you can do so by using the `arg-names`
+attribute of the advice element, which is treated in the same manner as the `argNames`
+attribute in an advice annotation (as described in <<aop-ataspectj-advice-params-names>>).
+The following example shows how to specify an argument name in XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:before
+		pointcut="com.xyz.lib.Pointcuts.anyPublicMethod() and @annotation(auditable)"
+		method="audit"
+		arg-names="auditable"/>
+----
+
+The `arg-names` attribute accepts a comma-delimited list of parameter names.
+
+The following slightly more involved example of the XSD-based approach shows
+some around advice used in conjunction with a number of strongly typed parameters:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package x.y.service;
+
+	public interface PersonService {
+
+		Person getPerson(String personName, int age);
+	}
+
+	public class DefaultPersonService implements PersonService {
+
+		public Person getPerson(String name, int age) {
+			return new Person(name, age);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package x.y.service
+
+	interface PersonService {
+
+		fun getPerson(personName: String, age: Int): Person
+	}
+
+	class DefaultPersonService : PersonService {
+
+		fun getPerson(name: String, age: Int): Person {
+			return Person(name, age)
+		}
+	}
+----
+
+Next up is the aspect. Notice the fact that the `profile(..)` method accepts a number of
+strongly-typed parameters, the first of which happens to be the join point used to
+proceed with the method call. The presence of this parameter is an indication that the
+`profile(..)` is to be used as `around` advice, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package x.y;
+
+	import org.aspectj.lang.ProceedingJoinPoint;
+	import org.springframework.util.StopWatch;
+
+	public class SimpleProfiler {
+
+		public Object profile(ProceedingJoinPoint call, String name, int age) throws Throwable {
+			StopWatch clock = new StopWatch("Profiling for '" + name + "' and '" + age + "'");
+			try {
+				clock.start(call.toShortString());
+				return call.proceed();
+			} finally {
+				clock.stop();
+				System.out.println(clock.prettyPrint());
+			}
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.springframework.util.StopWatch
+
+	class SimpleProfiler {
+
+		fun profile(call: ProceedingJoinPoint, name: String, age: Int): Any {
+			val clock = StopWatch("Profiling for '$name' and '$age'")
+			try {
+				clock.start(call.toShortString())
+				return call.proceed()
+			} finally {
+				clock.stop()
+				println(clock.prettyPrint())
+			}
+		}
+	}
+----
+
+Finally, the following example XML configuration effects the execution of the
+preceding advice for a particular join point:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
+		<bean id="personService" class="x.y.service.DefaultPersonService"/>
+
+		<!-- this is the actual advice itself -->
+		<bean id="profiler" class="x.y.SimpleProfiler"/>
+
+		<aop:config>
+			<aop:aspect ref="profiler">
+
+				<aop:pointcut id="theExecutionOfSomePersonServiceMethod"
+					expression="execution(* x.y.service.PersonService.getPerson(String,int))
+					and args(name, age)"/>
+
+				<aop:around pointcut-ref="theExecutionOfSomePersonServiceMethod"
+					method="profile"/>
+
+			</aop:aspect>
+		</aop:config>
+
+	</beans>
+----
+
+Consider the following driver script:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import org.springframework.beans.factory.BeanFactory;
+	import org.springframework.context.support.ClassPathXmlApplicationContext;
+	import x.y.service.PersonService;
+
+	public final class Boot {
+
+		public static void main(final String[] args) throws Exception {
+			BeanFactory ctx = new ClassPathXmlApplicationContext("x/y/plain.xml");
+			PersonService person = (PersonService) ctx.getBean("personService");
+			person.getPerson("Pengo", 12);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("x/y/plain.xml")
+		val person = ctx.getBean("personService") as PersonService
+		person.getPerson("Pengo", 12)
+	}
+----
+
+With such a Boot class, we would get output similar to the following on standard output:
+
+[literal,subs="verbatim,quotes"]
+----
+StopWatch 'Profiling for 'Pengo' and '12'': running time (millis) = 0
+-----------------------------------------
+ms     %     Task name
+-----------------------------------------
+00000  ?  execution(getFoo)
+----
+
+
+[[aop-ordering]]
+==== Advice Ordering
+
+When multiple pieces of advice need to run at the same join point (executing method)
+the ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
+between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
+by either adding the `@Order` annotation to the bean that backs the aspect or by having
+the bean implement the `Ordered` interface.
+
+[NOTE]
+====
+In contrast to the precedence rules for advice methods defined in the same `@Aspect`
+class, when two pieces of advice defined in the same `<aop:aspect>` element both need to
+run at the same join point, the precedence is determined by the order in which the advice
+elements are declared within the enclosing `<aop:aspect>` element, from highest to lowest
+precedence.
+
+For example, given an `around` advice and a `before` advice defined in the same
+`<aop:aspect>` element that apply to the same join point, to ensure that the `around`
+advice has higher precedence than the `before` advice, the `<aop:around>` element must be
+declared before the `<aop:before>` element.
+
+As a general rule of thumb, if you find that you have multiple pieces of advice defined
+in the same `<aop:aspect>` element that apply to the same join point, consider collapsing
+such advice methods into one advice method per join point in each `<aop:aspect>` element
+or refactor the pieces of advice into separate `<aop:aspect>` elements that you can order
+at the aspect level.
+====
+
+
+
+[[aop-schema-introductions]]
+=== Introductions
+
+Introductions (known as inter-type declarations in AspectJ) let an aspect declare
+that advised objects implement a given interface and provide an implementation of
+that interface on behalf of those objects.
+
+You can make an introduction by using the `aop:declare-parents` element inside an `aop:aspect`.
+You can use the `aop:declare-parents` element to declare that matching types have a new parent (hence the name).
+For example, given an interface named `UsageTracked` and an implementation of that interface named
+`DefaultUsageTracked`, the following aspect declares that all implementors of service
+interfaces also implement the `UsageTracked` interface. (In order to expose statistics
+through JMX for example.)
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspect id="usageTrackerAspect" ref="usageTracking">
+
+		<aop:declare-parents
+			types-matching="com.xzy.myapp.service.*+"
+			implement-interface="com.xyz.myapp.service.tracking.UsageTracked"
+			default-impl="com.xyz.myapp.service.tracking.DefaultUsageTracked"/>
+
+		<aop:before
+			pointcut="com.xyz.myapp.CommonPointcuts.businessService()
+				and this(usageTracked)"
+				method="recordUsage"/>
+
+	</aop:aspect>
+----
+
+The class that backs the `usageTracking` bean would then contain the following method:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public void recordUsage(UsageTracked usageTracked) {
+		usageTracked.incrementUseCount();
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun recordUsage(usageTracked: UsageTracked) {
+		usageTracked.incrementUseCount()
+	}
+----
+
+The interface to be implemented is determined by the `implement-interface` attribute. The
+value of the `types-matching` attribute is an AspectJ type pattern. Any bean of a
+matching type implements the `UsageTracked` interface. Note that, in the before
+advice of the preceding example, service beans can be directly used as implementations of
+the `UsageTracked` interface. To access a bean programmatically, you could write the
+following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	UsageTracked usageTracked = (UsageTracked) context.getBean("myService");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val usageTracked = context.getBean("myService") as UsageTracked
+----
+
+
+
+[[aop-schema-instatiation-models]]
+=== Aspect Instantiation Models
+
+The only supported instantiation model for schema-defined aspects is the singleton
+model. Other instantiation models may be supported in future releases.
+
+
+
+[[aop-schema-advisors]]
+=== Advisors
+
+The concept of "`advisors`" comes from the AOP support defined in Spring
+and does not have a direct equivalent in AspectJ. An advisor is like a small
+self-contained aspect that has a single piece of advice. The advice itself is
+represented by a bean and must implement one of the advice interfaces described in
+<<aop-api-advice-types>>. Advisors can take advantage of AspectJ pointcut expressions.
+
+Spring supports the advisor concept with the `<aop:advisor>` element. You most
+commonly see it used in conjunction with transactional advice, which also has its own
+namespace support in Spring. The following example shows an advisor:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:pointcut id="businessService"
+			expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+		<aop:advisor
+			pointcut-ref="businessService"
+			advice-ref="tx-advice"/>
+
+	</aop:config>
+
+	<tx:advice id="tx-advice">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+----
+
+As well as the `pointcut-ref` attribute used in the preceding example, you can also use the
+`pointcut` attribute to define a pointcut expression inline.
+
+To define the precedence of an advisor so that the advice can participate in ordering,
+use the `order` attribute to define the `Ordered` value of the advisor.
+
+
+
+[[aop-schema-example]]
+=== An AOP Schema Example
+
+This section shows how the concurrent locking failure retry example from
+<<aop-ataspectj-example>> looks when rewritten with the schema support.
+
+The execution of business services can sometimes fail due to concurrency issues (for
+example, a deadlock loser). If the operation is retried, it is likely to succeed
+on the next try. For business services where it is appropriate to retry in such
+conditions (idempotent operations that do not need to go back to the user for conflict
+resolution), we want to transparently retry the operation to avoid the client seeing a
+`PessimisticLockingFailureException`. This is a requirement that clearly cuts across
+multiple services in the service layer and, hence, is ideal for implementing through an
+aspect.
+
+Because we want to retry the operation, we need to use around advice so that we can
+call `proceed` multiple times. The following listing shows the basic aspect implementation
+(which is a regular Java class that uses the schema support):
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class ConcurrentOperationExecutor implements Ordered {
+
+		private static final int DEFAULT_MAX_RETRIES = 2;
+
+		private int maxRetries = DEFAULT_MAX_RETRIES;
+		private int order = 1;
+
+		public void setMaxRetries(int maxRetries) {
+			this.maxRetries = maxRetries;
+		}
+
+		public int getOrder() {
+			return this.order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+			int numAttempts = 0;
+			PessimisticLockingFailureException lockFailureException;
+			do {
+				numAttempts++;
+				try {
+					return pjp.proceed();
+				}
+				catch(PessimisticLockingFailureException ex) {
+					lockFailureException = ex;
+				}
+			} while(numAttempts <= this.maxRetries);
+			throw lockFailureException;
+		}
+
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class ConcurrentOperationExecutor : Ordered {
+
+		private val DEFAULT_MAX_RETRIES = 2
+
+		private var maxRetries = DEFAULT_MAX_RETRIES
+		private var order = 1
+
+		fun setMaxRetries(maxRetries: Int) {
+			this.maxRetries = maxRetries
+		}
+
+		override fun getOrder(): Int {
+			return this.order
+		}
+
+		fun setOrder(order: Int) {
+			this.order = order
+		}
+
+		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
+			var numAttempts = 0
+			var lockFailureException: PessimisticLockingFailureException
+			do {
+				numAttempts++
+				try {
+					return pjp.proceed()
+				} catch (ex: PessimisticLockingFailureException) {
+					lockFailureException = ex
+				}
+
+			} while (numAttempts <= this.maxRetries)
+			throw lockFailureException
+		}
+	}
+----
+
+Note that the aspect implements the `Ordered` interface so that we can set the precedence of
+the aspect higher than the transaction advice (we want a fresh transaction each time we
+retry). The `maxRetries` and `order` properties are both configured by Spring. The
+main action happens in the `doConcurrentOperation` around advice method. We try to
+proceed. If we fail with a `PessimisticLockingFailureException`, we try again,
+unless we have exhausted all of our retry attempts.
+
+NOTE: This class is identical to the one used in the @AspectJ example, but with the
+annotations removed.
+
+The corresponding Spring configuration is as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:config>
+
+		<aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
+
+			<aop:pointcut id="idempotentOperation"
+				expression="execution(* com.xyz.myapp.service.*.*(..))"/>
+
+			<aop:around
+				pointcut-ref="idempotentOperation"
+				method="doConcurrentOperation"/>
+
+		</aop:aspect>
+
+	</aop:config>
+
+	<bean id="concurrentOperationExecutor"
+		class="com.xyz.myapp.service.impl.ConcurrentOperationExecutor">
+			<property name="maxRetries" value="3"/>
+			<property name="order" value="100"/>
+	</bean>
+----
+
+Notice that, for the time, being we assume that all business services are idempotent. If
+this is not the case, we can refine the aspect so that it retries only genuinely
+idempotent operations, by introducing an `Idempotent` annotation and using the annotation
+to annotate the implementation of service operations, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface Idempotent {
+		// marker annotation
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Retention(AnnotationRetention.RUNTIME)
+	annotation class Idempotent {
+		// marker annotation
+	}
+----
+
+The
+change to the aspect to retry only idempotent operations involves refining the
+pointcut expression so that only `@Idempotent` operations match, as follows:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:pointcut id="idempotentOperation"
+			expression="execution(* com.xyz.myapp.service.*.*(..)) and
+			@annotation(com.xyz.myapp.service.Idempotent)"/>
+----
+
+
+
+
+[[aop-choosing]]
+== Choosing which AOP Declaration Style to Use
+
+Once you have decided that an aspect is the best approach for implementing a given
+requirement, how do you decide between using Spring AOP or AspectJ and between the
+Aspect language (code) style, the @AspectJ annotation style, or the Spring XML style? These
+decisions are influenced by a number of factors including application requirements,
+development tools, and team familiarity with AOP.
+
+
+
+[[aop-spring-or-aspectj]]
+=== Spring AOP or Full AspectJ?
+
+Use the simplest thing that can work. Spring AOP is simpler than using full AspectJ, as
+there is no requirement to introduce the AspectJ compiler / weaver into your development
+and build processes. If you only need to advise the execution of operations on Spring
+beans, Spring AOP is the right choice. If you need to advise objects not managed by
+the Spring container (such as domain objects, typically), you need to use
+AspectJ. You also need to use AspectJ if you wish to advise join points other than
+simple method executions (for example, field get or set join points and so on).
+
+When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
+the "`code style`") or the @AspectJ annotation style. Clearly, if you do not use Java
+5+, the choice has been made for you: Use the code style. If aspects play a large
+role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
+Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
+preferred option. It is cleaner and simpler because the language was purposefully
+designed for writing aspects. If you do not use Eclipse or have only a few aspects
+that do not play a major role in your application, you may want to consider using
+the @AspectJ style, sticking with regular Java compilation in your IDE, and adding
+an aspect weaving phase to your build script.
+
+
+
+[[aop-ataspectj-or-xml]]
+=== @AspectJ or XML for Spring AOP?
+
+If you have chosen to use Spring AOP, you have a choice of @AspectJ or XML style.
+There are various tradeoffs to consider.
+
+The XML style may most familiar to existing Spring users, and it is backed by genuine
+POJOs. When using AOP as a tool to configure enterprise services, XML can be a good
+choice (a good test is whether you consider the pointcut expression to be a part of your
+configuration that you might want to change independently). With the XML style, it is
+arguably clearer from your configuration which aspects are present in the system.
+
+The XML style has two disadvantages. First, it does not fully encapsulate the
+implementation of the requirement it addresses in a single place. The DRY principle says
+that there should be a single, unambiguous, authoritative representation of any piece of
+knowledge within a system. When using the XML style, the knowledge of how a requirement
+is implemented is split across the declaration of the backing bean class and the XML in
+the configuration file. When you use the @AspectJ style, this information is encapsulated
+in a single module: the aspect. Secondly, the XML style is slightly more limited in what
+it can express than the @AspectJ style: Only the "`singleton`" aspect instantiation model
+is supported, and it is not possible to combine named pointcuts declared in XML.
+For example, in the @AspectJ style you can write something like the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Pointcut("execution(* get*())")
+	public void propertyAccess() {}
+
+	@Pointcut("execution(org.xyz.Account+ *(..))")
+	public void operationReturningAnAccount() {}
+
+	@Pointcut("propertyAccess() && operationReturningAnAccount()")
+	public void accountPropertyAccess() {}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Pointcut("execution(* get*())")
+	fun propertyAccess() {}
+
+	@Pointcut("execution(org.xyz.Account+ *(..))")
+	fun operationReturningAnAccount() {}
+
+	@Pointcut("propertyAccess() && operationReturningAnAccount()")
+	fun accountPropertyAccess() {}
+----
+
+In the XML style you can declare the first two pointcuts:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:pointcut id="propertyAccess"
+			expression="execution(* get*())"/>
+
+	<aop:pointcut id="operationReturningAnAccount"
+			expression="execution(org.xyz.Account+ *(..))"/>
+----
+
+The downside of the XML approach is that you cannot define the
+`accountPropertyAccess` pointcut by combining these definitions.
+
+The @AspectJ style supports additional instantiation models and richer pointcut
+composition. It has the advantage of keeping the aspect as a modular unit. It also has
+the advantage that the @AspectJ aspects can be understood (and thus consumed) both by
+Spring AOP and by AspectJ. So, if you later decide you need the capabilities of AspectJ
+to implement additional requirements, you can easily migrate to a classic AspectJ setup.
+On balance, the Spring team prefers the @AspectJ style for custom aspects beyond simple
+configuration of enterprise services.
+
+
+
+
+[[aop-mixing-styles]]
+== Mixing Aspect Types
+
+It is perfectly possible to mix @AspectJ style aspects by using the auto-proxying support,
+schema-defined `<aop:aspect>` aspects, `<aop:advisor>` declared advisors, and even proxies
+and interceptors in other styles in the same configuration. All of these are implemented
+by using the same underlying support mechanism and can co-exist without any difficulty.
+
+
+
+
+[[aop-proxying]]
+== Proxying Mechanisms
+
+Spring AOP uses either JDK dynamic proxies or CGLIB to create the proxy for a given
+target object. JDK dynamic proxies are built into the JDK, whereas CGLIB is a common
+open-source class definition library (repackaged into `spring-core`).
+
+If the target object to be proxied implements at least one interface, a JDK dynamic
+proxy is used. All of the interfaces implemented by the target type are proxied.
+If the target object does not implement any interfaces, a CGLIB proxy is created.
+
+If you want to force the use of CGLIB proxying (for example, to proxy every method
+defined for the target object, not only those implemented by its interfaces),
+you can do so. However, you should consider the following issues:
+
+* With CGLIB, `final` methods cannot be advised, as they cannot be overridden in
+  runtime-generated subclasses.
+* As of Spring 4.0, the constructor of your proxied object is NOT called twice anymore,
+  since the CGLIB proxy instance is created through Objenesis. Only if your JVM does
+  not allow for constructor bypassing, you might see double invocations and
+  corresponding debug log entries from Spring's AOP support.
+
+To force the use of CGLIB proxies, set the value of the `proxy-target-class` attribute
+of the `<aop:config>` element to true, as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:config proxy-target-class="true">
+		<!-- other beans defined here... -->
+	</aop:config>
+----
+
+To force CGLIB proxying when you use the @AspectJ auto-proxy support, set the
+`proxy-target-class` attribute of the `<aop:aspectj-autoproxy>` element to `true`,
+as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+----
+
+[NOTE]
+====
+Multiple `<aop:config/>` sections are collapsed into a single unified auto-proxy creator
+at runtime, which applies the _strongest_ proxy settings that any of the
+`<aop:config/>` sections (typically from different XML bean definition files) specified.
+This also applies to the `<tx:annotation-driven/>` and `<aop:aspectj-autoproxy/>`
+elements.
+
+To be clear, using `proxy-target-class="true"` on `<tx:annotation-driven/>`,
+`<aop:aspectj-autoproxy/>`, or `<aop:config/>` elements forces the use of CGLIB
+proxies _for all three of them_.
+====
+
+
+
+[[aop-understanding-aop-proxies]]
+=== Understanding AOP Proxies
+
+Spring AOP is proxy-based. It is vitally important that you grasp the semantics of
+what that last statement actually means before you write your own aspects or use any of
+the Spring AOP-based aspects supplied with the Spring Framework.
+
+Consider first the scenario where you have a plain-vanilla, un-proxied,
+nothing-special-about-it, straight object reference, as the following
+code snippet shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class SimplePojo implements Pojo {
+
+		public void foo() {
+			// this next method invocation is a direct call on the 'this' reference
+			this.bar();
+		}
+
+		public void bar() {
+			// some logic...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class SimplePojo : Pojo {
+
+		fun foo() {
+			// this next method invocation is a direct call on the 'this' reference
+			this.bar()
+		}
+
+		fun bar() {
+			// some logic...
+		}
+	}
+----
+
+If you invoke a method on an object reference, the method is invoked directly on
+that object reference, as the following image and listing show:
+
+image::images/aop-proxy-plain-pojo-call.png[]
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class Main {
+
+		public static void main(String[] args) {
+			Pojo pojo = new SimplePojo();
+			// this is a direct method call on the 'pojo' reference
+			pojo.foo();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun main() {
+		val pojo = SimplePojo()
+		// this is a direct method call on the 'pojo' reference
+		pojo.foo()
+	}
+----
+
+Things change slightly when the reference that client code has is a proxy. Consider the
+following diagram and code snippet:
+
+image::images/aop-proxy-call.png[]
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class Main {
+
+		public static void main(String[] args) {
+			ProxyFactory factory = new ProxyFactory(new SimplePojo());
+			factory.addInterface(Pojo.class);
+			factory.addAdvice(new RetryAdvice());
+
+			Pojo pojo = (Pojo) factory.getProxy();
+			// this is a method call on the proxy!
+			pojo.foo();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+fun main() {
+	val factory = ProxyFactory(SimplePojo())
+	factory.addInterface(Pojo::class.java)
+	factory.addAdvice(RetryAdvice())
+
+	val pojo = factory.proxy as Pojo
+	// this is a method call on the proxy!
+	pojo.foo()
+}
+----
+
+The key thing to understand here is that the client code inside the `main(..)` method
+of the `Main` class has a reference to the proxy. This means that method calls on that
+object reference are calls on the proxy. As a result, the proxy can delegate to all of
+the interceptors (advice) that are relevant to that particular method call. However,
+once the call has finally reached the target object (the `SimplePojo` reference in
+this case), any method calls that it may make on itself, such as `this.bar()` or
+`this.foo()`, are going to be invoked against the `this` reference, and not the proxy.
+This has important implications. It means that self-invocation is not going to result
+in the advice associated with a method invocation getting a chance to run.
+
+Okay, so what is to be done about this? The best approach (the term "best" is used
+loosely here) is to refactor your code such that the self-invocation does not happen.
+This does entail some work on your part, but it is the best, least-invasive approach.
+The next approach is absolutely horrendous, and we hesitate to point it out, precisely
+because it is so horrendous. You can (painful as it is to us) totally tie the logic
+within your class to Spring AOP, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class SimplePojo implements Pojo {
+
+		public void foo() {
+			// this works, but... gah!
+			((Pojo) AopContext.currentProxy()).bar();
+		}
+
+		public void bar() {
+			// some logic...
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class SimplePojo : Pojo {
+
+		fun foo() {
+			// this works, but... gah!
+			(AopContext.currentProxy() as Pojo).bar()
+		}
+
+		fun bar() {
+			// some logic...
+		}
+	}
+----
+
+This totally couples your code to Spring AOP, and it makes the class itself aware of
+the fact that it is being used in an AOP context, which flies in the face of AOP. It
+also requires some additional configuration when the proxy is being created, as the
+following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	public class Main {
+
+		public static void main(String[] args) {
+			ProxyFactory factory = new ProxyFactory(new SimplePojo());
+			factory.addInterface(Pojo.class);
+			factory.addAdvice(new RetryAdvice());
+			factory.setExposeProxy(true);
+
+			Pojo pojo = (Pojo) factory.getProxy();
+			// this is a method call on the proxy!
+			pojo.foo();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	fun main() {
+		val factory = ProxyFactory(SimplePojo())
+		factory.addInterface(Pojo::class.java)
+		factory.addAdvice(RetryAdvice())
+		factory.isExposeProxy = true
+
+		val pojo = factory.proxy as Pojo
+		// this is a method call on the proxy!
+		pojo.foo()
+	}
+----
+
+Finally, it must be noted that AspectJ does not have this self-invocation issue because
+it is not a proxy-based AOP framework.
+
+
+
+
+[[aop-aspectj-programmatic]]
+== Programmatic Creation of @AspectJ Proxies
+
+In addition to declaring aspects in your configuration by using either `<aop:config>`
+or `<aop:aspectj-autoproxy>`, it is also possible to programmatically create proxies
+that advise target objects. For the full details of Spring's AOP API, see the
+<<aop-api, next chapter>>. Here, we want to focus on the ability to automatically
+create proxies by using @AspectJ aspects.
+
+You can use the `org.springframework.aop.aspectj.annotation.AspectJProxyFactory` class
+to create a proxy for a target object that is advised by one or more @AspectJ aspects.
+The basic usage for this class is very simple, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// create a factory that can generate a proxy for the given target object
+	AspectJProxyFactory factory = new AspectJProxyFactory(targetObject);
+
+	// add an aspect, the class must be an @AspectJ aspect
+	// you can call this as many times as you need with different aspects
+	factory.addAspect(SecurityManager.class);
+
+	// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect
+	factory.addAspect(usageTracker);
+
+	// now get the proxy object...
+	MyInterfaceType proxy = factory.getProxy();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// create a factory that can generate a proxy for the given target object
+	val factory = AspectJProxyFactory(targetObject)
+
+	// add an aspect, the class must be an @AspectJ aspect
+	// you can call this as many times as you need with different aspects
+	factory.addAspect(SecurityManager::class.java)
+
+	// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect
+	factory.addAspect(usageTracker)
+
+	// now get the proxy object...
+	val proxy = factory.getProxy<Any>()
+----
+
+See the {api-spring-framework}/aop/aspectj/annotation/AspectJProxyFactory.html[javadoc] for more information.
+
+
+
+
+[[aop-using-aspectj]]
+== Using AspectJ with Spring Applications
+
+Everything we have covered so far in this chapter is pure Spring AOP. In this section,
+we look at how you can use the AspectJ compiler or weaver instead of or in
+addition to Spring AOP if your needs go beyond the facilities offered by Spring AOP
+alone.
+
+Spring ships with a small AspectJ aspect library, which is available stand-alone in your
+distribution as `spring-aspects.jar`. You need to add this to your classpath in order
+to use the aspects in it. <<aop-atconfigurable>> and <<aop-ajlib-other>> discuss the
+content of this library and how you can use it. <<aop-aj-configure>> discusses how to
+dependency inject AspectJ aspects that are woven using the AspectJ compiler. Finally,
+<<aop-aj-ltw>> provides an introduction to load-time weaving for Spring applications
+that use AspectJ.
+
+
+
+[[aop-atconfigurable]]
+=== Using AspectJ to Dependency Inject Domain Objects with Spring
+
+The Spring container instantiates and configures beans defined in your application
+context. It is also possible to ask a bean factory to configure a pre-existing
+object, given the name of a bean definition that contains the configuration to be applied.
+`spring-aspects.jar` contains an annotation-driven aspect that exploits this
+capability to allow dependency injection of any object. The support is intended to
+be used for objects created outside of the control of any container. Domain objects
+often fall into this category because they are often created programmatically with the
+`new` operator or by an ORM tool as a result of a database query.
+
+The `@Configurable` annotation marks a class as being eligible for Spring-driven
+configuration. In the simplest case, you can use purely it as a marker annotation, as the
+following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package com.xyz.myapp.domain;
+
+	import org.springframework.beans.factory.annotation.Configurable;
+
+	@Configurable
+	public class Account {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package com.xyz.myapp.domain
+
+	import org.springframework.beans.factory.annotation.Configurable
+
+	@Configurable
+	class Account {
+		// ...
+	}
+----
+
+When used as a marker interface in this way, Spring configures new instances of the
+annotated type (`Account`, in this case) by using a bean definition (typically
+prototype-scoped) with the same name as the fully-qualified type name
+(`com.xyz.myapp.domain.Account`). Since the default name for a bean is the
+fully-qualified name of its type, a convenient way to declare the prototype definition
+is to omit the `id` attribute, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="com.xyz.myapp.domain.Account" scope="prototype">
+		<property name="fundsTransferService" ref="fundsTransferService"/>
+	</bean>
+----
+
+If you want to explicitly specify the name of the prototype bean definition to use, you
+can do so directly in the annotation, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package com.xyz.myapp.domain;
+
+	import org.springframework.beans.factory.annotation.Configurable;
+
+	@Configurable("account")
+	public class Account {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package com.xyz.myapp.domain
+
+	import org.springframework.beans.factory.annotation.Configurable
+
+	@Configurable("account")
+	class Account {
+		// ...
+	}
+----
+
+Spring now looks for a bean definition named `account` and uses that as the
+definition to configure new `Account` instances.
+
+You can also use autowiring to avoid having to specify a dedicated bean definition at
+all. To have Spring apply autowiring, use the `autowire` property of the `@Configurable`
+annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
+`@Configurable(autowire=Autowire.BY_NAME` for autowiring by type or by name,
+respectively. As an alternative, it is preferable to specify explicit, annotation-driven
+dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
+at the field or method level (see <<beans-annotation-config>> for further details).
+
+Finally, you can enable Spring dependency checking for the object references in the newly
+created and configured object by using the `dependencyCheck` attribute (for example,
+`@Configurable(autowire=Autowire.BY_NAME,dependencyCheck=true)`). If this attribute is
+set to `true`, Spring validates after configuration that all properties (which
+are not primitives or collections) have been set.
+
+Note that using the annotation on its own does nothing. It is the
+`AnnotationBeanConfigurerAspect` in `spring-aspects.jar` that acts on the presence of
+the annotation. In essence, the aspect says, "`after returning from the initialization of
+a new object of a type annotated with `@Configurable`, configure the newly created object
+using Spring in accordance with the properties of the annotation`". In this context,
+"`initialization`" refers to newly instantiated objects (for example, objects instantiated
+with the `new` operator) as well as to `Serializable` objects that are undergoing
+deserialization (for example, through
+https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
+
+[NOTE]
+=====
+One of the key phrases in the above paragraph is "`in essence`". For most cases, the
+exact semantics of "`after returning from the initialization of a new object`" are
+fine. In this context, "`after initialization`" means that the dependencies are
+injected after the object has been constructed. This means that the dependencies
+are not available for use in the constructor bodies of the class. If you want the
+dependencies to be injected before the constructor bodies run and thus be
+available for use in the body of the constructors, you need to define this on the
+`@Configurable` declaration, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configurable(preConstruction = true)
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configurable(preConstruction = true)
+----
+
+You can find more information about the language semantics of the various pointcut
+types in AspectJ
+https://www.eclipse.org/aspectj/doc/next/progguide/semantics-joinPoints.html[in this
+appendix] of the https://www.eclipse.org/aspectj/doc/next/progguide/index.html[AspectJ
+Programming Guide].
+=====
+
+For this to work, the annotated types must be woven with the AspectJ weaver. You can
+either use a build-time Ant or Maven task to do this (see, for example, the
+https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
+Environment Guide]) or load-time weaving (see <<aop-aj-ltw>>). The
+`AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
+a reference to the bean factory that is to be used to configure new objects). If you
+use Java-based configuration, you can add `@EnableSpringConfigured` to any
+`@Configuration` class, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableSpringConfigured
+	public class AppConfig {
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableSpringConfigured
+	class AppConfig {
+	}
+----
+
+If you prefer XML based configuration, the Spring
+<<core.adoc#xsd-schemas-context, `context` namespace>>
+defines a convenient `context:spring-configured` element, which you can use as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:spring-configured/>
+----
+
+Instances of `@Configurable` objects created before the aspect has been configured
+result in a message being issued to the debug log and no configuration of the
+object taking place. An example might be a bean in the Spring configuration that creates
+domain objects when it is initialized by Spring. In this case, you can use the
+`depends-on` bean attribute to manually specify that the bean depends on the
+configuration aspect. The following example shows how to use the `depends-on` attribute:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myService"
+			class="com.xzy.myapp.service.MyService"
+			depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
+
+		<!-- ... -->
+
+	</bean>
+----
+
+NOTE: Do not activate `@Configurable` processing through the bean configurer aspect unless you
+really mean to rely on its semantics at runtime. In particular, make sure that you do
+not use `@Configurable` on bean classes that are registered as regular Spring beans
+with the container. Doing so results in double initialization, once through the
+container and once through the aspect.
+
+
+[[aop-configurable-testing]]
+==== Unit Testing `@Configurable` Objects
+
+One of the goals of the `@Configurable` support is to enable independent unit testing
+of domain objects without the difficulties associated with hard-coded lookups.
+If `@Configurable` types have not been woven by AspectJ, the annotation has no affect
+during unit testing. You can set mock or stub property references in the object under
+test and proceed as normal. If `@Configurable` types have been woven by AspectJ,
+you can still unit test outside of the container as normal, but you see a warning
+message each time that you construct a `@Configurable` object indicating that it has
+not been configured by Spring.
+
+
+[[aop-configurable-container]]
+==== Working with Multiple Application Contexts
+
+The `AnnotationBeanConfigurerAspect` that is used to implement the `@Configurable` support
+is an AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope
+of `static` members: There is one aspect instance per classloader that defines the type.
+This means that, if you define multiple application contexts within the same classloader
+hierarchy, you need to consider where to define the `@EnableSpringConfigured` bean and
+where to place `spring-aspects.jar` on the classpath.
+
+Consider a typical Spring web application configuration that has a shared parent application
+context that defines common business services, everything needed to support those services,
+and one child application context for each servlet (which contains definitions particular
+to that servlet). All of these contexts co-exist within the same classloader hierarchy,
+and so the `AnnotationBeanConfigurerAspect` can hold a reference to only one of them.
+In this case, we recommend defining the `@EnableSpringConfigured` bean in the shared
+(parent) application context. This defines the services that you are likely to want to
+inject into domain objects. A consequence is that you cannot configure domain objects
+with references to beans defined in the child (servlet-specific) contexts by using the
+@Configurable mechanism (which is probably not something you want to do anyway).
+
+When deploying multiple web applications within the same container, ensure that each
+web application loads the types in `spring-aspects.jar` by using its own classloader
+(for example, by placing `spring-aspects.jar` in `'WEB-INF/lib'`). If `spring-aspects.jar`
+is added only to the container-wide classpath (and hence loaded by the shared parent
+classloader), all web applications share the same aspect instance (which is probably
+not what you want).
+
+
+
+[[aop-ajlib-other]]
+=== Other Spring aspects for AspectJ
+
+In addition to the `@Configurable` aspect, `spring-aspects.jar` contains an AspectJ
+aspect that you can use to drive Spring's transaction management for types and methods
+annotated with the `@Transactional` annotation. This is primarily intended for users who
+want to use the Spring Framework's transaction support outside of the Spring container.
+
+The aspect that interprets `@Transactional` annotations is the
+`AnnotationTransactionAspect`. When you use this aspect, you must annotate the
+implementation class (or methods within that class or both), not the interface (if
+any) that the class implements. AspectJ follows Java's rule that annotations on
+interfaces are not inherited.
+
+A `@Transactional` annotation on a class specifies the default transaction semantics for
+the execution of any public operation in the class.
+
+A `@Transactional` annotation on a method within the class overrides the default
+transaction semantics given by the class annotation (if present). Methods of any
+visibility may be annotated, including private methods. Annotating non-public methods
+directly is the only way to get transaction demarcation for the execution of such methods.
+
+TIP: Since Spring Framework 4.2, `spring-aspects` provides a similar aspect that offers the
+exact same features for the standard `javax.transaction.Transactional` annotation. Check
+`JtaAnnotationTransactionAspect` for more details.
+
+For AspectJ programmers who want to use the Spring configuration and transaction
+management support but do not want to (or cannot) use annotations, `spring-aspects.jar`
+also contains `abstract` aspects you can extend to provide your own pointcut
+definitions. See the sources for the `AbstractBeanConfigurerAspect` and
+`AbstractTransactionAspect` aspects for more information. As an example, the following
+excerpt shows how you could write an aspect to configure all instances of objects
+defined in the domain model by using prototype bean definitions that match the
+fully qualified class names:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public aspect DomainObjectConfiguration extends AbstractBeanConfigurerAspect {
+
+		public DomainObjectConfiguration() {
+			setBeanWiringInfoResolver(new ClassNameBeanWiringInfoResolver());
+		}
+
+		// the creation of a new bean (any object in the domain model)
+		protected pointcut beanCreation(Object beanInstance) :
+			initialization(new(..)) &&
+			CommonPointcuts.inDomainModel() &&
+			this(beanInstance);
+	}
+----
+
+
+
+[[aop-aj-configure]]
+=== Configuring AspectJ Aspects by Using Spring IoC
+
+When you use AspectJ aspects with Spring applications, it is natural to both want and
+expect to be able to configure such aspects with Spring. The AspectJ runtime itself is
+responsible for aspect creation, and the means of configuring the AspectJ-created
+aspects through Spring depends on the AspectJ instantiation model (the `per-xxx` clause)
+used by the aspect.
+
+The majority of AspectJ aspects are singleton aspects. Configuration of these
+aspects is easy. You can create a bean definition that references the aspect type as
+normal and include the `factory-method="aspectOf"` bean attribute. This ensures that
+Spring obtains the aspect instance by asking AspectJ for it rather than trying to create
+an instance itself. The following example shows how to use the `factory-method="aspectOf"` attribute:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="profiler" class="com.xyz.profiler.Profiler"
+			factory-method="aspectOf"> <1>
+
+		<property name="profilingStrategy" ref="jamonProfilingStrategy"/>
+	</bean>
+----
+<1> Note the `factory-method="aspectOf"` attribute
+
+
+Non-singleton aspects are harder to configure. However, it is possible to do so by
+creating prototype bean definitions and using the `@Configurable` support from
+`spring-aspects.jar` to configure the aspect instances once they have bean created by
+the AspectJ runtime.
+
+If you have some @AspectJ aspects that you want to weave with AspectJ (for example,
+using load-time weaving for domain model types) and other @AspectJ aspects that you want
+to use with Spring AOP, and these aspects are all configured in Spring, you
+need to tell the Spring AOP @AspectJ auto-proxying support which exact subset of the
+@AspectJ aspects defined in the configuration should be used for auto-proxying. You can
+do this by using one or more `<include/>` elements inside the `<aop:aspectj-autoproxy/>`
+declaration. Each `<include/>` element specifies a name pattern, and only beans with
+names matched by at least one of the patterns are used for Spring AOP auto-proxy
+configuration. The following example shows how to use `<include/>` elements:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<aop:aspectj-autoproxy>
+		<aop:include name="thisBean"/>
+		<aop:include name="thatBean"/>
+	</aop:aspectj-autoproxy>
+----
+
+NOTE: Do not be misled by the name of the `<aop:aspectj-autoproxy/>` element. Using it
+results in the creation of Spring AOP proxies. The @AspectJ style of aspect
+declaration is being used here, but the AspectJ runtime is not involved.
+
+
+
+[[aop-aj-ltw]]
+=== Load-time Weaving with AspectJ in the Spring Framework
+
+Load-time weaving (LTW) refers to the process of weaving AspectJ aspects into an
+application's class files as they are being loaded into the Java virtual machine (JVM).
+The focus of this section is on configuring and using LTW in the specific context of the
+Spring Framework. This section is not a general introduction to LTW. For full details on
+the specifics of LTW and configuring LTW with only AspectJ (with Spring not being
+involved at all), see the
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw.html[LTW section of the AspectJ
+Development Environment Guide].
+
+The value that the Spring Framework brings to AspectJ LTW is in enabling much
+finer-grained control over the weaving process. 'Vanilla' AspectJ LTW is effected by using
+a Java (5+) agent, which is switched on by specifying a VM argument when starting up a
+JVM. It is, thus, a JVM-wide setting, which may be fine in some situations but is often a
+little too coarse. Spring-enabled LTW lets you switch on LTW on a
+per-`ClassLoader` basis, which is more fine-grained and which can make more
+sense in a 'single-JVM-multiple-application' environment (such as is found in a typical
+application server environment).
+
+Further, <<aop-aj-ltw-environments, in certain environments>>, this support enables
+load-time weaving without making any modifications to the application server's launch
+script that is needed to add `-javaagent:path/to/aspectjweaver.jar` or (as we describe
+later in this section) `-javaagent:path/to/spring-instrument.jar`. Developers configure
+the application context to enable load-time weaving instead of relying on administrators
+who typically are in charge of the deployment configuration, such as the launch script.
+
+Now that the sales pitch is over, let us first walk through a quick example of AspectJ
+LTW that uses Spring, followed by detailed specifics about elements introduced in the
+example. For a complete example, see the
+https://github.com/spring-projects/spring-petclinic[Petclinic sample application].
+
+
+[[aop-aj-ltw-first-example]]
+==== A First Example
+
+Assume that you are an application developer who has been tasked with diagnosing
+the cause of some performance problems in a system. Rather than break out a
+profiling tool, we are going to switch on a simple profiling aspect that lets us
+quickly get some performance metrics. We can then apply a finer-grained profiling
+tool to that specific area immediately afterwards.
+
+NOTE: The example presented here uses XML configuration. You can also configure and
+use @AspectJ with <<beans-java, Java configuration>>. Specifically, you can use the
+`@EnableLoadTimeWeaving` annotation as an alternative to `<context:load-time-weaver/>`
+(see <<aop-aj-ltw-spring, below>> for details).
+
+The following example shows the profiling aspect, which is not fancy.
+It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
+
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
+----
+	package foo;
+
+	import org.aspectj.lang.ProceedingJoinPoint;
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Around;
+	import org.aspectj.lang.annotation.Pointcut;
+	import org.springframework.util.StopWatch;
+	import org.springframework.core.annotation.Order;
+
+	@Aspect
+	public class ProfilingAspect {
+
+		@Around("methodsToBeProfiled()")
+		public Object profile(ProceedingJoinPoint pjp) throws Throwable {
+			StopWatch sw = new StopWatch(getClass().getSimpleName());
+			try {
+				sw.start(pjp.getSignature().getName());
+				return pjp.proceed();
+			} finally {
+				sw.stop();
+				System.out.println(sw.prettyPrint());
+			}
+		}
+
+		@Pointcut("execution(public * foo..*.*(..))")
+		public void methodsToBeProfiled(){}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	package foo
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Around
+	import org.aspectj.lang.annotation.Pointcut
+	import org.springframework.util.StopWatch
+	import org.springframework.core.annotation.Order
+
+	@Aspect
+	class ProfilingAspect {
+
+		@Around("methodsToBeProfiled()")
+		fun profile(pjp: ProceedingJoinPoint): Any {
+			val sw = StopWatch(javaClass.simpleName)
+			try {
+				sw.start(pjp.getSignature().getName())
+				return pjp.proceed()
+			} finally {
+				sw.stop()
+				println(sw.prettyPrint())
+			}
+		}
+
+		@Pointcut("execution(public * foo..*.*(..))")
+		fun methodsToBeProfiled() {
+		}
+	}
+----
+
+We also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver that
+we want to weave our `ProfilingAspect` into our classes. This file convention, namely
+the presence of a file (or files) on the Java classpath called `META-INF/aop.xml` is
+standard AspectJ. The following example shows the `aop.xml` file:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "https://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+	<aspectj>
+
+		<weaver>
+			<!-- only weave classes in our application-specific packages -->
+			<include within="foo.*"/>
+		</weaver>
+
+		<aspects>
+			<!-- weave in just this aspect -->
+			<aspect name="foo.ProfilingAspect"/>
+		</aspects>
+
+	</aspectj>
+----
+
+Now we can move on to the Spring-specific portion of the configuration. We need
+to configure a `LoadTimeWeaver` (explained later). This load-time weaver is the
+essential component responsible for weaving the aspect configuration in one or
+more `META-INF/aop.xml` files into the classes in your application. The good
+thing is that it does not require a lot of configuration (there are some more
+options that you can specify, but these are detailed later), as can be seen in
+the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<!-- a service object; we will be profiling its methods -->
+		<bean id="entitlementCalculationService"
+				class="foo.StubEntitlementCalculationService"/>
+
+		<!-- this switches on the load-time weaving -->
+		<context:load-time-weaver/>
+	</beans>
+----
+
+Now that all the required artifacts (the aspect, the `META-INF/aop.xml`
+file, and the Spring configuration) are in place, we can create the following
+driver class with a `main(..)` method to demonstrate the LTW in action:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package foo;
+
+	import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+	public final class Main {
+
+		public static void main(String[] args) {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml", Main.class);
+
+			EntitlementCalculationService entitlementCalculationService =
+					(EntitlementCalculationService) ctx.getBean("entitlementCalculationService");
+
+			// the profiling aspect is 'woven' around this method execution
+			entitlementCalculationService.calculateEntitlement();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package foo
+
+	import org.springframework.context.support.ClassPathXmlApplicationContext
+
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("beans.xml")
+
+		val entitlementCalculationService = ctx.getBean("entitlementCalculationService") as EntitlementCalculationService
+
+		// the profiling aspect is 'woven' around this method execution
+		entitlementCalculationService.calculateEntitlement()
+	}
+----
+
+We have one last thing to do. The introduction to this section did say that one could
+switch on LTW selectively on a per-`ClassLoader` basis with Spring, and this is true.
+However, for this example, we use a Java agent (supplied with Spring) to switch on LTW.
+We use the following command to run the `Main` class shown earlier:
+
+[literal,subs="verbatim,quotes"]
+----
+java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main
+----
+
+The `-javaagent` is a flag for specifying and enabling
+https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html[agents
+to instrument programs that run on the JVM]. The Spring Framework ships with such an
+agent, the `InstrumentationSavingAgent`, which is packaged in the
+`spring-instrument.jar` that was supplied as the value of the `-javaagent` argument in
+the preceding example.
+
+The output from the execution of the `Main` program looks something like the next example.
+(I have introduced a `Thread.sleep(..)` statement into the `calculateEntitlement()`
+implementation so that the profiler actually captures something other than 0
+milliseconds (the `01234` milliseconds is not an overhead introduced by the AOP).
+The following listing shows the output we got when we ran our profiler:
+
+[literal,subs="verbatim,quotes"]
+----
+Calculating entitlement
+
+StopWatch 'ProfilingAspect': running time (millis) = 1234
+------ ----- ----------------------------
+ms     %     Task name
+------ ----- ----------------------------
+01234  100%  calculateEntitlement
+----
+
+Since this LTW is effected by using full-blown AspectJ, we are not limited only to advising
+Spring beans. The following slight variation on the `Main` program yields the same
+result:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	package foo;
+
+	import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+	public final class Main {
+
+		public static void main(String[] args) {
+			new ClassPathXmlApplicationContext("beans.xml", Main.class);
+
+			EntitlementCalculationService entitlementCalculationService =
+					new StubEntitlementCalculationService();
+
+			// the profiling aspect will be 'woven' around this method execution
+			entitlementCalculationService.calculateEntitlement();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	package foo
+
+	import org.springframework.context.support.ClassPathXmlApplicationContext
+
+	fun main(args: Array<String>) {
+		ClassPathXmlApplicationContext("beans.xml")
+
+		val entitlementCalculationService = StubEntitlementCalculationService()
+
+		// the profiling aspect will be 'woven' around this method execution
+		entitlementCalculationService.calculateEntitlement()
+	}
+----
+
+Notice how, in the preceding program, we bootstrap the Spring container and
+then create a new instance of the `StubEntitlementCalculationService` totally outside
+the context of Spring. The profiling advice still gets woven in.
+
+Admittedly, the example is simplistic. However, the basics of the LTW support in Spring
+have all been introduced in the earlier example, and the rest of this section explains
+the "`why`" behind each bit of configuration and usage in detail.
+
+NOTE: The `ProfilingAspect` used in this example may be basic, but it is quite useful. It is a
+nice example of a development-time aspect that developers can use during development
+and then easily exclude from builds of the application being deployed
+into UAT or production.
+
+
+[[aop-aj-ltw-the-aspects]]
+==== Aspects
+
+The aspects that you use in LTW have to be AspectJ aspects. You can write them in
+either the AspectJ language itself, or you can write your aspects in the @AspectJ-style.
+Your aspects are then both valid AspectJ and Spring AOP aspects.
+Furthermore, the compiled aspect classes need to be available on the classpath.
+
+
+[[aop-aj-ltw-aop_dot_xml]]
+==== 'META-INF/aop.xml'
+
+The AspectJ LTW infrastructure is configured by using one or more `META-INF/aop.xml`
+files that are on the Java classpath (either directly or, more typically, in jar files).
+
+The structure and contents of this file is detailed in the LTW part of the
+https://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[AspectJ reference
+documentation]. Because the `aop.xml` file is 100% AspectJ, we do not describe it further here.
+
+
+[[aop-aj-ltw-libraries]]
+==== Required libraries (JARS)
+
+At minimum, you need the following libraries to use the Spring Framework's support
+for AspectJ LTW:
+
+* `spring-aop.jar`
+* `aspectjweaver.jar`
+
+If you use the <<aop-aj-ltw-environments-generic, Spring-provided agent to enable
+instrumentation>>, you also need:
+
+* `spring-instrument.jar`
+
+
+[[aop-aj-ltw-spring]]
+==== Spring Configuration
+
+The key component in Spring's LTW support is the `LoadTimeWeaver` interface (in the
+`org.springframework.instrument.classloading` package), and the numerous implementations
+of it that ship with the Spring distribution. A `LoadTimeWeaver` is responsible for
+adding one or more `java.lang.instrument.ClassFileTransformers` to a `ClassLoader` at
+runtime, which opens the door to all manner of interesting applications, one of which
+happens to be the LTW of aspects.
+
+TIP: If you are unfamiliar with the idea of runtime class file transformation, see the
+javadoc API documentation for the `java.lang.instrument` package before continuing.
+While that documentation is not comprehensive, at least you can see the key interfaces
+and classes (for reference as you read through this section).
+
+Configuring a `LoadTimeWeaver` for a particular `ApplicationContext` can be as easy as
+adding one line. (Note that you almost certainly need to use an
+`ApplicationContext` as your Spring container -- typically, a `BeanFactory` is not
+enough because the LTW support uses `BeanFactoryPostProcessors`.)
+
+To enable the Spring Framework's LTW support, you need to configure a `LoadTimeWeaver`,
+which typically is done by using the `@EnableLoadTimeWeaving` annotation, as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	public class AppConfig {
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	class AppConfig {
+	}
+----
+
+Alternatively, if you prefer XML-based configuration, use the
+`<context:load-time-weaver/>` element. Note that the element is defined in the
+`context` namespace. The following example shows how to use `<context:load-time-weaver/>`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:load-time-weaver/>
+
+	</beans>
+----
+
+The preceding configuration automatically defines and registers a number of LTW-specific
+infrastructure beans, such as a `LoadTimeWeaver` and an `AspectJWeavingEnabler`, for you.
+The default `LoadTimeWeaver` is the `DefaultContextLoadTimeWeaver` class, which attempts
+to decorate an automatically detected `LoadTimeWeaver`. The exact type of `LoadTimeWeaver`
+that is "`automatically detected`" is dependent upon your runtime environment.
+The following table summarizes various `LoadTimeWeaver` implementations:
+
+[[aop-aj-ltw-spring-env-impls]]
+.DefaultContextLoadTimeWeaver LoadTimeWeavers
+|===
+| Runtime Environment| `LoadTimeWeaver` implementation
+
+| Running in https://tomcat.apache.org/[Apache Tomcat]
+| `TomcatLoadTimeWeaver`
+
+| Running in https://eclipse-ee4j.github.io/glassfish/[GlassFish] (limited to EAR deployments)
+| `GlassFishLoadTimeWeaver`
+
+| Running in Red Hat's https://www.jboss.org/jbossas/[JBoss AS] or https://www.wildfly.org/[WildFly]
+| `JBossLoadTimeWeaver`
+
+| Running in IBM's https://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
+| `WebSphereLoadTimeWeaver`
+
+| Running in Oracle's
+  https://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
+| `WebLogicLoadTimeWeaver`
+
+| JVM started with Spring `InstrumentationSavingAgent`
+  (`java -javaagent:path/to/spring-instrument.jar`)
+| `InstrumentationLoadTimeWeaver`
+
+| Fallback, expecting the underlying ClassLoader to follow common conventions
+  (namely `addTransformer` and optionally a `getThrowawayClassLoader` method)
+| `ReflectiveLoadTimeWeaver`
+|===
+
+Note that the table lists only the `LoadTimeWeavers` that are autodetected when you
+use the `DefaultContextLoadTimeWeaver`. You can specify exactly which `LoadTimeWeaver`
+implementation to use.
+
+To specify a specific `LoadTimeWeaver` with Java configuration, implement the
+`LoadTimeWeavingConfigurer` interface and override the `getLoadTimeWeaver()` method.
+The following example specifies a `ReflectiveLoadTimeWeaver`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	public class AppConfig implements LoadTimeWeavingConfigurer {
+
+		@Override
+		public LoadTimeWeaver getLoadTimeWeaver() {
+			return new ReflectiveLoadTimeWeaver();
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableLoadTimeWeaving
+	class AppConfig : LoadTimeWeavingConfigurer {
+
+		override fun getLoadTimeWeaver(): LoadTimeWeaver {
+			return ReflectiveLoadTimeWeaver()
+		}
+	}
+----
+
+If you use XML-based configuration, you can specify the fully qualified classname
+as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`
+element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:load-time-weaver
+				weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
+
+	</beans>
+----
+
+The `LoadTimeWeaver` that is defined and registered by the configuration can be later
+retrieved from the Spring container by using the well known name, `loadTimeWeaver`.
+Remember that the `LoadTimeWeaver` exists only as a mechanism for Spring's LTW
+infrastructure to add one or more `ClassFileTransformers`. The actual
+`ClassFileTransformer` that does the LTW is the `ClassPreProcessorAgentAdapter` (from
+the `org.aspectj.weaver.loadtime` package) class. See the class-level javadoc of the
+`ClassPreProcessorAgentAdapter` class for further details, because the specifics of how
+the weaving is actually effected is beyond the scope of this document.
+
+There is one final attribute of the configuration left to discuss: the `aspectjWeaving`
+attribute (or `aspectj-weaving` if you use XML). This attribute controls whether LTW
+is enabled or not. It accepts one of three possible values, with the default value being
+`autodetect` if the attribute is not present. The following table summarizes the three
+possible values:
+
+[[aop-aj-ltw-ltw-tag-attrs]]
+.AspectJ weaving attribute values
+|===
+| Annotation Value| XML Value| Explanation
+
+| `ENABLED`
+| `on`
+| AspectJ weaving is on, and aspects are woven at load-time as appropriate.
+
+| `DISABLED`
+| `off`
+| LTW is off. No aspect is woven at load-time.
+
+| `AUTODETECT`
+| `autodetect`
+| If the Spring LTW infrastructure can find at least one `META-INF/aop.xml` file,
+  then AspectJ weaving is on. Otherwise, it is off. This is the default value.
+|===
+
+
+[[aop-aj-ltw-environments]]
+==== Environment-specific Configuration
+
+This last section contains any additional settings and configuration that you need
+when you use Spring's LTW support in environments such as application servers and web
+containers.
+
+[[aop-aj-ltw-environments-tomcat-jboss-etc]]
+===== Tomcat, JBoss, WebSphere, WebLogic
+
+Tomcat, JBoss/WildFly, IBM WebSphere Application Server and Oracle WebLogic Server all
+provide a general app `ClassLoader` that is capable of local instrumentation. Spring's
+native LTW may leverage those ClassLoader implementations to provide AspectJ weaving.
+You can simply enable load-time weaving, as <<aop-using-aspectj, described earlier>>.
+Specifically, you do not need to modify the JVM launch script to add
+`-javaagent:path/to/spring-instrument.jar`.
+
+Note that on JBoss, you may need to disable the app server scanning to prevent it from
+loading the classes before the application actually starts. A quick workaround is to add
+to your artifact a file named `WEB-INF/jboss-scanning.xml` with the following content:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<scanning xmlns="urn:jboss:scanning:1.0"/>
+----
+
+[[aop-aj-ltw-environments-generic]]
+===== Generic Java Applications
+
+When class instrumentation is required in environments that are not supported by
+specific `LoadTimeWeaver` implementations, a JVM agent is the general solution.
+For such cases, Spring provides `InstrumentationLoadTimeWeaver` which requires a
+Spring-specific (but very general) JVM agent, `spring-instrument.jar`, autodetected
+by common `@EnableLoadTimeWeaving` and `<context:load-time-weaver/>` setups.
+
+To use it, you must start the virtual machine with the Spring agent by supplying
+the following JVM options:
+
+[literal]
+[subs="verbatim,quotes"]
+----
+-javaagent:/path/to/spring-instrument.jar
+----
+
+Note that this requires modification of the JVM launch script, which may prevent you
+from using this in application server environments (depending on your server and your
+operation policies). That said, for one-app-per-JVM deployments such as standalone
+Spring Boot applications, you typically control the entire JVM setup in any case.
+
+
+
+
+[[aop-resources]]
+== Further Resources
+
+More information on AspectJ can be found on the https://www.eclipse.org/aspectj[AspectJ website].
+
+_Eclipse AspectJ_ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
+comprehensive introduction and reference for the AspectJ language.
+
+_AspectJ in Action_, Second Edition by Ramnivas Laddad (Manning, 2009) comes highly
+recommended. The focus of the book is on AspectJ, but a lot of general AOP themes are
+explored (in some depth).

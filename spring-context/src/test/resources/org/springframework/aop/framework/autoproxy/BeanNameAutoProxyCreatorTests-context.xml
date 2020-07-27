@@ -1,41 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
 	<bean id="frozenProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-		<property name="beanNames" value="frozenBean"/>
-		<property name="frozen" value="true"/>
-		<property name="interceptorNames" value="nopInterceptor"/>
+		<property name="beanNames" value="frozenBean" />
+		<property name="frozen" value="true" />
+		<property name="interceptorNames" value="nopInterceptor" />
 	</bean>
 
 	<bean id="_jdkBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-		<description>
-			Automatically proxies using JDK dynamic proxies
-		</description>
-	  <property name="beanNames"><value>jdk*,onlyJdk,doubleJdk</value></property>
-	  <property name="interceptorNames">
-			<list>
-				<value>nopInterceptor</value>
-			</list>
-	  </property>
+		<description>Automatically proxies using JDK dynamic proxies</description>
+		<property name="beanNames" value="jdk*,onlyJdk,doubleJdk" />
+		<property name="interceptorNames" value="nopInterceptor" />
 	</bean>
 
 	<bean id="doubleJdkBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-	  <property name="beanNames" value="doubleJdk"/>
-		<property name="interceptorNames" value="nopInterceptor"/>
+		<property name="beanNames" value="doubleJdk" />
+		<property name="interceptorNames" value="nopInterceptor" />
 	</bean>
 
 	<bean id="_cglibBeanNameProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
-	  <property name="beanNames">
-			<value>
-				cglib*
-			</value>
+		<property name="beanNames" value="cglib*" />
+		<property name="proxyTargetClass">
+			<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
+			<value>true</value>
 		</property>
-	  <property name="proxyTargetClass">
-	  	<description>Use the inherited ProxyConfig property to force CGLIB proxying</description>
-	  	<value>true</value>
-	  </property>
 		<property name="interceptorNames">
 			<description>Interceptors and Advisors to apply automatically</description>
 			<list>
@@ -49,17 +39,17 @@
 		<description>
 			Illustrates a JDK introduction
 		</description>
-	  <property name="beanNames"><value>*introductionUsingJdk</value></property>
-	  <property name="interceptorNames">
+		<property name="beanNames" value="*introductionUsingJdk" />
+		<property name="interceptorNames">
 			<list>
 				<value>introductionNopInterceptor</value>
 				<value>timestampIntroduction</value>
 				<value>lockableAdvisor</value>
 			</list>
-	  </property>
+		</property>
 	</bean>
 
-	<bean id="timestampIntroduction" class="org.springframework.tests.aop.advice.TimestampIntroductionAdvisor"/>
+	<bean id="timestampIntroduction" class="org.springframework.aop.testfixture.advice.TimestampIntroductionAdvisor"/>
 
 	<!--
 		Stateful mixin. Note that singleton property is false.
@@ -67,18 +57,18 @@
 	<bean id="lockableAdvisor" class="test.mixin.LockMixinAdvisor"
 			scope="prototype"/>
 
-	<bean id="countingBeforeAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="countingBeforeAdvice" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionNopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="introductionNopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>introductionUsingJdk</value></property>
+	<bean id="introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="introductionUsingJdk" />
 	</bean>
 
-	<bean id="second-introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>second-introductionUsingJdk</value></property>
+	<bean id="second-introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="second-introductionUsingJdk" />
 	</bean>
 
 	<!--
@@ -88,30 +78,54 @@
 			lazy-init="true">
 	</bean>
 
-	<bean id="jdk1" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>jdk1</value></property>
+	<bean id="jdk1" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="jdk1" />
 	</bean>
 
-	<bean id="frozen" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="frozen" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
 
 	<alias name="frozen" alias="frozenBean"/>
 
-	<bean id="cglib1" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>cglib1</value></property>
+	<bean id="cglib1" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="cglib1" />
 	</bean>
 
-	<bean id="onlyJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>onlyJdk</value></property>
+	<bean id="onlyJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="onlyJdk" />
 	</bean>
 
-	<bean id="doubleJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>doubleJdk</value></property>
+	<bean id="doubleJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="doubleJdk" />
 	</bean>
 
-	<bean id="noproxy" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>noproxy</value></property>
+	<bean id="noproxy" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name" value="noproxy" />
+	</bean>
+
+	<bean id="lazy1" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
+		<property name="name" value="lazy1" />
+	</bean>
+	
+	<alias name="lazy1" alias="lazy1alias"/>
+
+	<bean id="lazy2" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
+		<property name="name" value="lazy2" />
+	</bean>
+
+	<bean id="lazyBeanNameAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="lazy1" />
+		<property name="customTargetSourceCreators">
+			<bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator" />
+		</property>
+	</bean>
+
+	<bean id="lazyAliasBeanNameAutoProxyCreator" class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames" value="lazy1alias" />
+		<property name="customTargetSourceCreators">
+			<bean class="org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator" />
+		</property>
 	</bean>
 
 </beans>
