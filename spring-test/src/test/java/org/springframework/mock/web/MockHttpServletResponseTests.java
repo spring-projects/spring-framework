@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,8 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.springframework.http.HttpHeaders.CONTENT_LANGUAGE;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
@@ -115,6 +118,26 @@ class MockHttpServletResponseTests {
 		assertThat(response.getContentType()).isEqualTo(contentType);
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test  // gh-25281
+	void contentLanguageHeaderWithSingleValue() {
+		String contentLanguage = "it";
+		response.setHeader(CONTENT_LANGUAGE, contentLanguage);
+		assertSoftly(softly -> {
+			softly.assertThat(response.getHeader(CONTENT_LANGUAGE)).isEqualTo(contentLanguage);
+			softly.assertThat(response.getLocale()).isEqualTo(Locale.ITALIAN);
+		});
+	}
+
+	@Test  // gh-25281
+	void contentLanguageHeaderWithMultipleValues() {
+		String contentLanguage = "it, en";
+		response.setHeader(CONTENT_LANGUAGE, contentLanguage);
+		assertSoftly(softly -> {
+			softly.assertThat(response.getHeader(CONTENT_LANGUAGE)).isEqualTo(contentLanguage);
+			softly.assertThat(response.getLocale()).isEqualTo(Locale.ITALIAN);
+		});
 	}
 
 	@Test

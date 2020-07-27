@@ -638,10 +638,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
+			String contentLanguages = value.toString();
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
+			headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
 			Locale language = headers.getContentLanguage();
 			setLocale(language != null ? language : Locale.getDefault());
+			// Since setLocale() sets the Content-Language header to the given
+			// single Locale, we have to explicitly set the Content-Language header
+			// to the user-provided value.
+			doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, true);
 			return true;
 		}
 		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {
@@ -660,12 +665,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
-		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
-		if (header == null) {
-			header = new HeaderValueHolder();
-			this.headers.put(name, header);
-		}
+		HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
 		if (replace) {
 			header.setValue(value);
 		}
