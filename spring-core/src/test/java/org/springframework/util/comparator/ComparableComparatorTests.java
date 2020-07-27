@@ -37,7 +37,7 @@ class ComparableComparatorTests {
 		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
-		assertThat(c.compare(s1, s2) < 0).isTrue();
+		assertThat(c.compare(s1, s2)).isLessThan(0);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

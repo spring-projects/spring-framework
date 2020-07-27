@@ -92,8 +92,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	public int compare(@Nullable T left, @Nullable T right) {
-		Comparator<T> comparator = nullsLow ? Comparator.nullsFirst(nonNullComparator) :
-								   Comparator.nullsLast(nonNullComparator);
+		Comparator<T> comparator = this.nullsLow ? Comparator.nullsFirst(this.nonNullComparator) : Comparator.nullsLast(this.nonNullComparator);
 		return comparator.compare(left, right);
 	}
 
@@ -113,7 +112,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 	@Override
 	public int hashCode() {
-		return Boolean.hashCode(nullsLow);
+		return Boolean.hashCode(this.nullsLow);
 	}
 
 	@Override

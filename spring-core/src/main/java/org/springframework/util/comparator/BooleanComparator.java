@@ -65,7 +65,7 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 	@Override
 	public int compare(Boolean left, Boolean right) {
-		int multiplier = trueLow ? -1 : 1;
+		int multiplier = this.trueLow ? -1 : 1;
 		return multiplier * Boolean.compare(left, right);
 	}
 
@@ -78,7 +78,7 @@ public class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 	@Override
 	public int hashCode() {
-		return Boolean.hashCode(trueLow);
+		return Boolean.hashCode(this.trueLow);
 	}
 
 	@Override
