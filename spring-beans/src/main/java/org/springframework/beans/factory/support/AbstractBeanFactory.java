@@ -181,7 +181,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			new NamedThreadLocal<>("Prototype beans currently in creation");
 
 	/** Application startup metrics. **/
-	private ApplicationStartup applicationStartup = ApplicationStartup.getDefault();
+	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 	/**
 	 * Create a new AbstractBeanFactory.

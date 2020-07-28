@@ -28,12 +28,10 @@ package org.springframework.core.metrics;
 public interface ApplicationStartup {
 
 	/**
-	 * Return a default "no op" {@code ApplicationStartup} implementation.
+	 * Default "no op" {@code ApplicationStartup} implementation.
 	 * <p>This variant is designed for minimal overhead and does not record data.
 	 */
-	static ApplicationStartup getDefault() {
-		return new DefaultApplicationStartup();
-	}
+	ApplicationStartup DEFAULT = new DefaultApplicationStartup();
 
 	/**
 	 * Create a new step and marks its beginning.

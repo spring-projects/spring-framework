@@ -145,7 +145,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	/* Using fully qualified class names as default bean names by default. */
 	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
 
-	private ApplicationStartup applicationStartup = ApplicationStartup.getDefault();
+	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 
 	@Override

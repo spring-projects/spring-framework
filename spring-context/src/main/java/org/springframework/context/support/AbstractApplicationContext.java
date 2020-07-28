@@ -231,7 +231,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
 	/** Application startup metrics. **/
-	private ApplicationStartup applicationStartup = ApplicationStartup.getDefault();
+	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
 	/** Statically specified listeners. */
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
