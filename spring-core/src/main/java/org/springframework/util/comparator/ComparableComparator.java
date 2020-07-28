@@ -23,7 +23,7 @@ import java.util.Comparator;
  * Mainly for internal use in other Comparators, when supposed
  * to work on Comparables.
  *
- * @author Keith Donald
+ * @author Keith Donald , Abhishek Kumar Mandal
  * @since 1.2.2
  * @param <T> the type of comparable objects that may be compared by this comparator
  * @see Comparable
@@ -35,8 +35,13 @@ public class ComparableComparator<T extends Comparable<T>> implements Comparator
 	 * @see Comparators#comparable()
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final ComparableComparator INSTANCE = new ComparableComparator();
-
+	private static final ComparableComparator INSTANCE = new ComparableComparator();
+	
+	private ComparableComparator(){}
+	
+	public ComparableComparator getInstance(){
+		return INSTANCE;
+	}
 
 	@Override
 	public int compare(T o1, T o2) {
