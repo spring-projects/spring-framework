@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics;
+package org.springframework.core.metrics;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 /**
  * Default "no op" {@code ApplicationStartup} implementation.
+ *
  * <p>This variant is designed for minimal overhead and does not record events.
  *
  * @author Brian Clozel
@@ -32,6 +33,7 @@ class DefaultApplicationStartup implements ApplicationStartup {
 	public DefaultStartupStep start(String name) {
 		return new DefaultStartupStep();
 	}
+
 
 	static class DefaultStartupStep implements StartupStep {
 
@@ -79,6 +81,7 @@ class DefaultApplicationStartup implements ApplicationStartup {
 		public void end() {
 			this.recorded = true;
 		}
+
 
 		static class DefaultTags implements StartupStep.Tags {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics.jfr;
+package org.springframework.core.metrics.jfr;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
 
-import org.springframework.beans.metrics.StartupStep;
+import org.springframework.core.metrics.StartupStep;
 
 /**
  * {@link StartupStep} implementation for the Java Flight Recorder.
@@ -39,12 +39,15 @@ class FlightRecorderStartupStep implements StartupStep {
 
 	private final Consumer<FlightRecorderStartupStep> recordingCallback;
 
+
 	public FlightRecorderStartupStep(long id, String name, long parentId,
 			Consumer<FlightRecorderStartupStep> recordingCallback) {
+
 		this.event = new FlightRecorderStartupEvent(id, name, parentId);
 		this.event.begin();
 		this.recordingCallback = recordingCallback;
 	}
+
 
 	@Override
 	public String getName() {
@@ -96,6 +99,7 @@ class FlightRecorderStartupStep implements StartupStep {
 		return this.event;
 	}
 
+
 	static class FlightRecorderTags implements Tags {
 
 		private Tag[] tags = new Tag[0];
@@ -135,10 +139,9 @@ class FlightRecorderStartupStep implements StartupStep {
 			public void remove() {
 				throw new UnsupportedOperationException("tags are append only");
 			}
-
 		}
-
 	}
+
 
 	static class FlightRecorderTag implements Tag {
 
@@ -160,7 +163,6 @@ class FlightRecorderStartupStep implements StartupStep {
 		public String getValue() {
 			return this.value;
 		}
-
 	}
 
 }

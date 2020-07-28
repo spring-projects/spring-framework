@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics;
+package org.springframework.core.metrics;
 
 import java.util.function.Supplier;
 
@@ -22,17 +22,19 @@ import org.springframework.lang.Nullable;
 
 /**
  * Step recording metrics about a particular phase or action happening during the {@link ApplicationStartup}.
+ *
  * <p>The lifecycle of a {@code StartupStep} goes as follows:
  * <ol>
- *     <li>the step is created and starts by calling {@link ApplicationStartup#start(String) the application startup}
- *     and is assigned a unique {@link StartupStep#getId() id}.
- *     <li>we can then attach information with {@link Tags} during processing
- *     <li>we then need to mark the {@link #end()} of the step
+ * <li>the step is created and starts by calling {@link ApplicationStartup#start(String) the application startup}
+ * and is assigned a unique {@link StartupStep#getId() id}.
+ * <li>we can then attach information with {@link Tags} during processing
+ * <li>we then need to mark the {@link #end()} of the step
  * </ol>
+ *
  * <p>Implementations can track the "execution time" or other metrics for steps.
  *
  * @author Brian Clozel
- * @since 5.3.0
+ * @since 5.3
  */
 public interface StartupStep {
 
@@ -51,7 +53,8 @@ public interface StartupStep {
 
 	/**
 	 * Return, if available, the id of the parent step.
-	 * <p>The parent step is the step that was started the most recently when the current step was created.
+	 * <p>The parent step is the step that was started the most recently
+	 * when the current step was created.
 	 */
 	@Nullable
 	Long getParentId();
@@ -81,12 +84,13 @@ public interface StartupStep {
 	 */
 	void end();
 
+
 	/**
 	 * Mutable collection of {@link Tag}.
 	 */
 	interface Tags extends Iterable<Tag> {
-
 	}
+
 
 	/**
 	 * Simple key/value association for storing step metadata.
@@ -103,4 +107,5 @@ public interface StartupStep {
 		 */
 		String getValue();
 	}
+
 }

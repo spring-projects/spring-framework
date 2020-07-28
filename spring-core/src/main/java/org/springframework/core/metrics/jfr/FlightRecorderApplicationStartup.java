@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics.jfr;
+package org.springframework.core.metrics.jfr;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import org.springframework.beans.metrics.ApplicationStartup;
-import org.springframework.beans.metrics.StartupStep;
+import org.springframework.core.metrics.ApplicationStartup;
+import org.springframework.core.metrics.StartupStep;
 
 /**
  * {@link ApplicationStartup} implementation for the Java Flight Recorder.
@@ -38,16 +38,18 @@ public class FlightRecorderApplicationStartup implements ApplicationStartup {
 
 	private final Deque<Long> currentSteps;
 
+
 	public FlightRecorderApplicationStartup() {
 		this.currentSequenceId = 0;
 		this.currentSteps = new ArrayDeque<>();
 		this.currentSteps.offerFirst(0L);
 	}
 
+
 	@Override
 	public StartupStep start(String name) {
 		FlightRecorderStartupStep step = new FlightRecorderStartupStep(++this.currentSequenceId, name,
-				this.currentSteps.peekFirst(), committedStep -> this.currentSteps.removeFirst());
+				this.currentSteps.getFirst(), committedStep -> this.currentSteps.removeFirst());
 		this.currentSteps.offerFirst(this.currentSequenceId);
 		return step;
 	}

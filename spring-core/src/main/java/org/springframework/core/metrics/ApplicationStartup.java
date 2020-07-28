@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics;
+package org.springframework.core.metrics;
 
 /**
  * Instruments the application startup phase using {@link StartupStep steps}.
@@ -23,7 +23,7 @@ package org.springframework.beans.metrics;
  * or their processing time.
  *
  * @author Brian Clozel
- * @since 5.3.0
+ * @since 5.3
  */
 public interface ApplicationStartup {
 

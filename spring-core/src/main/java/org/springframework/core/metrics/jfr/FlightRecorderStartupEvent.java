@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.metrics.jfr;
+package org.springframework.core.metrics.jfr;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;
@@ -24,10 +24,12 @@ import jdk.jfr.Label;
 /**
  * {@link Event} extension for recording {@link FlightRecorderStartupStep}
  * in Java Flight Recorder.
- * <p>{@link org.springframework.beans.metrics.StartupStep.Tags} are serialized as a single {@code String},
- * since Flight Recorder events do not support complex types.
+ *
+ * <p>{@link org.springframework.core.metrics.StartupStep.Tags} are serialized
+ * as a single {@code String}, since Flight Recorder events do not support complex types.
  *
  * @author Brian Clozel
+ * @since 5.3
  */
 @Category("Spring Application")
 @Label("Startup Step")

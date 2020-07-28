@@ -17,14 +17,14 @@
 package org.springframework.context;
 
 import org.springframework.beans.factory.Aware;
-import org.springframework.beans.metrics.ApplicationStartup;
+import org.springframework.core.metrics.ApplicationStartup;
 
 /**
  * Interface to be implemented by any object that wishes to be notified
  * of the {@link ApplicationStartup} that it runs with.
  *
  * @author Brian Clozel
- * @since 5.3.0
+ * @since 5.3
  * @see ApplicationContextAware
  */
 public interface ApplicationStartupAware extends Aware {

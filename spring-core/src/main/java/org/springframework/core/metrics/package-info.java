@@ -1,9 +1,9 @@
 /**
- * Support package for recording startup metrics using Java Flight Recorder.
+ * Support package for recording metrics during application startup.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.beans.metrics.jfr;
+package org.springframework.core.metrics;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

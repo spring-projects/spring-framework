@@ -26,8 +26,8 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.metrics.ApplicationStartup;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
@@ -281,13 +281,13 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Set the {@code ApplicationStartup} for this bean factory.
 	 * <p>This allows the application context to record metrics during application startup.
 	 * @param applicationStartup the new application startup
-	 * @since 5.3.0
+	 * @since 5.3
 	 */
 	void setApplicationStartup(ApplicationStartup applicationStartup);
 
 	/**
 	 * Return the {@code ApplicationStartup} for this bean factory.
-	 * @since 5.3.0
+	 * @since 5.3
 	 */
 	ApplicationStartup getApplicationStartup();
 
