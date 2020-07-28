@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.UsesSunMisc;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.toList;
@@ -474,6 +475,16 @@ class AnnotationTypeMappingsTests {
 			result[i] = resolved[i] != -1 ? mapping.getAttributes().get(resolved[i]) : null;
 		}
 		return result;
+	}
+
+	@Test
+	void forAnnotationTypeWhenRepeatableMetaAnnotationFilterd() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class,
+		annotationType ->
+				ObjectUtils.nullSafeEquals(annotationType, Repeating.class.getName()));
+		assertThat(getAll(mappings)).flatExtracting(
+				AnnotationTypeMapping::getAnnotationType).containsExactly(
+				WithRepeatedMetaAnnotations.class);
 	}
 
 	@Nullable
