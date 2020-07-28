@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
-@SuppressWarnings("deprecation")
 public class MediaType extends MimeType implements Serializable {
 
 	private static final long serialVersionUID = 2069937152339670231L;
@@ -370,6 +369,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
+
 	static {
 		// Not using "valueOf' to avoid static init cost
 		ALL = new MediaType("*", "*");
@@ -399,6 +399,7 @@ public class MediaType extends MimeType implements Serializable {
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
 	}
+
 
 	/**
 	 * Create a new {@code MediaType} for the given primary type.
@@ -483,11 +484,11 @@ public class MediaType extends MimeType implements Serializable {
 	 * checks on parameters are performed.
 	 * @param mimeType the MIME type
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
-	 * @since 5.3.0
+	 * @since 5.3
 	 */
 	public MediaType(MimeType mimeType) {
 		super(mimeType);
-		this.getParameters().forEach(this::checkParameters);
+		getParameters().forEach(this::checkParameters);
 	}
 
 
