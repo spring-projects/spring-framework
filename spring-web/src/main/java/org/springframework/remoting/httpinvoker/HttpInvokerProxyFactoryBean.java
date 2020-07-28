@@ -53,7 +53,7 @@ import org.springframework.util.Assert;
  * @see HttpInvokerServiceExporter
  * @see org.springframework.remoting.rmi.RmiProxyFactoryBean
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public class HttpInvokerProxyFactoryBean extends HttpInvokerClientInterceptor implements FactoryBean<Object> {

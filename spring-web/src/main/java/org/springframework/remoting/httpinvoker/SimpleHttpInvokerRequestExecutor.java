@@ -41,7 +41,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @author Juergen Hoeller
  * @since 1.1
  * @see java.net.HttpURLConnection
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public class SimpleHttpInvokerRequestExecutor extends AbstractHttpInvokerRequestExecutor {
