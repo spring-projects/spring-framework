@@ -35,6 +35,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpLogging;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -72,8 +73,9 @@ public abstract class Jackson2CodecSupport {
 
 	private static final List<MimeType> DEFAULT_MIME_TYPES = Collections.unmodifiableList(
 			Arrays.asList(
-					new MimeType("application", "json"),
-					new MimeType("application", "*+json")));
+					MediaType.APPLICATION_JSON,
+					new MediaType("application", "*+json"),
+					MediaType.APPLICATION_NDJSON));
 
 
 	protected final Log logger = HttpLogging.forLogName(getClass());

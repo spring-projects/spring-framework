@@ -197,6 +197,43 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 		testTokenize(asList("[1", ",2,", "3]"), asList("1", "2", "3"), true);
 	}
 
+	@Test
+	void tokenizeStream() {
+
+		// NDJSON (Newline Delimited JSON), JSON Lines
+		testTokenize(
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"\n",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"\n",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				true);
+
+		// JSON Sequence with newline separator
+		testTokenize(
+				asList(
+						"\n",
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"\n",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"\n",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				asList(
+						"{\"id\":1,\"name\":\"Robert\"}",
+						"{\"id\":2,\"name\":\"Raide\"}",
+						"{\"id\":3,\"name\":\"Ford\"}"
+				),
+				true);
+	}
+
 	private void testTokenize(List<String> input, List<String> output, boolean tokenize) {
 		StepVerifier.FirstStep<String> builder = StepVerifier.create(decode(input, tokenize, -1));
 		output.forEach(expected -> builder.assertNext(actual -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
-import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 /**
  * @author Sebastien Deleuze
@@ -71,7 +71,7 @@ class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTes
 
 		Flux<Person> result = this.webClient.get()
 				.uri("/stream")
-				.accept(APPLICATION_STREAM_JSON)
+				.accept(APPLICATION_NDJSON)
 				.retrieve()
 				.bodyToFlux(Person.class);
 
@@ -105,7 +105,7 @@ class JacksonStreamingIntegrationTests extends AbstractHttpHandlerIntegrationTes
 	static class JacksonStreamingController {
 
 		@GetMapping(value = "/stream",
-				produces = { APPLICATION_STREAM_JSON_VALUE, "application/stream+x-jackson-smile" })
+				produces = { APPLICATION_NDJSON_VALUE, "application/stream+x-jackson-smile" })
 		Flux<Person> person() {
 			return testInterval(Duration.ofMillis(100), 50).map(l -> new Person("foo " + l));
 		}

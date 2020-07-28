@@ -217,15 +217,35 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
 	/**
+	 * Public constant media type for {@code application/x-ndjson}.
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_NDJSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_NDJSON}.
+	 * @since 5.3
+	 */
+	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
+
+	/**
 	 * Public constant media type for {@code application/stream+json}.
+	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 * @since 5.0
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_STREAM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_STREAM_JSON}.
+	 * @deprecated as of 5.3 since it originates from the W3C Activity Streams
+	 * specification which has a more specific purpose and has been since
+	 * replaced with a different mime type. Use {@link #APPLICATION_NDJSON} as
+	 * a replacement or any other line-delimited JSON format (e.g. JSON Lines,
+	 * JSON Text Sequences).
 	 * @since 5.0
 	 */
+	@Deprecated
 	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
 
 	/**
@@ -378,6 +398,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
+		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
