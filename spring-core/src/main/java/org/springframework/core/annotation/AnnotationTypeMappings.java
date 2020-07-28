@@ -91,6 +91,9 @@ final class AnnotationTypeMappings {
 					.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
+					if (!isMappable(source, repeatedAnnotation)) {
+						continue;
+					}
 					addIfPossible(queue, source, repeatedAnnotation);
 				}
 			}
