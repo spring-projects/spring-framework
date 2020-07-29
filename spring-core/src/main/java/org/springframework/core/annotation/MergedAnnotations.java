@@ -326,7 +326,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers) {
 
-		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
+		return from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -340,7 +340,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationFilter an annotation filter used to restrict the
 	 * annotations considered
 	 * @return a {@link MergedAnnotations} instance containing the merged
-	 * element annotations
+	 * annotations for the supplied element
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
@@ -386,7 +386,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the annotations
 	 */
 	static MergedAnnotations from(Object source, Annotation[] annotations, RepeatableContainers repeatableContainers) {
-		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, AnnotationFilter.PLAIN);
+		return from(source, annotations, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**

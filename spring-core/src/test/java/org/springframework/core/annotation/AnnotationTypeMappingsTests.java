@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -38,6 +39,7 @@ import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.Mirr
 import org.springframework.lang.UsesSunMisc;
 import org.springframework.util.ReflectionUtils;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -500,11 +502,7 @@ class AnnotationTypeMappingsTests {
 	private List<AnnotationTypeMapping> getAll(AnnotationTypeMappings mappings) {
 		// AnnotationTypeMappings does not implement Iterable so we don't create
 		// too many garbage Iterators
-		List<AnnotationTypeMapping> result = new ArrayList<>(mappings.size());
-		for (int i = 0; i < mappings.size(); i++) {
-			result.add(mappings.get(i));
-		}
-		return result;
+		return IntStream.range(0, mappings.size()).mapToObj(mappings::get).collect(toList());
 	}
 
 	private List<String> getNames(MirrorSet mirrorSet) {
