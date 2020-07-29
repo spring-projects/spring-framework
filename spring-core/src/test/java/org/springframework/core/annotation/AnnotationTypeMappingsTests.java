@@ -474,6 +474,16 @@ class AnnotationTypeMappingsTests {
 		return result;
 	}
 
+	@Test
+	void forAnnotationTypeWhenRepeatableMetaAnnotationFilterd() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class,
+		annotationType ->
+				ObjectUtils.nullSafeEquals(annotationType, Repeating.class.getName()));
+		assertThat(getAll(mappings)).flatExtracting(
+				AnnotationTypeMapping::getAnnotationType).containsExactly(
+				WithRepeatedMetaAnnotations.class);
+	}
+
 	@Nullable
 	private Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getAliasMapping(attributeIndex);
