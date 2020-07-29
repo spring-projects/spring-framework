@@ -88,7 +88,7 @@ public class MediaTypeBenchmark {
 					"application/problem+json",
 					"application/xhtml+xml",
 					"application/rss+xml",
-					"application/stream+json",
+					"application/x-ndjson",
 					"application/xml;q=0.9",
 					"application/atom+xml",
 					"application/cbor",

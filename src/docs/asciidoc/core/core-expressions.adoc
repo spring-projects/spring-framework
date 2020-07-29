@@ -332,15 +332,20 @@ being placed in it. The following example shows how to do so:
 [[expressions-parser-configuration]]
 === Parser Configuration
 
-It is possible to configure the SpEL expression parser by using a parser configuration object
-(`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
+It is possible to configure the SpEL expression parser by using a parser configuration
+object (`org.springframework.expression.spel.SpelParserConfiguration`). The configuration
 object controls the behavior of some of the expression components. For example, if you
-index into an array or collection and the element at the specified index is `null`,
-you can automatically create the element. This is useful when using expressions made up of a
-chain of property references. If you index into an array or list
-and specifying an index that is beyond the end of the current size of the array or
-list, you can automatically grow the array or list to accommodate that index. The following
-example demonstrates how to automatically grow the list:
+index into an array or collection and the element at the specified index is `null`, SpEL
+can automatically create the element. This is useful when using expressions made up of a
+chain of property references. If you index into an array or list and specify an index
+that is beyond the end of the current size of the array or list, SpEL can automatically
+grow the array or list to accommodate that index. In order to add an element at the
+specified index, SpEL will try to create the element using the element type's default
+constructor before setting the specified value. If the element type does not have a
+default constructor, `null` will be added to the array or list. If there is no built-in
+or custom converter that knows how to set the value, `null` will remain in the array or
+list at the specified index. The following example demonstrates how to automatically grow
+the list:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

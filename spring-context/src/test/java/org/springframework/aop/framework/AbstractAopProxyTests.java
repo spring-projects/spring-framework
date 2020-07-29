@@ -765,7 +765,7 @@ public abstract class AbstractAopProxyTests {
 		@SuppressWarnings("serial")
 		class MyDi extends DelegatingIntroductionInterceptor implements TimeStamped {
 			/**
-			 * @see org.springframework.core.testfixture.util.TimeStamped#getTimeStamp()
+			 * @see org.springframework.core.testfixture.TimeStamped#getTimeStamp()
 			 */
 			@Override
 			public long getTimeStamp() {

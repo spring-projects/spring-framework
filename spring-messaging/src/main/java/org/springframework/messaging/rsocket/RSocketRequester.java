@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.RSocketClient;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
@@ -48,13 +49,16 @@ import org.springframework.util.MimeType;
 public interface RSocketRequester {
 
 	/**
-	 * This method returns {@code null} unless the the requester was created
-	 * with a "live" RSocket through one of the (now deprecated) builder connect
-	 * methods or via {@link #wrap(RSocket, MimeType, MimeType, RSocketStrategies)}
-	 * which is mainly for internal use in client and server responder
-	 * implementations. Otherwise in the more common case where there is no
-	 * "live" RSocket, the requester delegates to an
-	 * {@link io.rsocket.RSocketClient}.
+	 * Return the underlying {@link RSocketClient} used to make requests with.
+	 * @since 5.3
+	 */
+	RSocketClient rsocketClient();
+
+	/**
+	 * Return the underlying {@link RSocket} if the requester was created with a
+	 * "live" RSocket via {@link #wrap(RSocket, MimeType, MimeType, RSocketStrategies)}
+	 * or via one of the (deprecated) connect methods on the
+	 * {@code RSocketRequester} builder, or otherwise return {@code null}.
 	 */
 	@Nullable
 	RSocket rsocket();
@@ -104,13 +108,6 @@ public interface RSocketRequester {
 	RequestSpec metadata(Object metadata, @Nullable MimeType mimeType);
 
 	/**
-	 * Invoke the dispose method on the underlying
-	 * {@link io.rsocket.RSocketClient} or {@link RSocket}.
-	 * @since 5.3
-	 */
-	public void dispose();
-
-	/**
 	 * Obtain a builder to create a client {@link RSocketRequester} by connecting
 	 * to an RSocket server.
 	 */
@@ -126,9 +123,7 @@ public interface RSocketRequester {
 			RSocket rsocket, MimeType dataMimeType, MimeType metadataMimeType,
 			RSocketStrategies strategies) {
 
-		return new DefaultRSocketRequester(
-				new DefaultRSocketRequester.ConnectionRSocketDelegate(rsocket),
-				dataMimeType, metadataMimeType, strategies);
+		return new DefaultRSocketRequester(null, rsocket, dataMimeType, metadataMimeType, strategies);
 	}
 
 

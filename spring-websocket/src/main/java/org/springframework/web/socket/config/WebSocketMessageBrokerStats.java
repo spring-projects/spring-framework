@@ -96,7 +96,7 @@ public class WebSocketMessageBrokerStats {
 			}
 		}
 		SubProtocolHandler defaultHandler = this.webSocketHandler.getDefaultProtocolHandler();
-		if (defaultHandler != null && defaultHandler instanceof StompSubProtocolHandler) {
+		if (defaultHandler instanceof StompSubProtocolHandler) {
 			return (StompSubProtocolHandler) defaultHandler;
 		}
 		return null;

@@ -271,7 +271,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
-			requester.dispose()
+			requester.rsocketClient().dispose()
 			server.dispose()
 		}
 	}

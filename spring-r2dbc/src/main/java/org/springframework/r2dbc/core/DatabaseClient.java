@@ -69,7 +69,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 
 	/**
 	 * Specify a {@link Supplier SQL supplier} that provides SQL to run.
-	 * Contract for specifying a SQL call along with options leading to
+	 * Contract for specifying an SQL call along with options leading to
 	 * the execution. The SQL string can contain either native parameter
 	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
 	 * {@link NamedParameterExpander} is enabled.
@@ -148,7 +148,7 @@ public interface DatabaseClient extends ConnectionAccessor {
 
 
 	/**
-	 * Contract for specifying a SQL call along with options leading to the execution.
+	 * Contract for specifying an SQL call along with options leading to the execution.
 	 */
 	interface GenericExecuteSpec {
 

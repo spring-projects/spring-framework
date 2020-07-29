@@ -110,14 +110,14 @@ public class RSocketServerToClientIntegrationTests {
 					.rsocketConnector(connector -> connector.acceptor(responder))
 					.tcp("localhost", server.address().getPort());
 
-			// Make a request to cause a connection to be established.
-			requester.route("fnf").send().block();
+			// Trigger connection establishment.
+			requester.rsocketClient().source().block();
 
 			context.getBean(ServerController.class).await(Duration.ofSeconds(5));
 		}
 		finally {
 			if (requester != null) {
-				requester.dispose();
+				requester.rsocketClient().dispose();
 			}
 		}
 	}

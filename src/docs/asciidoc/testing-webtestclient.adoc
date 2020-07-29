@@ -378,7 +378,7 @@ You can also use https://github.com/jayway/JsonPath[JSONPath] expressions, as fo
 [[webtestclient-stream]]
 === Streaming Responses
 
-To test infinite streams (for example, `"text/event-stream"` or `"application/stream+json"`),
+To test infinite streams (for example, `"text/event-stream"` or `"application/x-ndjson"`),
 you need to exit the chained API (by using `returnResult`), immediately after the response status
 and header assertions, as the following example shows:
 

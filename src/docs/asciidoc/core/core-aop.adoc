@@ -83,9 +83,9 @@ Spring AOP includes the following types of advice:
   an exception).
 * After returning advice: Advice to be run after a join point completes
   normally (for example, if a method returns without throwing an exception).
-* After throwing advice: Advice to be executed if a method exits by throwing an
+* After throwing advice: Advice to be run if a method exits by throwing an
   exception.
-* After (finally) advice: Advice to be executed regardless of the means by which a
+* After (finally) advice: Advice to be run regardless of the means by which a
   join point exits (normal or exceptional return).
 * Around advice: Advice that surrounds a join point such as a method invocation.
   This is the most powerful kind of advice. Around advice can perform custom behavior
@@ -219,7 +219,7 @@ To use @AspectJ aspects in a Spring configuration, you need to enable Spring sup
 configuring Spring AOP based on @AspectJ aspects and auto-proxying beans based on
 whether or not they are advised by those aspects. By auto-proxying, we mean that, if Spring
 determines that a bean is advised by one or more aspects, it automatically generates
-a proxy for that bean to intercept method invocations and ensures that advice is executed
+a proxy for that bean to intercept method invocations and ensures that advice is run
 as needed.
 
 The @AspectJ support can be enabled with XML- or Java-style configuration. In either
@@ -334,7 +334,7 @@ hence, excludes it from auto-proxying.
 === Declaring a Pointcut
 
 Pointcuts determine join points of interest and thus enable us to control
-when advice executes. Spring AOP only supports method execution join points for Spring
+when advice runs. Spring AOP only supports method execution join points for Spring
 beans, so you can think of a pointcut as matching the execution of methods on Spring
 beans. A pointcut declaration has two parts: a signature comprising a name and any
 parameters and a pointcut expression that determines exactly which method
@@ -395,7 +395,7 @@ expressions:
   annotation (the execution of methods declared in types with the given annotation when
   using Spring AOP).
 * `@annotation`: Limits matching to join points where the subject of the join point
-  (the method being executed in Spring AOP) has the given annotation.
+  (the method being run in Spring AOP) has the given annotation.
 
 .Other pointcut types
 ****
@@ -1211,8 +1211,8 @@ The following example shows how to use after finally advice:
 ==== Around Advice
 
 The last kind of advice is around advice. Around advice runs "`around`" a matched method's
-execution. It has the opportunity to do work both before and after the method executes
-and to determine when, how, and even if the method actually gets to execute at all.
+execution. It has the opportunity to do work both before and after the method runs
+and to determine when, how, and even if the method actually gets to run at all.
 Around advice is often used if you need to share state before and after a method
 execution in a thread-safe manner (starting and stopping a timer, for example). Always
 use the least powerful form of advice that meets your requirements (that is, do not use
@@ -1221,7 +1221,7 @@ around advice if before advice would do).
 Around advice is declared by using the `@Around` annotation. The first parameter of the
 advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
 calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
-execute. The `proceed` method can also pass in an `Object[]`. The values
+run. The `proceed` method can also pass in an `Object[]`. The values
 in the array are used as the arguments to the method execution when it proceeds.
 
 NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than the
@@ -1783,15 +1783,15 @@ annotation. Consider the following example:
 	}
 ----
 
-In the preceding example, the effect of the `'perthis'` clause is that one aspect
-instance is created for each unique service object that executes a business service (each
-unique object bound to 'this' at join points matched by the pointcut expression). The
-aspect instance is created the first time that a method is invoked on the service object.
-The aspect goes out of scope when the service object goes out of scope. Before the aspect
-instance is created, none of the advice within it executes. As soon as the aspect
-instance has been created, the advice declared within it executes at matched join points,
-but only when the service object is the one with which this aspect is associated. See the
-AspectJ Programming Guide for more information on `per` clauses.
+In the preceding example, the effect of the `perthis` clause is that one aspect instance
+is created for each unique service object that performs a business service (each unique
+object bound to `this` at join points matched by the pointcut expression). The aspect
+instance is created the first time that a method is invoked on the service object. The
+aspect goes out of scope when the service object goes out of scope. Before the aspect
+instance is created, none of the advice within it runs. As soon as the aspect instance
+has been created, the advice declared within it runs at matched join points, but only
+when the service object is the one with which this aspect is associated. See the AspectJ
+Programming Guide for more information on `per` clauses.
 
 The `pertarget` instantiation model works in exactly the same way as `perthis`, but it
 creates one aspect instance for each unique target object at matched join points.
@@ -2188,7 +2188,7 @@ significantly improve the readability of your code.
 
 The `method` attribute identifies a method (`doAccessCheck`) that provides the body of
 the advice. This method must be defined for the bean referenced by the aspect element
-that contains the advice. Before a data access operation is executed (a method execution
+that contains the advice. Before a data access operation is performed (a method execution
 join point matched by the pointcut expression), the `doAccessCheck` method on the aspect
 bean is invoked.
 
@@ -2250,7 +2250,7 @@ example, you can declare the method signature as follows:
 [[aop-schema-advice-after-throwing]]
 ==== After Throwing Advice
 
-After throwing advice executes when a matched method execution exits by throwing an
+After throwing advice runs when a matched method execution exits by throwing an
 exception. It is declared inside an `<aop:aspect>` by using the `after-throwing` element,
 as the following example shows:
 
@@ -2325,8 +2325,8 @@ by using the `after` element, as the following example shows:
 ==== Around Advice
 
 The last kind of advice is around advice. Around advice runs "around" a matched method
-execution. It has the opportunity to do work both before and after the method executes
-and to determine when, how, and even if the method actually gets to execute at all.
+execution. It has the opportunity to do work both before and after the method runs
+and to determine when, how, and even if the method actually gets to run at all.
 Around advice is often used to share state before and after a method
 execution in a thread-safe manner (starting and stopping a timer, for example). Always
 use the least powerful form of advice that meets your requirements. Do not use around
@@ -2335,7 +2335,7 @@ advice if before advice can do the job.
 You can declare around advice by using the `aop:around` element. The first parameter of the
 advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
 calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
-execute. The `proceed` method may also be called with an `Object[]`. The values
+run. The `proceed` method may also be called with an `Object[]`. The values
 in the array are used as the arguments to the method execution when it proceeds. See
 <<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
 The following example shows how to declare around advice in XML:
@@ -2563,7 +2563,7 @@ ms     %     Task name
 [[aop-ordering]]
 ==== Advice Ordering
 
-When multiple pieces of advice need to execute at the same join point (executing method)
+When multiple pieces of advice need to run at the same join point (executing method)
 the ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
 between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
 by either adding the `@Order` annotation to the bean that backs the aspect or by having
@@ -2772,7 +2772,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 	class ConcurrentOperationExecutor : Ordered {
 
 		private val DEFAULT_MAX_RETRIES = 2
-		
+
 		private var maxRetries = DEFAULT_MAX_RETRIES
 		private var order = 1
 
@@ -2787,7 +2787,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		fun setOrder(order: Int) {
 			this.order = order
 		}
-		
+
 		fun doConcurrentOperation(pjp: ProceedingJoinPoint): Any {
 			var numAttempts = 0
 			var lockFailureException: PessimisticLockingFailureException
@@ -3160,13 +3160,13 @@ The key thing to understand here is that the client code inside the `main(..)` m
 of the `Main` class has a reference to the proxy. This means that method calls on that
 object reference are calls on the proxy. As a result, the proxy can delegate to all of
 the interceptors (advice) that are relevant to that particular method call. However,
-once the call has finally reached the target object (the `SimplePojo`, reference in
+once the call has finally reached the target object (the `SimplePojo` reference in
 this case), any method calls that it may make on itself, such as `this.bar()` or
 `this.foo()`, are going to be invoked against the `this` reference, and not the proxy.
 This has important implications. It means that self-invocation is not going to result
-in the advice associated with a method invocation getting a chance to execute.
+in the advice associated with a method invocation getting a chance to run.
 
-Okay, so what is to be done about this? The best approach (the term, "`best,`" is used
+Okay, so what is to be done about this? The best approach (the term "best" is used
 loosely here) is to refactor your code such that the self-invocation does not happen.
 This does entail some work on your part, but it is the best, least-invasive approach.
 The next approach is absolutely horrendous, and we hesitate to point it out, precisely
@@ -3433,7 +3433,7 @@ exact semantics of "`after returning from the initialization of a new object`" a
 fine. In this context, "`after initialization`" means that the dependencies are
 injected after the object has been constructed. This means that the dependencies
 are not available for use in the constructor bodies of the class. If you want the
-dependencies to be injected before the constructor bodies execute and thus be
+dependencies to be injected before the constructor bodies run and thus be
 available for use in the body of the constructors, you need to define this on the
 `@Configurable` declaration, as follows:
 

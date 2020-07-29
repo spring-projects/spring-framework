@@ -268,7 +268,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		 *
 		 * @return {code true} when the message size is parsed successfully, {code false} when the message size is
 		 * truncated
-		 * @see <a href ="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
+		 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
 		 */
 		private boolean readMessageSize(DataBuffer input) {
 			if (this.offset == 0) {

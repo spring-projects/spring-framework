@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ class ControllerMethodResolver {
 					AnnotatedElementUtils.hasAnnotation(method, ModelAttribute.class));
 
 
-	private static Log logger = LogFactory.getLog(ControllerMethodResolver.class);
+	private static final Log logger = LogFactory.getLog(ControllerMethodResolver.class);
 
 	private final List<SyncHandlerMethodArgumentResolver> initBinderResolvers;
 
@@ -95,13 +95,11 @@ class ControllerMethodResolver {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache = new ConcurrentHashMap<>(64);
-
 
 	private final Map<ControllerAdviceBean, Set<Method>> initBinderAdviceCache = new LinkedHashMap<>(64);
 
@@ -169,7 +167,7 @@ class ControllerMethodResolver {
 		boolean requestMappingMethod = !readers.isEmpty() && supportDataBinding;
 
 		// Annotation-based...
-		List<HandlerMethodArgumentResolver> result = new ArrayList<>();
+		List<HandlerMethodArgumentResolver> result = new ArrayList<>(30);
 		result.add(new RequestParamMethodArgumentResolver(beanFactory, adapterRegistry, false));
 		result.add(new RequestParamMapMethodArgumentResolver(adapterRegistry));
 		result.add(new PathVariableMethodArgumentResolver(beanFactory, adapterRegistry));

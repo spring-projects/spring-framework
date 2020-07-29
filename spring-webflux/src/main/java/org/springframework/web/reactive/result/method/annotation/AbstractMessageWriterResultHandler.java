@@ -209,7 +209,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(Method method) {
+		private static boolean isSuspend(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			return function != null && function.isSuspend();
 		}

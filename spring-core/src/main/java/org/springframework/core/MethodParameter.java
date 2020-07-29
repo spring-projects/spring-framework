@@ -910,7 +910,7 @@ public class MethodParameter {
 		 * Return the generic return type of the method, with support of suspending
 		 * functions via Kotlin reflection.
 		 */
-		static private Type getGenericReturnType(Method method) {
+		private static Type getGenericReturnType(Method method) {
 			try {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				if (function != null && function.isSuspend()) {
@@ -927,7 +927,7 @@ public class MethodParameter {
 		 * Return the return type of the method, with support of suspending
 		 * functions via Kotlin reflection.
 		 */
-		static private Class<?> getReturnType(Method method) {
+		private static Class<?> getReturnType(Method method) {
 			try {
 				KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 				if (function != null && function.isSuspend()) {

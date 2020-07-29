@@ -225,7 +225,7 @@ public class ReactiveTypeHandlerTests {
 	@Test
 	public void writeStreamJson() throws Exception {
 
-		this.servletRequest.addHeader("Accept", "application/stream+json");
+		this.servletRequest.addHeader("Accept", "application/x-ndjson");
 
 		Sinks.StandaloneFluxSink<Bar> sink = Sinks.unicast();
 		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(Bar.class));
@@ -243,7 +243,7 @@ public class ReactiveTypeHandlerTests {
 		sink.next(bar2);
 		sink.complete();
 
-		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/stream+json");
+		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/x-ndjson");
 		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
 	}
 

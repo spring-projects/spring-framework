@@ -224,7 +224,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(@Nullable Method method) {
+		private static boolean isSuspend(@Nullable Method method) {
 			if (method == null) {
 				return false;
 			}

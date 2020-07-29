@@ -57,7 +57,7 @@ import org.springframework.web.util.NestedServletException;
  * @see HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  * @see org.springframework.remoting.caucho.HessianServiceExporter
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public class HttpInvokerServiceExporter extends org.springframework.remoting.rmi.RemoteInvocationSerializingExporter implements HttpRequestHandler {

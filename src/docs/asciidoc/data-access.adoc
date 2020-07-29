@@ -250,9 +250,9 @@ mocked or stubbed as necessary.
 
 The `TransactionDefinition` interface specifies:
 
-* Propagation: Typically, all code executed within a transaction scope runs in
+* Propagation: Typically, all code within a transaction scope runs in
   that transaction. However, you can specify the behavior if
-  a transactional method is executed when a transaction context already exists. For
+  a transactional method is run when a transaction context already exists. For
   example, code can continue running in the existing transaction (the common case), or
   the existing transaction can be suspended and a new transaction created. Spring
   offers all of the transaction propagation options familiar from EJB CMT. To read
@@ -715,9 +715,9 @@ The following example shows an implementation of the preceding interface:
 ----
 
 Assume that the first two methods of the `FooService` interface, `getFoo(String)` and
-`getFoo(String, String)`, must execute in the context of a transaction with read-only
-semantics, and that the other methods, `insertFoo(Foo)` and `updateFoo(Foo)`, must
-execute in the context of a transaction with read-write semantics. The following
+`getFoo(String, String)`, must run in the context of a transaction with read-only
+semantics and that the other methods, `insertFoo(Foo)` and `updateFoo(Foo)`, must
+run in the context of a transaction with read-write semantics. The following
 configuration is explained in detail in the next few paragraphs:
 
 [source,xml,indent=0,subs="verbatim"]
@@ -778,8 +778,8 @@ configuration is explained in detail in the next few paragraphs:
 Examine the preceding configuration. It assumes that you want to make a service object,
 the `fooService` bean, transactional. The transaction semantics to apply are encapsulated
 in the `<tx:advice/>` definition. The `<tx:advice/>` definition reads as "all methods
-starting with `get` are to execute in the context of a read-only transaction, and all
-other methods are to execute with the default transaction semantics". The
+starting with `get` are to run in the context of a read-only transaction, and all
+other methods are to run with the default transaction semantics". The
 `transaction-manager` attribute of the `<tx:advice/>` tag is set to the name of the
 `TransactionManager` bean that is going to drive the transactions (in this case, the
 `txManager` bean).
@@ -791,7 +791,7 @@ you want to wire in has any other name, you must use the `transaction-manager`
 attribute explicitly, as in the preceding example.
 
 The `<aop:config/>` definition ensures that the transactional advice defined by the
-`txAdvice` bean executes at the appropriate points in the program. First, you define a
+`txAdvice` bean runs at the appropriate points in the program. First, you define a
 pointcut that matches the execution of any operation defined in the `FooService` interface
 (`fooServiceOperation`). Then you associate the pointcut with the `txAdvice` by using an
 advisor. The result indicates that, at the execution of a `fooServiceOperation`,
@@ -1904,14 +1904,14 @@ transactions. See Spring's {api-spring-framework}/jdbc/datasource/DataSourceTran
 [[transaction-declarative-applying-more-than-just-tx-advice]]
 ==== Advising Transactional Operations
 
-Suppose you want to execute both transactional operations and some basic profiling advice.
+Suppose you want to run both transactional operations and some basic profiling advice.
 How do you effect this in the context of `<tx:annotation-driven/>`?
 
 When you invoke the `updateFoo(Foo)` method, you want to see the following actions:
 
 * The configured profiling aspect starts.
-* The transactional advice executes.
-* The method on the advised object executes.
+* The transactional advice runs.
+* The method on the advised object runs.
 * The transaction commits.
 * The profiling aspect reports the exact duration of the whole transactional method invocation.
 
@@ -2016,14 +2016,14 @@ transactional aspects applied to it in the desired order:
 
 		<!-- this is the aspect -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
-			<!-- execute before the transactional advice (hence the lower order number) -->
+			<!-- run before the transactional advice (hence the lower order number) -->
 			<property name="order" value="1"/>
 		</bean>
 
 		<tx:annotation-driven transaction-manager="txManager" order="200"/>
 
 		<aop:config>
-				<!-- this advice will execute around the transactional advice -->
+				<!-- this advice runs around the transactional advice -->
 				<aop:aspect id="profilingAspect" ref="profiler">
 					<aop:pointcut id="serviceMethodWithReturnValue"
 							expression="execution(!void x.y..*Service.*(..))"/>
@@ -2070,13 +2070,13 @@ declarative approach:
 
 		<!-- the profiling advice -->
 		<bean id="profiler" class="x.y.SimpleProfiler">
-			<!-- execute before the transactional advice (hence the lower order number) -->
+			<!-- run before the transactional advice (hence the lower order number) -->
 			<property name="order" value="1"/>
 		</bean>
 
 		<aop:config>
 			<aop:pointcut id="entryPointMethod" expression="execution(* x.y..*Service.*(..))"/>
-			<!-- will execute after the profiling advice (c.f. the order attribute) -->
+			<!-- runs after the profiling advice (c.f. the order attribute) -->
 
 			<aop:advisor advice-ref="txAdvice" pointcut-ref="entryPointMethod" order="2"/>
 			<!-- order value is higher than the profiling aspect -->
@@ -2103,7 +2103,7 @@ declarative approach:
 
 The result of the preceding configuration is a `fooService` bean that has profiling and
 transactional aspects applied to it in that order. If you want the profiling advice
-to execute after the transactional advice on the way in and before the
+to run after the transactional advice on the way in and before the
 transactional advice on the way out, you can swap the value of the profiling
 aspect bean's `order` property so that it is higher than the transactional advice's
 order value.
@@ -2199,10 +2199,10 @@ couples you to Spring's transaction infrastructure and APIs. Whether or not prog
 transaction management is suitable for your development needs is a decision that you
 have to make yourself.
 
-Application code that must execute in a transactional context and that explicitly uses the
+Application code that must run in a transactional context and that explicitly uses the
 `TransactionTemplate` resembles the next example. You, as an application
 developer, can write a `TransactionCallback` implementation (typically expressed as an
-anonymous inner class) that contains the code that you need to execute in the context of
+anonymous inner class) that contains the code that you need to run in the context of
 a transaction. You can then pass an instance of your custom `TransactionCallback` to the
 `execute(..)` method exposed on the `TransactionTemplate`. The following example shows how to do so:
 
@@ -2221,7 +2221,7 @@ a transaction. You can then pass an instance of your custom `TransactionCallback
 
 		public Object someServiceMethod() {
 			return transactionTemplate.execute(new TransactionCallback() {
-				// the code in this method executes in a transactional context
+				// the code in this method runs in a transactional context
 				public Object doInTransaction(TransactionStatus status) {
 					updateOperation1();
 					return resultOfUpdateOperation2();
@@ -2382,7 +2382,7 @@ couples you to Spring's transaction infrastructure and APIs. Whether or not prog
 transaction management is suitable for your development needs is a decision that you have
 to make yourself.
 
-Application code that must execute in a transactional context and that explicitly uses
+Application code that must run in a transactional context and that explicitly uses
 the `TransactionOperator` resembles the next example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -2399,9 +2399,9 @@ the `TransactionOperator` resembles the next example:
 		}
 
 		public Mono<Object> someServiceMethod() {
-
-			// the code in this method executes in a transactional context
-
+			
+			// the code in this method runs in a transactional context
+			
             Mono<Object> update = updateOperation1();
 
 			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
@@ -2459,7 +2459,7 @@ method on the supplied `ReactiveTransaction` object, as follows:
 [[tx-prog-operator-cancel]]
 ===== Cancel Signals
 
-In Reactive Streams, a `Subscriber` can cancel its `Subscription` and terminate its
+In Reactive Streams, a `Subscriber` can cancel its `Subscription` and stop its
 `Publisher`. Operators in Project Reactor, as well as in other libraries, such as `next()`,
 `take(long)`, `timeout(Duration)`, and others can issue cancellations. There is no way to
 know the reason for the cancellation, whether it is due to an error or a simply lack of
@@ -2539,7 +2539,7 @@ following example shows how to do so:
 
 	TransactionStatus status = txManager.getTransaction(def);
 	try {
-		// execute your business logic here
+		// put your business logic here
 	}
 	catch (MyException ex) {
 		txManager.rollback(status);
@@ -2557,7 +2557,7 @@ following example shows how to do so:
 
 	val status = txManager.getTransaction(def)
 	try {
-		// execute your business logic here
+		// put your business logic here
 	} catch (ex: MyException) {
 		txManager.rollback(status)
 		throw ex
@@ -2589,7 +2589,7 @@ following example shows how to do so:
 
 	reactiveTx.flatMap(status -> {
 
-		Mono<Object> tx = ...; // execute your business logic here
+		Mono<Object> tx = ...; // put your business logic here
 
 		return tx.then(txManager.commit(status))
 				.onErrorResume(ex -> txManager.rollback(status).then(Mono.error(ex)));
@@ -2606,7 +2606,7 @@ following example shows how to do so:
 	val reactiveTx = txManager.getReactiveTransaction(def)
 	reactiveTx.flatMap { status ->
 
-		val tx = ... // execute your business logic here
+		val tx = ... // put your business logic here
 
 		tx.then(txManager.commit(status))
 				.onErrorResume { ex -> txManager.rollback(status).then(Mono.error(ex)) }
@@ -2981,7 +2981,7 @@ takes care of and which actions are your responsibility.
 |
 | X
 
-| Prepare and execute the statement.
+| Prepare and run the statement.
 | X
 |
 
@@ -3033,11 +3033,12 @@ advanced features require a JDBC 3.0 driver.
   the column names. This works only if the database provides adequate metadata. If the
   database does not provide this metadata, you have to provide explicit
   configuration of the parameters.
-* RDBMS objects, including `MappingSqlQuery`, `SqlUpdate` and `StoredProcedure`, require
-  you to create reusable and thread-safe objects during initialization of your data-access
-  layer. This approach is modeled after JDO Query, wherein you define your query
-  string, declare parameters, and compile the query. Once you do that, execute methods
-  can be called multiple times with various parameter values.
+* RDBMS objects — including `MappingSqlQuery`, `SqlUpdate`, and `StoredProcedure` —
+  require you to create reusable and thread-safe objects during initialization of your
+  data-access layer. This approach is modeled after JDO Query, wherein you define your
+  query string, declare parameters, and compile the query. Once you do that,
+  `execute(...)`, `update(...)`, and `findObject(...)` methods can be called multiple
+  times with various parameter values.
 
 
 
@@ -4523,14 +4524,14 @@ The following example shows a batch update that uses a batch size of 100:
 	}
 ----
 
-The batch update methods for this call returns an array of `int` arrays that contain an array
-entry for each batch with an array of the number of affected rows for each update. The top
-level array's length indicates the number of batches executed and the second level array's
-length indicates the number of updates in that batch. The number of updates in each batch
-should be the batch size provided for all batches (except that the last one that might
-be less), depending on the total number of update objects provided. The update count for
-each update statement is the one reported by the JDBC driver. If the count is not
-available, the JDBC driver returns a value of `-2`.
+The batch update methods for this call returns an array of `int` arrays that contains an
+array entry for each batch with an array of the number of affected rows for each update.
+The top-level array's length indicates the number of batches run, and the second level
+array's length indicates the number of updates in that batch. The number of updates in
+each batch should be the batch size provided for all batches (except that the last one
+that might be less), depending on the total number of update objects provided. The update
+count for each update statement is the one reported by the JDBC driver. If the count is
+not available, the JDBC driver returns a value of `-2`.
 
 
 
@@ -5091,7 +5092,7 @@ You can call a stored function in almost the same way as you call a stored proce
 that you provide a function name rather than a procedure name. You use the
 `withFunctionName` method as part of the configuration to indicate that you want to make
 a call to a function, and the corresponding string for a function call is generated. A
-specialized execute call (`executeFunction`) is used to execute the function, and it
+specialized call (`executeFunction`) is used to run the function, and it
 returns the function return value as an object of a specified type, which means you do
 not have to retrieve the return value from the results map. A similar convenience method
 (named `executeObject`) is also available for stored procedures that have only one `out`
@@ -5247,7 +5248,7 @@ The list of actors is then retrieved from the results map and returned to the ca
 === Modeling JDBC Operations as Java Objects
 
 The `org.springframework.jdbc.object` package contains classes that let you access
-the database in a more object-oriented manner. As an example, you can execute queries
+the database in a more object-oriented manner. As an example, you can run queries
 and get the results back as a list that contains business objects with the relational
 column data mapped to the properties of the business object. You can also run stored
 procedures and run update, delete, and insert statements.
@@ -5328,7 +5329,7 @@ data from the `t_actor` relation to an instance of the `Actor` class:
 The class extends `MappingSqlQuery` parameterized with the `Actor` type. The constructor
 for this customer query takes a `DataSource` as the only parameter. In this
 constructor, you can call the constructor on the superclass with the `DataSource` and the SQL
-that should be executed to retrieve the rows for this query. This SQL is used to
+that should be run to retrieve the rows for this query. This SQL is used to
 create a `PreparedStatement`, so it may contain placeholders for any parameters to be
 passed in during execution. You must declare each parameter by using the `declareParameter`
 method passing in an `SqlParameter`. The `SqlParameter` takes a name, and the JDBC type
@@ -6442,7 +6443,7 @@ boolean value from system properties or from an environment bean). The following
 
 The second option to control what happens with existing data is to be more tolerant of
 failures. To this end, you can control the ability of the initializer to ignore certain
-errors in the SQL it executes from the scripts, as the following example shows:
+errors in the SQL it runs from the scripts, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -6618,7 +6619,7 @@ You can customize the client by calling the following methods:
 * `….bindMarkers(…)`: Supply a specific `BindMarkersFactory` to configure named
 parameter to database bind marker translation.
 * `….executeFunction(…)`: Set the `ExecuteFunction` how `Statement` objects get
- executed.
+ run.
 * `….namedParameters(false)`: Disable named parameter expansion. Enabled by default.
 
 TIP: Dialects are resolved by {api-spring-framework}/r2dbc/core/binding/BindMarkersFactoryResolver.html[`BindMarkersFactoryResolver`]
@@ -6803,7 +6804,7 @@ input parameters. Parameterized statements bear the risk of SQL injection if
 parameters are not escaped properly. `DatabaseClient` leverages R2DBC's
 `bind` API to eliminate the risk of SQL injection for query parameters.
 You can provide a parameterized SQL statement with the `execute(…)` operator
-and bind parameters to the actual `Statement`. Your R2DBC driver then executes
+and bind parameters to the actual `Statement`. Your R2DBC driver then runs
 the statement by using prepared statements and parameter substitution.
 
 Parameter binding supports two binding strategies:
@@ -6852,7 +6853,7 @@ Consider the following query:
 SELECT id, name, state FROM table WHERE (name, age) IN (('John', 35), ('Ann', 50))
 ----
 
-The preceding query can be parametrized and executed as follows:
+The preceding query can be parametrized and run as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6900,7 +6901,7 @@ The following example shows a simpler variant using `IN` predicates:
 ===== Statement Filters
 
 Sometimes it you need to fine-tune options on the actual `Statement`
-before it gets executed. Register a `Statement` filter
+before it gets run. Register a `Statement` filter
 (`StatementFilterFunction`) through `DatabaseClient` to intercept and
 modify statements in their execution, as the following example shows:
 
@@ -6942,7 +6943,7 @@ modify statements in their execution, as the following example shows:
 	    .filter { statement -> s.fetchSize(25) }
 ----
 
-`StatementFilterFunction` implementations allow filtering of the executed 
+`StatementFilterFunction` implementations allow filtering of the
 `Statement` and filtering of `Result` objects.
 
 [[r2dbc-DatabaseClient-idioms]]
@@ -7088,7 +7089,7 @@ necessarily have to know how the production data source is configured.
 
 When you use Spring's R2DBC layer, you can can configure your own with a
 connection pool implementation provided by a third party. A popular
-implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring 
+implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring
 distribution are meant only for testing purposes and do not provide pooling.
 
 To configure a `ConnectionFactory`:
@@ -7161,7 +7162,7 @@ javadoc for more details.
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
 single R2DBC datasources. It binds an R2DBC connection from the specified connection factory
-to the subscriber `Context`, potentially allowing for one subscriber connection for each 
+to the subscriber `Context`, potentially allowing for one subscriber connection for each
 connection factory.
 
 Application code is required to retrieve the R2DBC connection through

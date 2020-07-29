@@ -78,6 +78,9 @@ public abstract class NettyWebSocketSessionSupport<T> extends AbstractWebSocketS
 	}
 
 	protected WebSocketFrame toFrame(WebSocketMessage message) {
+		if (message.getNativeMessage() != null) {
+			return message.getNativeMessage();
+		}
 		ByteBuf byteBuf = NettyDataBufferFactory.toByteBuf(message.getPayload());
 		if (WebSocketMessage.Type.TEXT.equals(message.getType())) {
 			return new TextWebSocketFrame(byteBuf);

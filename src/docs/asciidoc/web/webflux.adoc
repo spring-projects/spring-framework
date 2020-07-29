@@ -101,7 +101,7 @@ operations on the output, but you need to adapt the output for use with another 
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
 of RxJava or another reactive library. See <<webflux-reactive-libraries>> for more details.
 
-NOTE: In addition to Reactive APIs, WebFlux can also be used with 
+NOTE: In addition to Reactive APIs, WebFlux can also be used with
 <<languages.adoc#coroutines, Coroutines>> APIs in Kotlin which provides a more imperative style of programming.
 The following Kotlin code samples will be provided with Coroutines APIs.
 
@@ -218,7 +218,7 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally
 do not make applications run faster. They can, in some cases, (for example, if using the
-`WebClient` to execute remote calls in parallel). On the whole, it requires more work to do
+`WebClient` to run remote calls in parallel). On the whole, it requires more work to do
 things the non-blocking way and that can slightly increase the required processing time.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small,
@@ -755,9 +755,9 @@ into ``TokenBuffer``'s each representing a JSON object.
 * When decoding to a single-value publisher (e.g. `Mono`), there is one `TokenBuffer`.
 * When decoding to a multi-value publisher (e.g. `Flux`), each `TokenBuffer` is passed to
 the `ObjectMapper` as soon as enough bytes are received for a fully formed object. The
-input content can be a JSON array, or
-https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] if the content-type is
-`application/stream+json`.
+input content can be a JSON array, or any
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format such as NDJSON,
+JSON Lines, or JSON Text Sequences.
 
 The `Jackson2Encoder` works as follows:
 
@@ -766,9 +766,10 @@ The `Jackson2Encoder` works as follows:
 * For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.
 * For a multi-value publisher with a streaming media type such as
-`application/stream+json` or `application/stream+x-jackson-smile`, encode, write, and
+`application/x-ndjson` or `application/stream+x-jackson-smile`, encode, write, and
 flush each value individually using a
-https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format.
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format. Other
+streaming media types may be registered with the encoder.
 * For SSE the `Jackson2Encoder` is invoked per event and the output is flushed to ensure
 delivery without delay.
 
@@ -852,7 +853,7 @@ To configure all three in WebFlux, you'll need to supply a pre-configured instan
 [.small]#<<web.adoc#mvc-ann-async-http-streaming, Web MVC>>#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
-`application/stream+json`), it is important to send data periodically, in order to
+`application/x-ndjson`), it is important to send data periodically, in order to
 reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.
@@ -894,7 +895,7 @@ not meet the stated goals, please let us know.
 [[webflux-logging-id]]
 ==== Log Id
 
-In WebFlux, a single request can be executed over multiple threads and the thread ID
+In WebFlux, a single request can be run over multiple threads and the thread ID
 is not useful for correlating log messages that belong to a specific request. This is why
 WebFlux log messages are prefixed with a request-specific ID by default.
 
@@ -1105,7 +1106,7 @@ many extra convenient options.
 `DispatcherHandler` processes requests as follows:
 
 * Each `HandlerMapping` is asked to find a matching handler, and the first match is used.
-* If a handler is found, it is executed through an appropriate `HandlerAdapter`, which
+* If a handler is found, it is run through an appropriate `HandlerAdapter`, which
 exposes the return value from the execution as `HandlerResult`.
 * The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
 processing by writing to the response directly or by using a view to render.
@@ -4023,7 +4024,7 @@ underlying FreeMarker view technology):
 	@Configuration
 	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
-		
+
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.freeMarker()
 		}

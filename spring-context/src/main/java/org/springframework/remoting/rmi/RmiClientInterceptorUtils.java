@@ -44,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 1.1
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public abstract class RmiClientInterceptorUtils {

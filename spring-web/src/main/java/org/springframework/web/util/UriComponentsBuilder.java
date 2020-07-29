@@ -162,7 +162,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		this.port = other.port;
 		this.pathBuilder = other.pathBuilder.cloneBuilder();
 		this.uriVariables.putAll(other.uriVariables);
-		this.queryParams.putAll(other.queryParams);
+		this.queryParams.addAll(other.queryParams);
 		this.fragment = other.fragment;
 		this.encodeTemplate = other.encodeTemplate;
 		this.charset = other.charset;

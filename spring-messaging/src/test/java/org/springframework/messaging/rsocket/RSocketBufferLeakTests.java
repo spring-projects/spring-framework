@@ -94,7 +94,7 @@ class RSocketBufferLeakTests {
 
 	@AfterAll
 	void tearDownOnce() {
-		requester.dispose();
+		requester.rsocketClient().dispose();
 		server.dispose();
 		context.close();
 	}

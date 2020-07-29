@@ -380,6 +380,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		return handlers;
 	}
 
+	@Override
+	protected boolean hasGlobalExceptionHandlers() {
+		return !this.exceptionHandlerAdviceCache.isEmpty();
+	}
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.

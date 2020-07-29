@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 /**
  * Interface declaring a query operation that can be represented
  * with a query string. This interface is typically implemented
- * by classes representing a SQL operation such as {@code SELECT},
+ * by classes representing an SQL operation such as {@code SELECT},
  * {@code INSERT}, and such.
  *
  * @author Mark Paluch

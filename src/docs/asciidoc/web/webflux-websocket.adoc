@@ -128,7 +128,7 @@ requirements, the unified flow completes when:
 * At a chosen point, through the `close` method of `WebSocketSession`.
 
 When inbound and outbound message streams are composed together, there is no need to
-check if the connection is open, since Reactive Streams signals terminate activity.
+check if the connection is open, since Reactive Streams signals end activity.
 The inbound stream receives a completion or error signal, and the outbound stream
 receives a cancellation signal.
 
@@ -369,7 +369,7 @@ WebSocket options when running on Tomcat:
 		@Bean
 		fun webSocketService(): WebSocketService {
 			val strategy = TomcatRequestUpgradeStrategy().apply {
-				setMaxSessionIdleTimeout(0L)	
+				setMaxSessionIdleTimeout(0L)
 			}
 			return HandshakeWebSocketService(strategy)
 		}

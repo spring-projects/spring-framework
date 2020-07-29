@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
-		if (!(AbstractJCacheKeyOperation.class.isInstance(operation))) {
+		if (!(operation instanceof AbstractJCacheKeyOperation)) {
 			throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
 		}
 		CacheKeyInvocationContext<?> invocationContext = createCacheKeyInvocationContext(target, operation, params);

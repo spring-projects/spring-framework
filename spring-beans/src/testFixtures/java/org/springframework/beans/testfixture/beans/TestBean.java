@@ -469,7 +469,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !(other instanceof TestBean)) {
+		if (!(other instanceof TestBean)) {
 			return false;
 		}
 		TestBean tb2 = (TestBean) other;

@@ -206,8 +206,8 @@ public class DefaultRSocketRequesterBuilderTests {
 	}
 
 	private ConnectionSetupPayload getConnectionSetupPayload(RSocketRequester requester) {
-		// Trigger connection and sending of SETUP frame
-		requester.route("any-route").data("any-data").send().block();
+		// Trigger connection establishment
+		requester.rsocketClient().source().block();
 		return new DefaultConnectionSetupPayload(this.connection.setupFrame());
 	}
 
