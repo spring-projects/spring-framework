@@ -39,7 +39,7 @@ public class ComparableComparator<T extends Comparable<T>> implements Comparator
 	
 	private ComparableComparator(){}
 	
-	public ComparableComparator getInstance(){
+	public static ComparableComparator getInstance(){
 		return INSTANCE;
 	}
 
