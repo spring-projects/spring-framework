@@ -323,7 +323,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			currentResources = new HashSet<>(4);
 			this.resourcesCurrentlyBeingLoaded.set(currentResources);
 		}
-		//将当前资源加入记录中,如果存在currentResources里，报循环加载错误
+		//将当前资源加入记录中,如果存在currentResources里
+		//抛出异常，有自身引用自身的情况 比如：<import>
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
@@ -512,7 +513,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
-		//创建 BeanDefinitionDocumentReader 对象 此对象用于注册beanDefinition
+		//创建 BeanDefinitionDocumentReader 对象 此对象用于注册beanDefinition  -->DefaultBeanDefinitionDocumentReader
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		//注册beanDefinition

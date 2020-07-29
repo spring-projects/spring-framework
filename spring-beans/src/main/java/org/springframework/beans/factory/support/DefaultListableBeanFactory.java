@@ -923,6 +923,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			//如果已经存在BeanDefinition 且 不允许覆盖 则抛出异常
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
@@ -948,16 +949,29 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"] with [" + beanDefinition + "]");
 				}
 			}
+			//将beanDefinition存入map （put 覆盖）
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 		else {
+			/*
+			 * 判断是否有bean被创建
+			 * 如果存在有创建的bean 说明有bean进行了业务操作，然后还要继续注册bean
+			 * 例如：
+			 * ApplicationContext context = new ClassPathXmlApplicationContext("application.xml");
+			 * Object d1 = context.getBean("test");
+			 * DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+			 * factory.registerBeanDefinition("继续注册一个bean",new GenericBeanDefinition());
+			 * 所以要保证线程安全
+			 */
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
+					//同步块中，按照顺序put
 					this.beanDefinitionMap.put(beanName, beanDefinition);
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
+					//为了防止beanDefinitionNames在被迭代的过程中，进行add、remove操作引发快速失败机制，复制一份进行赋值操作
 					this.beanDefinitionNames = updatedDefinitions;
 					removeManualSingletonName(beanName);
 				}
