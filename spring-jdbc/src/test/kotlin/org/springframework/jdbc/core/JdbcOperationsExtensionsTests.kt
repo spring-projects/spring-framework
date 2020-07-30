@@ -53,7 +53,7 @@ class JdbcOperationsExtensionsTests {
 	@Test  // gh-22682
 	fun `queryForObject with nullable RowMapper-like function`() {
 		every { template.queryForObject(sql, any<RowMapper<Int>>(), 3) } returns null
-		assertThat(template.queryForObject(sql, 3) { _, _ -> null as Int? }).isNull()
+		assertThat(template.queryForObject<Int?>(sql, 3) { _, _ -> null }).isNull()
 		verify { template.queryForObject(eq(sql), any<RowMapper<Int?>>(), eq(3)) }
 	}
 
@@ -130,7 +130,7 @@ class JdbcOperationsExtensionsTests {
 
 	@Test
 	fun `query with RowMapper-like function`() {
-		val list = listOf(1, 2, 3)
+		val list = mutableListOf(1, 2, 3)
 		every { template.query(sql, ofType<RowMapper<*>>(), 3) } returns list
 		assertThat(template.query(sql, 3) { rs, _ ->
 			rs.getInt(1)
