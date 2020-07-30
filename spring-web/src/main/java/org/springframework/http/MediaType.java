@@ -229,6 +229,20 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
 
 	/**
+	 * Public constant media type for {@code application/json-seq}.
+	 * @see <a href="https://tools.ietf.org/html/rfc7464#section-4">
+	 *     JavaScript Object Notation (JSON) Text Sequences</a>
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_JSON_SEQ;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSON_SEQ}.
+	 * @since 5.3
+	 */
+	public static final String APPLICATION_JSON_SEQ_VALUE = "application/json-seq";
+
+	/**
 	 * Public constant media type for {@code application/stream+json}.
 	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 * @since 5.0
@@ -399,6 +413,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
 		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
+		APPLICATION_JSON_SEQ = new MediaType("application", "json-seq");
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
