@@ -463,6 +463,14 @@ class AnnotationTypeMappingsTests {
 		assertThat(mapping.isEquivalentToDefaultValue(0, OutputStream.class, ReflectionUtils::invokeMethod)).isFalse();
 	}
 
+	@Test
+	void forAnnotationTypeWhenRepeatableMetaAnnotationIsFiltered() {
+		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class,
+			Repeating.class.getName()::equals);
+		assertThat(getAll(mappings)).flatExtracting(AnnotationTypeMapping::getAnnotationType)
+			.containsExactly(WithRepeatedMetaAnnotations.class);
+	}
+
 	private Method[] resolveMirrorSets(AnnotationTypeMapping mapping, Class<?> element,
 			Class<? extends Annotation> annotationClass) {
 		Annotation annotation = element.getAnnotation(annotationClass);
@@ -472,16 +480,6 @@ class AnnotationTypeMappingsTests {
 			result[i] = resolved[i] != -1 ? mapping.getAttributes().get(resolved[i]) : null;
 		}
 		return result;
-	}
-
-	@Test
-	void forAnnotationTypeWhenRepeatableMetaAnnotationFilterd() {
-		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(WithRepeatedMetaAnnotations.class,
-		annotationType ->
-				ObjectUtils.nullSafeEquals(annotationType, Repeating.class.getName()));
-		assertThat(getAll(mappings)).flatExtracting(
-				AnnotationTypeMapping::getAnnotationType).containsExactly(
-				WithRepeatedMetaAnnotations.class);
 	}
 
 	@Nullable
