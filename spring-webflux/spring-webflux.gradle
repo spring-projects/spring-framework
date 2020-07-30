@@ -47,6 +47,7 @@ dependencies {
 	testCompile('org.apache.httpcomponents.client5:httpclient5:5.0')
 	testCompile('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	testCompile("com.squareup.okhttp3:mockwebserver")
+	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
 	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntime("org.jruby:jruby")
 	testRuntime("org.python:jython-standalone")
