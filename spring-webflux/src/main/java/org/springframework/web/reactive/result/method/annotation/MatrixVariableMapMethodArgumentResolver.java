@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,8 +105,7 @@ public class MatrixVariableMapMethodArgumentResolver extends HandlerMethodArgume
 		if (!MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
 			ResolvableType[] genericTypes = ResolvableType.forMethodParameter(parameter).getGenerics();
 			if (genericTypes.length == 2) {
-				Class<?> declaredClass = genericTypes[1].getRawClass();
-				return (declaredClass == null || !List.class.isAssignableFrom(declaredClass));
+				return !List.class.isAssignableFrom(genericTypes[1].toClass());
 			}
 		}
 		return false;

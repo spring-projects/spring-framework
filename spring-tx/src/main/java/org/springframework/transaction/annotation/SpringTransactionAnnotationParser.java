@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -29,15 +30,23 @@ import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Strategy implementation for parsing Spring's {@link Transactional} annotation.
  *
  * @author Juergen Hoeller
+ * @author Mark Paluch
  * @since 2.5
  */
 @SuppressWarnings("serial")
 public class SpringTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
+
+	@Override
+	public boolean isCandidateClass(Class<?> targetClass) {
+		return AnnotationUtils.isCandidateClass(targetClass, Transactional.class);
+	}
 
 	@Override
 	@Nullable
@@ -63,9 +72,16 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 		rbta.setPropagationBehavior(propagation.value());
 		Isolation isolation = attributes.getEnum("isolation");
 		rbta.setIsolationLevel(isolation.value());
+
 		rbta.setTimeout(attributes.getNumber("timeout").intValue());
+		String timeoutString = attributes.getString("timeoutString");
+		Assert.isTrue(!StringUtils.hasText(timeoutString) || rbta.getTimeout() < 0,
+				"Specify 'timeout' or 'timeoutString', not both");
+		rbta.setTimeoutString(timeoutString);
+
 		rbta.setReadOnly(attributes.getBoolean("readOnly"));
 		rbta.setQualifier(attributes.getString("value"));
+		rbta.setLabels(Arrays.asList(attributes.getStringArray("label")));
 
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
 		for (Class<?> rbRule : attributes.getClassArray("rollbackFor")) {
@@ -87,8 +103,8 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 
 
 	@Override
-	public boolean equals(Object other) {
-		return (this == other || other instanceof SpringTransactionAnnotationParser);
+	public boolean equals(@Nullable Object other) {
+		return (other instanceof SpringTransactionAnnotationParser);
 	}
 
 	@Override

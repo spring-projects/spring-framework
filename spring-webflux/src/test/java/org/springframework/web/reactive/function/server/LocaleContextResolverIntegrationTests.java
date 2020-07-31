@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -34,38 +33,24 @@ import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.i18n.FixedLocaleContextResolver;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class LocaleContextResolverIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
 
-	@Test
-	public void fixedLocale() {
-		Mono<ClientResponse> result = webClient
-				.get()
-				.uri("http://localhost:" + this.port + "/")
-				.exchange();
-
-		StepVerifier
-				.create(result)
-				.consumeNextWith(response -> {
-					assertEquals(HttpStatus.OK, response.statusCode());
-					assertEquals(Locale.GERMANY, response.headers().asHttpHeaders().getContentLanguage());
-				})
-				.verifyComplete();
-	}
 
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		return RouterFunctions.route(RequestPredicates.path("/"), this::render);
 	}
 
-	public Mono<RenderingResponse> render(ServerRequest request) {
+	Mono<RenderingResponse> render(ServerRequest request) {
 		return RenderingResponse.create("foo").build();
 	}
 
@@ -77,6 +62,25 @@ public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctio
 				.build();
 	}
 
+	@ParameterizedHttpServerTest
+	void fixedLocale(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		Mono<ClientResponse> result = webClient
+				.get()
+				.uri("http://localhost:" + this.port + "/")
+				.exchange();
+
+		StepVerifier
+				.create(result)
+				.consumeNextWith(response -> {
+					assertThat(response.statusCode()).isEqualTo(HttpStatus.OK);
+					assertThat(response.headers().asHttpHeaders().getContentLanguage()).isEqualTo(Locale.GERMANY);
+				})
+				.verifyComplete();
+	}
+
+
 	private static class DummyViewResolver implements ViewResolver {
 
 		@Override
@@ -84,6 +88,7 @@ public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctio
 			return Mono.just(new DummyView(locale));
 		}
 	}
+
 
 	private static class DummyView implements View {
 
@@ -105,4 +110,5 @@ public class LocaleContextResolverIntegrationTests extends AbstractRouterFunctio
 			return Mono.empty();
 		}
 	}
+
 }

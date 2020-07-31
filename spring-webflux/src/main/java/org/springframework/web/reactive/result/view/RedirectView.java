@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,8 +44,8 @@ import org.springframework.web.util.UriUtils;
  * URI template in which case the URI template variables will be replaced with
  * values from the model or with URI variables from the current request.
  *
- * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status
- * codes may be via constructor or setters arguments.
+ * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status codes
+ * may be via constructor or setters arguments.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -53,12 +53,12 @@ import org.springframework.web.util.UriUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)}");
 
-
-	private boolean contextRelative = true;
 
 	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
+
+	private boolean contextRelative = true;
 
 	private boolean propagateQuery = false;
 
@@ -92,22 +92,6 @@ public class RedirectView extends AbstractUrlBasedView {
 
 
 	/**
-	 * Whether to interpret a given redirect URLs that starts with a slash ("/")
-	 * as relative to the current context path ({@code true}, the default) or to
-	 * the web server root ({@code false}).
-	 */
-	public void setContextRelative(boolean contextRelative) {
-		this.contextRelative = contextRelative;
-	}
-
-	/**
-	 * Whether to interpret URLs as relative to the current context path.
-	 */
-	public boolean isContextRelative() {
-		return this.contextRelative;
-	}
-
-	/**
 	 * Set an alternate redirect status code such as
 	 * {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
@@ -122,6 +106,22 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
+	}
+
+	/**
+	 * Whether to interpret a given redirect URLs that starts with a slash ("/")
+	 * as relative to the current context path ({@code true}, the default) or to
+	 * the web server root ({@code false}).
+	 */
+	public void setContextRelative(boolean contextRelative) {
+		this.contextRelative = contextRelative;
+	}
+
+	/**
+	 * Whether to interpret URLs as relative to the current context path.
+	 */
+	public boolean isContextRelative() {
+		return this.contextRelative;
 	}
 
 	/**
@@ -220,10 +220,9 @@ public class RedirectView extends AbstractUrlBasedView {
 		return (processor != null ? processor.processUrl(exchange, result) : result);
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentUriVariables(ServerWebExchange exchange) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		return exchange.getAttributeOrDefault(name, Collections.<String, String>emptyMap());
+		return exchange.getAttributeOrDefault(name, Collections.emptyMap());
 	}
 
 	/**
@@ -245,12 +244,12 @@ public class RedirectView extends AbstractUrlBasedView {
 			String name = matcher.group(1);
 			Object value = (model.containsKey(name) ? model.get(name) : uriVariables.get(name));
 			Assert.notNull(value, () -> "No value for URI variable '" + name + "'");
-			result.append(targetUrl.substring(endLastMatch, matcher.start()));
+			result.append(targetUrl, endLastMatch, matcher.start());
 			result.append(encodeUriVariable(value.toString()));
 			endLastMatch = matcher.end();
 			found = matcher.find();
 		}
-		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
+		result.append(targetUrl, endLastMatch, targetUrl.length());
 		return result;
 	}
 
@@ -309,7 +308,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			return false;
 		}
 		String targetHost = UriComponentsBuilder.fromUriString(targetUrl).build().getHost();
-		if (StringUtils.isEmpty(targetHost)) {
+		if (!StringUtils.hasLength(targetHost)) {
 			return false;
 		}
 		for (String host : this.hosts) {

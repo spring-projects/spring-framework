@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -241,7 +241,7 @@ public abstract class CommonsFileUploadSupport {
 	/**
 	 * Parse the given List of Commons FileItems into a Spring MultipartParsingResult,
 	 * containing Spring MultipartFile instances and a Map of multipart parameter.
-	 * @param fileItems the Commons FileIterms to parse
+	 * @param fileItems the Commons FileItems to parse
 	 * @param encoding the encoding to use for form fields
 	 * @return the Spring MultipartParsingResult
 	 * @see CommonsMultipartFile#CommonsMultipartFile(org.apache.commons.fileupload.FileItem)

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -92,10 +93,11 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 					logger.debug("Failed to set JMSType - skipping", ex);
 				}
 			}
-			Set<String> headerNames = headers.keySet();
-			for (String headerName : headerNames) {
+			Set<Map.Entry<String, Object>> entries = headers.entrySet();
+			for (Map.Entry<String, Object> entry : entries) {
+				String headerName = entry.getKey();
 				if (StringUtils.hasText(headerName) && !headerName.startsWith(JmsHeaders.PREFIX)) {
-					Object value = headers.get(headerName);
+					Object value = entry.getValue();
 					if (value != null && SUPPORTED_PROPERTY_TYPES.contains(value.getClass())) {
 						try {
 							String propertyName = this.fromHeaderName(headerName);

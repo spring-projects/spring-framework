@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	@Override
 	@Nullable
 	public String[] getParameterNames(Constructor<?> ctor) {
-		if (!KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
+		if (ctor.getDeclaringClass().isEnum() || !KotlinDetector.isKotlinType(ctor.getDeclaringClass())) {
 			return null;
 		}
 

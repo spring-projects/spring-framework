@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,7 +101,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 * <p>The type of the target property for a multipart file can be Part, MultipartFile,
 	 * byte[], or String. The latter two receive the contents of the uploaded file;
 	 * all metadata like original file name, content type, etc are lost in those cases.
-	 * @param request request with parameters to bind (can be multipart)
+	 * @param request the request with parameters to bind (can be multipart)
 	 * @see org.springframework.web.multipart.MultipartRequest
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see javax.servlet.http.Part
@@ -126,11 +126,11 @@ public class WebRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Check if the request is a multipart request (by checking its Content-Type header).
-	 * @param request request with parameters to bind
+	 * @param request the request with parameters to bind
 	 */
 	private boolean isMultipartRequest(WebRequest request) {
 		String contentType = request.getHeader("Content-Type");
-		return (contentType != null && StringUtils.startsWithIgnoreCase(contentType, "multipart"));
+		return StringUtils.startsWithIgnoreCase(contentType, "multipart");
 	}
 
 	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {

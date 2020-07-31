@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,17 +18,17 @@ package org.springframework.test.web.servlet.setup;
 
 import javax.servlet.http.HttpSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
 /**
  * Tests for {@link SharedHttpSessionConfigurer}.
@@ -47,18 +47,18 @@ public class SharedHttpSessionTests {
 
 		MvcResult result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		HttpSession session = result.getRequest().getSession(false);
-		assertNotNull(session);
-		assertEquals(1, session.getAttribute("counter"));
+		assertThat(session).isNotNull();
+		assertThat(session.getAttribute("counter")).isEqualTo(1);
 
 		result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		session = result.getRequest().getSession(false);
-		assertNotNull(session);
-		assertEquals(2, session.getAttribute("counter"));
+		assertThat(session).isNotNull();
+		assertThat(session.getAttribute("counter")).isEqualTo(2);
 
 		result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		session = result.getRequest().getSession(false);
-		assertNotNull(session);
-		assertEquals(3, session.getAttribute("counter"));
+		assertThat(session).isNotNull();
+		assertThat(session.getAttribute("counter")).isEqualTo(3);
 	}
 
 	@Test
@@ -71,18 +71,18 @@ public class SharedHttpSessionTests {
 
 		MvcResult result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		HttpSession session = result.getRequest().getSession(false);
-		assertNull(session);
+		assertThat(session).isNull();
 
 		result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		session = result.getRequest().getSession(false);
-		assertNull(session);
+		assertThat(session).isNull();
 
 		url = "/session";
 
 		result = mockMvc.perform(get(url)).andExpect(status().isOk()).andReturn();
 		session = result.getRequest().getSession(false);
-		assertNotNull(session);
-		assertEquals(1, session.getAttribute("counter"));
+		assertThat(session).isNotNull();
+		assertThat(session.getAttribute("counter")).isEqualTo(1);
 	}
 
 

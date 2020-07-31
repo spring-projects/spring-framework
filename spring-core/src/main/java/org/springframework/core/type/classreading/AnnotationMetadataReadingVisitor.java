@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.lang.Nullable;
@@ -47,7 +48,12 @@ import org.springframework.util.MultiValueMap;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 2.5
+ * @deprecated As of Spring Framework 5.2, this class has been replaced by
+ * {@link SimpleAnnotationMetadataReadingVisitor} for internal use within the
+ * framework, but there is no public replacement for
+ * {@code AnnotationMetadataReadingVisitor}.
  */
+@Deprecated
 public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor implements AnnotationMetadata {
 
 	@Nullable
@@ -73,6 +79,11 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 
 	@Override
+	public MergedAnnotations getAnnotations() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		// Skip bridge methods - we're only interested in original annotation-defining user methods.
 		// On JDK 8, we'd otherwise run into double detection of the same annotated method...
@@ -84,8 +95,15 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
+	@Nullable
+	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+		if (!visible) {
+			return null;
+		}
 		String className = Type.getType(desc).getClassName();
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(className)) {
+			return null;
+		}
 		this.annotationSet.add(className);
 		return new AnnotationAttributesReadingVisitor(
 				className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
@@ -104,12 +122,10 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public boolean hasAnnotation(String annotationName) {
-		return this.annotationSet.contains(annotationName);
-	}
-
-	@Override
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
+		if (AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotationType)) {
+			return false;
+		}
 		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
 		for (Set<String> metaTypes : allMetaTypes) {
 			if (metaTypes.contains(metaAnnotationType)) {
@@ -126,9 +142,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	@Nullable
-	public AnnotationAttributes getAnnotationAttributes(String annotationName) {
-		return getAnnotationAttributes(annotationName, false);
+	public boolean hasAnnotation(String annotationName) {
+		return getAnnotationTypes().contains(annotationName);
 	}
 
 	@Override
@@ -145,21 +160,16 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	@Nullable
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
-		return getAllAnnotationAttributes(annotationName, false);
-	}
-
-	@Override
-	@Nullable
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<>();
 		List<AnnotationAttributes> attributes = this.attributesMap.get(annotationName);
 		if (attributes == null) {
 			return null;
 		}
+		String annotatedElement = "class '" + getClassName() + "'";
 		for (AnnotationAttributes raw : attributes) {
 			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					"class '" + getClassName() + "'", this.classLoader, raw, classValuesAsString).entrySet()) {
+					annotatedElement, this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}

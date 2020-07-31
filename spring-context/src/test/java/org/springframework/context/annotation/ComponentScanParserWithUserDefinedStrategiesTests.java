@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,15 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Mark Fisher
@@ -34,7 +35,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 	public void testCustomBeanNameGenerator() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customNameGeneratorTests.xml");
-		assertTrue(context.containsBean("testing.fooServiceImpl"));
+		assertThat(context.containsBean("testing.fooServiceImpl")).isTrue();
 	}
 
 	@Test
@@ -42,32 +43,22 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/annotation/customScopeResolverTests.xml");
 		BeanDefinition bd = context.getBeanFactory().getBeanDefinition("fooServiceImpl");
-		assertEquals("myCustomScope", bd.getScope());
-		assertFalse(bd.isSingleton());
+		assertThat(bd.getScope()).isEqualTo("myCustomScope");
+		assertThat(bd.isSingleton()).isFalse();
 	}
 
 	@Test
 	public void testInvalidConstructorBeanNameGenerator() {
-		try {
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 			new ClassPathXmlApplicationContext(
-					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml");
-			fail("should have failed: no-arg constructor is required");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
+					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml"));
 	}
 
 	@Test
 	public void testInvalidClassNameScopeMetadataResolver() {
-		try {
-			new ClassPathXmlApplicationContext(
-					"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml");
-			fail("should have failed: no such class");
-		}
-		catch (BeansException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext(
+						"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml"));
 	}
 
 }

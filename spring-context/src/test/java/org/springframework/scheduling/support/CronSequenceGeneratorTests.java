@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,10 @@ package org.springframework.scheduling.support;
 
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Juergen Hoeller
@@ -31,40 +32,41 @@ public class CronSequenceGeneratorTests {
 
 	@Test
 	public void at50Seconds() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53, 50)));
+		assertThat(new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53, 50))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
 	@Test
 	public void at0Seconds() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53)));
+		assertThat(new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
 	@Test
 	public void at0Minutes() {
-		assertEquals(new Date(2012, 6, 2, 1, 0),
-				new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0)));
+		assertThat(new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0))).isEqualTo(new Date(2012, 6, 2, 1, 0));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void with0Increment() {
-		new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withNegativeIncrement() {
-		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withInvertedMinuteRange() {
-		new CronSequenceGenerator("* 6-5 * * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("* 6-5 * * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void withInvertedHourRange() {
-		new CronSequenceGenerator("* * 6-5 * * *").next(new Date(2012, 6, 1, 9, 0));
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new CronSequenceGenerator("* * 6-5 * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
 	@Test
@@ -79,27 +81,27 @@ public class CronSequenceGeneratorTests {
 
 	@Test
 	public void validExpression() {
-		assertTrue(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *")).isTrue();
 	}
 
 	@Test
 	public void invalidExpressionWithLength() {
-		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *")).isFalse();
 	}
 
 	@Test
 	public void invalidExpressionWithSeconds() {
-		assertFalse(CronSequenceGenerator.isValidExpression("100 */2 1-4 * * *"));
+		assertThat(CronSequenceGenerator.isValidExpression("100 */2 1-4 * * *")).isFalse();
 	}
 
 	@Test
 	public void invalidExpressionWithMonths() {
-		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * INVALID *"));
+		assertThat(CronSequenceGenerator.isValidExpression("0 */2 1-4 * INVALID *")).isFalse();
 	}
 
 	@Test
 	public void nullExpression() {
-		assertFalse(CronSequenceGenerator.isValidExpression(null));
+		assertThat(CronSequenceGenerator.isValidExpression(null)).isFalse();
 	}
 
 }

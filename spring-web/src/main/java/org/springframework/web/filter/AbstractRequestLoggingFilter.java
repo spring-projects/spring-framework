@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,16 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.function.Predicate;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -94,6 +98,9 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	private boolean includeHeaders = false;
 
 	private boolean includePayload = false;
+
+	@Nullable
+	private Predicate<String> headerPredicate;
 
 	private int maxPayloadLength = DEFAULT_MAX_PAYLOAD_LENGTH;
 
@@ -174,6 +181,26 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 */
 	protected boolean isIncludePayload() {
 		return this.includePayload;
+	}
+
+	/**
+	 * Configure a predicate for selecting which headers should be logged if
+	 * {@link #setIncludeHeaders(boolean)} is set to {@code true}.
+	 * <p>By default this is not set in which case all headers are logged.
+	 * @param headerPredicate the predicate to use
+	 * @since 5.2
+	 */
+	public void setHeaderPredicate(@Nullable Predicate<String> headerPredicate) {
+		this.headerPredicate = headerPredicate;
+	}
+
+	/**
+	 * The configured {@link #setHeaderPredicate(Predicate) headerPredicate}.
+	 * @since 5.2
+	 */
+	@Nullable
+	protected Predicate<String> getHeaderPredicate() {
+		return this.headerPredicate;
 	}
 
 	/**
@@ -295,7 +322,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
-		msg.append("uri=").append(request.getRequestURI());
+		msg.append(request.getMethod()).append(" ");
+		msg.append(request.getRequestURI());
 
 		if (isIncludeQueryString()) {
 			String queryString = request.getQueryString();
@@ -307,26 +335,36 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		if (isIncludeClientInfo()) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
-				msg.append(";client=").append(client);
+				msg.append(", client=").append(client);
 			}
 			HttpSession session = request.getSession(false);
 			if (session != null) {
-				msg.append(";session=").append(session.getId());
+				msg.append(", session=").append(session.getId());
 			}
 			String user = request.getRemoteUser();
 			if (user != null) {
-				msg.append(";user=").append(user);
+				msg.append(", user=").append(user);
 			}
 		}
 
 		if (isIncludeHeaders()) {
-			msg.append(";headers=").append(new ServletServerHttpRequest(request).getHeaders());
+			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
+			if (getHeaderPredicate() != null) {
+				Enumeration<String> names = request.getHeaderNames();
+				while (names.hasMoreElements()) {
+					String header = names.nextElement();
+					if (!getHeaderPredicate().test(header)) {
+						headers.set(header, "masked");
+					}
+				}
+			}
+			msg.append(", headers=").append(headers);
 		}
 
 		if (isIncludePayload()) {
 			String payload = getMessagePayload(request);
 			if (payload != null) {
-				msg.append(";payload=").append(payload);
+				msg.append(", payload=").append(payload);
 			}
 		}
 

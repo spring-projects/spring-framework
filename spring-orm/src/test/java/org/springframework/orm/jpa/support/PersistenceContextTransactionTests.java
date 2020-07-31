@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,9 +23,9 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.SynchronizationType;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -33,8 +33,11 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Juergen Hoeller
@@ -53,7 +56,7 @@ public class PersistenceContextTransactionTests {
 	private EntityManagerHoldingBean bean;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
@@ -76,16 +79,16 @@ public class PersistenceContextTransactionTests {
 		};
 		pabpp.postProcessProperties(null, bean, "bean");
 
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 
-	@After
+	@AfterEach
 	public void clear() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
+		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -66,27 +66,60 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 		super(statusCode, statusText, headers, body, charset);
 	}
 
+	/**
+	 * Constructor with a status code and status text, headers, content, and an
+	 * prepared message.
+	 * @since 5.2.2
+	 */
+	public HttpServerErrorException(String message, HttpStatus statusCode, String statusText,
+			@Nullable HttpHeaders headers, @Nullable byte[] body, @Nullable Charset charset) {
+
+		super(message, statusCode, statusText, headers, body, charset);
+	}
 
 	/**
 	 * Create an {@code HttpServerErrorException} or an HTTP status specific sub-class.
 	 * @since 5.1
 	 */
-	public static HttpServerErrorException create(
-			HttpStatus statusCode, String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+	public static HttpServerErrorException create(HttpStatus statusCode,
+			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+		return create(null, statusCode, statusText, headers, body, charset);
+	}
+
+	/**
+	 * Variant of {@link #create(String, HttpStatus, String, HttpHeaders, byte[], Charset)}
+	 * with an optional prepared message.
+	 * @since 5.2.2.
+	 */
+	public static HttpServerErrorException create(@Nullable String message, HttpStatus statusCode,
+			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		switch (statusCode) {
 			case INTERNAL_SERVER_ERROR:
-				return new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException.InternalServerError(message, statusText, headers, body, charset) :
+						new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
 			case NOT_IMPLEMENTED:
-				return new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException.NotImplemented(message, statusText, headers, body, charset) :
+						new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
 			case BAD_GATEWAY:
-				return new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException.BadGateway(message, statusText, headers, body, charset) :
+						new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
 			case SERVICE_UNAVAILABLE:
-				return new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException.ServiceUnavailable(message, statusText, headers, body, charset) :
+						new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
 			case GATEWAY_TIMEOUT:
-				return new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException.GatewayTimeout(message, statusText, headers, body, charset) :
+						new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
 			default:
-				return new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+				return message != null ?
+						new HttpServerErrorException(message, statusCode, statusText, headers, body, charset) :
+						new HttpServerErrorException(statusCode, statusText, headers, body, charset);
 		}
 	}
 
@@ -98,10 +131,16 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class InternalServerError extends HttpServerErrorException {
+	public static final class InternalServerError extends HttpServerErrorException {
 
-		InternalServerError(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+		private InternalServerError(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 			super(HttpStatus.INTERNAL_SERVER_ERROR, statusText, headers, body, charset);
+		}
+
+		private InternalServerError(String message, String statusText,
+				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+			super(message, HttpStatus.INTERNAL_SERVER_ERROR, statusText, headers, body, charset);
 		}
 	}
 
@@ -110,10 +149,16 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class NotImplemented extends HttpServerErrorException {
+	public static final class NotImplemented extends HttpServerErrorException {
 
-		NotImplemented(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+		private NotImplemented(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 			super(HttpStatus.NOT_IMPLEMENTED, statusText, headers, body, charset);
+		}
+
+		private NotImplemented(String message, String statusText,
+				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+			super(message, HttpStatus.NOT_IMPLEMENTED, statusText, headers, body, charset);
 		}
 	}
 
@@ -122,10 +167,16 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class BadGateway extends HttpServerErrorException {
+	public static final class BadGateway extends HttpServerErrorException {
 
-		BadGateway(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+		private BadGateway(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 			super(HttpStatus.BAD_GATEWAY, statusText, headers, body, charset);
+		}
+
+		private BadGateway(String message, String statusText,
+				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+			super(message, HttpStatus.BAD_GATEWAY, statusText, headers, body, charset);
 		}
 	}
 
@@ -134,10 +185,16 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class ServiceUnavailable extends HttpServerErrorException {
+	public static final class ServiceUnavailable extends HttpServerErrorException {
 
-		ServiceUnavailable(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+		private ServiceUnavailable(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 			super(HttpStatus.SERVICE_UNAVAILABLE, statusText, headers, body, charset);
+		}
+
+		private ServiceUnavailable(String message, String statusText,
+				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+			super(message, HttpStatus.SERVICE_UNAVAILABLE, statusText, headers, body, charset);
 		}
 	}
 
@@ -146,10 +203,16 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class GatewayTimeout extends HttpServerErrorException {
+	public static final class GatewayTimeout extends HttpServerErrorException {
 
-		GatewayTimeout(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+		private GatewayTimeout(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 			super(HttpStatus.GATEWAY_TIMEOUT, statusText, headers, body, charset);
+		}
+
+		private GatewayTimeout(String message, String statusText,
+				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+
+			super(message, HttpStatus.GATEWAY_TIMEOUT, statusText, headers, body, charset);
 		}
 	}
 

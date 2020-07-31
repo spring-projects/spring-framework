@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.core.AttributeAccessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -27,8 +28,8 @@ import org.springframework.lang.Nullable;
  * concrete implementations.
  *
  * <p>This is just a minimal interface: The main intention is to allow a
- * {@link BeanFactoryPostProcessor} such as {@link PropertyPlaceholderConfigurer}
- * to introspect and modify property values and other bean metadata.
+ * {@link BeanFactoryPostProcessor} to introspect and modify property values
+ * and other bean metadata.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -40,16 +41,18 @@ import org.springframework.lang.Nullable;
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
-	 * Scope identifier for the standard singleton scope: "singleton".
+	 * Scope identifier for the standard singleton scope: {@value}.
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
+	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
 	 */
 	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 	/**
-	 * Scope identifier for the standard prototype scope: "prototype".
+	 * Scope identifier for the standard prototype scope: {@value}.
 	 * <p>Note that extended bean factories might support further scopes.
 	 * @see #setScope
+	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
 	 */
 	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -235,7 +238,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	MutablePropertyValues getPropertyValues();
 
 	/**
-	 * Return if there are property values values defined for this bean.
+	 * Return if there are property values defined for this bean.
 	 * @since 5.0.2
 	 */
 	default boolean hasPropertyValues() {
@@ -270,7 +273,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Set the role hint for this {@code BeanDefinition}. The role hint
-	 * provides the frameworks as well as tools with an indication of
+	 * provides the frameworks as well as tools an indication of
 	 * the role and importance of a particular {@code BeanDefinition}.
 	 * @since 5.1
 	 * @see #ROLE_APPLICATION
@@ -281,7 +284,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Get the role hint for this {@code BeanDefinition}. The role hint
-	 * provides the frameworks as well as tools with an indication of
+	 * provides the frameworks as well as tools an indication of
 	 * the role and importance of a particular {@code BeanDefinition}.
 	 * @see #ROLE_APPLICATION
 	 * @see #ROLE_SUPPORT
@@ -303,6 +306,17 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	// Read-only attributes
+
+	/**
+	 * Return a resolvable type for this bean definition,
+	 * based on the bean class or other specific metadata.
+	 * <p>This is typically fully resolved on a runtime-merged bean definition
+	 * but not necessarily on a configuration-time definition instance.
+	 * @return the resolvable type (potentially {@link ResolvableType#NONE})
+	 * @since 5.2
+	 * @see ConfigurableBeanFactory#getMergedBeanDefinition
+	 */
+	ResolvableType getResolvableType();
 
 	/**
 	 * Return whether this a <b>Singleton</b>, with a single, shared instance
@@ -333,7 +347,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Return the originating BeanDefinition, or {@code null} if none.
-	 * Allows for retrieving the decorated bean definition, if any.
+	 * <p>Allows for retrieving the decorated bean definition, if any.
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.
 	 */

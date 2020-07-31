@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,24 +46,23 @@ public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver 
 	}
 
 	/**
-	 * Build the BeanWiringInfo for the given Configurable annotation.
+	 * Build the {@link BeanWiringInfo} for the given {@link Configurable} annotation.
 	 * @param beanInstance the bean instance
 	 * @param annotation the Configurable annotation found on the bean class
 	 * @return the resolved BeanWiringInfo
 	 */
 	protected BeanWiringInfo buildWiringInfo(Object beanInstance, Configurable annotation) {
 		if (!Autowire.NO.equals(annotation.autowire())) {
+			// Autowiring by name or by type
 			return new BeanWiringInfo(annotation.autowire().value(), annotation.dependencyCheck());
 		}
+		else if (!annotation.value().isEmpty()) {
+			// Explicitly specified bean name for bean definition to take property values from
+			return new BeanWiringInfo(annotation.value(), false);
+		}
 		else {
-			if (!"".equals(annotation.value())) {
-				// explicitly specified bean name
-				return new BeanWiringInfo(annotation.value(), false);
-			}
-			else {
-				// default bean name
-				return new BeanWiringInfo(getDefaultBeanName(beanInstance), true);
-			}
+			// Default bean name for bean definition to take property values from
+			return new BeanWiringInfo(getDefaultBeanName(beanInstance), true);
 		}
 	}
 

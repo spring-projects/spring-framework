@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -86,13 +86,7 @@ public interface ClientRequest {
 	 * @return the attribute value
 	 */
 	default Optional<Object> attribute(String name) {
-		Map<String, Object> attributes = attributes();
-		if (attributes.containsKey(name)) {
-			return Optional.of(attributes.get(name));
-		}
-		else {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(attributes().get(name));
 	}
 
 	/**
@@ -102,18 +96,16 @@ public interface ClientRequest {
 
 	/**
 	 * Return a log message prefix to use to correlate messages for this request.
-	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
-	 * along with some extra formatting so that the prefix can be conveniently
-	 * prepended with no further formatting no separators required.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} surrounded with "[" and "]".
 	 * @return the log message prefix or an empty String if the
-	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * {@link #LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set.
 	 * @since 5.1
 	 */
 	String logPrefix();
 
 	/**
-	 * Writes this request to the given {@link ClientHttpRequest}.
-	 *
+	 * Write this request to the given {@link ClientHttpRequest}.
 	 * @param request the client http request to write to
 	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when writing is complete

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLException;
 
 import io.netty.bootstrap.Bootstrap;
@@ -44,7 +45,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation
- * that uses <a href="http://netty.io/">Netty 4</a> to create requests.
+ * that uses <a href="https://netty.io/">Netty 4</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link EventLoopGroup} instance: useful for
  * sharing across multiple clients.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.mock.jndi;
 
 import java.util.Hashtable;
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
@@ -80,7 +81,10 @@ import org.springframework.util.ReflectionUtils;
  * @see SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
+ * @deprecated Deprecated as of Spring Framework 5.2 in favor of complete solutions from
+ * third parties such as <a href="https://github.com/h-thurow/Simple-JNDI">Simple-JNDI</a>
  */
+@Deprecated
 public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder {
 
 	/** An instance of this class bound to JNDI. */
@@ -104,7 +108,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 	/**
 	 * If no SimpleNamingContextBuilder is already configuring JNDI,
-	 * create and activate one. Otherwise take the existing activate
+	 * create and activate one. Otherwise take the existing activated
 	 * SimpleNamingContextBuilder, clear it and return it.
 	 * <p>This is mainly intended for test suites that want to
 	 * reinitialize JNDI bindings from scratch repeatedly.
@@ -226,7 +230,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 		}
 
 		// Default case...
-		return environment1 -> new SimpleNamingContext("", this.boundObjects, (Hashtable<String, Object>) environment1);
+		return env -> new SimpleNamingContext("", this.boundObjects, (Hashtable<String, Object>) env);
 	}
 
 }

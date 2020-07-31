@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.mock.env;
 
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 /**
  * Simple {@link ConfigurableEnvironment} implementation exposing
@@ -26,7 +27,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author Chris Beams
  * @author Sam Brannen
  * @since 3.2
- * @see org.springframework.mock.env.MockPropertySource
+ * @see org.springframework.core.testfixture.env.MockPropertySource
  */
 public class MockEnvironment extends AbstractEnvironment {
 

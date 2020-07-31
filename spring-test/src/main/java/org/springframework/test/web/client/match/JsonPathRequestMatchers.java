@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -61,7 +61,7 @@ public class JsonPathRequestMatchers {
 	 * Evaluate the JSON path expression against the request content and
 	 * assert the resulting value with the given Hamcrest {@link Matcher}.
 	 */
-	public <T> RequestMatcher value(final Matcher<T> matcher) {
+	public <T> RequestMatcher value(Matcher<T> matcher) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
@@ -78,7 +78,7 @@ public class JsonPathRequestMatchers {
 	 * to coerce an integer into a double.
 	 * @since 4.3.3
 	 */
-	public <T> RequestMatcher value(final Matcher<T> matcher, final Class<T> targetType) {
+	public <T> RequestMatcher value(Matcher<T> matcher, Class<T> targetType) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
@@ -92,7 +92,7 @@ public class JsonPathRequestMatchers {
 	 * Evaluate the JSON path expression against the request content and
 	 * assert that the result is equal to the supplied value.
 	 */
-	public RequestMatcher value(final Object expectedValue) {
+	public RequestMatcher value(Object expectedValue) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {

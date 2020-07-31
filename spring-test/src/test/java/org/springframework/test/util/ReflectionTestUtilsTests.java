@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,9 @@
 
 package org.springframework.test.util;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
@@ -29,10 +27,16 @@ import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
 import org.springframework.test.util.subpackage.PersonEntity;
 import org.springframework.test.util.subpackage.StaticFields;
+import org.springframework.test.util.subpackage.StaticMethods;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.util.ReflectionTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.springframework.test.util.ReflectionTestUtils.getField;
+import static org.springframework.test.util.ReflectionTestUtils.invokeGetterMethod;
+import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
+import static org.springframework.test.util.ReflectionTestUtils.invokeSetterMethod;
+import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 /**
  * Unit tests for {@link ReflectionTestUtils}.
@@ -40,7 +44,7 @@ import static org.springframework.test.util.ReflectionTestUtils.*;
  * @author Sam Brannen
  * @author Juergen Hoeller
  */
-public class ReflectionTestUtilsTests {
+class ReflectionTestUtilsTests {
 
 	private static final Float PI = Float.valueOf((float) 22 / 7);
 
@@ -50,84 +54,82 @@ public class ReflectionTestUtilsTests {
 
 	private final LegacyEntity entity = new LegacyEntity();
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
-
-	@Before
-	public void resetStaticFields() {
+	@BeforeEach
+	void resetStaticFields() {
 		StaticFields.reset();
+		StaticMethods.reset();
 	}
 
 	@Test
-	public void setFieldWithNullTargetObject() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Object) null, "id", Long.valueOf(99));
+	void setFieldWithNullTargetObject() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField((Object) null, "id", Long.valueOf(99)))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void getFieldWithNullTargetObject() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		getField((Object) null, "id");
+	void getFieldWithNullTargetObject() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> getField((Object) null, "id"))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void setFieldWithNullTargetClass() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		setField((Class<?>) null, "id", Long.valueOf(99));
+	void setFieldWithNullTargetClass() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField((Class<?>) null, "id", Long.valueOf(99)))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void getFieldWithNullTargetClass() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either targetObject or targetClass"));
-		getField((Class<?>) null, "id");
+	void getFieldWithNullTargetClass() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> getField((Class<?>) null, "id"))
+			.withMessageStartingWith("Either targetObject or targetClass");
 	}
 
 	@Test
-	public void setFieldWithNullNameAndNullType() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Either name or type"));
-		setField(person, null, Long.valueOf(99), null);
+	void setFieldWithNullNameAndNullType() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, null, Long.valueOf(99), null))
+			.withMessageStartingWith("Either name or type");
 	}
 
 	@Test
-	public void setFieldWithBogusName() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field 'bogus'"));
-		setField(person, "bogus", Long.valueOf(99), long.class);
+	void setFieldWithBogusName() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, "bogus", Long.valueOf(99), long.class))
+			.withMessageStartingWith("Could not find field 'bogus'");
 	}
 
 	@Test
-	public void setFieldWithWrongType() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field"));
-		setField(person, "id", Long.valueOf(99), String.class);
+	void setFieldWithWrongType() throws Exception {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> setField(person, "id", Long.valueOf(99), String.class))
+			.withMessageStartingWith("Could not find field");
 	}
 
 	@Test
-	public void setFieldAndGetFieldForStandardUseCases() throws Exception {
+	void setFieldAndGetFieldForStandardUseCases() throws Exception {
 		assertSetFieldAndGetFieldBehavior(this.person);
 	}
 
 	@Test
-	public void setFieldAndGetFieldViaJdkDynamicProxy() throws Exception {
+	void setFieldAndGetFieldViaJdkDynamicProxy() throws Exception {
 		ProxyFactory pf = new ProxyFactory(this.person);
 		pf.addInterface(Person.class);
 		Person proxy = (Person) pf.getProxy();
-		assertTrue("Proxy is a JDK dynamic proxy", AopUtils.isJdkDynamicProxy(proxy));
+		assertThat(AopUtils.isJdkDynamicProxy(proxy)).as("Proxy is a JDK dynamic proxy").isTrue();
 		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
 	}
 
 	@Test
-	public void setFieldAndGetFieldViaCglibProxy() throws Exception {
+	void setFieldAndGetFieldViaCglibProxy() throws Exception {
 		ProxyFactory pf = new ProxyFactory(this.person);
 		pf.setProxyTargetClass(true);
 		Person proxy = (Person) pf.getProxy();
-		assertTrue("Proxy is a CGLIB proxy", AopUtils.isCglibProxy(proxy));
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
 		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
 	}
 
@@ -141,112 +143,112 @@ public class ReflectionTestUtilsTests {
 		setField(person, "favoriteNumber", PI, Number.class);
 
 		// Get reflectively
-		assertEquals(Long.valueOf(99), getField(person, "id"));
-		assertEquals("Tom", getField(person, "name"));
-		assertEquals(Integer.valueOf(42), getField(person, "age"));
-		assertEquals("blue", getField(person, "eyeColor"));
-		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
-		assertEquals(PI, getField(person, "favoriteNumber"));
+		assertThat(getField(person, "id")).isEqualTo(Long.valueOf(99));
+		assertThat(getField(person, "name")).isEqualTo("Tom");
+		assertThat(getField(person, "age")).isEqualTo(Integer.valueOf(42));
+		assertThat(getField(person, "eyeColor")).isEqualTo("blue");
+		assertThat(getField(person, "likesPets")).isEqualTo(Boolean.TRUE);
+		assertThat(getField(person, "favoriteNumber")).isEqualTo(PI);
 
 		// Get directly
-		assertEquals("ID (private field in a superclass)", 99, person.getId());
-		assertEquals("name (protected field)", "Tom", person.getName());
-		assertEquals("age (private field)", 42, person.getAge());
-		assertEquals("eye color (package private field)", "blue", person.getEyeColor());
-		assertEquals("'likes pets' flag (package private boolean field)", true, person.likesPets());
-		assertEquals("'favorite number' (package field)", PI, person.getFavoriteNumber());
+		assertThat(person.getId()).as("ID (private field in a superclass)").isEqualTo(99);
+		assertThat(person.getName()).as("name (protected field)").isEqualTo("Tom");
+		assertThat(person.getAge()).as("age (private field)").isEqualTo(42);
+		assertThat(person.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
+		assertThat(person.likesPets()).as("'likes pets' flag (package private boolean field)").isEqualTo(true);
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
 	}
 
 	private static void assertSetFieldAndGetFieldBehaviorForProxy(Person proxy, Person target) {
 		assertSetFieldAndGetFieldBehavior(proxy);
 
 		// Get directly from Target
-		assertEquals("ID (private field in a superclass)", 99, target.getId());
-		assertEquals("name (protected field)", "Tom", target.getName());
-		assertEquals("age (private field)", 42, target.getAge());
-		assertEquals("eye color (package private field)", "blue", target.getEyeColor());
-		assertEquals("'likes pets' flag (package private boolean field)", true, target.likesPets());
-		assertEquals("'favorite number' (package field)", PI, target.getFavoriteNumber());
+		assertThat(target.getId()).as("ID (private field in a superclass)").isEqualTo(99);
+		assertThat(target.getName()).as("name (protected field)").isEqualTo("Tom");
+		assertThat(target.getAge()).as("age (private field)").isEqualTo(42);
+		assertThat(target.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
+		assertThat(target.likesPets()).as("'likes pets' flag (package private boolean field)").isEqualTo(true);
+		assertThat(target.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
 	}
 
 	@Test
-	public void setFieldWithNullValuesForNonPrimitives() throws Exception {
+	void setFieldWithNullValuesForNonPrimitives() throws Exception {
 		// Fields must be non-null to start with
 		setField(person, "name", "Tom");
 		setField(person, "eyeColor", "blue", String.class);
 		setField(person, "favoriteNumber", PI, Number.class);
-		assertNotNull(person.getName());
-		assertNotNull(person.getEyeColor());
-		assertNotNull(person.getFavoriteNumber());
+		assertThat(person.getName()).isNotNull();
+		assertThat(person.getEyeColor()).isNotNull();
+		assertThat(person.getFavoriteNumber()).isNotNull();
 
 		// Set to null
 		setField(person, "name", null, String.class);
 		setField(person, "eyeColor", null, String.class);
 		setField(person, "favoriteNumber", null, Number.class);
 
-		assertNull("name (protected field)", person.getName());
-		assertNull("eye color (package private field)", person.getEyeColor());
-		assertNull("'favorite number' (package field)", person.getFavoriteNumber());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setFieldWithNullValueForPrimitiveLong() throws Exception {
-		setField(person, "id", null, long.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setFieldWithNullValueForPrimitiveInt() throws Exception {
-		setField(person, "age", null, int.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
-		setField(person, "likesPets", null, boolean.class);
+		assertThat(person.getName()).as("name (protected field)").isNull();
+		assertThat(person.getEyeColor()).as("eye color (package private field)").isNull();
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isNull();
 	}
 
 	@Test
-	public void setStaticFieldViaClass() throws Exception {
+	void setFieldWithNullValueForPrimitiveLong() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "id", null, long.class));
+	}
+
+	@Test
+	void setFieldWithNullValueForPrimitiveInt() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "age", null, int.class));
+	}
+
+	@Test
+	void setFieldWithNullValueForPrimitiveBoolean() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> setField(person, "likesPets", null, boolean.class));
+	}
+
+	@Test
+	void setStaticFieldViaClass() throws Exception {
 		setField(StaticFields.class, "publicField", "xxx");
 		setField(StaticFields.class, "privateField", "yyy");
 
-		assertEquals("public static field", "xxx", StaticFields.publicField);
-		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+		assertThat(StaticFields.publicField).as("public static field").isEqualTo("xxx");
+		assertThat(StaticFields.getPrivateField()).as("private static field").isEqualTo("yyy");
 	}
 
 	@Test
-	public void setStaticFieldViaClassWithExplicitType() throws Exception {
+	void setStaticFieldViaClassWithExplicitType() throws Exception {
 		setField(StaticFields.class, "publicField", "xxx", String.class);
 		setField(StaticFields.class, "privateField", "yyy", String.class);
 
-		assertEquals("public static field", "xxx", StaticFields.publicField);
-		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+		assertThat(StaticFields.publicField).as("public static field").isEqualTo("xxx");
+		assertThat(StaticFields.getPrivateField()).as("private static field").isEqualTo("yyy");
 	}
 
 	@Test
-	public void setStaticFieldViaInstance() throws Exception {
+	void setStaticFieldViaInstance() throws Exception {
 		StaticFields staticFields = new StaticFields();
 		setField(staticFields, null, "publicField", "xxx", null);
 		setField(staticFields, null, "privateField", "yyy", null);
 
-		assertEquals("public static field", "xxx", StaticFields.publicField);
-		assertEquals("private static field", "yyy", StaticFields.getPrivateField());
+		assertThat(StaticFields.publicField).as("public static field").isEqualTo("xxx");
+		assertThat(StaticFields.getPrivateField()).as("private static field").isEqualTo("yyy");
 	}
 
 	@Test
-	public void getStaticFieldViaClass() throws Exception {
-		assertEquals("public static field", "public", getField(StaticFields.class, "publicField"));
-		assertEquals("private static field", "private", getField(StaticFields.class, "privateField"));
+	void getStaticFieldViaClass() throws Exception {
+		assertThat(getField(StaticFields.class, "publicField")).as("public static field").isEqualTo("public");
+		assertThat(getField(StaticFields.class, "privateField")).as("private static field").isEqualTo("private");
 	}
 
 	@Test
-	public void getStaticFieldViaInstance() throws Exception {
+	void getStaticFieldViaInstance() throws Exception {
 		StaticFields staticFields = new StaticFields();
-		assertEquals("public static field", "public", getField(staticFields, "publicField"));
-		assertEquals("private static field", "private", getField(staticFields, "privateField"));
+		assertThat(getField(staticFields, "publicField")).as("public static field").isEqualTo("public");
+		assertThat(getField(staticFields, "privateField")).as("private static field").isEqualTo("private");
 	}
 
 	@Test
-	public void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
+	void invokeSetterMethodAndInvokeGetterMethodWithExplicitMethodNames() throws Exception {
 		invokeSetterMethod(person, "setId", Long.valueOf(1), long.class);
 		invokeSetterMethod(person, "setName", "Jerry", String.class);
 		invokeSetterMethod(person, "setAge", Integer.valueOf(33), int.class);
@@ -254,23 +256,23 @@ public class ReflectionTestUtilsTests {
 		invokeSetterMethod(person, "setLikesPets", Boolean.FALSE, boolean.class);
 		invokeSetterMethod(person, "setFavoriteNumber", Integer.valueOf(42), Number.class);
 
-		assertEquals("ID (protected method in a superclass)", 1, person.getId());
-		assertEquals("name (private method)", "Jerry", person.getName());
-		assertEquals("age (protected method)", 33, person.getAge());
-		assertEquals("eye color (package private method)", "green", person.getEyeColor());
-		assertEquals("'likes pets' flag (protected method for a boolean)", false, person.likesPets());
-		assertEquals("'favorite number' (protected method for a Number)", Integer.valueOf(42), person.getFavoriteNumber());
+		assertThat(person.getId()).as("ID (protected method in a superclass)").isEqualTo(1);
+		assertThat(person.getName()).as("name (private method)").isEqualTo("Jerry");
+		assertThat(person.getAge()).as("age (protected method)").isEqualTo(33);
+		assertThat(person.getEyeColor()).as("eye color (package private method)").isEqualTo("green");
+		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isEqualTo(false);
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(Integer.valueOf(42));
 
-		assertEquals(Long.valueOf(1), invokeGetterMethod(person, "getId"));
-		assertEquals("Jerry", invokeGetterMethod(person, "getName"));
-		assertEquals(Integer.valueOf(33), invokeGetterMethod(person, "getAge"));
-		assertEquals("green", invokeGetterMethod(person, "getEyeColor"));
-		assertEquals(Boolean.FALSE, invokeGetterMethod(person, "likesPets"));
-		assertEquals(Integer.valueOf(42), invokeGetterMethod(person, "getFavoriteNumber"));
+		assertThat(invokeGetterMethod(person, "getId")).isEqualTo(Long.valueOf(1));
+		assertThat(invokeGetterMethod(person, "getName")).isEqualTo("Jerry");
+		assertThat(invokeGetterMethod(person, "getAge")).isEqualTo(Integer.valueOf(33));
+		assertThat(invokeGetterMethod(person, "getEyeColor")).isEqualTo("green");
+		assertThat(invokeGetterMethod(person, "likesPets")).isEqualTo(Boolean.FALSE);
+		assertThat(invokeGetterMethod(person, "getFavoriteNumber")).isEqualTo(Integer.valueOf(42));
 	}
 
 	@Test
-	public void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
+	void invokeSetterMethodAndInvokeGetterMethodWithJavaBeanPropertyNames() throws Exception {
 		invokeSetterMethod(person, "id", Long.valueOf(99), long.class);
 		invokeSetterMethod(person, "name", "Tom");
 		invokeSetterMethod(person, "age", Integer.valueOf(42));
@@ -278,78 +280,78 @@ public class ReflectionTestUtilsTests {
 		invokeSetterMethod(person, "likesPets", Boolean.TRUE);
 		invokeSetterMethod(person, "favoriteNumber", PI, Number.class);
 
-		assertEquals("ID (protected method in a superclass)", 99, person.getId());
-		assertEquals("name (private method)", "Tom", person.getName());
-		assertEquals("age (protected method)", 42, person.getAge());
-		assertEquals("eye color (package private method)", "blue", person.getEyeColor());
-		assertEquals("'likes pets' flag (protected method for a boolean)", true, person.likesPets());
-		assertEquals("'favorite number' (protected method for a Number)", PI, person.getFavoriteNumber());
+		assertThat(person.getId()).as("ID (protected method in a superclass)").isEqualTo(99);
+		assertThat(person.getName()).as("name (private method)").isEqualTo("Tom");
+		assertThat(person.getAge()).as("age (protected method)").isEqualTo(42);
+		assertThat(person.getEyeColor()).as("eye color (package private method)").isEqualTo("blue");
+		assertThat(person.likesPets()).as("'likes pets' flag (protected method for a boolean)").isEqualTo(true);
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isEqualTo(PI);
 
-		assertEquals(Long.valueOf(99), invokeGetterMethod(person, "id"));
-		assertEquals("Tom", invokeGetterMethod(person, "name"));
-		assertEquals(Integer.valueOf(42), invokeGetterMethod(person, "age"));
-		assertEquals("blue", invokeGetterMethod(person, "eyeColor"));
-		assertEquals(Boolean.TRUE, invokeGetterMethod(person, "likesPets"));
-		assertEquals(PI, invokeGetterMethod(person, "favoriteNumber"));
+		assertThat(invokeGetterMethod(person, "id")).isEqualTo(Long.valueOf(99));
+		assertThat(invokeGetterMethod(person, "name")).isEqualTo("Tom");
+		assertThat(invokeGetterMethod(person, "age")).isEqualTo(Integer.valueOf(42));
+		assertThat(invokeGetterMethod(person, "eyeColor")).isEqualTo("blue");
+		assertThat(invokeGetterMethod(person, "likesPets")).isEqualTo(Boolean.TRUE);
+		assertThat(invokeGetterMethod(person, "favoriteNumber")).isEqualTo(PI);
 	}
 
 	@Test
-	public void invokeSetterMethodWithNullValuesForNonPrimitives() throws Exception {
+	void invokeSetterMethodWithNullValuesForNonPrimitives() throws Exception {
 		invokeSetterMethod(person, "name", null, String.class);
 		invokeSetterMethod(person, "eyeColor", null, String.class);
 		invokeSetterMethod(person, "favoriteNumber", null, Number.class);
 
-		assertNull("name (private method)", person.getName());
-		assertNull("eye color (package private method)", person.getEyeColor());
-		assertNull("'favorite number' (protected method for a Number)", person.getFavoriteNumber());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
-		invokeSetterMethod(person, "id", null, long.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
-		invokeSetterMethod(person, "age", null, int.class);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
-		invokeSetterMethod(person, "likesPets", null, boolean.class);
+		assertThat(person.getName()).as("name (private method)").isNull();
+		assertThat(person.getEyeColor()).as("eye color (package private method)").isNull();
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (protected method for a Number)").isNull();
 	}
 
 	@Test
-	public void invokeMethodWithAutoboxingAndUnboxing() {
+	void invokeSetterMethodWithNullValueForPrimitiveLong() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "id", null, long.class));
+	}
+
+	@Test
+	void invokeSetterMethodWithNullValueForPrimitiveInt() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "age", null, int.class));
+	}
+
+	@Test
+	void invokeSetterMethodWithNullValueForPrimitiveBoolean() throws Exception {
+		assertThatIllegalArgumentException().isThrownBy(() -> invokeSetterMethod(person, "likesPets", null, boolean.class));
+	}
+
+	@Test
+	void invokeMethodWithAutoboxingAndUnboxing() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer difference = invokeMethod(component, "subtract", 5, 2);
-		assertEquals("subtract(5, 2)", 3, difference.intValue());
+		assertThat(difference.intValue()).as("subtract(5, 2)").isEqualTo(3);
 	}
 
 	@Test
-	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
-	public void invokeMethodWithPrimitiveVarArgs() {
+	@Disabled("[SPR-8644] MethodInvoker.findMatchingMethod() does not currently support var-args")
+	void invokeMethodWithPrimitiveVarArgs() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", 1, 2, 3, 4);
-		assertEquals("add(1,2,3,4)", 10, sum.intValue());
+		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test
-	public void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
+	void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
 		// IntelliJ IDEA 11 won't accept int assignment here
 		Integer sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
-		assertEquals("add(1,2,3,4)", 10, sum.intValue());
+		assertThat(sum.intValue()).as("add(1,2,3,4)").isEqualTo(10);
 	}
 
 	@Test
-	public void invokeMethodSimulatingLifecycleEvents() {
-		assertNull("number", component.getNumber());
-		assertNull("text", component.getText());
+	void invokeMethodSimulatingLifecycleEvents() {
+		assertThat(component.getNumber()).as("number").isNull();
+		assertThat(component.getText()).as("text").isNull();
 
 		// Simulate autowiring a configuration method
 		invokeMethod(component, "configure", Integer.valueOf(42), "enigma");
-		assertEquals("number should have been configured", Integer.valueOf(42), component.getNumber());
-		assertEquals("text should have been configured", "enigma", component.getText());
+		assertThat(component.getNumber()).as("number should have been configured").isEqualTo(Integer.valueOf(42));
+		assertThat(component.getText()).as("text should have been configured").isEqualTo("enigma");
 
 		// Simulate @PostConstruct life-cycle event
 		invokeMethod(component, "init");
@@ -357,69 +359,131 @@ public class ReflectionTestUtilsTests {
 
 		// Simulate @PreDestroy life-cycle event
 		invokeMethod(component, "destroy");
-		assertNull("number", component.getNumber());
-		assertNull("text", component.getText());
+		assertThat(component.getNumber()).as("number").isNull();
+		assertThat(component.getText()).as("text").isNull();
 	}
 
 	@Test
-	public void invokeInitMethodBeforeAutowiring() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(equalTo("number must not be null"));
-		invokeMethod(component, "init");
+	void invokeInitMethodBeforeAutowiring() {
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "init"))
+			.withMessageStartingWith("number must not be null");
 	}
 
 	@Test
-	public void invokeMethodWithIncompatibleArgumentTypes() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "subtract", "foo", 2.0);
+	void invokeMethodWithIncompatibleArgumentTypes() {
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "subtract", "foo", 2.0))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
-	public void invokeMethodWithTooFewArguments() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", Integer.valueOf(42));
+	void invokeMethodWithTooFewArguments() {
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42)))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test
-	public void invokeMethodWithTooManyArguments() {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(startsWith("Method not found"));
-		invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux");
+	void invokeMethodWithTooManyArguments() {
+		assertThatIllegalStateException()
+			.isThrownBy(() -> invokeMethod(component, "configure", Integer.valueOf(42), "enigma", "baz", "quux"))
+			.withMessageStartingWith("Method not found");
 	}
 
 	@Test // SPR-14363
-	public void getFieldOnLegacyEntityWithSideEffectsInToString() {
+	void getFieldOnLegacyEntityWithSideEffectsInToString() {
 		Object collaborator = getField(entity, "collaborator");
-		assertNotNull(collaborator);
+		assertThat(collaborator).isNotNull();
 	}
 
 	@Test // SPR-9571 and SPR-14363
-	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
+	void setFieldOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		setField(entity, "collaborator", testCollaborator, Object.class);
-		assertTrue(entity.toString().contains(testCollaborator));
+		assertThat(entity.toString().contains(testCollaborator)).isTrue();
 	}
 
 	@Test // SPR-14363
-	public void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeMethodOnLegacyEntityWithSideEffectsInToString() {
 		invokeMethod(entity, "configure", Integer.valueOf(42), "enigma");
-		assertEquals("number should have been configured", Integer.valueOf(42), entity.getNumber());
-		assertEquals("text should have been configured", "enigma", entity.getText());
+		assertThat(entity.getNumber()).as("number should have been configured").isEqualTo(Integer.valueOf(42));
+		assertThat(entity.getText()).as("text should have been configured").isEqualTo("enigma");
 	}
 
 	@Test // SPR-14363
-	public void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeGetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		Object collaborator = invokeGetterMethod(entity, "collaborator");
-		assertNotNull(collaborator);
+		assertThat(collaborator).isNotNull();
 	}
 
 	@Test // SPR-14363
-	public void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
+	void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		invokeSetterMethod(entity, "collaborator", testCollaborator);
-		assertTrue(entity.toString().contains(testCollaborator));
+		assertThat(entity.toString().contains(testCollaborator)).isTrue();
+	}
+
+	@Test
+	void invokeStaticMethodWithNullTargetClass() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> invokeMethod((Class<?>) null, null))
+			.withMessage("Target class must not be null");
+	}
+
+	@Test
+	void invokeStaticMethodWithNullMethodName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> invokeMethod(getClass(), null))
+			.withMessage("Method name must not be empty");
+	}
+
+	@Test
+	void invokeStaticMethodWithEmptyMethodName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> invokeMethod(getClass(), "  "))
+			.withMessage("Method name must not be empty");
+	}
+
+	@Test
+	void invokePublicStaticVoidMethodWithArguments() {
+		assertThat(StaticMethods.getPublicMethodValue()).isEqualTo("public");
+
+		String testCollaborator = "test collaborator";
+		invokeMethod(StaticMethods.class, "publicMethod", testCollaborator);
+		assertThat(StaticMethods.getPublicMethodValue()).isEqualTo(testCollaborator);
+	}
+
+	@Test
+	void invokePublicStaticMethodWithoutArguments() {
+		assertThat(StaticMethods.getPublicMethodValue()).isEqualTo("public");
+
+		String result = invokeMethod(StaticMethods.class, "publicMethod");
+		assertThat(result).isEqualTo(StaticMethods.getPublicMethodValue());
+	}
+
+	@Test
+	void invokePrivateStaticVoidMethodWithArguments() {
+		assertThat(StaticMethods.getPrivateMethodValue()).isEqualTo("private");
+
+		String testCollaborator = "test collaborator";
+		invokeMethod(StaticMethods.class, "privateMethod", testCollaborator);
+		assertThat(StaticMethods.getPrivateMethodValue()).isEqualTo(testCollaborator);
+	}
+
+	@Test
+	void invokePrivateStaticMethodWithoutArguments() {
+		assertThat(StaticMethods.getPrivateMethodValue()).isEqualTo("private");
+
+		String result = invokeMethod(StaticMethods.class, "privateMethod");
+		assertThat(result).isEqualTo(StaticMethods.getPrivateMethodValue());
+	}
+
+	@Test
+	void invokeStaticMethodWithNullTargetObjectAndNullTargetClass() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> invokeMethod((Object) null, (Class<?>) null, "id"))
+			.withMessage("Either 'targetObject' or 'targetClass' for the method must be specified");
 	}
 
 }

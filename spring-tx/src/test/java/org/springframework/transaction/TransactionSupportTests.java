@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.transaction;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
@@ -25,7 +25,9 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Juergen Hoeller
@@ -38,20 +40,15 @@ public class TransactionSupportTests {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
-		assertFalse("Must not have transaction", status1.hasTransaction());
+		assertThat(status1.hasTransaction()).as("Must not have transaction").isFalse();
 
 		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-		assertTrue("Must have transaction", status2.hasTransaction());
-		assertTrue("Must be new transaction", status2.isNewTransaction());
+		assertThat(status2.hasTransaction()).as("Must have transaction").isTrue();
+		assertThat(status2.isNewTransaction()).as("Must be new transaction").isTrue();
 
-		try {
-			tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
-			fail("Should not have thrown NoTransactionException");
-		}
-		catch (IllegalTransactionStateException ex) {
-			// expected
-		}
+		assertThatExceptionOfType(IllegalTransactionStateException.class).isThrownBy(() ->
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY)));
 	}
 
 	@Test
@@ -59,23 +56,21 @@ public class TransactionSupportTests {
 		PlatformTransactionManager tm = new TestTransactionManager(true, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
-		assertTrue("Must have transaction", status1.getTransaction() != null);
-		assertTrue("Must not be new transaction", !status1.isNewTransaction());
+		assertThat(status1.getTransaction() != null).as("Must have transaction").isTrue();
+		boolean condition2 = !status1.isNewTransaction();
+		assertThat(condition2).as("Must not be new transaction").isTrue();
 
 		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-		assertTrue("Must have transaction", status2.getTransaction() != null);
-		assertTrue("Must not be new transaction", !status2.isNewTransaction());
+		assertThat(status2.getTransaction() != null).as("Must have transaction").isTrue();
+		boolean condition1 = !status2.isNewTransaction();
+		assertThat(condition1).as("Must not be new transaction").isTrue();
 
-		try {
-			DefaultTransactionStatus status3 = (DefaultTransactionStatus)
-					tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
-			assertTrue("Must have transaction", status3.getTransaction() != null);
-			assertTrue("Must not be new transaction", !status3.isNewTransaction());
-		}
-		catch (NoTransactionException ex) {
-			fail("Should not have thrown NoTransactionException");
-		}
+		DefaultTransactionStatus status3 = (DefaultTransactionStatus)
+				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
+		assertThat(status3.getTransaction() != null).as("Must have transaction").isTrue();
+		boolean condition = !status3.isNewTransaction();
+		assertThat(condition).as("Must not be new transaction").isTrue();
 	}
 
 	@Test
@@ -84,10 +79,10 @@ public class TransactionSupportTests {
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
 
-		assertTrue("triggered begin", tm.begin);
-		assertTrue("triggered commit", tm.commit);
-		assertTrue("no rollback", !tm.rollback);
-		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("triggered commit").isTrue();
+		assertThat(tm.rollback).as("no rollback").isFalse();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -96,10 +91,10 @@ public class TransactionSupportTests {
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
 
-		assertTrue("triggered begin", tm.begin);
-		assertTrue("no commit", !tm.commit);
-		assertTrue("triggered rollback", tm.rollback);
-		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("triggered rollback").isTrue();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -109,10 +104,10 @@ public class TransactionSupportTests {
 		status.setRollbackOnly();
 		tm.commit(status);
 
-		assertTrue("triggered begin", tm.begin);
-		assertTrue("no commit", !tm.commit);
-		assertTrue("triggered rollback", tm.rollback);
-		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("triggered rollback").isTrue();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -121,10 +116,10 @@ public class TransactionSupportTests {
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
 
-		assertTrue("no begin", !tm.begin);
-		assertTrue("no commit", !tm.commit);
-		assertTrue("no rollback", !tm.rollback);
-		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+		assertThat(tm.begin).as("no begin").isFalse();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("no rollback").isFalse();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -133,10 +128,10 @@ public class TransactionSupportTests {
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
 
-		assertTrue("no begin", !tm.begin);
-		assertTrue("no commit", !tm.commit);
-		assertTrue("no rollback", !tm.rollback);
-		assertTrue("triggered rollbackOnly", tm.rollbackOnly);
+		assertThat(tm.begin).as("no begin").isFalse();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("no rollback").isFalse();
+		assertThat(tm.rollbackOnly).as("triggered rollbackOnly").isTrue();
 	}
 
 	@Test
@@ -146,10 +141,10 @@ public class TransactionSupportTests {
 		status.setRollbackOnly();
 		tm.commit(status);
 
-		assertTrue("no begin", !tm.begin);
-		assertTrue("no commit", !tm.commit);
-		assertTrue("no rollback", !tm.rollback);
-		assertTrue("triggered rollbackOnly", tm.rollbackOnly);
+		assertThat(tm.begin).as("no begin").isFalse();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("no rollback").isFalse();
+		assertThat(tm.rollbackOnly).as("triggered rollbackOnly").isTrue();
 	}
 
 	@Test
@@ -162,10 +157,10 @@ public class TransactionSupportTests {
 			}
 		});
 
-		assertTrue("triggered begin", tm.begin);
-		assertTrue("triggered commit", tm.commit);
-		assertTrue("no rollback", !tm.rollback);
-		assertTrue("no rollbackOnly", !tm.rollbackOnly);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("triggered commit").isTrue();
+		assertThat(tm.rollback).as("no rollback").isFalse();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -178,8 +173,8 @@ public class TransactionSupportTests {
 			}
 		});
 
-		assertSame(template, ptm.getDefinition());
-		assertFalse(ptm.getStatus().isRollbackOnly());
+		assertThat(ptm.getDefinition()).isSameAs(template);
+		assertThat(ptm.getStatus().isRollbackOnly()).isFalse();
 	}
 
 	@Test
@@ -187,23 +182,18 @@ public class TransactionSupportTests {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		final RuntimeException ex = new RuntimeException("Some application exception");
-		try {
-			template.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					throw ex;
-				}
-			});
-			fail("Should have propagated RuntimeException");
-		}
-		catch (RuntimeException caught) {
-			// expected
-			assertTrue("Correct exception", caught == ex);
-			assertTrue("triggered begin", tm.begin);
-			assertTrue("no commit", !tm.commit);
-			assertTrue("triggered rollback", tm.rollback);
-			assertTrue("no rollbackOnly", !tm.rollbackOnly);
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				template.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						throw ex;
+					}
+				}))
+			.isSameAs(ex);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("triggered rollback").isTrue();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@SuppressWarnings("serial")
@@ -219,45 +209,35 @@ public class TransactionSupportTests {
 		};
 		TransactionTemplate template = new TransactionTemplate(tm);
 		final RuntimeException ex = new RuntimeException("Some application exception");
-		try {
-			template.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					throw ex;
-				}
-			});
-			fail("Should have propagated RuntimeException");
-		}
-		catch (RuntimeException caught) {
-			// expected
-			assertTrue("Correct exception", caught == tex);
-			assertTrue("triggered begin", tm.begin);
-			assertTrue("no commit", !tm.commit);
-			assertTrue("triggered rollback", tm.rollback);
-			assertTrue("no rollbackOnly", !tm.rollbackOnly);
-		}
+		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+				template.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						throw ex;
+					}
+				}))
+			.isSameAs(tex);
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("triggered rollback").isTrue();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
 	public void transactionTemplateWithError() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
-		try {
-			template.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					throw new Error("Some application error");
-				}
-			});
-			fail("Should have propagated Error");
-		}
-		catch (Error err) {
-			// expected
-			assertTrue("triggered begin", tm.begin);
-			assertTrue("no commit", !tm.commit);
-			assertTrue("triggered rollback", tm.rollback);
-			assertTrue("no rollbackOnly", !tm.rollbackOnly);
-		}
+		assertThatExceptionOfType(Error.class).isThrownBy(() ->
+				template.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus status) {
+						throw new Error("Some application error");
+					}
+				}));
+		assertThat(tm.begin).as("triggered begin").isTrue();
+		assertThat(tm.commit).as("no commit").isFalse();
+		assertThat(tm.rollback).as("triggered rollback").isTrue();
+		assertThat(tm.rollbackOnly).as("no rollbackOnly").isFalse();
 	}
 
 	@Test
@@ -265,47 +245,28 @@ public class TransactionSupportTests {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate();
 		template.setTransactionManager(tm);
-		assertTrue("correct transaction manager set", template.getTransactionManager() == tm);
+		assertThat(template.getTransactionManager() == tm).as("correct transaction manager set").isTrue();
 
-		try {
-			template.setPropagationBehaviorName("TIMEOUT_DEFAULT");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
 		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
-		assertTrue("Correct propagation behavior set", template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS);
+		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS).as("Correct propagation behavior set").isTrue();
 
-		try {
-			template.setPropagationBehavior(999);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.setPropagationBehavior(999));
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
-		assertTrue("Correct propagation behavior set", template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY);
+		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY).as("Correct propagation behavior set").isTrue();
 
-		try {
-			template.setIsolationLevelName("TIMEOUT_DEFAULT");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.setIsolationLevelName("TIMEOUT_DEFAULT"));
 		template.setIsolationLevelName("ISOLATION_SERIALIZABLE");
-		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_SERIALIZABLE);
+		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_SERIALIZABLE).as("Correct isolation level set").isTrue();
 
-		try {
-			template.setIsolationLevel(999);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				template.setIsolationLevel(999));
+
 		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ);
+		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ).as("Correct isolation level set").isTrue();
 	}
 
 	@Test
@@ -316,16 +277,16 @@ public class TransactionSupportTests {
 		TransactionTemplate template2 = new TransactionTemplate(tm2);
 		TransactionTemplate template3 = new TransactionTemplate(tm2);
 
-		assertNotEquals(template1, template2);
-		assertNotEquals(template1, template3);
-		assertEquals(template2, template3);
+		assertThat(template2).isNotEqualTo(template1);
+		assertThat(template3).isNotEqualTo(template1);
+		assertThat(template3).isEqualTo(template2);
 	}
 
 
-	@After
+	@AfterEach
 	public void clear() {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 
 }

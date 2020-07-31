@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
  * A helper class for assertions on JSON content.
  *
  * <p>Use of this class requires the <a
- * href="http://jsonassert.skyscreamer.org/">JSONassert</a> library.
+ * href="https://jsonassert.skyscreamer.org/">JSONassert</a> library.
  *
  * @author Sebastien Deleuze
  * @since 4.1

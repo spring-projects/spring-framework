@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -120,7 +120,7 @@ class ModelInitializer {
 		Object value = handlerResult.getReturnValue();
 		if (value != null) {
 			ResolvableType type = handlerResult.getReturnType();
-			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.getRawClass(), value);
+			ReactiveAdapter adapter = this.adapterRegistry.getAdapter(type.resolve(), value);
 			if (isAsyncVoidType(type, adapter)) {
 				return Mono.from(adapter.toPublisher(value));
 			}
@@ -131,7 +131,7 @@ class ModelInitializer {
 	}
 
 	private boolean isAsyncVoidType(ResolvableType type, @Nullable  ReactiveAdapter adapter) {
-		return adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class);
+		return (adapter != null && (adapter.isNoValue() || type.resolveGeneric() == Void.class));
 	}
 
 	private String getAttributeName(MethodParameter param) {

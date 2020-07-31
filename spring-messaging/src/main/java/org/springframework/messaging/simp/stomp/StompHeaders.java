@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,8 +48,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers">
- * http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
+ * @see <a href="https://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers">
+ * https://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
  */
 public class StompHeaders implements MultiValueMap<String, String>, Serializable {
 
@@ -282,7 +282,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		if (rawValues == null) {
 			return null;
 		}
-		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
+		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
 	}
 
 	/**
@@ -552,7 +552,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof StompHeaders &&
 				this.headers.equals(((StompHeaders) other).headers)));
 	}

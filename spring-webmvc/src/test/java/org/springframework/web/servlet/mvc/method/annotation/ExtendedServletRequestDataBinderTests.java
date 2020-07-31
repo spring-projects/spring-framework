@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,16 +19,16 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link ExtendedServletRequestDataBinder}.
@@ -39,7 +39,7 @@ public class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 	}
@@ -55,8 +55,8 @@ public class ExtendedServletRequestDataBinderTests {
 		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
-		assertEquals("nameValue", target.getName());
-		assertEquals(25, target.getAge());
+		assertThat(target.getName()).isEqualTo("nameValue");
+		assertThat(target.getAge()).isEqualTo(25);
 	}
 
 	@Test
@@ -72,8 +72,8 @@ public class ExtendedServletRequestDataBinderTests {
 		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
-		assertEquals("nameValue", target.getName());
-		assertEquals(35, target.getAge());
+		assertThat(target.getName()).isEqualTo("nameValue");
+		assertThat(target.getAge()).isEqualTo(35);
 	}
 
 	@Test
@@ -82,8 +82,8 @@ public class ExtendedServletRequestDataBinderTests {
 		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
-		assertEquals(null, target.getName());
-		assertEquals(0, target.getAge());
+		assertThat(target.getName()).isEqualTo(null);
+		assertThat(target.getAge()).isEqualTo(0);
 	}
 
 }

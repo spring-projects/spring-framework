@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
 
 	<!--
 		Just included for the count: not to mean anything in particular
 	-->
-	<bean id="something" class="org.springframework.tests.sample.beans.GenericIntegerBean"/>
+	<bean id="something" class="org.springframework.beans.testfixture.beans.GenericIntegerBean"/>
 
-	<bean id="indexedBean" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
+	<bean id="indexedBean" class="org.springframework.beans.testfixture.beans.IndexedTestBean"/>
 
-	<bean id="annotatedBean" class="org.springframework.tests.sample.beans.AnnotatedBean"/>
+	<bean id="annotatedBean" class="org.springframework.beans.testfixture.beans.AnnotatedBean"/>
 
 	<!-- Overridden by next factory -->
-	<bean id="test" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="test" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>25</value></property>
 	</bean>
 
-	<bean id="testFactory1" class="org.springframework.tests.sample.beans.factory.DummyFactory"/>
+	<bean id="testFactory1" class="org.springframework.beans.testfixture.beans.factory.DummyFactory"/>
 
-	<bean id="testFactory2" class="org.springframework.tests.sample.beans.factory.DummyFactory">
+	<bean id="testFactory2" class="org.springframework.beans.testfixture.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.beans.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +35,9 @@ import org.springframework.util.StringValueResolver;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of 5.2, in favor of custom annotation attribute processing
  */
+@Deprecated
 public abstract class AnnotationBeanUtils {
 
 	/**
@@ -62,7 +65,8 @@ public abstract class AnnotationBeanUtils {
 	public static void copyPropertiesToBean(Annotation ann, Object bean, @Nullable StringValueResolver valueResolver,
 			String... excludedProperties) {
 
-		Set<String> excluded = new HashSet<>(Arrays.asList(excludedProperties));
+		Set<String> excluded = (excludedProperties.length == 0 ? Collections.emptySet() :
+				new HashSet<>(Arrays.asList(excludedProperties)));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {

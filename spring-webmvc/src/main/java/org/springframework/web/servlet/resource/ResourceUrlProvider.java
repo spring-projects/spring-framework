@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -52,7 +53,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = UrlPathHelper.defaultInstance;
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -179,8 +180,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private int getLookupPathIndex(HttpServletRequest request) {
 		UrlPathHelper pathHelper = getUrlPathHelper();
+		if (request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) == null) {
+			pathHelper.resolveAndCacheLookupPath(request);
+		}
 		String requestUri = pathHelper.getRequestUri(request);
-		String lookupPath = pathHelper.getLookupPathForRequest(request);
+		String lookupPath = UrlPathHelper.getResolvedLookupPath(request);
 		return requestUri.indexOf(lookupPath);
 	}
 

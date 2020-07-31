@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,37 +18,33 @@ package org.springframework.web.reactive.function.client;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpRequest;
+import org.springframework.web.testfixture.http.client.reactive.MockClientHttpResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Arjen Poutsma
  */
 public class DefaultClientResponseBuilderTests {
 
-	private DataBufferFactory dataBufferFactory;
-
-	@Before
-	public void createBufferFactory() {
-		this.dataBufferFactory = new DefaultDataBufferFactory();
-	}
-
 	@Test
 	public void normal() {
 		Flux<DataBuffer> body = Flux.just("baz")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+				.map(DefaultDataBufferFactory.sharedInstance::wrap);
 
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_GATEWAY, ExchangeStrategies.withDefaults())
 				.header("foo", "bar")
@@ -56,11 +52,11 @@ public class DefaultClientResponseBuilderTests {
 				.body(body)
 				.build();
 
-		assertEquals(HttpStatus.BAD_GATEWAY, response.statusCode());
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
 		HttpHeaders responseHeaders = response.headers().asHttpHeaders();
-		assertEquals("bar", responseHeaders.getFirst("foo"));
-		assertNotNull("qux", response.cookies().getFirst("baz"));
-		assertEquals("qux", response.cookies().getFirst("baz").getValue());
+		assertThat(responseHeaders.getFirst("foo")).isEqualTo("bar");
+		assertThat(response.cookies().getFirst("baz")).as("qux").isNotNull();
+		assertThat(response.cookies().getFirst("baz").getValue()).isEqualTo("qux");
 
 		StepVerifier.create(response.bodyToFlux(String.class))
 				.expectNext("baz")
@@ -68,37 +64,48 @@ public class DefaultClientResponseBuilderTests {
 	}
 
 	@Test
-	public void from() {
+	public void mutate() {
 		Flux<DataBuffer> otherBody = Flux.just("foo", "bar")
 				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+				.map(DefaultDataBufferFactory.sharedInstance::wrap);
 
-		ClientResponse other = ClientResponse.create(HttpStatus.BAD_REQUEST, ExchangeStrategies.withDefaults())
-				.header("foo", "bar")
-				.cookie("baz", "qux")
-				.body(otherBody)
-				.build();
+		HttpRequest mockClientHttpRequest = new MockClientHttpRequest(HttpMethod.GET, "/path");
 
-		Flux<DataBuffer> body = Flux.just("baz")
-				.map(s -> s.getBytes(StandardCharsets.UTF_8))
-				.map(dataBufferFactory::wrap);
+		MockClientHttpResponse httpResponse = new MockClientHttpResponse(HttpStatus.OK);
+		httpResponse.getHeaders().add("foo", "bar");
+		httpResponse.getHeaders().add("bar", "baz");
+		httpResponse.getCookies().add("baz", ResponseCookie.from("baz", "qux").build());
+		httpResponse.setBody(otherBody);
 
-		ClientResponse result = ClientResponse.from(other)
-				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
+		DefaultClientResponse otherResponse = new DefaultClientResponse(
+				httpResponse, ExchangeStrategies.withDefaults(), "my-prefix", "", () -> mockClientHttpRequest);
+
+		ClientResponse result = otherResponse.mutate()
+				.statusCode(HttpStatus.BAD_REQUEST)
+				.headers(headers -> headers.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", ResponseCookie.from("baz", "quux").build()))
-				.body(body)
 				.build();
 
-		assertEquals(HttpStatus.BAD_REQUEST, result.statusCode());
-		assertEquals(1, result.headers().asHttpHeaders().size());
-		assertEquals("baar", result.headers().asHttpHeaders().getFirst("foo"));
-		assertEquals(1, result.cookies().size());
-		assertEquals("quux", result.cookies().getFirst("baz").getValue());
+
+		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(3);
+		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
+		assertThat(result.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
+		assertThat(result.cookies().size()).isEqualTo(1);
+		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
+		assertThat(result.logPrefix()).isEqualTo("my-prefix");
 
 		StepVerifier.create(result.bodyToFlux(String.class))
-				.expectNext("baz")
+				.expectNext("foobar")
 				.verifyComplete();
 	}
 
+	@Test
+	public void mutateWithCustomStatus() {
+		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
+		ClientResponse result = other.mutate().build();
 
+		assertThat(result.rawStatusCode()).isEqualTo(499);
+		assertThatIllegalArgumentException().isThrownBy(result::statusCode);
+	}
 }

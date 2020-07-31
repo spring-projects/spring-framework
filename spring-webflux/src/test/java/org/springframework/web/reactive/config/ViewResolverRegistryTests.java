@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@ package org.springframework.web.reactive.config;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.core.Ordered;
@@ -32,7 +32,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.reactive.result.view.script.ScriptTemplateViewResolver;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link ViewResolverRegistry}.
@@ -45,7 +45,7 @@ public class ViewResolverRegistryTests {
 	private ViewResolverRegistry registry;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		StaticWebApplicationContext context = new StaticWebApplicationContext();
 		context.registerSingleton("freeMarkerConfigurer", FreeMarkerConfigurer.class);
@@ -56,22 +56,22 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void order() {
-		assertEquals(Ordered.LOWEST_PRECEDENCE, this.registry.getOrder());
+		assertThat(this.registry.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
 	public void hasRegistrations() {
-		assertFalse(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isFalse();
 
 		this.registry.freeMarker();
-		assertTrue(this.registry.hasRegistrations());
+		assertThat(this.registry.hasRegistrations()).isTrue();
 	}
 
 	@Test
 	public void noResolvers() {
-		assertNotNull(this.registry.getViewResolvers());
-		assertEquals(0, this.registry.getViewResolvers().size());
-		assertFalse(this.registry.hasRegistrations());
+		assertThat(this.registry.getViewResolvers()).isNotNull();
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(0);
+		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
 	@Test
@@ -79,8 +79,8 @@ public class ViewResolverRegistryTests {
 		UrlBasedViewResolver viewResolver = new UrlBasedViewResolver();
 		this.registry.viewResolver(viewResolver);
 
-		assertSame(viewResolver, this.registry.getViewResolvers().get(0));
-		assertEquals(1, this.registry.getViewResolvers().size());
+		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
+		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -88,8 +88,8 @@ public class ViewResolverRegistryTests {
 		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 		this.registry.defaultViews(view);
 
-		assertEquals(1, this.registry.getDefaultViews().size());
-		assertSame(view, this.registry.getDefaultViews().get(0));
+		assertThat(this.registry.getDefaultViews().size()).isEqualTo(1);
+		assertThat(this.registry.getDefaultViews().get(0)).isSameAs(view);
 	}
 
 	@Test  // SPR-16431
@@ -97,11 +97,11 @@ public class ViewResolverRegistryTests {
 		this.registry.scriptTemplate().prefix("/").suffix(".html");
 
 		List<ViewResolver> viewResolvers = this.registry.getViewResolvers();
-		assertEquals(1, viewResolvers.size());
-		assertEquals(ScriptTemplateViewResolver.class, viewResolvers.get(0).getClass());
+		assertThat(viewResolvers.size()).isEqualTo(1);
+		assertThat(viewResolvers.get(0).getClass()).isEqualTo(ScriptTemplateViewResolver.class);
 		DirectFieldAccessor accessor =  new DirectFieldAccessor(viewResolvers.get(0));
-		assertEquals("/", accessor.getPropertyValue("prefix"));
-		assertEquals(".html", accessor.getPropertyValue("suffix"));
+		assertThat(accessor.getPropertyValue("prefix")).isEqualTo("/");
+		assertThat(accessor.getPropertyValue("suffix")).isEqualTo(".html");
 	}
 
 }

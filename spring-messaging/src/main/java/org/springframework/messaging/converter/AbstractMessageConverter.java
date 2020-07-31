@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.messaging.converter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<MimeType> supportedMimeTypes;
+	private final List<MimeType> supportedMimeTypes = new ArrayList<>(4);
 
 	@Nullable
 	private ContentTypeResolver contentTypeResolver = new DefaultContentTypeResolver();
@@ -58,21 +59,28 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 
 	/**
-	 * Construct an {@code AbstractMessageConverter} supporting a single MIME type.
+	 * Constructor with a single MIME type.
 	 * @param supportedMimeType the supported MIME type
 	 */
 	protected AbstractMessageConverter(MimeType supportedMimeType) {
-		Assert.notNull(supportedMimeType, "supportedMimeType is required");
-		this.supportedMimeTypes = Collections.<MimeType>singletonList(supportedMimeType);
+		this(Collections.singletonList(supportedMimeType));
 	}
 
 	/**
-	 * Construct an {@code AbstractMessageConverter} supporting multiple MIME types.
+	 * Constructor with one or more MIME types via vararg.
+	 * @param supportedMimeTypes the supported MIME types
+	 * @since 5.2.2
+	 */
+	protected AbstractMessageConverter(MimeType... supportedMimeTypes) {
+		this(Arrays.asList(supportedMimeTypes));
+	}
+
+	/**
+	 * Constructor with a Collection of MIME types.
 	 * @param supportedMimeTypes the supported MIME types
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
-		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
-		this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
+		this.supportedMimeTypes.addAll(supportedMimeTypes);
 	}
 
 
@@ -81,6 +89,14 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	public List<MimeType> getSupportedMimeTypes() {
 		return Collections.unmodifiableList(this.supportedMimeTypes);
+	}
+
+	/**
+	 * Allows sub-classes to add more supported mime types.
+	 * @since 5.2.2
+	 */
+	protected void addSupportedMimeTypes(MimeType... supportedMimeTypes) {
+		this.supportedMimeTypes.addAll(Arrays.asList(supportedMimeTypes));
 	}
 
 	/**

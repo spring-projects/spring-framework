@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -60,8 +60,8 @@ import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
@@ -74,11 +74,11 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	public void handlerMapping() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) config.getBean(HandlerMapping.class);
-		assertEquals(1, hm.getOrder());
+		assertThat(hm.getOrder()).isEqualTo(1);
 
 		Map<String, Object> handlerMap = hm.getHandlerMap();
-		assertEquals(1, handlerMap.size());
-		assertNotNull(handlerMap.get("/simpleBroker"));
+		assertThat(handlerMap.size()).isEqualTo(1);
+		assertThat(handlerMap.get("/simpleBroker")).isNotNull();
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		SubProtocolWebSocketHandler webSocketHandler = config.getBean(SubProtocolWebSocketHandler.class);
 
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
-		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+		assertThat(interceptors.get(interceptors.size() - 1).getClass()).isEqualTo(ImmutableMessageChannelInterceptor.class);
 
 		TestWebSocketSession session = new TestWebSocketSession("s1");
 		session.setOpen(true);
@@ -99,10 +99,10 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		Message<?> message = channel.messages.get(0);
 		StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-		assertNotNull(accessor);
-		assertFalse(accessor.isMutable());
-		assertEquals(SimpMessageType.MESSAGE, accessor.getMessageType());
-		assertEquals("/foo", accessor.getDestination());
+		assertThat(accessor).isNotNull();
+		assertThat(accessor.isMutable()).isFalse();
+		assertThat(accessor.getMessageType()).isEqualTo(SimpMessageType.MESSAGE);
+		assertThat(accessor.getDestination()).isEqualTo("/foo");
 	}
 
 	@Test
@@ -112,10 +112,10 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
-		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+		assertThat(interceptors.get(interceptors.size() - 1).getClass()).isEqualTo(ImmutableMessageChannelInterceptor.class);
 
-		assertEquals(1, handlers.size());
-		assertTrue(handlers.contains(config.getBean(SubProtocolWebSocketHandler.class)));
+		assertThat(handlers.size()).isEqualTo(1);
+		assertThat(handlers.contains(config.getBean(SubProtocolWebSocketHandler.class))).isTrue();
 	}
 
 	@Test
@@ -125,11 +125,11 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
-		assertEquals(ImmutableMessageChannelInterceptor.class, interceptors.get(interceptors.size()-1).getClass());
+		assertThat(interceptors.get(interceptors.size() - 1).getClass()).isEqualTo(ImmutableMessageChannelInterceptor.class);
 
-		assertEquals(2, handlers.size());
-		assertTrue(handlers.contains(config.getBean(SimpleBrokerMessageHandler.class)));
-		assertTrue(handlers.contains(config.getBean(UserDestinationMessageHandler.class)));
+		assertThat(handlers.size()).isEqualTo(2);
+		assertThat(handlers.contains(config.getBean(SimpleBrokerMessageHandler.class))).isTrue();
+		assertThat(handlers.contains(config.getBean(UserDestinationMessageHandler.class))).isTrue();
 	}
 
 	@Test
@@ -137,13 +137,13 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
 		SubProtocolWebSocketHandler subWsHandler = config.getBean(SubProtocolWebSocketHandler.class);
 
-		assertEquals(1024 * 1024, subWsHandler.getSendBufferSizeLimit());
-		assertEquals(25 * 1000, subWsHandler.getSendTimeLimit());
-		assertEquals(30 * 1000, subWsHandler.getTimeToFirstMessage());
+		assertThat(subWsHandler.getSendBufferSizeLimit()).isEqualTo((1024 * 1024));
+		assertThat(subWsHandler.getSendTimeLimit()).isEqualTo((25 * 1000));
+		assertThat(subWsHandler.getTimeToFirstMessage()).isEqualTo((30 * 1000));
 
 		Map<String, SubProtocolHandler> handlerMap = subWsHandler.getProtocolHandlerMap();
 		StompSubProtocolHandler protocolHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
-		assertEquals(128 * 1024, protocolHandler.getMessageSizeLimit());
+		assertThat(protocolHandler.getMessageSizeLimit()).isEqualTo((128 * 1024));
 	}
 
 	@Test
@@ -153,12 +153,12 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		String name = "messageBrokerSockJsTaskScheduler";
 		ThreadPoolTaskScheduler taskScheduler = config.getBean(name, ThreadPoolTaskScheduler.class);
 		ScheduledThreadPoolExecutor executor = taskScheduler.getScheduledThreadPoolExecutor();
-		assertEquals(Runtime.getRuntime().availableProcessors(), executor.getCorePoolSize());
-		assertTrue(executor.getRemoveOnCancelPolicy());
+		assertThat(executor.getCorePoolSize()).isEqualTo(Runtime.getRuntime().availableProcessors());
+		assertThat(executor.getRemoveOnCancelPolicy()).isTrue();
 
 		SimpleBrokerMessageHandler handler = config.getBean(SimpleBrokerMessageHandler.class);
-		assertNotNull(handler.getTaskScheduler());
-		assertArrayEquals(new long[] {15000, 15000}, handler.getHeartbeatValue());
+		assertThat(handler.getTaskScheduler()).isNotNull();
+		assertThat(handler.getHeartbeatValue()).isEqualTo(new long[] {15000, 15000});
 	}
 
 	@Test
@@ -168,21 +168,21 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		WebSocketMessageBrokerStats stats = config.getBean(name, WebSocketMessageBrokerStats.class);
 		String actual = stats.toString();
 		String expected = "WebSocketSession\\[0 current WS\\(0\\)-HttpStream\\(0\\)-HttpPoll\\(0\\), " +
-				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)\\], " +
-				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)\\], " +
-				"stompBrokerRelay\\[null\\], " +
-				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"outboundChannelpool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\], " +
-				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d\\]";
+				"0 total, 0 closed abnormally \\(0 connect failure, 0 send limit, 0 transport error\\)], " +
+				"stompSubProtocol\\[processed CONNECT\\(0\\)-CONNECTED\\(0\\)-DISCONNECT\\(0\\)], " +
+				"stompBrokerRelay\\[null], " +
+				"inboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d], " +
+				"outboundChannel\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d], " +
+				"sockJsScheduler\\[pool size = \\d, active threads = \\d, queued tasks = \\d, completed tasks = \\d]";
 
-		assertTrue("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual, actual.matches(expected));
+		assertThat(actual.matches(expected)).as("\nExpected: " + expected.replace("\\", "") + "\n  Actual: " + actual).isTrue();
 	}
 
 	@Test
 	public void webSocketHandlerDecorator() throws Exception {
 		ApplicationContext config = createConfig(WebSocketHandlerDecoratorConfig.class);
 		WebSocketHandler handler = config.getBean(SubProtocolWebSocketHandler.class);
-		assertNotNull(handler);
+		assertThat(handler).isNotNull();
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) config.getBean("stompWebSocketHandlerMapping");
 		WebSocketHttpRequestHandler httpHandler = (WebSocketHttpRequestHandler) mapping.getHandlerMap().get("/test");
@@ -190,7 +190,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		WebSocketSession session = new TestWebSocketSession("id");
 		handler.afterConnectionEstablished(session);
-		assertEquals(true, session.getAttributes().get("decorated"));
+		assertThat(session.getAttributes().get("decorated")).isEqualTo(true);
 	}
 
 

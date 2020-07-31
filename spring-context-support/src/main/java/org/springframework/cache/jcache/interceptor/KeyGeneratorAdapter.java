@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
@@ -86,7 +87,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
-		if (!(AbstractJCacheKeyOperation.class.isInstance(operation))) {
+		if (!(operation instanceof AbstractJCacheKeyOperation)) {
 			throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
 		}
 		CacheKeyInvocationContext<?> invocationContext = createCacheKeyInvocationContext(target, operation, params);
@@ -107,7 +108,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 			Object value = param.getValue();
 			if (param.getParameterPosition() == context.getAllParameters().length - 1 &&
 					context.getMethod().isVarArgs()) {
-				parameters.addAll((List<Object>) CollectionUtils.arrayToList(value));
+				parameters.addAll(CollectionUtils.arrayToList(value));
 			}
 			else {
 				parameters.add(value);

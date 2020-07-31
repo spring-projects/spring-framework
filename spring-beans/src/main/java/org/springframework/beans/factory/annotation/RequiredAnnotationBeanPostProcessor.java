@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Conventions;
@@ -75,8 +75,8 @@ import org.springframework.util.Assert;
  * (or a custom {@link org.springframework.beans.factory.InitializingBean} implementation)
  */
 @Deprecated
-public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
+public class RequiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
+		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
 
 	/**
 	 * Bean definition attribute that may indicate whether a given bean is supposed
@@ -183,7 +183,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 			return true;
 		}
 		Object value = beanDefinition.getAttribute(SKIP_REQUIRED_CHECK_ATTRIBUTE);
-		return (value != null && (Boolean.TRUE.equals(value) || Boolean.valueOf(value.toString())));
+		return (value != null && (Boolean.TRUE.equals(value) || Boolean.parseBoolean(value.toString())));
 	}
 
 	/**

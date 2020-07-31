@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -35,7 +35,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
@@ -49,7 +50,7 @@ public class SimpMessagingTemplateTests {
 	private StubMessageChannel messageChannel;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
@@ -61,29 +62,35 @@ public class SimpMessagingTemplateTests {
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertEquals(1, messages.size());
+		assertThat(messages.size()).isEqualTo(1);
 
 		Message<byte[]> message = messages.get(0);
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertEquals(SimpMessageType.MESSAGE, headerAccessor.getMessageType());
-		assertEquals("/user/joe/queue/foo", headerAccessor.getDestination());
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.getMessageType()).isEqualTo(SimpMessageType.MESSAGE);
+		assertThat(headerAccessor.getDestination()).isEqualTo("/user/joe/queue/foo");
 	}
 
 	@Test
 	public void convertAndSendToUserWithEncoding() {
-		this.messagingTemplate.convertAndSendToUser("http://joe.openid.example.org/", "/queue/foo", "data");
+		this.messagingTemplate.convertAndSendToUser("https://joe.openid.example.org/", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertEquals(1, messages.size());
+		assertThat(messages.size()).isEqualTo(1);
 
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertEquals("/user/http:%2F%2Fjoe.openid.example.org%2F/queue/foo", headerAccessor.getDestination());
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.getDestination()).isEqualTo("/user/https:%2F%2Fjoe.openid.example.org%2F/queue/foo");
+	}
+
+	@Test // gh-23836
+	public void convertAndSendToUserWithInvalidSequence() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.messagingTemplate.convertAndSendToUser("joe%2F", "/queue/foo", "data"));
 	}
 
 	@Test
@@ -96,9 +103,9 @@ public class SimpMessagingTemplateTests {
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertNull(headerAccessor.toMap().get("key"));
-		assertEquals(Arrays.asList("value"), headerAccessor.getNativeHeader("key"));
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.toMap().get("key")).isNull();
+		assertThat(headerAccessor.getNativeHeader("key")).isEqualTo(Arrays.asList("value"));
 	}
 
 	@Test
@@ -113,9 +120,9 @@ public class SimpMessagingTemplateTests {
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(messages.get(0), SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertEquals("value", headerAccessor.toMap().get("key"));
-		assertNull(headerAccessor.getNativeHeader("key"));
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.toMap().get("key")).isEqualTo("value");
+		assertThat(headerAccessor.getNativeHeader("key")).isNull();
 	}
 
 	// SPR-11868
@@ -126,15 +133,15 @@ public class SimpMessagingTemplateTests {
 		this.messagingTemplate.convertAndSendToUser("joe", "/queue/foo", "data");
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 
-		assertEquals(1, messages.size());
+		assertThat(messages.size()).isEqualTo(1);
 
 		Message<byte[]> message = messages.get(0);
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 
-		assertNotNull(headerAccessor);
-		assertEquals(SimpMessageType.MESSAGE, headerAccessor.getMessageType());
-		assertEquals("/prefix/joe/queue/foo", headerAccessor.getDestination());
+		assertThat(headerAccessor).isNotNull();
+		assertThat(headerAccessor.getMessageType()).isEqualTo(SimpMessageType.MESSAGE);
+		assertThat(headerAccessor.getDestination()).isEqualTo("/prefix/joe/queue/foo");
 	}
 
 	@Test
@@ -150,22 +157,22 @@ public class SimpMessagingTemplateTests {
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 		Message<byte[]> message = messages.get(0);
 
-		assertSame(headers, message.getHeaders());
-		assertFalse(accessor.isMutable());
+		assertThat(message.getHeaders()).isSameAs(headers);
+		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test
 	public void processHeadersToSend() {
 		Map<String, Object> map = this.messagingTemplate.processHeadersToSend(null);
 
-		assertNotNull(map);
-		assertTrue("Actual: " + map.getClass().toString(), MessageHeaders.class.isAssignableFrom(map.getClass()));
+		assertThat(map).isNotNull();
+		assertThat(MessageHeaders.class.isAssignableFrom(map.getClass())).as("Actual: " + map.getClass().toString()).isTrue();
 
 		SimpMessageHeaderAccessor headerAccessor =
 				MessageHeaderAccessor.getAccessor((MessageHeaders) map, SimpMessageHeaderAccessor.class);
 
-		assertTrue(headerAccessor.isMutable());
-		assertEquals(SimpMessageType.MESSAGE, headerAccessor.getMessageType());
+		assertThat(headerAccessor.isMutable()).isTrue();
+		assertThat(headerAccessor.getMessageType()).isEqualTo(SimpMessageType.MESSAGE);
 	}
 
 	@Test
@@ -182,8 +189,8 @@ public class SimpMessagingTemplateTests {
 		List<Message<byte[]>> messages = this.messageChannel.getMessages();
 		Message<byte[]> sentMessage = messages.get(0);
 
-		assertSame(message, sentMessage);
-		assertFalse(accessor.isMutable());
+		assertThat(sentMessage).isSameAs(message);
+		assertThat(accessor.isMutable()).isFalse();
 	}
 
 	@Test
@@ -198,8 +205,8 @@ public class SimpMessagingTemplateTests {
 		Message<byte[]> sentMessage = messages.get(0);
 
 		MessageHeaderAccessor sentAccessor = MessageHeaderAccessor.getAccessor(sentMessage, MessageHeaderAccessor.class);
-		assertEquals(StompHeaderAccessor.class, sentAccessor.getClass());
-		assertEquals("/queue/foo-user123", ((StompHeaderAccessor) sentAccessor).getDestination());
+		assertThat(sentAccessor.getClass()).isEqualTo(StompHeaderAccessor.class);
+		assertThat(((StompHeaderAccessor) sentAccessor).getDestination()).isEqualTo("/queue/foo-user123");
 	}
 
 }

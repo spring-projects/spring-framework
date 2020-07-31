@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,16 +21,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture for the use of {@link ChannelInterceptor}s.
@@ -44,7 +44,7 @@ public class ChannelInterceptorTests {
 	private TestMessageHandler messageHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.channel = new ExecutorSubscribableChannel();
 		this.messageHandler = new TestMessageHandler();
@@ -60,12 +60,12 @@ public class ChannelInterceptorTests {
 		this.channel.addInterceptor(interceptor);
 		this.channel.send(MessageBuilder.withPayload("test").build());
 
-		assertEquals(1, this.messageHandler.getMessages().size());
+		assertThat(this.messageHandler.getMessages().size()).isEqualTo(1);
 		Message<?> result = this.messageHandler.getMessages().get(0);
 
-		assertNotNull(result);
-		assertSame(expected, result);
-		assertTrue(interceptor.wasAfterCompletionInvoked());
+		assertThat(result).isNotNull();
+		assertThat(result).isSameAs(expected);
+		assertThat(interceptor.wasAfterCompletionInvoked()).isTrue();
 	}
 
 	@Test
@@ -77,11 +77,11 @@ public class ChannelInterceptorTests {
 		Message<?> message = MessageBuilder.withPayload("test").build();
 		this.channel.send(message);
 
-		assertEquals(1, interceptor1.getCounter().get());
-		assertEquals(1, interceptor2.getCounter().get());
-		assertEquals(0, this.messageHandler.getMessages().size());
-		assertTrue(interceptor1.wasAfterCompletionInvoked());
-		assertFalse(interceptor2.wasAfterCompletionInvoked());
+		assertThat(interceptor1.getCounter().get()).isEqualTo(1);
+		assertThat(interceptor2.getCounter().get()).isEqualTo(1);
+		assertThat(this.messageHandler.getMessages().size()).isEqualTo(0);
+		assertThat(interceptor1.wasAfterCompletionInvoked()).isTrue();
+		assertThat(interceptor2.wasAfterCompletionInvoked()).isFalse();
 	}
 
 	@Test
@@ -100,15 +100,15 @@ public class ChannelInterceptorTests {
 				completionInvoked.set(true);
 			}
 			private void assertInput(Message<?> message, MessageChannel channel, boolean sent) {
-				assertNotNull(message);
-				assertNotNull(channel);
-				assertSame(ChannelInterceptorTests.this.channel, channel);
-				assertTrue(sent);
+				assertThat(message).isNotNull();
+				assertThat(channel).isNotNull();
+				assertThat(channel).isSameAs(ChannelInterceptorTests.this.channel);
+				assertThat(sent).isTrue();
 			}
 		});
 		this.channel.send(MessageBuilder.withPayload("test").build());
-		assertTrue(preSendInvoked.get());
-		assertTrue(completionInvoked.get());
+		assertThat(preSendInvoked.get()).isTrue();
+		assertThat(completionInvoked.get()).isTrue();
 	}
 
 	@Test
@@ -133,15 +133,15 @@ public class ChannelInterceptorTests {
 				completionInvoked.set(true);
 			}
 			private void assertInput(Message<?> message, MessageChannel channel, boolean sent) {
-				assertNotNull(message);
-				assertNotNull(channel);
-				assertSame(testChannel, channel);
-				assertFalse(sent);
+				assertThat(message).isNotNull();
+				assertThat(channel).isNotNull();
+				assertThat(channel).isSameAs(testChannel);
+				assertThat(sent).isFalse();
 			}
 		});
 		testChannel.send(MessageBuilder.withPayload("test").build());
-		assertTrue(preSendInvoked.get());
-		assertTrue(completionInvoked.get());
+		assertThat(preSendInvoked.get()).isTrue();
+		assertThat(completionInvoked.get()).isTrue();
 	}
 
 	@Test
@@ -160,10 +160,10 @@ public class ChannelInterceptorTests {
 			testChannel.send(MessageBuilder.withPayload("test").build());
 		}
 		catch (Exception ex) {
-			assertEquals("Simulated exception", ex.getCause().getMessage());
+			assertThat(ex.getCause().getMessage()).isEqualTo("Simulated exception");
 		}
-		assertTrue(interceptor1.wasAfterCompletionInvoked());
-		assertTrue(interceptor2.wasAfterCompletionInvoked());
+		assertThat(interceptor1.wasAfterCompletionInvoked()).isTrue();
+		assertThat(interceptor2.wasAfterCompletionInvoked()).isTrue();
 	}
 
 	@Test
@@ -177,10 +177,10 @@ public class ChannelInterceptorTests {
 			this.channel.send(MessageBuilder.withPayload("test").build());
 		}
 		catch (Exception ex) {
-			assertEquals("Simulated exception", ex.getCause().getMessage());
+			assertThat(ex.getCause().getMessage()).isEqualTo("Simulated exception");
 		}
-		assertTrue(interceptor1.wasAfterCompletionInvoked());
-		assertFalse(interceptor2.wasAfterCompletionInvoked());
+		assertThat(interceptor1.wasAfterCompletionInvoked()).isTrue();
+		assertThat(interceptor2.wasAfterCompletionInvoked()).isFalse();
 	}
 
 
@@ -215,7 +215,7 @@ public class ChannelInterceptorTests {
 
 		@Override
 		public Message<?> preSend(Message<?> message, MessageChannel channel) {
-			assertNotNull(message);
+			assertThat(message).isNotNull();
 			counter.incrementAndGet();
 			return message;
 		}

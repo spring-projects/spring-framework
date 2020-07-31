@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,14 @@ package org.springframework.expression.spel;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Common superclass for expression tests.
@@ -56,9 +56,7 @@ public abstract class AbstractExpressionTests {
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedResultType) {
 		Expression expr = parser.parseExpression(expression);
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).as("expression").isNotNull();
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
@@ -70,27 +68,24 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 
 		Class<?> resultType = value.getClass();
-		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
-				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
+		assertThat(resultType).as("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
 
 		if (expectedValue instanceof String) {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-					AbstractExpressionTests.stringValueOf(value));
+			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 		else {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 	}
 
 	public void evaluateAndAskForReturnType(String expression, Object expectedValue, Class<?> expectedResultType) {
 		Expression expr = parser.parseExpression(expression);
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).as("expression").isNotNull();
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
@@ -100,13 +95,13 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 
 		Class<?> resultType = value.getClass();
-		assertEquals("Type of the actual result was not as expected.  Expected '" + expectedResultType +
-				"' but result was of type '" + resultType + "'", expectedResultType, resultType);
-		assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+		assertThat(resultType).as("Type of the actual result was not as expected.  Expected '" + expectedResultType +
+				"' but result was of type '" + resultType + "'").isEqualTo(expectedResultType);
+		assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 	}
 
 	/**
@@ -121,9 +116,7 @@ public abstract class AbstractExpressionTests {
 	 */
 	public void evaluate(String expression, Object expectedValue, Class<?> expectedClassOfResult, boolean shouldBeWritable) {
 		Expression expr = parser.parseExpression(expression);
-		if (expr == null) {
-			fail("Parser returned null for expression");
-		}
+		assertThat(expr).as("expression").isNotNull();
 		if (DEBUG) {
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
 		}
@@ -132,26 +125,19 @@ public abstract class AbstractExpressionTests {
 			if (expectedValue == null) {
 				return;  // no point doing other checks
 			}
-			assertNull("Expression returned null value, but expected '" + expectedValue + "'", expectedValue);
+			assertThat(expectedValue).as("Expression returned null value, but expected '" + expectedValue + "'").isNull();
 		}
 		Class<? extends Object> resultType = value.getClass();
 		if (expectedValue instanceof String) {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue,
-					AbstractExpressionTests.stringValueOf(value));
+			assertThat(AbstractExpressionTests.stringValueOf(value)).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
 		else {
-			assertEquals("Did not get expected value for expression '" + expression + "'.", expectedValue, value);
+			assertThat(value).as("Did not get expected value for expression '" + expression + "'.").isEqualTo(expectedValue);
 		}
-		assertTrue("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
-				"' but result was of type '" + resultType + "'", expectedClassOfResult.equals(resultType));
+		assertThat(expectedClassOfResult.equals(resultType)).as("Type of the result was not as expected.  Expected '" + expectedClassOfResult +
+				"' but result was of type '" + resultType + "'").isTrue();
 
-		boolean isWritable = expr.isWritable(context);
-		if (isWritable != shouldBeWritable) {
-			if (shouldBeWritable)
-				fail("Expected the expression to be writable but it is not");
-			else
-				fail("Expected the expression to be readonly but it is not");
-		}
+		assertThat(expr.isWritable(context)).as("isWritable").isEqualTo(shouldBeWritable);
 	}
 
 	/**
@@ -178,59 +164,31 @@ public abstract class AbstractExpressionTests {
 	 */
 	protected void evaluateAndCheckError(String expression, Class<?> expectedReturnType, SpelMessage expectedMessage,
 			Object... otherProperties) {
-		try {
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() -> {
 			Expression expr = parser.parseExpression(expression);
-			if (expr == null) {
-				fail("Parser returned null for expression");
-			}
+			assertThat(expr).as("expression").isNotNull();
 			if (expectedReturnType != null) {
 				expr.getValue(context, expectedReturnType);
 			}
 			else {
 				expr.getValue(context);
 			}
-			fail("Should have failed with message " + expectedMessage);
-		}
-		catch (EvaluationException ee) {
-			SpelEvaluationException ex = (SpelEvaluationException) ee;
-			if (ex.getMessageCode() != expectedMessage) {
-				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
-			}
-			if (otherProperties != null && otherProperties.length != 0) {
+		}).satisfies(ex -> {
+			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
+			if (!ObjectUtils.isEmpty(otherProperties)) {
 				// first one is expected position of the error within the string
 				int pos = ((Integer) otherProperties[0]).intValue();
-				assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
+				assertThat(ex.getPosition()).as("position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();
-					if (inserts == null) {
-						inserts = new Object[0];
-					}
-					if (inserts.length < otherProperties.length - 1) {
-						fail("Cannot check " + (otherProperties.length - 1) +
-								" properties of the exception, it only has " + inserts.length + " inserts");
-					}
-					for (int i = 1; i < otherProperties.length; i++) {
-						if (otherProperties[i] == null) {
-							if (inserts[i - 1] != null) {
-								fail("Insert does not match, expected 'null' but insert value was '" +
-										inserts[i - 1] + "'");
-							}
-						}
-						else if (inserts[i - 1] == null) {
-							if (otherProperties[i] != null) {
-								fail("Insert does not match, expected '" + otherProperties[i] +
-										"' but insert value was 'null'");
-							}
-						}
-						else if (!inserts[i - 1].equals(otherProperties[i])) {
-							fail("Insert does not match, expected '" + otherProperties[i] +
-									"' but insert value was '" + inserts[i - 1] + "'");
-						}
-					}
+					assertThat(inserts).as("inserts").hasSizeGreaterThanOrEqualTo(otherProperties.length - 1);
+					Object[] expectedInserts = new Object[inserts.length];
+					System.arraycopy(otherProperties, 1, expectedInserts, 0, expectedInserts.length);
+					assertThat(inserts).as("inserts").containsExactly(expectedInserts);
 				}
 			}
-		}
+		});
 	}
 
 	/**
@@ -242,39 +200,25 @@ public abstract class AbstractExpressionTests {
 	 * @param otherProperties the expected inserts within the message
 	 */
 	protected void parseAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
-		try {
+		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			Expression expr = parser.parseExpression(expression);
 			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
-			fail("Parsing should have failed!");
-		}
-		catch (ParseException pe) {
-			SpelParseException ex = (SpelParseException)pe;
-			if (ex.getMessageCode() != expectedMessage) {
-				assertEquals("Failed to get expected message", expectedMessage, ex.getMessageCode());
-			}
+		}).satisfies(ex -> {
+			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
 				int pos = ((Integer) otherProperties[0]).intValue();
-				assertEquals("Did not get correct position reported in error ", pos, ex.getPosition());
+				assertThat(pos).as("reported position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();
-					if (inserts == null) {
-						inserts = new Object[0];
-					}
-					if (inserts.length < otherProperties.length - 1) {
-						fail("Cannot check " + (otherProperties.length - 1) +
-								" properties of the exception, it only has " + inserts.length + " inserts");
-					}
-					for (int i = 1; i < otherProperties.length; i++) {
-						if (!inserts[i - 1].equals(otherProperties[i])) {
-							fail("Insert does not match, expected '" + otherProperties[i] +
-									"' but insert value was '" + inserts[i - 1] + "'");
-						}
-					}
+					assertThat(inserts).as("inserts").hasSizeGreaterThanOrEqualTo(otherProperties.length - 1);
+					Object[] expectedInserts = new Object[inserts.length];
+					System.arraycopy(otherProperties, 1, expectedInserts, 0, expectedInserts.length);
+					assertThat(inserts).as("inserts").containsExactly(expectedInserts);
 				}
 			}
-		}
+		});
 	}
 
 

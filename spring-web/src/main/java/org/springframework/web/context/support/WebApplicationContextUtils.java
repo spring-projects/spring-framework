@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletConfig;
@@ -295,11 +296,11 @@ public abstract class WebApplicationContextUtils {
 
 		Assert.notNull(sources, "'propertySources' must not be null");
 		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
-		if (servletContext != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+		if (servletContext != null && sources.get(name) instanceof StubPropertySource) {
 			sources.replace(name, new ServletContextPropertySource(name, servletContext));
 		}
 		name = StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME;
-		if (servletConfig != null && sources.contains(name) && sources.get(name) instanceof StubPropertySource) {
+		if (servletConfig != null && sources.get(name) instanceof StubPropertySource) {
 			sources.replace(name, new ServletConfigPropertySource(name, servletConfig));
 		}
 	}

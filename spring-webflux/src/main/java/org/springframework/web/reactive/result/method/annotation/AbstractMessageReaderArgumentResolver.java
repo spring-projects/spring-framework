@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
@@ -78,7 +79,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
-	 * @param readers readers to convert from the request body
+	 * @param readers the readers to convert from the request body
 	 */
 	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers) {
 		this(readers, ReactiveAdapterRegistry.getSharedInstance());
@@ -127,13 +128,13 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 	/**
 	 * Read the body from a method argument with {@link HttpMessageReader}.
-	 * @param bodyParam the {@link MethodParameter} to read
-	 * @param actualParam the actual {@link MethodParameter} to read; could be different
-	 * from {@code bodyParameter} when processing {@code HttpEntity} for example
+	 * @param bodyParam represents the element type for the body
+	 * @param actualParam the actual method argument type; possibly different
+	 * from {@code bodyParam}, e.g. for an {@code HttpEntity} argument
 	 * @param isBodyRequired true if the body is required
 	 * @param bindingContext the binding context to use
 	 * @param exchange the current exchange
-	 * @return the body
+	 * @return a Mono with the value to use for the method argument
 	 * @since 5.0.2
 	 */
 	protected Mono<Object> readBody(MethodParameter bodyParam, @Nullable MethodParameter actualParam,
@@ -151,6 +152,12 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		MediaType contentType = request.getHeaders().getContentType();
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+		Object[] hints = extractValidationHints(bodyParam);
+
+		if (mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+			return Mono.error(new IllegalStateException(
+					"In a WebFlux application, form data is accessed via ServerWebExchange.getFormData()."));
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(exchange.getLogPrefix() + (contentType != null ?
@@ -170,7 +177,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					if (isBodyRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(bodyParam)));
 					}
-					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						flux = flux.doOnNext(target ->
 								validate(target, hints, bodyParam, bindingContext, exchange));
@@ -187,7 +193,6 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 					if (isBodyRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(bodyParam)));
 					}
-					Object[] hints = extractValidationHints(bodyParam);
 					if (hints != null) {
 						mono = mono.doOnNext(target ->
 								validate(target, hints, bodyParam, bindingContext, exchange));
@@ -201,7 +206,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		HttpMethod method = request.getMethod();
 		if (contentType == null && method != null && SUPPORTED_METHODS.contains(method)) {
-			Flux<DataBuffer> body = request.getBody().doOnNext(o -> {
+			Flux<DataBuffer> body = request.getBody().doOnNext(buffer -> {
+				DataBufferUtils.release(buffer);
 				// Body not empty, back to 415..
 				throw new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes, elementType);
 			});
@@ -219,8 +225,9 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 				new ServerWebInputException("Failed to read HTTP message", parameter, ex) : ex);
 	}
 
-	private ServerWebInputException handleMissingBody(MethodParameter param) {
-		return new ServerWebInputException("Request body is missing: " + param.getExecutable().toGenericString());
+	private ServerWebInputException handleMissingBody(MethodParameter parameter) {
+		String paramInfo = parameter.getExecutable().toGenericString();
+		return new ServerWebInputException("Request body is missing: " + paramInfo, parameter);
 	}
 
 	/**

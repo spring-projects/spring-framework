@@ -1,6 +1,6 @@
                                  Apache License
                            Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+                        https://www.apache.org/licenses/
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
@@ -192,7 +192,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -212,7 +212,7 @@ code for these subcomponents is subject to the terms and
 conditions of the following licenses.
 
 
->>> ASM 4.0 (org.ow2.asm:asm:4.0, org.ow2.asm:asm-commons:4.0):
+>>> ASM 7.1 (org.ow2.asm:asm:7.1, org.ow2.asm:asm-commons:7.1):
 
 Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.
@@ -244,36 +244,46 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
-Copyright (c) 1999-2009, OW2 Consortium <http://www.ow2.org/>
+Copyright (c) 1999-2009, OW2 Consortium <https://www.ow2.org/>
 
 
->>> CGLIB 3.0 (cglib:cglib:3.0):
+>>> CGLIB 3.3 (cglib:cglib:3.3):
 
 Per the LICENSE file in the CGLIB JAR distribution downloaded from
-http://sourceforge.net/projects/cglib/files/cglib3/3.0/cglib-3.0.jar/download,
-CGLIB 3.0 is licensed under the Apache License, version 2.0, the text of which
+https://github.com/cglib/cglib/releases/download/RELEASE_3_3_0/cglib-3.3.0.jar,
+CGLIB 3.3 is licensed under the Apache License, version 2.0, the text of which
 is included above.
 
 
-=======================================================================
+>>> Objenesis 3.1 (org.objenesis:objenesis:3.1):
 
-To the extent any open source subcomponents are licensed under the EPL and/or
+Per the LICENSE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html, Objenesis 3.1 is licensed under the
+Apache License, version 2.0, the text of which is included above.
+
+Per the NOTICE file in the Objenesis ZIP distribution downloaded from
+http://objenesis.org/download.html and corresponding to section 4d of the
+Apache License, Version 2.0, in this case for Objenesis:
+
+Objenesis
+Copyright 2006-2019 Joe Walnes, Henri Tremblay, Leonardo Mesquita
+
+
+===============================================================================
+
+To the extent any open source components are licensed under the EPL and/or
 other similar licenses that require the source code and/or modifications to
 source code to be made available (as would be noted above), you may obtain a
 copy of the source code corresponding to the binaries for such open source
 components and modifications thereto, if any, (the "Source Files"), by
-downloading the Source Files from http://www.springsource.org/download, or by
-sending a request, with your name and address to:
+downloading the Source Files from https://spring.io/projects, Pivotal's website
+at https://network.pivotal.io/open-source, or by sending a request, with your
+name and address to: Pivotal Software, Inc., 875 Howard Street, 5th floor, San
+Francisco, CA 94103, Attention: General Counsel. All such requests should
+clearly specify: OPEN SOURCE FILES REQUEST, Attention General Counsel. Pivotal
+can mail a copy of the Source Files to you on a CD or equivalent physical
+medium.
 
-    Pivotal, Inc., 875 Howard St,
-    San Francisco, CA 94103
-    United States of America
-
-or email info@pivotal.io.  All such requests should clearly specify:
-
-    OPEN SOURCE FILES REQUEST
-    Attention General Counsel
-
-Pivotal shall mail a copy of the Source Files to you on a CD or equivalent
-physical medium. This offer to obtain a copy of the Source Files is valid for
-three years from the date you acquired this Software product.
+This offer to obtain a copy of the Source Files is valid for three years from
+the date you acquired this Software product. Alternatively, the Source Files
+may accompany the Software.

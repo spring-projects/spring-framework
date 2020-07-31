@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -44,13 +45,15 @@ import org.springframework.util.Assert;
  * in {@link FileSystemResource#FileSystemResource(Path) FileSystemResource},
  * applying Spring's standard String-based path transformations but
  * performing all operations via the {@link java.nio.file.Files} API.
+ * This {@code PathResource} is effectively a pure {@code java.nio.path.Path}
+ * based alternative with different {@code createRelative} behavior.
  *
  * @author Philippe Marschall
  * @author Juergen Hoeller
  * @since 4.0
- * @see FileSystemResource#FileSystemResource(Path)
  * @see java.nio.file.Path
  * @see java.nio.file.Files
+ * @see FileSystemResource
  */
 public class PathResource extends AbstractResource implements WritableResource {
 
@@ -105,7 +108,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 
 	/**
 	 * This implementation returns whether the underlying file exists.
-	 * @see org.springframework.core.io.PathResource#exists()
+	 * @see java.nio.file.Files#exists(Path, java.nio.file.LinkOption...)
 	 */
 	@Override
 	public boolean exists() {
@@ -251,7 +254,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * @see java.nio.file.Path#resolve(String)
 	 */
 	@Override
-	public Resource createRelative(String relativePath) throws IOException {
+	public Resource createRelative(String relativePath) {
 		return new PathResource(this.path.resolve(relativePath));
 	}
 
@@ -274,7 +277,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * This implementation compares the underlying Path references.
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof PathResource &&
 				this.path.equals(((PathResource) other).path)));
 	}

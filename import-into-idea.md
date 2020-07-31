@@ -14,7 +14,7 @@ _Within your locally cloned spring-framework working directory:_
 1. `spring-core` and `spring-oxm` should be pre-compiled due to repackaged dependencies.
 See `*RepackJar` tasks in the build and https://youtrack.jetbrains.com/issue/IDEA-160605).
 2. `spring-aspects` does not compile due to references to aspect types unknown to
-IntelliJ IDEA. See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the
+IntelliJ IDEA. See https://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the
 'spring-aspects' can be excluded from the project to avoid compilation errors.
 3. While JUnit tests pass from the command line with Gradle, some may fail when run from
 IntelliJ IDEA. Resolving this is a work in progress. If attempting to run all JUnit tests from within
@@ -31,6 +31,6 @@ You'll notice these files are already intentionally in .gitignore. The same poli
 
 ## FAQ
 
-Q. What about IntelliJ IDEA's own [Gradle support](http://confluence.jetbrains.net/display/IDEADEV/Gradle+integration)?
+Q. What about IntelliJ IDEA's own [Gradle support](https://confluence.jetbrains.net/display/IDEADEV/Gradle+integration)?
 
-A. Keep an eye on http://youtrack.jetbrains.com/issue/IDEA-53476
+A. Keep an eye on https://youtrack.jetbrains.com/issue/IDEA-53476

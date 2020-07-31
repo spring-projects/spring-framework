@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,126 +16,123 @@
 
 package org.springframework.context.annotation;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.util.StopWatch;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 2.5
  */
+@EnabledForTestGroups(PERFORMANCE)
 public class AnnotationProcessorPerformanceTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
-	@BeforeClass
+
+	@BeforeAll
 	public static void commonAssumptions() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 	}
 
 	@Test
-	public void testPrototypeCreationWithResourcePropertiesIsFastEnough() {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
-		ctx.refresh();
+	public void prototypeCreationWithResourcePropertiesIsFastEnough() {
+		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		TestBean spouse = (TestBean) ctx.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
-		}
-		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+
+		assertFastEnough(ctx);
 	}
 
 	@Test
-	public void testPrototypeCreationWithOverriddenResourcePropertiesIsFastEnough() {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
-		ctx.refresh();
+	public void prototypeCreationWithOverriddenResourcePropertiesIsFastEnough() {
+		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(ResourceAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		TestBean spouse = (TestBean) ctx.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
-		}
-		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+
+		assertFastEnough(ctx);
 	}
 
 	@Test
-	public void testPrototypeCreationWithAutowiredPropertiesIsFastEnough() {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
-		ctx.refresh();
+	public void prototypeCreationWithAutowiredPropertiesIsFastEnough() {
+		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		TestBean spouse = (TestBean) ctx.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
-		}
-		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+
+		assertFastEnough(ctx);
 	}
 
 	@Test
-	public void testPrototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
-		ctx.refresh();
+	public void prototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
+		GenericApplicationContext ctx = createContext();
 
 		RootBeanDefinition rbd = new RootBeanDefinition(AutowiredAnnotatedTestBean.class);
-		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
 		ctx.registerBeanDefinition("test", rbd);
 		ctx.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		TestBean spouse = (TestBean) ctx.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) ctx.getBean("test");
-			assertSame(spouse, tb.getSpouse());
-		}
-		sw.stop();
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
+
+		assertFastEnough(ctx);
+	}
+
+	private GenericApplicationContext createContext() {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
+		ctx.refresh();
+		return ctx;
+	}
+
+	private void assertFastEnough(GenericApplicationContext ctx) {
+		AtomicBoolean done = new AtomicBoolean();
+		TestBean spouse = ctx.getBean("spouse", TestBean.class);
+		Executors.newSingleThreadExecutor().submit(() -> {
+			for (int i = 0; i < 100_000; i++) {
+				TestBean tb = ctx.getBean("test", TestBean.class);
+				assertThat(tb.getSpouse()).isSameAs(spouse);
+			}
+			done.set(true);
+		});
+
+		// "fast enough" is of course relative, but we're using 6 seconds with the hope
+		// that these tests typically pass on the CI server.
+		Awaitility.await()
+			.atMost(6, TimeUnit.SECONDS)
+			.pollInterval(100, TimeUnit.MILLISECONDS)
+			.untilTrue(done);
 	}
 
 

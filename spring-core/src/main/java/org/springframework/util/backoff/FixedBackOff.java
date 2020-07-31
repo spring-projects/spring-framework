@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -109,14 +109,12 @@ public class FixedBackOff implements BackOff {
 
 		@Override
 		public String toString() {
-			final StringBuilder sb = new StringBuilder("FixedBackOff{");
-			sb.append("interval=").append(FixedBackOff.this.interval);
 			String attemptValue = (FixedBackOff.this.maxAttempts == Long.MAX_VALUE ?
 					"unlimited" : String.valueOf(FixedBackOff.this.maxAttempts));
-			sb.append(", currentAttempts=").append(this.currentAttempts);
-			sb.append(", maxAttempts=").append(attemptValue);
-			sb.append('}');
-			return sb.toString();
+			return "FixedBackOff{interval=" + FixedBackOff.this.interval +
+					", currentAttempts=" + this.currentAttempts +
+					", maxAttempts=" + attemptValue +
+					'}';
 		}
 	}
 

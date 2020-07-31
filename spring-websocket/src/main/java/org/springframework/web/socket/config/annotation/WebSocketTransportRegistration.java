@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,20 +47,12 @@ public class WebSocketTransportRegistration {
 
 
 	/**
-	 * Configure the maximum size for an incoming sub-protocol message.
-	 * For example a STOMP message may be received as multiple WebSocket messages
-	 * or multiple HTTP POST requests when SockJS fallback options are in use.
-	 * <p>In theory a WebSocket message can be almost unlimited in size.
-	 * In practice WebSocket servers impose limits on incoming message size.
-	 * STOMP clients for example tend to split large messages around 16K
-	 * boundaries. Therefore a server must be able to buffer partial content
-	 * and decode when enough data is received. Use this property to configure
-	 * the max size of the buffer to use.
+	 * Configure the maximum size of an inbound sub-protocol message, such as
+	 * a STOMP frame which may be aggregated from multiple WebSocket messages.
 	 * <p>The default value is 64K (i.e. 64 * 1024).
-	 * <p><strong>NOTE</strong> that the current version 1.2 of the STOMP spec
-	 * does not specifically discuss how to send STOMP messages over WebSocket.
-	 * Version 2 of the spec will but in the mean time existing client libraries
-	 * have already established a practice that servers must handle.
+	 * <p><strong>Note:</strong> This is not the same as the size of an
+	 * individual WebSocket message which needs to be configured at the WebSocket
+	 * server level instead. See the reference documentation for details.
 	 */
 	public WebSocketTransportRegistration setMessageSizeLimit(int messageSizeLimit) {
 		this.messageSizeLimit = messageSizeLimit;

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,18 @@ package org.springframework.test.web.client;
 
 import java.net.SocketException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
 import org.springframework.web.client.RestTemplate;
 
-import static org.springframework.http.HttpMethod.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link MockRestServiceServer}.
@@ -59,14 +63,15 @@ public class MockRestServiceServerTests {
 		server.verify();
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void exactExpectOrder() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
 				.ignoreExpectOrder(false).build();
 
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		this.restTemplate.getForObject("/bar", Void.class);
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.restTemplate.getForObject("/bar", Void.class));
 	}
 
 	@Test
@@ -112,6 +117,24 @@ public class MockRestServiceServerTests {
 		server.verify();
 	}
 
+	@Test  // gh-24486
+	public void resetClearsRequestFailures() {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		server.verify();
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.withMessageStartingWith("No further requests expected");
+
+		server.reset();
+
+		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		server.verify();
+	}
+
 	@Test  // SPR-16132
 	public void followUpRequestAfterFailure() {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
@@ -124,12 +147,28 @@ public class MockRestServiceServerTests {
 
 		try {
 			this.restTemplate.getForEntity("/some-service/some-endpoint", String.class);
+			fail("Expected exception");
 		}
 		catch (Exception ex) {
 			this.restTemplate.postForEntity("/reporting-service/report-error", ex.toString(), String.class);
 		}
 
 		server.verify();
+	}
+
+	@Test  // gh-21799
+	public void verifyShouldFailIfRequestsFailed() {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+		server.expect(once(), requestTo("/remoteurl")).andRespond(withSuccess());
+
+		this.restTemplate.postForEntity("/remoteurl", null, String.class);
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(() -> this.restTemplate.postForEntity("/remoteurl", null, String.class))
+				.withMessageStartingWith("No further requests expected");
+
+		assertThatExceptionOfType(AssertionError.class)
+				.isThrownBy(server::verify)
+				.withMessageStartingWith("Some requests did not execute successfully");
 	}
 
 }

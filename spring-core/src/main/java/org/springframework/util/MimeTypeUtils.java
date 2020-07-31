@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,15 +28,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType.SpecificityComparator;
 
 /**
  * Miscellaneous {@link MimeType} utility methods.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Dimitrios Liapis
+ * @author Brian Clozel
+ * @author Sam Brannen
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
@@ -50,7 +58,7 @@ public abstract class MimeTypeUtils {
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>();
+	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -152,26 +160,31 @@ public abstract class MimeTypeUtils {
 	 */
 	public static final String TEXT_XML_VALUE = "text/xml";
 
+
+	private static final ConcurrentLruCache<String, MimeType> cachedMimeTypes =
+			new ConcurrentLruCache<>(64, MimeTypeUtils::parseMimeTypeInternal);
+
 	@Nullable
 	private static volatile Random random;
 
-
 	static {
-		ALL = MimeType.valueOf(ALL_VALUE);
-		APPLICATION_JSON = MimeType.valueOf(APPLICATION_JSON_VALUE);
-		APPLICATION_OCTET_STREAM = MimeType.valueOf(APPLICATION_OCTET_STREAM_VALUE);
-		APPLICATION_XML = MimeType.valueOf(APPLICATION_XML_VALUE);
-		IMAGE_GIF = MimeType.valueOf(IMAGE_GIF_VALUE);
-		IMAGE_JPEG = MimeType.valueOf(IMAGE_JPEG_VALUE);
-		IMAGE_PNG = MimeType.valueOf(IMAGE_PNG_VALUE);
-		TEXT_HTML = MimeType.valueOf(TEXT_HTML_VALUE);
-		TEXT_PLAIN = MimeType.valueOf(TEXT_PLAIN_VALUE);
-		TEXT_XML = MimeType.valueOf(TEXT_XML_VALUE);
+		// Not using "parseMimeType" to avoid static init cost
+		ALL = new MimeType("*", "*");
+		APPLICATION_JSON = new MimeType("application", "json");
+		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");
+		APPLICATION_XML = new MimeType("application", "xml");
+		IMAGE_GIF = new MimeType("image", "gif");
+		IMAGE_JPEG = new MimeType("image", "jpeg");
+		IMAGE_PNG = new MimeType("image", "png");
+		TEXT_HTML = new MimeType("text", "html");
+		TEXT_PLAIN = new MimeType("text", "plain");
+		TEXT_XML = new MimeType("text", "xml");
 	}
 
 
 	/**
 	 * Parse the given String into a single {@code MimeType}.
+	 * Recently parsed {@code MimeType} are cached for further retrieval.
 	 * @param mimeType the string to parse
 	 * @return the mime type
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
@@ -180,7 +193,14 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeType)) {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
+		// do not cache multipart mime types with random boundaries
+		if (mimeType.startsWith("multipart")) {
+			return parseMimeTypeInternal(mimeType);
+		}
+		return cachedMimeTypes.get(mimeType);
+	}
 
+	private static MimeType parseMimeTypeInternal(String mimeType) {
 		int index = mimeType.indexOf(';');
 		String fullType = (index >= 0 ? mimeType.substring(0, index) : mimeType).trim();
 		if (fullType.isEmpty()) {
@@ -199,7 +219,7 @@ public abstract class MimeTypeUtils {
 			throw new InvalidMimeTypeException(mimeType, "does not contain subtype after '/'");
 		}
 		String type = fullType.substring(0, subIndex);
-		String subtype = fullType.substring(subIndex + 1, fullType.length());
+		String subtype = fullType.substring(subIndex + 1);
 		if (MimeType.WILDCARD_TYPE.equals(type) && !MimeType.WILDCARD_TYPE.equals(subtype)) {
 			throw new InvalidMimeTypeException(mimeType, "wildcard type is legal only in '*/*' (all mime types)");
 		}
@@ -228,7 +248,7 @@ public abstract class MimeTypeUtils {
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex >= 0) {
 					String attribute = parameter.substring(0, eqIndex).trim();
-					String value = parameter.substring(eqIndex + 1, parameter.length()).trim();
+					String value = parameter.substring(eqIndex + 1).trim();
 					parameters.put(attribute, value);
 				}
 			}
@@ -248,21 +268,56 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Parse the given, comma-separated string into a list of {@code MimeType} objects.
+	 * Parse the comma-separated string into a list of {@code MimeType} objects.
 	 * @param mimeTypes the string to parse
 	 * @return the list of mime types
-	 * @throws IllegalArgumentException if the string cannot be parsed
+	 * @throws InvalidMimeTypeException if the string cannot be parsed
 	 */
 	public static List<MimeType> parseMimeTypes(String mimeTypes) {
 		if (!StringUtils.hasLength(mimeTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = StringUtils.tokenizeToStringArray(mimeTypes, ",");
-		List<MimeType> result = new ArrayList<>(tokens.length);
-		for (String token : tokens) {
-			result.add(parseMimeType(token));
+		return tokenize(mimeTypes).stream()
+				.filter(StringUtils::hasText)
+				.map(MimeTypeUtils::parseMimeType)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Tokenize the given comma-separated string of {@code MimeType} objects
+	 * into a {@code List<String>}. Unlike simple tokenization by ",", this
+	 * method takes into account quoted parameters.
+	 * @param mimeTypes the string to tokenize
+	 * @return the list of tokens
+	 * @since 5.1.3
+	 */
+	public static List<String> tokenize(String mimeTypes) {
+		if (!StringUtils.hasLength(mimeTypes)) {
+			return Collections.emptyList();
 		}
-		return result;
+		List<String> tokens = new ArrayList<>();
+		boolean inQuotes = false;
+		int startIndex = 0;
+		int i = 0;
+		while (i < mimeTypes.length()) {
+			switch (mimeTypes.charAt(i)) {
+				case '"':
+					inQuotes = !inQuotes;
+					break;
+				case ',':
+					if (!inQuotes) {
+						tokens.add(mimeTypes.substring(startIndex, i));
+						startIndex = i + 1;
+					}
+					break;
+				case '\\':
+					i++;
+					break;
+			}
+			i++;
+		}
+		tokens.add(mimeTypes.substring(startIndex));
+		return tokens;
 	}
 
 	/**
@@ -282,7 +337,6 @@ public abstract class MimeTypeUtils {
 		}
 		return builder.toString();
 	}
-
 
 	/**
 	 * Sorts the given list of {@code MimeType} objects by specificity.
@@ -305,7 +359,7 @@ public abstract class MimeTypeUtils {
 	 * <blockquote>audio/basic == text/html</blockquote> <blockquote>audio/basic ==
 	 * audio/wave</blockquote>
 	 * @param mimeTypes the list of mime types to be sorted
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">HTTP 1.1: Semantics
 	 * and Content, section 5.3.2</a>
 	 */
 	public static void sortBySpecificity(List<MimeType> mimeTypes) {
@@ -350,6 +404,86 @@ public abstract class MimeTypeUtils {
 	 */
 	public static String generateMultipartBoundaryString() {
 		return new String(generateMultipartBoundary(), StandardCharsets.US_ASCII);
+	}
+
+
+	/**
+	 * Simple Least Recently Used cache, bounded by the maximum size given
+	 * to the class constructor.
+	 * <p>This implementation is backed by a {@code ConcurrentHashMap} for storing
+	 * the cached values and a {@code ConcurrentLinkedQueue} for ordering the keys
+	 * and choosing the least recently used key when the cache is at full capacity.
+	 * @param <K> the type of the key used for caching
+	 * @param <V> the type of the cached values
+	 */
+	private static class ConcurrentLruCache<K, V> {
+
+		private final int maxSize;
+
+		private final ConcurrentLinkedDeque<K> queue = new ConcurrentLinkedDeque<>();
+
+		private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
+
+		private final ReadWriteLock lock;
+
+		private final Function<K, V> generator;
+
+		private volatile int size;
+
+		public ConcurrentLruCache(int maxSize, Function<K, V> generator) {
+			Assert.isTrue(maxSize > 0, "LRU max size should be positive");
+			Assert.notNull(generator, "Generator function should not be null");
+			this.maxSize = maxSize;
+			this.generator = generator;
+			this.lock = new ReentrantReadWriteLock();
+		}
+
+		public V get(K key) {
+			V cached = this.cache.get(key);
+			if (cached != null) {
+				if (this.size < this.maxSize) {
+					return cached;
+				}
+				this.lock.readLock().lock();
+				try {
+					if (this.queue.removeLastOccurrence(key)) {
+						this.queue.offer(key);
+					}
+					return cached;
+				}
+				finally {
+					this.lock.readLock().unlock();
+				}
+			}
+			this.lock.writeLock().lock();
+			try {
+				// Retrying in case of concurrent reads on the same key
+				cached = this.cache.get(key);
+				if (cached  != null) {
+					if (this.queue.removeLastOccurrence(key)) {
+						this.queue.offer(key);
+					}
+					return cached;
+				}
+				// Generate value first, to prevent size inconsistency
+				V value = this.generator.apply(key);
+				int cacheSize = this.size;
+				if (cacheSize == this.maxSize) {
+					K leastUsed = this.queue.poll();
+					if (leastUsed != null) {
+						this.cache.remove(leastUsed);
+						cacheSize--;
+					}
+				}
+				this.queue.offer(key);
+				this.cache.put(key, value);
+				this.size = cacheSize + 1;
+				return value;
+			}
+			finally {
+				this.lock.writeLock().unlock();
+			}
+		}
 	}
 
 }

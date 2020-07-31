@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Date sequence generator for a
- * <a href="http://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
+ * <a href="https://www.manpagez.com/man/5/crontab/">Crontab pattern</a>,
  * allowing clients to specify a pattern that the sequence matches.
  *
  * <p>The pattern is a list of six single space-separated fields: representing
@@ -372,7 +372,7 @@ public class CronSequenceGenerator {
 			return result;
 		}
 		if (!field.contains("-")) {
-			result[0] = result[1] = Integer.valueOf(field);
+			result[0] = result[1] = Integer.parseInt(field);
 		}
 		else {
 			String[] split = StringUtils.delimitedListToStringArray(field, "-");
@@ -380,8 +380,8 @@ public class CronSequenceGenerator {
 				throw new IllegalArgumentException("Range has more than two fields: '" +
 						field + "' in expression \"" + this.expression + "\"");
 			}
-			result[0] = Integer.valueOf(split[0]);
-			result[1] = Integer.valueOf(split[1]);
+			result[0] = Integer.parseInt(split[0]);
+			result[1] = Integer.parseInt(split[1]);
 		}
 		if (result[0] >= max || result[1] >= max) {
 			throw new IllegalArgumentException("Range exceeds maximum (" + max + "): '" +
@@ -428,7 +428,7 @@ public class CronSequenceGenerator {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

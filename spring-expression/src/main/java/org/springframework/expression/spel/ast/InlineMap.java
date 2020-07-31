@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,14 +40,14 @@ public class InlineMap extends SpelNodeImpl {
 	private TypedValue constant;
 
 
-	public InlineMap(int pos, SpelNodeImpl... args) {
-		super(pos, args);
+	public InlineMap(int startPos, int endPos, SpelNodeImpl... args) {
+		super(startPos, endPos, args);
 		checkIfConstant();
 	}
 
 
 	/**
-	 * If all the components of the list are constants, or lists/maps that themselves
+	 * If all the components of the map are constants, or lists/maps that themselves
 	 * contain constants, then a constant list can be built to represent this node.
 	 * This will speed up later getValue calls and reduce the amount of garbage created.
 	 */
@@ -70,14 +70,14 @@ public class InlineMap extends SpelNodeImpl {
 						break;
 					}
 				}
-				else if (!((c%2)==0 && (child instanceof PropertyOrFieldReference))) {
+				else if (!(c % 2 == 0 && child instanceof PropertyOrFieldReference)) {
 					isConstant = false;
 					break;
 				}
 			}
 		}
 		if (isConstant) {
-			Map<Object,Object> constantMap = new LinkedHashMap<>();
+			Map<Object, Object> constantMap = new LinkedHashMap<>();
 			int childCount = getChildCount();
 			for (int c = 0; c < childCount; c++) {
 				SpelNode keyChild = getChild(c++);
@@ -159,9 +159,9 @@ public class InlineMap extends SpelNodeImpl {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public Map<Object,Object> getConstantValue() {
+	public Map<Object, Object> getConstantValue() {
 		Assert.state(this.constant != null, "No constant");
-		return (Map<Object,Object>) this.constant.getValue();
+		return (Map<Object, Object>) this.constant.getValue();
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.bind.support;
 
 import java.util.List;
+
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,9 +29,9 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -41,7 +42,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Brian Clozel
@@ -62,7 +63,7 @@ public class WebRequestDataBinderIntegrationTests {
 	protected static MediaType contentType;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void startJettyServer() throws Exception {
 		// Let server pick its own random, available port.
 		jettyServer = new Server(0);
@@ -87,7 +88,7 @@ public class WebRequestDataBinderIntegrationTests {
 		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopJettyServer() throws Exception {
 		if (jettyServer != null) {
 			jettyServer.stop();
@@ -107,8 +108,8 @@ public class WebRequestDataBinderIntegrationTests {
 
 		template.postForLocation(baseUrl + "/parts", parts);
 
-		assertNotNull(bean.getFirstPart());
-		assertNotNull(bean.getSecondPart());
+		assertThat(bean.getFirstPart()).isNotNull();
+		assertThat(bean.getSecondPart()).isNotNull();
 	}
 
 	@Test
@@ -124,8 +125,8 @@ public class WebRequestDataBinderIntegrationTests {
 
 		template.postForLocation(baseUrl + "/partlist", parts);
 
-		assertNotNull(bean.getPartList());
-		assertEquals(parts.get("partList").size(), bean.getPartList().size());
+		assertThat(bean.getPartList()).isNotNull();
+		assertThat(bean.getPartList().size()).isEqualTo(parts.get("partList").size());
 	}
 
 

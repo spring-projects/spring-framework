@@ -37,7 +37,7 @@ import java.lang.reflect.Method;
  * @author Eric Bruneton
  * @author Chris Nokleberg
  */
-public class Type {
+public final class Type {
 
   /** The sort of the {@code void} type. See {@link #getSort}. */
   public static final int VOID = 0;
@@ -153,7 +153,7 @@ public class Type {
    * @param valueBuffer a buffer containing the value of this field or method type.
    * @param valueBegin the beginning index, inclusive, of the value of this field or method type in
    *     valueBuffer.
-   * @param valueEnd tne end index, exclusive, of the value of this field or method type in
+   * @param valueEnd the end index, exclusive, of the value of this field or method type in
    *     valueBuffer.
    */
   private Type(final int sort, final String valueBuffer, final int valueBegin, final int valueEnd) {
@@ -304,9 +304,9 @@ public class Type {
         currentOffset++;
       }
       if (methodDescriptor.charAt(currentOffset++) == 'L') {
-        while (methodDescriptor.charAt(currentOffset++) != ';') {
-          // Skip the argument descriptor content.
-        }
+        // Skip the argument descriptor content.
+        int semiColumnOffset = methodDescriptor.indexOf(';', currentOffset);
+        currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
       }
       ++numArgumentTypes;
     }
@@ -323,9 +323,9 @@ public class Type {
         currentOffset++;
       }
       if (methodDescriptor.charAt(currentOffset++) == 'L') {
-        while (methodDescriptor.charAt(currentOffset++) != ';') {
-          // Skip the argument descriptor content.
-        }
+        // Skip the argument descriptor content.
+        int semiColumnOffset = methodDescriptor.indexOf(';', currentOffset);
+        currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
       }
       argumentTypes[currentArgumentTypeIndex++] =
           getTypeInternal(methodDescriptor, currentArgumentTypeOffset, currentOffset);
@@ -365,20 +365,8 @@ public class Type {
    * @return the {@link Type} corresponding to the return type of the given method descriptor.
    */
   public static Type getReturnType(final String methodDescriptor) {
-    // Skip the first character, which is always a '('.
-    int currentOffset = 1;
-    // Skip the argument types, one at a each loop iteration.
-    while (methodDescriptor.charAt(currentOffset) != ')') {
-      while (methodDescriptor.charAt(currentOffset) == '[') {
-        currentOffset++;
-      }
-      if (methodDescriptor.charAt(currentOffset++) == 'L') {
-        while (methodDescriptor.charAt(currentOffset++) != ';') {
-          // Skip the argument descriptor content.
-        }
-      }
-    }
-    return getTypeInternal(methodDescriptor, currentOffset + 1, methodDescriptor.length());
+    return getTypeInternal(
+        methodDescriptor, getReturnTypeOffset(methodDescriptor), methodDescriptor.length());
   }
 
   /**
@@ -389,6 +377,29 @@ public class Type {
    */
   public static Type getReturnType(final Method method) {
     return getType(method.getReturnType());
+  }
+
+  /**
+   * Returns the start index of the return type of the given method descriptor.
+   *
+   * @param methodDescriptor a method descriptor.
+   * @return the start index of the return type of the given method descriptor.
+   */
+  static int getReturnTypeOffset(final String methodDescriptor) {
+    // Skip the first character, which is always a '('.
+    int currentOffset = 1;
+    // Skip the argument types, one at a each loop iteration.
+    while (methodDescriptor.charAt(currentOffset) != ')') {
+      while (methodDescriptor.charAt(currentOffset) == '[') {
+        currentOffset++;
+      }
+      if (methodDescriptor.charAt(currentOffset++) == 'L') {
+        // Skip the argument descriptor content.
+        int semiColumnOffset = methodDescriptor.indexOf(';', currentOffset);
+        currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
+      }
+    }
+    return currentOffset + 1;
   }
 
   /**
@@ -508,11 +519,7 @@ public class Type {
     if (sort == OBJECT) {
       return valueBuffer.substring(valueBegin - 1, valueEnd + 1);
     } else if (sort == INTERNAL) {
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append('L');
-      stringBuilder.append(valueBuffer, valueBegin, valueEnd);
-      stringBuilder.append(';');
-      return stringBuilder.toString();
+      return 'L' + valueBuffer.substring(valueBegin, valueEnd) + ';';
     } else {
       return valueBuffer.substring(valueBegin, valueEnd);
     }
@@ -540,8 +547,8 @@ public class Type {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append('(');
     Class<?>[] parameters = constructor.getParameterTypes();
-    for (int i = 0; i < parameters.length; ++i) {
-      appendDescriptor(parameters[i], stringBuilder);
+    for (Class<?> parameter : parameters) {
+      appendDescriptor(parameter, stringBuilder);
     }
     return stringBuilder.append(")V").toString();
   }
@@ -556,8 +563,8 @@ public class Type {
   public static String getMethodDescriptor(final Type returnType, final Type... argumentTypes) {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append('(');
-    for (int i = 0; i < argumentTypes.length; ++i) {
-      argumentTypes[i].appendDescriptor(stringBuilder);
+    for (Type argumentType : argumentTypes) {
+      argumentType.appendDescriptor(stringBuilder);
     }
     stringBuilder.append(')');
     returnType.appendDescriptor(stringBuilder);
@@ -574,8 +581,8 @@ public class Type {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append('(');
     Class<?>[] parameters = method.getParameterTypes();
-    for (int i = 0; i < parameters.length; ++i) {
-      appendDescriptor(parameters[i], stringBuilder);
+    for (Class<?> parameter : parameters) {
+      appendDescriptor(parameter, stringBuilder);
     }
     stringBuilder.append(')');
     appendDescriptor(method.getReturnType(), stringBuilder);
@@ -591,9 +598,7 @@ public class Type {
     if (sort == OBJECT) {
       stringBuilder.append(valueBuffer, valueBegin - 1, valueEnd + 1);
     } else if (sort == INTERNAL) {
-      stringBuilder.append('L');
-      stringBuilder.append(valueBuffer, valueBegin, valueEnd);
-      stringBuilder.append(';');
+      stringBuilder.append('L').append(valueBuffer, valueBegin, valueEnd).append(';');
     } else {
       stringBuilder.append(valueBuffer, valueBegin, valueEnd);
     }
@@ -636,14 +641,7 @@ public class Type {
       }
       stringBuilder.append(descriptor);
     } else {
-      stringBuilder.append('L');
-      String name = currentClass.getName();
-      int nameLength = name.length();
-      for (int i = 0; i < nameLength; ++i) {
-        char car = name.charAt(i);
-        stringBuilder.append(car == '.' ? '/' : car);
-      }
-      stringBuilder.append(';');
+      stringBuilder.append('L').append(getInternalName(currentClass)).append(';');
     }
   }
 
@@ -741,9 +739,9 @@ public class Type {
           currentOffset++;
         }
         if (methodDescriptor.charAt(currentOffset++) == 'L') {
-          while (methodDescriptor.charAt(currentOffset++) != ';') {
-            // Skip the argument descriptor content.
-          }
+          // Skip the argument descriptor content.
+          int semiColumnOffset = methodDescriptor.indexOf(';', currentOffset);
+          currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
         }
         argumentsSize += 1;
       }

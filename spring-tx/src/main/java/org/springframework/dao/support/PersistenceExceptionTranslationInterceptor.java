@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -134,6 +134,7 @@ public class PersistenceExceptionTranslationInterceptor
 
 
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
@@ -146,7 +147,7 @@ public class PersistenceExceptionTranslationInterceptor
 			else {
 				PersistenceExceptionTranslator translator = this.persistenceExceptionTranslator;
 				if (translator == null) {
-					Assert.state(this.beanFactory != null, "No PersistenceExceptionTranslator set");
+					Assert.state(this.beanFactory != null, "Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 					translator = detectPersistenceExceptionTranslators(this.beanFactory);
 					this.persistenceExceptionTranslator = translator;
 				}

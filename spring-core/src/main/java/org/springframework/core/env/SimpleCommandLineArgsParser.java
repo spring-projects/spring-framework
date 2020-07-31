@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,15 +21,20 @@ package org.springframework.core.env;
  * {@link CommandLineArgs} object.
  *
  * <h3>Working with option arguments</h3>
- * Option arguments must adhere to the exact syntax:
+ * <p>Option arguments must adhere to the exact syntax:
+ *
  * <pre class="code">--optName[=optValue]</pre>
- * That is, options must be prefixed with "{@code --}", and may or may not specify a value.
- * If a value is specified, the name and value must be separated <em>without spaces</em>
- * by an equals sign ("=").
+ *
+ * <p>That is, options must be prefixed with "{@code --}" and may or may not
+ * specify a value. If a value is specified, the name and value must be separated
+ * <em>without spaces</em> by an equals sign ("="). The value may optionally be
+ * an empty string.
  *
  * <h4>Valid examples of option arguments</h4>
  * <pre class="code">
  * --foo
+ * --foo=
+ * --foo=""
  * --foo=bar
  * --foo="bar then baz"
  * --foo=bar,baz,biz</pre>
@@ -42,11 +47,12 @@ package org.springframework.core.env;
  * --foo=bar --foo=baz --foo=biz</pre>
  *
  * <h3>Working with non-option arguments</h3>
- * Any and all arguments specified at the command line without the "{@code --}" option
- * prefix will be considered as "non-option arguments" and made available through the
- * {@link CommandLineArgs#getNonOptionArgs()} method.
+ * <p>Any and all arguments specified at the command line without the "{@code --}"
+ * option prefix will be considered as "non-option arguments" and made available
+ * through the {@link CommandLineArgs#getNonOptionArgs()} method.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 class SimpleCommandLineArgsParser {
@@ -61,17 +67,18 @@ class SimpleCommandLineArgsParser {
 		CommandLineArgs commandLineArgs = new CommandLineArgs();
 		for (String arg : args) {
 			if (arg.startsWith("--")) {
-				String optionText = arg.substring(2, arg.length());
+				String optionText = arg.substring(2);
 				String optionName;
 				String optionValue = null;
-				if (optionText.contains("=")) {
-					optionName = optionText.substring(0, optionText.indexOf('='));
-					optionValue = optionText.substring(optionText.indexOf('=')+1, optionText.length());
+				int indexOfEqualsSign = optionText.indexOf('=');
+				if (indexOfEqualsSign > -1) {
+					optionName = optionText.substring(0, indexOfEqualsSign);
+					optionValue = optionText.substring(indexOfEqualsSign + 1);
 				}
 				else {
 					optionName = optionText;
 				}
-				if (optionName.isEmpty() || (optionValue != null && optionValue.isEmpty())) {
+				if (optionName.isEmpty()) {
 					throw new IllegalArgumentException("Invalid argument syntax: " + arg);
 				}
 				commandLineArgs.addOptionArg(optionName, optionValue);

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -28,8 +28,9 @@ import org.springframework.web.bind.annotation.MatrixVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code @RequestMapping} integration focusing on controller method parameters.
@@ -40,8 +41,7 @@ import static org.junit.Assert.assertEquals;
  * </ul>
  * @author Rossen Stoyanchev
  */
-public class ControllerInputIntegrationTests extends AbstractRequestMappingIntegrationTests {
-
+class ControllerInputIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -52,23 +52,29 @@ public class ControllerInputIntegrationTests extends AbstractRequestMappingInteg
 	}
 
 
-	@Test
-	public void handleWithParam() throws Exception {
+	@ParameterizedHttpServerTest
+	void handleWithParam(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/param?name=George", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test // SPR-15140
-	public void handleWithEncodedParam() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-15140
+	void handleWithEncodedParam(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "Hello  + \u00e0!";
-		assertEquals(expected, performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody());
+		assertThat(performGet("/param?name=%20%2B+%C3%A0", new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void matrixVariable() throws Exception {
+	@ParameterizedHttpServerTest
+	void matrixVariable(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "p=11, q2=22, q4=44";
 		String url = "/first;p=11/second;q=22/third-fourth;q=44";
-		assertEquals(expected, performGet(url, new HttpHeaders(), String.class).getBody());
+		assertThat(performGet(url, new HttpHeaders(), String.class).getBody()).isEqualTo(expected);
 	}
 
 
@@ -76,6 +82,7 @@ public class ControllerInputIntegrationTests extends AbstractRequestMappingInteg
 	@EnableWebFlux
 	static class WebConfig {
 	}
+
 
 	@RestController
 	@SuppressWarnings("unused")

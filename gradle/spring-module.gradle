@@ -1,0 +1,77 @@
+apply plugin: 'org.springframework.build.compile'
+apply plugin: 'org.springframework.build.optional-dependencies'
+apply plugin: 'me.champeau.gradle.jmh'
+apply from: "$rootDir/gradle/publications.gradle"
+
+dependencies {
+	jmh 'org.openjdk.jmh:jmh-core:1.23'
+	jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
+	jmh 'net.sf.jopt-simple:jopt-simple:4.6'
+}
+jmh {
+	duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jar {
+	manifest.attributes["Implementation-Title"] = project.name
+	manifest.attributes["Implementation-Version"] = project.version
+	manifest.attributes["Automatic-Module-Name"] = project.name.replace('-', '.')  // for Jigsaw
+	manifest.attributes["Created-By"] =
+			"${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
+
+	from("${rootDir}/src/docs/dist") {
+		include "license.txt"
+		include "notice.txt"
+		into "META-INF"
+		expand(copyright: new Date().format("yyyy"), version: project.version)
+	}
+}
+
+normalization {
+	runtimeClasspath {
+		ignore "META-INF/MANIFEST.MF"
+	}
+}
+
+javadoc {
+	description = "Generates project-level javadoc for use in -javadoc jar"
+
+	options.encoding = "UTF-8"
+	options.memberLevel = JavadocMemberLevel.PROTECTED
+	options.author = true
+	options.header = project.name
+	options.use = true
+	options.links(project.ext.javadocLinks)
+	options.addStringOption("Xdoclint:none", "-quiet")
+
+	// Suppress warnings due to cross-module @see and @link references.
+	// Note that global 'api' task does display all warnings.
+	logging.captureStandardError LogLevel.INFO
+	logging.captureStandardOutput LogLevel.INFO  // suppress "## warnings" message
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveClassifier.set("sources")
+	from sourceSets.main.allSource
+	// Don't include or exclude anything explicitly by default. See SPR-12085.
+}
+
+task javadocJar(type: Jar) {
+	archiveClassifier.set("javadoc")
+	from javadoc
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+			artifact javadocJar
+		}
+	}
+}
+
+// Disable publication of test fixture artifacts.
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
