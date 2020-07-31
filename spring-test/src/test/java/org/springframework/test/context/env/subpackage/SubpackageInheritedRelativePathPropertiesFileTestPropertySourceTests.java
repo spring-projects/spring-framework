@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,7 @@
 package org.springframework.test.context.env.subpackage;
 
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.env.ExplicitPropertiesFileTestPropertySourceTests;
+import org.springframework.test.context.env.ExplicitPropertiesFileInClasspathTestPropertySourceTests;
 
 /**
  * Integration tests for {@link TestPropertySource @TestPropertySource}
@@ -27,8 +27,8 @@ import org.springframework.test.context.env.ExplicitPropertiesFileTestPropertySo
  * @author Sam Brannen
  * @since 4.1
  */
-public class SubpackageInheritedRelativePathPropertiesFileTestPropertySourceTests extends
-		ExplicitPropertiesFileTestPropertySourceTests {
+class SubpackageInheritedRelativePathPropertiesFileTestPropertySourceTests extends
+		ExplicitPropertiesFileInClasspathTestPropertySourceTests {
 
 	/* all tests are in superclass */
 

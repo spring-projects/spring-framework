@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * A factory for {@link DataBuffer DataBuffers}, allowing for allocation and wrapping of
- * data buffers.
+ * A factory for {@link DataBuffer DataBuffers}, allowing for allocation and
+ * wrapping of data buffers.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -74,4 +74,5 @@ public interface DataBufferFactory {
 	 * @since 5.0.3
 	 */
 	DataBuffer join(List<? extends DataBuffer> dataBuffers);
+
 }

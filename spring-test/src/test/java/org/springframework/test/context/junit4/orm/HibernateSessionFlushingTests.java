@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,8 +32,9 @@ import org.springframework.test.context.junit4.orm.domain.Person;
 import org.springframework.test.context.junit4.orm.service.PersonService;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
@@ -59,19 +60,19 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 
 	@Before
 	public void setup() {
-		assertInTransaction(true);
-		assertNotNull("PersonService should have been autowired.", personService);
-		assertNotNull("SessionFactory should have been autowired.", sessionFactory);
+		assertThatTransaction().isActive();
+		assertThat(personService).as("PersonService should have been autowired.").isNotNull();
+		assertThat(sessionFactory).as("SessionFactory should have been autowired.").isNotNull();
 	}
 
 
 	@Test
 	public void findSam() {
 		Person sam = personService.findByName(SAM);
-		assertNotNull("Should be able to find Sam", sam);
+		assertThat(sam).as("Should be able to find Sam").isNotNull();
 		DriversLicense driversLicense = sam.getDriversLicense();
-		assertNotNull("Sam's driver's license should not be null", driversLicense);
-		assertEquals("Verifying Sam's driver's license number", Long.valueOf(1234), driversLicense.getNumber());
+		assertThat(driversLicense).as("Sam's driver's license should not be null").isNotNull();
+		assertThat(driversLicense.getNumber()).as("Verifying Sam's driver's license number").isEqualTo(Long.valueOf(1234));
 	}
 
 	@Test  // SPR-16956
@@ -83,7 +84,7 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		Session session = sessionFactory.getCurrentSession();
 		session.flush();
 		session.refresh(sam);
-		assertEquals("Sam", sam.getName());
+		assertThat(sam.getName()).isEqualTo("Sam");
 	}
 
 	@Test
@@ -92,14 +93,15 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		Person juergen = new Person(JUERGEN, driversLicense);
 		int numRows = countRowsInTable("person");
 		personService.save(juergen);
-		assertEquals("Verifying number of rows in the 'person' table.", numRows + 1, countRowsInTable("person"));
-		assertNotNull("Should be able to save and retrieve Juergen", personService.findByName(JUERGEN));
-		assertNotNull("Juergen's ID should have been set", juergen.getId());
+		assertThat(countRowsInTable("person")).as("Verifying number of rows in the 'person' table.").isEqualTo((numRows + 1));
+		assertThat(personService.findByName(JUERGEN)).as("Should be able to save and retrieve Juergen").isNotNull();
+		assertThat(juergen.getId()).as("Juergen's ID should have been set").isNotNull();
 	}
 
-	@Test(expected = ConstraintViolationException.class)
+	@Test
 	public void saveJuergenWithNullDriversLicense() {
-		personService.save(new Person(JUERGEN));
+		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() ->
+				personService.save(new Person(JUERGEN)));
 	}
 
 	@Test
@@ -110,22 +112,24 @@ public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4Sp
 		// finally flushed (i.e., in production code)
 	}
 
-	@Test(expected = ConstraintViolationException.class)
+	@Test
 	public void updateSamWithNullDriversLicenseWithSessionFlush() throws Throwable {
 		updateSamWithNullDriversLicense();
-		// Manual flush is required to avoid false positive in test
-		try {
-			sessionFactory.getCurrentSession().flush();
-		}
-		catch (PersistenceException ex) {
-			// Wrapped in Hibernate 5.2, with the constraint violation as cause
-			throw ex.getCause();
-		}
+		assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(() -> {
+			// Manual flush is required to avoid false positive in test
+			try {
+				sessionFactory.getCurrentSession().flush();
+			}
+			catch (PersistenceException ex) {
+				// Wrapped in Hibernate 5.2, with the constraint violation as cause
+				throw ex.getCause();
+			}
+		});
 	}
 
 	private void updateSamWithNullDriversLicense() {
 		Person sam = personService.findByName(SAM);
-		assertNotNull("Should be able to find Sam", sam);
+		assertThat(sam).as("Should be able to find Sam").isNotNull();
 		sam.setDriversLicense(null);
 		personService.save(sam);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -153,7 +153,7 @@ public abstract class StatementCreatorUtils {
 	 * @param ps the prepared statement or callable statement
 	 * @param paramIndex index of the parameter we are setting
 	 * @param sqlType the SQL type of the parameter
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -171,7 +171,7 @@ public abstract class StatementCreatorUtils {
 	 * @param sqlType the SQL type of the parameter
 	 * @param typeName the type name of the parameter
 	 * (optional, only used for SQL NULL and SqlTypeValue)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -191,7 +191,7 @@ public abstract class StatementCreatorUtils {
 	 * (optional, only used for SQL NULL and SqlTypeValue)
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
-	 * @param inValue the value to set (plain value or a SqlTypeValue)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
 	 * @throws SQLException if thrown by PreparedStatement methods
 	 * @see SqlTypeValue
 	 */
@@ -312,7 +312,6 @@ public abstract class StatementCreatorUtils {
 				else {
 					ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
 				}
-				return;
 			}
 			else {
 				// Fallback: setString or setNString binding
@@ -460,11 +459,16 @@ public abstract class StatementCreatorUtils {
 	public static void cleanupParameters(@Nullable Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
-				if (inValue instanceof DisposableSqlTypeValue) {
-					((DisposableSqlTypeValue) inValue).cleanup();
+				// Unwrap SqlParameterValue first...
+				if (inValue instanceof SqlParameterValue) {
+					inValue = ((SqlParameterValue) inValue).getValue();
 				}
-				else if (inValue instanceof SqlValue) {
+				// Check for disposable value types
+				if (inValue instanceof SqlValue) {
 					((SqlValue) inValue).cleanup();
+				}
+				else if (inValue instanceof DisposableSqlTypeValue) {
+					((DisposableSqlTypeValue) inValue).cleanup();
 				}
 			}
 		}

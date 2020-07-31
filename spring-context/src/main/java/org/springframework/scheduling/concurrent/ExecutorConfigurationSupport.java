@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	private boolean waitForTasksToCompleteOnShutdown = false;
 
-	private int awaitTerminationSeconds = 0;
+	private long awaitTerminationMillis = 0;
 
 	@Nullable
 	private String beanName;
@@ -141,11 +141,21 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * since all remaining tasks in the queue will still get executed - in contrast
 	 * to the default shutdown behavior where it's just about waiting for currently
 	 * executing tasks that aren't reacting to thread interruption.
+	 * @see #setAwaitTerminationMillis
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
-		this.awaitTerminationSeconds = awaitTerminationSeconds;
+		this.awaitTerminationMillis = awaitTerminationSeconds * 1000;
+	}
+
+	/**
+	 * Variant of {@link #setAwaitTerminationSeconds} with millisecond precision.
+	 * @since 5.2.4
+	 * @see #setAwaitTerminationSeconds
+	 */
+	public void setAwaitTerminationMillis(long awaitTerminationMillis) {
+		this.awaitTerminationMillis = awaitTerminationMillis;
 	}
 
 	@Override
@@ -239,9 +249,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * {@link #setAwaitTerminationSeconds "awaitTerminationSeconds"} property.
 	 */
 	private void awaitTerminationIfNecessary(ExecutorService executor) {
-		if (this.awaitTerminationSeconds > 0) {
+		if (this.awaitTerminationMillis > 0) {
 			try {
-				if (!executor.awaitTermination(this.awaitTerminationSeconds, TimeUnit.SECONDS)) {
+				if (!executor.awaitTermination(this.awaitTerminationMillis, TimeUnit.MILLISECONDS)) {
 					if (logger.isWarnEnabled()) {
 						logger.warn("Timed out while waiting for executor" +
 								(this.beanName != null ? " '" + this.beanName + "'" : "") + " to terminate");

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
@@ -62,6 +63,15 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	 * Return a read-only map of cookies sent by the client.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
+
+	/**
+	 * Return the local address the request was accepted on, if available.
+	 * @since 5.2.3
+	 */
+	@Nullable
+	default InetSocketAddress getLocalAddress() {
+		return null;
+	}
 
 	/**
 	 * Return the remote address where this request is connected to, if available.
@@ -137,9 +147,15 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		Builder contextPath(String contextPath);
 
 		/**
-		 * Set or override the specified header.
+		 * Set or override the specified header values under the given name.
+		 * <p>If you need to add header values, remove headers, etc., use
+		 * {@link #headers(Consumer)} for greater control.
+		 * @param headerName the header name
+		 * @param headerValues the header values
+		 * @since 5.1.9
+		 * @see #headers(Consumer)
 		 */
-		Builder header(String key, String value);
+		Builder header(String headerName, String... headerValues);
 
 		/**
 		 * Manipulate request headers. The provided {@code HttpHeaders} contains
@@ -147,6 +163,7 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * {@linkplain HttpHeaders#set(String, String) overwrite} or
 		 * {@linkplain HttpHeaders#remove(Object) remove} existing values, or
 		 * use any other {@link HttpHeaders} methods.
+		 * @see #header(String, String...)
 		 */
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
@@ -157,6 +174,12 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * @since 5.0.7
 		 */
 		Builder sslInfo(SslInfo sslInfo);
+
+		/**
+		 * Set the address of the remote client.
+		 * @since 5.3
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.

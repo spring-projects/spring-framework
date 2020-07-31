@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ public interface DestinationResolvingMessageRequestReplyOperations<D> extends Me
 	 * Resolve the given destination name to a destination and send the given message,
 	 * receive a reply and return it.
 	 * @param destinationName the name of the target destination
-	 * @param requestMessage the mesage to send
+	 * @param requestMessage the message to send
 	 * @return the received message, possibly {@code null} if the message could not
 	 * be received, for example due to a timeout
 	 */

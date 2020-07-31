@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	     xmlns:util="http://www.springframework.org/schema/util"
-	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
-           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+	     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 	<!-- just ensures that one can use <ref bean=""/> to refer to the various <util:collections/> types -->
 
@@ -12,7 +12,7 @@
 	<util:set id="set"/>
 	<util:properties id="properties" location="org/springframework/beans/factory/xml/test.properties"/>
 
-	<bean id="bean" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="bean" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="someMap">
 			<map>
 				<entry key="map">

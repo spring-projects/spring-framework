@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture for {@link ParameterizedTypeReference}.
@@ -30,40 +30,40 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class ParameterizedTypeReferenceTests {
+class ParameterizedTypeReferenceTests {
 
 	@Test
-	public void stringTypeReference() {
+	void stringTypeReference() {
 		ParameterizedTypeReference<String> typeReference = new ParameterizedTypeReference<String>() {};
-		assertEquals(String.class, typeReference.getType());
+		assertThat(typeReference.getType()).isEqualTo(String.class);
 	}
 
 	@Test
-	public void mapTypeReference() throws Exception {
+	void mapTypeReference() throws Exception {
 		Type mapType = getClass().getMethod("mapMethod").getGenericReturnType();
 		ParameterizedTypeReference<Map<Object,String>> typeReference = new ParameterizedTypeReference<Map<Object,String>>() {};
-		assertEquals(mapType, typeReference.getType());
+		assertThat(typeReference.getType()).isEqualTo(mapType);
 	}
 
 	@Test
-	public void listTypeReference() throws Exception {
+	void listTypeReference() throws Exception {
 		Type listType = getClass().getMethod("listMethod").getGenericReturnType();
 		ParameterizedTypeReference<List<String>> typeReference = new ParameterizedTypeReference<List<String>>() {};
-		assertEquals(listType, typeReference.getType());
+		assertThat(typeReference.getType()).isEqualTo(listType);
 	}
 
 	@Test
-	public void reflectiveTypeReferenceWithSpecificDeclaration() throws Exception{
+	void reflectiveTypeReferenceWithSpecificDeclaration() throws Exception{
 		Type listType = getClass().getMethod("listMethod").getGenericReturnType();
 		ParameterizedTypeReference<List<String>> typeReference = ParameterizedTypeReference.forType(listType);
-		assertEquals(listType, typeReference.getType());
+		assertThat(typeReference.getType()).isEqualTo(listType);
 	}
 
 	@Test
-	public void reflectiveTypeReferenceWithGenericDeclaration() throws Exception{
+	void reflectiveTypeReferenceWithGenericDeclaration() throws Exception{
 		Type listType = getClass().getMethod("listMethod").getGenericReturnType();
 		ParameterizedTypeReference<?> typeReference = ParameterizedTypeReference.forType(listType);
-		assertEquals(listType, typeReference.getType());
+		assertThat(typeReference.getType()).isEqualTo(listType);
 	}
 
 

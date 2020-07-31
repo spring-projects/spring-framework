@@ -34,7 +34,7 @@ package org.springframework.asm;
  *
  * @author Eric Bruneton
  */
-public class TypePath {
+public final class TypePath {
 
   /** A type path step that steps into the element type of an array type. See {@link #getStep}. */
   public static final int ARRAY_ELEMENT = 0;

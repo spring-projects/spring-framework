@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp;
 
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.CompositeMessageCondition;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.MessageCondition;
 
@@ -34,86 +35,66 @@ import org.springframework.messaging.handler.MessageCondition;
  */
 public class SimpMessageMappingInfo implements MessageCondition<SimpMessageMappingInfo> {
 
-	private final SimpMessageTypeMessageCondition messageTypeMessageCondition;
-
-	private final DestinationPatternsMessageCondition destinationConditions;
+	private final CompositeMessageCondition delegate;
 
 
 	public SimpMessageMappingInfo(SimpMessageTypeMessageCondition messageTypeMessageCondition,
 			DestinationPatternsMessageCondition destinationConditions) {
 
-		this.messageTypeMessageCondition = messageTypeMessageCondition;
-		this.destinationConditions = destinationConditions;
+		this.delegate = new CompositeMessageCondition(messageTypeMessageCondition, destinationConditions);
+	}
+
+	private SimpMessageMappingInfo(CompositeMessageCondition delegate) {
+		this.delegate = delegate;
 	}
 
 
 	public SimpMessageTypeMessageCondition getMessageTypeMessageCondition() {
-		return this.messageTypeMessageCondition;
+		return this.delegate.getCondition(SimpMessageTypeMessageCondition.class);
 	}
 
 	public DestinationPatternsMessageCondition getDestinationConditions() {
-		return this.destinationConditions;
+		return this.delegate.getCondition(DestinationPatternsMessageCondition.class);
 	}
 
 
 	@Override
 	public SimpMessageMappingInfo combine(SimpMessageMappingInfo other) {
-		SimpMessageTypeMessageCondition typeCond =
-				this.getMessageTypeMessageCondition().combine(other.getMessageTypeMessageCondition());
-		DestinationPatternsMessageCondition destCond =
-				this.destinationConditions.combine(other.getDestinationConditions());
-		return new SimpMessageMappingInfo(typeCond, destCond);
+		return new SimpMessageMappingInfo(this.delegate.combine(other.delegate));
 	}
 
 	@Override
 	@Nullable
 	public SimpMessageMappingInfo getMatchingCondition(Message<?> message) {
-		SimpMessageTypeMessageCondition typeCond = this.messageTypeMessageCondition.getMatchingCondition(message);
-		if (typeCond == null) {
-			return null;
-		}
-		DestinationPatternsMessageCondition destCond = this.destinationConditions.getMatchingCondition(message);
-		if (destCond == null) {
-			return null;
-		}
-		return new SimpMessageMappingInfo(typeCond, destCond);
+		CompositeMessageCondition condition = this.delegate.getMatchingCondition(message);
+		return condition != null ? new SimpMessageMappingInfo(condition) : null;
 	}
 
 	@Override
 	public int compareTo(SimpMessageMappingInfo other, Message<?> message) {
-		int result = this.messageTypeMessageCondition.compareTo(other.messageTypeMessageCondition, message);
-		if (result != 0) {
-			return result;
-		}
-		result = this.destinationConditions.compareTo(other.destinationConditions, message);
-		if (result != 0) {
-			return result;
-		}
-		return 0;
+		return this.delegate.compareTo(other.delegate, message);
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
 		if (!(other instanceof SimpMessageMappingInfo)) {
 			return false;
 		}
-		SimpMessageMappingInfo otherInfo = (SimpMessageMappingInfo) other;
-		return (this.destinationConditions.equals(otherInfo.destinationConditions) &&
-				this.messageTypeMessageCondition.equals(otherInfo.messageTypeMessageCondition));
+		return this.delegate.equals(((SimpMessageMappingInfo) other).delegate);
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.destinationConditions.hashCode() * 31 + this.messageTypeMessageCondition.hashCode());
+		return this.delegate.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return "{" + this.destinationConditions + ",messageType=" + this.messageTypeMessageCondition + '}';
+		return this.delegate.toString();
 	}
 
 }

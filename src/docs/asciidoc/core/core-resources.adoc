@@ -14,6 +14,7 @@ Spring. It includes the following topics:
 
 
 
+
 [[resources-introduction]]
 == Introduction
 
@@ -28,6 +29,7 @@ such as a method to check for the existence of the resource being pointed to.
 
 
 
+
 [[resources-resource]]
 == The Resource Interface
 
@@ -35,9 +37,8 @@ Spring's `Resource` interface is meant to be a more capable interface for abstra
 access to low-level resources. The following listing shows the `Resource` interface
 definition:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface Resource extends InputStreamSource {
 
@@ -54,26 +55,50 @@ definition:
 		String getFilename();
 
 		String getDescription();
-
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface Resource : InputStreamSource {
+
+		fun exists(): Boolean
+
+		val isOpen: Boolean
+
+		val url: URL
+
+		val file: File
+
+		@Throws(IOException::class)
+		fun createRelative(relativePath: String): Resource
+
+		val filename: String
+
+		val description: String
+	}
+----
 
 As the definition of the `Resource` interface shows, it extends the `InputStreamSource`
 interface. The following listing shows the definition of the `InputStreamSource`
 interface:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface InputStreamSource {
 
 		InputStream getInputStream() throws IOException;
-
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface InputStreamSource {
+
+		val inputStream: InputStream
+	}
+----
 
 Some of the most important methods from the `Resource` interface are:
 
@@ -111,6 +136,7 @@ considered equivalent to any other library you would use for this purpose.
 NOTE: The `Resource` abstraction does not replace functionality.
 It wraps it where possible. For example, a `UrlResource` wraps a URL and uses the
 wrapped `URL` to do its work.
+
 
 
 
@@ -163,18 +189,18 @@ to the filesystem. To address this, the various `Resource` implementations alway
 resolution as a `java.net.URL`.
 
 A `ClassPathResource` is created by Java code by explicitly using the `ClassPathResource`
-constructor but is often created implicitly when you call an API method that
-takes a `String` argument meant to represent a path. For the latter case, a
-JavaBeans `PropertyEditor` recognizes the special prefix, `classpath:`, on the string
-path and creates a `ClassPathResource` in that case.
+constructor but is often created implicitly when you call an API method that takes a
+`String` argument meant to represent a path. For the latter case, a JavaBeans
+`PropertyEditor` recognizes the special prefix, `classpath:`, on the string path and
+creates a `ClassPathResource` in that case.
 
 
 
 [[resources-implementations-filesystemresource]]
 === `FileSystemResource`
 
-This is a `Resource` implementation for `java.io.File` handles. It supports
-resolution as a `File` and as a `URL`.
+This is a `Resource` implementation for `java.io.File` and `java.nio.file.Path` handles.
+It supports resolution as a `File` and as a `URL`.
 
 
 
@@ -224,17 +250,22 @@ The `ResourceLoader` interface is meant to be implemented by objects that can re
 (that is, load) `Resource` instances. The following listing shows the `ResourceLoader`
 interface definition:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface ResourceLoader {
 
 		Resource getResource(String location);
-
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+interface ResourceLoader {
+
+	fun getResource(location: String): Resource
+}
+----
 
 All application contexts implement the `ResourceLoader` interface. Therefore, all
 application contexts may be used to obtain `Resource` instances.
@@ -242,17 +273,20 @@ application contexts may be used to obtain `Resource` instances.
 When you call `getResource()` on a specific application context, and the location path
 specified doesn't have a specific prefix, you get back a `Resource` type that is
 appropriate to that particular application context. For example, assume the following
-snippet of code was executed against a `ClassPathXmlApplicationContext` instance:
+snippet of code was run against a `ClassPathXmlApplicationContext` instance:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val template = ctx.getResource("some/resource/path/myTemplate.txt")
+----
 
-Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If the same method were executed
+Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If the same method were run
 against a `FileSystemXmlApplicationContext` instance, it would return a
 `FileSystemResource`. For a `WebApplicationContext`, it would return a
 `ServletContextResource`. It would similarly return appropriate objects for each context.
@@ -264,31 +298,42 @@ On the other hand, you may also force `ClassPathResource` to be used, regardless
 application context type, by specifying the special `classpath:` prefix, as the following
 example shows:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val template = ctx.getResource("classpath:some/resource/path/myTemplate.txt")
+----
 
 Similarly, you can force a `UrlResource` to be used by specifying any of the standard
 `java.net.URL` prefixes. The following pair of examples use the `file` and `http`
 prefixes:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	Resource template = ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val template = ctx.getResource("file:///some/resource/path/myTemplate.txt")
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
-	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
+	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt")
+----
 
 The following table summarizes the strategy for converting `String` objects to `Resource` objects:
 
@@ -306,7 +351,7 @@ The following table summarizes the strategy for converting `String` objects to `
 | Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats>>.
 
 | http:
-| `http://myserver/logo.png`
+| `https://myserver/logo.png`
 | Loaded as a `URL`.
 
 | (none)
@@ -316,47 +361,55 @@ The following table summarizes the strategy for converting `String` objects to `
 
 
 
+
 [[resources-resourceloaderaware]]
 == The `ResourceLoaderAware` interface
 
-The `ResourceLoaderAware` interface is a special marker interface that identifies objects
-that expect to be provided with a `ResourceLoader` reference. The following listing shows
-the definition of the `ResourceLoaderAware` interface:
+The `ResourceLoaderAware` interface is a special callback interface which identifies
+components that expect to be provided with a `ResourceLoader` reference. The following
+listing shows the definition of the `ResourceLoaderAware` interface:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	public interface ResourceLoaderAware {
 
 		void setResourceLoader(ResourceLoader resourceLoader);
 	}
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	interface ResourceLoaderAware {
 
-When a class implements `ResourceLoaderAware` and is deployed into an application
-context (as a Spring-managed bean), it is recognized as `ResourceLoaderAware` by the
-application context. The application context then invokes
-`setResourceLoader(ResourceLoader)`, supplying itself as the argument (remember, all
-application contexts in Spring implement the `ResourceLoader` interface).
+		fun setResourceLoader(resourceLoader: ResourceLoader)
+	}
+----
 
-Since an `ApplicationContext` is a `ResourceLoader`, the bean could also
-implement the `ApplicationContextAware` interface and use the supplied application
-context directly to load resources. However, in general, it is better to use the specialized
-`ResourceLoader` interface if that is all you need. The code would be coupled only
-to the resource loading interface (which can be considered a utility interface) and not to
-the whole Spring `ApplicationContext` interface.
+When a class implements `ResourceLoaderAware` and is deployed into an application context
+(as a Spring-managed bean), it is recognized as `ResourceLoaderAware` by the application
+context. The application context then invokes `setResourceLoader(ResourceLoader)`,
+supplying itself as the argument (remember, all application contexts in Spring implement
+the `ResourceLoader` interface).
 
-As of Spring 2.5, you can rely upon autowiring of the `ResourceLoader` as an alternative
-to implementing the `ResourceLoaderAware` interface. The "`traditional`" `constructor` and
-`byType` autowiring modes (as described in <<beans-factory-autowire>>) are now capable
-of providing a dependency of type `ResourceLoader` for either a constructor argument or a
+Since an `ApplicationContext` is a `ResourceLoader`, the bean could also implement the
+`ApplicationContextAware` interface and use the supplied application context directly to
+load resources. However, in general, it is better to use the specialized `ResourceLoader`
+interface if that is all you need. The code would be coupled only to the resource loading
+interface (which can be considered a utility interface) and not to the whole Spring
+`ApplicationContext` interface.
+
+In application components, you may also rely upon autowiring of the `ResourceLoader` as
+an alternative to implementing the `ResourceLoaderAware` interface. The "`traditional`"
+`constructor` and `byType` autowiring modes (as described in <<beans-factory-autowire>>)
+are capable of providing a `ResourceLoader` for either a constructor argument or a
 setter method parameter, respectively. For more flexibility (including the ability to
 autowire fields and multiple parameter methods), consider using the annotation-based
 autowiring features. In that case, the `ResourceLoader` is autowired into a field,
-constructor argument, or method parameter that expects the `ResourceLoader` type as
-long as the field, constructor, or method in question carries the `@Autowired`
-annotation. For more information, see <<beans-autowired-annotation>>.
+constructor argument, or method parameter that expects the `ResourceLoader` type as long
+as the field, constructor, or method in question carries the `@Autowired` annotation.
+For more information, see <<beans-autowired-annotation>>.
+
 
 
 
@@ -376,17 +429,14 @@ register and use a special JavaBeans `PropertyEditor`, which can convert `String
 to `Resource` objects. So, if `myBean` has a template property of type `Resource`, it can
 be configured with a simple string for that resource, as the following example shows:
 
-====
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myBean" class="...">
 		<property name="template" value="some/resource/path/myTemplate.txt"/>
 	</bean>
 ----
-====
 
-Note that the resource path has no prefix. Consequetly, because the application context itself is
+Note that the resource path has no prefix. Consequently, because the application context itself is
 going to be used as the `ResourceLoader`, the resource itself is loaded through a
 `ClassPathResource`, a `FileSystemResource`, or a `ServletContextResource`,
 depending on the exact type of the context.
@@ -395,19 +445,16 @@ If you need to force a specific `Resource` type to be used, you can use a prefix
 The following two examples show how to force a `ClassPathResource` and a
 `UrlResource` (the latter being used to access a filesystem file):
 
-====
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="template" value="classpath:some/resource/path/myTemplate.txt">
 ----
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="template" value="file:///some/resource/path/myTemplate.txt"/>
 ----
-====
+
 
 
 
@@ -431,44 +478,54 @@ that path and used to load the bean definitions depends on and is appropriate to
 specific application context. For example, consider the following example, which creates a
 `ClassPathXmlApplicationContext`:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = ClassPathXmlApplicationContext("conf/appContext.xml")
+----
 
 The bean definitions are loaded from the classpath, because a `ClassPathResource` is
 used. However, consider the following example, which creates a `FileSystemXmlApplicationContext`:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/appContext.xml");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = FileSystemXmlApplicationContext("conf/appContext.xml")
+----
 
 Now the bean definition is loaded from a filesystem location (in this case, relative to
 the current working directory).
 
 Note that the use of the special classpath prefix or a standard URL prefix on the
 location path overrides the default type of `Resource` created to load the
-definition. Consider the folowing example:
+definition. Consider the following example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = FileSystemXmlApplicationContext("classpath:conf/appContext.xml")
 ----
 
 Using `FileSystemXmlApplicationContext` loads the bean definitions from the classpath. However, it is still a
 `FileSystemXmlApplicationContext`. If it is subsequently used as a `ResourceLoader`, any
 unprefixed paths are still treated as filesystem paths.
-
 
 
 [[resources-app-ctx-classpathxml]]
@@ -482,9 +539,7 @@ then derives the path information from the supplied class.
 
 Consider the following directory layout:
 
-====
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 com/
   foo/
@@ -492,22 +547,24 @@ com/
     daos.xml
     MessengerService.class
 ----
-====
 
 The following example shows how a `ClassPathXmlApplicationContext` instance composed of the beans defined in
 files named `services.xml` and `daos.xml` (which are on the classpath) can be instantiated:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext(
 		new String[] {"services.xml", "daos.xml"}, MessengerService.class);
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = ClassPathXmlApplicationContext(arrayOf("services.xml", "daos.xml"), MessengerService::class.java)
+----
 
-See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext` Javadoc] for details
-on the various constructors.
+See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext`]
+javadoc for details on the various constructors.
 
 
 
@@ -532,22 +589,18 @@ You cannot use the `classpath*:` prefix to construct an actual `Resource`, as
 a resource points to just one resource at a time.
 
 
-
 [[resources-app-ctx-ant-patterns-in-paths]]
 ==== Ant-style Patterns
 
 Path locations can contain Ant-style patterns, as the following example shows:
 
-====
-[literal]
-[subs="verbatim"]
+[literal,subs="verbatim,quotes"]
 ----
-/WEB-INF/*-context.xml
-com/mycompany/**/applicationContext.xml
-file:C:/some/path/*-context.xml
+/WEB-INF/\*-context.xml
+com/mycompany/\**/applicationContext.xml
+file:C:/some/path/\*-context.xml
 classpath:com/mycompany/**/applicationContext.xml
 ----
-====
 
 When the path location contains an Ant-style pattern, the resolver follows a more complex procedure to try to resolve the
 wildcard. It produces a `Resource` for the path up to the last non-wildcard segment and
@@ -561,26 +614,23 @@ the wildcards.
 [[resources-app-ctx-portability]]
 ===== Implications on Portability
 
-If the specified path is already a file URL (either implicitly because
-the base `ResourceLoader` is a filesystem one or explicitly), wildcarding is guaranteed to work in
-a completely portable fashion.
+If the specified path is already a file URL (either implicitly because the base
+`ResourceLoader` is a filesystem one or explicitly), wildcarding is guaranteed to
+work in a completely portable fashion.
 
 If the specified path is a classpath location, the resolver must obtain the last
-non-wildcard path segment URL by making a `Classloader.getResource()` call. Since this is just
-a node of the path (not the file at the end), it is actually undefined (in the
-`ClassLoader` Javadoc) exactly what sort of a URL is returned in this case. In
-practice, it is always a `java.io.File` representing the directory (where the classpath
-resource resolves to a filesystem location) or a jar URL of some sort w(here the
-classpath resource resolves to a jar location). Still, there is a portability concern on
-this operation.
+non-wildcard path segment URL by making a `Classloader.getResource()` call. Since this
+is just a node of the path (not the file at the end), it is actually undefined (in the
+`ClassLoader` javadoc) exactly what sort of a URL is returned in this case. In practice,
+it is always a `java.io.File` representing the directory (where the classpath resource
+resolves to a filesystem location) or a jar URL of some sort (where the classpath resource
+resolves to a jar location). Still, there is a portability concern on this operation.
 
 If a jar URL is obtained for the last non-wildcard segment, the resolver must be able to
 get a `java.net.JarURLConnection` from it or manually parse the jar URL, to be able to
-walk the contents of the jar and resolve the wildcard. This does work in most
-environments but fails in others, and we strongly recommend that the wildcard
-resolution of resources coming from jars be thoroughly tested in your specific
-environment before you rely on it.
-
+walk the contents of the jar and resolve the wildcard. This does work in most environments
+but fails in others, and we strongly recommend that the wildcard resolution of resources
+coming from jars be thoroughly tested in your specific environment before you rely on it.
 
 
 [[resources-classpath-wildcards]]
@@ -589,14 +639,17 @@ environment before you rely on it.
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix, as the following example shows:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx =
 		new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = ClassPathXmlApplicationContext("classpath*:conf/appContext.xml")
+----
 
 This special prefix specifies that all classpath resources that match the given name
 must be obtained (internally, this essentially happens through a call to
@@ -621,7 +674,6 @@ class loader hierarchy and then, off each resource, the same `PathMatcher` resol
 strategy described earlier is used for the wildcard subpath.
 
 
-
 [[resources-wildcards-in-path-other-stuff]]
 ==== Other Notes Relating to Wildcards
 
@@ -640,11 +692,11 @@ as well, but this is not guaranteed to lead to portable behavior.
 [NOTE]
 ====
 The scanning of classpath packages requires the presence of corresponding directory
-entries in the classpath. When you build JARs with Ant, do not
-activate the files-only switch of the JAR task. Also, classpath directories may not
-get exposed based on security policies in some environments -- for example, stand-alone applications on
-JDK 1.7.0_45 and higher (which requires 'Trusted-Library' to be set up in your manifests. See
-http://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
+entries in the classpath. When you build JARs with Ant, do not activate the files-only
+switch of the JAR task. Also, classpath directories may not get exposed based on security
+policies in some environments -- for example, stand-alone applications on JDK 1.7.0_45
+and higher (which requires 'Trusted-Library' to be set up in your manifests. See
+https://stackoverflow.com/questions/19394570/java-jre-7u45-breaks-classloader-getresources).
 
 On JDK 9's module path (Jigsaw), Spring's classpath scanning generally works as expected.
 Putting resources into a dedicated directory is highly recommendable here as well,
@@ -655,18 +707,14 @@ Ant-style patterns with `classpath:` resources are not guaranteed to find matchi
 resources if the root package to search is available in multiple class path locations.
 Consider the following example of a resource location:
 
-====
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 com/mycompany/package1/service-context.xml
 ----
-====
 
 Now consider an Ant-style path that someone might use to try to find that file:
 
-[literal]
-[subs="verbatim,quotes"]
+[literal,subs="verbatim,quotes"]
 ----
 classpath:com/mycompany/**/service-context.xml
 ----
@@ -695,59 +743,87 @@ For backwards compatibility (historical) reasons however, this changes when the
 to treat all location paths as relative, whether they start with a leading slash or not.
 In practice, this means the following examples are equivalent:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/context.xml");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = FileSystemXmlApplicationContext("conf/context.xml")
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("/conf/context.xml");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx = FileSystemXmlApplicationContext("/conf/context.xml")
+----
 
-The following exmaples are also equivalent (even though it would make sense for them to be different, as one
+The following examples are also equivalent (even though it would make sense for them to be different, as one
 case is relative and the other absolute):
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("some/resource/path/myTemplate.txt");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx: FileSystemXmlApplicationContext = ...
+	ctx.getResource("some/resource/path/myTemplate.txt")
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("/some/resource/path/myTemplate.txt");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val ctx: FileSystemXmlApplicationContext = ...
+	ctx.getResource("/some/resource/path/myTemplate.txt")
+----
 
 In practice, if you need true absolute filesystem paths, you should avoid using
 absolute paths with `FileSystemResource` or `FileSystemXmlApplicationContext` and
 force the use of a `UrlResource` by using the `file:` URL prefix. The following examples
 show how to do so:
 
-====
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
 	ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// actual context type doesn't matter, the Resource will always be UrlResource
+	ctx.getResource("file:///some/resource/path/myTemplate.txt")
+----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
-====
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
+	val ctx = FileSystemXmlApplicationContext("file:///conf/context.xml")
+----

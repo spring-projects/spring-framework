@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -71,18 +72,27 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		super.service(request, response);
 
 		if (request.getAsyncContext() != null) {
-			MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
-			Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
-			MockAsyncContext mockAsyncContext = ((MockAsyncContext) mockRequest.getAsyncContext());
-			Assert.notNull(mockAsyncContext, "MockAsyncContext not found. Did request wrapper not delegate startAsync?");
+			MockAsyncContext asyncContext;
+			if (request.getAsyncContext() instanceof MockAsyncContext) {
+				asyncContext = (MockAsyncContext) request.getAsyncContext();
+			}
+			else {
+				MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+				Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
+				asyncContext = (MockAsyncContext) mockRequest.getAsyncContext();
+				Assert.notNull(asyncContext, () ->
+						"Outer request wrapper " + request.getClass().getName() + " has an AsyncContext," +
+								"but it is not a MockAsyncContext, while the nested " +
+								mockRequest.getClass().getName() + " does not have an AsyncContext at all.");
+			}
 
 			CountDownLatch dispatchLatch = new CountDownLatch(1);
-			mockAsyncContext.addDispatchHandler(dispatchLatch::countDown);
+			asyncContext.addDispatchHandler(dispatchLatch::countDown);
 			getMvcResult(request).setAsyncDispatchLatch(dispatchLatch);
 		}
 	}
 
-	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
+	private void registerAsyncResultInterceptors(HttpServletRequest request) {
 
 		WebAsyncUtils.getAsyncManager(request).registerCallableInterceptor(KEY,
 				new CallableProcessingInterceptor() {

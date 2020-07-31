@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ package org.springframework.test.context.hierarchies.web;
 
 import javax.servlet.ServletContext;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
@@ -49,44 +49,44 @@ public class DispatcherWacRootWacEarTests extends RootWacEarTests {
 	private String dispatcher;
 
 
-	@Ignore("Superseded by verifyDispatcherWacConfig()")
+	@Disabled("Superseded by verifyDispatcherWacConfig()")
 	@Test
 	@Override
-	public void verifyEarConfig() {
+	void verifyEarConfig() {
 		/* no-op */
 	}
 
-	@Ignore("Superseded by verifyDispatcherWacConfig()")
+	@Disabled("Superseded by verifyDispatcherWacConfig()")
 	@Test
 	@Override
-	public void verifyRootWacConfig() {
+	void verifyRootWacConfig() {
 		/* no-op */
 	}
 
 	@Test
-	public void verifyDispatcherWacConfig() {
+	void verifyDispatcherWacConfig() {
 		ApplicationContext parent = wac.getParent();
-		assertNotNull(parent);
-		assertTrue(parent instanceof WebApplicationContext);
+		assertThat(parent).isNotNull();
+		boolean condition = parent instanceof WebApplicationContext;
+		assertThat(condition).isTrue();
 
 		ApplicationContext grandParent = parent.getParent();
-		assertNotNull(grandParent);
-		assertFalse(grandParent instanceof WebApplicationContext);
+		assertThat(grandParent).isNotNull();
+		boolean condition1 = grandParent instanceof WebApplicationContext;
+		assertThat(condition1).isFalse();
 
 		ServletContext dispatcherServletContext = wac.getServletContext();
-		assertNotNull(dispatcherServletContext);
+		assertThat(dispatcherServletContext).isNotNull();
 		ServletContext rootServletContext = ((WebApplicationContext) parent).getServletContext();
-		assertNotNull(rootServletContext);
-		assertSame(dispatcherServletContext, rootServletContext);
+		assertThat(rootServletContext).isNotNull();
+		assertThat(rootServletContext).isSameAs(dispatcherServletContext);
 
-		assertSame(parent,
-			rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
-		assertSame(parent,
-			dispatcherServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertThat(rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(parent);
+		assertThat(dispatcherServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)).isSameAs(parent);
 
-		assertEquals("ear", ear);
-		assertEquals("root", root);
-		assertEquals("dispatcher", dispatcher);
+		assertThat(ear).isEqualTo("ear");
+		assertThat(root).isEqualTo("root");
+		assertThat(dispatcher).isEqualTo("dispatcher");
 	}
 
 }

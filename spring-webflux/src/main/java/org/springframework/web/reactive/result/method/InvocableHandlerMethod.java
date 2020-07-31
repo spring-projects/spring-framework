@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,16 +21,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
@@ -40,7 +38,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -53,6 +50,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -62,17 +60,23 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object NO_ARG_VALUE = new Object();
 
 
-	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 
+	/**
+	 * Create an instance from a {@code HandlerMethod}.
+	 */
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
 	}
 
+	/**
+	 * Create an instance from a bean instance and a method.
+	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
 	}
@@ -83,15 +87,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * argument values against a {@code ServerWebExchange}.
 	 */
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.resolvers.clear();
-		this.resolvers.addAll(resolvers);
+		this.resolvers.addResolvers(resolvers);
 	}
 
 	/**
 	 * Return the configured argument resolvers.
 	 */
 	public List<HandlerMethodArgumentResolver> getResolvers() {
-		return this.resolvers;
+		return this.resolvers.getResolvers();
 	}
 
 	/**
@@ -111,12 +114,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Configure a reactive registry. This is needed for cases where the response
-	 * is fully handled within the controller in combination with an async void
-	 * return value.
-	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
-	 * default settings.
-	 * @param registry the registry to use
+	 * Configure a reactive adapter registry. This is needed for cases where the response is
+	 * fully handled within the controller in combination with an async void return value.
+	 * <p>By default this is a {@link ReactiveAdapterRegistry} with default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
 		this.reactiveAdapterRegistry = registry;
@@ -128,21 +128,29 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param exchange the current exchange
 	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to match by type
-	 * @return a Mono with a {@link HandlerResult}.
+	 * @return a Mono with a {@link HandlerResult}
 	 */
+	@SuppressWarnings("KotlinInternalInJava")
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		return resolveArguments(exchange, bindingContext, providedArgs).flatMap(args -> {
+		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
 			Object value;
 			try {
 				ReflectionUtils.makeAccessible(getBridgedMethod());
-				value = getBridgedMethod().invoke(getBean(), args);
+				Method method = getBridgedMethod();
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())
+						&& CoroutinesUtils.isSuspendingFunction(method)) {
+					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				}
+				else {
+					value = method.invoke(getBean(), args);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				assertTargetBean(getBridgedMethod(), getBean(), args);
 				String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
-				throw new IllegalStateException(formatInvokeError(text, args), ex);
+				return Mono.error(new IllegalStateException(formatInvokeError(text, args), ex));
 			}
 			catch (InvocationTargetException ex) {
 				return Mono.error(ex.getTargetException());
@@ -169,120 +177,53 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(
+	private Mono<Object[]> getMethodArgumentValues(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
-		if (ObjectUtils.isEmpty(getMethodParameters())) {
+		MethodParameter[] parameters = getMethodParameters();
+		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
 		}
-		try {
-			List<Mono<Object>> argMonos = Stream.of(getMethodParameters())
-					.map(param -> {
-						param.initParameterNameDiscovery(this.parameterNameDiscoverer);
-						return findProvidedArgument(param, providedArgs)
-								.map(Mono::just)
-								.orElseGet(() -> {
-									HandlerMethodArgumentResolver resolver = findResolver(exchange, param);
-									return resolveArg(resolver, param, bindingContext, exchange);
-								});
 
-					})
-					.collect(Collectors.toList());
-
-			// Create Mono with array of resolved values...
-			return Mono.zip(argMonos, argValues ->
-					Stream.of(argValues).map(o -> o != NO_ARG_VALUE ? o : null).toArray());
+		List<Mono<Object>> argMonos = new ArrayList<>(parameters.length);
+		for (MethodParameter parameter : parameters) {
+			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+			Object providedArg = findProvidedArgument(parameter, providedArgs);
+			if (providedArg != null) {
+				argMonos.add(Mono.just(providedArg));
+				continue;
+			}
+			if (!this.resolvers.supportsParameter(parameter)) {
+				return Mono.error(new IllegalStateException(
+						formatArgumentError(parameter, "No suitable resolver")));
+			}
+			try {
+				argMonos.add(this.resolvers.resolveArgument(parameter, bindingContext, exchange)
+						.defaultIfEmpty(NO_ARG_VALUE)
+						.doOnError(ex -> logArgumentErrorIfNecessary(exchange, parameter, ex)));
+			}
+			catch (Exception ex) {
+				logArgumentErrorIfNecessary(exchange, parameter, ex);
+				argMonos.add(Mono.error(ex));
+			}
 		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
+		return Mono.zip(argMonos, values ->
+				Stream.of(values).map(value -> value != NO_ARG_VALUE ? value : null).toArray());
 	}
 
-	private Optional<Object> findProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (ObjectUtils.isEmpty(providedArgs)) {
-			return Optional.empty();
-		}
-		return Arrays.stream(providedArgs)
-				.filter(arg -> parameter.getParameterType().isInstance(arg))
-				.findFirst();
-	}
-
-	private HandlerMethodArgumentResolver findResolver(ServerWebExchange exchange, MethodParameter param) {
-		return this.resolvers.stream()
-				.filter(r -> r.supportsParameter(param))
-				.findFirst().orElseThrow(() ->
-						new IllegalStateException(formatArgumentError(param, "No suitable resolver")));
-	}
-
-	private Mono<Object> resolveArg(HandlerMethodArgumentResolver resolver, MethodParameter parameter,
-			BindingContext bindingContext, ServerWebExchange exchange) {
-
-		try {
-			return resolver.resolveArgument(parameter, bindingContext, exchange)
-					.defaultIfEmpty(NO_ARG_VALUE)
-					.doOnError(cause -> logArgumentErrorIfNecessary(exchange, parameter, cause));
-		}
-		catch (Exception ex) {
-			logArgumentErrorIfNecessary(exchange, parameter, ex);
-			return Mono.error(ex);
-		}
-	}
-
-	private void logArgumentErrorIfNecessary(
-			ServerWebExchange exchange, MethodParameter parameter, Throwable cause) {
-
-		// Leave stack trace for later, if error is not handled..
-		String message = cause.getMessage();
-		if (!message.contains(parameter.getExecutable().toGenericString())) {
+	private void logArgumentErrorIfNecessary(ServerWebExchange exchange, MethodParameter parameter, Throwable ex) {
+		// Leave stack trace for later, if error is not handled...
+		String exMsg = ex.getMessage();
+		if (exMsg != null && !exMsg.contains(parameter.getExecutable().toGenericString())) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, message));
+				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, exMsg));
 			}
 		}
 	}
 
-	private static String formatArgumentError(MethodParameter param, String message) {
-		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
-	}
-
-	/**
-	 * Assert that the target bean class is an instance of the class where the given
-	 * method is declared. In some cases the actual controller instance at request-
-	 * processing time may be a JDK dynamic proxy (lazy initialization, prototype
-	 * beans, and others). {@code @Controller}'s that require proxying should prefer
-	 * class-based proxy mechanisms.
-	 */
-	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
-		Class<?> methodDeclaringClass = method.getDeclaringClass();
-		Class<?> targetBeanClass = targetBean.getClass();
-		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-			String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean class '" +
-					targetBeanClass.getName() + "'. If the controller requires proxying " +
-					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalStateException(formatInvokeError(text, args));
-		}
-	}
-
-	private String formatInvokeError(String text, Object[] args) {
-
-		String formattedArgs = IntStream.range(0, args.length)
-				.mapToObj(i -> (args[i] != null ?
-						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
-						"[" + i + "] [null]"))
-				.collect(Collectors.joining(",\n", " ", " "));
-
-		return text + "\n" +
-				"Controller [" + getBeanType().getName() + "]\n" +
-				"Method [" + getBridgedMethod().toGenericString() + "]\n" +
-				"with argument values:\n" + formattedArgs;
-	}
-
-	private boolean isAsyncVoidReturnType(MethodParameter returnType,
-			@Nullable ReactiveAdapter reactiveAdapter) {
-
-		if (reactiveAdapter != null && reactiveAdapter.supportsEmpty()) {
-			if (reactiveAdapter.isNoValue()) {
+	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {
+		if (adapter != null && adapter.supportsEmpty()) {
+			if (adapter.isNoValue()) {
 				return true;
 			}
 			Type parameterType = returnType.getGenericParameterType();

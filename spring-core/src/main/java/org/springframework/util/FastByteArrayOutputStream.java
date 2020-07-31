@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -206,9 +206,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	 */
 	public byte[] toByteArray() {
 		byte[] bytesUnsafe = toByteArrayUnsafe();
-		byte[] ret = new byte[bytesUnsafe.length];
-		System.arraycopy(bytesUnsafe, 0, ret, 0, bytesUnsafe.length);
-		return ret;
+		return bytesUnsafe.clone();
 	}
 
 	/**
@@ -367,7 +365,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 			else {
 				if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
 					this.totalBytesRead++;
-					return this.currentBuffer[this.nextIndexInCurrentBuffer++];
+					return this.currentBuffer[this.nextIndexInCurrentBuffer++] & 0xFF;
 				}
 				else {
 					if (this.buffersIterator.hasNext()) {

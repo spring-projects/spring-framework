@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,21 +20,21 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Text fixture with {@link RequestHeaderMapMethodArgumentResolver}.
@@ -59,8 +59,8 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	private MockHttpServletRequest request;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setup() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
@@ -76,10 +76,10 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("Map parameter not supported", resolver.supportsParameter(paramMap));
-		assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(paramMultiValueMap));
-		assertTrue("HttpHeaders parameter not supported", resolver.supportsParameter(paramHttpHeaders));
-		assertFalse("non-@RequestParam map supported", resolver.supportsParameter(paramUnsupported));
+		assertThat(resolver.supportsParameter(paramMap)).as("Map parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramMultiValueMap)).as("MultiValueMap parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramHttpHeaders)).as("HttpHeaders parameter not supported").isTrue();
+		assertThat(resolver.supportsParameter(paramUnsupported)).as("non-@RequestParam map supported").isFalse();
 	}
 
 	@Test
@@ -91,8 +91,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(paramMap, null, webRequest, null);
 
-		assertTrue(result instanceof Map);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof Map;
+		assertThat(condition).isTrue();
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
@@ -110,8 +111,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
 
-		assertTrue(result instanceof MultiValueMap);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof MultiValueMap;
+		assertThat(condition).isTrue();
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 	@Test
@@ -129,8 +131,9 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(paramHttpHeaders, null, webRequest, null);
 
-		assertTrue(result instanceof HttpHeaders);
-		assertEquals("Invalid result", expected, result);
+		boolean condition = result instanceof HttpHeaders;
+		assertThat(condition).isTrue();
+		assertThat(result).as("Invalid result").isEqualTo(expected);
 	}
 
 

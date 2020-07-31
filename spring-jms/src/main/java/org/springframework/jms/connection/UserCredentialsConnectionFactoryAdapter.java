@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,6 +62,11 @@ import org.springframework.util.StringUtils;
  * This can be used to keep a UserCredentialsConnectionFactoryAdapter bean
  * definition just for the <i>option</i> of implicitly passing in user credentials
  * if the particular target ConnectionFactory requires it.
+ *
+ * <p>As of Spring Framework 5, this class delegates JMS 2.0 {@code JMSContext}
+ * calls and therefore requires the JMS 2.0 API to be present at runtime.
+ * It may nevertheless run against a JMS 1.1 driver (bound to the JMS 2.0 API)
+ * as long as no actual JMS 2.0 calls are triggered by the application's setup.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -144,7 +149,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Determine whether there are currently thread-bound credentials,
 	 * using them if available, falling back to the statically specified
-	 * username and password (i.e. values of the bean properties) else.
+	 * username and password (i.e. values of the bean properties) otherwise.
 	 * @see #doCreateConnection
 	 */
 	@Override
@@ -326,12 +331,10 @@ public class UserCredentialsConnectionFactoryAdapter
 
 		public final String password;
 
-
-		private JmsUserCredentials(String username, String password) {
+		public JmsUserCredentials(String username, String password) {
 			this.username = username;
 			this.password = password;
 		}
-
 
 		@Override
 		public String toString() {

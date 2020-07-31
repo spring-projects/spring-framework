@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,15 @@
 
 package org.springframework.aop.target;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.SideEffectBean;
+import org.springframework.beans.testfixture.beans.SideEffectBean;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson
@@ -35,18 +32,19 @@ import static org.springframework.tests.TestResourceUtils.*;
  */
 public class PrototypeTargetSourceTests {
 
-	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetSourceTests.class, "context.xml");
-
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
-	private BeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
-	@Before
-	public void setUp() throws Exception {
+
+	@BeforeEach
+	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.beanFactory).loadBeanDefinitions(CONTEXT);
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				qualifiedResource(PrototypeTargetSourceTests.class, "context.xml"));
 	}
+
 
 	/**
 	 * Test that multiple invocations of the prototype bean will result
@@ -56,15 +54,14 @@ public class PrototypeTargetSourceTests {
 	@Test
 	public void testPrototypeAndSingletonBehaveDifferently() {
 		SideEffectBean singleton = (SideEffectBean) beanFactory.getBean("singleton");
-		assertEquals(INITIAL_COUNT, singleton.getCount());
+		assertThat(singleton.getCount()).isEqualTo(INITIAL_COUNT);
 		singleton.doWork();
-		assertEquals(INITIAL_COUNT + 1, singleton.getCount());
+		assertThat(singleton.getCount()).isEqualTo((INITIAL_COUNT + 1));
 
 		SideEffectBean prototype = (SideEffectBean) beanFactory.getBean("prototype");
-		assertEquals(INITIAL_COUNT, prototype.getCount());
+		assertThat(prototype.getCount()).isEqualTo(INITIAL_COUNT);
 		prototype.doWork();
-		assertEquals(INITIAL_COUNT, prototype.getCount());
+		assertThat(prototype.getCount()).isEqualTo(INITIAL_COUNT);
 	}
-
 
 }

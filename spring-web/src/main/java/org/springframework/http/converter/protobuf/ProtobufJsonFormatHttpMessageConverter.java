@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,38 +37,37 @@ import org.springframework.lang.Nullable;
  * @since 5.0
  * @see JsonFormat#parser()
  * @see JsonFormat#printer()
- * @see #ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser, JsonFormat.Printer)
+ * @see #ProtobufJsonFormatHttpMessageConverter(com.google.protobuf.util.JsonFormat.Parser, com.google.protobuf.util.JsonFormat.Printer)
  */
 public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageConverter {
 
 	/**
-	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with default
-	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration.
+	 * Constructor with default instances of
+	 * {@link com.google.protobuf.util.JsonFormat.Parser JsonFormat.Parser},
+	 * {@link com.google.protobuf.util.JsonFormat.Printer JsonFormat.Printer},
+	 * and {@link ExtensionRegistry}.
 	 */
 	public ProtobufJsonFormatHttpMessageConverter() {
-		this(null,  null, (ExtensionRegistry)null);
+		this(null, null);
 	}
 
 	/**
-	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
-	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration.
-	 * @param parser the JSON parser configuration
-	 * @param printer the JSON printer configuration
+	 * Constructor with given instances of
+	 * {@link com.google.protobuf.util.JsonFormat.Parser JsonFormat.Parser},
+	 * {@link com.google.protobuf.util.JsonFormat.Printer JsonFormat.Printer},
+	 * and a default instance of {@link ExtensionRegistry}.
 	 */
 	public ProtobufJsonFormatHttpMessageConverter(
 			@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {
 
-		this(parser, printer, (ExtensionRegistry)null);
+		this(parser, printer, (ExtensionRegistry) null);
 	}
 
 	/**
-	 * Construct a new {@code ProtobufJsonFormatHttpMessageConverter} with the given
-	 * {@code JsonFormat.Parser} and {@code JsonFormat.Printer} configuration, also
-	 * accepting a registry that specifies protocol message extensions.
-	 * @param parser the JSON parser configuration
-	 * @param printer the JSON printer configuration
-	 * @param extensionRegistry the registry to populate
-	 * @since 5.1
+	 * Constructor with given instances of
+	 * {@link com.google.protobuf.util.JsonFormat.Parser JsonFormat.Parser},
+	 * {@link com.google.protobuf.util.JsonFormat.Printer JsonFormat.Printer},
+	 * and {@link ExtensionRegistry}.
 	 */
 	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,
 			@Nullable JsonFormat.Printer printer, @Nullable ExtensionRegistry extensionRegistry) {
@@ -84,7 +83,7 @@ public class ProtobufJsonFormatHttpMessageConverter extends ProtobufHttpMessageC
 	 * @param printer the JSON printer configuration
 	 * @param registryInitializer an initializer for message extensions
 	 * @deprecated as of 5.1, in favor of
-	 * {@link #ProtobufJsonFormatHttpMessageConverter(JsonFormat.Parser, JsonFormat.Printer, ExtensionRegistry)}
+	 * {@link #ProtobufJsonFormatHttpMessageConverter(com.google.protobuf.util.JsonFormat.Parser, com.google.protobuf.util.JsonFormat.Printer, ExtensionRegistry)}
 	 */
 	@Deprecated
 	public ProtobufJsonFormatHttpMessageConverter(@Nullable JsonFormat.Parser parser,

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,41 +20,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Supports parameters of a given type and resolves them using a stub value.
- * Also records the resolved parameter value.
+ * Stub resolver for a fixed value type and/or value.
  *
  * @author Rossen Stoyanchev
  */
 public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final Class<?> parameterType;
+	private final Class<?> valueType;
 
-	private final Object stubValue;
+	@Nullable
+	private final Object value;
 
 	private List<MethodParameter> resolvedParameters = new ArrayList<>();
 
-	public StubArgumentResolver(Class<?> supportedParameterType, Object stubValue) {
-		this.parameterType = supportedParameterType;
-		this.stubValue = stubValue;
+
+	public StubArgumentResolver(Object value) {
+		this(value.getClass(), value);
 	}
+
+	public StubArgumentResolver(Class<?> valueType) {
+		this(valueType, null);
+	}
+
+	public StubArgumentResolver(Class<?> valueType, Object value) {
+		this.valueType = valueType;
+		this.value = value;
+	}
+
 
 	public List<MethodParameter> getResolvedParameters() {
 		return resolvedParameters;
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.getParameterType().equals(this.parameterType);
+		return parameter.getParameterType().equals(this.valueType);
 	}
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+
 		this.resolvedParameters.add(parameter);
-		return this.stubValue;
+		return this.value;
 	}
+
 }

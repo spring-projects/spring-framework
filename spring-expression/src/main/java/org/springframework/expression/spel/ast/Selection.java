@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -69,8 +69,8 @@ public class Selection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 
-	public Selection(boolean nullSafe, int variant, int pos, SpelNodeImpl expression) {
-		super(pos, expression);
+	public Selection(boolean nullSafe, int variant, int startPos, int endPos, SpelNodeImpl expression) {
+		super(startPos, endPos, expression);
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
@@ -205,19 +205,16 @@ public class Selection extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
+		return prefix() + getChild(0).toStringAST() + "]";
+	}
+
+	private String prefix() {
 		switch (this.variant) {
-			case ALL:
-				sb.append("?[");
-				break;
-			case FIRST:
-				sb.append("^[");
-				break;
-			case LAST:
-				sb.append("$[");
-				break;
+			case ALL:   return "?[";
+			case FIRST: return "^[";
+			case LAST:  return "$[";
 		}
-		return sb.append(getChild(0).toStringAST()).append("]").toString();
+		return "";
 	}
 
 }

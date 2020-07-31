@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.messaging.support;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
@@ -76,16 +77,19 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	}
 
 
+	@Override
 	public T getPayload() {
 		return this.payload;
 	}
 
+	@Override
 	public MessageHeaders getHeaders() {
 		return this.headers;
 	}
 
 
-	public boolean equals(Object other) {
+	@Override
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -97,11 +101,13 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
 	}
 
+	@Override
 	public int hashCode() {
 		// Using nullSafeHashCode for proper array hashCode handling
 		return (ObjectUtils.nullSafeHashCode(this.payload) * 23 + this.headers.hashCode());
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" [payload=");

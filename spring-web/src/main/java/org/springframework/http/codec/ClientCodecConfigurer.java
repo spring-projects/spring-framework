@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,6 +63,12 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 	@Override
 	ClientDefaultCodecs defaultCodecs();
 
+	/**
+	 * {@inheritDoc}.
+	 */
+	@Override
+	ClientCodecConfigurer clone();
+
 
 	/**
 	 * Static factory method for a {@code ClientCodecConfigurer}.
@@ -89,6 +95,8 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 		 * <p>By default if this is not set, and Jackson is available, the
 		 * {@link #jackson2JsonDecoder} override is used instead. Use this property
 		 * if you want to further customize the SSE decoder.
+		 * <p>Note that {@link #maxInMemorySize(int)}, if configured, will be
+		 * applied to the given decoder.
 		 * @param decoder the decoder to use
 		 */
 		void serverSentEventDecoder(Decoder<?> decoder);

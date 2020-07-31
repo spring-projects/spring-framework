@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierNickname;
 import javax.annotation.meta.When;
@@ -30,6 +31,8 @@ import javax.annotation.meta.When;
  * some circumstance（环境）. Leverages JSR 305 meta-annotations to indicate nullability in Java
  * to common tools with JSR 305 support and used by Kotlin to infer(推断) nullability of Spring API.
  *
+ * <p>Leverages JSR-305 meta-annotations to indicate nullability in Java to common
+ * tools with JSR-305 support and used by Kotlin to infer nullability of Spring API.
  * <p>Should be used at parameter, return value, and field level. Methods override should
  * repeat parent {@code @Nullable} annotations unless they behave differently.
  *

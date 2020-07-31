@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,7 +68,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	protected final Method method;
 
-	protected Object[] arguments = new Object[0];
+	protected Object[] arguments;
 
 	@Nullable
 	private final Class<?> targetClass;
@@ -158,7 +158,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
-		//	We start with an index of -1 and increment early.
+		// We start with an index of -1 and increment early.
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
@@ -212,8 +212,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		Object[] cloneArguments = this.arguments;
 		if (this.arguments.length > 0) {
 			// Build an independent copy of the arguments array.
-			cloneArguments = new Object[this.arguments.length];
-			System.arraycopy(this.arguments, 0, cloneArguments, 0, this.arguments.length);
+			cloneArguments = this.arguments.clone();
 		}
 		return invocableClone(cloneArguments);
 	}

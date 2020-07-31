@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
@@ -74,7 +75,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Set a Map with URL paths as keys and {@code VersionStrategy} as values.
 	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
 	 * details, see the {@link org.springframework.util.AntPathMatcher} javadoc.
-	 * @param map map with URLs as keys and version strategies as values
+	 * @param map a map with URLs as keys and version strategies as values
 	 */
 	public void setStrategyMap(Map<String, VersionStrategy> map) {
 		this.versionStrategyMap.clear();
@@ -168,7 +169,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		String candidateVersion = versionStrategy.extractVersion(requestPath);
-		if (StringUtils.isEmpty(candidateVersion)) {
+		if (!StringUtils.hasLength(candidateVersion)) {
 			return null;
 		}
 
@@ -312,7 +313,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers = (this.original instanceof HttpResource ?
 					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
-			headers.setETag("\"" + this.version + "\"");
+			headers.setETag("W/\"" + this.version + "\"");
 			return headers;
 		}
 	}

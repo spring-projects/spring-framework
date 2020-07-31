@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,75 +17,107 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.ResolvableType.forClass;
 
 /**
  * @author Arjen Poutsma
  */
-public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
+class ResourceDecoderTests extends AbstractDecoderTests<ResourceDecoder> {
 
-	private final ResourceDecoder decoder = new ResourceDecoder();
+	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
-	@Test
-	public void canDecode() {
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
+
+
+	ResourceDecoderTests() {
+		super(new ResourceDecoder());
 	}
 
+	@Override
+	@Test
+	public void canDecode() {
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Object.class), MimeTypeUtils.APPLICATION_JSON)).isFalse();
+	}
+
+
+	@Override
 	@Test
 	public void decode() {
-		DataBuffer fooBuffer = stringBuffer("foo");
-		DataBuffer barBuffer = stringBuffer("bar");
-		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
 
-		Flux<Resource> result = this.decoder
-				.decode(source, forClass(Resource.class), null, Collections.emptyMap());
-
-		StepVerifier.create(result)
+		testDecodeAll(input, Resource.class, step -> step
 				.consumeNextWith(resource -> {
 					try {
 						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-						assertEquals("foobar", new String(bytes));
+						assertThat(new String(bytes)).isEqualTo("foobar");
 					}
-					catch (IOException e) {
-						fail(e.getMessage());
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
 					}
 				})
 				.expectComplete()
-				.verify();
+				.verify());
+	}
+
+	@Override
+	@Test
+	public void decodeToMono() {
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
+		testDecodeToMonoAll(input, ResolvableType.forClass(Resource.class),
+				step -> step
+						.consumeNextWith(value -> {
+							Resource resource = (Resource) value;
+							try {
+								byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+								assertThat(new String(bytes)).isEqualTo("foobar");
+								assertThat(resource.getFilename()).isEqualTo("testFile");
+							}
+							catch (IOException ex) {
+								throw new AssertionError(ex.getMessage(), ex);
+							}
+						})
+						.expectComplete()
+						.verify(),
+				null,
+				Collections.singletonMap(ResourceDecoder.FILENAME_HINT, "testFile"));
 	}
 
 	@Test
-	public void decodeError() {
-		DataBuffer fooBuffer = stringBuffer("foo");
-		Flux<DataBuffer> source =
-				Flux.just(fooBuffer).concatWith(Flux.error(new RuntimeException()));
-
-
-		Flux<Resource> result = this.decoder
-				.decode(source, forClass(Resource.class), null, Collections.emptyMap());
-
-		StepVerifier.create(result)
-				.expectError()
-				.verify();
+	public void decodeInputStreamResource() {
+		Flux<DataBuffer> input = Flux.concat(dataBuffer(this.fooBytes), dataBuffer(this.barBytes));
+		testDecodeAll(input, InputStreamResource.class, step -> step
+				.consumeNextWith(resource -> {
+					try {
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
+						assertThat(new String(bytes)).isEqualTo("foobar");
+						assertThat(resource.contentLength()).isEqualTo(fooBytes.length + barBytes.length);
+					}
+					catch (IOException ex) {
+						throw new AssertionError(ex.getMessage(), ex);
+					}
+				})
+				.expectComplete()
+				.verify());
 	}
 
 }

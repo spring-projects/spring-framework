@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.function.Consumer;
+
 import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
@@ -123,6 +125,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	private boolean allowResultAccessAfterCompletion = false;
 
 	private boolean hibernateManagedSession = false;
+
+	@Nullable
+	private Consumer<Session> sessionInitializer;
 
 	@Nullable
 	private Object entityInterceptor;
@@ -300,6 +305,18 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	/**
+	 * Specify a callback for customizing every Hibernate {@code Session} resource
+	 * created for a new transaction managed by this {@code HibernateTransactionManager}.
+	 * <p>This enables convenient customizations for application purposes, e.g.
+	 * setting Hibernate filters.
+	 * @since 5.3
+	 * @see Session#enableFilter
+	 */
+	public void setSessionInitializer(Consumer<Session> sessionInitializer) {
+		this.sessionInitializer = sessionInitializer;
+	}
+
+	/**
 	 * Set the bean name of a Hibernate entity interceptor that allows to inspect
 	 * and change property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this transaction manager.
@@ -461,6 +478,9 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				Session newSession = (entityInterceptor != null ?
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
 						obtainSessionFactory().openSession());
+				if (this.sessionInitializer != null) {
+					this.sessionInitializer.accept(newSession);
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Opened new Session [" + newSession + "] for Hibernate transaction");
 				}
@@ -480,6 +500,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					Connection con = ((SessionImplementor) session).connection();
 					Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 					txObject.setPreviousIsolationLevel(previousIsolationLevel);
+					txObject.setReadOnly(definition.isReadOnly());
 					if (this.allowResultAccessAfterCompletion && !txObject.isNewSession()) {
 						int currentHoldability = con.getHoldability();
 						if (currentHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
@@ -541,7 +562,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
 				SessionImplementor sessionImpl = (SessionImplementor) session;
-				ConnectionHolder conHolder = new ConnectionHolder(sessionImpl::connection);
+				// The following needs to use a lambda expression instead of a method reference
+				// for compatibility with Hibernate ORM <5.2 where connection() is defined on
+				// SessionImplementor itself instead of on SharedSessionContractImplementor...
+				ConnectionHolder conHolder = new ConnectionHolder(() -> sessionImpl.connection());
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
 					conHolder.setTimeoutInSeconds(timeout);
 				}
@@ -708,7 +732,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				if (previousHoldability != null) {
 					con.setHoldability(previousHoldability);
 				}
-				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
+				DataSourceUtils.resetConnectionAfterTransaction(
+						con, txObject.getPreviousIsolationLevel(), txObject.isReadOnly());
 			}
 			catch (HibernateException ex) {
 				logger.debug("Could not access JDBC Connection of Hibernate Session", ex);

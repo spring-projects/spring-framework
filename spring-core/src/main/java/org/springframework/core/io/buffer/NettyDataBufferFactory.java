@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * Netty {@link ByteBufAllocator}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.0
  * @see io.netty.buffer.PooledByteBufAllocator
  * @see io.netty.buffer.UnpooledByteBufAllocator
@@ -41,15 +42,16 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 
 
 	/**
-	 * Creates a new {@code NettyDataBufferFactory} based on the given factory.
+	 * Create a new {@code NettyDataBufferFactory} based on the given factory.
 	 * @param byteBufAllocator the factory to use
 	 * @see io.netty.buffer.PooledByteBufAllocator
 	 * @see io.netty.buffer.UnpooledByteBufAllocator
 	 */
 	public NettyDataBufferFactory(ByteBufAllocator byteBufAllocator) {
-		Assert.notNull(byteBufAllocator, "'byteBufAllocator' must not be null");
+		Assert.notNull(byteBufAllocator, "ByteBufAllocator must not be null");
 		this.byteBufAllocator = byteBufAllocator;
 	}
+
 
 	/**
 	 * Return the {@code ByteBufAllocator} used by this factory.
@@ -83,36 +85,40 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>This implementation uses Netty's {@link CompositeByteBuf}.
-	 */
-	@Override
-	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
-		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
-		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer(dataBuffers.size());
-		for (DataBuffer dataBuffer : dataBuffers) {
-			Assert.isInstanceOf(NettyDataBuffer.class, dataBuffer);
-			NettyDataBuffer nettyDataBuffer = (NettyDataBuffer) dataBuffer;
-			composite.addComponent(true, nettyDataBuffer.getNativeBuffer());
-		}
-		return new NettyDataBuffer(composite, this);
-	}
-
-	/**
 	 * Wrap the given Netty {@link ByteBuf} in a {@code NettyDataBuffer}.
 	 * @param byteBuf the Netty byte buffer to wrap
 	 * @return the wrapped buffer
 	 */
 	public NettyDataBuffer wrap(ByteBuf byteBuf) {
+		byteBuf.touch();
 		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	/**
-	 * Return the given Netty {@link DataBuffer} as a {@link ByteBuf}. Returns the
-	 * {@linkplain NettyDataBuffer#getNativeBuffer() native buffer} if {@code buffer} is
-	 * a {@link NettyDataBuffer}; returns {@link Unpooled#wrappedBuffer(ByteBuffer)}
-	 * otherwise.
-	 * @param buffer the {@code DataBuffer} to return a {@code ByteBuf} for.
+	 * {@inheritDoc}
+	 * <p>This implementation uses Netty's {@link CompositeByteBuf}.
+	 */
+	@Override
+	public DataBuffer join(List<? extends DataBuffer> dataBuffers) {
+		Assert.notEmpty(dataBuffers, "DataBuffer List must not be empty");
+		int bufferCount = dataBuffers.size();
+		if (bufferCount == 1) {
+			return dataBuffers.get(0);
+		}
+		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer(bufferCount);
+		for (DataBuffer dataBuffer : dataBuffers) {
+			Assert.isInstanceOf(NettyDataBuffer.class, dataBuffer);
+			composite.addComponent(true, ((NettyDataBuffer) dataBuffer).getNativeBuffer());
+		}
+		return new NettyDataBuffer(composite, this);
+	}
+
+	/**
+	 * Return the given Netty {@link DataBuffer} as a {@link ByteBuf}.
+	 * <p>Returns the {@linkplain NettyDataBuffer#getNativeBuffer() native buffer}
+	 * if {@code buffer} is a {@link NettyDataBuffer}; returns
+	 * {@link Unpooled#wrappedBuffer(ByteBuffer)} otherwise.
+	 * @param buffer the {@code DataBuffer} to return a {@code ByteBuf} for
 	 * @return the netty {@code ByteBuf}
 	 */
 	public static ByteBuf toByteBuf(DataBuffer buffer) {
@@ -129,4 +135,5 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	public String toString() {
 		return "NettyDataBufferFactory (" + this.byteBufAllocator + ")";
 	}
+
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,19 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sam Brannen
  * @since 4.0.3
  */
-public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
+class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 
+	@Override
 	protected EmbeddedDatabaseType getEmbeddedDatabaseType() {
 		return EmbeddedDatabaseType.H2;
 	}
@@ -38,7 +39,7 @@ public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 	 * @since 5.0
 	 */
 	@Test
-	public void scriptWithH2Alias() throws Exception {
+	void scriptWithH2Alias() throws Exception {
 		databasePopulator.addScript(usersSchema());
 		databasePopulator.addScript(resource("db-test-data-h2-alias.sql"));
 		// Set statement separator to double newline so that ";" is not
@@ -47,7 +48,7 @@ public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 		databasePopulator.setSeparator("\n\n");
 		DatabasePopulatorUtils.execute(databasePopulator, db);
 		String sql = "select REVERSE(first_name) from users where last_name='Brannen'";
-		assertThat(jdbcTemplate.queryForObject(sql, String.class), equalTo("maS"));
+		assertThat(jdbcTemplate.queryForObject(sql, String.class)).isEqualTo("maS");
 	}
 
 }

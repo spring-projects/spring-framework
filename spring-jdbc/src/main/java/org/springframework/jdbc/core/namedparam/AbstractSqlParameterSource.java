@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,26 @@ package org.springframework.jdbc.core.namedparam;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
+import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@link SqlParameterSource} implementations.
- * Provides registration of SQL types per parameter.
+ * Provides registration of SQL types per parameter and a friendly
+ * {@link #toString() toString} representation enumerating all parameters for
+ * a {@code SqlParameterSource} implementing {@link #getParameterNames()}.
+ * Concrete subclasses must implement {@link #hasValue} and {@link #getValue}.
  *
  * @author Juergen Hoeller
+ * @author Jens Schauder
  * @since 2.0
+ * @see #hasValue(String)
+ * @see #getValue(String)
+ * @see #getParameterNames()
  */
 public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
@@ -37,7 +47,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 
 
 	/**
-	 * Register a SQL type for the given parameter.
+	 * Register an SQL type for the given parameter.
 	 * @param paramName the name of the parameter
 	 * @param sqlType the SQL type of the parameter
 	 */
@@ -47,7 +57,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	}
 
 	/**
-	 * Register a SQL type for the given parameter.
+	 * Register an SQL type for the given parameter.
 	 * @param paramName the name of the parameter
 	 * @param typeName the type name of the parameter
 	 */
@@ -79,6 +89,47 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		return this.typeNames.get(paramName);
+	}
+
+
+	/**
+	 * Enumerate the parameter names and values with their corresponding SQL type if available,
+	 * or just return the simple {@code SqlParameterSource} implementation class name otherwise.
+	 * @since 5.2
+	 * @see #getParameterNames()
+	 */
+	@Override
+	public String toString() {
+		String[] parameterNames = getParameterNames();
+		if (parameterNames != null) {
+			StringJoiner result = new StringJoiner(", ", getClass().getSimpleName() + " {", "}");
+			for (String parameterName : parameterNames) {
+				Object value = getValue(parameterName);
+				if (value instanceof SqlParameterValue) {
+					value = ((SqlParameterValue) value).getValue();
+				}
+				String typeName = getTypeName(parameterName);
+				if (typeName == null) {
+					int sqlType = getSqlType(parameterName);
+					if (sqlType != TYPE_UNKNOWN) {
+						typeName = JdbcUtils.resolveTypeName(sqlType);
+						if (typeName == null) {
+							typeName = String.valueOf(sqlType);
+						}
+					}
+				}
+				StringBuilder entry = new StringBuilder();
+				entry.append(parameterName).append('=').append(value);
+				if (typeName != null) {
+					entry.append(" (type:").append(typeName).append(')');
+				}
+				result.add(entry);
+			}
+			return result.toString();
+		}
+		else {
+			return getClass().getSimpleName();
+		}
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.http.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -30,7 +30,7 @@ import org.springframework.http.client.MultipartBodyBuilder.PublisherEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -60,36 +60,34 @@ public class MultipartBodyBuilderTests {
 
 		MultiValueMap<String, HttpEntity<?>> result = builder.build();
 
-		assertEquals(5, result.size());
+		assertThat(result.size()).isEqualTo(5);
 		HttpEntity<?> resultEntity = result.getFirst("key");
-		assertNotNull(resultEntity);
-		assertEquals(multipartData, resultEntity.getBody());
-		assertEquals("bar", resultEntity.getHeaders().getFirst("foo"));
+		assertThat(resultEntity).isNotNull();
+		assertThat(resultEntity.getBody()).isEqualTo(multipartData);
+		assertThat(resultEntity.getHeaders().getFirst("foo")).isEqualTo("bar");
 
 		resultEntity = result.getFirst("logo");
-		assertNotNull(resultEntity);
-		assertEquals(logo, resultEntity.getBody());
-		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertThat(resultEntity).isNotNull();
+		assertThat(resultEntity.getBody()).isEqualTo(logo);
+		assertThat(resultEntity.getHeaders().getFirst("baz")).isEqualTo("qux");
 
 		resultEntity = result.getFirst("entity");
-		assertNotNull(resultEntity);
-		assertEquals("body", resultEntity.getBody());
-		assertEquals("bar", resultEntity.getHeaders().getFirst("foo"));
-		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertThat(resultEntity).isNotNull();
+		assertThat(resultEntity.getBody()).isEqualTo("body");
+		assertThat(resultEntity.getHeaders().getFirst("foo")).isEqualTo("bar");
+		assertThat(resultEntity.getHeaders().getFirst("baz")).isEqualTo("qux");
 
 		resultEntity = result.getFirst("publisherClass");
-		assertNotNull(resultEntity);
-		assertEquals(publisher, resultEntity.getBody());
-		assertEquals(ResolvableType.forClass(String.class),
-				((PublisherEntity<?,?>) resultEntity).getResolvableType());
-		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertThat(resultEntity).isNotNull();
+		assertThat(resultEntity.getBody()).isEqualTo(publisher);
+		assertThat(((PublisherEntity<?, ?>) resultEntity).getResolvableType()).isEqualTo(ResolvableType.forClass(String.class));
+		assertThat(resultEntity.getHeaders().getFirst("baz")).isEqualTo("qux");
 
 		resultEntity = result.getFirst("publisherPtr");
-		assertNotNull(resultEntity);
-		assertEquals(publisher, resultEntity.getBody());
-		assertEquals(ResolvableType.forClass(String.class),
-				((PublisherEntity<?,?>) resultEntity).getResolvableType());
-		assertEquals("qux", resultEntity.getHeaders().getFirst("baz"));
+		assertThat(resultEntity).isNotNull();
+		assertThat(resultEntity.getBody()).isEqualTo(publisher);
+		assertThat(((PublisherEntity<?, ?>) resultEntity).getResolvableType()).isEqualTo(ResolvableType.forClass(String.class));
+		assertThat(resultEntity.getHeaders().getFirst("baz")).isEqualTo("qux");
 	}
 
 	@Test // SPR-16601
@@ -100,8 +98,8 @@ public class MultipartBodyBuilderTests {
 		builder.asyncPart("publisherClass", publisher, String.class).header("baz", "qux");
 		HttpEntity<?> entity = builder.build().getFirst("publisherClass");
 
-		assertNotNull(entity);
-		assertEquals(PublisherEntity.class, entity.getClass());
+		assertThat(entity).isNotNull();
+		assertThat(entity.getClass()).isEqualTo(PublisherEntity.class);
 
 		// Now build a new MultipartBodyBuilder, as BodyInserters.fromMultipartData would do...
 
@@ -109,8 +107,8 @@ public class MultipartBodyBuilderTests {
 		builder.part("publisherClass", entity);
 		entity = builder.build().getFirst("publisherClass");
 
-		assertNotNull(entity);
-		assertEquals(PublisherEntity.class, entity.getClass());
+		assertThat(entity).isNotNull();
+		assertThat(entity.getClass()).isEqualTo(PublisherEntity.class);
 	}
 
 }

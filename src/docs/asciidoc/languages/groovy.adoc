@@ -7,7 +7,7 @@ existing Java application.
 
 The Spring Framework provides a dedicated `ApplicationContext` that supports a Groovy-based
 Bean Definition DSL. For more details, see
-<<core.adoc#groovy-bean-definition-dsl,The Groovy Bean Definition DSL>>.
+<<core.adoc#groovy-bean-definition-dsl, The Groovy Bean Definition DSL>>.
 
 Further support for Groovy, including beans written in Groovy, refreshable script beans,
 and more is available in <<dynamic-language>>.

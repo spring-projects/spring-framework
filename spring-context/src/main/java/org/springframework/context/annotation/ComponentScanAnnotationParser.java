@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -151,9 +151,9 @@ class ComponentScanAnnotationParser {
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
 							"@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
-					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
-					ParserStrategyUtils.invokeAwareMethods(
-							filter, this.environment, this.resourceLoader, this.registry);
+
+					TypeFilter filter = ParserStrategyUtils.instantiateClass(filterClass, TypeFilter.class,
+							this.environment, this.resourceLoader, this.registry);
 					typeFilters.add(filter);
 					break;
 				default:

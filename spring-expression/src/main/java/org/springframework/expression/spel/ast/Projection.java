@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,8 +46,8 @@ public class Projection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 
-	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
-		super(pos, expression);
+	public Projection(boolean nullSafe, int startPos, int endPos, SpelNodeImpl expression) {
+		super(startPos, endPos, expression);
 		this.nullSafe = nullSafe;
 	}
 
@@ -92,12 +92,11 @@ public class Projection extends SpelNodeImpl {
 					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
-			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {
 				try {
 					state.pushActiveContextObject(new TypedValue(element));
-					state.enterScope("index", idx);
+					state.enterScope("index", result.size());
 					Object value = this.children[0].getValueInternal(state).getValue();
 					if (value != null && operandIsArray) {
 						arrayElementType = determineCommonType(arrayElementType, value.getClass());
@@ -108,7 +107,6 @@ public class Projection extends SpelNodeImpl {
 					state.exitScope();
 					state.popActiveContextObject();
 				}
-				idx++;
 			}
 
 			if (operandIsArray) {

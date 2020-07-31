@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,13 @@ package org.springframework.context.annotation;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Stephane Nicoll
@@ -35,18 +35,18 @@ public class Spr11310Tests {
 	public void orderedList() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		StringHolder holder = context.getBean(StringHolder.class);
-		assertEquals("second", holder.itemsList.get(0));
-		assertEquals("first", holder.itemsList.get(1));
-		assertEquals("unknownOrder", holder.itemsList.get(2));
+		assertThat(holder.itemsList.get(0)).isEqualTo("second");
+		assertThat(holder.itemsList.get(1)).isEqualTo("first");
+		assertThat(holder.itemsList.get(2)).isEqualTo("unknownOrder");
 	}
 
 	@Test
 	public void orderedArray() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		StringHolder holder = context.getBean(StringHolder.class);
-		assertEquals("second", holder.itemsArray[0]);
-		assertEquals("first", holder.itemsArray[1]);
-		assertEquals("unknownOrder", holder.itemsArray[2]);
+		assertThat(holder.itemsArray[0]).isEqualTo("second");
+		assertThat(holder.itemsArray[1]).isEqualTo("first");
+		assertThat(holder.itemsArray[2]).isEqualTo("unknownOrder");
 	}
 
 

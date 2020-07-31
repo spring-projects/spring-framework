@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,34 +18,37 @@ package org.springframework.test.context.configuration.interfaces;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.assertContextCacheStatistics;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * @author Sam Brannen
  * @since 4.3
  */
-@RunWith(JUnit4.class)
-public class DirtiesContextInterfaceTests {
+class DirtiesContextInterfaceTests {
 
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
 
-	@BeforeClass
-	public static void verifyInitialCacheState() {
+	@BeforeAll
+	static void verifyInitialCacheState() {
 		resetContextCache();
 		// Reset static counters in case tests are run multiple times in a test suite --
 		// for example, via JUnit's @Suite.
@@ -54,13 +57,13 @@ public class DirtiesContextInterfaceTests {
 		assertContextCacheStatistics("BeforeClass", 0, cacheHits.get(), cacheMisses.get());
 	}
 
-	@AfterClass
-	public static void verifyFinalCacheState() {
+	@AfterAll
+	static void verifyFinalCacheState() {
 		assertContextCacheStatistics("AfterClass", 0, cacheHits.get(), cacheMisses.get());
 	}
 
 	@Test
-	public void verifyDirtiesContextBehavior() throws Exception {
+	void verifyDirtiesContextBehavior() throws Exception {
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase.class, 1);
 		assertContextCacheStatistics("after class-level @DirtiesContext with clean test method and default class mode",
 			0, cacheHits.get(), cacheMisses.incrementAndGet());
@@ -72,6 +75,14 @@ public class DirtiesContextInterfaceTests {
 
 
 	@RunWith(SpringRunner.class)
+	// Ensure that we do not include the EventPublishingTestExecutionListener
+	// since it will access the ApplicationContext for each method in the
+	// TestExecutionListener API, thus distorting our cache hit/miss results.
+	@TestExecutionListeners({
+		DirtiesContextBeforeModesTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class,
+		DirtiesContextTestExecutionListener.class
+	})
 	public static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase
 			implements DirtiesContextTestInterface {
 
@@ -79,9 +90,9 @@ public class DirtiesContextInterfaceTests {
 		ApplicationContext applicationContext;
 
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired() {
-			assertNotNull("The application context should have been autowired.", this.applicationContext);
+			assertThat(this.applicationContext).as("The application context should have been autowired.").isNotNull();
 		}
 
 

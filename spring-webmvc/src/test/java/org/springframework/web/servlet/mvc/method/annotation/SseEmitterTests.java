@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,17 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 
@@ -36,12 +36,15 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.e
  */
 public class SseEmitterTests {
 
+	private static final MediaType TEXT_PLAIN_UTF8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
+
+
 	private SseEmitter emitter;
 
 	private TestHandler handler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		this.handler = new TestHandler();
 		this.emitter = new SseEmitter();
@@ -53,18 +56,18 @@ public class SseEmitterTests {
 	public void send() throws Exception {
 		this.emitter.send("foo");
 		this.handler.assertSentObjectCount(3);
-		this.handler.assertObject(0, "data:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
-		this.handler.assertObject(2, "\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
 	}
 
 	@Test
 	public void sendWithMediaType() throws Exception {
 		this.emitter.send("foo", MediaType.TEXT_PLAIN);
 		this.handler.assertSentObjectCount(3);
-		this.handler.assertObject(0, "data:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo", MediaType.TEXT_PLAIN);
-		this.handler.assertObject(2, "\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
 	}
 
 	@Test
@@ -77,40 +80,40 @@ public class SseEmitterTests {
 	public void sendEventWithDataLine() throws Exception {
 		this.emitter.send(event().data("foo"));
 		this.handler.assertSentObjectCount(3);
-		this.handler.assertObject(0, "data:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
-		this.handler.assertObject(2, "\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
 	}
 
 	@Test
 	public void sendEventWithTwoDataLines() throws Exception {
 		this.emitter.send(event().data("foo").data("bar"));
 		this.handler.assertSentObjectCount(5);
-		this.handler.assertObject(0, "data:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, "data:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
-		this.handler.assertObject(2, "\ndata:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(3, "bar");
-		this.handler.assertObject(4, "\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(4, "\n\n", TEXT_PLAIN_UTF8);
 	}
 
 	@Test
 	public void sendEventFull() throws Exception {
 		this.emitter.send(event().comment("blah").name("test").reconnectTime(5000L).id("1").data("foo"));
 		this.handler.assertSentObjectCount(3);
-		this.handler.assertObject(0, ":blah\nevent:test\nretry:5000\nid:1\ndata:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, ":blah\nevent:test\nretry:5000\nid:1\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
-		this.handler.assertObject(2, "\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\n\n", TEXT_PLAIN_UTF8);
 	}
 
 	@Test
 	public void sendEventFullWithTwoDataLinesInTheMiddle() throws Exception {
 		this.emitter.send(event().comment("blah").data("foo").data("bar").name("test").reconnectTime(5000L).id("1"));
 		this.handler.assertSentObjectCount(5);
-		this.handler.assertObject(0, ":blah\ndata:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(0, ":blah\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(1, "foo");
-		this.handler.assertObject(2, "\ndata:", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(2, "\ndata:", TEXT_PLAIN_UTF8);
 		this.handler.assertObject(3, "bar");
-		this.handler.assertObject(4, "\nevent:test\nretry:5000\nid:1\n\n", SseEmitter.TEXT_PLAIN);
+		this.handler.assertObject(4, "\nevent:test\nretry:5000\nid:1\n\n", TEXT_PLAIN_UTF8);
 	}
 
 
@@ -122,7 +125,7 @@ public class SseEmitterTests {
 
 
 		public void assertSentObjectCount(int size) {
-			assertEquals(size, this.objects.size());
+			assertThat(this.objects.size()).isEqualTo(size);
 		}
 
 		public void assertObject(int index, Object object) {
@@ -130,9 +133,9 @@ public class SseEmitterTests {
 		}
 
 		public void assertObject(int index, Object object, MediaType mediaType) {
-			assertTrue(index <= this.objects.size());
-			assertEquals(object, this.objects.get(index));
-			assertEquals(mediaType, this.mediaTypes.get(index));
+			assertThat(index <= this.objects.size()).isTrue();
+			assertThat(this.objects.get(index)).isEqualTo(object);
+			assertThat(this.mediaTypes.get(index)).isEqualTo(mediaType);
 		}
 
 		@Override

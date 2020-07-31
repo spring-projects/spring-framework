@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,11 +33,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
@@ -76,6 +76,9 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Nullable
 	private transient volatile ResolvableType resolvableType;
+
+	@Nullable
+	private transient volatile TypeDescriptor typeDescriptor;
 
 
 	/**
@@ -276,13 +279,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Increase this descriptor's nesting level.
-	 * @see MethodParameter#increaseNestingLevel()
 	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			this.methodParameter.increaseNestingLevel();
+			this.methodParameter = this.methodParameter.nested();
 		}
 	}
 
@@ -296,12 +298,12 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		this.containingClass = containingClass;
 		this.resolvableType = null;
 		if (this.methodParameter != null) {
-			GenericTypeResolver.resolveParameterType(this.methodParameter, containingClass);
+			this.methodParameter = this.methodParameter.withContainingClass(containingClass);
 		}
 	}
 
 	/**
-	 * Build a ResolvableType object for the wrapped parameter/field.
+	 * Build a {@link ResolvableType} object for the wrapped parameter/field.
 	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
@@ -313,6 +315,21 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 			this.resolvableType = resolvableType;
 		}
 		return resolvableType;
+	}
+
+	/**
+	 * Build a {@link TypeDescriptor} object for the wrapped parameter/field.
+	 * @since 5.1.4
+	 */
+	public TypeDescriptor getTypeDescriptor() {
+		TypeDescriptor typeDescriptor = this.typeDescriptor;
+		if (typeDescriptor == null) {
+			typeDescriptor = (this.field != null ?
+					new TypeDescriptor(getResolvableType(), getDependencyType(), getAnnotations()) :
+					new TypeDescriptor(obtainMethodParameter()));
+			this.typeDescriptor = typeDescriptor;
+		}
+		return typeDescriptor;
 	}
 
 	/**
@@ -354,7 +371,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Determine the name of the wrapped parameter/field.
-	 * @return the declared name (never {@code null})
+	 * @return the declared name (may be {@code null} if unresolvable)
 	 */
 	@Nullable
 	public String getDependencyName() {
@@ -397,7 +414,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -411,7 +428,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass);
+		return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.containingClass));
 	}
 
 
@@ -438,7 +455,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 							this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
 				}
 				for (int i = 1; i < this.nestingLevel; i++) {
-					this.methodParameter.increaseNestingLevel();
+					this.methodParameter = this.methodParameter.nested();
 				}
 			}
 		}

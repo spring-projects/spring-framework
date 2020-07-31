@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
@@ -29,7 +29,9 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for the expression state object - some features are not yet exploited in the language (eg nested scopes)
@@ -43,7 +45,7 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 	public void testConstruction() {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		ExpressionState state = new ExpressionState(context);
-		assertEquals(context, state.getEvaluationContext());
+		assertThat(state.getEvaluationContext()).isEqualTo(context);
 	}
 
 	// Local variables are in variable scopes which come and go during evaluation.  Normal variables are
@@ -54,130 +56,128 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		ExpressionState state = getState();
 
 		Object value = state.lookupLocalVariable("foo");
-		assertNull(value);
+		assertThat(value).isNull();
 
 		state.setLocalVariable("foo",34);
 		value = state.lookupLocalVariable("foo");
-		assertEquals(34, value);
+		assertThat(value).isEqualTo(34);
 
 		state.setLocalVariable("foo", null);
 		value = state.lookupLocalVariable("foo");
-		assertEquals(null, value);
+		assertThat(value).isEqualTo(null);
 	}
 
 	@Test
 	public void testVariables() {
 		ExpressionState state = getState();
 		TypedValue typedValue = state.lookupVariable("foo");
-		assertEquals(TypedValue.NULL, typedValue);
+		assertThat(typedValue).isEqualTo(TypedValue.NULL);
 
 		state.setVariable("foo",34);
 		typedValue = state.lookupVariable("foo");
-		assertEquals(34, typedValue.getValue());
-		assertEquals(Integer.class, typedValue.getTypeDescriptor().getType());
+		assertThat(typedValue.getValue()).isEqualTo(34);
+		assertThat(typedValue.getTypeDescriptor().getType()).isEqualTo(Integer.class);
 
 		state.setVariable("foo","abc");
 		typedValue = state.lookupVariable("foo");
-		assertEquals("abc", typedValue.getValue());
-		assertEquals(String.class, typedValue.getTypeDescriptor().getType());
+		assertThat(typedValue.getValue()).isEqualTo("abc");
+		assertThat(typedValue.getTypeDescriptor().getType()).isEqualTo(String.class);
 	}
 
 	@Test
-	public void testNoVariableInteference() {
+	public void testNoVariableInterference() {
 		ExpressionState state = getState();
 		TypedValue typedValue = state.lookupVariable("foo");
-		assertEquals(TypedValue.NULL, typedValue);
+		assertThat(typedValue).isEqualTo(TypedValue.NULL);
 
 		state.setLocalVariable("foo",34);
 		typedValue = state.lookupVariable("foo");
-		assertEquals(TypedValue.NULL, typedValue);
+		assertThat(typedValue).isEqualTo(TypedValue.NULL);
 
 		state.setVariable("goo", "hello");
-		assertNull(state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("goo")).isNull();
 	}
 
 	@Test
 	public void testLocalVariableNestedScopes() {
 		ExpressionState state = getState();
-		assertEquals(null, state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(null);
 
 		state.setLocalVariable("foo",12);
-		assertEquals(12, state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
 
 		state.enterScope(null);
-		assertEquals(12, state.lookupLocalVariable("foo"));  // found in upper scope
+		// found in upper scope
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
 
 		state.setLocalVariable("foo","abc");
-		assertEquals("abc", state.lookupLocalVariable("foo"));  // found in nested scope
+		// found in nested scope
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo("abc");
 
 		state.exitScope();
-		assertEquals(12, state.lookupLocalVariable("foo"));  // found in nested scope
+		// found in nested scope
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
 	}
 
 	@Test
 	public void testRootContextObject() {
 		ExpressionState state = getState();
-		assertEquals(Inventor.class, state.getRootContextObject().getValue().getClass());
+		assertThat(state.getRootContextObject().getValue().getClass()).isEqualTo(Inventor.class);
 
 		// although the root object is being set on the evaluation context, the value in the 'state' remains what it was when constructed
 		((StandardEvaluationContext) state.getEvaluationContext()).setRootObject(null);
-		assertEquals(Inventor.class, state.getRootContextObject().getValue().getClass());
+		assertThat(state.getRootContextObject().getValue().getClass()).isEqualTo(Inventor.class);
 		// assertEquals(null, state.getRootContextObject().getValue());
 
 		state = new ExpressionState(new StandardEvaluationContext());
-		assertEquals(TypedValue.NULL, state.getRootContextObject());
+		assertThat(state.getRootContextObject()).isEqualTo(TypedValue.NULL);
 
 
 		((StandardEvaluationContext) state.getEvaluationContext()).setRootObject(null);
-		assertEquals(null, state.getRootContextObject().getValue());
+		assertThat(state.getRootContextObject().getValue()).isEqualTo(null);
 	}
 
 	@Test
 	public void testActiveContextObject() {
 		ExpressionState state = getState();
-		assertEquals(state.getRootContextObject().getValue(), state.getActiveContextObject().getValue());
+		assertThat(state.getActiveContextObject().getValue()).isEqualTo(state.getRootContextObject().getValue());
 
-		try {
-			state.popActiveContextObject();
-			fail("stack should be empty...");
-		}
-		catch (IllegalStateException ese) {
-			// success
-		}
+		assertThatIllegalStateException().isThrownBy(
+				state::popActiveContextObject);
 
 		state.pushActiveContextObject(new TypedValue(34));
-		assertEquals(34, state.getActiveContextObject().getValue());
+		assertThat(state.getActiveContextObject().getValue()).isEqualTo(34);
 
 		state.pushActiveContextObject(new TypedValue("hello"));
-		assertEquals("hello", state.getActiveContextObject().getValue());
+		assertThat(state.getActiveContextObject().getValue()).isEqualTo("hello");
 
 		state.popActiveContextObject();
-		assertEquals(34, state.getActiveContextObject().getValue());
+		assertThat(state.getActiveContextObject().getValue()).isEqualTo(34);
 
 		state.popActiveContextObject();
-		assertEquals(state.getRootContextObject().getValue(), state.getActiveContextObject().getValue());
+		assertThat(state.getActiveContextObject().getValue()).isEqualTo(state.getRootContextObject().getValue());
 
 		state = new ExpressionState(new StandardEvaluationContext());
-		assertEquals(TypedValue.NULL, state.getActiveContextObject());
+		assertThat(state.getActiveContextObject()).isEqualTo(TypedValue.NULL);
 	}
 
 	@Test
 	public void testPopulatedNestedScopes() {
 		ExpressionState state = getState();
-		assertNull(state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isNull();
 
 		state.enterScope("foo",34);
-		assertEquals(34, state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
 
 		state.enterScope(null);
 		state.setLocalVariable("foo", 12);
-		assertEquals(12, state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
 
 		state.exitScope();
-		assertEquals(34, state.lookupLocalVariable("foo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
 
 		state.exitScope();
-		assertNull(state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("goo")).isNull();
 	}
 
 	@Test
@@ -187,92 +187,78 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		// supplied should override root on context
 		ExpressionState state = new ExpressionState(ctx,new TypedValue("i am a string"));
 		TypedValue stateRoot = state.getRootContextObject();
-		assertEquals(String.class, stateRoot.getTypeDescriptor().getType());
-		assertEquals("i am a string", stateRoot.getValue());
+		assertThat(stateRoot.getTypeDescriptor().getType()).isEqualTo(String.class);
+		assertThat(stateRoot.getValue()).isEqualTo("i am a string");
 	}
 
 	@Test
 	public void testPopulatedNestedScopesMap() {
 		ExpressionState state = getState();
-		assertNull(state.lookupLocalVariable("foo"));
-		assertNull(state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("foo")).isNull();
+		assertThat(state.lookupLocalVariable("goo")).isNull();
 
 		Map<String,Object> m = new HashMap<>();
 		m.put("foo", 34);
 		m.put("goo", "abc");
 
 		state.enterScope(m);
-		assertEquals(34, state.lookupLocalVariable("foo"));
-		assertEquals("abc", state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(34);
+		assertThat(state.lookupLocalVariable("goo")).isEqualTo("abc");
 
 		state.enterScope(null);
 		state.setLocalVariable("foo",12);
-		assertEquals(12, state.lookupLocalVariable("foo"));
-		assertEquals("abc", state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("foo")).isEqualTo(12);
+		assertThat(state.lookupLocalVariable("goo")).isEqualTo("abc");
 
 		state.exitScope();
 		state.exitScope();
-		assertNull(state.lookupLocalVariable("foo"));
-		assertNull(state.lookupLocalVariable("goo"));
+		assertThat(state.lookupLocalVariable("foo")).isNull();
+		assertThat(state.lookupLocalVariable("goo")).isNull();
 	}
 
 	@Test
 	public void testOperators() {
 		ExpressionState state = getState();
-		try {
-			state.operate(Operation.ADD,1,2);
-			fail("should have failed");
-		}
-		catch (EvaluationException ee) {
-			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, sEx.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				state.operate(Operation.ADD,1,2))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES));
 
-		try {
-			state.operate(Operation.ADD,null,null);
-			fail("should have failed");
-		}
-		catch (EvaluationException ee) {
-			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, sEx.getMessageCode());
-		}
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				state.operate(Operation.ADD,null,null))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES));
 	}
 
 	@Test
 	public void testComparator() {
 		ExpressionState state = getState();
-		assertEquals(state.getEvaluationContext().getTypeComparator(), state.getTypeComparator());
+		assertThat(state.getTypeComparator()).isEqualTo(state.getEvaluationContext().getTypeComparator());
 	}
 
 	@Test
 	public void testTypeLocator() throws EvaluationException {
 		ExpressionState state = getState();
-		assertNotNull(state.getEvaluationContext().getTypeLocator());
-		assertEquals(Integer.class, state.findType("java.lang.Integer"));
-		try {
-			state.findType("someMadeUpName");
-			fail("Should have failed to find it");
-		}
-		catch (EvaluationException ee) {
-			SpelEvaluationException sEx = (SpelEvaluationException)ee;
-			assertEquals(SpelMessage.TYPE_NOT_FOUND, sEx.getMessageCode());
-		}
+		assertThat(state.getEvaluationContext().getTypeLocator()).isNotNull();
+		assertThat(state.findType("java.lang.Integer")).isEqualTo(Integer.class);
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				state.findType("someMadeUpName"))
+			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.TYPE_NOT_FOUND));
+
 	}
 
 	@Test
 	public void testTypeConversion() throws EvaluationException {
 		ExpressionState state = getState();
 		String s = (String) state.convertValue(34, TypeDescriptor.valueOf(String.class));
-		assertEquals("34", s);
+		assertThat(s).isEqualTo("34");
 
 		s = (String)state.convertValue(new TypedValue(34), TypeDescriptor.valueOf(String.class));
-		assertEquals("34", s);
+		assertThat(s).isEqualTo("34");
 	}
 
 	@Test
 	public void testPropertyAccessors() {
 		ExpressionState state = getState();
-		assertEquals(state.getEvaluationContext().getPropertyAccessors(), state.getPropertyAccessors());
+		assertThat(state.getPropertyAccessors()).isEqualTo(state.getEvaluationContext().getPropertyAccessors());
 	}
 
 	/**

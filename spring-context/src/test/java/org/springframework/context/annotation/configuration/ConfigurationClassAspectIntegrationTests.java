@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,11 +20,12 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -33,10 +34,9 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * System tests covering use of AspectJ {@link Aspect}s in conjunction with {@link Configuration} classes.
@@ -73,9 +73,9 @@ public class ConfigurationClassAspectIntegrationTests {
 		ctx.refresh();
 
 		TestBean testBean = ctx.getBean("testBean", TestBean.class);
-		assertThat(testBean.getName(), equalTo("name"));
+		assertThat(testBean.getName()).isEqualTo("name");
 		testBean.absquatulate();
-		assertThat(testBean.getName(), equalTo("advisedName"));
+		assertThat(testBean.getName()).isEqualTo("advisedName");
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class ConfigurationClassAspectIntegrationTests {
 			return new TestBean("name");
 		}
 
-		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
@@ -122,7 +122,7 @@ public class ConfigurationClassAspectIntegrationTests {
 	@Aspect
 	static class NameChangingAspect {
 
-		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}

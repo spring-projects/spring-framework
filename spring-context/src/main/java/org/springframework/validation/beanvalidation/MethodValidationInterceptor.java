@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
@@ -28,8 +29,12 @@ import javax.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -47,7 +52,7 @@ import org.springframework.validation.annotation.Validated;
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
  *
- * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1 provider.
+ * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -84,8 +89,13 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		// Avoid Validator invocation on FactoryBean.getObjectType/isSingleton
+		if (isFactoryBeanMetadataMethod(invocation.getMethod())) {
+			return invocation.proceed();
+		}
+
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		// Standard Bean Validation 1.1 API
@@ -93,17 +103,18 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Method methodToValidate = invocation.getMethod();
 		Set<ConstraintViolation<Object>> result;
 
+		Object target = invocation.getThis();
+		Assert.state(target != null, "Target must not be null");
+
 		try {
-			result = execVal.validateParameters(
-					invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
 		}
 		catch (IllegalArgumentException ex) {
 			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
 			// Let's try to find the bridged method on the implementation class...
 			methodToValidate = BridgeMethodResolver.findBridgedMethod(
-					ClassUtils.getMostSpecificMethod(invocation.getMethod(), invocation.getThis().getClass()));
-			result = execVal.validateParameters(
-					invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+					ClassUtils.getMostSpecificMethod(invocation.getMethod(), target.getClass()));
+			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
 		}
 		if (!result.isEmpty()) {
 			throw new ConstraintViolationException(result);
@@ -111,12 +122,33 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 		Object returnValue = invocation.proceed();
 
-		result = execVal.validateReturnValue(invocation.getThis(), methodToValidate, returnValue, groups);
+		result = execVal.validateReturnValue(target, methodToValidate, returnValue, groups);
 		if (!result.isEmpty()) {
 			throw new ConstraintViolationException(result);
 		}
 
 		return returnValue;
+	}
+
+	private boolean isFactoryBeanMetadataMethod(Method method) {
+		Class<?> clazz = method.getDeclaringClass();
+
+		// Call from interface-based proxy handle, allowing for an efficient check?
+		if (clazz.isInterface()) {
+			return ((clazz == FactoryBean.class || clazz == SmartFactoryBean.class) &&
+					!method.getName().equals("getObject"));
+		}
+
+		// Call from CGLIB proxy handle, potentially implementing a FactoryBean method?
+		Class<?> factoryBeanType = null;
+		if (SmartFactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = SmartFactoryBean.class;
+		}
+		else if (FactoryBean.class.isAssignableFrom(clazz)) {
+			factoryBeanType = FactoryBean.class;
+		}
+		return (factoryBeanType != null && !method.getName().equals("getObject") &&
+				ClassUtils.hasMethod(factoryBeanType, method));
 	}
 
 	/**
@@ -129,7 +161,9 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
 		if (validatedAnn == null) {
-			validatedAnn = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
+			Object target = invocation.getThis();
+			Assert.state(target != null, "Target must not be null");
+			validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
 		}
 		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.http.converter.xml;
+
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -57,9 +59,9 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 	 * @see Jackson2ObjectMapperBuilder#xml()
 	 */
 	public MappingJackson2XmlHttpMessageConverter(ObjectMapper objectMapper) {
-		super(objectMapper, new MediaType("application", "xml"),
-				new MediaType("text", "xml"),
-				new MediaType("application", "*+xml"));
+		super(objectMapper, new MediaType("application", "xml", StandardCharsets.UTF_8),
+				new MediaType("text", "xml", StandardCharsets.UTF_8),
+				new MediaType("application", "*+xml", StandardCharsets.UTF_8));
 		Assert.isInstanceOf(XmlMapper.class, objectMapper, "XmlMapper required");
 	}
 

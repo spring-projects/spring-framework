@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,12 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -38,6 +39,8 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferLimitException;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.codec.HttpMessageDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -49,6 +52,8 @@ import org.springframework.util.MimeType;
 /**
  * Abstract base class for Jackson 2.9 decoding, leveraging non-blocking parsing.
  *
+ * <p>Compatible with Jackson 2.9.7 and higher.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -57,11 +62,7 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport implements HttpMessageDecoder<Object> {
 
-	/**
-	 * Until https://github.com/FasterXML/jackson-core/issues/476 is resolved,
-	 * we need to ensure buffer recycling is off.
-	 */
-	private final JsonFactory jsonFactory;
+	private int maxInMemorySize = 256 * 1024;
 
 
 	/**
@@ -69,8 +70,28 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	 */
 	protected AbstractJackson2Decoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		this.jsonFactory = mapper.getFactory().copy()
-				.disable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING);
+	}
+
+
+	/**
+	 * Set the max number of bytes that can be buffered by this decoder. This
+	 * is either the size of the entire input when decoding as a whole, or the
+	 * size of one top-level JSON object within a JSON stream. When the limit
+	 * is exceeded, {@link DataBufferLimitException} is raised.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 * @since 5.1.11
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.maxInMemorySize = byteCount;
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 * @since 5.1.11
+	 */
+	public int getMaxInMemorySize() {
+		return this.maxInMemorySize;
 	}
 
 
@@ -86,58 +107,118 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Flux<Object> decode(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, true);
-		return decodeInternal(tokens, elementType, mimeType, hints);
+		ObjectMapper mapper = getObjectMapper();
+
+		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+		if (BigDecimal.class.equals(elementType.getType())) {
+			forceUseOfBigDecimal = true;
+		}
+
+		Flux<DataBuffer> processed = processInput(input, elementType, mimeType, hints);
+		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, mapper.getFactory(), mapper,
+				true, forceUseOfBigDecimal, getMaxInMemorySize());
+
+		ObjectReader reader = getObjectReader(elementType, hints);
+
+		return tokens.handle((tokenBuffer, sink) -> {
+			try {
+				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
+				logValue(value, hints);
+				if (value != null) {
+					sink.next(value);
+				}
+			}
+			catch (IOException ex) {
+				sink.error(processException(ex));
+			}
+		});
+	}
+
+	/**
+	 * Process the input publisher into a flux. Default implementation returns
+	 * {@link Flux#from(Publisher)}, but subclasses can choose to customize
+	 * this behavior.
+	 * @param input the {@code DataBuffer} input stream to process
+	 * @param elementType the expected type of elements in the output stream
+	 * @param mimeType the MIME type associated with the input stream (optional)
+	 * @param hints additional information about how to do encode
+	 * @return the processed flux
+	 * @since 5.1.14
+	 */
+	protected Flux<DataBuffer> processInput(Publisher<DataBuffer> input, ResolvableType elementType,
+				@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		return Flux.from(input);
 	}
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(Flux.from(input), this.jsonFactory, false);
-		return decodeInternal(tokens, elementType, mimeType, hints).singleOrEmpty();
+		return DataBufferUtils.join(input, this.maxInMemorySize)
+				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
 	}
 
-	private Flux<Object> decodeInternal(Flux<TokenBuffer> tokens, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+	@Override
+	public Object decode(DataBuffer dataBuffer, ResolvableType targetType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		Assert.notNull(tokens, "'tokens' must not be null");
+		try {
+			ObjectReader objectReader = getObjectReader(targetType, hints);
+			Object value = objectReader.readValue(dataBuffer.asInputStream());
+			logValue(value, hints);
+			return value;
+		}
+		catch (IOException ex) {
+			throw processException(ex);
+		}
+		finally {
+			DataBufferUtils.release(dataBuffer);
+		}
+	}
+
+	private ObjectReader getObjectReader(ResolvableType elementType, @Nullable Map<String, Object> hints) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-
-		MethodParameter param = getParameter(elementType);
-		Class<?> contextClass = (param != null ? param.getContainingClass() : null);
+		Class<?> contextClass = getContextClass(elementType);
+		if (contextClass == null && hints != null) {
+			contextClass = getContextClass((ResolvableType) hints.get(ACTUAL_TYPE_HINT));
+		}
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
-
-		ObjectReader reader = (jsonView != null ?
+		return jsonView != null ?
 				getObjectMapper().readerWithView(jsonView).forType(javaType) :
-				getObjectMapper().readerFor(javaType));
+				getObjectMapper().readerFor(javaType);
+	}
 
-		return tokens.map(tokenBuffer -> {
-			try {
-				Object value = reader.readValue(tokenBuffer.asParser(getObjectMapper()));
-				if (!Hints.isLoggingSuppressed(hints)) {
-					LogFormatUtils.traceDebug(logger, traceOn -> {
-						String formatted = LogFormatUtils.formatValue(value, !traceOn);
-						return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
-					});
-				}
-				return value;
-			}
-			catch (InvalidDefinitionException ex) {
-				throw new CodecException("Type definition error: " + ex.getType(), ex);
-			}
-			catch (JsonProcessingException ex) {
-				throw new DecodingException("JSON decoding error: " + ex.getOriginalMessage(), ex);
-			}
-			catch (IOException ex) {
-				throw new DecodingException("I/O error while parsing input stream", ex);
-			}
-		});
+	@Nullable
+	private Class<?> getContextClass(@Nullable ResolvableType elementType) {
+		MethodParameter param = (elementType != null ? getParameter(elementType)  : null);
+		return (param != null ? param.getContainingClass() : null);
+	}
+
+	private void logValue(@Nullable Object value, @Nullable Map<String, Object> hints) {
+		if (!Hints.isLoggingSuppressed(hints)) {
+			LogFormatUtils.traceDebug(logger, traceOn -> {
+				String formatted = LogFormatUtils.formatValue(value, !traceOn);
+				return Hints.getLogPrefix(hints) + "Decoded [" + formatted + "]";
+			});
+		}
+	}
+
+	private CodecException processException(IOException ex) {
+		if (ex instanceof InvalidDefinitionException) {
+			JavaType type = ((InvalidDefinitionException) ex).getType();
+			return new CodecException("Type definition error: " + type, ex);
+		}
+		if (ex instanceof JsonProcessingException) {
+			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();
+			return new DecodingException("JSON decoding error: " + originalMessage, ex);
+		}
+		return new DecodingException("I/O error while parsing input stream", ex);
 	}
 
 
-	// HttpMessageDecoder...
+	// HttpMessageDecoder
 
 	@Override
 	public Map<String, Object> getDecodeHints(ResolvableType actualType, ResolvableType elementType,
@@ -151,7 +232,8 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return getMimeTypes();
 	}
 
-	// Jackson2CodecSupport ...
+
+	// Jackson2CodecSupport
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {

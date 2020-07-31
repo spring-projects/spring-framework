@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.metrics.ApplicationStartup;
+import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
@@ -44,6 +46,7 @@ import org.springframework.util.ErrorHandler;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @see #setTaskExecutor
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
@@ -53,6 +56,9 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Nullable
 	private ErrorHandler errorHandler;
+
+	@Nullable
+	private ApplicationStartup applicationStartup;
 
 
 	/**
@@ -121,6 +127,21 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		return this.errorHandler;
 	}
 
+	/**
+	 * Set the {@link ApplicationStartup} to track event listener invocations during startup.
+	 * @since 5.3
+	 */
+	public void setApplicationStartup(@Nullable ApplicationStartup applicationStartup) {
+		this.applicationStartup = applicationStartup;
+	}
+
+	/**
+	 * Return the current application startup for this multicaster.
+	 */
+	@Nullable
+	public ApplicationStartup getApplicationStartup() {
+		return this.applicationStartup;
+	}
 
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
@@ -130,10 +151,20 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	@Override
 	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
-		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
-			Executor executor = getTaskExecutor();
+		Executor executor = getTaskExecutor();
+		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null) {
 				executor.execute(() -> invokeListener(listener, event));
+			}
+			else if (this.applicationStartup != null) {
+				StartupStep invocationStep = this.applicationStartup.start("spring.event.invoke-listener");
+				invokeListener(listener, event);
+				invocationStep.tag("event", event::toString);
+				if (eventType != null) {
+					invocationStep.tag("eventType", eventType::toString);
+				}
+				invocationStep.tag("listener", listener::toString);
+				invocationStep.end();
 			}
 			else {
 				invokeListener(listener, event);
@@ -166,7 +197,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		}
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void doInvokeListener(ApplicationListener listener, ApplicationEvent event) {
 		try {
 			listener.onApplicationEvent(event);
@@ -177,8 +208,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
 				// -> let's suppress the exception and just log a debug message.
 				Log logger = LogFactory.getLog(getClass());
-				if (logger.isDebugEnabled()) {
-					logger.debug("Non-matching event type for listener: " + listener, ex);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Non-matching event type for listener: " + listener, ex);
 				}
 			}
 			else {

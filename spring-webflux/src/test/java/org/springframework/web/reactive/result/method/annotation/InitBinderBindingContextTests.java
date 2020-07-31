@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,14 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,14 +34,15 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.SyncInvocableHandlerMethod;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link InitBinderBindingContext}.
+ *
  * @author Rossen Stoyanchev
  */
 public class InitBinderBindingContextTests {
@@ -59,8 +58,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("id", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("id");
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertSame(conversionService, dataBinder.getConversionService());
+		assertThat(dataBinder.getConversionService()).isSameAs(conversionService);
 	}
 
 	@Test
@@ -81,8 +80,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "foo");
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("id", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("id");
 	}
 
 	@Test
@@ -91,7 +90,7 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "invalidName");
 
-		assertNull(dataBinder.getDisallowedFields());
+		assertThat(dataBinder.getDisallowedFields()).isNull();
 	}
 
 	@Test
@@ -100,14 +99,15 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, null);
 
-		assertNull(dataBinder.getDisallowedFields());
+		assertThat(dataBinder.getDisallowedFields()).isNull();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void returnValueNotExpected() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		BindingContext context = createBindingContext("initBinderReturnValue", WebDataBinder.class);
-		context.createDataBinder(exchange, null, "invalidName");
+		assertThatIllegalStateException().isThrownBy(() ->
+				context.createDataBinder(exchange, null, "invalidName"));
 	}
 
 	@Test
@@ -120,8 +120,8 @@ public class InitBinderBindingContextTests {
 		BindingContext context = createBindingContext("initBinderTypeConversion", WebDataBinder.class, int.class);
 		WebDataBinder dataBinder = context.createDataBinder(exchange, null, "foo");
 
-		assertNotNull(dataBinder.getDisallowedFields());
-		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
+		assertThat(dataBinder.getDisallowedFields()).isNotNull();
+		assertThat(dataBinder.getDisallowedFields()[0]).isEqualTo("requestParam-22");
 	}
 
 

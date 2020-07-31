@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,6 +62,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public final class ModelFactory {
 
 	private static final Log logger = LogFactory.getLog(ModelFactory.class);
+
 
 	private final List<ModelMethod> modelMethods = new ArrayList<>();
 
@@ -140,14 +141,22 @@ public final class ModelFactory {
 			}
 
 			Object returnValue = modelMethod.invokeForRequest(request, container);
-			if (!modelMethod.isVoid()){
-				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
-				if (!ann.binding()) {
-					container.setBindingDisabled(returnValueName);
+			if (modelMethod.isVoid()) {
+				if (StringUtils.hasText(ann.value())) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Name in @ModelAttribute is ignored because method returns void: " +
+								modelMethod.getShortLogMessage());
+					}
 				}
-				if (!container.containsAttribute(returnValueName)) {
-					container.addAttribute(returnValueName, returnValue);
-				}
+				continue;
+			}
+
+			String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
+			if (!ann.binding()) {
+				container.setBindingDisabled(returnValueName);
+			}
+			if (!container.containsAttribute(returnValueName)) {
+				container.addAttribute(returnValueName, returnValue);
 			}
 		}
 	}
@@ -302,16 +311,6 @@ public final class ModelFactory {
 				}
 			}
 			return true;
-		}
-
-		public List<String> getUnresolvedDependencies(ModelAndViewContainer mavContainer) {
-			List<String> result = new ArrayList<>(this.dependencies.size());
-			for (String name : this.dependencies) {
-				if (!mavContainer.containsAttribute(name)) {
-					result.add(name);
-				}
-			}
-			return result;
 		}
 
 		@Override

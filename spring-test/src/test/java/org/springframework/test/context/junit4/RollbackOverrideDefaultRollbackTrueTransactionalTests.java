@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 
-import static org.junit.Assert.*;
-import static org.springframework.test.transaction.TransactionTestUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.transaction.TransactionAssert.assertThatTransaction;
 
 /**
  * Extension of {@link DefaultRollbackTrueRollbackAnnotationTransactionalTests}
@@ -44,6 +44,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalTests
 	private static JdbcTemplate jdbcTemplate;
 
 
+	@Override
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);
@@ -53,26 +54,23 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalTests
 	@Override
 	public void verifyInitialTestData() {
 		clearPersonTable(jdbcTemplate);
-		assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
-		assertEquals("Verifying the initial number of rows in the person table.", 1,
-			countRowsInPersonTable(jdbcTemplate));
+		assertThat(addPerson(jdbcTemplate, BOB)).as("Adding bob").isEqualTo(1);
+		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the initial number of rows in the person table.").isEqualTo(1);
 	}
 
 	@Test
 	@Rollback(false)
 	@Override
 	public void modifyTestDataWithinTransaction() {
-		assertInTransaction(true);
-		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
-		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,
-			countRowsInPersonTable(jdbcTemplate));
+		assertThatTransaction().isActive();
+		assertThat(addPerson(jdbcTemplate, JANE)).as("Adding jane").isEqualTo(1);
+		assertThat(addPerson(jdbcTemplate, SUE)).as("Adding sue").isEqualTo(1);
+		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the number of rows in the person table within a transaction.").isEqualTo(3);
 	}
 
 	@AfterClass
 	public static void verifyFinalTestData() {
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
-			countRowsInPersonTable(jdbcTemplate));
+		assertThat(countRowsInPersonTable(jdbcTemplate)).as("Verifying the final number of rows in the person table after all tests.").isEqualTo(3);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,12 @@ package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for target selection matching (see SPR-3783).
@@ -45,7 +45,7 @@ public class TargetPointcutSelectionTests {
 	public TestInterceptor testInterceptor;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -64,17 +64,17 @@ public class TargetPointcutSelectionTests {
 	@Test
 	public void targetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
-		assertEquals("Should have been advised by POJO advice for impl", 1, testAspectForTestImpl1.count);
-		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);
-		assertEquals("Should have been advised by advisor", 1, testInterceptor.count);
+		assertThat(testAspectForTestImpl1.count).as("Should have been advised by POJO advice for impl").isEqualTo(1);
+		assertThat(testAspectForAbstractTestImpl.count).as("Should have been advised by POJO advice for base type").isEqualTo(1);
+		assertThat(testInterceptor.count).as("Should have been advised by advisor").isEqualTo(1);
 	}
 
 	@Test
 	public void targetNonSelectionForMismatchedType() {
 		testImpl2.interfaceMethod();
-		assertEquals("Shouldn't have been advised by POJO advice for impl", 0, testAspectForTestImpl1.count);
-		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);
-		assertEquals("Shouldn't have been advised by advisor", 0, testInterceptor.count);
+		assertThat(testAspectForTestImpl1.count).as("Shouldn't have been advised by POJO advice for impl").isEqualTo(0);
+		assertThat(testAspectForAbstractTestImpl.count).as("Should have been advised by POJO advice for base type").isEqualTo(1);
+		assertThat(testInterceptor.count).as("Shouldn't have been advised by advisor").isEqualTo(0);
 	}
 
 

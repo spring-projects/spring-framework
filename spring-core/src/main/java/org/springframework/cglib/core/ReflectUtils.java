@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -336,7 +336,15 @@ public class ReflectUtils {
 	public static Constructor getConstructor(Class type, Class[] parameterTypes) {
 		try {
 			Constructor constructor = type.getDeclaredConstructor(parameterTypes);
-			constructor.setAccessible(true);
+			if (System.getSecurityManager() != null) {
+				AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+					constructor.setAccessible(true);
+					return null;
+				});
+			}
+			else {
+				constructor.setAccessible(true);
+			}
 			return constructor;
 		}
 		catch (NoSuchMethodException e) {
@@ -491,7 +499,10 @@ public class ReflectUtils {
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
 		Class c = null;
-		if (contextClass != null && privateLookupInMethod != null && lookupDefineClassMethod != null) {
+
+		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
+		if (contextClass != null && contextClass.getClassLoader() == loader &&
+				privateLookupInMethod != null && lookupDefineClassMethod != null) {
 			try {
 				MethodHandles.Lookup lookup = (MethodHandles.Lookup)
 						privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
@@ -510,29 +521,52 @@ public class ReflectUtils {
 				throw new CodeGenerationException(ex);
 			}
 		}
-		if (protectionDomain == null) {
-			protectionDomain = PROTECTION_DOMAIN;
-		}
-		if (c == null) {
-			if (classLoaderDefineClassMethod != null) {
-				Object[] args = new Object[]{className, b, 0, b.length, protectionDomain};
-				try {
-					if (!classLoaderDefineClassMethod.isAccessible()) {
-						classLoaderDefineClassMethod.setAccessible(true);
-					}
-					c = (Class) classLoaderDefineClassMethod.invoke(loader, args);
+
+		// Classic option: protected ClassLoader.defineClass method
+		if (c == null && classLoaderDefineClassMethod != null) {
+			if (protectionDomain == null) {
+				protectionDomain = PROTECTION_DOMAIN;
+			}
+			Object[] args = new Object[]{className, b, 0, b.length, protectionDomain};
+			try {
+				if (!classLoaderDefineClassMethod.isAccessible()) {
+					classLoaderDefineClassMethod.setAccessible(true);
 				}
-				catch (InvocationTargetException ex) {
-					throw new CodeGenerationException(ex.getTargetException());
-				}
-				catch (Throwable ex) {
+				c = (Class) classLoaderDefineClassMethod.invoke(loader, args);
+			}
+			catch (InvocationTargetException ex) {
+				throw new CodeGenerationException(ex.getTargetException());
+			}
+			catch (Throwable ex) {
+				// Fall through if setAccessible fails with InaccessibleObjectException on JDK 9+
+				// (on the module path and/or with a JVM bootstrapped with --illegal-access=deny)
+				if (!ex.getClass().getName().endsWith("InaccessibleObjectException")) {
 					throw new CodeGenerationException(ex);
 				}
 			}
-			else {
-				throw new CodeGenerationException(THROWABLE);
+		}
+
+		// Fallback option: JDK 9+ Lookup.defineClass API even if ClassLoader does not match
+		if (c == null && contextClass != null && contextClass.getClassLoader() != loader &&
+				privateLookupInMethod != null && lookupDefineClassMethod != null) {
+			try {
+				MethodHandles.Lookup lookup = (MethodHandles.Lookup)
+						privateLookupInMethod.invoke(null, contextClass, MethodHandles.lookup());
+				c = (Class) lookupDefineClassMethod.invoke(lookup, b);
+			}
+			catch (InvocationTargetException ex) {
+				throw new CodeGenerationException(ex.getTargetException());
+			}
+			catch (Throwable ex) {
+				throw new CodeGenerationException(ex);
 			}
 		}
+
+		// No defineClass variant available at all?
+		if (c == null) {
+			throw new CodeGenerationException(THROWABLE);
+		}
+
 		// Force static initializers to run.
 		Class.forName(className, true, loader);
 		return c;

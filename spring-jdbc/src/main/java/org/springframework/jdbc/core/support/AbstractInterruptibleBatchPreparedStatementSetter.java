@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,7 +71,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * @return whether there were values to apply (that is, whether the applied
 	 * parameters should be added to the batch and this method should be called
 	 * for a further iteration)
-	 * @throws SQLException if a SQLException is encountered
+	 * @throws SQLException if an SQLException is encountered
 	 * (i.e. there is no need to catch SQLException)
 	 */
 	protected abstract boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException;

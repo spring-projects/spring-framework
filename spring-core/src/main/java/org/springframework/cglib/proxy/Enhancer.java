@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -259,6 +259,9 @@ public class Enhancer extends AbstractClassGenerator {
 	public void setSuperclass(Class superclass) {
 		if (superclass != null && superclass.isInterface()) {
 			setInterfaces(new Class[]{superclass});
+			// SPRING PATCH BEGIN
+			setContextClass(superclass);
+			// SPRING PATCH END
 		}
 		else if (superclass != null && superclass.equals(Object.class)) {
 			// affects choice of ClassLoader
@@ -683,7 +686,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 		ClassEmitter e = new ClassEmitter(v);
 		if (currentData == null) {
-			e.begin_class(Constants.V1_2,
+			e.begin_class(Constants.V1_8,
 					Constants.ACC_PUBLIC,
 					getClassName(),
 					Type.getType(sc),
@@ -693,7 +696,7 @@ public class Enhancer extends AbstractClassGenerator {
 					Constants.SOURCE_FILE);
 		}
 		else {
-			e.begin_class(Constants.V1_2,
+			e.begin_class(Constants.V1_8,
 					Constants.ACC_PUBLIC,
 					getClassName(),
 					null,
@@ -762,7 +765,7 @@ public class Enhancer extends AbstractClassGenerator {
 
 	/**
 	 * This method should not be called in regular flow.
-	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link EnhancerFactoryData} as a cache value,
+	 * Technically speaking {@link #wrapCachedClass(Class)} uses {@link Enhancer.EnhancerFactoryData} as a cache value,
 	 * and the latter enables faster instantiation than plain old reflection lookup and invoke.
 	 * This method is left intact for backward compatibility reasons: just in case it was ever used.
 	 * @param type class to instantiate
@@ -1118,7 +1121,7 @@ public class Enhancer extends AbstractClassGenerator {
 		CodeEmitter e = ce.begin_method(Constants.ACC_PUBLIC, NEW_INSTANCE, null);
 		Type thisType = getThisType(e);
 		e.load_arg(0);
-		e.invoke_static(thisType, SET_THREAD_CALLBACKS);
+		e.invoke_static(thisType, SET_THREAD_CALLBACKS, false);
 		emitCommonNewInstance(e);
 	}
 
@@ -1137,7 +1140,7 @@ public class Enhancer extends AbstractClassGenerator {
 		e.dup();
 		e.invoke_constructor(thisType);
 		e.aconst_null();
-		e.invoke_static(thisType, SET_THREAD_CALLBACKS);
+		e.invoke_static(thisType, SET_THREAD_CALLBACKS, false);
 		e.return_value();
 		e.end_method();
 	}
@@ -1156,7 +1159,7 @@ public class Enhancer extends AbstractClassGenerator {
 				e.push(0);
 				e.load_arg(0);
 				e.aastore();
-				e.invoke_static(getThisType(e), SET_THREAD_CALLBACKS);
+				e.invoke_static(getThisType(e), SET_THREAD_CALLBACKS, false);
 				break;
 			default:
 				e.throw_exception(ILLEGAL_STATE_EXCEPTION, "More than one callback object required");
@@ -1168,7 +1171,7 @@ public class Enhancer extends AbstractClassGenerator {
 		final CodeEmitter e = ce.begin_method(Constants.ACC_PUBLIC, MULTIARG_NEW_INSTANCE, null);
 		final Type thisType = getThisType(e);
 		e.load_arg(2);
-		e.invoke_static(thisType, SET_THREAD_CALLBACKS);
+		e.invoke_static(thisType, SET_THREAD_CALLBACKS, false);
 		e.new_instance(thisType);
 		e.dup();
 		e.load_arg(0);
@@ -1191,7 +1194,7 @@ public class Enhancer extends AbstractClassGenerator {
 			}
 		});
 		e.aconst_null();
-		e.invoke_static(thisType, SET_THREAD_CALLBACKS);
+		e.invoke_static(thisType, SET_THREAD_CALLBACKS, false);
 		e.return_value();
 		e.end_method();
 	}

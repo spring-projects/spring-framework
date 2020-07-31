@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,11 @@ package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -158,12 +156,16 @@ public final class WebHttpHandlerBuilder {
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
-		// Autowire lists for @Bean + @Order
-
-		SortedBeanContainer container = new SortedBeanContainer();
-		context.getAutowireCapableBeanFactory().autowireBean(container);
-		builder.filters(filters -> filters.addAll(container.getFilters()));
-		builder.exceptionHandlers(handlers -> handlers.addAll(container.getExceptionHandlers()));
+		List<WebFilter> webFilters = context
+				.getBeanProvider(WebFilter.class)
+				.orderedStream()
+				.collect(Collectors.toList());
+		builder.filters(filters -> filters.addAll(webFilters));
+		List<WebExceptionHandler> exceptionHandlers = context
+				.getBeanProvider(WebExceptionHandler.class)
+				.orderedStream()
+				.collect(Collectors.toList());
+		builder.exceptionHandlers(handlers -> handlers.addAll(exceptionHandlers));
 
 		try {
 			builder.sessionManager(
@@ -176,14 +178,6 @@ public final class WebHttpHandlerBuilder {
 		try {
 			builder.codecConfigurer(
 					context.getBean(SERVER_CODEC_CONFIGURER_BEAN_NAME, ServerCodecConfigurer.class));
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Fall back on default
-		}
-
-		try {
-			builder.localeContextResolver(
-					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Fall back on default
@@ -387,32 +381,6 @@ public final class WebHttpHandlerBuilder {
 	@Override
 	public WebHttpHandlerBuilder clone() {
 		return new WebHttpHandlerBuilder(this);
-	}
-
-
-	private static class SortedBeanContainer {
-
-		private List<WebFilter> filters = Collections.emptyList();
-
-		private List<WebExceptionHandler> exceptionHandlers = Collections.emptyList();
-
-		@Autowired(required = false)
-		public void setFilters(List<WebFilter> filters) {
-			this.filters = filters;
-		}
-
-		public List<WebFilter> getFilters() {
-			return this.filters;
-		}
-
-		@Autowired(required = false)
-		public void setExceptionHandlers(List<WebExceptionHandler> exceptionHandlers) {
-			this.exceptionHandlers = exceptionHandlers;
-		}
-
-		public List<WebExceptionHandler> getExceptionHandlers() {
-			return this.exceptionHandlers;
-		}
 	}
 
 }

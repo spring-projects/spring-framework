@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,9 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.NestedIOException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ResourceUtils;
@@ -39,6 +42,7 @@ import org.springframework.util.ResourceUtils;
  * throw an exception; and "toString" will return the description.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  */
 public abstract class AbstractResource implements Resource {
@@ -51,18 +55,28 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public boolean exists() {
 		// Try file existence: can we find the file in the file system?
-		try {
-			return getFile().exists();
-		}
-		catch (IOException ex) {
-			// Fall back to stream existence: can we open the stream?
+		if (isFile()) {
 			try {
-				getInputStream().close();
-				return true;
+				return getFile().exists();
 			}
-			catch (Throwable isEx) {
-				return false;
+			catch (IOException ex) {
+				Log logger = LogFactory.getLog(getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not retrieve File for existence check of " + getDescription(), ex);
+				}
 			}
+		}
+		// Fall back to stream existence: can we open the stream?
+		try {
+			getInputStream().close();
+			return true;
+		}
+		catch (Throwable ex) {
+			Log logger = LogFactory.getLog(getClass());
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not retrieve InputStream for existence check of " + getDescription(), ex);
+			}
+			return false;
 		}
 	}
 
@@ -136,9 +150,11 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation reads the entire InputStream to calculate the
-	 * content length. Subclasses will almost always be able to provide
-	 * a more optimal version of this, e.g. checking a File length.
+	 * This method reads the entire InputStream to determine the content length.
+	 * <p>For a custom sub-class of {@code InputStreamResource}, we strongly
+	 * recommend overriding this method with a more optimal implementation, e.g.
+	 * checking File length, or possibly simply returning -1 if the stream can
+	 * only be read once.
 	 * @see #getInputStream()
 	 */
 	@Override
@@ -146,7 +162,7 @@ public abstract class AbstractResource implements Resource {
 		InputStream is = getInputStream();
 		try {
 			long size = 0;
-			byte[] buf = new byte[255];
+			byte[] buf = new byte[256];
 			int read;
 			while ((read = is.read(buf)) != -1) {
 				size += read;
@@ -158,6 +174,10 @@ public abstract class AbstractResource implements Resource {
 				is.close();
 			}
 			catch (IOException ex) {
+				Log logger = LogFactory.getLog(getClass());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not close content-length InputStream for " + getDescription(), ex);
+				}
 			}
 		}
 	}
@@ -169,10 +189,11 @@ public abstract class AbstractResource implements Resource {
 	 */
 	@Override
 	public long lastModified() throws IOException {
-		long lastModified = getFileForLastModifiedCheck().lastModified();
-		if (lastModified == 0L) {
+		File fileToCheck = getFileForLastModifiedCheck();
+		long lastModified = fileToCheck.lastModified();
+		if (lastModified == 0L && !fileToCheck.exists()) {
 			throw new FileNotFoundException(getDescription() +
-					" cannot be resolved in the file system for resolving its last-modified timestamp");
+					" cannot be resolved in the file system for checking its last-modified timestamp");
 		}
 		return lastModified;
 	}
@@ -214,7 +235,7 @@ public abstract class AbstractResource implements Resource {
 	 * @see #getDescription()
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof Resource &&
 				((Resource) other).getDescription().equals(getDescription())));
 	}

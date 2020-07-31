@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,10 +39,10 @@ import org.springframework.transaction.PlatformTransactionManager;
  * typical case of declarative transaction demarcation: namely, wrapping a singleton
  * target object with a transactional proxy, proxying all the interfaces that the target
  * implements. However, in Spring versions 2.0 and beyond, the functionality provided here
- * is superseded by the more convenient {@code tx:} XML namespace. See the <a
- * href="http://bit.ly/qUwvwz">declarative transaction management</a> section of the
- * Spring reference documentation to understand the modern options for managing
- * transactions in Spring applications. For these reasons, <strong>users should favor of
+ * is superseded by the more convenient {@code tx:} XML namespace. See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/data-access.html#transaction-declarative">declarative transaction management</a>
+ * section of the Spring reference documentation to understand modern options for managing
+ * transactions in Spring applications. For these reasons, <strong>users should favor
  * the {@code tx:} XML namespace as well as
  * the @{@link org.springframework.transaction.annotation.Transactional Transactional}
  * and @{@link org.springframework.transaction.annotation.EnableTransactionManagement

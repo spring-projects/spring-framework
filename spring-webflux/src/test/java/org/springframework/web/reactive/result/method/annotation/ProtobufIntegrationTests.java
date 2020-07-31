@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -35,43 +32,47 @@ import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.protobuf.Msg;
 import org.springframework.web.reactive.protobuf.SecondMsg;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for Protobuf support.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
-public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
-	public static final Msg TEST_MSG = Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
+	static final Msg TEST_MSG =
+			Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(123).build()).build();
 
 	private WebClient webClient;
 
 
 	@Override
-	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(TestConfiguration .class);
-		wac.refresh();
-		return wac;
-	}
-
-	@Override
-	@Before
-	public void setup() throws Exception {
-		super.setup();
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
 		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
-	@Test
-	public void value() {
+	@Override
+	protected ApplicationContext initApplicationContext() {
+		return new AnnotationConfigApplicationContext(TestConfiguration.class);
+	}
+
+
+	@ParameterizedHttpServerTest
+	void value(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/message")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertFalse(response.headers().contentType().get().getParameters().containsKey("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertThat(response.headers().contentType().get().getParameters().containsKey("delimited")).isFalse();
+					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
 				})
 				.flatMap(response -> response.bodyToMono(Msg.class));
 
@@ -80,15 +81,17 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void values() {
+	@ParameterizedHttpServerTest
+	void values(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Msg> result = this.webClient.get()
 				.uri("/messages")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
+					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
 				})
 				.flatMapMany(response -> response.bodyToFlux(Msg.class));
 
@@ -99,15 +102,17 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void streaming() {
+	@ParameterizedHttpServerTest
+	void streaming(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Flux<Msg> result = this.webClient.get()
 				.uri("/message-stream")
 				.exchange()
 				.doOnNext(response -> {
-					Assert.assertEquals("true", response.headers().contentType().get().getParameters().get("delimited"));
-					Assert.assertEquals("sample.proto", response.headers().header("X-Protobuf-Schema").get(0));
-					Assert.assertEquals("Msg", response.headers().header("X-Protobuf-Message").get(0));
+					assertThat(response.headers().contentType().get().getParameters().get("delimited")).isEqualTo("true");
+					assertThat(response.headers().header("X-Protobuf-Schema").get(0)).isEqualTo("sample.proto");
+					assertThat(response.headers().header("X-Protobuf-Message").get(0)).isEqualTo("Msg");
 				})
 				.flatMapMany(response -> response.bodyToFlux(Msg.class));
 
@@ -118,8 +123,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verify();
 	}
 
-	@Test
-	public void empty() {
+	@ParameterizedHttpServerTest
+	void empty(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/empty")
 				.retrieve()
@@ -129,8 +136,10 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 				.verifyComplete();
 	}
 
-	@Test
-	public void defaultInstance() {
+	@ParameterizedHttpServerTest
+	void defaultInstance(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<Msg> result = this.webClient.get()
 				.uri("/default-instance")
 				.retrieve()
@@ -139,6 +148,7 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 		StepVerifier.create(result)
 				.verifyComplete();
 	}
+
 
 	@RestController
 	@SuppressWarnings("unused")
@@ -156,7 +166,8 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 
 		@GetMapping(value = "/message-stream", produces = "application/x-protobuf;delimited=true")
 		Flux<Msg> messageStream() {
-			return testInterval(Duration.ofMillis(50), 5).map(l -> Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(l.intValue()).build()).build());
+			return testInterval(Duration.ofMillis(50), 5).map(l ->
+					Msg.newBuilder().setFoo("Foo").setBlah(SecondMsg.newBuilder().setBlah(l.intValue()).build()).build());
 		}
 
 		@GetMapping("/empty")
@@ -168,8 +179,8 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 		Mono<Msg> defaultInstance() {
 			return Mono.just(Msg.getDefaultInstance());
 		}
-
 	}
+
 
 	@Configuration
 	@EnableWebFlux
@@ -177,4 +188,5 @@ public class ProtobufIntegrationTests extends AbstractRequestMappingIntegrationT
 	@SuppressWarnings("unused")
 	static class TestConfiguration {
 	}
+
 }

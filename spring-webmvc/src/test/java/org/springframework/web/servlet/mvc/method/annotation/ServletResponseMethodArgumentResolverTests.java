@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,19 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.Method;
+
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test fixture with {@link ServletResponseMethodArgumentResolver}.
@@ -50,7 +51,7 @@ public class ServletResponseMethodArgumentResolverTests {
 	private Method method;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
 		mavContainer = new ModelAndViewContainer();
@@ -64,40 +65,40 @@ public class ServletResponseMethodArgumentResolverTests {
 	@Test
 	public void servletResponse() throws Exception {
 		MethodParameter servletResponseParameter = new MethodParameter(method, 0);
-		assertTrue("ServletResponse not supported", resolver.supportsParameter(servletResponseParameter));
+		assertThat(resolver.supportsParameter(servletResponseParameter)).as("ServletResponse not supported").isTrue();
 
 		Object result = resolver.resolveArgument(servletResponseParameter, mavContainer, webRequest, null);
-		assertSame("Invalid result", servletResponse, result);
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(result).as("Invalid result").isSameAs(servletResponse);
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 	}
 
 	@Test  // SPR-8983
 	public void servletResponseNoMavContainer() throws Exception {
 		MethodParameter servletResponseParameter = new MethodParameter(method, 0);
-		assertTrue("ServletResponse not supported", resolver.supportsParameter(servletResponseParameter));
+		assertThat(resolver.supportsParameter(servletResponseParameter)).as("ServletResponse not supported").isTrue();
 
 		Object result = resolver.resolveArgument(servletResponseParameter, null, webRequest, null);
-		assertSame("Invalid result", servletResponse, result);
+		assertThat(result).as("Invalid result").isSameAs(servletResponse);
 	}
 
 	@Test
 	public void outputStream() throws Exception {
 		MethodParameter outputStreamParameter = new MethodParameter(method, 1);
-		assertTrue("OutputStream not supported", resolver.supportsParameter(outputStreamParameter));
+		assertThat(resolver.supportsParameter(outputStreamParameter)).as("OutputStream not supported").isTrue();
 
 		Object result = resolver.resolveArgument(outputStreamParameter, mavContainer, webRequest, null);
-		assertSame("Invalid result", servletResponse.getOutputStream(), result);
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(result).as("Invalid result").isSameAs(servletResponse.getOutputStream());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 	}
 
 	@Test
 	public void writer() throws Exception {
 		MethodParameter writerParameter = new MethodParameter(method, 2);
-		assertTrue("Writer not supported", resolver.supportsParameter(writerParameter));
+		assertThat(resolver.supportsParameter(writerParameter)).as("Writer not supported").isTrue();
 
 		Object result = resolver.resolveArgument(writerParameter, mavContainer, webRequest, null);
-		assertSame("Invalid result", servletResponse.getWriter(), result);
-		assertTrue(mavContainer.isRequestHandled());
+		assertThat(result).as("Invalid result").isSameAs(servletResponse.getWriter());
+		assertThat(mavContainer.isRequestHandled()).isTrue();
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -74,7 +72,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json", StandardCharsets.UTF_8));
+		super(new MimeType("application", "json"));
 		this.objectMapper = initObjectMapper();
 	}
 
@@ -85,7 +83,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @since 4.1.5
 	 */
 	public MappingJackson2MessageConverter(MimeType... supportedMimeTypes) {
-		super(Arrays.asList(supportedMimeTypes));
+		super(supportedMimeTypes);
 		this.objectMapper = initObjectMapper();
 	}
 
@@ -220,6 +218,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 				else {
 					return this.objectMapper.readValue((byte[]) payload, javaType);
 				}
+			}
+			else if (targetClass.isInstance(payload)) {
+				return payload;
 			}
 			else {
 				if (view != null) {

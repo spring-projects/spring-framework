@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ public class SqlReturnUpdateCount extends SqlParameter {
 
 	/**
 	 * Create a new SqlReturnUpdateCount.
-	 * @param name name of the parameter, as used in input and output maps
+	 * @param name the name of the parameter, as used in input and output maps
 	 */
 	public SqlReturnUpdateCount(String name) {
 		super(name, Types.INTEGER);

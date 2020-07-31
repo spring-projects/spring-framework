@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.management.DynamicMBean;
 import javax.management.JMException;
 import javax.management.MBeanException;
@@ -509,7 +510,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/**
 	 * Register the defined beans with the {@link MBeanServer}.
 	 * <p>Each bean is exposed to the {@code MBeanServer} via a
-	 * {@code ModelMBean}. The actual implemetation of the
+	 * {@code ModelMBean}. The actual implementation of the
 	 * {@code ModelMBean} interface used depends on the implementation of
 	 * the {@code ModelMBeanProvider} interface that is configured. By
 	 * default the {@code RequiredModelMBean} class that is supplied with
@@ -939,9 +940,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * {@link org.springframework.jmx.export.notification.NotificationPublisher} is injected.
 	 */
 	private void injectNotificationPublisherIfNecessary(
-			Object managedResource, ModelMBean modelMBean, ObjectName objectName) {
+			Object managedResource, @Nullable ModelMBean modelMBean, @Nullable ObjectName objectName) {
 
-		if (managedResource instanceof NotificationPublisherAware) {
+		if (managedResource instanceof NotificationPublisherAware && modelMBean != null && objectName != null) {
 			((NotificationPublisherAware) managedResource).setNotificationPublisher(
 					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
@@ -1112,7 +1113,6 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 		@Override
 		protected void postProcessTargetObject(Object targetObject) {
-			Assert.state(this.modelMBean != null && this.objectName != null, "Not initialized");
 			injectNotificationPublisherIfNecessary(targetObject, this.modelMBean, this.objectName);
 		}
 	}

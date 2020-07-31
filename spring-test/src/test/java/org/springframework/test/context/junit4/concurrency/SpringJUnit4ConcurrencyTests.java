@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.ParallelComputer;
 
-import org.springframework.test.context.hierarchies.web.DispatcherWacRootWacEarTests;
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit4.InheritedConfigSpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.junit4.MethodLevelTransactionalSpringRunnerTests;
 import org.springframework.test.context.junit4.SpringJUnit47ClassRunnerRuleTests;
@@ -35,17 +35,11 @@ import org.springframework.test.context.junit4.rules.BaseAppCtxRuleTests;
 import org.springframework.test.context.junit4.rules.BasicAnnotationConfigWacSpringRuleTests;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import org.springframework.test.context.web.RequestAndSessionScopedBeansWacTests;
-import org.springframework.test.context.web.socket.WebSocketServletServerContainerFactoryBeanTests;
-import org.springframework.test.web.client.samples.SampleTests;
-import org.springframework.test.web.servlet.samples.context.JavaConfigTests;
-import org.springframework.test.web.servlet.samples.context.WebAppResourceTests;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
 
-import static org.springframework.core.annotation.AnnotatedElementUtils.*;
-import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
  * Concurrency tests for the {@link SpringRunner}, {@link SpringClassRule}, and
@@ -84,20 +78,14 @@ public class SpringJUnit4ConcurrencyTests {
 			MethodLevelTransactionalSpringRunnerTests.class,
 			TimedTransactionalSpringRunnerTests.class,
 		// Web and Scopes
-			DispatcherWacRootWacEarTests.class,
 			BasicAnnotationConfigWacSpringRuleTests.class,
-			RequestAndSessionScopedBeansWacTests.class,
-			WebSocketServletServerContainerFactoryBeanTests.class,
 		// Spring MVC Test
-			JavaConfigTests.class,
-			WebAppResourceTests.class,
-			SampleTests.class
 	};
 
 
 	@BeforeClass
 	public static void abortIfLongRunningTestGroupIsNotEnabled() {
-		Assume.group(TestGroup.LONG_RUNNING);
+		assumeTrue("TestGroup " + TestGroup.LONG_RUNNING + " is not active.", TestGroup.LONG_RUNNING.isActive());
 	}
 
 	@Test

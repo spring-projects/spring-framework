@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,31 +28,20 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
- * {@link PlaceholderConfigurerSupport} subclass that resolves ${...} placeholders
- * against {@link #setLocation local} {@link #setProperties properties} and/or system properties
+ * {@link PlaceholderConfigurerSupport} subclass that resolves ${...} placeholders against
+ * {@link #setLocation local} {@link #setProperties properties} and/or system properties
  * and environment variables.
- *
- * <p>As of Spring 3.1, {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * PropertySourcesPlaceholderConfigurer} should be used preferentially over this implementation; it is
- * more flexible through taking advantage of the {@link org.springframework.core.env.Environment Environment} and
- * {@link org.springframework.core.env.PropertySource PropertySource} mechanisms also made available in Spring 3.1.
  *
  * <p>{@link PropertyPlaceholderConfigurer} is still appropriate for use when:
  * <ul>
  * <li>the {@code spring-context} module is not available (i.e., one is using Spring's
  * {@code BeanFactory} API as opposed to {@code ApplicationContext}).
- * <li>existing configuration makes use of the {@link #setSystemPropertiesMode(int) "systemPropertiesMode"} and/or
- * {@link #setSystemPropertiesModeName(String) "systemPropertiesModeName"} properties. Users are encouraged to move
- * away from using these settings, and rather configure property source search order through the container's
- * {@code Environment}; however, exact preservation of functionality may be maintained by continuing to
- * use {@code PropertyPlaceholderConfigurer}.
+ * <li>existing configuration makes use of the {@link #setSystemPropertiesMode(int) "systemPropertiesMode"}
+ * and/or {@link #setSystemPropertiesModeName(String) "systemPropertiesModeName"} properties.
+ * Users are encouraged to move away from using these settings, and rather configure property
+ * source search order through the container's {@code Environment}; however, exact preservation
+ * of functionality may be maintained by continuing to use {@code PropertyPlaceholderConfigurer}.
  * </ul>
- *
- * <p>Prior to Spring 3.1, the {@code <context:property-placeholder/>} namespace element
- * registered an instance of {@code PropertyPlaceholderConfigurer}. It will still do so if
- * using the {@code spring-context-3.0.xsd} definition of the namespace. That is, you can preserve
- * registration of {@code PropertyPlaceholderConfigurer} through the namespace, even if using Spring 3.1;
- * simply do not update your {@code xsi:schemaLocation} and continue using the 3.0 XSD.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -60,8 +49,11 @@ import org.springframework.util.StringValueResolver;
  * @see #setSystemPropertiesModeName
  * @see PlaceholderConfigurerSupport
  * @see PropertyOverrideConfigurer
- * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * @deprecated as of 5.2; use {@code org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
+ * instead which is more flexible through taking advantage of the {@link org.springframework.core.env.Environment}
+ * and {@link org.springframework.core.env.PropertySource} mechanisms.
  */
+@Deprecated
 public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport {
 
 	/** Never check system properties. */
@@ -92,7 +84,6 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * Set the system property mode by the name of the corresponding constant,
 	 * e.g. "SYSTEM_PROPERTIES_MODE_OVERRIDE".
 	 * @param constantName name of the constant
-	 * @throws java.lang.IllegalArgumentException if an invalid constant was specified
 	 * @see #setSystemPropertiesMode
 	 */
 	public void setSystemPropertiesModeName(String constantName) throws IllegalArgumentException {
@@ -124,14 +115,9 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * against system environment variables. Note that it is generally recommended
 	 * to pass external values in as JVM system properties: This can easily be
 	 * achieved in a startup script, even for existing environment variables.
-	 * <p><b>NOTE:</b> Access to environment variables does not work on the
-	 * Sun VM 1.4, where the corresponding {@link System#getenv} support was
-	 * disabled - before it eventually got re-enabled for the Sun VM 1.5.
-	 * Please upgrade to 1.5 (or higher) if you intend to rely on the
-	 * environment variable support.
 	 * @see #setSystemPropertiesMode
-	 * @see java.lang.System#getProperty(String)
-	 * @see java.lang.System#getenv(String)
+	 * @see System#getProperty(String)
+	 * @see System#getenv(String)
 	 */
 	public void setSearchSystemEnvironment(boolean searchSystemEnvironment) {
 		this.searchSystemEnvironment = searchSystemEnvironment;

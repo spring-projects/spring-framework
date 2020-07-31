@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -26,12 +25,12 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
@@ -77,7 +76,16 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod httpMethod, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		MonoProcessor<ClientHttpResponse> result = MonoProcessor.create();
+		return Mono.defer(() -> doConnect(httpMethod, uri, requestCallback))
+				.subscribeOn(Schedulers.parallel());
+	}
+
+	private Mono<ClientHttpResponse> doConnect(
+			HttpMethod httpMethod, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
+
+		MonoProcessor<Void> requestWriteCompletion = MonoProcessor.create();
+		MonoProcessor<Void> handlerCompletion = MonoProcessor.create();
+		ClientHttpResponse[] savedResponse = new ClientHttpResponse[1];
 
 		MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);
 		MockServerHttpResponse mockServerResponse = new MockServerHttpResponse();
@@ -86,20 +94,26 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 			log("Invoking HttpHandler for ", httpMethod, uri);
 			ServerHttpRequest mockServerRequest = adaptRequest(mockClientRequest, requestBody);
 			ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
-			this.handler.handle(mockServerRequest, responseToUse).subscribe(aVoid -> {}, result::onError);
+			this.handler.handle(mockServerRequest, responseToUse).subscribe(handlerCompletion);
 			return Mono.empty();
 		});
 
 		mockServerResponse.setWriteHandler(responseBody ->
 				Mono.fromRunnable(() -> {
 					log("Creating client response for ", httpMethod, uri);
-					result.onNext(adaptResponse(mockServerResponse, responseBody));
+					savedResponse[0] = adaptResponse(mockServerResponse, responseBody);
 				}));
 
 		log("Writing client request for ", httpMethod, uri);
-		requestCallback.apply(mockClientRequest).subscribe(aVoid -> {}, result::onError);
+		requestCallback.apply(mockClientRequest).subscribe(requestWriteCompletion);
 
-		return result;
+		return Mono.when(requestWriteCompletion, handlerCompletion)
+				.onErrorMap(ex -> {
+					ClientHttpResponse response = savedResponse[0];
+					return response != null ? new FailureAfterResponseCompletedException(response, ex) : ex;
+				})
+				.then(Mono.fromCallable(() -> savedResponse[0] != null ?
+						savedResponse[0] : adaptResponse(mockServerResponse, Flux.empty())));
 	}
 
 	private void log(String message, HttpMethod httpMethod, URI uri) {
@@ -121,12 +135,41 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	}
 
 	private ClientHttpResponse adaptResponse(MockServerHttpResponse response, Flux<DataBuffer> body) {
-		HttpStatus status = Optional.ofNullable(response.getStatusCode()).orElse(HttpStatus.OK);
-		MockClientHttpResponse clientResponse = new MockClientHttpResponse(status);
+		Integer status = response.getRawStatusCode();
+		MockClientHttpResponse clientResponse = new MockClientHttpResponse((status != null) ? status : 200);
 		clientResponse.getHeaders().putAll(response.getHeaders());
 		clientResponse.getCookies().putAll(response.getCookies());
 		clientResponse.setBody(body);
 		return clientResponse;
+	}
+
+
+	/**
+	 * Indicates that an error occurred after the server response was completed,
+	 * via {@link ServerHttpResponse#writeWith} or {@link ServerHttpResponse#setComplete()},
+	 * and can no longer be changed. This exception wraps the error and also
+	 * provides {@link #getCompletedResponse() access} to the response.
+	 * <p>What happens on an actual running server depends on when the server
+	 * commits the response and the error may or may not change the response.
+	 * Therefore in tests without a server the exception is wrapped and allowed
+	 * to propagate so the application is alerted.
+	 * @since 5.2.2
+	 */
+	@SuppressWarnings("serial")
+	public static final class FailureAfterResponseCompletedException extends RuntimeException {
+
+		private final ClientHttpResponse completedResponse;
+
+
+		private FailureAfterResponseCompletedException(ClientHttpResponse response, Throwable cause) {
+			super("Error occurred after response was completed: " + response, cause);
+			this.completedResponse = response;
+		}
+
+
+		public ClientHttpResponse getCompletedResponse() {
+			return this.completedResponse;
+		}
 	}
 
 }

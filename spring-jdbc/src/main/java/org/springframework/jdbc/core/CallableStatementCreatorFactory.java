@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Helper class that efficiently creates multiple {@link CallableStatementCreator}
- * objects with different parameters based on a SQL statement and a single
+ * objects with different parameters based on an SQL statement and a single
  * set of parameter declarations.
  *
  * @author Rod Johnson
@@ -70,6 +70,14 @@ public class CallableStatementCreatorFactory {
 		this.declaredParameters = declaredParameters;
 	}
 
+
+	/**
+	 * Return the SQL call string.
+	 * @since 5.1.3
+	 */
+	public final String getCallString() {
+		return this.callString;
+	}
 
 	/**
 	 * Add a new declared parameter.

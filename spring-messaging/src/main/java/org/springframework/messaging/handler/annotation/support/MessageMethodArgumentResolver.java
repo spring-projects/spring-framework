@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
  */
 public class MessageMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Nullable
 	private final MessageConverter converter;
 
 
@@ -71,7 +72,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Class<?> targetMessageType = parameter.getParameterType();
-		Class<?> targetPayloadType = getPayloadType(parameter);
+		Class<?> targetPayloadType = getPayloadType(parameter, message);
 
 		if (!targetMessageType.isAssignableFrom(message.getClass())) {
 			throw new MethodArgumentTypeMismatchException(message, parameter, "Actual message type '" +
@@ -94,7 +95,19 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		return MessageBuilder.createMessage(payload, message.getHeaders());
 	}
 
-	private Class<?> getPayloadType(MethodParameter parameter) {
+	/**
+	 * Resolve the target class to convert the payload to.
+	 * <p>By default this is the generic type declared in the {@code Message}
+	 * method parameter but that can be overridden to select a more specific
+	 * target type after also taking into account the "Content-Type", e.g.
+	 * return {@code String} if target type is {@code Object} and
+	 * {@code "Content-Type:text/**"}.
+	 * @param parameter the target method parameter
+	 * @param message the message being processed
+	 * @return the target type to use
+	 * @since 5.2
+	 */
+	protected Class<?> getPayloadType(MethodParameter parameter, Message<?> message) {
 		Type genericParamType = parameter.getGenericParameterType();
 		ResolvableType resolvableType = ResolvableType.forType(genericParamType).as(Message.class);
 		return resolvableType.getGeneric().toClass();

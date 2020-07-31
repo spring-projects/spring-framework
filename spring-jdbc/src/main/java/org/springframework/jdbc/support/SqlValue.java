@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ public interface SqlValue {
 	 * Set the value on the given PreparedStatement.
 	 * @param ps the PreparedStatement to work on
 	 * @param paramIndex the index of the parameter for which we need to set the value
-	 * @throws SQLException if a SQLException is encountered while setting parameter values
+	 * @throws SQLException if an SQLException is encountered while setting parameter values
 	 */
 	void setValue(PreparedStatement ps, int paramIndex)	throws SQLException;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,136 +16,131 @@
 
 package org.springframework.util;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import org.springframework.util.StopWatch.TaskInfo;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
+ * Unit tests for {@link StopWatch}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class StopWatchTests {
+class StopWatchTests {
 
-	private final StopWatch sw = new StopWatch();
+	private static final String ID = "myId";
 
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
+	private static final String name1 = "Task 1";
+	private static final String name2 = "Task 2";
+
+	private static final long duration1 = 200;
+	private static final long duration2 = 100;
+	private static final long fudgeFactor = 50;
+
+	private final StopWatch stopWatch = new StopWatch(ID);
+
 
 	@Test
-	public void validUsage() throws Exception {
-		String id = "myId";
-		StopWatch sw = new StopWatch(id);
-		long int1 = 166L;
-		long int2 = 45L;
-		String name1 = "Task 1";
-		String name2 = "Task 2";
-
-		assertFalse(sw.isRunning());
-		sw.start(name1);
-		Thread.sleep(int1);
-		assertTrue(sw.isRunning());
-		assertEquals(name1, sw.currentTaskName());
-		sw.stop();
-
-		// TODO are timings off in JUnit? Why do these assertions sometimes fail
-		// under both Ant and Eclipse?
-
-		// long fudgeFactor = 5L;
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >=
-		// int1);
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
-		// + fudgeFactor);
-		sw.start(name2);
-		Thread.sleep(int2);
-		sw.stop();
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1
-		// + int2);
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
-		// + int2 + fudgeFactor);
-
-		assertTrue(sw.getTaskCount() == 2);
-		String pp = sw.prettyPrint();
-		assertTrue(pp.contains(name1));
-		assertTrue(pp.contains(name2));
-
-		StopWatch.TaskInfo[] tasks = sw.getTaskInfo();
-		assertTrue(tasks.length == 2);
-		assertTrue(tasks[0].getTaskName().equals(name1));
-		assertTrue(tasks[1].getTaskName().equals(name2));
-
-		String toString = sw.toString();
-		assertTrue(toString.contains(id));
-		assertTrue(toString.contains(name1));
-		assertTrue(toString.contains(name2));
-
-		assertEquals(id, sw.getId());
+	void failureToStartBeforeGettingTimings() {
+		assertThatIllegalStateException().isThrownBy(stopWatch::getLastTaskTimeMillis);
 	}
 
 	@Test
-	public void validUsageNotKeepingTaskList() throws Exception {
-		sw.setKeepTaskList(false);
-		long int1 = 166L;
-		long int2 = 45L;
-		String name1 = "Task 1";
-		String name2 = "Task 2";
-
-		assertFalse(sw.isRunning());
-		sw.start(name1);
-		Thread.sleep(int1);
-		assertTrue(sw.isRunning());
-		sw.stop();
-
-		// TODO are timings off in JUnit? Why do these assertions sometimes fail
-		// under both Ant and Eclipse?
-
-		// long fudgeFactor = 5L;
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >=
-		// int1);
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
-		// + fudgeFactor);
-		sw.start(name2);
-		Thread.sleep(int2);
-		sw.stop();
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1
-		// + int2);
-		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
-		// + int2 + fudgeFactor);
-
-		assertTrue(sw.getTaskCount() == 2);
-		String pp = sw.prettyPrint();
-		assertTrue(pp.contains("kept"));
-
-		String toString = sw.toString();
-		assertFalse(toString.contains(name1));
-		assertFalse(toString.contains(name2));
-
-		exception.expect(UnsupportedOperationException.class);
-		sw.getTaskInfo();
+	void failureToStartBeforeStop() {
+		assertThatIllegalStateException().isThrownBy(stopWatch::stop);
 	}
 
 	@Test
-	public void failureToStartBeforeGettingTimings() {
-		exception.expect(IllegalStateException.class);
-		sw.getLastTaskTimeMillis();
+	void rejectsStartTwice() {
+		stopWatch.start();
+		assertThat(stopWatch.isRunning()).isTrue();
+		stopWatch.stop();
+		assertThat(stopWatch.isRunning()).isFalse();
+
+		stopWatch.start();
+		assertThat(stopWatch.isRunning()).isTrue();
+		assertThatIllegalStateException().isThrownBy(stopWatch::start);
 	}
 
 	@Test
-	public void failureToStartBeforeStop() {
-		exception.expect(IllegalStateException.class);
-		sw.stop();
+	void validUsage() throws Exception {
+		assertThat(stopWatch.isRunning()).isFalse();
+
+		stopWatch.start(name1);
+		Thread.sleep(duration1);
+		assertThat(stopWatch.isRunning()).isTrue();
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
+		stopWatch.stop();
+		assertThat(stopWatch.isRunning()).isFalse();
+		assertThat(stopWatch.getLastTaskTimeNanos())
+			.as("last task time in nanoseconds for task #1")
+			.isGreaterThanOrEqualTo(millisToNanos(duration1 - fudgeFactor))
+			.isLessThanOrEqualTo(millisToNanos(duration1 + fudgeFactor));
+		assertThat(stopWatch.getTotalTimeMillis())
+			.as("total time in milliseconds for task #1")
+			.isGreaterThanOrEqualTo(duration1 - fudgeFactor)
+			.isLessThanOrEqualTo(duration1 + fudgeFactor);
+		assertThat(stopWatch.getTotalTimeSeconds())
+			.as("total time in seconds for task #1")
+			.isGreaterThanOrEqualTo((duration1 - fudgeFactor) / 1000.0)
+			.isLessThanOrEqualTo((duration1 + fudgeFactor) / 1000.0);
+
+		stopWatch.start(name2);
+		Thread.sleep(duration2);
+		assertThat(stopWatch.isRunning()).isTrue();
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name2);
+		stopWatch.stop();
+		assertThat(stopWatch.isRunning()).isFalse();
+		assertThat(stopWatch.getLastTaskTimeNanos())
+			.as("last task time in nanoseconds for task #2")
+			.isGreaterThanOrEqualTo(millisToNanos(duration2))
+			.isLessThanOrEqualTo(millisToNanos(duration2 + fudgeFactor));
+		assertThat(stopWatch.getTotalTimeMillis())
+			.as("total time in milliseconds for tasks #1 and #2")
+			.isGreaterThanOrEqualTo(duration1 + duration2 - fudgeFactor)
+			.isLessThanOrEqualTo(duration1 + duration2 + fudgeFactor);
+		assertThat(stopWatch.getTotalTimeSeconds())
+			.as("total time in seconds for task #2")
+			.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
+			.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
+
+		assertThat(stopWatch.getTaskCount()).isEqualTo(2);
+		assertThat(stopWatch.prettyPrint()).contains(name1, name2);
+		assertThat(stopWatch.getTaskInfo()).extracting(TaskInfo::getTaskName).containsExactly(name1, name2);
+		assertThat(stopWatch.toString()).contains(ID, name1, name2);
+		assertThat(stopWatch.getId()).isEqualTo(ID);
 	}
 
 	@Test
-	public void rejectsStartTwice() {
-		sw.start("");
-		sw.stop();
-		sw.start("");
-		assertTrue(sw.isRunning());
-		exception.expect(IllegalStateException.class);
-		sw.start("");
+	void validUsageDoesNotKeepTaskList() throws Exception {
+		stopWatch.setKeepTaskList(false);
+
+		stopWatch.start(name1);
+		Thread.sleep(duration1);
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
+		stopWatch.stop();
+
+		stopWatch.start(name2);
+		Thread.sleep(duration2);
+		assertThat(stopWatch.currentTaskName()).isEqualTo(name2);
+		stopWatch.stop();
+
+		assertThat(stopWatch.getTaskCount()).isEqualTo(2);
+		assertThat(stopWatch.prettyPrint()).contains("No task info kept");
+		assertThat(stopWatch.toString()).doesNotContain(name1, name2);
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+			.isThrownBy(stopWatch::getTaskInfo)
+			.withMessage("Task info is not being kept!");
+	}
+
+	private static long millisToNanos(long duration) {
+		return MILLISECONDS.toNanos(duration);
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@
 package org.springframework.core.io.buffer;
 
 /**
- * Extension of {@link DataBuffer} that allows for buffer that share a memory
- * pool. Introduces methods for reference counting.
+ * Extension of {@link DataBuffer} that allows for buffer that share
+ * a memory pool. Introduces methods for reference counting.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -26,7 +26,8 @@ package org.springframework.core.io.buffer;
 public interface PooledDataBuffer extends DataBuffer {
 
 	/**
-	 * Return {@code true} if this buffer is allocated; {@code false} if it has been deallocated.
+	 * Return {@code true} if this buffer is allocated;
+	 * {@code false} if it has been deallocated.
 	 * @since 5.1
 	 */
 	boolean isAllocated();
@@ -38,9 +39,10 @@ public interface PooledDataBuffer extends DataBuffer {
 	PooledDataBuffer retain();
 
 	/**
-	 * Decrease the reference count for this buffer by one, and deallocate it
-	 * once the count reaches zero.
-	 * @return {@code true} if the buffer was deallocated; {@code false} otherwise.
+	 * Decrease the reference count for this buffer by one,
+	 * and deallocate it once the count reaches zero.
+	 * @return {@code true} if the buffer was deallocated;
+	 * {@code false} otherwise
 	 */
 	boolean release();
 

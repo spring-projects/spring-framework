@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,25 +20,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
  */
-public class FutureAdapterTests {
+class FutureAdapterTests {
 
 	private FutureAdapter<String, Integer> adapter;
 
 	private Future<Integer> adaptee;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
-	public void setUp() {
+	void setUp() {
 		adaptee = mock(Future.class);
 		adapter = new FutureAdapter<String, Integer>(adaptee) {
 			@Override
@@ -49,38 +50,38 @@ public class FutureAdapterTests {
 	}
 
 	@Test
-	public void cancel() throws Exception {
+	void cancel() throws Exception {
 		given(adaptee.cancel(true)).willReturn(true);
 		boolean result = adapter.cancel(true);
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void isCancelled() {
+	void isCancelled() {
 		given(adaptee.isCancelled()).willReturn(true);
 		boolean result = adapter.isCancelled();
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void isDone() {
+	void isDone() {
 		given(adaptee.isDone()).willReturn(true);
 		boolean result = adapter.isDone();
-		assertTrue(result);
+		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void get() throws Exception {
+	void get() throws Exception {
 		given(adaptee.get()).willReturn(42);
 		String result = adapter.get();
-		assertEquals("42", result);
+		assertThat(result).isEqualTo("42");
 	}
 
 	@Test
-	public void getTimeOut() throws Exception {
+	void getTimeOut() throws Exception {
 		given(adaptee.get(1, TimeUnit.SECONDS)).willReturn(42);
 		String result = adapter.get(1, TimeUnit.SECONDS);
-		assertEquals("42", result);
+		assertThat(result).isEqualTo("42");
 	}
 
 

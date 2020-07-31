@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,11 +23,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
-import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionInvocationTargetException;
@@ -39,7 +38,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests invocation of methods.
@@ -98,15 +98,15 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		eContext.setVariable("bar", 3);
 		Object o = expr.getValue(eContext);
-		assertEquals(3, o);
-		assertEquals(1, parser.parseExpression("counter").getValue(eContext));
+		assertThat(o).isEqualTo(3);
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(1);
 
 		// Now the expression has cached that throwException(int) is the right thing to call
 		// Let's change 'bar' to be a PlaceOfBirth which indicates the cached reference is
 		// out of date.
 		eContext.setVariable("bar", new PlaceOfBirth("London"));
 		o = expr.getValue(eContext);
-		assertEquals("London", o);
+		assertThat(o).isEqualTo("London");
 		// That confirms the logic to mark the cached reference stale and retry is working
 
 		// Now let's cause the method to exit via exception and ensure it doesn't cause a retry.
@@ -114,39 +114,23 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		// First, switch back to throwException(int)
 		eContext.setVariable("bar", 3);
 		o = expr.getValue(eContext);
-		assertEquals(3, o);
-		assertEquals(2, parser.parseExpression("counter").getValue(eContext));
+		assertThat(o).isEqualTo(3);
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(2);
 
 
 		// Now cause it to throw an exception:
 		eContext.setVariable("bar", 1);
-		try {
-			o = expr.getValue(eContext);
-			fail();
-		}
-		catch (Exception ex) {
-			if (ex instanceof SpelEvaluationException) {
-				fail("Should not be a SpelEvaluationException: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(Exception.class).isThrownBy(() -> expr.getValue(eContext))
+			.isNotInstanceOf(SpelEvaluationException.class);
+
 		// If counter is 4 then the method got called twice!
-		assertEquals(3, parser.parseExpression("counter").getValue(eContext));
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(3);
 
 		eContext.setVariable("bar", 4);
-		try {
-			o = expr.getValue(eContext);
-			fail();
-		}
-		catch (Exception ex) {
-			// 4 means it will throw a checked exception - this will be wrapped
-			if (!(ex instanceof ExpressionInvocationTargetException)) {
-				fail("Should have been wrapped: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() -> expr.getValue(eContext));
+
 		// If counter is 5 then the method got called twice!
-		assertEquals(4, parser.parseExpression("counter").getValue(eContext));
+		assertThat(parser.parseExpression("counter").getValue(eContext)).isEqualTo(4);
 	}
 
 	/**
@@ -164,16 +148,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 2);
-		try {
-			expr.getValue(context);
-			fail();
-		}
-		catch (Exception ex) {
-			if (ex instanceof SpelEvaluationException) {
-				fail("Should not be a SpelEvaluationException: " + ex);
-			}
-			// normal
-		}
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(() -> expr.getValue(context))
+			.isNotInstanceOf(SpelEvaluationException.class);
 	}
 
 	@Test
@@ -188,15 +165,9 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 4);
-		try {
-			expr.getValue(context);
-			fail();
-		}
-		catch (ExpressionInvocationTargetException ex) {
-			Throwable cause = ex.getCause();
-			assertEquals("org.springframework.expression.spel.testresources.Inventor$TestException",
-					cause.getClass().getName());
-		}
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() -> expr.getValue(context))
+			.satisfies(ex -> assertThat(ex.getCause().getClass().getName()).isEqualTo(
+					"org.springframework.expression.spel.testresources.Inventor$TestException"));
 	}
 
 	@Test
@@ -210,24 +181,24 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		// Filter will be called but not do anything, so first doit() will be invoked
 		SpelExpression expr = (SpelExpression) parser.parseExpression("doit(1)");
 		String result = expr.getValue(context, String.class);
-		assertEquals("1", result);
-		assertTrue(filter.filterCalled);
+		assertThat(result).isEqualTo("1");
+		assertThat(filter.filterCalled).isTrue();
 
 		// Filter will now remove non @Anno annotated methods
 		filter.removeIfNotAnnotated = true;
 		filter.filterCalled = false;
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
 		result = expr.getValue(context, String.class);
-		assertEquals("double 1.0", result);
-		assertTrue(filter.filterCalled);
+		assertThat(result).isEqualTo("double 1.0");
+		assertThat(filter.filterCalled).isTrue();
 
 		// check not called for other types
 		filter.filterCalled = false;
 		context.setRootObject(new String("abc"));
 		expr = (SpelExpression) parser.parseExpression("charAt(0)");
 		result = expr.getValue(context, String.class);
-		assertEquals("a", result);
-		assertFalse(filter.filterCalled);
+		assertThat(result).isEqualTo("a");
+		assertThat(filter.filterCalled).isFalse();
 
 		// check de-registration works
 		filter.filterCalled = false;
@@ -235,8 +206,8 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		context.setRootObject(new TestObject());
 		expr = (SpelExpression) parser.parseExpression("doit(1)");
 		result = expr.getValue(context, String.class);
-		assertEquals("1", result);
-		assertFalse(filter.filterCalled);
+		assertThat(result).isEqualTo("1");
+		assertThat(filter.filterCalled).isFalse();
 	}
 
 	@Test
@@ -245,20 +216,19 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// reflective method accessor is the only one by default
 		List<MethodResolver> methodResolvers = ctx.getMethodResolvers();
-		assertEquals(1, methodResolvers.size());
+		assertThat(methodResolvers.size()).isEqualTo(1);
 
 		MethodResolver dummy = new DummyMethodResolver();
 		ctx.addMethodResolver(dummy);
-		assertEquals(2, ctx.getMethodResolvers().size());
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 
-		List<MethodResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getMethodResolvers());
-		assertTrue(ctx.removeMethodResolver(dummy));
-		assertFalse(ctx.removeMethodResolver(dummy));
-		assertEquals(1, ctx.getMethodResolvers().size());
+		List<MethodResolver> copy = new ArrayList<>(ctx.getMethodResolvers());
+		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
+		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);
 
 		ctx.setMethodResolvers(copy);
-		assertEquals(2, ctx.getMethodResolvers().size());
+		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 	}
 
 	@Test
@@ -294,7 +264,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 	public void testMethodOfClass() throws Exception {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
-		assertEquals("java.lang.String", value);
+		assertThat(value).isEqualTo("java.lang.String");
 	}
 
 	@Test
@@ -302,18 +272,10 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		final BytesService service = new BytesService();
 		byte[] bytes = new byte[100];
 		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
-		context.setBeanResolver(new BeanResolver() {
-			@Override
-			public Object resolve(EvaluationContext context, String beanName) throws AccessException {
-				if ("service".equals(beanName)) {
-					return service;
-				}
-				return null;
-			}
-		});
+		context.setBeanResolver((context1, beanName) -> ("service".equals(beanName) ? service : null));
 		Expression expression = parser.parseExpression("@service.handleBytes(#root)");
 		byte[] outBytes = expression.getValue(context, byte[].class);
-		assertSame(bytes, outBytes);
+		assertThat(outBytes).isSameAs(bytes);
 	}
 
 

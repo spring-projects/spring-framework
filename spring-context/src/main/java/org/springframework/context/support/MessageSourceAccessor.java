@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -79,7 +79,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
 	 */
@@ -90,7 +90,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @param locale the Locale in which to do lookup
 	 * @return the message
@@ -102,7 +102,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @return the message
@@ -114,7 +114,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage the String to return if the lookup fails
 	 * @param locale the Locale in which to do lookup
@@ -127,7 +127,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -137,7 +137,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param locale the Locale in which to do lookup
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -148,7 +148,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the default Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -159,7 +159,7 @@ public class MessageSourceAccessor {
 
 	/**
 	 * Retrieve the message for the given code and the given Locale.
-	 * @param code code of the message
+	 * @param code the code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param locale the Locale in which to do lookup
 	 * @return the message

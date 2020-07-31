@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.http.HttpHeaders;
@@ -35,8 +33,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Unit tests for {@link DefaultTransportRequest}.
@@ -57,12 +59,8 @@ public class DefaultTransportRequestTests {
 	private TestTransport xhrTransport;
 
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
-
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.connectCallback = mock(ListenableFutureCallback.class);
 		this.connectFuture = new SettableListenableFuture<>();
@@ -78,7 +76,7 @@ public class DefaultTransportRequestTests {
 		request.connect(null, this.connectFuture);
 		WebSocketSession session = mock(WebSocketSession.class);
 		this.webSocketTransport.getConnectCallback().onSuccess(session);
-		assertSame(session, this.connectFuture.get());
+		assertThat(this.connectFuture.get()).isSameAs(session);
 	}
 
 	@Test
@@ -90,15 +88,15 @@ public class DefaultTransportRequestTests {
 
 		// Transport error => fallback
 		this.webSocketTransport.getConnectCallback().onFailure(new IOException("Fake exception 1"));
-		assertFalse(this.connectFuture.isDone());
-		assertTrue(this.xhrTransport.invoked());
+		assertThat(this.connectFuture.isDone()).isFalse();
+		assertThat(this.xhrTransport.invoked()).isTrue();
 
 		// Transport error => no more fallback
 		this.xhrTransport.getConnectCallback().onFailure(new IOException("Fake exception 2"));
-		assertTrue(this.connectFuture.isDone());
-		this.thrown.expect(ExecutionException.class);
-		this.thrown.expectMessage("Fake exception 2");
-		this.connectFuture.get();
+		assertThat(this.connectFuture.isDone()).isTrue();
+		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
+				this.connectFuture::get)
+			.withMessageContaining("Fake exception 2");
 	}
 
 	@Test
@@ -112,8 +110,8 @@ public class DefaultTransportRequestTests {
 		request1.addTimeoutTask(sessionCleanupTask);
 		request1.connect(null, this.connectFuture);
 
-		assertTrue(this.webSocketTransport.invoked());
-		assertFalse(this.xhrTransport.invoked());
+		assertThat(this.webSocketTransport.invoked()).isTrue();
+		assertThat(this.xhrTransport.invoked()).isFalse();
 
 		// Get and invoke the scheduled timeout task
 		ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -121,12 +119,12 @@ public class DefaultTransportRequestTests {
 		verifyNoMoreInteractions(scheduler);
 		taskCaptor.getValue().run();
 
-		assertTrue(this.xhrTransport.invoked());
+		assertThat(this.xhrTransport.invoked()).isTrue();
 		verify(sessionCleanupTask).run();
 	}
 
 	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
 		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 

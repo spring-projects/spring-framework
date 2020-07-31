@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,14 @@
 
 package org.springframework.beans.factory.annotation
 
-import org.junit.Test
-
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.BeanCreationException
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.beans.factory.support.RootBeanDefinition
-import org.springframework.tests.sample.beans.TestBean
-
-import org.junit.Assert.*
-import org.springframework.beans.factory.BeanCreationException
-import org.springframework.tests.sample.beans.Colour
+import org.springframework.beans.testfixture.beans.Colour
+import org.springframework.beans.testfixture.beans.TestBean
 
 /**
  * Tests for Kotlin support with [Autowired].
@@ -47,9 +46,9 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("testBean", tb)
 
 		val kb = bf.getBean("annotatedBean", KotlinBean::class.java)
-		assertSame(tb, kb.injectedFromConstructor)
-		assertSame(tb, kb.injectedFromMethod)
-		assertSame(tb, kb.injectedField)
+		assertThat(kb.injectedFromConstructor).isSameAs(tb)
+		assertThat(kb.injectedFromMethod).isSameAs(tb)
+		assertThat(kb.injectedField).isSameAs(tb)
 	}
 
 	@Test
@@ -63,9 +62,9 @@ class KotlinAutowiredTests {
 		bf.registerBeanDefinition("annotatedBean", bd)
 
 		val kb = bf.getBean("annotatedBean", KotlinBean::class.java)
-		assertNull(kb.injectedFromConstructor)
-		assertNull(kb.injectedFromMethod)
-		assertNull(kb.injectedField)
+		assertThat(kb.injectedFromConstructor).isNull()
+		assertThat(kb.injectedFromMethod).isNull()
+		assertThat(kb.injectedField).isNull()
 	}
 	
 	@Test  // SPR-15847
@@ -81,9 +80,9 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("testBean", tb)
 
 		val kb = bf.getBean("bean", KotlinBeanWithMandatoryAndOptionalParameters::class.java)
-		assertSame(tb, kb.injectedFromConstructor)
-		assertEquals("foo", kb.optional)
-		assertEquals("bar", kb.initializedField)
+		assertThat(kb.injectedFromConstructor).isSameAs(tb)
+		assertThat(kb.optional).isEqualTo("foo")
+		assertThat(kb.initializedField).isEqualTo("bar")
 	}
 
 	@Test
@@ -97,9 +96,9 @@ class KotlinAutowiredTests {
 		bf.registerBeanDefinition("bean", bd)
 
 		val kb = bf.getBean("bean", KotlinBeanWithOptionalParameters::class.java)
-		assertNotNull(kb.optional1)
-		assertEquals("foo", kb.optional2)
-		assertEquals("bar", kb.initializedField)
+		assertThat(kb.optional1).isNotNull()
+		assertThat(kb.optional2).isEqualTo("foo")
+		assertThat(kb.initializedField).isEqualTo("bar")
 	}
 
 	@Test  // SPR-15847
@@ -115,8 +114,8 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("testBean", tb)
 
 		val kb = bf.getBean("bean", KotlinBeanWithOptionalParameterAndExplicitConstructor::class.java)
-		assertSame(tb, kb.injectedFromConstructor)
-		assertEquals("foo", kb.optional)
+		assertThat(kb.injectedFromConstructor).isSameAs(tb)
+		assertThat(kb.optional).isEqualTo("foo")
 	}
 
 	@Test  // SPR-15847
@@ -134,9 +133,9 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("colour", colour)
 
 		val kb = bf.getBean("bean", KotlinBeanWithAutowiredSecondaryConstructor::class.java)
-		assertSame(tb, kb.injectedFromConstructor)
-		assertEquals("bar", kb.optional)
-		assertSame(colour, kb.injectedFromSecondaryConstructor)
+		assertThat(kb.injectedFromConstructor).isSameAs(tb)
+		assertThat(kb.optional).isEqualTo("bar")
+		assertThat(kb.injectedFromSecondaryConstructor).isSameAs(colour)
 	}
 
 	@Test  // SPR-16012
@@ -150,7 +149,7 @@ class KotlinAutowiredTests {
 		bf.registerBeanDefinition("bean", bd)
 
 		val kb = bf.getBean("bean", KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
-		assertNotNull(kb.testBean)
+		assertThat(kb.testBean).isNotNull()
 	}
 
 	@Test  // SPR-16012
@@ -166,7 +165,7 @@ class KotlinAutowiredTests {
 		bf.registerSingleton("testBean", tb)
 
 		val kb = bf.getBean("bean", KotlinBeanWithPrimaryAndDefaultConstructors::class.java)
-		assertEquals(tb, kb.testBean)
+		assertThat(kb.testBean).isEqualTo(tb)
 	}
 
 	@Test  // SPR-16289
@@ -183,7 +182,7 @@ class KotlinAutowiredTests {
 		bf.getBean(KotlinBeanWithPrimaryAndSecondaryConstructors::class.java)
 	}
 
-	@Test(expected = BeanCreationException::class)  // SPR-16022
+	@Test  // SPR-16022
 	fun `No autowiring with primary and secondary non annotated constructors`() {
 		val bf = DefaultListableBeanFactory()
 		val bpp = AutowiredAnnotationBeanPostProcessor()
@@ -197,7 +196,9 @@ class KotlinAutowiredTests {
 		val colour = Colour.BLUE
 		bf.registerSingleton("colour", colour)
 
-		bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+		assertThatExceptionOfType(BeanCreationException::class.java).isThrownBy {
+			bf.getBean("bean", KotlinBeanWithSecondaryConstructor::class.java)
+		}
 	}
 
 
