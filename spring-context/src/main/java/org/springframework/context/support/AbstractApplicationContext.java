@@ -636,14 +636,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
-		// Configure the bean factory with context callbacks.
-		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
-		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
-		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
-		beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
-		beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+
+		{
+			// 这些接口不会被自动装配
+			beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
+			beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
+			beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationEventPublisherAware.class);
+			beanFactory.ignoreDependencyInterface(MessageSourceAware.class);
+			beanFactory.ignoreDependencyInterface(ApplicationContextAware.class);
+		}
+
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
@@ -652,15 +655,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
-		// Register early post-processor for detecting inner beans as ApplicationListeners.
-		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
-		// Detect a LoadTimeWeaver and prepare for weaving, if found.
-		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
-			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
-			// Set a temporary ClassLoader for type matching.
-			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+		{
+			// Configure the bean factory with context callbacks.
+			beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+			// Register early post-processor for detecting inner beans as ApplicationListeners.
+			beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
+			// Detect a LoadTimeWeaver and prepare for weaving, if found.
+			if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+				beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+				// Set a temporary ClassLoader for type matching.
+				beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+			}
 		}
+
 
 		// Register default environment beans.
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
@@ -688,6 +696,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before singleton instantiation.
+	 * {
+	 *     创建并调用所有的已经注册的 BeanFactoryPostProcessor。
+	 *     一定要在 singleton instantiation 之前调用
+	 * }
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());

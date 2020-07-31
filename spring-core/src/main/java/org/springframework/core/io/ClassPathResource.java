@@ -40,6 +40,12 @@ import org.springframework.util.StringUtils;
  * @since 28.12.2003
  * @see ClassLoader#getResourceAsStream(String)
  * @see Class#getResourceAsStream(String)
+ *
+ * {
+ *     使用 clazz 或者 classLoader 加载 路径为 path 的资源
+ *
+ * }
+ *
  */
 public class ClassPathResource extends AbstractFileResolvingResource {
 

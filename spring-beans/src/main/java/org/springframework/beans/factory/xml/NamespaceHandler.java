@@ -39,7 +39,12 @@ import org.springframework.lang.Nullable;
  * <p>Developers writing their own custom element extensions typically will
  * not implement this interface directly, but rather make use of the provided
  * {@link NamespaceHandlerSupport} class.
+ * {
+ *      调用方：DefaultBeanDefinitionDocumentReader
+ *      作用：在Spring 的 XML 配置中自定义命名空间
+ *      用法：一般都会继承 NamespaceHandlerSupport 来实现自定义的命名空间
  *
+ * }
  * @author Rob Harrop
  * @author Erik Wiersma
  * @since 2.0
@@ -51,6 +56,9 @@ public interface NamespaceHandler {
 	/**
 	 * Invoked by the {@link DefaultBeanDefinitionDocumentReader} after
 	 * construction but before any custom elements are parsed.
+	 * {
+	 *     在 DefaultBeanDefinitionDocumentReader 创建后，解析 自定义命名空间前调用
+	 * }
 	 * @see NamespaceHandlerSupport#registerBeanDefinitionParser(String, BeanDefinitionParser)
 	 */
 	void init();
@@ -65,6 +73,9 @@ public interface NamespaceHandler {
 	 * inside (for example) a {@code <property>} tag.
 	 * <p>Implementations may return {@code null} if they will
 	 * <strong>not</strong> be used in a nested scenario.
+	 * {
+	 *     将Element解析成  BeanDefinitions 并使用 BeanDefinitionRegistry 注册
+	 * }
 	 * @param element the element that is to be parsed into one or more {@code BeanDefinitions}
 	 * @param parserContext the object encapsulating the current state of the parsing process
 	 * @return the primary {@code BeanDefinition} (can be {@code null} as explained above)

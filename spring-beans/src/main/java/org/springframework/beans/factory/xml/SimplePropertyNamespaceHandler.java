@@ -44,6 +44,10 @@ import org.springframework.lang.Nullable;
  * than being the concrete value, it contains the name of the bean that will
  * be injected into that property.
  *
+ * {
+ *     <bean id="rob" class="..TestBean" p:name="Rob Harrop" p:spouse-ref="sally"/>
+ *     将 {@code p:name} 解析成 TestBean 的属性 name
+ * }
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

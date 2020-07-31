@@ -70,6 +70,15 @@ public interface ConfigurableListableBeanFactory
 	 * ApplicationContext instance that the bean is living in.
 	 * <p>Note: There are no such default types registered in a plain BeanFactory,
 	 * not even for the BeanFactory interface itself.
+	 * {
+	 *     目的：一个Bean是可以被容器自动装配，但是这个bean没有定义在 factory中
+	 *     示例：
+	 *     class a {
+	 *         @Autowired
+	 * 	 *     ApplicationContext ac;
+	 *     }
+	 *     ac 会被解析成 当前bean所在的ApplicationContext实例，但是 ApplicationContext 并没有注册到 factory 中
+	 * }
 	 * @param dependencyType the dependency type to register. This will typically
 	 * be a base interface such as BeanFactory, with extensions of it resolved
 	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
@@ -77,6 +86,7 @@ public interface ConfigurableListableBeanFactory
 	 * @param autowiredValue the corresponding autowired value. This may also be an
 	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
 	 * interface, which allows for lazy resolution of the actual target value.
+	 *
 	 */
 	void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 

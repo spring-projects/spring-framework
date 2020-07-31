@@ -47,18 +47,27 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	/**
 	 * Stores the {@link BeanDefinitionParser} implementations keyed by the
 	 * local name of the {@link Element Elements} they handle.
+	 * {
+	 *     key 为 元素名称，value 为该元素使用的 BeanDefinitionParser
+	 * }
 	 */
 	private final Map<String, BeanDefinitionParser> parsers = new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the
 	 * local name of the {@link Element Elements} they handle.
+	 * {
+	 *     key 为 元素名称，value 为该元素使用的 BeanDefinitionDecorator
+	 * }
 	 */
 	private final Map<String, BeanDefinitionDecorator> decorators = new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the local
 	 * name of the {@link Attr Attrs} they handle.
+	 * {
+	 *      key 为 属性名称，value 为该元素使用的 BeanDefinitionDecorator
+	 * }
 	 */
 	private final Map<String, BeanDefinitionDecorator> attributeDecorators = new HashMap<>();
 

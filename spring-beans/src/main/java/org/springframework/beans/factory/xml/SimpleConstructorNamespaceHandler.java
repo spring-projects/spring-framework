@@ -53,6 +53,10 @@ import org.springframework.util.StringUtils;
  * support for indexes or types. Further more, the names are used as hints by
  * the container which, by default, does type introspection.
  *
+ * {
+ *     <bean id="author" class="..TestBean" c:name="Enescu" c:work-ref="compositions"/>
+ *     会通过构造函数 TestBean(name,work) 创建对象
+ * }
  * @author Costin Leau
  * @since 3.1
  * @see SimplePropertyNamespaceHandler

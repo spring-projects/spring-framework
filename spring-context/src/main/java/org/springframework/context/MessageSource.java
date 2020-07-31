@@ -32,6 +32,9 @@ import org.springframework.lang.Nullable;
  * being able to reload message definitions without restarting the VM
  * </ul>
  *
+ * {
+ *     对i18n进行支持，读取信息的策略类接口，默认提供了两个拆箱可用的实现
+ * }
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.context.support.ResourceBundleMessageSource

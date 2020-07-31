@@ -28,7 +28,9 @@ import org.springframework.lang.Nullable;
  * <p>An {@link org.springframework.context.ApplicationEventPublisher}, typically
  * a Spring {@link org.springframework.context.ApplicationContext}, can use an
  * ApplicationEventMulticaster as a delegate for actually publishing events.
- *
+ * {
+ *     管理 ApplicationListener 清单，并将事件派发给他们
+ * }
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Stephane Nicoll
