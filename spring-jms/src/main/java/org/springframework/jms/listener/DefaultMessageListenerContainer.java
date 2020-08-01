@@ -99,13 +99,6 @@ import org.springframework.util.backoff.FixedBackOff;
  * number of 1 consumer, otherwise you'd receive the same message multiple times on
  * the same node.
  *
- * <p><b>Note: Don't use Spring's {@link org.springframework.jms.connection.CachingConnectionFactory}
- * in combination with dynamic scaling.</b> Ideally, don't use it with a message
- * listener container at all, since it is generally preferable to let the
- * listener container itself handle appropriate caching within its lifecycle.
- * Also, stopping and restarting a listener container will only work with an
- * independent, locally cached Connection - not with an externally cached one.
- *
  * <p><b>It is strongly recommended to either set {@link #setSessionTransacted
  * "sessionTransacted"} to "true" or specify an external {@link #setTransactionManager
  * "transactionManager"}.</b> See the {@link AbstractMessageListenerContainer}
@@ -419,6 +412,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * tasks allow thread pools to control the scheduling. Hence, thread
 	 * pools will usually prefer short-lived tasks.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
+	 * <p>Using a CachingConnectionFactory in conjunction with a DefaultMessageListenerContainer 
+	 * that implements scaling using maxMessagePerTask can result in 
+	 * JMS messages delivered to cached consumers that are no longer attached 
+	 * to the DefaultMessageListenerContainer. 
 	 * @see #setTaskExecutor
 	 * @see #setReceiveTimeout
 	 * @see org.springframework.scheduling.SchedulingTaskExecutor#prefersShortLivedTasks()
