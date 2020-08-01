@@ -25,5 +25,5 @@ dependencies {
 	testCompile(testFixtures(project(":spring-web")))
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-websocket")
-	testCompile("io.projectreactor.netty:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty-http")
 }

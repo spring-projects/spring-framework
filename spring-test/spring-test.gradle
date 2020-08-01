@@ -68,7 +68,7 @@ dependencies {
 	testCompile("org.apache.tiles:tiles-servlet")
 	testCompile("org.hsqldb:hsqldb")
 	testCompile("org.apache.httpcomponents:httpclient")
-	testCompile("io.projectreactor.netty:reactor-netty")
+	testCompile("io.projectreactor.netty:reactor-netty-http")
 	testCompile("de.bechte.junit:junit-hierarchicalcontextrunner")
 	testRuntime("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
