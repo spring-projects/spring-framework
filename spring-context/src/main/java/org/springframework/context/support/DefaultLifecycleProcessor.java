@@ -143,11 +143,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
-				LifecycleGroup group = phases.get(phase);
-				if (group == null) {
-					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
-					phases.put(phase, group);
-				}
+				LifecycleGroup group = phases.computeIfAbsent(phase,
+						p -> new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly));
 				group.add(beanName, bean);
 			}
 		});
