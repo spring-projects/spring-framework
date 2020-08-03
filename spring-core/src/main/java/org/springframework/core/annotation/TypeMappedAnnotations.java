@@ -576,14 +576,16 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			if (this.mappingCursors == null) {
 				this.mappingCursors = new int[aggregate.size()];
 			}
-			for (int annotationIndex = 0; annotationIndex < aggregate.size(); annotationIndex++) {
-				AnnotationTypeMapping mapping = getNextSuitableMapping(aggregate, annotationIndex);
-				if (mapping != null && mapping.getDistance() < lowestDistance) {
-					annotationResult = annotationIndex;
-					lowestDistance = mapping.getDistance();
-				}
-				if (lowestDistance == 0) {
-					break;
+			if(annotationResult == -1) {
+				for (int annotationIndex = 0; annotationIndex < aggregate.size(); annotationIndex++) {
+					AnnotationTypeMapping mapping = getNextSuitableMapping(aggregate, annotationIndex);
+					if (mapping != null && mapping.getDistance() < lowestDistance) {
+						annotationResult = annotationIndex;
+						lowestDistance = mapping.getDistance();
+					}
+					if (lowestDistance == 0) {
+						break;
+					}
 				}
 			}
 			if (annotationResult != -1) {
