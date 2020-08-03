@@ -563,7 +563,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		public boolean tryAdvance(Consumer<? super MergedAnnotation<A>> action) {
 			while (this.aggregateCursor < this.aggregates.size()) {
 				Aggregate aggregate = this.aggregates.get(this.aggregateCursor);
-				if (tryAdvance(aggregate, action)) {
+				if (tryAdvance(aggregate, action, Integer.MAX_VALUE, -1)) {
 					return true;
 				}
 				this.aggregateCursor++;
@@ -572,12 +572,10 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			return false;
 		}
 
-		private boolean tryAdvance(Aggregate aggregate, Consumer<? super MergedAnnotation<A>> action) {
+		private boolean tryAdvance(Aggregate aggregate, Consumer<? super MergedAnnotation<A>> action, int lowestDistance, int annotationResult) {
 			if (this.mappingCursors == null) {
 				this.mappingCursors = new int[aggregate.size()];
 			}
-			int lowestDistance = Integer.MAX_VALUE;
-			int annotationResult = -1;
 			for (int annotationIndex = 0; annotationIndex < aggregate.size(); annotationIndex++) {
 				AnnotationTypeMapping mapping = getNextSuitableMapping(aggregate, annotationIndex);
 				if (mapping != null && mapping.getDistance() < lowestDistance) {
@@ -594,7 +592,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 						this.requiredType != null ? IntrospectionFailureLogger.INFO : IntrospectionFailureLogger.DEBUG);
 				this.mappingCursors[annotationResult]++;
 				if (mergedAnnotation == null) {
-					return tryAdvance(aggregate, action);
+					return tryAdvance(aggregate, action, lowestDistance, annotationResult);
 				}
 				action.accept(mergedAnnotation);
 				return true;
