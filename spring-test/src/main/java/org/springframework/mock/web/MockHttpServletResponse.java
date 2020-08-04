@@ -331,6 +331,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void reset() {
 		resetBuffer();
 		this.characterEncoding = null;
+		this.charset = false;
 		this.contentLength = 0;
 		this.contentType = null;
 		this.locale = Locale.getDefault();

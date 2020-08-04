@@ -16,7 +16,7 @@ dependencies {
 	optional("org.freemarker:freemarker")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
-	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("org.apache.tomcat:tomcat-websocket")
 	optional("org.eclipse.jetty.websocket:websocket-server") {
 		exclude group: "javax.servlet", module: "javax.servlet"
@@ -48,7 +48,7 @@ dependencies {
 	testCompile('org.apache.httpcomponents.core5:httpcore5-reactive:5.0')
 	testCompile("com.squareup.okhttp3:mockwebserver")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
-	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
+	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntime("org.jruby:jruby")
 	testRuntime("org.python:jython-standalone")
 	testRuntime("org.synchronoss.cloud:nio-multipart-parser")

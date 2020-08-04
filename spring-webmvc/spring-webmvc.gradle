@@ -61,7 +61,8 @@ dependencies {
 	testCompile("io.projectreactor:reactor-core")
 	testCompile("io.reactivex.rxjava3:rxjava")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
-	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
+	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223")
+	testRuntime("org.jetbrains.kotlinx:kotlinx-coroutines-core") // Temporary dependency to fix a NoClassDefFoundError error, should not be necessary
 	testRuntime("org.jruby:jruby")
 	testRuntime("org.python:jython-standalone")
 	testRuntime("org.webjars:underscorejs")
