@@ -48,6 +48,9 @@ public class BitsCronFieldTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseMonth("13"));
 		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseDaysOfWeek("8"));
 		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseSeconds("20-10"));
+		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseDaysOfWeek("*SUN"));
+		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseDaysOfWeek("SUN*"));
+		assertThatIllegalArgumentException().isThrownBy(() -> BitsCronField.parseHours("*ANYTHING_HERE"));
 	}
 
 	@Test

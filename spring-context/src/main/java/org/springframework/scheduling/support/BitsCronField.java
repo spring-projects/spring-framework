@@ -150,7 +150,7 @@ final class BitsCronField extends CronField {
 	}
 
 	private static ValueRange parseRange(String value, Type type) {
-		if (value.indexOf('*') != -1) {
+		if (value.equals("*")) {
 			return type.range();
 		}
 		else {
