@@ -63,7 +63,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "key"))
+				.contextWrite(Context.of(ROUTING_KEY, "key"))
 				.as(StepVerifier::create)
 				.expectNext(routedConnectionFactory)
 				.verifyComplete();
@@ -109,7 +109,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "unknown"))
+				.contextWrite(Context.of(ROUTING_KEY, "unknown"))
 				.as(StepVerifier::create)
 				.verifyError(IllegalStateException.class);
 	}
@@ -122,7 +122,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "unknown"))
+				.contextWrite(Context.of(ROUTING_KEY, "unknown"))
 				.as(StepVerifier::create)
 				.expectNext(defaultConnectionFactory)
 				.verifyComplete();
@@ -153,7 +153,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "my-key"))
+				.contextWrite(Context.of(ROUTING_KEY, "my-key"))
 				.as(StepVerifier::create)
 				.expectNext(routedConnectionFactory)
 				.verifyComplete();
@@ -168,7 +168,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "lookup-key"))
+				.contextWrite(Context.of(ROUTING_KEY, "lookup-key"))
 				.as(StepVerifier::create)
 				.expectNext(defaultConnectionFactory)
 				.verifyComplete();
@@ -177,7 +177,7 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 		connectionFactory.afterPropertiesSet();
 
 		connectionFactory.determineTargetConnectionFactory()
-				.subscriberContext(Context.of(ROUTING_KEY, "lookup-key"))
+				.contextWrite(Context.of(ROUTING_KEY, "lookup-key"))
 				.as(StepVerifier::create)
 				.expectNext(routedConnectionFactory)
 				.verifyComplete();
@@ -187,8 +187,12 @@ public class AbstractRoutingConnectionFactoryUnitTests {
 
 		@Override
 		protected Mono<Object> determineCurrentLookupKey() {
-			return Mono.subscriberContext().filter(context -> context.hasKey(ROUTING_KEY))
-					.map(context -> context.get(ROUTING_KEY));
+			return Mono.deferContextual(context -> {
+				if (context.hasKey(ROUTING_KEY)) {
+					return Mono.just(context.get(ROUTING_KEY));
+				}
+				return Mono.empty();
+			});
 		}
 	}
 
