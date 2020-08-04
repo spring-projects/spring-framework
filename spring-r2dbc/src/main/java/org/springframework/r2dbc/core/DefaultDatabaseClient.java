@@ -86,6 +86,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 
 	@Override
+	public ConnectionFactory getConnectionFactory() {
+		return this.connectionFactory;
+	}
+
+	@Override
 	public GenericExecuteSpec sql(String sql) {
 		Assert.hasText(sql, "SQL must not be null or empty");
 		return sql(() -> sql);
