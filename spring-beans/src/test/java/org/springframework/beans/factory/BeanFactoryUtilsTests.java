@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 04.07.2003
  */
 public class BeanFactoryUtilsTests {
@@ -317,6 +318,108 @@ public class BeanFactoryUtilsTests {
 	public void testIntDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("int");
 		assertTrue(Arrays.equals(new String[] { "buffer" }, deps));
+	}
+
+	@Test
+	public void isSingletonAndIsPrototypeWithStaticFactory() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean bean = new TestBean();
+		DummyFactory fb1 = new DummyFactory();
+		DummyFactory fb2 = new DummyFactory();
+		fb2.setSingleton(false);
+		TestBeanSmartFactoryBean sfb1 = new TestBeanSmartFactoryBean(true, true);
+		TestBeanSmartFactoryBean sfb2 = new TestBeanSmartFactoryBean(true, false);
+		TestBeanSmartFactoryBean sfb3 = new TestBeanSmartFactoryBean(false, true);
+		TestBeanSmartFactoryBean sfb4 = new TestBeanSmartFactoryBean(false, false);
+		lbf.addBean("bean", bean);
+		lbf.addBean("fb1", fb1);
+		lbf.addBean("fb2", fb2);
+		lbf.addBean("sfb1", sfb1);
+		lbf.addBean("sfb2", sfb2);
+		lbf.addBean("sfb3", sfb3);
+		lbf.addBean("sfb4", sfb4);
+
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
+		assertSame(bean, beans.get("bean"));
+		assertSame(fb1.getObject(), beans.get("fb1"));
+		assertTrue(beans.get("fb2") instanceof TestBean);
+		assertTrue(beans.get("sfb1") instanceof TestBean);
+		assertTrue(beans.get("sfb2") instanceof TestBean);
+		assertTrue(beans.get("sfb3") instanceof TestBean);
+		assertTrue(beans.get("sfb4") instanceof TestBean);
+
+		assertEquals(7, lbf.getBeanDefinitionCount());
+		assertTrue(lbf.getBean("bean") instanceof TestBean);
+		assertTrue(lbf.getBean("&fb1") instanceof FactoryBean);
+		assertTrue(lbf.getBean("&fb2") instanceof FactoryBean);
+		assertTrue(lbf.getBean("&sfb1") instanceof SmartFactoryBean);
+		assertTrue(lbf.getBean("&sfb2") instanceof SmartFactoryBean);
+		assertTrue(lbf.getBean("&sfb3") instanceof SmartFactoryBean);
+		assertTrue(lbf.getBean("&sfb4") instanceof SmartFactoryBean);
+
+		assertTrue(lbf.isSingleton("bean"));
+		assertTrue(lbf.isSingleton("fb1"));
+		assertTrue(lbf.isSingleton("fb2"));
+		assertTrue(lbf.isSingleton("sfb1"));
+		assertTrue(lbf.isSingleton("sfb2"));
+		assertTrue(lbf.isSingleton("sfb3"));
+		assertTrue(lbf.isSingleton("sfb4"));
+
+		assertTrue(lbf.isSingleton("&fb1"));
+		assertFalse(lbf.isSingleton("&fb2"));
+		assertTrue(lbf.isSingleton("&sfb1"));
+		assertTrue(lbf.isSingleton("&sfb2"));
+		assertFalse(lbf.isSingleton("&sfb3"));
+		assertFalse(lbf.isSingleton("&sfb4"));
+
+		assertFalse(lbf.isPrototype("bean"));
+		assertFalse(lbf.isPrototype("fb1"));
+		assertFalse(lbf.isPrototype("fb2"));
+		assertFalse(lbf.isPrototype("sfb1"));
+		assertFalse(lbf.isPrototype("sfb2"));
+		assertFalse(lbf.isPrototype("sfb3"));
+		assertFalse(lbf.isPrototype("sfb4"));
+
+		assertFalse(lbf.isPrototype("&fb1"));
+		assertTrue(lbf.isPrototype("&fb2"));
+		assertTrue(lbf.isPrototype("&sfb1"));
+		assertFalse(lbf.isPrototype("&sfb2"));
+		assertTrue(lbf.isPrototype("&sfb3"));
+		assertTrue(lbf.isPrototype("&sfb4"));
+	}
+
+
+	static class TestBeanSmartFactoryBean implements SmartFactoryBean<TestBean> {
+
+		private final TestBean testBean = new TestBean("enigma", 42);
+		private final boolean singleton;
+		private final boolean prototype;
+
+		TestBeanSmartFactoryBean(boolean singleton, boolean prototype) {
+			this.singleton = singleton;
+			this.prototype = prototype;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return this.singleton;
+		}
+
+		@Override
+		public boolean isPrototype() {
+			return this.prototype;
+		}
+
+		@Override
+		public Class<TestBean> getObjectType() {
+			return TestBean.class;
+		}
+
+		public TestBean getObject() throws Exception {
+			// We don't really care if the actual instance is a singleton or prototype
+			// for the tests that use this factory.
+			return this.testBean;
+		}
 	}
 
 }
