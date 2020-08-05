@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
- * Exception handling via {@code @ExceptionHandler} method.
+ * Exception handling via {@code @ExceptionHandler} methods.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class ExceptionHandlerTests {
+class ExceptionHandlerTests {
 
 	@Test
-	public void testExceptionHandlerMethod() throws Exception {
+	void localExceptionHandlerMethod() throws Exception {
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Clyde"))
 				.andExpect(status().isOk())
@@ -45,7 +46,7 @@ public class ExceptionHandlerTests {
 	}
 
 	@Test
-	public void testGlobalExceptionHandlerMethod() throws Exception {
+	void globalExceptionHandlerMethod() throws Exception {
 		standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
 				.perform(get("/person/Bonnie"))
 				.andExpect(status().isOk())
@@ -53,7 +54,7 @@ public class ExceptionHandlerTests {
 	}
 
 	@Test
-	public void testGlobalExceptionHandlerMethodUsingClassArgument() throws Exception {
+	void globalExceptionHandlerMethodUsingClassArgument() throws Exception {
 		standaloneSetup(PersonController.class).setControllerAdvice(GlobalExceptionHandler.class).build()
 				.perform(get("/person/Bonnie"))
 				.andExpect(status().isOk())
@@ -65,7 +66,7 @@ public class ExceptionHandlerTests {
 	private static class PersonController {
 
 		@GetMapping("/person/{name}")
-		public String show(@PathVariable String name) {
+		String show(@PathVariable String name) {
 			if (name.equals("Clyde")) {
 				throw new IllegalArgumentException("simulated exception");
 			}
@@ -76,7 +77,7 @@ public class ExceptionHandlerTests {
 		}
 
 		@ExceptionHandler
-		public String handleException(IllegalArgumentException exception) {
+		String handleException(IllegalArgumentException exception) {
 			return "errorView";
 		}
 	}
@@ -86,10 +87,9 @@ public class ExceptionHandlerTests {
 	private static class GlobalExceptionHandler {
 
 		@ExceptionHandler
-		public String handleException(IllegalStateException exception) {
+		String handleException(IllegalStateException exception) {
 			return "globalErrorView";
 		}
-
 	}
 
 }
