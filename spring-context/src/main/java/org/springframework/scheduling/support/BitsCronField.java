@@ -109,7 +109,7 @@ final class BitsCronField extends CronField {
 
 
 	private static BitsCronField parseDate(String value, BitsCronField.Type type) {
-		if (value.indexOf('?') != -1) {
+		if (value.equals("?")) {
 			value = "*";
 		}
 		return BitsCronField.parseField(value, type);
