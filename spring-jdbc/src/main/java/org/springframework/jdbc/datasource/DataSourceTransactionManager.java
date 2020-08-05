@@ -256,6 +256,9 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
+		/*Added line of code to allow users to get readOnly status earlier (i.e. in case @prepareSynchronization doesn't
+		do anything because status.isNewSynchronization() == false and so read only status is not set in the next method */
+		TransactionSynchronizationManager.setCurrentTransactionReadOnly(definition.isReadOnly());
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		Connection con = null;
 
