@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.springframework.beans.testfixture.beans.TestAnnotation;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
@@ -325,6 +328,33 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
+	public void findAnnotationOnBean() {
+		this.listableBeanFactory.registerSingleton("controllerAdvice", new ControllerAdviceClass());
+		this.listableBeanFactory.registerSingleton("restControllerAdvice", new RestControllerAdviceClass());
+		testFindAnnotationOnBean(this.listableBeanFactory);
+	}
+
+	@Test  // gh-25520
+	public void findAnnotationOnBeanWithStaticFactory() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		lbf.addBean("controllerAdvice", new ControllerAdviceClass());
+		lbf.addBean("restControllerAdvice", new RestControllerAdviceClass());
+		testFindAnnotationOnBean(lbf);
+	}
+
+	private void testFindAnnotationOnBean(ListableBeanFactory lbf) {
+		assertControllerAdvice(lbf, "controllerAdvice");
+		assertControllerAdvice(lbf, "restControllerAdvice");
+	}
+
+	private void assertControllerAdvice(ListableBeanFactory lbf, String beanName) {
+		ControllerAdvice controllerAdvice = lbf.findAnnotationOnBean(beanName, ControllerAdvice.class);
+		assertThat(controllerAdvice).isNotNull();
+		assertThat(controllerAdvice.value()).isEqualTo("com.example");
+		assertThat(controllerAdvice.basePackage()).isEqualTo("com.example");
+	}
+
+	@Test
 	public void isSingletonAndIsPrototypeWithStaticFactory() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		TestBean bean = new TestBean();
@@ -392,6 +422,35 @@ public class BeanFactoryUtilsTests {
 		assertThat(lbf.isPrototype("&sfb4")).isTrue();
 	}
 
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ControllerAdvice {
+
+		@AliasFor("basePackage")
+		String value() default "";
+
+		@AliasFor("value")
+		String basePackage() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ControllerAdvice
+	@interface RestControllerAdvice {
+
+		@AliasFor(annotation = ControllerAdvice.class)
+		String value() default "";
+
+		@AliasFor(annotation = ControllerAdvice.class)
+		String basePackage() default "";
+	}
+
+	@ControllerAdvice("com.example")
+	static class ControllerAdviceClass {
+	}
+
+	@RestControllerAdvice("com.example")
+	static class RestControllerAdviceClass {
+	}
 
 	static class TestBeanSmartFactoryBean implements SmartFactoryBean<TestBean> {
 
