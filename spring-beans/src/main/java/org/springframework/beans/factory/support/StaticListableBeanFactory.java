@@ -37,7 +37,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -450,7 +450,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			throws NoSuchBeanDefinitionException {
 
 		Class<?> beanType = getType(beanName);
-		return (beanType != null ? AnnotationUtils.findAnnotation(beanType, annotationType) : null);
+		return (beanType != null ? AnnotatedElementUtils.findMergedAnnotation(beanType, annotationType) : null);
 	}
 
 }
