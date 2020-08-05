@@ -224,14 +224,14 @@ public class RSocketClientToServerIntegrationTests {
 	@Controller
 	static class ServerController {
 
-		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
+		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
-		final Sinks.StandaloneFluxSink<String> metadataPushPayloads = Sinks.replayAll();
+		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
 
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.next(payload);
+			this.fireForgetPayloads.emitNext(payload);
 		}
 
 		@MessageMapping("echo")
@@ -273,7 +273,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@ConnectMapping("foo-updates")
 		public void handleMetadata(@Header("foo") String foo) {
-			this.metadataPushPayloads.next(foo);
+			this.metadataPushPayloads.emitNext(foo);
 		}
 
 		@MessageExceptionHandler

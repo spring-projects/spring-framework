@@ -371,7 +371,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		assertThat(controller.fluxSink).isNotNull();
-		controller.fluxSink.next("foo");
+		controller.fluxSink.emitNext("foo");
 
 		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
@@ -587,7 +587,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		private MonoProcessor<String> monoProcessor;
 
-		private Sinks.StandaloneFluxSink<String> fluxSink;
+		private Sinks.Many<String> fluxSink;
 
 		private boolean exceptionCaught = false;
 
@@ -599,7 +599,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("flux")
 		public Flux<String> handleFlux() {
-			this.fluxSink = Sinks.unicast();
+			this.fluxSink = Sinks.many().unicast().onBackpressureBuffer();
 			return this.fluxSink.asFlux();
 		}
 
