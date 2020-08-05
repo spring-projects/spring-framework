@@ -121,9 +121,7 @@ public final class CronExpression {
 	 * </li>
 	 * <li>
 	 * In the "day of week" field, {@code L} stands for "the last day of the
-	 * week", and uses the
-	 * {@linkplain java.util.Locale#getDefault() system default locale}
-	 * to determine which day that is (i.e. Sunday or Saturday).
+	 * week".
 	 * If prefixed by a number or three-letter name (i.e. {@code dL} or
 	 * {@code DDDL}), it means "the last day of week {@code d} (or {@code DDD})
 	 * in the month".
@@ -158,7 +156,6 @@ public final class CronExpression {
 	 * <li>{@code "0 0 0 L-3 * *"} = third-to-last day of the month at midnight</li>
 	 * <li>{@code "0 0 0 1W * *"} = first weekday of the month at midnight</li>
 	 * <li>{@code "0 0 0 LW * *"} = last weekday of the month at midnight</li>
-	 * <li>{@code "0 0 0 * * L"} = last day of the week at midnight</li>
 	 * <li>{@code "0 0 0 * * 5L"} = last Friday of the month at midnight</li>
 	 * <li>{@code "0 0 0 * * THUL"} = last Thursday of the month at midnight</li>
 	 * <li>{@code "0 0 0 ? * 5#2"} = the second Friday in the month at midnight</li>

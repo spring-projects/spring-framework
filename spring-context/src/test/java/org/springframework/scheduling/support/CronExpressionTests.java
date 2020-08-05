@@ -24,14 +24,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
-import java.util.Locale;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static java.time.DayOfWeek.FRIDAY;
 import static java.time.DayOfWeek.MONDAY;
-import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 import static java.time.DayOfWeek.TUESDAY;
 import static java.time.DayOfWeek.WEDNESDAY;
@@ -734,60 +732,6 @@ class CronExpressionTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual).isEqualTo(expected);
 		assertThat(actual).is(weekday);
-	}
-
-	@Test
-	public void quartzLastDayOfWeekFirstDayMonday() {
-		Locale defaultLocale = Locale.getDefault();
-		try {
-			Locale.setDefault(Locale.UK);
-
-			CronExpression expression = CronExpression.parse("0 0 0 * * L");
-
-			LocalDateTime last = LocalDateTime.of(LocalDate.of(2008, 1, 4), LocalTime.now());
-			LocalDateTime expected = LocalDateTime.of(2008, 1, 6, 0, 0);
-			LocalDateTime actual = expression.next(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
-
-			last = actual;
-			expected = expected.plusWeeks(1);
-			actual = expression.next(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
-		}
-		finally {
-			Locale.setDefault(defaultLocale);
-		}
-	}
-
-	@Test
-	public void quartzLastDayOfWeekFirstDaySunday() {
-		Locale defaultLocale = Locale.getDefault();
-		try {
-			Locale.setDefault(Locale.US);
-
-			CronExpression expression = CronExpression.parse("0 0 0 * * L");
-
-			LocalDateTime last = LocalDateTime.of(LocalDate.of(2008, 1, 4), LocalTime.now());
-			LocalDateTime expected = LocalDateTime.of(2008, 1, 5, 0, 0);
-			LocalDateTime actual = expression.next(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SATURDAY);
-
-			last = actual;
-			expected = expected.plusWeeks(1);
-			actual = expression.next(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SATURDAY);
-		}
-		finally {
-			Locale.setDefault(defaultLocale);
-		}
 	}
 
 	@Test

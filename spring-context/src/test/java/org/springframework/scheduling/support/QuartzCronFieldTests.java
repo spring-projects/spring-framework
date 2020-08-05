@@ -18,12 +18,9 @@ package org.springframework.scheduling.support;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
-import static java.time.DayOfWeek.SATURDAY;
-import static java.time.DayOfWeek.SUNDAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -63,48 +60,6 @@ class QuartzCronFieldTests {
 	}
 
 	@Test
-	public void lastDayOfWeekFirstDayMonday() {
-		Locale defaultLocale = Locale.getDefault();
-		try {
-			Locale.setDefault(Locale.UK);
-			QuartzCronField field = QuartzCronField.parseDaysOfWeek("L");
-
-			LocalDate last = LocalDate.of(2020, 6, 16);
-			LocalDate expected = LocalDate.of(2020, 6, 21);
-			assertThat(field.nextOrSame(last)).isEqualTo(expected);
-
-			LocalDate actual = field.nextOrSame(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SUNDAY);
-		}
-		finally {
-			Locale.setDefault(defaultLocale);
-		}
-	}
-
-	@Test
-	public void lastDayOfWeekFirstDaySunday() {
-		Locale defaultLocale = Locale.getDefault();
-		try {
-			Locale.setDefault(Locale.US);
-			QuartzCronField field = QuartzCronField.parseDaysOfWeek("L");
-
-			LocalDate last = LocalDate.of(2020, 6, 16);
-			LocalDate expected = LocalDate.of(2020, 6, 20);
-			assertThat(field.nextOrSame(last)).isEqualTo(expected);
-
-			LocalDate actual = field.nextOrSame(last);
-			assertThat(actual).isNotNull();
-			assertThat(actual).isEqualTo(expected);
-			assertThat(actual.getDayOfWeek()).isEqualTo(SATURDAY);
-		}
-		finally {
-			Locale.setDefault(defaultLocale);
-		}
-	}
-
-	@Test
 	void lastDayOfWeekOffset() {
 		// last Thursday (4) of the month
 		QuartzCronField field = QuartzCronField.parseDaysOfWeek("4L");
@@ -129,6 +84,7 @@ class QuartzCronFieldTests {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek(""));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("1"));
+		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("L"));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("L1"));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("LL"));
 		assertThatIllegalArgumentException().isThrownBy(() -> QuartzCronField.parseDaysOfWeek("-4L"));
