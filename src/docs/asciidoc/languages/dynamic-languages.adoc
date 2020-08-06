@@ -67,7 +67,7 @@ The following example defines a class that has a dependency on the `Messenger` i
 
 The following example implements the `Messenger` interface in Groovy:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -282,7 +282,7 @@ surrounded by quotation marks. The following listing shows the changes that you
 (the developer) should make to the `Messenger.groovy` source file when the
 execution of the program is paused:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	package org.springframework.scripting
@@ -371,7 +371,7 @@ constructors and properties 100% clear, the following mixture of code and config
 does not work:
 
 .An approach that cannot work
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -697,7 +697,7 @@ beans, you have to enable the "`refreshable beans`" functionality. See
 The following example shows an `org.springframework.web.servlet.mvc.Controller` implemented
 by using the Groovy dynamic language:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file '/WEB-INF/groovy/FortuneController.groovy'
