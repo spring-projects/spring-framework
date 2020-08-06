@@ -1217,7 +1217,7 @@ To send multipart data, you need to provide a `MultiValueMap<String, Object>` wh
 may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
 part content with headers. For example:
 
-[source,java,intent=0]
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
@@ -1238,7 +1238,7 @@ explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
 Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
 
-[source,java,intent=0]
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	MultiValueMap<String, Object> parts = ...;
