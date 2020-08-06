@@ -79,20 +79,17 @@ public class DefaultRSocketRequesterBuilderTests {
 
 
 	@Test
-	@SuppressWarnings({"unchecked", "deprecation"})
+	@SuppressWarnings("unchecked")
 	public void rsocketConnectorConfigurer() {
-		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketConnector(this.connectorConfigurer)
-				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
 				.transport(this.transport);
 
 		// RSocketStrategies and RSocketConnector configurers should have been called
 
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
-		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
 		assertThat(this.connectorConfigurer.connector()).isNotNull();
 	}
 
