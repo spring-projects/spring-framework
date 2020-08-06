@@ -169,11 +169,9 @@ public class HandlerMappingIntrospector
 			if (handler == null) {
 				continue;
 			}
-			if (handler.getInterceptors() != null) {
-				for (HandlerInterceptor interceptor : handler.getInterceptors()) {
-					if (interceptor instanceof CorsConfigurationSource) {
-						return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
-					}
+			for (HandlerInterceptor interceptor : handler.getInterceptorList()) {
+				if (interceptor instanceof CorsConfigurationSource) {
+					return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
 				}
 			}
 			if (handler.getHandler() instanceof CorsConfigurationSource) {

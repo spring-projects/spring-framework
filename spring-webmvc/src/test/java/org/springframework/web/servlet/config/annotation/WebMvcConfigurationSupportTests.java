@@ -66,6 +66,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
@@ -123,8 +124,9 @@ public class WebMvcConfigurationSupportTests {
 
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertThat(chain).isNotNull();
-		assertThat(chain.getInterceptors()).isNotNull();
-		assertThat(chain.getInterceptors()[0].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
+		HandlerInterceptor[] interceptors = chain.getInterceptors();
+		assertThat(interceptors).isNotNull();
+		assertThat(interceptors[0].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
 
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/scoped"));
 		assertThat(chain).as("HandlerExecutionChain for '/scoped' mapping should not be null.").isNotNull();
@@ -162,10 +164,11 @@ public class WebMvcConfigurationSupportTests {
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
 
 		assertThat(chain).isNotNull();
-		assertThat(chain.getInterceptors()).isNotNull();
-		assertThat(chain.getInterceptors().length).isEqualTo(3);
-		assertThat(chain.getInterceptors()[1].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
-		assertThat(chain.getInterceptors()[2].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
+		HandlerInterceptor[] interceptors = chain.getInterceptors();
+		assertThat(interceptors).isNotNull();
+		assertThat(interceptors.length).isEqualTo(3);
+		assertThat(interceptors[1].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
+		assertThat(interceptors[2].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
 	}
 
 	@Test

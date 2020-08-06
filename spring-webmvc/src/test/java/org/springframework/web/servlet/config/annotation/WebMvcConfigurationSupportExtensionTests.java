@@ -64,6 +64,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
@@ -136,12 +137,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertThat(rmHandlerMapping.getPathMatcher().getClass()).isEqualTo(TestPathMatcher.class);
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertThat(chain).isNotNull();
-		assertThat(chain.getInterceptors()).isNotNull();
-		assertThat(chain.getInterceptors().length).isEqualTo(4);
-		assertThat(chain.getInterceptors()[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
-		assertThat(chain.getInterceptors()[1].getClass()).isEqualTo(LocaleChangeInterceptor.class);
-		assertThat(chain.getInterceptors()[2].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
-		assertThat(chain.getInterceptors()[3].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
+		HandlerInterceptor[] interceptors = chain.getInterceptors();
+		assertThat(interceptors).isNotNull();
+		assertThat(interceptors.length).isEqualTo(4);
+		assertThat(interceptors[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
+		assertThat(interceptors[1].getClass()).isEqualTo(LocaleChangeInterceptor.class);
+		assertThat(interceptors[2].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
+		assertThat(interceptors[3].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
 
 		Map<RequestMappingInfo, HandlerMethod> map = rmHandlerMapping.getHandlerMethods();
 		assertThat(map.size()).isEqualTo(2);
@@ -180,12 +182,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
 		assertThat(chain).isNotNull();
 		assertThat(chain.getHandler()).isNotNull();
-		assertThat(chain.getInterceptors().length).as(Arrays.toString(chain.getInterceptors())).isEqualTo(5);
-		assertThat(chain.getInterceptors()[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
-		// PathExposingHandlerInterceptor at chain.getInterceptors()[1]
-		assertThat(chain.getInterceptors()[2].getClass()).isEqualTo(LocaleChangeInterceptor.class);
-		assertThat(chain.getInterceptors()[3].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
-		assertThat(chain.getInterceptors()[4].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
+		interceptors = chain.getInterceptors();
+		assertThat(interceptors.length).as(Arrays.toString(interceptors)).isEqualTo(5);
+		assertThat(interceptors[0].getClass().getSimpleName()).isEqualTo("CorsInterceptor");
+		// PathExposingHandlerInterceptor at interceptors[1]
+		assertThat(interceptors[2].getClass()).isEqualTo(LocaleChangeInterceptor.class);
+		assertThat(interceptors[3].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
+		assertThat(interceptors[4].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
 
 		handlerMapping = (AbstractHandlerMapping) this.config.defaultServletHandlerMapping();
 		handlerMapping.setApplicationContext(this.context);

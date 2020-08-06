@@ -652,13 +652,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			HandlerExecutionChain chain, @Nullable CorsConfiguration config) {
 
 		if (CorsUtils.isPreFlightRequest(request)) {
-			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+			List<HandlerInterceptor> interceptors = chain.getInterceptorList();
+			return new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
 		}
 		else {
 			chain.addInterceptor(0, new CorsInterceptor(config));
+			return chain;
 		}
-		return chain;
 	}
 
 
