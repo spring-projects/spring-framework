@@ -79,7 +79,7 @@ The following example implements the `Messenger` interface in Groovy:
 	// define the implementation in Groovy
 	class GroovyMessenger implements Messenger {
 
-		String message
+		String message;
 	}
 ----
 
@@ -388,9 +388,9 @@ does not work:
 			this.message = message;
 		}
 
-		String message
+		String message;
 
-		String anotherMessage
+		String anotherMessage;
 	}
 ----
 
