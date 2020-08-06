@@ -101,8 +101,7 @@ There is built-in support for the following:
 
 For example, to switch to Apache HttpComponents, you can use the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 ----
@@ -122,8 +121,7 @@ either as a `String` variable argument, or as `Map<String,String>`.
 
 The following example uses a `String` variable argument:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String result = restTemplate.getForObject(
 			"https://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
@@ -131,8 +129,7 @@ The following example uses a `String` variable argument:
 
 The following example uses a `Map<String, String>`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	Map<String, String> vars = Collections.singletonMap("hotel", "42");
 
@@ -142,8 +139,7 @@ The following example uses a `Map<String, String>`:
 
 Keep in mind URI templates are automatically encoded, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	restTemplate.getForObject("https://example.com/hotel list", String.class);
 
@@ -161,8 +157,7 @@ For more details on working with and encoding URIs, see <<web.adoc#mvc-uri-build
 
 You can use the `exchange()` methods to specify request headers, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String uriTemplate = "https://example.com/hotels/{hotel}";
 	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
@@ -301,8 +296,7 @@ and writes the media type supported by the Java I/O API.
 You can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View]
 to serialize only a subset of the object properties, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
 	value.setSerializationView(User.WithoutPasswordView.class);
@@ -320,8 +314,7 @@ To send multipart data, you need to provide a `MultiValueMap<String, Object>` wh
 may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
 part content with headers. For example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 
@@ -341,8 +334,7 @@ explicitly provide the `MediaType` with an `HttpEntity` wrapper.
 
 Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	MultiValueMap<String, Object> parts = ...;
 	template.postForObject("https://example.com/upload", parts, Void.class);
@@ -398,8 +390,7 @@ The following remoting technologies are now deprecated and will not be replaced:
 While discussing the remoting capabilities of Spring, we use the following domain
 model and corresponding services:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Account implements Serializable{
 
@@ -415,8 +406,7 @@ model and corresponding services:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface AccountService {
 
@@ -426,8 +416,7 @@ model and corresponding services:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// the implementation doing nothing at the moment
 	public class AccountServiceImpl implements AccountService {
@@ -603,8 +592,7 @@ the Spring application context. This means that you can apply Spring functionali
 injection through `@Autowired` works as well. The following example shows how to
 define these beans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
 		<property name="baseAddress" value="http://localhost:8080/"/>
@@ -622,8 +610,7 @@ since the endpoint in this example is a fully Spring-managed bean. This means th
 the endpoint implementation can be as follows (without any superclass declared --
 and Spring's `@Autowired` configuration annotation is still honored):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@WebService(serviceName="AccountService")
 	public class AccountServiceEndpoint {
@@ -676,8 +663,7 @@ version that can return a proxy that implements our business service interface.
 In the following example, we use `JaxWsPortProxyFactoryBean` to create a proxy for the
 `AccountService` endpoint (again):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
 		<property name="serviceInterface" value="example.AccountService"/> <1>
@@ -699,8 +685,7 @@ Accessing the web service is easy, as we have a bean factory for it that exposes
 an interface called `AccountService`. The following example shows how we can wire this
 up in Spring:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="client" class="example.AccountClientImpl">
 		...
@@ -711,8 +696,7 @@ up in Spring:
 From the client code, we can access the web service as if it were a normal class,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class AccountClientImpl {
 
@@ -761,8 +745,7 @@ supports the exposing of any non-RMI services via RMI invokers.
 We first have to set up our service in the Spring container.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="accountService" class="example.AccountServiceImpl">
 		<!-- any additional properties, maybe a DAO? -->
@@ -772,8 +755,7 @@ The following example shows how to do so:
 Next, we have to expose our service by using `RmiServiceExporter`.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
 		<!-- does not necessarily have to be the same name as the bean to be exported -->
@@ -801,8 +783,7 @@ anonymous port is used to communicate with the service.
 Our client is a simple object that uses the `AccountService` to manage accounts,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SimpleObject {
 
@@ -819,8 +800,7 @@ as the following example shows:
 To link in the service on the client, we create a separate Spring container,
 to contain the following simple object and the service linking configuration bits:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleObject">
 		<property name="accountService" ref="accountService"/>
@@ -855,8 +835,7 @@ Hessian communicates through HTTP and does so by using a custom servlet. By usin
 servlet to expose your services. First, we have to create a new servlet in our application,
 as shown in the following excerpt from `web.xml`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<servlet>
 		<servlet-name>remoting</servlet-name>
@@ -888,8 +867,7 @@ its target exporter.
 In the newly created application context called `remoting-servlet.xml`, we create a
 `HessianServiceExporter` to export our services, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="accountService" class="example.AccountServiceImpl">
 		<!-- any additional properties, maybe a DAO? -->
@@ -910,8 +888,7 @@ within the containing `DispatcherServlet` instance's mapping (as defined earlier
 Alternatively, you can create a `HessianServiceExporter` in your root application context (for example,
 in `WEB-INF/applicationContext.xml`), as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
 		<property name="service" ref="accountService"/>
@@ -924,8 +901,7 @@ with the same end result: The exporter gets mapped to the request path at
 `/remoting/AccountService`. Note that the servlet name needs to match the bean name of
 the target exporter. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<servlet>
 		<servlet-name>accountExporter</servlet-name>
@@ -947,8 +923,7 @@ principles apply as with the RMI example. We create a separate bean factory or
 application context and mention the following beans where the `SimpleObject` is by using
 the `AccountService` to manage accounts, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleObject">
 		<property name="accountService" ref="accountService"/>
@@ -970,8 +945,7 @@ be applied through using the `web.xml` security features, for example. Usually,
 you need not use per-user security credentials here. Rather, you can use shared credentials that you define
 at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`), as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
 		<property name="interceptors" ref="authorizationInterceptor"/>
@@ -1039,8 +1013,7 @@ To expose the `AccountService` (mentioned earlier) within a Spring Web MVC
 `DispatcherServlet`, the following configuration needs to be in place in the
 dispatcher's application context, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
 		<property name="service" ref="accountService"/>
@@ -1054,8 +1027,7 @@ mapping facilities, as explained in <<remoting-caucho-protocols, the section on 
 Alternatively, you can create an `HttpInvokerServiceExporter` in your root application context
 (for example, in `'WEB-INF/applicationContext.xml'`), as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
 		<property name="service" ref="accountService"/>
@@ -1066,8 +1038,7 @@ Alternatively, you can create an `HttpInvokerServiceExporter` in your root appli
 In addition, you can define a corresponding servlet for this exporter in `web.xml`, with the
 servlet name matching the bean name of the target exporter, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<servlet>
 		<servlet-name>accountExporter</servlet-name>
@@ -1089,8 +1060,7 @@ when you use Hessian. By using a proxy, Spring can translate your calls to
 HTTP POST requests to the URL that points to the exported service. The following example
 shows how to configure this arrangement:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
 		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
@@ -1103,8 +1073,7 @@ As mentioned earlier, you can choose what HTTP client you want to use. By defaul
 `HttpComponents` client by setting the `httpInvokerRequestExecutor` property.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="httpInvokerRequestExecutor">
 		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
@@ -1127,8 +1096,7 @@ See <<jms>> for information on Spring's rich support for JMS-based messaging.
 
 The following interface is used on both the server and the client sides:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -1140,8 +1108,7 @@ The following interface is used on both the server and the client sides:
 
 The following simple implementation of the preceding interface is used on the server-side:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -1156,8 +1123,7 @@ The following simple implementation of the preceding interface is used on the se
 The following configuration file contains the JMS-infrastructure beans that are shared
 on both the client and the server:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1183,8 +1149,7 @@ on both the client and the server:
 On the server, you need to expose the service object that uses the
 `JmsInvokerServiceExporter`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1210,8 +1175,7 @@ On the server, you need to expose the service object that uses the
 	</beans>
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -1235,8 +1199,7 @@ interface (`CheckingAccountService`).
 The following example defines beans that you can inject into other client-side objects
 (and the proxy takes care of forwarding the call to the server-side object via JMS):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1254,8 +1217,7 @@ The following example defines beans that you can inject into other client-side o
 	</beans>
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -1339,8 +1301,7 @@ practice and use the EJB Business Methods Interface pattern, so that the EJB's l
 interface extends a non-EJB-specific business methods interface. We call this
 business methods interface `MyComponent`. The following example shows such an interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MyComponent {
 		...
@@ -1358,8 +1319,7 @@ controller to the EJB implementation is to expose a setter method of type `MyCom
 on the controller. This saves the reference as an instance variable in the
 controller. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	private MyComponent myComponent;
 
@@ -1374,8 +1334,7 @@ Now, assuming we obtain our controller object out of a Spring container, we can
 which is the EJB proxy object. We configure the proxy and set the
 `myComponent` property of the controller with the following configuration entry:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myComponent"
 			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
@@ -1402,8 +1361,7 @@ Alternatively (and preferably in case of many such proxy definitions), consider 
 the `<jee:local-slsb>` configuration element in Spring's "`jee`" namespace.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
 			business-interface="com.mycom.MyComponent"/>
@@ -1849,8 +1807,7 @@ that takes no destination argument uses the default destination.
 The following example uses the `MessageCreator` callback to create a text message from the
 supplied `Session` object:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.jms.ConnectionFactory;
 	import javax.jms.JMSException;
@@ -1925,8 +1882,7 @@ gives you access to the message after it has been converted but before it is sen
 following example shows how to modify a message header and a property after a
 `java.util.Map` is converted to a message:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public void sendWithConversion() {
 		Map map = new HashMap();
@@ -2007,8 +1963,7 @@ on multiple threads, it is important to ensure that your implementation is threa
 
 The following example shows a simple implementation of an MDP:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.jms.JMSException;
 	import javax.jms.Message;
@@ -2039,8 +1994,7 @@ container.
 The following example shows how to define and configure one of the message listener
 containers that ships with Spring (in this case, `DefaultMessageListenerContainer`):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
 	<bean id="messageListener" class="jmsexample.ExampleListener"/>
@@ -2066,8 +2020,7 @@ a similar contract to the JMS `MessageListener` interface but also gives the mes
 method access to the JMS `Session` from which the `Message` was received.
 The following listing shows the definition of the `SessionAwareMessageListener` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jms.listener;
 
@@ -2102,8 +2055,7 @@ messaging support. In a nutshell, it lets you expose almost any class as an MDP
 
 Consider the following interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MessageDelegate {
 
@@ -2125,8 +2077,7 @@ receive and handle.
 
 Now consider the following implementation of the `MessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultMessageDelegate implements MessageDelegate {
 		// implementation elided for clarity...
@@ -2137,8 +2088,7 @@ In particular, note how the preceding implementation of the `MessageDelegate` in
 `DefaultMessageDelegate` class) has no JMS dependencies at all. It truly is a
 POJO that we can make into an MDP through the following configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
 	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
@@ -2163,8 +2113,7 @@ also how the `receive(..)` method is strongly typed to receive and respond only 
 `TextMessage` messages.
 The following listing shows the definition of the `TextMessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TextMessageDelegate {
 
@@ -2174,8 +2123,7 @@ The following listing shows the definition of the `TextMessageDelegate` interfac
 
 The following listing shows a class that implements the `TextMessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultTextMessageDelegate implements TextMessageDelegate {
 		// implementation elided for clarity...
@@ -2184,8 +2132,7 @@ The following listing shows a class that implements the `TextMessageDelegate` in
 
 The configuration of the attendant `MessageListenerAdapter` would then be as follows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
 		<constructor-arg>
@@ -2205,8 +2152,7 @@ swallowed). Another of the capabilities of the `MessageListenerAdapter` class is
 ability to automatically send back a response `Message` if a handler method returns a
 non-void value. Consider the following interface and class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ResponsiveTextMessageDelegate {
 
@@ -2215,8 +2161,7 @@ non-void value. Consider the following interface and class:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultResponsiveTextMessageDelegate implements ResponsiveTextMessageDelegate {
 		// implementation elided for clarity...
@@ -2251,8 +2196,7 @@ has committed but message processing failed to commit.
 
 Consider the following bean definition:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
@@ -2276,8 +2220,7 @@ semantics, at the expense of XA transaction log overhead).
 
 The following bean definition creates a transaction manager:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
@@ -2285,8 +2228,7 @@ The following bean definition creates a transaction manager:
 Then we need to add it to our earlier container configuration. The container
 takes care of the rest. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
@@ -2308,8 +2250,7 @@ automatically determine the `ActivationSpec` class name from the provider's
 `ResourceAdapter` class name. Therefore, it is typically possible to provide
 Spring's generic `JmsActivationSpecConfig`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
 		<property name="resourceAdapter" ref="resourceAdapter"/>
@@ -2326,8 +2267,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 `ActivationSpec` object. The `ActivationSpec` object may also come from a JNDI lookup
 (using `<jee:jndi-lookup>`). The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
 		<property name="resourceAdapter" ref="resourceAdapter"/>
@@ -2344,8 +2284,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 Using Spring's `ResourceAdapterFactoryBean`, you can configure the target `ResourceAdapter`
 locally, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="resourceAdapter" class="org.springframework.jca.support.ResourceAdapterFactoryBean">
 		<property name="resourceAdapter">
@@ -2397,8 +2336,7 @@ The easiest way to receive a message asynchronously is to use the annotated list
 endpoint infrastructure. In a nutshell, it lets you expose a method of a managed
 bean as a JMS listener endpoint. The following example shows how to use it:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyService {
@@ -2430,8 +2368,7 @@ declarations to it.
 To enable support for `@JmsListener` annotations, you can add `@EnableJms` to one of
 your `@Configuration` classes, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2464,8 +2401,7 @@ for details and examples.
 If you prefer <<jms-namespace, XML configuration>>, you can use the `<jms:annotation-driven>`
 element, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:annotation-driven/>
 
@@ -2487,8 +2423,7 @@ the container for that model. The infrastructure lets you programmatically confi
 in addition to the ones that are detected by the `JmsListener` annotation.
 The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2522,8 +2457,7 @@ So far, we have been injecting a simple `String` in our endpoint, but it can act
 have a very flexible method signature. In the following example, we rewrite it to inject the `Order` with
 a custom header:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyService {
@@ -2557,8 +2491,7 @@ The ability to inject Spring's `Message` abstraction is particularly useful to b
 from all the information stored in the transport-specific message without relying on
 transport-specific API. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	public void processOrder(Message<Order> order) { ... }
@@ -2571,8 +2504,7 @@ support there as well.
 For instance, if we want to make sure our `Order` is valid before processing it, we can
 annotate the payload with `@Valid` and configure the necessary validator, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2606,8 +2538,7 @@ messaging abstraction.
 Assuming that our `processOrder` method should now return an `OrderStatus`, we can write it
 to automatically send a response, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
@@ -2623,8 +2554,7 @@ annotation at the class level to share a default reply destination.
 If you need to set additional headers in a transport-independent manner, you can return a
 `Message` instead, with a method similar to the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
@@ -2641,8 +2571,7 @@ If you need to compute the response destination at runtime, you can encapsulate 
 in a `JmsResponse` instance that also provides the destination to use at runtime. We can rewrite the previous
 example as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
@@ -2659,8 +2588,7 @@ Finally, if you need to specify some QoS values for the response such as the pri
 the time to live, you can configure the `JmsListenerContainerFactory` accordingly,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2687,8 +2615,7 @@ as the following example shows:
 Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
 namespace elements, you need to reference the JMS schema, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -2711,8 +2638,7 @@ annotation-driven listener endpoints>>. `<listener-container/>` and `<jca-listen
 define shared listener container configuration and can contain `<listener/>` child elements.
 The following example shows a basic configuration for two listeners:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:listener-container>
 
@@ -2780,8 +2706,7 @@ You can automatically expose such settings as a `JmsListenerContainerFactory` by
 specifying the `id` of the bean to expose through the `factory-id` attribute,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:listener-container connection-factory="myConnectionFactory"
 			task-executor="myTaskExecutor"
@@ -2908,8 +2833,7 @@ also provides a discussion of transaction choices and message redelivery scenari
 Configuring a JCA-based listener container with the `jms` schema support is very similar,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:jca-listener-container resource-adapter="myResourceAdapter"
 			destination-resolver="myDestinationResolver"
@@ -3021,8 +2945,7 @@ The core class in Spring's JMX framework is the `MBeanExporter`. This class is
 responsible for taking your Spring beans and registering them with a JMX `MBeanServer`.
 For example, consider the following class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -3062,8 +2985,7 @@ To expose the properties and methods of this bean as attributes and operations o
 MBean, you can configure an instance of the `MBeanExporter` class in your
 configuration file and pass in the bean, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<!-- this bean must not be lazily initialized if the exporting is to happen -->
@@ -3116,8 +3038,7 @@ You can also ensure that a specific `MBeanServer` is used by setting the value o
 `MBeanExporter` instance's `server` property to the `MBeanServer` value returned by an
 `MBeanServerFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3160,8 +3081,7 @@ used. However, when multiple instances exist, the exporter might pick the wrong 
 In such cases, you should use the `MBeanServer` `agentId` to indicate which instance to
 be used, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
@@ -3182,8 +3102,7 @@ For platforms or cases where the existing `MBeanServer` has a dynamic (or unknow
 <<core.adoc#beans-factory-class-static-factory-method, factory-method>>,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -3217,8 +3136,7 @@ registered as-is with the `MBeanServer` without further intervention from Spring
 to be automatically detected by the `MBeanExporter` by setting the `autodetect`
 property to `true`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="autodetect" value="true"/>
@@ -3280,8 +3198,7 @@ values.
 The following example shows how to change from the default registration
 behavior to the `REPLACE_EXISTING` behavior:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3355,8 +3272,7 @@ an operation or an attribute.
 The following example shows the annotated version of the `JmxTestBean` class that we
 used in <<jmx-exporting-mbeanserver>>:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -3434,8 +3350,7 @@ contain only one operation (`add(int, int)`) when you use the `MetadataMBeanInfo
 The following configuration shows how you can configure the `MBeanExporter` to use the
 `MetadataMBeanInfoAssembler`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -3572,8 +3487,7 @@ the `MetadataMBeanInfoAssembler`, which votes to include any bean that is marked
 with the `ManagedResource` attribute. The default approach in this case is to use the
 bean name as the `ObjectName`, which results in a configuration similar to the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3621,8 +3535,7 @@ and removing the need for your beans to implement the MBean interfaces.
 Consider the following interface, which is used to define a management interface for the
 `JmxTestBean` class that we showed earlier:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface IJmxTestBean {
 
@@ -3645,8 +3558,7 @@ This interface defines the methods and properties that are exposed as operations
 attributes on the JMX MBean. The following code shows how to configure Spring JMX to use
 this interface as the definition for the management interface:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3699,8 +3611,7 @@ management interface.
 that are exposed to JMX as attributes and operations. The following code shows a sample
 configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
@@ -3752,8 +3663,7 @@ that corresponds to the bean key. If no entry is found or if the `Properties` in
 
 The following code shows a sample configuration for the `KeyNamingStrategy`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3803,8 +3713,7 @@ the `ObjectName`.
 attribute on each bean to create the `ObjectName`. The following code shows the
 configuration for the `MetadataNamingStrategy`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3838,8 +3747,7 @@ format: _[fully-qualified-package-name]:type=[short-classname],name=[bean-name]_
 example, the generated `ObjectName` for the following bean would be
 `com.example:type=MyClass,name=myBean`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myBean" class="com.example.MyClass"/>
 ----
@@ -3857,8 +3765,7 @@ always enabled as well). In fact, rather than defining an `MBeanExporter` bean, 
 simpler syntax is supported by the `@EnableMBeanExport` `@Configuration` annotation,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableMBeanExport
@@ -3870,8 +3777,7 @@ as the following example shows:
 If you prefer XML-based configuration, the `<context:mbean-export/>` element serves the
 same purpose and is shown in the following listing:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:mbean-export/>
 ----
@@ -3882,8 +3788,7 @@ value for the generated MBean `ObjectName` domains. This is used in place of the
 fully qualified package name as described in the previous section on
 <<jmx-naming-metadata, MetadataNamingStrategy>>, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EnableMBeanExport(server="myMBeanServer", defaultDomain="myDomain")
 	@Configuration
@@ -3894,8 +3799,7 @@ fully qualified package name as described in the previous section on
 
 The following example shows the XML equivalent of the preceding annotation-based example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>
 ----
@@ -3923,8 +3827,7 @@ connectors.
 To have Spring JMX create, start, and expose a JSR-160 `JMXConnectorServer`, you can use the
 following configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/>
 ----
@@ -3940,8 +3843,7 @@ To specify another URL and register the `JMXConnectorServer` itself with the
 `MBeanServer`, you can use the `serviceUrl` and `ObjectName` properties, respectively,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector"
 			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
@@ -3956,8 +3858,7 @@ with the `MBeanServer` under that `ObjectName`. The following example shows the 
 parameters that you can pass to the `ConnectorServerFactoryBean` when creating a
 `JMXConnector`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector"
 			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
@@ -3980,8 +3881,7 @@ use Spring to export remote services for you through RMI, Spring has already
 constructed an RMI registry. If not, you can easily start a registry by using the following
 snippet of configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
 		<property name="port" value="1099"/>
@@ -3995,8 +3895,7 @@ snippet of configuration:
 To create an `MBeanServerConnection` to a remote JSR-160-enabled `MBeanServer`, you can use the
 `MBeanServerConnectionFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
 		<property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi"/>
@@ -4014,8 +3913,7 @@ other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J
 can take advantage of protocols such as SOAP or Hessian over simple HTTP or SSL and others,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
 		<property name="objectName" value="connector:name=burlap"/>
@@ -4036,8 +3934,7 @@ local or remote `MBeanServer`. These proxies provide you with a standard Java in
 through which you can interact with your MBeans. The following code shows how to configure a
 proxy for an MBean running in a local `MBeanServer`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
 		<property name="objectName" value="bean:name=testBean"/>
@@ -4056,8 +3953,7 @@ The `MBeanProxyFactoryBean` can create a proxy to any MBean that is accessible t
 you can override this and provide an `MBeanServerConnection` that points to a remote
 `MBeanServer` to cater for proxies that point to remote MBeans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="clientConnector"
 			class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
@@ -4095,8 +3991,7 @@ example, consider the scenario where one would like to be informed (through a
 `Notification`) each and every time an attribute of a target MBean changes. The following
 example writes notifications to the console:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.example;
 
@@ -4123,8 +4018,7 @@ example writes notifications to the console:
 The following example adds `ConsoleLoggingNotificationListener` (defined in the preceding
 example) to `notificationListenerMappings`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4160,8 +4054,7 @@ it deems appropriate in response to the `Notification`.
 You can also use straight bean names as the link between exported beans and listeners,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4193,8 +4086,7 @@ that the enclosing `MBeanExporter` exports, you can use the special wildcard (`{
 as the key for an entry in the `notificationListenerMappings` property
 map, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="notificationListenerMappings">
 		<map>
@@ -4218,8 +4110,7 @@ object that can be used in advanced JMX notification scenarios.
 The configuration when using `NotificationListenerBean` instances is not wildly
 different to what was presented previously, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4258,8 +4149,7 @@ we want to be given a handback object every time a `Notification` is raised and 
 we also want to filter out extraneous `Notifications` by supplying a
 `NotificationFilter`. The following example accomplishes these goals:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4351,8 +4241,7 @@ published, and invoke the `sendNotification(Notification)` on the
 In the following example, exported instances of the `JmxTestBean` publish a
 `NotificationEvent` every time the `add(int, int)` operation is invoked:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -4453,8 +4342,7 @@ JavaMail features, such as MIME message support to the `MailSender` interface
 
 Assume that we have a business interface called `OrderManager`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface OrderManager {
 
@@ -4473,8 +4361,7 @@ order number needs to be generated and sent to a customer who placed the relevan
 The following example shows how to use `MailSender` and `SimpleMailMessage` to send an
 email when someone places an order:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.mail.MailException;
 	import org.springframework.mail.MailSender;
@@ -4521,8 +4408,7 @@ email when someone places an order:
 
 The following example shows the bean definitions for the preceding code:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="mail.mycompany.example"/>
@@ -4548,8 +4434,7 @@ This section describes another implementation of `OrderManager` that uses the `M
 callback interface. In the following example, the `mailSender` property is of type
 `JavaMailSender` so that we are able to use the JavaMail `MimeMessage` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.mail.Message;
 	import javax.mail.MessagingException;
@@ -4613,8 +4498,7 @@ A class that comes in pretty handy when dealing with JavaMail messages is
 having to use the verbose JavaMail API. Using the `MimeMessageHelper`, it is
 pretty easy to create a `MimeMessage`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// of course you would use DI in any real-world cases
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
@@ -4642,8 +4526,7 @@ that you do not want displayed as an attachment.
 The following example shows you how to use the `MimeMessageHelper` to send an email
 with a single JPEG image attachment:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
 	sender.setHost("mail.host.com");
@@ -4669,8 +4552,7 @@ with a single JPEG image attachment:
 The following example shows you how to use the `MimeMessageHelper` to send an email
 with an inline image:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
 	sender.setHost("mail.host.com");
@@ -4808,8 +4690,7 @@ Spring's `TaskExecutor` implementations are used as simple JavaBeans. In the fol
 we define a bean that uses the `ThreadPoolTaskExecutor` to asynchronously print
 out a set of messages:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.core.task.TaskExecutor;
 
@@ -4848,8 +4729,7 @@ decide when the task gets run.
 
 To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
 		<property name="corePoolSize" value="5"/>
@@ -4871,8 +4751,7 @@ In addition to the `TaskExecutor` abstraction, Spring 3.0 introduced a `TaskSche
 with a variety of methods for scheduling tasks to run at some point in the future.
 The following listing shows the `TaskScheduler` interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TaskScheduler {
 
@@ -4917,8 +4796,7 @@ If these determinations do take into account the outcome of the preceding execut
 that information is available within a `TriggerContext`. The `Trigger` interface itself
 is quite simple, as the following listing shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Trigger {
 
@@ -4931,8 +4809,7 @@ the relevant data and is open for extension in the future, if necessary. The
 `TriggerContext` is an interface (a `SimpleTriggerContext` implementation is used by
 default). The following listing shows the available methods for `Trigger` implementations.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TriggerContext {
 
@@ -5007,8 +4884,7 @@ execution.
 To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling` and
 `@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableAsync
@@ -5028,8 +4904,7 @@ javadoc for full details.
 If you prefer XML configuration, you can use the `<task:annotation-driven>` element,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>
@@ -5054,8 +4929,7 @@ example, the following method is invoked every five seconds with a fixed delay,
 meaning that the period is measured from the completion time of each preceding
 invocation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(fixedDelay=5000)
 	public void doSomething() {
@@ -5067,8 +4941,7 @@ If you need a fixed-rate execution, you can change the property name specified w
 the annotation. The following method is invoked every five seconds (measured between the
 successive start times of each invocation):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(fixedRate=5000)
 	public void doSomething() {
@@ -5080,8 +4953,7 @@ For fixed-delay and fixed-rate tasks, you can specify an initial delay by indica
 number of milliseconds to wait before the first execution of the method, as the following
 `fixedRate` example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(initialDelay=1000, fixedRate=5000)
 	public void doSomething() {
@@ -5132,8 +5004,7 @@ invocation, while the actual execution of the method occurs in a task that has b
 submitted to a Spring `TaskExecutor`. In the simplest case, you can apply the annotation
 to a method that returns `void`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	void doSomething() {
@@ -5146,8 +5017,7 @@ arguments, because they are invoked in the "`normal`" way by callers at runtime 
 than from a scheduled task being managed by the container. For example, the following code is
 a legitimate application of the `@Async` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	void doSomething(String s) {
@@ -5161,8 +5031,7 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 `get()` on that `Future`. The following example shows how to use `@Async` on a method
 that returns a value:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	Future<String> returnSomething(int i) {
@@ -5180,8 +5049,7 @@ You can not use `@Async` in conjunction with lifecycle callbacks such as
 a separate initializing Spring bean that then invokes the `@Async` annotated method on the
 target, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SampleBeanImpl implements SampleBean {
 
@@ -5224,8 +5092,7 @@ implementation, if any. However, you can use the `value` attribute of the `@Asyn
 annotation when you need to indicate that an executor other than the default should be
 used when executing a given method. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async("otherExecutor")
 	void doSomething(String s) {
@@ -5248,8 +5115,7 @@ however, the exception is uncaught and cannot be transmitted. You can provide an
 `AsyncUncaughtExceptionHandler` to handle such exceptions. The following example shows
 how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
 
@@ -5279,8 +5145,7 @@ scheduled with a trigger.
 The following element creates a `ThreadPoolTaskScheduler` instance with the
 specified thread pool size:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:scheduler id="scheduler" pool-size="10"/>
 ----
@@ -5296,8 +5161,7 @@ There are no other configuration options for the scheduler.
 
 The following creates a `ThreadPoolTaskExecutor` instance:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor id="executor" pool-size="10"/>
 ----
@@ -5313,8 +5177,7 @@ max sizes are the same). However, the `executor` element's `pool-size` attribute
 accepts a range in the form of `min-max`. The following example sets a minimum value of
 `5` and a maximum value of `25`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithPoolSizeRange"
@@ -5362,8 +5225,7 @@ element.
 The following example shows an `executor` element with a number of attributes to specify
 various behaviors:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithCallerRunsPolicy"
@@ -5379,8 +5241,7 @@ threads get stopped. A time value of zero causes excess threads to stop
 immediately after executing a task without remaining follow-up work in the task queue.
 The following example sets the `keep-alive` value to two minutes:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithKeepAlive"
@@ -5399,8 +5260,7 @@ for configuring message-driven POJOs. Basically, a `ref` attribute can point to 
 Spring-managed object, and the `method` attribute provides the name of a method to be
 invoked on that object. The following listing shows a simple example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:scheduled-tasks scheduler="myScheduler">
 		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000"/>
@@ -5537,8 +5397,7 @@ Quartz `JobDetail` objects contain all the information needed to run a job. Spri
 `JobDetailFactoryBean`, which provides bean-style properties for XML configuration purposes.
 Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="jobClass" value="example.ExampleJob"/>
@@ -5594,8 +5453,7 @@ of the `JobDetailFactoryBean` (`exampleJob` in the preceding example above).
 Often you merely need to invoke a method on a specific object. By using the
 `MethodInvokingJobDetailFactoryBean`, you can do exactly this, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="exampleBusinessObject"/>
@@ -5606,8 +5464,7 @@ Often you merely need to invoke a method on a specific object. By using the
 The preceding example results in the `doIt` method being called on the
 `exampleBusinessObject` method, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBusinessObject {
 
@@ -5619,8 +5476,7 @@ The preceding example results in the `doIt` method being called on the
 	}
 ----
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>
 ----
@@ -5637,8 +5493,7 @@ job does not start before the first one has finished. To make jobs resulting fro
 `MethodInvokingJobDetailFactoryBean` be non-concurrent, set the `concurrent` flag to
 `false`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="exampleBusinessObject"/>
@@ -5689,8 +5544,7 @@ The preceding example sets up two triggers, one running every 50 seconds with a 
 seconds and one running every morning at 6 AM. To finalize everything, we need to set up the
 `SchedulerFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
@@ -5820,8 +5674,7 @@ having to actually invoke the method. In its simplest form, the annotation decla
 requires the name of the cache associated with the annotated method, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable("books")
 	public Book findBook(ISBN isbn) {...}
@@ -5839,8 +5692,7 @@ the cached method was not actually invoked.
 
 The following example uses `@Cacheable` on the `findBook` method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable({"books", "isbns"})
 	public Book findBook(ISBN isbn) {...}
@@ -5885,8 +5737,7 @@ that cannot be readily mapped on top of the cache structure. This tends to becom
 when the target method has multiple arguments out of which only some are suitable for
 caching (while the rest are used only by the method logic). Consider the following example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable("books")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -5908,8 +5759,7 @@ work for some methods, it rarely works for all methods.
 The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read <<core.adoc#expressions, Spring Expression Language>>):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -5929,8 +5779,7 @@ to be shared, you can define a custom `keyGenerator` on the operation. To do so,
 specify the name of the `KeyGenerator` bean implementation to use, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", keyGenerator="myKeyGenerator")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -5958,8 +5807,7 @@ single `CacheManager` and have no complex cache resolution requirements.
 For applications that work with several cache managers, you can set the
 `cacheManager` to use for each operation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", cacheManager="anotherCacheManager") <1>
 	public Book findBook(ISBN isbn) {...}
@@ -5973,8 +5821,7 @@ requested for every cache operation, letting the implementation actually resolve
 the caches to use based on runtime arguments. The following example shows how to
 specify a `CacheResolver`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheResolver="runtimeCacheResolver") <1>
 	public Book findBook(ISBN isbn) {...}
@@ -6007,8 +5854,7 @@ cache provider to lock the cache entry while the value is being computed. As a r
 only one thread is busy computing the value, while the others are blocked until the entry
 is updated in the cache. The following example shows how to use the `sync` attribute:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="foos", sync=true) <1>
 	public Foo executeExpensiveOperation(String id) {...}
@@ -6031,8 +5877,7 @@ cached (that is, the method is invoked every time no matter what values are in t
 or what arguments are used). For example, the following method is cached only if the
 argument `name` has a length shorter than 32:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32") <1>
 	public Book findBook(String name)
@@ -6045,8 +5890,7 @@ adding of a value to the cache. Unlike `condition`, `unless` expressions are eva
 after the method has been invoked. To expand on the previous example, perhaps we only
 want to cache paperback books, as the following example does:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32", unless="#result.hardback") <1>
 	public Book findBook(String name)
@@ -6058,8 +5902,7 @@ The cache abstraction supports `java.util.Optional`, using its content as the ca
 only if it is present. `#result` always refers to the business entity and never a
 supported wrapper, so the previous example can be rewritten as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32", unless="#result?.hardback")
 	public Optional<Book> findBook(String name)
@@ -6137,8 +5980,7 @@ result is placed into the cache (according to the `@CachePut` options). It suppo
 the same options as `@Cacheable` and should be used for cache population rather than
 method flow optimization. The following example uses the `@CachePut` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CachePut(cacheNames="book", key="#isbn")
 	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
@@ -6168,8 +6010,7 @@ condition to be specified, and features an extra parameter
 rather than just an entry eviction (based on the key). The following example evicts
 all entries from the `books` cache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheEvict(cacheNames="books", allEntries=true) <1>
 	public void loadBooks(InputStream batch)
@@ -6207,8 +6048,7 @@ expression is different between different caches. `@Caching` lets multiple neste
 `@Cacheable`, `@CachePut`, and `@CacheEvict` annotations be used on the same method.
 The following example uses two `@CacheEvict` annotations:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames="secondary", key="#p0") })
 	public Book importBooks(String deposit, Date date)
@@ -6225,8 +6065,7 @@ instance, specifying the name of the cache to use for every cache operation of t
 class can be replaced by a single class-level definition. This is where `@CacheConfig`
 comes into play. The following examples uses `@CacheConfig` to set the name of the cache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheConfig("books") <1>
 	public class BookRepositoryImpl implements BookRepository {
@@ -6262,8 +6101,7 @@ your code).
 To enable caching annotations add the annotation `@EnableCaching` to one of your
 `@Configuration` classes:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableCaching
@@ -6273,8 +6111,7 @@ To enable caching annotations add the annotation `@EnableCaching` to one of your
 
 Alternatively, for XML configuration you can use the `cache:annotation-driven` element:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -6421,8 +6258,7 @@ use `@Cacheable`, `@CachePut`, `@CacheEvict`, and `@CacheConfig` as
 can annotate other annotations). In the following example, we replace a common
 `@Cacheable` declaration with our own custom annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
@@ -6434,8 +6270,7 @@ can annotate other annotations). In the following example, we replace a common
 In the preceding example, we have defined our own `SlowService` annotation,
 which itself is annotated with `@Cacheable`. Now we can replace the following code:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6444,8 +6279,7 @@ which itself is annotated with `@Cacheable`. Now we can replace the following co
 The following example shows the custom annotation with which we can replace the
 preceding code:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SlowService
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6519,8 +6353,7 @@ of `@CacheResult#cacheName()` for more information.
 `CacheResolver` instances are retrieved by a `CacheResolverFactory`. It is possible
 to customize the factory for each cache operation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheNames="books", cacheResolverFactory=MyCacheResolverFactory.class) <1>
 	public Book findBook(ISBN isbn)
@@ -6539,8 +6372,7 @@ similar to Spring's <<cache-annotations-cacheable-key, custom key generation
 declaration>>. For instance, the following are identical operations, one using
 Spring's abstraction and the other using JCache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6560,8 +6392,7 @@ retrieved with such a parameter). The following caches the exception so that fur
 calls with the same, invalid, ISBN throw the cached exception directly instead of
 invoking the method again:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheName="books", exceptionCacheName="failures"
 				cachedExceptions = InvalidIsbnNotFoundException.class)
@@ -6655,8 +6486,7 @@ The JDK-based `Cache` implementation resides under
 `org.springframework.cache.concurrent` package. It lets you use `ConcurrentHashMap`
 as a backing `Cache` store. The following example shows how to configure two caches:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- simple cache manager -->
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
@@ -6688,8 +6518,7 @@ The Ehcache 2.x implementation is located in the `org.springframework.cache.ehca
 package. Again, to use it, you need to declare the appropriate `CacheManager`.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
@@ -6713,8 +6542,7 @@ of Caffeine.
 
 The following example configures a `CacheManager` that creates the cache on demand:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
@@ -6723,8 +6551,7 @@ The following example configures a `CacheManager` that creates the cache on dema
 You can also provide the caches to use explicitly. In that case, only those
 are made available by the manager. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
 		<property name="caches">
@@ -6760,8 +6587,7 @@ implementation is located in the `org.springframework.cache.jcache` package.
 Again, to use it, you need to declare the appropriate `CacheManager`.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.jcache.JCacheCacheManager"
@@ -6783,8 +6609,7 @@ cache declarations (which can prove tedious), you can wire in a simple dummy cac
 performs no caching -- that is, it forces the cached methods to be invoked every time.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
 		<property name="cacheManagers">

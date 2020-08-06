@@ -8844,8 +8844,7 @@ You can configure marshallers more concisely by using tags from the OXM namespac
 To make these tags available, you must first reference the appropriate schema in the
 preamble of the XML configuration file. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"

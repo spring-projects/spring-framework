@@ -29,8 +29,7 @@ Creating a WebSocket server is as simple as implementing `WebSocketHandler` or, 
 likely, extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`. The following
 example uses `TextWebSocketHandler`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.socket.WebSocketHandler;
 	import org.springframework.web.socket.WebSocketSession;
@@ -49,8 +48,7 @@ example uses `TextWebSocketHandler`:
 There is dedicated WebSocket Java configuration and XML namespace support for mapping the preceding
 WebSocket handler to a specific URL, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.socket.config.annotation.EnableWebSocket;
 	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -75,8 +73,7 @@ WebSocket handler to a specific URL, as the following example shows:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -120,8 +117,7 @@ You can use such an interceptor to preclude the handshake or to make any attribu
 available to the `WebSocketSession`. The following example uses a built-in interceptor
 to pass HTTP session attributes to the WebSocket session:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocket
@@ -138,8 +134,7 @@ to pass HTTP session attributes to the WebSocket session:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -218,8 +213,7 @@ upgrade to a Servlet container version with JSR-356 support, it should
 be possible to selectively enable or disable web fragments (and SCI scanning)
 through the use of the `<absolute-ordering />` element in `web.xml`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -237,8 +231,7 @@ You can then selectively enable web fragments by name, such as Spring's own
 `SpringServletContainerInitializer` that provides support for the Servlet 3
 Java initialization API. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<web-app xmlns="http://java.sun.com/xml/ns/javaee"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -267,8 +260,7 @@ and others.
 For Tomcat, WildFly, and GlassFish, you can add a `ServletServerContainerFactoryBean` to your
 WebSocket Java config, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocket
@@ -287,8 +279,7 @@ WebSocket Java config, as the following example shows:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -314,8 +305,7 @@ For Jetty, you need to supply a pre-configured Jetty `WebSocketServerFactory` an
 that into Spring's `DefaultHandshakeHandler` through your WebSocket Java config.
 The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocket
@@ -343,8 +333,7 @@ The following example shows how to do so:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -408,8 +397,7 @@ The three possible behaviors are:
 
 You can configure WebSocket and SockJS allowed origins, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.socket.config.annotation.EnableWebSocket;
 	import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -434,8 +422,7 @@ You can configure WebSocket and SockJS allowed origins, as the following example
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -544,8 +531,7 @@ https://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tes
 
 You can enable SockJS through Java configuration, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocket
@@ -566,8 +552,7 @@ You can enable SockJS through Java configuration, as the following example shows
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -658,8 +643,7 @@ a URL from the same origin as the application.
 
 The following example shows how to do so in Java configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -787,8 +771,7 @@ to the server. At present there are two implementations:
 
 The following example shows how to create a SockJS client and connect to a SockJS endpoint:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
   List<Transport> transports = new ArrayList<>(2);
   transports.add(new WebSocketTransport(new StandardWebSocketClient()));
@@ -806,8 +789,7 @@ To use `SockJsClient` to simulate a large number of concurrent users, you
 need to configure the underlying HTTP client (for XHR transports) to allow a sufficient
 number of connections and threads. The following example shows how to do so with Jetty:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 HttpClient jettyHttpClient = new HttpClient();
 jettyHttpClient.setMaxConnectionsPerDestination(1000);
@@ -817,8 +799,7 @@ jettyHttpClient.setExecutor(new QueuedThreadPool(1000));
 The following example shows the server-side SockJS-related properties (see javadoc for details)
 that you should also consider customizing:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	public class WebSocketConfig extends WebSocketMessageBrokerConfigurationSupport {
@@ -978,8 +959,7 @@ STOMP over WebSocket support is available in the `spring-messaging` and
 `spring-websocket` modules. Once you have those dependencies, you can expose a STOMP
 endpoints, over WebSocket with <<websocket-fallback>>, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 	import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -1011,8 +991,7 @@ route messages whose destination header begins with `/topic `or `/queue` to the 
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1048,8 +1027,7 @@ https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the mos
 actively maintained and evolving successor of that library. The following example code
 is based on it:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
 	var stompClient = webstomp.over(socket);
@@ -1060,8 +1038,7 @@ is based on it:
 
 Alternatively, if you connect through WebSocket (without SockJS), you can use the following code:
 
-[source,javascript,indent=0]
-[subs="verbatim,quotes"]
+[source,javascript,indent=0,subs="verbatim,quotes"]
 ----
 	var socket = new WebSocket("/spring-websocket-portfolio/portfolio");
 	var stompClient = Stomp.over(socket);
@@ -1091,8 +1068,7 @@ To configure the underlying WebSocket server, the information in
 <<websocket-server-runtime-configuration>> applies. For Jetty, however you need to set
 the `HandshakeHandler` and `WebSocketPolicy` through the `StompEndpointRegistry`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1180,8 +1156,7 @@ to broadcast to subscribed clients.
 
 We can trace the flow through a simple example. Consider the following example, which sets up a server:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1358,8 +1333,7 @@ when a subscription is stored and ready for broadcasts, a client should ask for 
 receipt if the server supports it (simple broker does not). For example, with the Java
 <<websocket-stomp-client, STOMP client>>, you could do the following to add a receipt:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Autowired
 	private TaskScheduler messageBrokerTaskScheduler;
@@ -1390,8 +1364,7 @@ An application can use `@MessageExceptionHandler` methods to handle exceptions f
 itself or through a method argument if you want to get access to the exception instance.
 The following example declares an exception through a method argument:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class MyController {
@@ -1427,8 +1400,7 @@ The easiest way to do so is to inject a `SimpMessagingTemplate` and
 use it to send messages. Typically, you would inject it by
 type, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class GreetingController {
@@ -1470,8 +1442,7 @@ https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbe
 For that, you can declare your own scheduler or use the one that is automatically
 declared and used internally. The following example shows how to declare your own scheduler:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Configuration
 @EnableWebSocketMessageBroker
@@ -1515,8 +1486,7 @@ and run it with STOMP support enabled. Then you can enable the STOMP broker rela
 
 The following example configuration enables a full-featured broker:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1538,8 +1508,7 @@ The following example configuration enables a full-featured broker:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1617,8 +1586,7 @@ connectivity is lost, to the same host and port. If you wish to supply multiple 
 on each attempt to connect, you can configure a supplier of addresses, instead of a
 fixed host and port. The following example shows how to do that:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Configuration
 @EnableWebSocketMessageBroker
@@ -1658,8 +1626,7 @@ you are more used to messaging conventions, you can switch to using dot (`.`) as
 
 The following example shows how to do so in Java configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1678,8 +1645,7 @@ The following example shows how to do so in Java configuration:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1705,8 +1671,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 After that, a controller can use a dot (`.`) as the separator in `@MessageMapping` methods,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	@MessageMapping("red")
@@ -1815,8 +1780,7 @@ the user header on the CONNECT `Message`. Spring notes and saves the authenticat
 user and associate it with subsequent STOMP messages on the same session. The following
 example shows how register a custom authentication interceptor:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1873,8 +1837,7 @@ A message-handling method can send messages to the user associated with
 the message being handled through the `@SendToUser` annotation (also supported on
 the class-level to share a common destination), as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class PortfolioController {
@@ -1893,8 +1856,7 @@ to the given destination are targeted. However, sometimes, it may be necessary t
 target only the session that sent the message being handled. You can do so by
 setting the `broadcast` attribute to false, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Controller
 	public class MyController {
@@ -1924,8 +1886,7 @@ component by, for example, injecting the `SimpMessagingTemplate` created by the 
 the XML namespace. (The bean name is `brokerMessagingTemplate` if required
 for qualification with `@Qualifier`.) The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Service
 public class TradeServiceImpl implements TradeService {
@@ -1974,8 +1935,7 @@ not match the exact order of publication.
 
 If this is an issue, enable the `setPreservePublishOrder` flag, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -1992,8 +1952,7 @@ If this is an issue, enable the `setPreservePublishOrder` flag, as the following
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2065,8 +2024,7 @@ of a STOMP connection but not for every client message. Applications can also re
 `ChannelInterceptor` to intercept any message and in any part of the processing chain.
 The following example shows how to intercept inbound messages from clients:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -2082,8 +2040,7 @@ The following example shows how to intercept inbound messages from clients:
 A custom `ChannelInterceptor` can use `StompHeaderAccessor` or `SimpMessageHeaderAccessor`
 to access information about the message, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyChannelInterceptor implements ChannelInterceptor {
 
@@ -2118,8 +2075,7 @@ Spring provides a STOMP over WebSocket client and a STOMP over TCP client.
 
 To begin, you can create and configure `WebSocketStompClient`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebSocketClient webSocketClient = new StandardWebSocketClient();
 	WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
@@ -2135,8 +2091,7 @@ use WebSocket or HTTP-based transport as a fallback. For more details, see
 Next, you can establish a connection and provide a handler for the STOMP session,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	String url = "ws://127.0.0.1:8080/endpoint";
 	StompSessionHandler sessionHandler = new MyStompSessionHandler();
@@ -2145,8 +2100,7 @@ as the following example shows:
 
 When the session is ready for use, the handler is notified, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 
@@ -2160,8 +2114,7 @@ public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 Once the session is established, any payload can be sent and is
 serialized with the configured `MessageConverter`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 session.send("/topic/something", "payload");
 ----
@@ -2171,8 +2124,7 @@ for messages on the subscription and returns a `Subscription` handle that you ca
 use to unsubscribe. For each received message, the handler can specify the target
 `Object` type to which the payload should be deserialized, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 session.subscribe("/topic/something", new StompFrameHandler() {
 
@@ -2231,8 +2183,7 @@ transport-level errors including `ConnectionLostException`.
 Each WebSocket session has a map of attributes. The map is attached as a header to
 inbound client messages and may be accessed from a controller method, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 @Controller
 public class MyController {
@@ -2251,8 +2202,7 @@ registered on the `clientInboundChannel`. Those are typically singletons and liv
 longer than any individual WebSocket session. Therefore, you need to use a
 scope proxy mode for WebSocket-scoped beans, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -2360,8 +2310,7 @@ documentation of the XML schema for important additional details.
 
 The following example shows a possible configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -2379,8 +2328,7 @@ The following example shows a possible configuration:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -2415,8 +2363,7 @@ minimum.
 
 The following example shows one possible configuration:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableWebSocketMessageBroker
@@ -2434,8 +2381,7 @@ The following example shows one possible configuration:
 
 The following example shows the XML configuration equivalent of the preceding example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes,attributes"]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

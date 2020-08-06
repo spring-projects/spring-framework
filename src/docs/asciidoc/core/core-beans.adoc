@@ -135,8 +135,7 @@ dependency-inject domain objects with Spring>>.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1980,8 +1979,7 @@ then nested `constructor-arg` elements.
 The following example uses the `c:` namespace to do the same thing as the from
 <<beans-constructor-injection>>:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3428,8 +3426,7 @@ you can use the `init-method` attribute to specify the name of the method that h
 no-argument signature. With Java configuration, you can use the `initMethod` attribute of
 `@Bean`. See <<beans-java-lifecycle-callbacks>>. Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
 ----
@@ -7852,8 +7849,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 Experienced Spring users may be familiar with the XML declaration equivalent from
 Spring's `context:` namespace, shown in the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<context:component-scan base-package="com.acme"/>
