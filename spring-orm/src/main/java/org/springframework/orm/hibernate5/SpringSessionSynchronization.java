@@ -98,13 +98,12 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void beforeCompletion() {
 		try {
 			Session session = this.sessionHolder.getSession();
 			if (this.sessionHolder.getPreviousFlushMode() != null) {
 				// In case of pre-bound Session, restore previous flush mode.
-				session.setFlushMode(this.sessionHolder.getPreviousFlushMode());
+				session.setHibernateFlushMode(this.sessionHolder.getPreviousFlushMode());
 			}
 			// Eagerly disconnect the Session here, to make release mode "on_close" work nicely.
 			session.disconnect();
