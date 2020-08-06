@@ -242,7 +242,7 @@ The following example shows a path being used against another bean, by name:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-	// target bean to be referenced by name
+	<!-- target bean to be referenced by name -->
 	<bean id="person" class="org.springframework.beans.TestBean" scope="prototype">
 		<property name="age" value="10"/>
 		<property name="spouse">
@@ -252,7 +252,7 @@ The following example shows a path being used against another bean, by name:
 		</property>
 	</bean>
 
-	// results in 11, which is the value of property 'spouse.age' of bean 'person'
+	<!-- results in 11, which is the value of property 'spouse.age' of bean 'person' -->
 	<bean id="theAge"
 			class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
 		<property name="targetBeanName" value="person"/>

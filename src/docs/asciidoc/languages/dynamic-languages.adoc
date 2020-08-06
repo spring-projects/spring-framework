@@ -462,7 +462,7 @@ The following bean definition uses the calculator defined in Groovy:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<-- from the file 'beans.xml' -->
+	<!-- from the file 'beans.xml' -->
 	<beans>
 		<lang:groovy id="calculator" script-source="classpath:calculator.groovy"/>
 	</beans>
