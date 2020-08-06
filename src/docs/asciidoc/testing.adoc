@@ -4771,8 +4771,7 @@ The preceding code listings use the same XML context file referenced by the
 `@ContextConfiguration` annotation (that is, `repository-config.xml`). The following
 shows this configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -4933,8 +4932,7 @@ need to configure a theme in the mock session managed by the TestContext framewo
 following example shows how to do so:
 
 .Session-scoped bean configuration
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 

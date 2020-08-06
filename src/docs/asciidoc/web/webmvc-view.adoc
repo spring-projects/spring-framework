@@ -905,8 +905,7 @@ called `spring-form.tld`.
 To use the tags from this library, add the following directive to the top of your JSP
 page:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 ----

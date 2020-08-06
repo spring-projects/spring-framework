@@ -32,8 +32,7 @@ the following preamble at the top of your Spring XML configuration file. The tex
 following snippet references the correct schema so that the tags in the `tx` namespace
 are available to you:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -72,8 +71,7 @@ To use the elements in the `jdbc` schema, you need to have the following preambl
 top of your Spring XML configuration file. The text in the following snippet references
 the correct schema so that the elements in the `jdbc` namespace are available to you:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
