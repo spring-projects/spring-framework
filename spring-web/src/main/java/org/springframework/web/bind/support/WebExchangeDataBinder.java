@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
  * binding from URL query params or form data in the request data to Java objects.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class WebExchangeDataBinder extends WebDataBinder {
@@ -64,7 +65,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 
 	/**
 	 * Bind query params, form data, and or multipart form data to the binder target.
-	 * @param exchange the current exchange.
+	 * @param exchange the current exchange
 	 * @return a {@code Mono<Void>} when binding is complete
 	 */
 	public Mono<Void> bind(ServerWebExchange exchange) {
@@ -76,8 +77,11 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	/**
 	 * Protected method to obtain the values for data binding. By default this
 	 * method delegates to {@link #extractValuesToBind(ServerWebExchange)}.
+	 * @param exchange the current exchange
+	 * @return a map of bind values
+	 * @since 5.3
 	 */
-	protected Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
+	public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
 		return extractValuesToBind(exchange);
 	}
 
@@ -107,7 +111,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 				});
 	}
 
-	private static void addBindValue(Map<String, Object> params, String key, List<?> values) {
+	protected static void addBindValue(Map<String, Object> params, String key, List<?> values) {
 		if (!CollectionUtils.isEmpty(values)) {
 			values = values.stream()
 					.map(value -> value instanceof FormFieldPart ? ((FormFieldPart) value).value() : value)
