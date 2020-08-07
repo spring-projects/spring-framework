@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,9 +187,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Set "global" CORS configuration based on URL patterns. By default the first
-	 * matching URL pattern is combined with the CORS configuration for the
-	 * handler, if any.
+	 * Set the "global" CORS configurations based on URL patterns. By default the first
+	 * matching URL pattern is combined with the CORS configuration for the handler, if any.
 	 * @since 4.2
 	 */
 	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
@@ -197,7 +196,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Get the "global" CORS configuration.
+	 * Get the "global" CORS configurations.
 	 */
 	public Map<String, CorsConfiguration> getCorsConfigurations() {
 		return this.globalCorsConfigSource.getCorsConfigurations();
@@ -261,21 +260,22 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Detect beans of type {@link MappedInterceptor} and add them to the list of mapped interceptors.
-	 * <p>This is called in addition to any {@link MappedInterceptor}s that may have been provided
-	 * via {@link #setInterceptors}, by default adding all beans of type {@link MappedInterceptor}
-	 * from the current context and its ancestors. Subclasses can override and refine this policy.
-	 * @param mappedInterceptors an empty list to add {@link MappedInterceptor} instances to
+	 * Detect beans of type {@link MappedInterceptor} and add them to the list
+	 * of mapped interceptors.
+	 * <p>This is called in addition to any {@link MappedInterceptor}s that may
+	 * have been provided via {@link #setInterceptors}, by default adding all
+	 * beans of type {@link MappedInterceptor} from the current context and its
+	 * ancestors. Subclasses can override and refine this policy.
+	 * @param mappedInterceptors an empty list to add to
 	 */
 	protected void detectMappedInterceptors(List<HandlerInterceptor> mappedInterceptors) {
-		mappedInterceptors.addAll(
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(
-						getApplicationContext(), MappedInterceptor.class, true, false).values());
+		mappedInterceptors.addAll(BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				getApplicationContext(), MappedInterceptor.class, true, false).values());
 	}
 
 	/**
-	 * Initialize the specified interceptors, checking for {@link MappedInterceptor}s and
-	 * adapting {@link HandlerInterceptor}s and {@link WebRequestInterceptor}s if necessary.
+	 * Initialize the specified interceptors adapting
+	 * {@link WebRequestInterceptor}s to {@link HandlerInterceptor}.
 	 * @see #setInterceptors
 	 * @see #adaptInterceptor
 	 */
@@ -292,13 +292,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Adapt the given interceptor object to the {@link HandlerInterceptor} interface.
-	 * <p>By default, the supported interceptor types are {@link HandlerInterceptor}
-	 * and {@link WebRequestInterceptor}. Each given {@link WebRequestInterceptor}
-	 * will be wrapped in a {@link WebRequestHandlerInterceptorAdapter}.
-	 * Can be overridden in subclasses.
-	 * @param interceptor the specified interceptor object
-	 * @return the interceptor wrapped as HandlerInterceptor
+	 * Adapt the given interceptor object to {@link HandlerInterceptor}.
+	 * <p>By default, the supported interceptor types are
+	 * {@link HandlerInterceptor} and {@link WebRequestInterceptor}. Each given
+	 * {@link WebRequestInterceptor} is wrapped with
+	 * {@link WebRequestHandlerInterceptorAdapter}.
+	 * @param interceptor the interceptor
+	 * @return the interceptor downcast or adapted to HandlerInterceptor
 	 * @see org.springframework.web.servlet.HandlerInterceptor
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
 	 * @see WebRequestHandlerInterceptorAdapter
@@ -317,7 +317,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the adapted interceptors as {@link HandlerInterceptor} array.
-	 * @return the array of {@link HandlerInterceptor}s, or {@code null} if none
+	 * @return the array of {@link HandlerInterceptor HandlerInterceptor}s,
+	 * or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
 		int count = this.adaptedInterceptors.size();
@@ -394,8 +395,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Build a {@link HandlerExecutionChain} for the given handler, including
 	 * applicable interceptors.
 	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
-	 * with the given handler, the handler mapping's common interceptors, and any
-	 * {@link MappedInterceptor}s matching to the current request URL. Interceptors
+	 * with the given handler, the common interceptors of the handler mapping, and any
+	 * {@link MappedInterceptor MappedInterceptors} matching to the current request URL. Interceptors
 	 * are added in the order they were registered. Subclasses may override this
 	 * in order to extend/rearrange the list of interceptors.
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a
@@ -464,12 +465,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		if (CorsUtils.isPreFlightRequest(request)) {
 			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+			return new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
 		}
 		else {
 			chain.addInterceptor(new CorsInterceptor(config));
+			return chain;
 		}
-		return chain;
 	}
 
 
