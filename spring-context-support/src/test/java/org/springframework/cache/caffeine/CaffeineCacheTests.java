@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * @author Ben Manes
@@ -59,6 +61,34 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 	@Override
 	protected Object getNativeCache() {
 		return nativeCache;
+	}
+
+	@Test
+	void testLoadingCacheGet() {
+		Object value = new Object();
+		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.build(key -> value));
+		ValueWrapper valueWrapper = loadingCache.get(new Object());
+		assertThat(valueWrapper).isNotNull();
+		assertThat(valueWrapper.get()).isEqualTo(value);
+	}
+
+	@Test
+	void testLoadingCacheGetWithType() {
+		String value = "value";
+		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.build(key -> value));
+		String valueWrapper = loadingCache.get(new Object(), String.class);
+		assertThat(valueWrapper).isNotNull();
+		assertThat(valueWrapper).isEqualTo(value);
+	}
+
+	@Test
+	void testLoadingCacheGetWithWrongType() {
+		String value = "value";
+		CaffeineCache loadingCache = new CaffeineCache(CACHE_NAME, Caffeine.newBuilder()
+				.build(key -> value));
+		assertThatIllegalStateException().isThrownBy(() -> loadingCache.get(new Object(), Long.class));
 	}
 
 	@Test
