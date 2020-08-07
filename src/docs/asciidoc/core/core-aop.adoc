@@ -3503,7 +3503,6 @@ configuration aspect. The following example shows how to use the `depends-on` at
 			class="com.xzy.myapp.service.MyService"
 			depends-on="org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect">
 
-		<!-- ... -->
 
 	</bean>
 ----
