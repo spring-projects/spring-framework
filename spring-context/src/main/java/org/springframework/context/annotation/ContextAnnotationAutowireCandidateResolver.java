@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -71,9 +73,11 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 	}
 
 	protected Object buildLazyResolutionProxy(final DependencyDescriptor descriptor, final String beanName) {
-		Assert.state(getBeanFactory() instanceof DefaultListableBeanFactory,
+		BeanFactory beanFactory = getBeanFactory();
+		Assert.state(beanFactory instanceof DefaultListableBeanFactory,
 				"BeanFactory needs to be a DefaultListableBeanFactory");
-		final DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) getBeanFactory();
+		final DefaultListableBeanFactory dlbf = (DefaultListableBeanFactory) beanFactory;
+
 		TargetSource ts = new TargetSource() {
 			@Override
 			public Class<?> getTargetClass() {
@@ -85,20 +89,28 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			}
 			@Override
 			public Object getTarget() {
-				Object target = beanFactory.doResolveDependency(descriptor, beanName, null, null);
+				Set<String> autowiredBeanNames = (beanName != null ? new LinkedHashSet<String>(1) : null);
+				Object target = dlbf.doResolveDependency(descriptor, beanName, autowiredBeanNames, null);
 				if (target == null) {
 					Class<?> type = getTargetClass();
 					if (Map.class == type) {
-						return Collections.EMPTY_MAP;
+						return Collections.emptyMap();
 					}
 					else if (List.class == type) {
-						return Collections.EMPTY_LIST;
+						return Collections.emptyList();
 					}
 					else if (Set.class == type || Collection.class == type) {
-						return Collections.EMPTY_SET;
+						return Collections.emptySet();
 					}
 					throw new NoSuchBeanDefinitionException(descriptor.getResolvableType(),
 							"Optional dependency not present for lazy injection point");
+				}
+				if (autowiredBeanNames != null) {
+					for (String autowiredBeanName : autowiredBeanNames) {
+						if (dlbf.containsBean(autowiredBeanName)) {
+							dlbf.registerDependentBean(autowiredBeanName, beanName);
+						}
+					}
 				}
 				return target;
 			}
@@ -106,13 +118,14 @@ public class ContextAnnotationAutowireCandidateResolver extends QualifierAnnotat
 			public void releaseTarget(Object target) {
 			}
 		};
+
 		ProxyFactory pf = new ProxyFactory();
 		pf.setTargetSource(ts);
 		Class<?> dependencyType = descriptor.getDependencyType();
 		if (dependencyType.isInterface()) {
 			pf.addInterface(dependencyType);
 		}
-		return pf.getProxy(beanFactory.getBeanClassLoader());
+		return pf.getProxy(dlbf.getBeanClassLoader());
 	}
 
 }
