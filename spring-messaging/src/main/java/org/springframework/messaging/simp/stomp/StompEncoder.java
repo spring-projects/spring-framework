@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ public class StompEncoder  {
 	private StringBuilder getStringBuilder(@Nullable StringBuilder sb, String inString, int i) {
 		if (sb == null) {
 			sb = new StringBuilder(inString.length());
-			sb.append(inString.substring(0, i));
+			sb.append(inString, 0, i);
 		}
 		return sb;
 	}

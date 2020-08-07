@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ final class PatternMappingFilterProxy implements Filter {
 	private void addUrlPattern(String urlPattern) {
 		Assert.notNull(urlPattern, "Found null URL Pattern");
 		if (urlPattern.startsWith(EXTENSION_MAPPING_PATTERN)) {
-			this.endsWithMatches.add(urlPattern.substring(1, urlPattern.length()));
+			this.endsWithMatches.add(urlPattern.substring(1));
 		}
 		else if (urlPattern.equals(PATH_MAPPING_PATTERN)) {
 			this.startsWithMatches.add("");
@@ -83,7 +83,7 @@ final class PatternMappingFilterProxy implements Filter {
 			this.exactMatches.add(urlPattern.substring(0, urlPattern.length() - 2));
 		}
 		else {
-			if ("".equals(urlPattern)) {
+			if (urlPattern.isEmpty()) {
 				urlPattern = "/";
 			}
 			this.exactMatches.add(urlPattern);

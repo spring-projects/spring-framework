@@ -160,7 +160,7 @@ public class WebSocketExtension {
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex != -1) {
 					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1, parameter.length());
+					String value = parameter.substring(eqIndex + 1);
 					parameters.put(attribute, value);
 				}
 			}

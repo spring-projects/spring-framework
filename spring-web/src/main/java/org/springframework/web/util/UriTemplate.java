@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,19 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents a URI template. A URI template is a URI-like String that contains variables
- * enclosed by braces ({@code {}}) which can be expanded to produce an actual URI.
+ * Representation of a URI template that can be expanded with URI variables via
+ * {@link #expand(Map)}, {@link #expand(Object[])}, or matched to a URL via
+ * {@link #match(String)}. This class is designed to be thread-safe and
+ * reusable, and allows any number of expand or match calls.
  *
- * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
- * for example usages.
- *
- * <p>This class is designed to be thread-safe and reusable, allowing for any number
- * of expand or match calls.
+ * <p><strong>Note:</strong> this class uses {@link UriComponentsBuilder}
+ * internally to expand URI templates, and is merely a shortcut for already
+ * prepared URI templates. For more dynamic preparation and extra flexibility,
+ * e.g. around URI encoding, consider using {@code UriComponentsBuilder} or the
+ * higher level {@link DefaultUriBuilderFactory} which adds several encoding
+ * modes on top of {@code UriComponentsBuilder}. See the
+ * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-uri-building">reference docs</a>
+ * for further details.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -220,7 +225,7 @@ public class UriTemplate implements Serializable {
 								throw new IllegalArgumentException(
 										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
-							String regex = variable.substring(idx + 1, variable.length());
+							String regex = variable.substring(idx + 1);
 							pattern.append('(');
 							pattern.append(regex);
 							pattern.append(')');
