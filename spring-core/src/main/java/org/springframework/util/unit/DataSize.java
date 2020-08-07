@@ -248,7 +248,23 @@ public final class DataSize implements Comparable<DataSize> {
 
 	@Override
 	public String toString() {
-		return String.format("%dB", this.bytes);
+		long kb = this.toKilobytes();
+		if (kb == 0) {
+			return this.bytes + "B";
+		}
+		long mb = this.toMegabytes();
+		if (mb == 0) {
+			return kb + "KB";
+		}
+		long gb = this.toGigabytes();
+		if (gb == 0) {
+			return mb + "MB";
+		}
+		long tb = this.toTerabytes();
+		if (tb == 0) {
+			return gb + "GB";
+		}
+		return tb + "TB";
 	}
 
 
