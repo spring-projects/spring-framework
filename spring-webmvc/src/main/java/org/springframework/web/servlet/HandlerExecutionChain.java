@@ -103,6 +103,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Add the given interceptor at the specified index of this chain.
+	 * @since 5.2
 	 */
 	public void addInterceptor(int index, HandlerInterceptor interceptor) {
 		this.interceptorList.add(index, interceptor);
