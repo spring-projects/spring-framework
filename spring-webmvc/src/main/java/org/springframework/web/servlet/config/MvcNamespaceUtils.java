@@ -66,6 +66,7 @@ public abstract class MvcNamespaceUtils {
 
 	private static final String HANDLER_MAPPING_INTROSPECTOR_BEAN_NAME = "mvcHandlerMappingIntrospector";
 
+	private MvcNamespaceUtils(){}
 
 	public static void registerDefaultComponents(ParserContext parserContext, @Nullable Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
