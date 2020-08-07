@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * Cleaned URL (with normalized path), used for comparisons.
 	 */
-	private final URL cleanedUrl;
+	@Nullable
+	private volatile URL cleanedUrl;
 
 
 	/**
@@ -69,7 +70,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 		Assert.notNull(uri, "URI must not be null");
 		this.uri = uri;
 		this.url = uri.toURL();
-		this.cleanedUrl = getCleanedUrl(this.url, uri.toString());
 	}
 
 	/**
@@ -78,9 +78,8 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	public UrlResource(URL url) {
 		Assert.notNull(url, "URL must not be null");
-		this.url = url;
-		this.cleanedUrl = getCleanedUrl(this.url, url.toString());
 		this.uri = null;
+		this.url = url;
 	}
 
 	/**
@@ -127,7 +126,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();
-			this.cleanedUrl = getCleanedUrl(this.url, this.uri.toString());
 		}
 		catch (URISyntaxException ex) {
 			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
@@ -144,16 +142,33 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @return the cleaned URL
 	 * @see org.springframework.util.StringUtils#cleanPath
 	 */
-	private URL getCleanedUrl(URL originalUrl, String originalPath) {
-		try {
-			return new URL(StringUtils.cleanPath(originalPath));
+	private static URL getCleanedUrl(URL originalUrl, String originalPath) {
+		String cleanedPath = StringUtils.cleanPath(originalPath);
+		if (!cleanedPath.equals(originalPath)) {
+			try {
+				return new URL(cleanedPath);
+			}
+			catch (MalformedURLException ex) {
+				// Cleaned URL path cannot be converted to URL -> take original URL.
+			}
 		}
-		catch (MalformedURLException ex) {
-			// Cleaned URL path cannot be converted to URL
-			// -> take original URL.
-			return originalUrl;
-		}
+		return originalUrl;
 	}
+
+	/**
+	 * Lazily determine a cleaned URL for the given original URL.
+	 * @see #getCleanedUrl(URL, String)
+	 */
+	private URL getCleanedUrl() {
+		URL cleanedUrl = this.cleanedUrl;
+		if (cleanedUrl != null) {
+			return cleanedUrl;
+		}
+		cleanedUrl = getCleanedUrl(this.url, (this.uri != null ? this.uri : this.url).toString());
+		this.cleanedUrl = cleanedUrl;
+		return cleanedUrl;
+	}
+
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
@@ -245,7 +260,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getFilename() {
-		return StringUtils.getFilename(this.cleanedUrl.getPath());
+		return StringUtils.getFilename(getCleanedUrl().getPath());
 	}
 
 	/**
@@ -263,7 +278,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	public boolean equals(Object other) {
 		return (this == other || (other instanceof UrlResource &&
-				this.cleanedUrl.equals(((UrlResource) other).cleanedUrl)));
+				getCleanedUrl().equals(((UrlResource) other).getCleanedUrl())));
 	}
 
 	/**
@@ -271,7 +286,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public int hashCode() {
-		return this.cleanedUrl.hashCode();
+		return getCleanedUrl().hashCode();
 	}
 
 }
