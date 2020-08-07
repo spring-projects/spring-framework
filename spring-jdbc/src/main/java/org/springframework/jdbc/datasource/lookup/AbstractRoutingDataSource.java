@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource.lookup;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -162,6 +163,29 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 			throw new IllegalArgumentException(
 					"Illegal data source value - only [javax.sql.DataSource] and String supported: " + dataSource);
 		}
+	}
+
+	/**
+	 * Return the resolved target DataSources that this router manages.
+	 * @return an unmodifiable map of resolved lookup keys and DataSources
+	 * @throws IllegalStateException if the target DataSources are not resolved yet
+	 * @since 5.2.9
+	 * @see #setTargetDataSources
+	 */
+	public Map<Object, DataSource> getResolvedDataSources() {
+		Assert.state(this.resolvedDataSources != null, "DataSources not resolved yet - call afterPropertiesSet");
+		return Collections.unmodifiableMap(this.resolvedDataSources);
+	}
+
+	/**
+	 * Return the resolved default target DataSource, if any.
+	 * @return the default DataSource, or {@code null} if none or not resolved yet
+	 * @since 5.2.9
+	 * @see #setDefaultTargetDataSource
+	 */
+	@Nullable
+	public DataSource getResolvedDefaultDataSource() {
+		return this.resolvedDefaultDataSource;
 	}
 
 

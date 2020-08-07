@@ -325,9 +325,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
 			this.dependencyComparator = otherListableFactory.dependencyComparator;
-			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware...
+			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware
 			setAutowireCandidateResolver(otherListableFactory.getAutowireCandidateResolver().cloneIfNecessary());
-			// Make resolvable dependencies (e.g. ResourceLoader) available here as well...
+			// Make resolvable dependencies (e.g. ResourceLoader) available here as well
 			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}
 	}
@@ -462,6 +462,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 			}
+			@SuppressWarnings("unchecked")
 			@Override
 			@SuppressWarnings("unchecked")
 			public Stream<T> stream() {
@@ -469,6 +470,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
+			@SuppressWarnings("unchecked")
 			@Override
 			@SuppressWarnings("unchecked")
 			public Stream<T> orderedStream() {
