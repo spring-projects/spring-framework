@@ -464,7 +464,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			@SuppressWarnings("unchecked")
 			@Override
-			@SuppressWarnings("unchecked")
 			public Stream<T> stream() {
 				return Arrays.stream(getBeanNamesForTypedStream(requiredType, allowEagerInit))
 						.map(name -> (T) getBean(name))
@@ -472,7 +471,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			@SuppressWarnings("unchecked")
 			@Override
-			@SuppressWarnings("unchecked")
 			public Stream<T> orderedStream() {
 				String[] beanNames = getBeanNamesForTypedStream(requiredType, allowEagerInit);
 				if (beanNames.length == 0) {
@@ -1690,7 +1688,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						if (candidatePriority.equals(highestPriority)) {
 							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 									"Multiple beans found with the same priority ('" + highestPriority +
-											"') among candidates: " + candidates.keySet());
+									"') among candidates: " + candidates.keySet());
 						}
 						else if (candidatePriority < highestPriority) {
 							highestPriorityBeanName = candidateBeanName;
@@ -1776,7 +1774,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
-						"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 	/**
@@ -1821,7 +1819,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			public boolean isRequired() {
 				return false;
 			}
-
 			@Override
 			public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
