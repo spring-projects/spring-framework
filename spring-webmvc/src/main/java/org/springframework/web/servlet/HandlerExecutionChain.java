@@ -97,6 +97,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Add the given interceptor at the specified index of this chain.
+	 * @since 5.2
 	 */
 	public void addInterceptor(int index, HandlerInterceptor interceptor) {
 		initInterceptorList().add(index, interceptor);
@@ -219,7 +220,7 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler and interceptors' {@code toString()}.
+	 * Delegates to the handler's {@code toString()} implementation.
 	 */
 	@Override
 	public String toString() {
