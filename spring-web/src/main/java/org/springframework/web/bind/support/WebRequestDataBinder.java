@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,12 +109,12 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public void bind(WebRequest request) {
 		MutablePropertyValues mpvs = new MutablePropertyValues(request.getParameterMap());
-		if (isMultipartRequest(request) && request instanceof NativeWebRequest) {
+		if (request instanceof NativeWebRequest) {
 			MultipartRequest multipartRequest = ((NativeWebRequest) request).getNativeRequest(MultipartRequest.class);
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
-			else {
+			else if (isMultipartRequest(request)) {
 				HttpServletRequest servletRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
 				if (servletRequest != null) {
 					bindParts(servletRequest, mpvs);
@@ -130,7 +130,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	private boolean isMultipartRequest(WebRequest request) {
 		String contentType = request.getHeader("Content-Type");
-		return StringUtils.startsWithIgnoreCase(contentType, "multipart");
+		return StringUtils.startsWithIgnoreCase(contentType, "multipart/");
 	}
 
 	private void bindParts(HttpServletRequest request, MutablePropertyValues mpvs) {

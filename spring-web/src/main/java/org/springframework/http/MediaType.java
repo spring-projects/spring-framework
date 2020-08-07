@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
-@SuppressWarnings("deprecation")
 public class MediaType extends MimeType implements Serializable {
 
 	private static final long serialVersionUID = 2069937152339670231L;
@@ -647,7 +646,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
 		List<MediaType> mediaTypes = new ArrayList<>(mimeTypes.size());
-		for(MimeType mimeType : mimeTypes) {
+		for (MimeType mimeType : mimeTypes) {
 			mediaTypes.add(MediaType.asMediaType(mimeType));
 		}
 		return mediaTypes;
