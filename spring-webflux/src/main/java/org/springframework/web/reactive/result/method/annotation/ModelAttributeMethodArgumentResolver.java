@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -116,7 +117,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
-		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.create();
+		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.fromSink(Sinks.one());
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
 
 		return valueMono.flatMap(value -> {
