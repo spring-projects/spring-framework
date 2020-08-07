@@ -616,6 +616,7 @@ public class DataSourceTransactionManagerTests  {
 			return null;
 		}
 	}
+
 	@Test
 	public void testParticipatingTransactionWithRollbackOnlyAndInnerSynch() throws Exception {
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
