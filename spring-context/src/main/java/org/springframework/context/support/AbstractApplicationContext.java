@@ -1264,6 +1264,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
+		assertBeanFactoryActive();
+		return getBeanFactory().getBeanProvider(requiredType, allowEagerInit);
+	}
+
+	@Override
 	public String[] getBeanNamesForType(ResolvableType type) {
 		assertBeanFactoryActive();
 		return getBeanFactory().getBeanNamesForType(type);
