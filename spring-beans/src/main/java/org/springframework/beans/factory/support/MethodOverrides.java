@@ -17,9 +17,8 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Set of method overrides, determining which, if any, methods on a
@@ -35,10 +34,7 @@ import java.util.Set;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides =
-			Collections.synchronizedSet(new LinkedHashSet<MethodOverride>(0));
-
-	private volatile boolean modified = false;
+	private final Set<MethodOverride> overrides = new CopyOnWriteArraySet<MethodOverride>();
 
 
 	/**
@@ -60,7 +56,6 @@ public class MethodOverrides {
 	 */
 	public void addOverrides(MethodOverrides other) {
 		if (other != null) {
-			this.modified = true;
 			this.overrides.addAll(other.overrides);
 		}
 	}
@@ -69,17 +64,15 @@ public class MethodOverrides {
 	 * Add the given method override.
 	 */
 	public void addOverride(MethodOverride override) {
-		this.modified = true;
 		this.overrides.add(override);
 	}
 
 	/**
 	 * Return all method overrides contained by this object.
-	 * @return Set of MethodOverride objects
+	 * @return a Set of MethodOverride objects
 	 * @see MethodOverride
 	 */
 	public Set<MethodOverride> getOverrides() {
-		this.modified = true;
 		return this.overrides;
 	}
 
@@ -87,7 +80,7 @@ public class MethodOverrides {
 	 * Return whether the set of method overrides is empty.
 	 */
 	public boolean isEmpty() {
-		return (!this.modified || this.overrides.isEmpty());
+		return this.overrides.isEmpty();
 	}
 
 	/**
@@ -96,18 +89,13 @@ public class MethodOverrides {
 	 * @return the method override, or {@code null} if none
 	 */
 	public MethodOverride getOverride(Method method) {
-		if (!this.modified) {
-			return null;
-		}
-		synchronized (this.overrides) {
-			MethodOverride match = null;
-			for (MethodOverride candidate : this.overrides) {
-				if (candidate.matches(method)) {
-					match = candidate;
-				}
+		MethodOverride match = null;
+		for (MethodOverride candidate : this.overrides) {
+			if (candidate.matches(method)) {
+				match = candidate;
 			}
-			return match;
 		}
+		return match;
 	}
 
 
