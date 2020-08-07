@@ -28,10 +28,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
+ * Tests for {@link CaffeineCache}.
+ *
  * @author Ben Manes
  * @author Stephane Nicoll
  */
-public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> {
+class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<CaffeineCache> {
 
 	private com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCache;
 
@@ -40,12 +42,12 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 	private CaffeineCache cacheNoNull;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		nativeCache = Caffeine.newBuilder().build();
 		cache = new CaffeineCache(CACHE_NAME, nativeCache);
 		com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCacheNoNull
 				= Caffeine.newBuilder().build();
-		cacheNoNull =  new CaffeineCache(CACHE_NAME_NO_NULL, nativeCacheNoNull, false);
+		cacheNoNull = new CaffeineCache(CACHE_NAME_NO_NULL, nativeCacheNoNull, false);
 	}
 
 	@Override
@@ -92,7 +94,7 @@ public class CaffeineCacheTests extends AbstractValueAdaptingCacheTests<Caffeine
 	}
 
 	@Test
-	public void testPutIfAbsentNullValue() throws Exception {
+	void testPutIfAbsentNullValue() {
 		CaffeineCache cache = getCache();
 
 		Object key = new Object();
