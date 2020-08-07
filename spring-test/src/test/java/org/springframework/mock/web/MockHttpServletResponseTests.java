@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -444,6 +444,29 @@ public class MockHttpServletResponseTests {
 		assertTrue(cookie.getSecure());
 		assertTrue(cookie.isHttpOnly());
 		assertEquals("Lax", ((MockCookie) cookie).getSameSite());
+	}
+
+	@Test  // gh-25501
+	public void resetResetsCharset() {
+		assertFalse(response.isCharset());
+		response.setCharacterEncoding("UTF-8");
+		assertTrue(response.isCharset());
+		assertEquals(response.getCharacterEncoding(), "UTF-8");
+		response.setContentType("text/plain");
+		assertEquals(response.getContentType(), "text/plain");
+		String contentTypeHeader = response.getHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals(contentTypeHeader, "text/plain;charset=UTF-8");
+
+		response.reset();
+
+		assertFalse(response.isCharset());
+		// Do not invoke setCharacterEncoding() since that sets the charset flag to true.
+		// response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/plain");
+		assertFalse(response.isCharset()); // should still be false
+		assertEquals(response.getContentType(), "text/plain");
+		contentTypeHeader = response.getHeader(HttpHeaders.CONTENT_TYPE);
+		assertEquals(contentTypeHeader, "text/plain");
 	}
 
 }
