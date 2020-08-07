@@ -212,7 +212,7 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler and interceptors' {@code toString()}.
+	 * Delegates to the handler's {@code toString()} implementation.
 	 */
 	@Override
 	public String toString() {
