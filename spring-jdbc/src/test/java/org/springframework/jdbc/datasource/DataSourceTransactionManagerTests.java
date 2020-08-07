@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 
@@ -552,7 +553,6 @@ public class DataSourceTransactionManagerTests  {
 		verify(con2).close();
 	}
 	/**
-	 * MJC adapted from testParticipatingTransactionWithRollbackOnlyAndInnerSynch
 	 * This test checks added line of code in the beginning of doBegin() method of DataSourceTransactionManager class
 	 * which allows users to check readonly status earlier of transaction earlier than they otherwise could in some circumstances
 	 * and then for example if readOnly re-use that connection multiple times for different nodes of a DataSource
@@ -560,11 +560,12 @@ public class DataSourceTransactionManagerTests  {
 	 */
 	@Test
 	public void testEarlyInitOfReadonlyStatusForCustomDataSource() throws Exception {
-   /* Makes sure that when startTransaction() is called that prepareSynchronization() will not do anything because
-   status.isNewSynchronization()==false to properly simulate the case where added code is needed in DataSourceTransactionManager */
+   		// Ensures that prepareSynchronization() will not do anything when startTransaction() is called
+		// (because status.isNewSynchronization()==false)
+		// to properly simulate the case where added code is needed in DataSourceTransactionManager
 		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
 		//need a DataSource to test user case that datasource can get same connection multiple times if readOnly
-		TestCustomDataSource dsCustom = new TestCustomDataSource();
+		TestCustomRODataSource dsCustom = new TestCustomRODataSource();
 		DefaultTransactionDefinition transDef = new DefaultTransactionDefinition();
 		TransactionStatus tsNotReadonly = tm.getTransaction(transDef);
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
@@ -579,7 +580,7 @@ public class DataSourceTransactionManagerTests  {
 		// need this to clean up state so @AfterEach validation succeeds
 		TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 	}
-	private static class TestCustomDataSource extends AbstractDataSource {
+	private static class TestCustomRODataSource extends AbstractDataSource {
 		/**
 		 * <p>Attempts to establish a connection with the data source that
 		 * this {@code DataSource} object represents.
