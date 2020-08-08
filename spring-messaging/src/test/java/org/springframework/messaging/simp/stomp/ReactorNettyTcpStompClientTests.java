@@ -106,8 +106,8 @@ public class ReactorNettyTcpStompClientTests {
 		ConsumingHandler consumingHandler2 = new ConsumingHandler(destination);
 		ListenableFuture<StompSession> consumerFuture2 = this.client.connect(consumingHandler2);
 
-		assertThat(consumingHandler1.awaitForSubscriptions(5000)).isTrue();
-		assertThat(consumingHandler2.awaitForSubscriptions(5000)).isTrue();
+		assertThat(consumingHandler1.awaitForSubscriptions(10000)).isTrue();
+		assertThat(consumingHandler2.awaitForSubscriptions(10000)).isTrue();
 
 		ProducingHandler producingHandler = new ProducingHandler();
 		producingHandler.addToSend(destination, "foo1");
