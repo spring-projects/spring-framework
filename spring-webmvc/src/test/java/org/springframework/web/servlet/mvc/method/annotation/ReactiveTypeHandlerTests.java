@@ -109,11 +109,11 @@ public class ReactiveTypeHandlerTests {
 	public void deferredResultSubscriberWithOneValue() throws Exception {
 
 		// Mono
-		MonoProcessor<String> mono = MonoProcessor.create();
+		MonoProcessor<String> mono = MonoProcessor.fromSink(Sinks.one());
 		testDeferredResultSubscriber(mono, Mono.class, forClass(String.class), () -> mono.onNext("foo"), "foo");
 
 		// Mono empty
-		MonoProcessor<String> monoEmpty = MonoProcessor.create();
+		MonoProcessor<String> monoEmpty = MonoProcessor.fromSink(Sinks.one());
 		testDeferredResultSubscriber(monoEmpty, Mono.class, forClass(String.class), monoEmpty::onComplete, null);
 
 		// RxJava Single
