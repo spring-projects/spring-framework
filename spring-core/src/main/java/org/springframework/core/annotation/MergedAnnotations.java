@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Provides access to a collection of merged annotations, usually obtained
@@ -345,6 +346,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
 	}
 
@@ -405,6 +408,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(Object source, Annotation[] annotations,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
 	}
 
