@@ -200,12 +200,32 @@ class DataSizeTests {
 
 	@Test
 	void toStringUsesBytes() {
-		assertThat(DataSize.ofKilobytes(1).toString()).isEqualTo("1024B");
+		assertThat(DataSize.ofBytes(1023).toString()).isEqualTo("1023B");
+	}
+
+	@Test
+	void toStringUsesKilobytes() {
+		assertThat(DataSize.ofKilobytes(1).toString()).isEqualTo("1KB");
+	}
+
+	@Test
+	void toStringUsesMegabytes() {
+		assertThat(DataSize.ofMegabytes(1).toString()).isEqualTo("1MB");
+	}
+
+	@Test
+	void toStringUsesGigabytes() {
+		assertThat(DataSize.ofGigabytes(1).toString()).isEqualTo("1GB");
+	}
+
+	@Test
+	void toStringUsesTerabytes() {
+		assertThat(DataSize.ofTerabytes(1).toString()).isEqualTo("1TB");
 	}
 
 	@Test
 	void toStringWithNegativeBytes() {
-		assertThat(DataSize.ofKilobytes(-1).toString()).isEqualTo("-1024B");
+		assertThat(DataSize.ofKilobytes(-1).toString()).isEqualTo("-1KB");
 	}
 
 	@Test
