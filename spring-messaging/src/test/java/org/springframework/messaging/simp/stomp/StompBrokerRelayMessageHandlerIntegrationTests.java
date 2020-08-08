@@ -254,7 +254,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public void expectBrokerAvailabilityEvent(boolean isBrokerAvailable) throws InterruptedException {
-			BrokerAvailabilityEvent event = this.eventQueue.poll(40000, TimeUnit.MILLISECONDS);
+			BrokerAvailabilityEvent event = this.eventQueue.poll(20000, TimeUnit.MILLISECONDS);
 			assertThat(event).as("Times out waiting for BrokerAvailabilityEvent[" + isBrokerAvailable + "]").isNotNull();
 			assertThat(event.isBrokerAvailable()).isEqualTo(isBrokerAvailable);
 		}
