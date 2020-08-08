@@ -125,7 +125,7 @@ public class ReactiveTypeHandlerTests {
 
 	@Test
 	public void deferredResultSubscriberWithNoValues() throws Exception {
-		MonoProcessor<String> monoEmpty = MonoProcessor.create();
+		MonoProcessor<String> monoEmpty = MonoProcessor.fromSink(Sinks.one());
 		testDeferredResultSubscriber(monoEmpty, Mono.class, forClass(String.class), monoEmpty::onComplete, null);
 	}
 
@@ -152,7 +152,7 @@ public class ReactiveTypeHandlerTests {
 		IllegalStateException ex = new IllegalStateException();
 
 		// Mono
-		MonoProcessor<String> mono = MonoProcessor.create();
+		MonoProcessor<String> mono = MonoProcessor.fromSink(Sinks.one());
 		testDeferredResultSubscriber(mono, Mono.class, forClass(String.class), () -> mono.onError(ex), ex);
 
 		// RxJava Single
