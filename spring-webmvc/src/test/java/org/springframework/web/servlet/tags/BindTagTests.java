@@ -65,14 +65,14 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat(status.getExpression() == null).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		boolean condition = !status.isError();
 		assertThat(condition).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 0).as("Correct errorCodes").isTrue();
 		assertThat(status.getErrorMessages().length == 0).as("Correct errorMessages").isTrue();
-		assertThat("".equals(status.getErrorCode())).as("Correct errorCode").isTrue();
-		assertThat("".equals(status.getErrorMessage())).as("Correct errorMessage").isTrue();
-		assertThat("".equals(status.getErrorMessagesAsString(","))).as("Correct errorMessagesAsString").isTrue();
+		assertThat(status.getErrorCode().isEmpty()).as("Correct errorCode").isTrue();
+		assertThat(status.getErrorMessage().isEmpty()).as("Correct errorMessage").isTrue();
+		assertThat(status.getErrorMessagesAsString(",").isEmpty()).as("Correct errorMessagesAsString").isTrue();
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat(status.getExpression() == null).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 1).as("Correct errorCodes").isTrue();
 		assertThat(status.getErrorMessages().length == 1).as("Correct errorMessages").isTrue();
@@ -106,7 +106,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 1).as("Correct errorCodes").isTrue();
 		assertThat(status.getErrorMessages().length == 1).as("Correct errorMessages").isTrue();
@@ -130,7 +130,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat(status.getExpression() == null).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 1).as("Correct errorCodes").isTrue();
 		assertThat("code1".equals(status.getErrorCode())).as("Correct errorCode").isTrue();
@@ -143,7 +143,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 1).as("Correct errorCodes").isTrue();
 		assertThat("code1".equals(status.getErrorCode())).as("Correct errorCode").isTrue();
@@ -164,7 +164,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat(status.getExpression() == null).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorMessages().length == 1).as("Correct errorMessages").isTrue();
 		assertThat("message1".equals(status.getErrorMessage())).as("Correct errorMessage").isTrue();
@@ -178,7 +178,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorMessages().length == 1).as("Correct errorMessages").isTrue();
 		assertThat("message1".equals(status.getErrorMessage())).as("Correct errorMessage").isTrue();
@@ -280,7 +280,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 3).as("Correct errorCodes").isTrue();
 		assertThat(status.getErrorMessages().length == 3).as("Correct errorMessages").isTrue();
@@ -342,7 +342,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorCodes().length == 3).as("Correct errorCodes").isTrue();
 		assertThat("code1".equals(status.getErrorCode())).as("Correct errorCode").isTrue();
@@ -401,7 +401,7 @@ public class BindTagTests extends AbstractTagTests {
 		assertThat(status != null).as("Has status variable").isTrue();
 		assertThat("*".equals(status.getExpression())).as("Correct expression").isTrue();
 		assertThat(status.getValue() == null).as("Correct value").isTrue();
-		assertThat("".equals(status.getDisplayValue())).as("Correct displayValue").isTrue();
+		assertThat(status.getDisplayValue().isEmpty()).as("Correct displayValue").isTrue();
 		assertThat(status.isError()).as("Correct isError").isTrue();
 		assertThat(status.getErrorMessages().length == 3).as("Correct errorMessages").isTrue();
 		assertThat("message & 1".equals(status.getErrorMessage())).as("Correct errorMessage").isTrue();

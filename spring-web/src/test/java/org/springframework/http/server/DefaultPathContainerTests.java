@@ -77,7 +77,7 @@ public class DefaultPathContainerTests {
 
 		PathContainer container = PathContainer.parsePath(rawValue);
 
-		if ("".equals(rawValue)) {
+		if (rawValue.isEmpty()) {
 			assertThat(container.elements().size()).isEqualTo(0);
 			return;
 		}

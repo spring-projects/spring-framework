@@ -245,8 +245,8 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	public void emptyValues() {
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean kerry = (TestBean) getBeanFactory().getBean("kerry");
-		assertThat("".equals(rod.getTouchy())).as("Touchy is empty").isTrue();
-		assertThat("".equals(kerry.getTouchy())).as("Touchy is empty").isTrue();
+		assertThat(rod.getTouchy().isEmpty()).as("Touchy is empty").isTrue();
+		assertThat(kerry.getTouchy().isEmpty()).as("Touchy is empty").isTrue();
 	}
 
 	@Test

@@ -115,7 +115,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
-		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
+		else if (arg.isEmpty() && namedValueInfo.defaultValue != null) {
 			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 

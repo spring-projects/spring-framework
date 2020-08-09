@@ -1534,7 +1534,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	private boolean isDefaultValue(String value) {
-		return (DEFAULT_VALUE.equals(value) || "".equals(value));
+		return (DEFAULT_VALUE.equals(value) || value.isEmpty());
 	}
 
 	private boolean isCandidateElement(Node node) {

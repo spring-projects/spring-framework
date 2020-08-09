@@ -449,7 +449,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 				else if (SINGLETON_KEY.equals(property)) {
 					// Spring 1.2 style
 					String val = StringUtils.trimWhitespace((String) entry.getValue());
-					scope = ("".equals(val) || TRUE_VALUE.equals(val) ? BeanDefinition.SCOPE_SINGLETON :
+					scope = (val.isEmpty() || TRUE_VALUE.equals(val) ? BeanDefinition.SCOPE_SINGLETON :
 							BeanDefinition.SCOPE_PROTOTYPE);
 				}
 				else if (LAZY_INIT_KEY.equals(property)) {

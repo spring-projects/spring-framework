@@ -340,7 +340,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			URL url = resourceUrls.nextElement();
 			result.add(convertClassLoaderURL(url));
 		}
-		if ("".equals(path)) {
+		if (path.isEmpty()) {
 			// The above result is likely to be incomplete, i.e. only containing file system references.
 			// We need to have pointers to each of the jar files on the classpath as well...
 			addAllClassLoaderJarRoots(cl, result);
@@ -639,7 +639,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (logger.isTraceEnabled()) {
 				logger.trace("Looking for matching resources in jar file [" + jarFileUrl + "]");
 			}
-			if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
+			if (rootEntryPath.isEmpty() && !rootEntryPath.endsWith("/")) {
 				// Root entry path must end with slash to allow for proper matching.
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";

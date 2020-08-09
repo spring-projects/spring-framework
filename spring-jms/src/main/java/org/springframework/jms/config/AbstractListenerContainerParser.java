@@ -255,7 +255,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		else if (DESTINATION_TYPE_TOPIC.equals(destinationType)) {
 			pubSubDomain = true;
 		}
-		else if ("".equals(destinationType) || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
+		else if (destinationType.isEmpty() || DESTINATION_TYPE_QUEUE.equals(destinationType)) {
 			// the default: queue
 		}
 		else {

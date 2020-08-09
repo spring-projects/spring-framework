@@ -233,7 +233,7 @@ public class UrlPathHelper {
 		}
 		// Else, use path within current servlet mapping if applicable
 		String rest = getPathWithinServletMapping(request);
-		if (!"".equals(rest)) {
+		if (!rest.isEmpty()) {
 			return rest;
 		}
 		else {

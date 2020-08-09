@@ -102,7 +102,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 
 		return resolveName(resolvedName.toString(), nestedParameter, exchange)
 				.flatMap(arg -> {
-					if ("".equals(arg) && namedValueInfo.defaultValue != null) {
+					if (arg.isEmpty() && namedValueInfo.defaultValue != null) {
 						arg = resolveStringValue(namedValueInfo.defaultValue);
 					}
 					arg = applyConversion(arg, namedValueInfo, parameter, bindingContext, exchange);

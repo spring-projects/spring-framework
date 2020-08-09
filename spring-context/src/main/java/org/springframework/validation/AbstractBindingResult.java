@@ -105,7 +105,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs,
 			@Nullable String defaultMessage) {
 
-		if ("".equals(getNestedPath()) && !StringUtils.hasLength(field)) {
+		if (getNestedPath().isEmpty() && !StringUtils.hasLength(field)) {
 			// We're at the top of the nested object hierarchy,
 			// so the present level is not a field but rather the top object.
 			// The best we can do is register a global error here...

@@ -407,7 +407,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void servletPath(UriComponents uriComponents, MockHttpServletRequest request) {
-		if ("".equals(request.getPathInfo())) {
+		if (request.getPathInfo().isEmpty()) {
 			request.setPathInfo(null);
 		}
 		String path = uriComponents.getPath();

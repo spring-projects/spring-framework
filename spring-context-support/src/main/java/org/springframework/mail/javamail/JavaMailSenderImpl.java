@@ -507,9 +507,9 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	protected Transport connectTransport() throws MessagingException {
 		String username = getUsername();
 		String password = getPassword();
-		if ("".equals(username)) {  // probably from a placeholder
+		if (username.isEmpty()) {  // probably from a placeholder
 			username = null;
-			if ("".equals(password)) {  // in conjunction with "" username, this means no password to use
+			if (password.isEmpty()) {  // in conjunction with "" username, this means no password to use
 				password = null;
 			}
 		}

@@ -93,7 +93,7 @@ public abstract class JmxUtils {
 		MBeanServer server = null;
 
 		// null means any registered server, but "" specifically means the platform server
-		if (!"".equals(agentId)) {
+		if (!agentId.isEmpty()) {
 			List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(agentId);
 			if (!CollectionUtils.isEmpty(servers)) {
 				// Check to see if an MBeanServer is registered.

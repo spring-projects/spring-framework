@@ -569,7 +569,7 @@ public class JavaMailSenderTests {
 
 		@Override
 		public synchronized void close() throws MessagingException {
-			if ("".equals(connectedHost)) {
+			if (connectedHost.isEmpty()) {
 				throw new MessagingException("close failure");
 			}
 			this.closeCalled = true;

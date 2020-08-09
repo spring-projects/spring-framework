@@ -64,10 +64,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
-		if (!"".equals(containerClass)) {
+		if (!containerClass.isEmpty()) {
 			return null; // Not supported
 		}
-		else if ("".equals(containerType) || containerType.startsWith("default")) {
+		else if (containerType.isEmpty() || containerType.startsWith("default")) {
 			factoryDef.setBeanClassName("org.springframework.jms.config.DefaultJmsListenerContainerFactory");
 		}
 		else if (containerType.startsWith("simple")) {
@@ -91,10 +91,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
-		if (!"".equals(containerClass)) {
+		if (!containerClass.isEmpty()) {
 			containerDef.setBeanClassName(containerClass);
 		}
-		else if ("".equals(containerType) || containerType.startsWith("default")) {
+		else if (containerType.isEmpty() || containerType.startsWith("default")) {
 			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer");
 		}
 		else if (containerType.startsWith("simple")) {

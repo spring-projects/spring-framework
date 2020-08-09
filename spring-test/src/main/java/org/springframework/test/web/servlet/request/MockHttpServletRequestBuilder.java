@@ -560,7 +560,7 @@ public class MockHttpServletRequestBuilder
 		if (!StringUtils.hasText(this.servletPath)) {
 			this.servletPath = parentBuilder.servletPath;
 		}
-		if ("".equals(this.pathInfo)) {
+		if (this.pathInfo.isEmpty()) {
 			this.pathInfo = parentBuilder.pathInfo;
 		}
 
@@ -771,7 +771,7 @@ public class MockHttpServletRequestBuilder
 		request.setContextPath(this.contextPath);
 		request.setServletPath(this.servletPath);
 
-		if ("".equals(this.pathInfo)) {
+		if (this.pathInfo.isEmpty()) {
 			if (!requestUri.startsWith(this.contextPath + this.servletPath)) {
 				throw new IllegalArgumentException(
 						"Invalid servlet path [" + this.servletPath + "] for request URI [" + requestUri + "]");

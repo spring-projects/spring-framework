@@ -166,7 +166,7 @@ public class ConstructorArgumentValues {
 		if (valueHolder != null &&
 				(valueHolder.getType() == null ||
 						(requiredType != null && ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
-				(valueHolder.getName() == null || "".equals(requiredName) ||
+				(valueHolder.getName() == null || requiredName.isEmpty() ||
 						(requiredName != null && requiredName.equals(valueHolder.getName())))) {
 			return valueHolder;
 		}
@@ -282,7 +282,7 @@ public class ConstructorArgumentValues {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
 			}
-			if (valueHolder.getName() != null && !"".equals(requiredName) &&
+			if (valueHolder.getName() != null && !requiredName.isEmpty() &&
 					(requiredName == null || !valueHolder.getName().equals(requiredName))) {
 				continue;
 			}

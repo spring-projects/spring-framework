@@ -235,7 +235,7 @@ class MergedSqlConfig {
 
 	private static String getString(AnnotationAttributes attributes, String attributeName, String defaultValue) {
 		String value = attributes.getString(attributeName);
-		if ("".equals(value)) {
+		if (value.isEmpty()) {
 			value = defaultValue;
 		}
 		return value;

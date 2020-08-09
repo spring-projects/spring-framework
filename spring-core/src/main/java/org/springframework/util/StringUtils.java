@@ -94,7 +94,7 @@ public abstract class StringUtils {
 	 * @see #hasText(String)
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
-		return (str == null || "".equals(str));
+		return (str == null || str.isEmpty());
 	}
 
 	/**
@@ -716,7 +716,7 @@ public abstract class StringUtils {
 			pathElements.add(0, TOP_PATH);
 		}
 		// If nothing else left, at least explicitly point to current path.
-		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
+		if (pathElements.size() == 1 && pathElements.getLast().isEmpty() && !prefix.endsWith(FOLDER_SEPARATOR)) {
 			pathElements.add(0, CURRENT_PATH);
 		}
 
