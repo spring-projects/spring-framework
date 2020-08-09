@@ -1634,7 +1634,7 @@ public class AnnotatedElementUtils {
                         valuesAlreadyReplaced.add(attributeOverrideName);
 
                         // Ensure all aliased attributes in the target annotation are overridden. (SPR-14069)
-                        List<String> aliases = AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideNames);
+                        List<String> aliases = AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideName);
                         if (aliases != null) {
                             for (String alias : aliases) {
                                 if (!valuesAlreadyReplaced.contains(alias)) {

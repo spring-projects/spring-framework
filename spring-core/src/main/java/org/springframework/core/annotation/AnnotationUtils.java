@@ -2227,9 +2227,9 @@ public abstract class AnnotationUtils {
 
                     List<String> mirrorAliasedAttributeNames = getAliasedAttributeName(mirrorAliasFors, alias.aliasedAttribute);
                     if (!mirrorAliasedAttributeNames.contains(this.sourceAttributeName)) {
-                        String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+                        String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not just %s.",
                                 alias.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
-                                mirrorAliasedAttributeNames);
+                                mirrorAliasedAttributeNames.toString());
                         throw new AnnotationConfigurationException(msg);
                     }
                 }
