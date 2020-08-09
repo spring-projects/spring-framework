@@ -32,6 +32,7 @@ import javax.jms.Message;
  * @see JmsTemplate#convertAndSend(javax.jms.Destination, Object, MessagePostProcessor)
  * @see org.springframework.jms.support.converter.MessageConverter
  */
+@FunctionalInterface
 public interface MessagePostProcessor {
 
 	/**

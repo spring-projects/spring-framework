@@ -28,6 +28,7 @@ import org.springframework.messaging.Message;
  * @see MessageSendingOperations
  * @see MessageRequestReplyOperations
  */
+@FunctionalInterface
 public interface MessagePostProcessor {
 
 	/**
