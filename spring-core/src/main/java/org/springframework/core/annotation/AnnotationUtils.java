@@ -2175,11 +2175,13 @@ public abstract class AnnotationUtils {
             this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
             this.sourceAttributeName = sourceAttribute.getName();
 
+            List<String> aliasedAttributeNames = getAliasedAttributeName(aliasFors, sourceAttribute);
             List<Alias> aliases = new ArrayList<Alias>(aliasFors.length);
-            for (AliasFor aliasFor : aliasFors) {
+            for (int i = 0; i < aliasFors.length; i++) {
+                AliasFor aliasFor = aliasFors[i];
+                String aliasedAttributeName = aliasedAttributeNames.get(i);
                 Class<? extends Annotation> aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
                         this.sourceAnnotationType : aliasFor.annotation());
-                String aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
                 if (aliasedAnnotationType == this.sourceAnnotationType &&
                         aliasedAttributeName.equals(this.sourceAttributeName)) {
                     String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] points to " +
@@ -2216,18 +2218,18 @@ public abstract class AnnotationUtils {
                 }
 
                 if (alias.isAliasPair) {
-                    AliasFor mirrorAliasFor = alias.aliasedAttribute.getAnnotation(AliasFor.class);
-                    if (mirrorAliasFor == null) {
+                    AliasFor[] mirrorAliasFors = getAliasFors(alias.aliasedAttribute);
+                    if (mirrorAliasFors == null) {
                         String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s].",
                                 alias.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
                         throw new AnnotationConfigurationException(msg);
                     }
 
-                    String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, alias.aliasedAttribute);
-                    if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
+                    List<String> mirrorAliasedAttributeNames = getAliasedAttributeName(mirrorAliasFors, alias.aliasedAttribute);
+                    if (!mirrorAliasedAttributeNames.contains(this.sourceAttributeName)) {
                         String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
                                 alias.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
-                                mirrorAliasedAttributeName);
+                                mirrorAliasedAttributeNames);
                         throw new AnnotationConfigurationException(msg);
                     }
                 }
@@ -2416,30 +2418,34 @@ public abstract class AnnotationUtils {
          * one of the attributes has been declared while simultaneously ensuring
          * that at least one of the attributes has been declared.
          *
-         * @param aliasFor  the {@code @AliasFor} annotation from which to retrieve
+         * @param aliasFors the {@code @AliasFor} annotation from which to retrieve
          *                  the aliased attribute name
          * @param attribute the attribute that is annotated with {@code @AliasFor}
          * @return the name of the aliased attribute (never {@code null} or empty)
          * @throws AnnotationConfigurationException if invalid configuration of
          *                                          {@code @AliasFor} is detected
          */
-        private String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
-            String attributeName = aliasFor.attribute();
-            String value = aliasFor.value();
-            boolean attributeDeclared = StringUtils.hasText(attributeName);
-            boolean valueDeclared = StringUtils.hasText(value);
+        private List<String> getAliasedAttributeName(AliasFor[] aliasFors, Method attribute) {
+            List<String> aliasedAttributeNames = new ArrayList<String>();
+            for (AliasFor aliasFor : aliasFors) {
+                String attributeName = aliasFor.attribute();
+                String value = aliasFor.value();
+                boolean attributeDeclared = StringUtils.hasText(attributeName);
+                boolean valueDeclared = StringUtils.hasText(value);
 
-            // Ensure user did not declare both 'value' and 'attribute' in @AliasFor
-            if (attributeDeclared && valueDeclared) {
-                String msg = String.format("In @AliasFor declared on attribute '%s' in annotation [%s], attribute 'attribute' " +
-                                "and its alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
-                        attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value);
-                throw new AnnotationConfigurationException(msg);
+                // Ensure user did not declare both 'value' and 'attribute' in @AliasFor
+                if (attributeDeclared && valueDeclared) {
+                    String msg = String.format("In @AliasFor declared on attribute '%s' in annotation [%s], attribute 'attribute' " +
+                                    "and its alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
+                            attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value);
+                    throw new AnnotationConfigurationException(msg);
+                }
+
+                // Either explicit attribute name or pointing to same-named attribute by default
+                attributeName = (attributeDeclared ? attributeName : value);
+                aliasedAttributeNames.add(StringUtils.hasText(attributeName) ? attributeName.trim() : attribute.getName());
             }
-
-            // Either explicit attribute name or pointing to same-named attribute by default
-            attributeName = (attributeDeclared ? attributeName : value);
-            return (StringUtils.hasText(attributeName) ? attributeName.trim() : attribute.getName());
+            return aliasedAttributeNames;
         }
 
         @Override
