@@ -19,6 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -175,15 +176,18 @@ import java.lang.annotation.Target;
  * as the reference manual for details.
  *
  * @author Sam Brannen
+ * @author Zicheng Zhang
  * @since 4.2
  * @see AnnotatedElementUtils
  * @see AnnotationUtils
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, java.lang.reflect.AnnotatedElement)
  * @see SynthesizedAnnotation
+ * @see AliasFors
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
+@Repeatable(AliasFors.class)
 public @interface AliasFor {
 
 	/**

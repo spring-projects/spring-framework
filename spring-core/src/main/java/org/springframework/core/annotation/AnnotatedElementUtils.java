@@ -21,6 +21,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -87,10 +88,12 @@ import java.util.Set;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Zicheng Zhang
  * @see AliasFor
  * @see AnnotationAttributes
  * @see AnnotationUtils
  * @see BridgeMethodResolver
+ * @see AliasFors
  * @since 4.0
  */
 public class AnnotatedElementUtils {
@@ -1615,34 +1618,38 @@ public class AnnotatedElementUtils {
 
             for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
                 String attributeName = attributeMethod.getName();
-                String attributeOverrideName = AnnotationUtils.getAttributeOverrideName(attributeMethod, targetAnnotationType);
+                String[] attributeOverrideNames = AnnotationUtils.getAttributeOverrideName(attributeMethod, targetAnnotationType);
+                if (null == attributeOverrideNames) {
+                    continue;
+                }
+                for (String attributeOverrideName : attributeOverrideNames) {
+                    // Explicit annotation attribute override declared via @AliasFor
+                    if (!StringUtils.isEmpty(attributeOverrideName)) {
+                        if (valuesAlreadyReplaced.contains(attributeOverrideName)) {
+                            continue;
+                        }
 
-                // Explicit annotation attribute override declared via @AliasFor
-                if (attributeOverrideName != null) {
-                    if (valuesAlreadyReplaced.contains(attributeOverrideName)) {
-                        continue;
-                    }
+                        List<String> targetAttributeNames = new ArrayList<String>();
+                        targetAttributeNames.add(attributeOverrideName);
+                        valuesAlreadyReplaced.add(attributeOverrideName);
 
-                    List<String> targetAttributeNames = new ArrayList<String>();
-                    targetAttributeNames.add(attributeOverrideName);
-                    valuesAlreadyReplaced.add(attributeOverrideName);
-
-                    // Ensure all aliased attributes in the target annotation are overridden. (SPR-14069)
-                    List<String> aliases = AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideName);
-                    if (aliases != null) {
-                        for (String alias : aliases) {
-                            if (!valuesAlreadyReplaced.contains(alias)) {
-                                targetAttributeNames.add(alias);
-                                valuesAlreadyReplaced.add(alias);
+                        // Ensure all aliased attributes in the target annotation are overridden. (SPR-14069)
+                        List<String> aliases = AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideNames);
+                        if (aliases != null) {
+                            for (String alias : aliases) {
+                                if (!valuesAlreadyReplaced.contains(alias)) {
+                                    targetAttributeNames.add(alias);
+                                    valuesAlreadyReplaced.add(alias);
+                                }
                             }
                         }
-                    }
 
-                    overrideAttributes(element, annotation, attributes, attributeName, targetAttributeNames);
-                }
-                // Implicit annotation attribute override based on convention
-                else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
-                    overrideAttribute(element, annotation, attributes, attributeName, attributeName);
+                        overrideAttributes(element, annotation, attributes, attributeName, targetAttributeNames);
+                    }
+                    // Implicit annotation attribute override based on convention
+                    else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
+                        overrideAttribute(element, annotation, attributes, attributeName, attributeName);
+                    }
                 }
             }
         }

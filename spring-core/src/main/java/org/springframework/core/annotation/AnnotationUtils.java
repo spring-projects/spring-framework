@@ -38,8 +38,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -95,6 +97,7 @@ import java.util.Set;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Zicheng Zhang
  * @see AliasFor
  * @see AnnotationAttributes
  * @see AnnotatedElementUtils
@@ -102,6 +105,7 @@ import java.util.Set;
  * @see java.lang.reflect.AnnotatedElement#getAnnotations()
  * @see java.lang.reflect.AnnotatedElement#getAnnotation(Class)
  * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotations()
+ * @see AliasFors
  * @since 2.0
  */
 public abstract class AnnotationUtils {
@@ -1796,7 +1800,7 @@ public abstract class AnnotationUtils {
      *                                          {@code @AliasFor} is detected
      * @since 4.2
      */
-    static String getAttributeOverrideName(Method attribute, Class<? extends Annotation> metaAnnotationType) {
+    static String[] getAttributeOverrideName(Method attribute, Class<? extends Annotation> metaAnnotationType) {
         Assert.notNull(attribute, "attribute must not be null");
         Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
         Assert.isTrue(Annotation.class != metaAnnotationType,
@@ -2094,13 +2098,25 @@ public abstract class AnnotationUtils {
 
         private final String sourceAttributeName;
 
-        private final Method aliasedAttribute;
+        private final Alias[] aliases;
 
-        private final Class<? extends Annotation> aliasedAnnotationType;
+        private static class Alias {
 
-        private final String aliasedAttributeName;
+            private final Method aliasedAttribute;
 
-        private final boolean isAliasPair;
+            private final Class<? extends Annotation> aliasedAnnotationType;
+
+            private final String aliasedAttributeName;
+
+            private final boolean isAliasPair;
+
+            private Alias(Method aliasedAttribute, Class<? extends Annotation> aliasedAnnotationType, String aliasedAttributeName, boolean isAliasPair) {
+                this.aliasedAttribute = aliasedAttribute;
+                this.aliasedAnnotationType = aliasedAnnotationType;
+                this.aliasedAttributeName = aliasedAttributeName;
+                this.isAliasPair = isAliasPair;
+            }
+        }
 
         /**
          * Create an {@code AliasDescriptor} <em>from</em> the declaration
@@ -2119,19 +2135,39 @@ public abstract class AnnotationUtils {
                 return descriptor;
             }
 
-            AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
-            if (aliasFor == null) {
+            AliasFor[] aliasFors = getAliasFors(attribute);
+            if (aliasFors == null) {
                 return null;
             }
 
-            descriptor = new AliasDescriptor(attribute, aliasFor);
+            descriptor = new AliasDescriptor(attribute, aliasFors);
             descriptor.validate();
             aliasDescriptorCache.put(attribute, descriptor);
             return descriptor;
         }
 
+        /**
+         * First try to obtain {@link AliasFors},if it cannot be obtained,
+         * try to obtain {@link AliasFor} again, if it can be obtained,
+         * return an array with only a single element, or return null
+         * if it still cannot be obtained.
+         *
+         * @since 4.2.28
+         */
+        private static AliasFor[] getAliasFors(AnnotatedElement element) {
+            AliasFors aliasFors = element.getAnnotation(AliasFors.class);
+            if (aliasFors == null) {
+                AliasFor aliasFor = element.getAnnotation(AliasFor.class);
+                if (aliasFor == null) {
+                    return null;
+                }
+                return new AliasFor[]{aliasFor};
+            }
+            return aliasFors.value();
+        }
+
         @SuppressWarnings("unchecked")
-        private AliasDescriptor(Method sourceAttribute, AliasFor aliasFor) {
+        private AliasDescriptor(Method sourceAttribute, AliasFor[] aliasFors) {
             Class<?> declaringClass = sourceAttribute.getDeclaringClass();
             Assert.isTrue(declaringClass.isAnnotation(), "sourceAttribute must be from an annotation");
 
@@ -2139,69 +2175,77 @@ public abstract class AnnotationUtils {
             this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
             this.sourceAttributeName = sourceAttribute.getName();
 
-            this.aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
-                    this.sourceAnnotationType : aliasFor.annotation());
-            this.aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
-            if (this.aliasedAnnotationType == this.sourceAnnotationType &&
-                    this.aliasedAttributeName.equals(this.sourceAttributeName)) {
-                String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] points to " +
-                                "itself. Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
-                        sourceAttribute.getName(), declaringClass.getName());
-                throw new AnnotationConfigurationException(msg);
-            }
-            try {
-                this.aliasedAttribute = this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
-            } catch (NoSuchMethodException ex) {
-                String msg = String.format(
-                        "Attribute '%s' in annotation [%s] is declared as an @AliasFor nonexistent attribute '%s' in annotation [%s].",
-                        this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-                        this.aliasedAnnotationType.getName());
-                throw new AnnotationConfigurationException(msg, ex);
-            }
+            List<Alias> aliases = new ArrayList<Alias>(aliasFors.length);
+            for (AliasFor aliasFor : aliasFors) {
+                Class<? extends Annotation> aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
+                        this.sourceAnnotationType : aliasFor.annotation());
+                String aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
+                if (aliasedAnnotationType == this.sourceAnnotationType &&
+                        aliasedAttributeName.equals(this.sourceAttributeName)) {
+                    String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] points to " +
+                                    "itself. Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
+                            sourceAttribute.getName(), declaringClass.getName());
+                    throw new AnnotationConfigurationException(msg);
+                }
+                Method aliasedAttribute;
+                try {
+                    aliasedAttribute = aliasedAnnotationType.getDeclaredMethod(aliasedAttributeName);
+                } catch (NoSuchMethodException ex) {
+                    String msg = String.format(
+                            "Attribute '%s' in annotation [%s] is declared as an @AliasFor nonexistent attribute '%s' in annotation [%s].",
+                            this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttributeName,
+                            aliasedAnnotationType.getName());
+                    throw new AnnotationConfigurationException(msg, ex);
+                }
 
-            this.isAliasPair = (this.sourceAnnotationType == this.aliasedAnnotationType);
+                boolean isAliasPair = (this.sourceAnnotationType == aliasedAnnotationType);
+                aliases.add(new Alias(aliasedAttribute, aliasedAnnotationType, aliasedAttributeName, isAliasPair));
+            }
+            this.aliases = aliases.toArray(new Alias[0]);
         }
 
         private void validate() {
-            // Target annotation is not meta-present?
-            if (!this.isAliasPair && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
-                String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] declares " +
-                                "an alias for attribute '%s' in meta-annotation [%s] which is not meta-present.",
-                        this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-                        this.aliasedAnnotationType.getName());
-                throw new AnnotationConfigurationException(msg);
-            }
-
-            if (this.isAliasPair) {
-                AliasFor mirrorAliasFor = this.aliasedAttribute.getAnnotation(AliasFor.class);
-                if (mirrorAliasFor == null) {
-                    String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s].",
-                            this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
+            for (Alias alias : this.aliases) {
+                // Target annotation is not meta-present?
+                if (!alias.isAliasPair && !isAnnotationMetaPresent(this.sourceAnnotationType, alias.aliasedAnnotationType)) {
+                    String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] declares " +
+                                    "an alias for attribute '%s' in meta-annotation [%s] which is not meta-present.",
+                            this.sourceAttributeName, this.sourceAnnotationType.getName(), alias.aliasedAttributeName,
+                            alias.aliasedAnnotationType.getName());
                     throw new AnnotationConfigurationException(msg);
                 }
 
-                String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, this.aliasedAttribute);
-                if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
-                    String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
-                            this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
-                            mirrorAliasedAttributeName);
+                if (alias.isAliasPair) {
+                    AliasFor mirrorAliasFor = alias.aliasedAttribute.getAnnotation(AliasFor.class);
+                    if (mirrorAliasFor == null) {
+                        String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s].",
+                                alias.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
+                        throw new AnnotationConfigurationException(msg);
+                    }
+
+                    String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, alias.aliasedAttribute);
+                    if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
+                        String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+                                alias.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
+                                mirrorAliasedAttributeName);
+                        throw new AnnotationConfigurationException(msg);
+                    }
+                }
+
+                Class<?> returnType = this.sourceAttribute.getReturnType();
+                Class<?> aliasedReturnType = alias.aliasedAttribute.getReturnType();
+                if (returnType != aliasedReturnType &&
+                        (!aliasedReturnType.isArray() || returnType != aliasedReturnType.getComponentType())) {
+                    String msg = String.format("Misconfigured aliases: attribute '%s' in annotation [%s] " +
+                                    "and attribute '%s' in annotation [%s] must declare the same return type.",
+                            this.sourceAttributeName, this.sourceAnnotationType.getName(), alias.aliasedAttributeName,
+                            alias.aliasedAnnotationType.getName());
                     throw new AnnotationConfigurationException(msg);
                 }
-            }
 
-            Class<?> returnType = this.sourceAttribute.getReturnType();
-            Class<?> aliasedReturnType = this.aliasedAttribute.getReturnType();
-            if (returnType != aliasedReturnType &&
-                    (!aliasedReturnType.isArray() || returnType != aliasedReturnType.getComponentType())) {
-                String msg = String.format("Misconfigured aliases: attribute '%s' in annotation [%s] " +
-                                "and attribute '%s' in annotation [%s] must declare the same return type.",
-                        this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-                        this.aliasedAnnotationType.getName());
-                throw new AnnotationConfigurationException(msg);
-            }
-
-            if (this.isAliasPair) {
-                validateDefaultValueConfiguration(this.aliasedAttribute);
+                if (alias.isAliasPair) {
+                    validateDefaultValueConfiguration(alias.aliasedAttribute);
+                }
             }
         }
 
@@ -2244,7 +2288,12 @@ public abstract class AnnotationUtils {
          * @see #isAliasFor
          */
         private boolean isOverrideFor(Class<? extends Annotation> metaAnnotationType) {
-            return (this.aliasedAnnotationType == metaAnnotationType);
+            for (Alias alias : this.aliases) {
+                if (alias.aliasedAnnotationType == metaAnnotationType) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -2260,24 +2309,38 @@ public abstract class AnnotationUtils {
          * @see #isOverrideFor
          */
         private boolean isAliasFor(AliasDescriptor otherDescriptor) {
-            for (AliasDescriptor lhs = this; lhs != null; lhs = lhs.getAttributeOverrideDescriptor()) {
-                for (AliasDescriptor rhs = otherDescriptor; rhs != null; rhs = rhs.getAttributeOverrideDescriptor()) {
-                    if (lhs.aliasedAttribute.equals(rhs.aliasedAttribute)) {
-                        return true;
+            Queue<AliasDescriptor> lhs = new LinkedList<AliasDescriptor>();
+            lhs.offer(this);
+            while (!lhs.isEmpty()) {
+                AliasDescriptor lh = lhs.poll();
+                Queue<AliasDescriptor> rhs = new LinkedList<AliasDescriptor>();
+                rhs.offer(otherDescriptor);
+                while (!rhs.isEmpty()) {
+                    AliasDescriptor rh = rhs.poll();
+                    for (Alias lhAlias : lh.aliases) {
+                        for (Alias rhAlias : rh.aliases) {
+                            if (lhAlias.aliasedAttribute.equals(rhAlias.aliasedAttribute)) {
+                                return true;
+                            }
+                        }
                     }
+                    rhs.addAll(rh.getAttributeOverrideDescriptor());
                 }
+                lhs.addAll(lh.getAttributeOverrideDescriptor());
             }
             return false;
         }
 
         public List<String> getAttributeAliasNames() {
             // Explicit alias pair?
-            if (this.isAliasPair) {
-                return Collections.singletonList(this.aliasedAttributeName);
+            List<String> aliases = new ArrayList<String>();
+            for (Alias alias : this.aliases) {
+                if (alias.isAliasPair) {
+                    aliases.add(alias.aliasedAttributeName);
+                }
             }
 
             // Else: search for implicit aliases
-            List<String> aliases = new ArrayList<String>();
             for (AliasDescriptor otherDescriptor : getOtherDescriptors()) {
                 if (this.isAliasFor(otherDescriptor)) {
                     this.validateAgainst(otherDescriptor);
@@ -2300,27 +2363,47 @@ public abstract class AnnotationUtils {
             return otherDescriptors;
         }
 
-        public String getAttributeOverrideName(Class<? extends Annotation> metaAnnotationType) {
+        public String[] getAttributeOverrideName(Class<? extends Annotation> metaAnnotationType) {
             Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
             Assert.isTrue(Annotation.class != metaAnnotationType,
                     "metaAnnotationType must not be [java.lang.annotation.Annotation]");
-
+            List<String> result = new ArrayList<String>();
+            Queue<AliasDescriptor> queue = new LinkedList<AliasDescriptor>();
+            queue.offer(this);
             // Search the attribute override hierarchy, starting with the current attribute
-            for (AliasDescriptor desc = this; desc != null; desc = desc.getAttributeOverrideDescriptor()) {
-                if (desc.isOverrideFor(metaAnnotationType)) {
-                    return desc.aliasedAttributeName;
+            while (!queue.isEmpty()) {
+                AliasDescriptor desc = queue.poll();
+                if (desc == null) {
+                    continue;
                 }
+                // Determine whether this descriptor represents an explicit
+                // substitution of the attribute in the provided meta annotation.
+                if (desc.aliases != null) {
+                    for (int i = 0; i < desc.aliases.length; i++) {
+                        if (desc.aliases[i].aliasedAnnotationType == metaAnnotationType) {
+                            result.add(desc.aliases[i].aliasedAttributeName);
+                        }
+                    }
+                }
+                queue.addAll(desc.getAttributeOverrideDescriptor());
             }
-
-            // Else: explicit attribute override for a different meta-annotation
-            return null;
-        }
-
-        private AliasDescriptor getAttributeOverrideDescriptor() {
-            if (this.isAliasPair) {
+            if (result.isEmpty()) {
+                // Else: explicit attribute override for a different meta-annotation
                 return null;
             }
-            return AliasDescriptor.from(this.aliasedAttribute);
+            return result.toArray(new String[0]);
+        }
+
+        private List<AliasDescriptor> getAttributeOverrideDescriptor() {
+            List<AliasDescriptor> result = new ArrayList<AliasDescriptor>();
+            for (Alias alias : this.aliases) {
+                Method aliasedAttribute = alias.aliasedAttribute;
+                if (alias.isAliasPair) {
+                    continue;
+                }
+                result.add(AliasDescriptor.from(aliasedAttribute));
+            }
+            return result;
         }
 
         /**
@@ -2361,9 +2444,19 @@ public abstract class AnnotationUtils {
 
         @Override
         public String toString() {
-            return String.format("%s: @%s(%s) is an alias for @%s(%s)", getClass().getSimpleName(),
-                    this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName,
-                    this.aliasedAnnotationType.getSimpleName(), this.aliasedAttributeName);
+            StringBuilder sb = new StringBuilder(String.format("%s: @%s(%s) is an alias for [", getClass().getSimpleName(),
+                    this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName));
+            for (int i = 0; i < this.aliases.length - 1; i++) {
+                Alias alias = this.aliases[i];
+                sb.append(String.format("@%s(%s)",
+                        alias.aliasedAnnotationType.getSimpleName(), alias.aliasedAttributeName))
+                        .append(",");
+            }
+            Alias last = this.aliases[this.aliases.length - 1];
+            sb.append(String.format("@%s(%s)",
+                    last.aliasedAnnotationType.getSimpleName(), last.aliasedAttributeName));
+            sb.append("]");
+            return sb.toString();
         }
     }
 
