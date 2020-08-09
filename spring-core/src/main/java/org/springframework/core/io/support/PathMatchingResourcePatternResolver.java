@@ -639,7 +639,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			if (logger.isTraceEnabled()) {
 				logger.trace("Looking for matching resources in jar file [" + jarFileUrl + "]");
 			}
-			if (rootEntryPath.isEmpty() && !rootEntryPath.endsWith("/")) {
+			if (!rootEntryPath.isEmpty() && !rootEntryPath.endsWith("/")) {
 				// Root entry path must end with slash to allow for proper matching.
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";
