@@ -300,9 +300,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				markBeanAsCreated(beanName);
 			}
 
+			StartupStep beanCreation = this.applicationStartup.start("spring.beans.instantiate")
+					.tag("beanName", name);
 			try {
-				StartupStep beanCreation = this.applicationStartup.start("spring.beans.instantiate")
-						.tag("beanName", name);
 				if (requiredType != null) {
 					beanCreation.tag("beanType", requiredType::toString);
 				}
@@ -383,11 +383,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						throw new ScopeNotActiveException(beanName, scopeName, ex);
 					}
 				}
-				beanCreation.end();
 			}
 			catch (BeansException ex) {
+				beanCreation.tag("exception", ex.getClass().toString());
+				beanCreation.tag("message", ex.getMessage());
 				cleanupAfterBeanCreationFailure(beanName);
 				throw ex;
+			}
+			finally {
+				beanCreation.end();
 			}
 		}
 
