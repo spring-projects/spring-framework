@@ -73,7 +73,7 @@ class ViewResolutionTests {
 		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.person.name").value("Corea"));
 	}
 
@@ -119,7 +119,7 @@ class ViewResolutionTests {
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.person.name").value("Corea"));
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_XML))
@@ -150,4 +150,3 @@ class ViewResolutionTests {
 	}
 
 }
-

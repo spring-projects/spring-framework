@@ -144,7 +144,7 @@ class MockHttpServletResponseTests {
 	void setContentTypeThenCharacterEncoding() {
 		response.setContentType("test/plain");
 		response.setCharacterEncoding("UTF-8");
-		assertThat(response.getContentType()).isEqualTo("test/plain");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
@@ -153,7 +153,7 @@ class MockHttpServletResponseTests {
 	void setCharacterEncodingThenContentType() {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("test/plain");
-		assertThat(response.getContentType()).isEqualTo("test/plain");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
@@ -488,7 +488,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCharset()).isTrue();
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 		response.setContentType("text/plain");
-		assertThat(response.getContentType()).isEqualTo("text/plain");
+		assertThat(response.getContentType()).isEqualTo("text/plain;charset=UTF-8");
 		String contentTypeHeader = response.getHeader(CONTENT_TYPE);
 		assertThat(contentTypeHeader).isEqualTo("text/plain;charset=UTF-8");
 
