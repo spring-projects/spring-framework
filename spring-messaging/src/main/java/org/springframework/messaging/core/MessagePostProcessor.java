@@ -34,8 +34,8 @@ public interface MessagePostProcessor {
 	/**
 	 * Process the given message.
 	 * @param message the message to process
-	 * @return a post-processed variant of the message,
-	 * or simply the incoming message; never {@code null}
+	 * @return a post-processed variant of the message, or simply the incoming
+	 * message; never {@code null}
 	 */
 	Message<?> postProcessMessage(Message<?> message);
 
