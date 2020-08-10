@@ -144,7 +144,6 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
-
 				int phase = getPhase(bean);
 				phases.computeIfAbsent(
 						phase,
@@ -153,7 +152,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 		});
 		if (!phases.isEmpty()) {
-			phases.forEach((key, value) -> value.start());
+			phases.values().forEach(LifecycleGroup::start);
 		}
 	}
 
