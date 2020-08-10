@@ -1621,21 +1621,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Determine the bean type for the given FactoryBean definition, as far as possible.
 	 * Only called if there is no singleton instance registered for the target bean
-	 * already. Implementations are only allowed to instantiate the factory bean if
-	 * {@code allowInit} is {@code true}, otherwise they should try to determine the
-	 * result through other means.
+	 * already. The implementation is allowed to instantiate the target factory bean if
+	 * {@code allowInit} is {@code true} and the type cannot be determined another way;
+	 * otherwise it is restricted to introspecting signatures and related metadata.
 	 * <p>If no {@link FactoryBean#OBJECT_TYPE_ATTRIBUTE} if set on the bean definition
 	 * and {@code allowInit} is {@code true}, the default implementation will create
 	 * the FactoryBean via {@code getBean} to call its {@code getObjectType} method.
 	 * Subclasses are encouraged to optimize this, typically by inspecting the generic
-	 * signature of the factory bean class or the factory method that creates it. If
-	 * subclasses do instantiate the FactoryBean, they should consider trying the
-	 * {@code getObjectType} method without fully populating the bean. If this fails, a
-	 * full FactoryBean creation as performed by this implementation should be used as
-	 * fallback.
+	 * signature of the factory bean class or the factory method that creates it.
+	 * If subclasses do instantiate the FactoryBean, they should consider trying the
+	 * {@code getObjectType} method without fully populating the bean. If this fails,
+	 * a full FactoryBean creation as performed by this implementation should be used
+	 * as fallback.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @param allowInit if initialization of the FactoryBean is permitted
+	 * @param allowInit if initialization of the FactoryBean is permitted if the type
+	 * cannot be determined another way
 	 * @return the type for the bean if determinable, otherwise {@code ResolvableType.NONE}
 	 * @since 5.2
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
@@ -1651,7 +1652,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			try {
 				FactoryBean<?> factoryBean = doGetBean(FACTORY_BEAN_PREFIX + beanName, FactoryBean.class, null, true);
 				Class<?> objectType = getTypeForFactoryBean(factoryBean);
-				return (objectType != null) ? ResolvableType.forClass(objectType) : ResolvableType.NONE;
+				return (objectType != null ? ResolvableType.forClass(objectType) : ResolvableType.NONE);
 			}
 			catch (BeanCreationException ex) {
 				if (ex.contains(BeanCurrentlyInCreationException.class)) {
