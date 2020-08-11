@@ -351,6 +351,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Callback interface used to process the YAML parsing results.
 	 */
+	@FunctionalInterface
 	public interface MatchCallback {
 
 		/**
@@ -367,6 +368,7 @@ public abstract class YamlProcessor {
 	/**
 	 * Strategy interface used to test if properties match.
 	 */
+	@FunctionalInterface
 	public interface DocumentMatcher {
 
 		/**
