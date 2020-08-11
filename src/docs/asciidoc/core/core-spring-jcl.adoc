@@ -1,11 +1,27 @@
 [[spring-jcl]]
 = Logging
 
-Spring Framework since 5.0 comes with its own Commons Logging bridge implemented
-in `spring-jcl` module. The implementation checks for the presence of the Log4j 2.x API
-and the SLF4J 1.7 API in the Spring Framework classpath, falling back to JUL if none of
-the two is available. Note that this Commons Logging variant is only meant to be used
-for infrastructure logging purposes in the core framework and in extensions.
+Since Spring Framework 5.0, Spring comes with its own Commons Logging bridge implemented
+in the `spring-jcl` module. The implementation checks for the presence of the Log4j 2.x
+API and the SLF4J 1.7 API in the classpath and uses the first one of those found as the
+logging implementation, falling back to the Java platform's core logging facilities (also
+known as _JUL_ or `java.util.logging`) if neither Log4j 2.x nor SLF4J is available.
+
+Put Log4j 2.x or Logback (or another SLF4J provider) in your classpath, without any extra
+bridges, and let the framework auto-adapt to your choice. For further information see the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-logging[Spring
+Boot Logging Reference Documentation].
+
+[NOTE]
+====
+Spring's Commons Logging variant is only meant to be used for infrastructure logging
+purposes in the core framework and in extensions.
+
+For logging needs within application code, prefer direct use of Log4j 2.x, SLF4J, or JUL.
+====
+
+A `Log` implementation may be retrieved via `org.apache.commons.logging.LogFactory` as in
+the following example.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -23,10 +39,3 @@ class MyBean {
   // ...
 }
 ----
-
-Log implementation may be instantiated by `org.apache.commons.logging.LogFactory`.
-
-For logging need in application code, prefer direct use of Log4j 2.x or SLF4J or JUL.
-Simply put Log4j 2.x or Logback (or another SLF4J provider) onto your classpath, without
-any extra bridges, and let the framework auto-adapt to your choice. For further information see
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-logging[Spring Boot Logging Reference Documentation].
