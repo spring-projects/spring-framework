@@ -2823,10 +2823,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new View() {
 				@Override
-				public String getContentType() {
-					return null;
-				}
-				@Override
 				@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
 				public void render(@Nullable Map model, HttpServletRequest request, HttpServletResponse response)
 						throws Exception {
@@ -2867,17 +2863,10 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class ModelExposingViewResolver implements ViewResolver {
 
 		@Override
-		public View resolveViewName(final String viewName, Locale locale) throws Exception {
-			return new View() {
-				@Override
-				public String getContentType() {
-					return null;
-				}
-				@Override
-				public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public View resolveViewName(String viewName, Locale locale) {
+			return (model, request, response) -> {
 					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
-				}
 			};
 		}
 	}
