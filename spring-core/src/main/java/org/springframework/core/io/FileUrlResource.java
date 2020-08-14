@@ -91,8 +91,14 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 	public boolean isWritable() {
 		try {
 			URL url = getURL();
-			File file = getFile();
-			return (file.canWrite() && !file.isDirectory());
+			if (ResourceUtils.isFileURL(url)) {
+				// Proceed with file system resolution
+				File file = getFile();
+				return (file.canWrite() && !file.isDirectory());
+			}
+			else {
+				return false;
+			}
 		}
 		catch (IOException ex) {
 			return false;
