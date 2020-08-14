@@ -330,4 +330,11 @@ class ResourceTests {
 				new ClassPathResource("Resource.class", getClass()).createRelative("X").readableChannel());
 	}
 
+	@Test
+	void fileUrlResourceTest() throws IOException {
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			new FileUrlResource(new URL("https://spring.io/"));
+		});
+	}
+
 }

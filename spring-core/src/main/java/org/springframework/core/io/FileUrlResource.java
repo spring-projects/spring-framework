@@ -59,6 +59,7 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 	 */
 	public FileUrlResource(URL url) {
 		super(url);
+		Assert.isTrue(ResourceUtils.isFileURL(url),"url's protocol must be file or start with vfs");
 	}
 
 	/**
@@ -90,14 +91,8 @@ public class FileUrlResource extends UrlResource implements WritableResource {
 	public boolean isWritable() {
 		try {
 			URL url = getURL();
-			if (ResourceUtils.isFileURL(url)) {
-				// Proceed with file system resolution
-				File file = getFile();
-				return (file.canWrite() && !file.isDirectory());
-			}
-			else {
-				return true;
-			}
+			File file = getFile();
+			return (file.canWrite() && !file.isDirectory());
 		}
 		catch (IOException ex) {
 			return false;
