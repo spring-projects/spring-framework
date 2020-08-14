@@ -27,6 +27,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.io.UpgradeListener;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -136,7 +137,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		MonoProcessor<Void> completionMono = MonoProcessor.fromSink(Sinks.one());
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {

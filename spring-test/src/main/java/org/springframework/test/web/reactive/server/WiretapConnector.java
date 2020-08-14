@@ -27,6 +27,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -132,7 +133,7 @@ class WiretapConnector implements ClientHttpConnector {
 
 		private final DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
 
-		private final MonoProcessor<byte[]> content = MonoProcessor.create();
+		private final MonoProcessor<byte[]> content = MonoProcessor.fromSink(Sinks.one());
 
 		private boolean hasContentConsumer;
 

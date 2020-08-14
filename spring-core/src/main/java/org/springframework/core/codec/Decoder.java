@@ -23,6 +23,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -92,7 +93,7 @@ public interface Decoder<T> {
 	default T decode(DataBuffer buffer, ResolvableType targetType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) throws DecodingException {
 
-		MonoProcessor<T> processor = MonoProcessor.create();
+		MonoProcessor<T> processor = MonoProcessor.fromSink(Sinks.one());
 		decodeToMono(Mono.just(buffer), targetType, mimeType, hints).subscribeWith(processor);
 
 		Assert.state(processor.isTerminated(), "DataBuffer decoding should have completed.");

@@ -325,9 +325,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.allowBeanDefinitionOverriding = otherListableFactory.allowBeanDefinitionOverriding;
 			this.allowEagerClassLoading = otherListableFactory.allowEagerClassLoading;
 			this.dependencyComparator = otherListableFactory.dependencyComparator;
-			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware...
+			// A clone of the AutowireCandidateResolver since it is potentially BeanFactoryAware
 			setAutowireCandidateResolver(otherListableFactory.getAutowireCandidateResolver().cloneIfNecessary());
-			// Make resolvable dependencies (e.g. ResourceLoader) available here as well...
+			// Make resolvable dependencies (e.g. ResourceLoader) available here as well
 			this.resolvableDependencies.putAll(otherListableFactory.resolvableDependencies);
 		}
 	}
@@ -354,14 +354,51 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
-	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) throws BeansException {
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) {
 		Assert.notNull(requiredType, "Required type must not be null");
-		return getBeanProvider(ResolvableType.forRawClass(requiredType));
+		return getBeanProvider(ResolvableType.forRawClass(requiredType), true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
+		return getBeanProvider(requiredType, true);
+	}
+
+
+	//---------------------------------------------------------------------
+	// Implementation of ListableBeanFactory interface
+	//---------------------------------------------------------------------
+
+	@Override
+	public boolean containsBeanDefinition(String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
+		return this.beanDefinitionMap.containsKey(beanName);
+	}
+
+	@Override
+	public int getBeanDefinitionCount() {
+		return this.beanDefinitionMap.size();
+	}
+
+	@Override
+	public String[] getBeanDefinitionNames() {
+		String[] frozenNames = this.frozenBeanDefinitionNames;
+		if (frozenNames != null) {
+			return frozenNames.clone();
+		}
+		else {
+			return StringUtils.toStringArray(this.beanDefinitionNames);
+		}
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit) {
+		Assert.notNull(requiredType, "Required type must not be null");
+		return getBeanProvider(ResolvableType.forRawClass(requiredType), allowEagerInit);
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
 		return new BeanObjectProvider<T>() {
 			@Override
 			public T getObject() throws BeansException {
@@ -425,15 +462,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				}
 			}
+			@SuppressWarnings("unchecked")
 			@Override
 			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForTypedStream(requiredType))
+				return Arrays.stream(getBeanNamesForTypedStream(requiredType, allowEagerInit))
 						.map(name -> (T) getBean(name))
 						.filter(bean -> !(bean instanceof NullBean));
 			}
+			@SuppressWarnings("unchecked")
 			@Override
 			public Stream<T> orderedStream() {
-				String[] beanNames = getBeanNamesForTypedStream(requiredType);
+				String[] beanNames = getBeanNamesForTypedStream(requiredType, allowEagerInit);
 				if (beanNames.length == 0) {
 					return Stream.empty();
 				}
@@ -472,35 +511,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
-	private String[] getBeanNamesForTypedStream(ResolvableType requiredType) {
-		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType);
-	}
-
-
-	//---------------------------------------------------------------------
-	// Implementation of ListableBeanFactory interface
-	//---------------------------------------------------------------------
-
-	@Override
-	public boolean containsBeanDefinition(String beanName) {
-		Assert.notNull(beanName, "Bean name must not be null");
-		return this.beanDefinitionMap.containsKey(beanName);
-	}
-
-	@Override
-	public int getBeanDefinitionCount() {
-		return this.beanDefinitionMap.size();
-	}
-
-	@Override
-	public String[] getBeanDefinitionNames() {
-		String[] frozenNames = this.frozenBeanDefinitionNames;
-		if (frozenNames != null) {
-			return frozenNames.clone();
-		}
-		else {
-			return StringUtils.toStringArray(this.beanDefinitionNames);
-		}
+	private String[] getBeanNamesForTypedStream(ResolvableType requiredType, boolean allowEagerInit) {
+		return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this, requiredType, true, allowEagerInit);
 	}
 
 	@Override
@@ -1676,7 +1688,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						if (candidatePriority.equals(highestPriority)) {
 							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
 									"Multiple beans found with the same priority ('" + highestPriority +
-											"') among candidates: " + candidates.keySet());
+									"') among candidates: " + candidates.keySet());
 						}
 						else if (candidatePriority < highestPriority) {
 							highestPriorityBeanName = candidateBeanName;
@@ -1762,7 +1774,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		throw new NoSuchBeanDefinitionException(resolvableType,
 				"expected at least 1 bean which qualifies as autowire candidate. " +
-						"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
 	/**
@@ -1807,7 +1819,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			public boolean isRequired() {
 				return false;
 			}
-
 			@Override
 			public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
 				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :

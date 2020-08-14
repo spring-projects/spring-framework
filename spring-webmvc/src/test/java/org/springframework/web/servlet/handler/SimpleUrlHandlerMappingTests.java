@@ -158,11 +158,8 @@ public class SimpleUrlHandlerMappingTests {
 
 	private HandlerExecutionChain getHandler(HandlerMapping mapping, MockHttpServletRequest request) throws Exception {
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		HandlerInterceptor[] interceptors = chain.getInterceptors();
-		if (interceptors != null) {
-			for (HandlerInterceptor interceptor : interceptors) {
-				interceptor.preHandle(request, null, chain.getHandler());
-			}
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			interceptor.preHandle(request, null, chain.getHandler());
 		}
 		return chain;
 	}

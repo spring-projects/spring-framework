@@ -273,14 +273,11 @@ public class PathMatchingUrlHandlerMappingTests {
 			ServletRequestPathUtils.parseAndCache(request);
 		}
 
-		HandlerExecutionChain executionChain = mapping.getHandler(request);
-		HandlerInterceptor[] interceptors = executionChain.getInterceptors();
-		if (interceptors != null) {
-			for (HandlerInterceptor interceptor : interceptors) {
-				interceptor.preHandle(request, null, executionChain.getHandler());
-			}
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+			interceptor.preHandle(request, null, chain.getHandler());
 		}
-		return executionChain;
+		return chain;
 	}
 
 }

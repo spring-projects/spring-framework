@@ -88,6 +88,43 @@ public interface ListableBeanFactory extends BeanFactory {
 	String[] getBeanDefinitionNames();
 
 	/**
+	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
+	 * of instances, including availability and uniqueness options.
+	 * @param requiredType type the bean must match; can be an interface or superclass
+	 * @param allowEagerInit whether stream-based access may initialize <i>lazy-init
+	 * singletons</i> and <i>objects created by FactoryBeans</i> (or by factory methods
+	 * with a "factory-bean" reference) for the type check
+	 * @return a corresponding provider handle
+	 * @since 5.3
+	 * @see #getBeanProvider(ResolvableType, boolean)
+	 * @see #getBeanProvider(Class)
+	 * @see #getBeansOfType(Class, boolean, boolean)
+	 * @see #getBeanNamesForType(Class, boolean, boolean)
+	 */
+	<T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit);
+
+	/**
+	 * Return a provider for the specified bean, allowing for lazy on-demand retrieval
+	 * of instances, including availability and uniqueness options.
+	 * @param requiredType type the bean must match; can be a generic type declaration.
+	 * Note that collection types are not supported here, in contrast to reflective
+	 * injection points. For programmatically retrieving a list of beans matching a
+	 * specific type, specify the actual bean type as an argument here and subsequently
+	 * use {@link ObjectProvider#orderedStream()} or its lazy streaming/iteration options.
+	 * @param allowEagerInit whether stream-based access may initialize <i>lazy-init
+	 * singletons</i> and <i>objects created by FactoryBeans</i> (or by factory methods
+	 * with a "factory-bean" reference) for the type check
+	 * @return a corresponding provider handle
+	 * @since 5.3
+	 * @see #getBeanProvider(ResolvableType)
+	 * @see ObjectProvider#iterator()
+	 * @see ObjectProvider#stream()
+	 * @see ObjectProvider#orderedStream()
+	 * @see #getBeanNamesForType(ResolvableType, boolean, boolean)
+	 */
+	<T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit);
+
+	/**
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of {@code getObjectType}
 	 * in the case of FactoryBeans.

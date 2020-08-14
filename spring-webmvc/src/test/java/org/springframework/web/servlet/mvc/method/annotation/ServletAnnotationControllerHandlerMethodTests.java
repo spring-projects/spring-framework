@@ -57,6 +57,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -108,6 +109,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -139,6 +141,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
@@ -158,6 +161,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockMultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
@@ -1935,6 +1939,44 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	void dataClassBindingWithPathVariable(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(PathVariableDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind/true");
+		request.addParameter("param1", "value1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-0");
+	}
+
+	@PathPatternsParameterizedTest
+	void dataClassBindingWithMultipartFile(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(MultipartFileDataClassController.class, usePathPatterns);
+
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.setRequestURI("/bind");
+		request.addFile(new MockMultipartFile("param1", "value1".getBytes(StandardCharsets.UTF_8)));
+		request.addParameter("param2", "true");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-0");
+	}
+
+	@PathPatternsParameterizedTest
+	void dataClassBindingWithServletPart(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(ServletPartDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType("multipart/form-data");
+		request.setRequestURI("/bind");
+		request.addPart(new MockPart("param1", "value1".getBytes(StandardCharsets.UTF_8)));
+		request.addParameter("param2", "true");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-0");
+	}
+
+	@PathPatternsParameterizedTest
 	void dataClassBindingWithAdditionalSetter(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(DataClassController.class, usePathPatterns);
 
@@ -2781,10 +2823,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new View() {
 				@Override
-				public String getContentType() {
-					return null;
-				}
-				@Override
 				@SuppressWarnings({"unchecked", "deprecation", "rawtypes"})
 				public void render(@Nullable Map model, HttpServletRequest request, HttpServletResponse response)
 						throws Exception {
@@ -2825,17 +2863,10 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class ModelExposingViewResolver implements ViewResolver {
 
 		@Override
-		public View resolveViewName(final String viewName, Locale locale) throws Exception {
-			return new View() {
-				@Override
-				public String getContentType() {
-					return null;
-				}
-				@Override
-				public void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+		public View resolveViewName(String viewName, Locale locale) {
+			return (model, request, response) -> {
 					request.setAttribute("viewName", viewName);
 					request.getSession().setAttribute("model", model);
-				}
 			};
 		}
 	}
@@ -3832,6 +3863,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@RestController
+	public static class PathVariableDataClassController {
+
+		@RequestMapping("/bind/{param2}")
+		public String handle(DataClass data) {
+			return data.param1 + "-" + data.param2 + "-" + data.param3;
+		}
+	}
+
+	@RestController
 	public static class ValidatedDataClassController {
 
 		@InitBinder
@@ -3870,6 +3910,70 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			rc.getBindStatus("dataClass.param2");
 			rc.getBindStatus("dataClass.param3");
 			response.getWriter().write(this.content);
+		}
+	}
+
+	public static class MultipartFileDataClass {
+
+		@NotNull
+		public final MultipartFile param1;
+
+		public final boolean param2;
+
+		public int param3;
+
+		@ConstructorProperties({"param1", "param2", "optionalParam"})
+		public MultipartFileDataClass(MultipartFile param1, boolean p2, Optional<Integer> optionalParam) {
+			this.param1 = param1;
+			this.param2 = p2;
+			Assert.notNull(optionalParam, "Optional must not be null");
+			optionalParam.ifPresent(integer -> this.param3 = integer);
+		}
+
+		public void setParam3(int param3) {
+			this.param3 = param3;
+		}
+	}
+
+	@RestController
+	public static class MultipartFileDataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(MultipartFileDataClass data) throws IOException {
+			return StreamUtils.copyToString(data.param1.getInputStream(), StandardCharsets.UTF_8) +
+					"-" + data.param2 + "-" + data.param3;
+		}
+	}
+
+	public static class ServletPartDataClass {
+
+		@NotNull
+		public final Part param1;
+
+		public final boolean param2;
+
+		public int param3;
+
+		@ConstructorProperties({"param1", "param2", "optionalParam"})
+		public ServletPartDataClass(Part param1, boolean p2, Optional<Integer> optionalParam) {
+			this.param1 = param1;
+			this.param2 = p2;
+			Assert.notNull(optionalParam, "Optional must not be null");
+			optionalParam.ifPresent(integer -> this.param3 = integer);
+		}
+
+		public void setParam3(int param3) {
+			this.param3 = param3;
+		}
+	}
+
+	@RestController
+	public static class ServletPartDataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(ServletPartDataClass data) throws IOException {
+			return StreamUtils.copyToString(data.param1.getInputStream(), StandardCharsets.UTF_8) +
+					"-" + data.param2 + "-" + data.param3;
 		}
 	}
 

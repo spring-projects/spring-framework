@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.util.retry.Retry;
 
 import org.springframework.context.annotation.Bean;
@@ -98,7 +99,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
-		MonoProcessor<Object> output = MonoProcessor.create();
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
 
 		this.client.execute(getUrl("/sub-protocol"),
 				new WebSocketHandler() {
@@ -131,7 +132,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("my-header", "my-value");
-		MonoProcessor<Object> output = MonoProcessor.create();
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
 
 		this.client.execute(getUrl("/custom-header"), headers,
 				session -> session.receive()
@@ -147,7 +148,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.create();
+		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.fromSink(Sinks.one());
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
@@ -168,7 +169,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void cookie(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		MonoProcessor<Object> output = MonoProcessor.create();
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
 		AtomicReference<String> cookie = new AtomicReference<>();
 		this.client.execute(getUrl("/cookie"),
 				session -> {

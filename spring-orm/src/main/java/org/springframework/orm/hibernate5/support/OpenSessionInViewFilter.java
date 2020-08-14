@@ -204,11 +204,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see FlushMode#MANUAL
 	 */
-	@SuppressWarnings("deprecation")
 	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		try {
 			Session session = sessionFactory.openSession();
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 			return session;
 		}
 		catch (HibernateException ex) {

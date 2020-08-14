@@ -27,7 +27,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 /**
  * Implementation of {@link RouterFunctions.Visitor} that changes the
  * {@link PathPatternParser} on path-related request predicates
- * (i.e. {@code RequestPredicates.PathPatternPredicate}.
+ * (i.e. {@link RequestPredicates.PathPatternPredicate}).
  *
  * @author Arjen Poutsma
  * @since 5.3

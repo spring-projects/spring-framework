@@ -89,9 +89,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private List<RSocketConnectorConfigurer> rsocketConnectorConfigurers = new ArrayList<>();
 
-	@SuppressWarnings("deprecation")
-	private List<ClientRSocketFactoryConfigurer> rsocketFactoryConfigurers = new ArrayList<>();
-
 
 	@Override
 	public RSocketRequester.Builder dataMimeType(@Nullable MimeType mimeType) {
@@ -145,13 +142,6 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	}
 
 	@Override
-	@Deprecated
-	public RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer) {
-		this.rsocketFactoryConfigurers.add(configurer);
-		return this;
-	}
-
-	@Override
 	public RSocketRequester.Builder apply(Consumer<RSocketRequester.Builder> configurer) {
 		configurer.accept(this);
 		return this;
@@ -180,7 +170,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Mono<Payload> setupPayload = getSetupPayload(dataMimeType, metaMimeType, strategies);
 
 		RSocketConnector connector = initConnector(
-				this.rsocketConnectorConfigurers, this.rsocketFactoryConfigurers,
+				this.rsocketConnectorConfigurers,
 				metaMimeType, dataMimeType, setupPayload, strategies);
 
 		return new DefaultRSocketRequester(
@@ -214,7 +204,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Mono<Payload> setupPayload = getSetupPayload(dataMimeType, metaMimeType, rsocketStrategies);
 
 		RSocketConnector connector = initConnector(
-				this.rsocketConnectorConfigurers, this.rsocketFactoryConfigurers,
+				this.rsocketConnectorConfigurers,
 				metaMimeType, dataMimeType, setupPayload, rsocketStrategies);
 
 		return connector.connect(transport).map(rsocket ->
@@ -304,18 +294,11 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	@SuppressWarnings("deprecation")
 	private RSocketConnector initConnector(List<RSocketConnectorConfigurer> connectorConfigurers,
-			List<ClientRSocketFactoryConfigurer> factoryConfigurers,
 			MimeType metaMimeType, MimeType dataMimeType, Mono<Payload> setupPayloadMono,
 			RSocketStrategies rsocketStrategies) {
 
 		RSocketConnector connector = RSocketConnector.create();
 		connectorConfigurers.forEach(c -> c.configure(connector));
-
-		if (!factoryConfigurers.isEmpty()) {
-			io.rsocket.RSocketFactory.ClientRSocketFactory factory =
-					new io.rsocket.RSocketFactory.ClientRSocketFactory(connector);
-			factoryConfigurers.forEach(c -> c.configure(factory));
-		}
 
 		if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
 			connector.payloadDecoder(PayloadDecoder.ZERO_COPY);

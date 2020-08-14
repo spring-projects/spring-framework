@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -41,7 +42,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -117,7 +117,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
-		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.create();
+		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.fromSink(Sinks.one());
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
 
 		return valueMono.flatMap(value -> {
@@ -233,7 +233,8 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return WebExchangeDataBinder.extractValuesToBind(exchange).map(bindValues -> {
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, attributeName);
+		return getValuesToBind(binder, exchange).map(bindValues -> {
 			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
 			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
 			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
@@ -241,7 +242,6 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			Assert.state(paramNames.length == paramTypes.length,
 					() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 			Object[] args = new Object[paramTypes.length];
-			WebDataBinder binder = context.createDataBinder(exchange, null, attributeName);
 			String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
 			String fieldMarkerPrefix = binder.getFieldMarkerPrefix();
 			for (int i = 0; i < paramNames.length; i++) {
@@ -269,6 +269,18 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			}
 			return BeanUtils.instantiateClass(ctor, args);
 		});
+	}
+
+	/**
+	 * Protected method to obtain the values for data binding. By default this
+	 * method delegates to {@link WebExchangeDataBinder#getValuesToBind}.
+	 * @param binder the data binder in use
+	 * @param exchange the current exchange
+	 * @return a map of bind values
+	 * @since 5.3
+	 */
+	public Mono<Map<String, Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder.getValuesToBind(exchange);
 	}
 
 	private boolean hasErrorsArgument(MethodParameter parameter) {

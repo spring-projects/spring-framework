@@ -593,7 +593,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 		@MessageMapping("mono")
 		public Mono<String> handleMono() {
-			this.monoProcessor = MonoProcessor.create();
+			this.monoProcessor = MonoProcessor.fromSink(Sinks.one());
 			return this.monoProcessor;
 		}
 

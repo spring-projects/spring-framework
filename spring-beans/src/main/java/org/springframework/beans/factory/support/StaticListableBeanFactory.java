@@ -37,7 +37,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -186,73 +186,12 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType) throws BeansException {
-		return getBeanProvider(ResolvableType.forRawClass(requiredType));
+		return getBeanProvider(ResolvableType.forRawClass(requiredType), true);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType) {
-		return new ObjectProvider<T>() {
-			@Override
-			public T getObject() throws BeansException {
-				String[] beanNames = getBeanNamesForType(requiredType);
-				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0], requiredType);
-				}
-				else if (beanNames.length > 1) {
-					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
-				}
-				else {
-					throw new NoSuchBeanDefinitionException(requiredType);
-				}
-			}
-			@Override
-			public T getObject(Object... args) throws BeansException {
-				String[] beanNames = getBeanNamesForType(requiredType);
-				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0], args);
-				}
-				else if (beanNames.length > 1) {
-					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
-				}
-				else {
-					throw new NoSuchBeanDefinitionException(requiredType);
-				}
-			}
-			@Override
-			@Nullable
-			public T getIfAvailable() throws BeansException {
-				String[] beanNames = getBeanNamesForType(requiredType);
-				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0]);
-				}
-				else if (beanNames.length > 1) {
-					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
-				}
-				else {
-					return null;
-				}
-			}
-			@Override
-			@Nullable
-			public T getIfUnique() throws BeansException {
-				String[] beanNames = getBeanNamesForType(requiredType);
-				if (beanNames.length == 1) {
-					return (T) getBean(beanNames[0]);
-				}
-				else {
-					return null;
-				}
-			}
-			@Override
-			public Stream<T> stream() {
-				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
-			}
-			@Override
-			public Stream<T> orderedStream() {
-				return stream().sorted(OrderComparator.INSTANCE);
-			}
-		};
+		return getBeanProvider(requiredType, true);
 	}
 
 	@Override
@@ -335,6 +274,77 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	@Override
 	public String[] getBeanDefinitionNames() {
 		return StringUtils.toStringArray(this.beans.keySet());
+	}
+
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(Class<T> requiredType, boolean allowEagerInit) {
+		return getBeanProvider(ResolvableType.forRawClass(requiredType), allowEagerInit);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> ObjectProvider<T> getBeanProvider(ResolvableType requiredType, boolean allowEagerInit) {
+		return new ObjectProvider<T>() {
+			@Override
+			public T getObject() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0], requiredType);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+			}
+			@Override
+			public T getObject(Object... args) throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0], args);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					throw new NoSuchBeanDefinitionException(requiredType);
+				}
+			}
+			@Override
+			@Nullable
+			public T getIfAvailable() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0]);
+				}
+				else if (beanNames.length > 1) {
+					throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+				}
+				else {
+					return null;
+				}
+			}
+			@Override
+			@Nullable
+			public T getIfUnique() throws BeansException {
+				String[] beanNames = getBeanNamesForType(requiredType);
+				if (beanNames.length == 1) {
+					return (T) getBean(beanNames[0]);
+				}
+				else {
+					return null;
+				}
+			}
+			@Override
+			public Stream<T> stream() {
+				return Arrays.stream(getBeanNamesForType(requiredType)).map(name -> (T) getBean(name));
+			}
+			@Override
+			public Stream<T> orderedStream() {
+				return stream().sorted(OrderComparator.INSTANCE);
+			}
+		};
 	}
 
 	@Override
@@ -450,7 +460,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			throws NoSuchBeanDefinitionException {
 
 		Class<?> beanType = getType(beanName);
-		return (beanType != null ? AnnotationUtils.findAnnotation(beanType, annotationType) : null);
+		return (beanType != null ? AnnotatedElementUtils.findMergedAnnotation(beanType, annotationType) : null);
 	}
 
 }

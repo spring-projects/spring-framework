@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
  * @since 5.1
  * @param <T> the object type
  */
+@SuppressWarnings("deprecation")
 public class MonoToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
 	private final MonoProcessor<T> processor;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	@Override
 	@Nullable
 	public ValueWrapper get(Object key) {
-		Object value = lookup(key);
-		return toValueWrapper(value);
+		return toValueWrapper(lookup(key));
 	}
 
 	@Override

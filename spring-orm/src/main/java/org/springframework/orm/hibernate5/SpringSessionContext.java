@@ -80,7 +80,6 @@ public class SpringSessionContext implements CurrentSessionContext {
 	 * Retrieve the Spring-managed Session for the current thread, if any.
 	 */
 	@Override
-	@SuppressWarnings("deprecation")
 	public Session currentSession() throws HibernateException {
 		Object value = TransactionSynchronizationManager.getResource(this.sessionFactory);
 		if (value instanceof Session) {
@@ -100,7 +99,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 				FlushMode flushMode = session.getHibernateFlushMode();
 				if (flushMode.equals(FlushMode.MANUAL) &&
 						!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-					session.setFlushMode(FlushMode.AUTO);
+					session.setHibernateFlushMode(FlushMode.AUTO);
 					sessionHolder.setPreviousFlushMode(flushMode);
 				}
 			}
@@ -130,7 +129,7 @@ public class SpringSessionContext implements CurrentSessionContext {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			Session session = this.sessionFactory.openSession();
 			if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-				session.setFlushMode(FlushMode.MANUAL);
+				session.setHibernateFlushMode(FlushMode.MANUAL);
 			}
 			SessionHolder sessionHolder = new SessionHolder(session);
 			TransactionSynchronizationManager.registerSynchronization(
