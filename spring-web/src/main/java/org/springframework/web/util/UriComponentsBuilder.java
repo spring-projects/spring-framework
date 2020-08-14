@@ -440,7 +440,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Build a {@code UriComponents} instance from the various components
 	 * contained in this builder.
-	 * @param encoded whether all the components set in this builder are
+	 * @param encoded asserts whether all the components set in this builder are already
 	 * encoded ({@code true}) or not ({@code false})
 	 * @return the URI components
 	 */

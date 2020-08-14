@@ -50,6 +50,18 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class UriComponentsBuilderTests {
 
 	@Test
+	public void fromUriStringQueryParamContainingBracket() throws URISyntaxException {
+		URI uri = new URI("http://example.com/some/path?query=[fromto]");
+		URI finalUri = uri;
+		assertThatIllegalArgumentException().isThrownBy(() -> UriComponentsBuilder.fromUri(finalUri).build(true));
+		//ok, then encode it
+		uri = UriComponentsBuilder.fromUri(uri).build(false).encode().toUri();
+		//confirm encoded
+		URI checkUri = UriComponentsBuilder.fromUri(uri).build(true).toUri();
+		assertThat(uri.toString()).isEqualTo(checkUri.toString());
+	}
+
+	@Test
 	void plain() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.scheme("https").host("example.com")
