@@ -51,6 +51,20 @@ public abstract class ObjectUtils {
 
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
+	private static final Map<Class<?>, Function<?, String>> NULL_SAFE_CONVERTERS = new HashMap<>();
+
+	static {
+		NULL_SAFE_CONVERTERS.put(String.class, x -> (String)x);
+		NULL_SAFE_CONVERTERS.put(boolean[].class, (Function<boolean[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(byte[].class, (Function<byte[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(char[].class, (Function<char[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(double[].class, (Function<double[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(float[].class, (Function<float[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(int[].class, (Function<int[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(long[].class, (Function<long[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(short[].class, (Function<short[], String>) ObjectUtils::nullSafeToString);
+	}
+
 
 	/**
 	 * Return whether the given throwable is a checked exception:
@@ -214,7 +228,7 @@ public abstract class ObjectUtils {
 	public static boolean containsConstant(Enum<?>[] enumValues, String constant, boolean caseSensitive) {
 		for (Enum<?> candidate : enumValues) {
 			if (caseSensitive ? candidate.toString().equals(constant) :
-				candidate.toString().equalsIgnoreCase(constant)) {
+					candidate.toString().equalsIgnoreCase(constant)) {
 				return true;
 			}
 		}
@@ -236,7 +250,7 @@ public abstract class ObjectUtils {
 			}
 		}
 		throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " +
-						enumValues.getClass().getComponentType().getName());
+				enumValues.getClass().getComponentType().getName());
 	}
 
 	/**
@@ -670,24 +684,12 @@ public abstract class ObjectUtils {
 
 	}
 
-	private static final Map<Class<?>, Function<?, String>> NULL_SAFE_CONVERTERS = new HashMap<>();
-
 	@SuppressWarnings("unchecked")
 	private static <T> String innerWildcardCapture(Function<T, String> function, Object argument){
 		return function.apply((T)argument);
 	}
 
-	static {
-		NULL_SAFE_CONVERTERS.put(String.class, x -> (String)x);
-		NULL_SAFE_CONVERTERS.put(boolean[].class, (Function<boolean[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(byte[].class, (Function<byte[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(char[].class, (Function<char[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(double[].class, (Function<double[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(float[].class, (Function<float[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(int[].class, (Function<int[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(long[].class, (Function<long[], String>) ObjectUtils::nullSafeToString);
-		NULL_SAFE_CONVERTERS.put(short[].class, (Function<short[], String>) ObjectUtils::nullSafeToString);
-	}
+
 
 	/**
 	 * Return a String representation of the contents of the specified array.

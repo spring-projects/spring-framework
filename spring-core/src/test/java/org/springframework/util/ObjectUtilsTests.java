@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-		package org.springframework.util;
+package org.springframework.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -165,7 +165,7 @@ class ObjectUtilsTests {
 	@Test
 	void toObjectArrayWithNonArrayType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-																ObjectUtils.toObjectArray("Not an []"));
+						ObjectUtils.toObjectArray("Not an []"));
 	}
 
 	@Test
@@ -817,8 +817,8 @@ class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR")).isEqualTo(Tropes.BAR);
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
-																ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
-											.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
+						ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
+				.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
 	}
 
 	@Test
