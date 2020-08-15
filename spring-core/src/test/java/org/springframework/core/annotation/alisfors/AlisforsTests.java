@@ -202,6 +202,9 @@ public class AlisforsTests {
 
     @Test
     public void test4() {
+        // not pass, does it matter? is it a bug?
+        // Mr Sam Brannen, confirm this question, please
+        // if it is a bug, please contact 1936978077@qq.com by email
         Test8 test8 = AnnotatedElementUtils.getMergedAnnotation(Element5.class, Test8.class);
         Test9 test9 = AnnotatedElementUtils.getMergedAnnotation(Element5.class, Test9.class);
         System.out.println(test8.toString());
