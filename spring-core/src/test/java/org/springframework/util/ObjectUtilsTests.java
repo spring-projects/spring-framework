@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+		package org.springframework.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -165,7 +165,7 @@ class ObjectUtilsTests {
 	@Test
 	void toObjectArrayWithNonArrayType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				ObjectUtils.toObjectArray("Not an []"));
+																ObjectUtils.toObjectArray("Not an []"));
 	}
 
 	@Test
@@ -644,7 +644,7 @@ class ObjectUtilsTests {
 	@Test
 	void nullSafeToStringWithCharArray() {
 		char[] array = {'A', 'B'};
-		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{'A', 'B'}");
+		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{A, B}");
 	}
 
 	@Test
@@ -733,7 +733,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithObjectArray() {
-		Object[] array = {"Han", Long.valueOf(43)};
+		Object[] array = {"Han", 43L};
 		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{Han, 43}");
 	}
 
@@ -817,8 +817,20 @@ class ObjectUtilsTests {
 		assertThat(ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "BAR")).isEqualTo(Tropes.BAR);
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
-			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
+																ObjectUtils.caseInsensitiveValueOf(Tropes.values(), "bogus"))
+											.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
+	}
+
+	@Test
+	void nullSafeToStringWithToStringMethodNull(){
+		User user = new User();
+		assertThat(ObjectUtils.nullSafeToString(user)).isEqualTo("user");
+	}
+
+	@Test
+	void nullSafeToStringWithToStringMethodNonNull(){
+		UserNullToString user = new UserNullToString();
+		assertThat(ObjectUtils.nullSafeToString(user)).isEqualTo("null");
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {
@@ -829,5 +841,21 @@ class ObjectUtilsTests {
 
 
 	enum Tropes {FOO, BAR, baz}
+
+	static class UserNullToString {
+
+		@Override
+		public String toString(){
+			return null;
+		}
+	}
+
+	static class User {
+
+		@Override
+		public String toString(){
+			return "user";
+		}
+	}
 
 }

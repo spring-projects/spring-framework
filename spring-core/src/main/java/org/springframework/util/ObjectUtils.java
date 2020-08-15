@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
 
@@ -48,12 +49,6 @@ public abstract class ObjectUtils {
 	private static final int INITIAL_HASH = 7;
 	private static final int MULTIPLIER = 31;
 
-	private static final String EMPTY_STRING = "";
-	private static final String NULL_STRING = "null";
-	private static final String ARRAY_START = "{";
-	private static final String ARRAY_END = "}";
-	private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
-	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
 
@@ -219,7 +214,7 @@ public abstract class ObjectUtils {
 	public static boolean containsConstant(Enum<?>[] enumValues, String constant, boolean caseSensitive) {
 		for (Enum<?> candidate : enumValues) {
 			if (caseSensitive ? candidate.toString().equals(constant) :
-					candidate.toString().equalsIgnoreCase(constant)) {
+				candidate.toString().equalsIgnoreCase(constant)) {
 				return true;
 			}
 		}
@@ -241,7 +236,7 @@ public abstract class ObjectUtils {
 			}
 		}
 		throw new IllegalArgumentException("Constant [" + constant + "] does not exist in enum type " +
-				enumValues.getClass().getComponentType().getName());
+						enumValues.getClass().getComponentType().getName());
 	}
 
 	/**
@@ -609,7 +604,7 @@ public abstract class ObjectUtils {
 	 */
 	public static String identityToString(@Nullable Object obj) {
 		if (obj == null) {
-			return EMPTY_STRING;
+			return "";
 		}
 		String className = obj.getClass().getName();
 		String identityHexString = getIdentityHexString(obj);
@@ -636,7 +631,7 @@ public abstract class ObjectUtils {
 	 */
 	public static String getDisplayString(@Nullable Object obj) {
 		if (obj == null) {
-			return EMPTY_STRING;
+			return "";
 		}
 		return nullSafeToString(obj);
 	}
@@ -648,7 +643,7 @@ public abstract class ObjectUtils {
 	 * @return the corresponding class name
 	 */
 	public static String nullSafeClassName(@Nullable Object obj) {
-		return (obj != null ? obj.getClass().getName() : NULL_STRING);
+		return (obj != null ? obj.getClass().getName() : "null");
 	}
 
 	/**
@@ -659,41 +654,39 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code obj}
 	 */
 	public static String nullSafeToString(@Nullable Object obj) {
+
 		if (obj == null) {
-			return NULL_STRING;
+			return "null";
 		}
-		if (obj instanceof String) {
-			return (String) obj;
-		}
+
 		if (obj instanceof Object[]) {
 			return nullSafeToString((Object[]) obj);
 		}
-		if (obj instanceof boolean[]) {
-			return nullSafeToString((boolean[]) obj);
-		}
-		if (obj instanceof byte[]) {
-			return nullSafeToString((byte[]) obj);
-		}
-		if (obj instanceof char[]) {
-			return nullSafeToString((char[]) obj);
-		}
-		if (obj instanceof double[]) {
-			return nullSafeToString((double[]) obj);
-		}
-		if (obj instanceof float[]) {
-			return nullSafeToString((float[]) obj);
-		}
-		if (obj instanceof int[]) {
-			return nullSafeToString((int[]) obj);
-		}
-		if (obj instanceof long[]) {
-			return nullSafeToString((long[]) obj);
-		}
-		if (obj instanceof short[]) {
-			return nullSafeToString((short[]) obj);
-		}
-		String str = obj.toString();
-		return (str != null ? str : EMPTY_STRING);
+
+		return Optional
+				.ofNullable(NULL_SAFE_CONVERTERS.get(obj.getClass()))
+				.map(x -> innerWildcardCapture(x, obj))
+				.orElse(String.valueOf(obj.toString()));
+
+	}
+
+	private static final Map<Class<?>, Function<?, String>> NULL_SAFE_CONVERTERS = new HashMap<>();
+
+	@SuppressWarnings("unchecked")
+	private static <T> String innerWildcardCapture(Function<T, String> function, Object argument){
+		return function.apply((T)argument);
+	}
+
+	static {
+		NULL_SAFE_CONVERTERS.put(String.class, x -> (String)x);
+		NULL_SAFE_CONVERTERS.put(boolean[].class, (Function<boolean[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(byte[].class, (Function<byte[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(char[].class, (Function<char[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(double[].class, (Function<double[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(float[].class, (Function<float[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(int[].class, (Function<int[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(long[].class, (Function<long[], String>) ObjectUtils::nullSafeToString);
+		NULL_SAFE_CONVERTERS.put(short[].class, (Function<short[], String>) ObjectUtils::nullSafeToString);
 	}
 
 	/**
@@ -706,18 +699,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable Object[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (Object o : array) {
-			stringJoiner.add(String.valueOf(o));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -730,18 +712,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable boolean[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (boolean b : array) {
-			stringJoiner.add(String.valueOf(b));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -754,18 +725,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable byte[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (byte b : array) {
-			stringJoiner.add(String.valueOf(b));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -778,18 +738,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable char[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (char c : array) {
-			stringJoiner.add('\'' + String.valueOf(c) + '\'');
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -802,18 +751,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable double[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (double d : array) {
-			stringJoiner.add(String.valueOf(d));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -826,18 +764,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable float[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (float f : array) {
-			stringJoiner.add(String.valueOf(f));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -850,18 +777,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable int[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (int i : array) {
-			stringJoiner.add(String.valueOf(i));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -874,18 +790,7 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable long[] array) {
-		if (array == null) {
-			return NULL_STRING;
-		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
-		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (long l : array) {
-			stringJoiner.add(String.valueOf(l));
-		}
-		return stringJoiner.toString();
+		return innerNullSafeToString(Arrays.toString(array));
 	}
 
 	/**
@@ -898,18 +803,17 @@ public abstract class ObjectUtils {
 	 * @return a String representation of {@code array}
 	 */
 	public static String nullSafeToString(@Nullable short[] array) {
-		if (array == null) {
-			return NULL_STRING;
+		return innerNullSafeToString(Arrays.toString(array));
+	}
+
+	private static String innerNullSafeToString(String inter){
+		if ("null".equals(inter)) {
+			return inter;
 		}
-		int length = array.length;
-		if (length == 0) {
-			return EMPTY_ARRAY;
+		if ("[]".equals(inter)) {
+			return "{}";
 		}
-		StringJoiner stringJoiner = new StringJoiner(ARRAY_ELEMENT_SEPARATOR, ARRAY_START, ARRAY_END);
-		for (short s : array) {
-			stringJoiner.add(String.valueOf(s));
-		}
-		return stringJoiner.toString();
+		return "{" + inter.substring(1, inter.length() - 1) + "}";
 	}
 
 }
