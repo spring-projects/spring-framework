@@ -684,13 +684,6 @@ public abstract class ObjectUtils {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T> String innerWildcardCapture(Function<T, String> function, Object argument){
-		return function.apply((T)argument);
-	}
-
-
-
 	/**
 	 * Return a String representation of the contents of the specified array.
 	 * <p>The String representation consists of a list of the array's elements,
@@ -816,6 +809,11 @@ public abstract class ObjectUtils {
 			return "{}";
 		}
 		return "{" + inter.substring(1, inter.length() - 1) + "}";
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> String innerWildcardCapture(Function<T, String> function, Object argument){
+		return function.apply((T)argument);
 	}
 
 }
