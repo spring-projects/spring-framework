@@ -387,13 +387,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithBooleanArray() {
-		int expected = 31 * 7 + Boolean.TRUE.hashCode();
-		expected = 31 * expected + Boolean.FALSE.hashCode();
+		boolean [] one = {true, false};
+		boolean [] two = {false, true};
+		boolean [] three = {true, false};
 
-		boolean[] array = {true, false};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -403,13 +402,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithByteArray() {
-		int expected = 31 * 7 + 8;
-		expected = 31 * expected + 10;
+		byte [] one = {8, 10};
+		byte [] two = {1, 2};
+		byte [] three = {8, 10};
 
-		byte[] array = {8, 10};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -419,13 +417,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithCharArray() {
-		int expected = 31 * 7 + 'a';
-		expected = 31 * expected + 'E';
+		char [] one = {'a', 'E'};
+		char [] two = {'E', 'a'};
+		char [] three = {'a', 'E'};
 
-		char[] array = {'a', 'E'};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -435,15 +432,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithDoubleArray() {
-		long bits = Double.doubleToLongBits(8449.65);
-		int expected = 31 * 7 + (int) (bits ^ (bits >>> 32));
-		bits = Double.doubleToLongBits(9944.923);
-		expected = 31 * expected + (int) (bits ^ (bits >>> 32));
+		double [] one = {8449.65, 9944.923};
+		double [] two = {9944.923, 8449.65};
+		double [] three = {8449.65, 9944.923};
 
-		double[] array = {8449.65, 9944.923};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -453,13 +447,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithFloatArray() {
-		int expected = 31 * 7 + Float.floatToIntBits(9.6f);
-		expected = 31 * expected + Float.floatToIntBits(7.4f);
+		float [] one = {9.6f, 7.4f};
+		float [] two = {7.4f, 9.6f};
+		float [] three = {9.6f, 7.4f};
 
-		float[] array = {9.6f, 7.4f};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -469,13 +462,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithIntArray() {
-		int expected = 31 * 7 + 884;
-		expected = 31 * expected + 340;
+		long [] one = {884, 340};
+		long [] two = {340, 884};
+		long [] three = {884, 340};
 
-		int[] array = {884, 340};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -485,15 +477,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithLongArray() {
-		long lng = 7993L;
-		int expected = 31 * 7 + (int) (lng ^ (lng >>> 32));
-		lng = 84320L;
-		expected = 31 * expected + (int) (lng ^ (lng >>> 32));
+		long [] one = {7993L, 84320L};
+		long [] two = {84320L, 7993L};
+		long [] three = {7993L, 84320L};
 
-		long[] array = {7993L, 84320L};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -509,13 +498,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithObjectArray() {
-		int expected = 31 * 7 + "Leia".hashCode();
-		expected = 31 * expected + "Han".hashCode();
+		Object [] one = {"Leia", "Han"};
+		Object [] two = {"Han", "Leia"};
+		Object [] three = {"Leia", "Han"};
 
-		Object[] array = {"Leia", "Han"};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test
@@ -593,13 +581,12 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashCodeWithShortArray() {
-		int expected = 31 * 7 + 70;
-		expected = 31 * expected + 8;
+		short [] one = {7, 8};
+		short [] two = {8, 7};
+		short [] three = {7, 8};
 
-		short[] array = {70, 8};
-		int actual = ObjectUtils.nullSafeHashCode(array);
-
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isEqualTo(ObjectUtils.nullSafeHashCode(three));
+		assertThat(ObjectUtils.nullSafeHashCode(one)).isNotEqualTo(ObjectUtils.nullSafeHashCode(two));
 	}
 
 	@Test

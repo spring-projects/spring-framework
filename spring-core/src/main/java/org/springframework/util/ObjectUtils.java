@@ -19,10 +19,13 @@ package org.springframework.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import java.util.function.Function;
 import org.springframework.lang.Nullable;
 
 /**
@@ -45,8 +48,18 @@ import org.springframework.lang.Nullable;
  */
 public abstract class ObjectUtils {
 
-	private static final int INITIAL_HASH = 7;
-	private static final int MULTIPLIER = 31;
+	private static final Map<Class<?>, Function<?, Integer>> HASHCODE_CONVERTERS = new HashMap<>();
+
+	static {
+		HASHCODE_CONVERTERS.put(boolean[].class, (Function<boolean[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(byte[].class, (Function<byte[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(char[].class, (Function<char[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(double[].class, (Function<double[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(float[].class, (Function<float[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(int[].class, (Function<int[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(long[].class, (Function<long[], Integer>) Arrays::hashCode);
+		HASHCODE_CONVERTERS.put(short[].class, (Function<short[], Integer>) Arrays::hashCode);
+	}
 
 	private static final String EMPTY_STRING = "";
 	private static final String NULL_STRING = "null";
@@ -390,174 +403,108 @@ public abstract class ObjectUtils {
 	 * @see #nullSafeHashCode(short[])
 	 */
 	public static int nullSafeHashCode(@Nullable Object obj) {
+
 		if (obj == null) {
 			return 0;
 		}
-		if (obj.getClass().isArray()) {
-			if (obj instanceof Object[]) {
-				return nullSafeHashCode((Object[]) obj);
-			}
-			if (obj instanceof boolean[]) {
-				return nullSafeHashCode((boolean[]) obj);
-			}
-			if (obj instanceof byte[]) {
-				return nullSafeHashCode((byte[]) obj);
-			}
-			if (obj instanceof char[]) {
-				return nullSafeHashCode((char[]) obj);
-			}
-			if (obj instanceof double[]) {
-				return nullSafeHashCode((double[]) obj);
-			}
-			if (obj instanceof float[]) {
-				return nullSafeHashCode((float[]) obj);
-			}
-			if (obj instanceof int[]) {
-				return nullSafeHashCode((int[]) obj);
-			}
-			if (obj instanceof long[]) {
-				return nullSafeHashCode((long[]) obj);
-			}
-			if (obj instanceof short[]) {
-				return nullSafeHashCode((short[]) obj);
-			}
+		if (obj instanceof Object[]) {
+			return nullSafeHashCode((Object[]) obj);
 		}
-		return obj.hashCode();
+
+		return Optional
+				.ofNullable(HASHCODE_CONVERTERS.get(obj.getClass()))
+				.map(x -> innerWildcardCapture(x, obj))
+				.orElse(obj.hashCode());
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable Object[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (Object element : array) {
-			hash = MULTIPLIER * hash + nullSafeHashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable boolean[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (boolean element : array) {
-			hash = MULTIPLIER * hash + Boolean.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable byte[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (byte element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable char[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (char element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable double[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (double element : array) {
-			hash = MULTIPLIER * hash + Double.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable float[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (float element : array) {
-			hash = MULTIPLIER * hash + Float.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable int[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (int element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable long[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (long element : array) {
-			hash = MULTIPLIER * hash + Long.hashCode(element);
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
 	 * Return a hash code based on the contents of the specified array.
 	 * If {@code array} is {@code null}, this method returns 0.
+	 * @deprecated in favor of Arrays::hashCode
 	 */
+	@Deprecated
 	public static int nullSafeHashCode(@Nullable short[] array) {
-		if (array == null) {
-			return 0;
-		}
-		int hash = INITIAL_HASH;
-		for (short element : array) {
-			hash = MULTIPLIER * hash + element;
-		}
-		return hash;
+		return Arrays.hashCode(array);
 	}
 
 	/**
@@ -910,6 +857,11 @@ public abstract class ObjectUtils {
 			stringJoiner.add(String.valueOf(s));
 		}
 		return stringJoiner.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T, R> R innerWildcardCapture(Function<T, R> function, Object argument){
+		return function.apply((T)argument);
 	}
 
 }
