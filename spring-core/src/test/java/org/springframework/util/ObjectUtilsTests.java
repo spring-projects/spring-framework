@@ -830,7 +830,7 @@ class ObjectUtilsTests {
 	@Test
 	void nullSafeToStringWithToStringMethodNonNull(){
 		UserNullToString user = new UserNullToString();
-		assertThat(ObjectUtils.nullSafeToString(user)).isEqualTo("null");
+		assertThat(ObjectUtils.nullSafeToString(user)).isEqualTo("");
 	}
 
 	private void assertEqualHashCodes(int expected, Object array) {

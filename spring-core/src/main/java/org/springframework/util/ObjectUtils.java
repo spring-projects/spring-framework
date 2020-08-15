@@ -680,7 +680,7 @@ public abstract class ObjectUtils {
 		return Optional
 				.ofNullable(NULL_SAFE_CONVERTERS.get(obj.getClass()))
 				.map(x -> innerWildcardCapture(x, obj))
-				.orElse(String.valueOf(obj.toString()));
+				.orElse(obj.toString() != null ? obj.toString() : "");
 
 	}
 
