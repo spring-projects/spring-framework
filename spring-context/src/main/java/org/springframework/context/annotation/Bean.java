@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ import org.springframework.core.annotation.AliasFor;
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
  * semantics as mentioned above. This works out in {@code BFPP} cases, as they are not typically
- * referenced by other {@code @Bean} methods. As a reminder, a WARN-level log message will be
+ * referenced by other {@code @Bean} methods. As a reminder, an INFO-level log message will be
  * issued for any non-static {@code @Bean} methods having a return type assignable to
  * {@code BeanFactoryPostProcessor}.
  *
