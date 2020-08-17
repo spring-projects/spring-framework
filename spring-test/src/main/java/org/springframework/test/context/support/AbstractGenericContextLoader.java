@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <ul>
 	 * <li>Calls {@link #validateMergedContextConfiguration(MergedContextConfiguration)}
 	 * to allow subclasses to validate the supplied configuration before proceeding.</li>
-	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
+	 * <li>Calls {@link #createContext()} to create a {@link GenericApplicationContext}
+	 * instance.</li>
 	 * <li>If the supplied {@code MergedContextConfiguration} references a
 	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
 	 * the corresponding {@link MergedContextConfiguration#getParentApplicationContext()
@@ -112,7 +113,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 		validateMergedContextConfiguration(mergedConfig);
 
-		GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = createContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
 		if (parent != null) {
@@ -150,7 +151,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <p>Implementation details:
 	 *
 	 * <ul>
-	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
+	 * <li>Calls {@link #createContext()} to create a {@link GenericApplicationContext}
+	 * instance.</li>
 	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} to allow for customizing the context
 	 * before bean definitions are loaded.</li>
 	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to allow for customizing the
@@ -184,7 +186,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 			logger.debug(String.format("Loading ApplicationContext for locations [%s].",
 				StringUtils.arrayToCommaDelimitedString(locations)));
 		}
-		GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = createContext();
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
@@ -193,6 +195,22 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
+	}
+
+	/**
+	 * Factory method for creating the {@link GenericApplicationContext} used by
+	 * this {@code ContextLoader}.
+	 *
+	 * <p>The default implementation creates a {@code GenericApplicationContext}
+	 * using the default constructor. This method may be overridden in subclasses
+	 * &mdash; for example, to create a {@code GenericApplicationContext} with
+	 * a custom {@link DefaultListableBeanFactory} implementation.
+	 *
+	 * @return a newly instantiated {@code GenericApplicationContext}
+	 * @since 5.2.9
+	 */
+	protected GenericApplicationContext createContext() {
+		return new GenericApplicationContext();
 	}
 
 	/**
