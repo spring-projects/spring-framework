@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,8 +306,8 @@ class DefaultWebTestClient implements WebTestClient {
 		public ResponseSpec exchange() {
 			ClientResponse clientResponse = this.bodySpec.exchange().block(getTimeout());
 			Assert.state(clientResponse != null, "No ClientResponse");
-			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+			ExchangeResult result = wiretapConnector.getExchangeResult(this.requestId, this.uriTemplate, getTimeout());
+			return new DefaultResponseSpec(result, clientResponse, getTimeout());
 		}
 	}
 
@@ -321,10 +321,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 
-		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
-				@Nullable String uriTemplate, Duration timeout) {
-
-			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
+		DefaultResponseSpec(ExchangeResult exchangeResult, ClientResponse response, Duration timeout) {
+			this.exchangeResult = exchangeResult;
 			this.response = response;
 			this.timeout = timeout;
 		}
