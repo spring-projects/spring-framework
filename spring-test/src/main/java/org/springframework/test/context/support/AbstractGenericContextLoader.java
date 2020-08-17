@@ -112,7 +112,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 		validateMergedContextConfiguration(mergedConfig);
 
-		GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = createContext();
 
 		ApplicationContext parent = mergedConfig.getParentApplicationContext();
 		if (parent != null) {
@@ -128,6 +128,15 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
+	}
+
+	/**
+	 * Creates instance of application context used by this {@code ContextLoader}
+	 *
+	 * @return new Instance of application context
+	 */
+	protected GenericApplicationContext createContext() {
+		return new GenericApplicationContext();
 	}
 
 	/**
@@ -184,7 +193,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 			logger.debug(String.format("Loading ApplicationContext for locations [%s].",
 				StringUtils.arrayToCommaDelimitedString(locations)));
 		}
-		GenericApplicationContext context = new GenericApplicationContext();
+		GenericApplicationContext context = createContext();
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
