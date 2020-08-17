@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 
@@ -550,6 +551,71 @@ public class DataSourceTransactionManagerTests  {
 		verify(con).commit();
 		verify(con).close();
 		verify(con2).close();
+	}
+
+	/**
+	 * This test checks added line of code in the beginning of doBegin() method of DataSourceTransactionManager class
+	 * which allows users to check readonly status earlier of transaction earlier than they otherwise could in some circumstances
+	 * and then for example if readOnly re-use that connection multiple times for different nodes of a DataSource
+	 * @throws Exception
+	 */
+	@Test
+	public void testEarlyInitOfReadonlyStatusForCustomDataSource() throws Exception {
+		// Ensures that prepareSynchronization() will not do anything when startTransaction() is called
+		// (because status.isNewSynchronization()==false)
+		// to properly simulate the case where added code is needed in DataSourceTransactionManager
+		tm.setTransactionSynchronization(DataSourceTransactionManager.SYNCHRONIZATION_NEVER);
+		//need a DataSource to test user case that datasource can get same connection multiple times if readOnly
+		TestCustomRODataSource dsCustom = new TestCustomRODataSource();
+		DefaultTransactionDefinition transDef = new DefaultTransactionDefinition();
+		TransactionStatus tsNotReadonly = tm.getTransaction(transDef);
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+		tm.rollback(tsNotReadonly);//needed to reset for next transaction/test
+		transDef.setReadOnly(true);
+		TransactionStatus tsIsReadonly = tm.getTransaction(transDef);
+		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isTrue();
+		dsCustom.getConnection();//this is where user wants to check readonly
+		tm.rollback(tsIsReadonly);//needed to reset for next transaction/test
+		verify(con, times(2)).rollback();
+		verify(con, times(2)).close();
+		// need this to clean up state so @AfterEach validation succeeds
+		TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+	}
+	private static class TestCustomRODataSource extends AbstractDataSource {
+		/**
+		 * <p>Attempts to establish a connection with the data source that
+		 * this {@code DataSource} object represents.
+		 *
+		 * @return a connection to the data source
+		 * @throws SQLException if a database access error occurs
+		 * @throws SQLTimeoutException when the driver has determined that the
+		 * timeout value specified by the {@code setLoginTimeout} method has
+		 * been exceeded and has at least tried to cancel the current database connection attempt
+		 */
+		@Override
+		public Connection getConnection() throws SQLException {
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isTrue();
+			return null;
+		}
+		/**
+		 * <p>Attempts to establish a connection with the data source that
+		 * this {@code DataSource} object represents.
+		 *
+		 * @param username the database user on whose behalf the connection is
+		 *                 being made
+		 * @param password the user's password
+		 * @return a connection to the data source
+		 * @throws SQLException if a database access error occurs
+		 * @throws SQLTimeoutException when the driver has determined that the timeout
+		 * value specified by the {@code setLoginTimeout} method has been exceeded and
+		 * has at least tried to cancel the current database connection attempt
+		 * @since 1.4
+		 */
+		@Override
+		public Connection getConnection(String username, String password) throws SQLException {
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isTrue();
+			return null;
+		}
 	}
 
 	@Test
