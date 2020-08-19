@@ -88,15 +88,16 @@ class WiretapConnector implements ClientHttpConnector {
 	 * Create the {@link ExchangeResult} for the given "request-id" header value.
 	 */
 	ExchangeResult getExchangeResult(String requestId, @Nullable String uriTemplate, Duration timeout) {
-		ClientExchangeInfo info = this.exchanges.remove(requestId);
-		Assert.state(info != null, () -> {
+		ClientExchangeInfo clientInfo = this.exchanges.remove(requestId);
+		Assert.state(clientInfo != null, () -> {
 			String header = WebTestClient.WEBTESTCLIENT_REQUEST_ID;
 			return "No match for " + header + "=" + requestId;
 		});
-		return new ExchangeResult(info.getRequest(), info.getResponse(),
-				info.getRequest().getRecorder().getContent(),
-				info.getResponse().getRecorder().getContent(),
-				timeout, uriTemplate);
+		return new ExchangeResult(clientInfo.getRequest(), clientInfo.getResponse(),
+				clientInfo.getRequest().getRecorder().getContent(),
+				clientInfo.getResponse().getRecorder().getContent(),
+				timeout, uriTemplate,
+				clientInfo.getResponse().getMockServerResult());
 	}
 
 
@@ -278,6 +279,12 @@ class WiretapConnector implements ClientHttpConnector {
 		@SuppressWarnings("ConstantConditions")
 		public Flux<DataBuffer> getBody() {
 			return Flux.from(this.recorder.getPublisherToUse());
+		}
+
+		@Nullable
+		public Object getMockServerResult() {
+			return (getDelegate() instanceof MockServerClientHttpResponse ?
+					((MockServerClientHttpResponse) getDelegate()).getServerResult() : null);
 		}
 	}
 
