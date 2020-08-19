@@ -378,7 +378,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
-			Flux<T> body = this.response.bodyToFlux(elementClass);
+			Flux<T> body;
+			if (elementClass.equals(Void.class)) {
+				this.response.releaseBody().block();
+				body = Flux.empty();
+			}
+			else {
+				body = this.response.bodyToFlux(elementClass);
+			}
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
