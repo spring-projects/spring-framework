@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
+package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
 import javax.validation.Valid;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.client.MockMvcTestClient;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -38,36 +41,26 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
- * Examples of expectations on the content of the model prepared by the controller.
+ * MockMvcTestClient equivalent of the MockMvc
+ * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.ModelAssertionTests}.
  *
  * @author Rossen Stoyanchev
  */
 public class ModelAssertionTests {
 
-	private MockMvc mockMvc;
-
-
-	@BeforeEach
-	void setup() {
-		SampleController controller = new SampleController("a string value", 3, new Person("a name"));
-
-		this.mockMvc = standaloneSetup(controller)
-				.defaultRequest(get("/"))
-				.alwaysExpect(status().isOk())
-				.setControllerAdvice(new ModelAttributeAdvice())
-				.build();
-	}
+	private final WebTestClient client =
+			MockMvcTestClient.bindToController(new SampleController("a string value", 3, new Person("a name")))
+					.controllerAdvice(new ModelAttributeAdvice())
+					.alwaysExpect(status().isOk())
+					.build();
 
 	@Test
 	void attributeEqualTo() throws Exception {
-		mockMvc.perform(get("/"))
+		performRequest(HttpMethod.GET, "/")
 			.andExpect(model().attribute("integer", 3))
 			.andExpect(model().attribute("string", "a string value"))
 			.andExpect(model().attribute("integer", equalTo(3))) // Hamcrest...
@@ -77,7 +70,7 @@ public class ModelAssertionTests {
 
 	@Test
 	void attributeExists() throws Exception {
-		mockMvc.perform(get("/"))
+		performRequest(HttpMethod.GET, "/")
 			.andExpect(model().attributeExists("integer", "string", "person"))
 			.andExpect(model().attribute("integer", notNullValue()))  // Hamcrest...
 			.andExpect(model().attribute("INTEGER", nullValue()));
@@ -85,7 +78,7 @@ public class ModelAssertionTests {
 
 	@Test
 	void attributeHamcrestMatchers() throws Exception {
-		mockMvc.perform(get("/"))
+		performRequest(HttpMethod.GET, "/")
 			.andExpect(model().attribute("integer", equalTo(3)))
 			.andExpect(model().attribute("string", allOf(startsWith("a string"), endsWith("value"))))
 			.andExpect(model().attribute("person", hasProperty("name", equalTo("a name"))));
@@ -93,12 +86,17 @@ public class ModelAssertionTests {
 
 	@Test
 	void hasErrors() throws Exception {
-		mockMvc.perform(post("/persons")).andExpect(model().attributeHasErrors("person"));
+		performRequest(HttpMethod.POST, "/persons").andExpect(model().attributeHasErrors("person"));
 	}
 
 	@Test
 	void hasNoErrors() throws Exception {
-		mockMvc.perform(get("/")).andExpect(model().hasNoErrors());
+		performRequest(HttpMethod.GET, "/").andExpect(model().hasNoErrors());
+	}
+
+	private ResultActions performRequest(HttpMethod method, String uri) {
+		EntityExchangeResult<Void> result = client.method(method).uri(uri).exchange().expectBody().isEmpty();
+		return MockMvcTestClient.resultActionsFor(result);
 	}
 
 

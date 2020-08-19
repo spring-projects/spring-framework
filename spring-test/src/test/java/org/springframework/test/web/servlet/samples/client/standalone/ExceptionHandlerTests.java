@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.samples.standalone;
+package org.springframework.test.web.servlet.samples.client.standalone;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.client.MockMvcTestClient;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,37 +32,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
-
 /**
- * Exception handling via {@code @ExceptionHandler} methods.
+ * MockMvcTestClient equivalent of the MockMvc
+ * {@link org.springframework.test.web.servlet.samples.standalone.ExceptionHandlerTests}.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  */
-public class ExceptionHandlerTests {
+class ExceptionHandlerTests {
 
 	@Nested
 	class MvcTests {
 
 		@Test
-		void localExceptionHandlerMethod() throws Exception {
-			standaloneSetup(new PersonController()).build()
-				.perform(get("/person/Clyde"))
-				.andExpect(status().isOk())
-				.andExpect(forwardedUrl("errorView"));
+		void localExceptionHandlerMethod() {
+			WebTestClient client = MockMvcTestClient.bindToController(new PersonController()).build();
+
+			client.get().uri("/person/Clyde")
+					.exchange()
+					.expectStatus().isOk()
+					.expectHeader().valueEquals("Forwarded-Url", "errorView");
 		}
 
 		@Test
-		void globalExceptionHandlerMethod() throws Exception {
-			standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
-				.perform(get("/person/Bonnie"))
-				.andExpect(status().isOk())
-				.andExpect(forwardedUrl("globalErrorView"));
+		void globalExceptionHandlerMethod() {
+			WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+					.controllerAdvice(new GlobalExceptionHandler())
+					.build();
+
+			client.get().uri("/person/Bonnie")
+					.exchange()
+					.expectStatus().isOk()
+					.expectHeader().valueEquals("Forwarded-Url", "globalErrorView");
 		}
 	}
 
@@ -99,50 +101,69 @@ public class ExceptionHandlerTests {
 	class RestTests {
 
 		@Test
-		void noException() throws Exception {
-			standaloneSetup(RestPersonController.class)
-				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class).build()
-				.perform(get("/person/Yoda").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.name").value("Yoda"));
+		void noException() {
+			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+					.controllerAdvice(new RestPersonControllerExceptionHandler())
+					.build();
+
+			client.get().uri("/person/Yoda")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.name", "Yoda");
 		}
 
 		@Test
-		void localExceptionHandlerMethod() throws Exception {
-			standaloneSetup(RestPersonController.class)
-				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class).build()
-				.perform(get("/person/Luke").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.error").value("local - IllegalArgumentException"));
+		void localExceptionHandlerMethod() {
+			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+					.controllerAdvice(new RestPersonControllerExceptionHandler())
+					.build();
+
+			client.get().uri("/person/Luke")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.error", "local - IllegalArgumentException");
 		}
 
 		@Test
-		void globalExceptionHandlerMethod() throws Exception {
-			standaloneSetup(RestPersonController.class)
-				.setControllerAdvice(RestGlobalExceptionHandler.class).build()
-				.perform(get("/person/Leia").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.error").value("global - IllegalStateException"));
+		void globalExceptionHandlerMethod() {
+			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+					.controllerAdvice(new RestGlobalExceptionHandler())
+					.build();
+
+			client.get().uri("/person/Leia")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.error", "global - IllegalArgumentException");
 		}
 
 		@Test
-		void globalRestPersonControllerExceptionHandlerTakesPrecedenceOverGlobalExceptionHandler() throws Exception {
-			standaloneSetup(RestPersonController.class)
-				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class).build()
-				.perform(get("/person/Leia").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.error").value("globalPersonController - IllegalStateException"));
+		void globalRestPersonControllerExceptionHandlerTakesPrecedenceOverGlobalExceptionHandler() {
+			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+					.controllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
+					.build();
+
+			client.get().uri("/person/Leia")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.error", "globalPersonController - IllegalStateException");
 		}
 
-		@Test  // gh-25520
-		void noHandlerFound() throws Exception {
-			standaloneSetup(RestPersonController.class)
-				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
-				.addDispatcherServletCustomizer(servlet -> servlet.setThrowExceptionIfNoHandlerFound(true))
-				.build()
-				.perform(get("/bogus").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.error").value("global - NoHandlerFoundException"));
+		@Test
+		void noHandlerFound() {
+			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+					.controllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
+					.dispatcherServletCustomizer(servlet -> servlet.setThrowExceptionIfNoHandlerFound(true))
+					.build();
+
+			client.get().uri("/bogus")
+					.accept(MediaType.APPLICATION_JSON)
+					.exchange()
+					.expectStatus().isOk()
+					.expectBody().jsonPath("$.error", "global - NoHandlerFoundException");
 		}
 	}
 

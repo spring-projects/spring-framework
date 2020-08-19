@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
+package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
 import java.net.URL;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.client.MockMvcTestClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -30,55 +33,58 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
- * Examples of expectations on flash attributes.
+ * MockMvcTestClient equivalent of the MockMvc
+ * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.FlashAttributeAssertionTests}.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  */
 public class FlashAttributeAssertionTests {
 
-	private final MockMvc mockMvc = standaloneSetup(new PersonController())
-										.alwaysExpect(status().isFound())
-										.alwaysExpect(flash().attributeCount(3))
-										.build();
+	private final WebTestClient client =
+			MockMvcTestClient.bindToController(new PersonController())
+					.alwaysExpect(status().isFound())
+					.alwaysExpect(flash().attributeCount(3))
+					.build();
 
 
 	@Test
-	void attributeCountWithWrongCount() throws Exception {
+	void attributeCountWithWrongCount() {
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() -> this.mockMvc.perform(post("/persons")).andExpect(flash().attributeCount(1)))
+			.isThrownBy(() -> performRequest().andExpect(flash().attributeCount(1)))
 			.withMessage("FlashMap size expected:<1> but was:<3>");
 	}
 
 	@Test
 	void attributeExists() throws Exception {
-		this.mockMvc.perform(post("/persons"))
-			.andExpect(flash().attributeExists("one", "two", "three"));
+		performRequest().andExpect(flash().attributeExists("one", "two", "three"));
 	}
 
 	@Test
 	void attributeEqualTo() throws Exception {
-		this.mockMvc.perform(post("/persons"))
-			.andExpect(flash().attribute("one", "1"))
-			.andExpect(flash().attribute("two", 2.222))
-			.andExpect(flash().attribute("three", new URL("https://example.com")));
+		performRequest()
+				.andExpect(flash().attribute("one", "1"))
+				.andExpect(flash().attribute("two", 2.222))
+				.andExpect(flash().attribute("three", new URL("https://example.com")));
 	}
 
 	@Test
 	void attributeMatchers() throws Exception {
-		this.mockMvc.perform(post("/persons"))
-			.andExpect(flash().attribute("one", containsString("1")))
-			.andExpect(flash().attribute("two", closeTo(2, 0.5)))
-			.andExpect(flash().attribute("three", notNullValue()))
-			.andExpect(flash().attribute("one", equalTo("1")))
-			.andExpect(flash().attribute("two", equalTo(2.222)))
-			.andExpect(flash().attribute("three", equalTo(new URL("https://example.com"))));
+		performRequest()
+				.andExpect(flash().attribute("one", containsString("1")))
+				.andExpect(flash().attribute("two", closeTo(2, 0.5)))
+				.andExpect(flash().attribute("three", notNullValue()))
+				.andExpect(flash().attribute("one", equalTo("1")))
+				.andExpect(flash().attribute("two", equalTo(2.222)))
+				.andExpect(flash().attribute("three", equalTo(new URL("https://example.com"))));
+	}
+
+	private ResultActions performRequest() {
+		EntityExchangeResult<Void> result = client.post().uri("/persons").exchange().expectBody().isEmpty();
+		return MockMvcTestClient.resultActionsFor(result);
 	}
 
 

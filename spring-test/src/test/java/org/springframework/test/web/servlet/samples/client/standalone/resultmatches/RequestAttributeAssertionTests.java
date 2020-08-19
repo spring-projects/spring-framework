@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
+package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.HandlerMapping;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -29,21 +32,27 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
- * Examples of expectations on created request attributes.
+ * MockMvcTestClient equivalent of the MockMvc
+ * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.RequestAttributeAssertionTests}.
  *
  * @author Rossen Stoyanchev
  */
 public class RequestAttributeAssertionTests {
 
-	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).build();
+	private final WebTestClient mainServletClient =
+			MockMvcTestClient.bindToController(new SimpleController())
+					.defaultRequest(get("/").servletPath("/main"))
+					.build();
+
+	private final WebTestClient client =
+			MockMvcTestClient.bindToController(new SimpleController()).build();
 
 
 	@Test
 	void requestAttributeEqualTo() throws Exception {
-		this.mockMvc.perform(get("/main/1").servletPath("/main"))
+		performRequest(mainServletClient, "/main/1")
 			.andExpect(request().attribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, "/{id}"))
 			.andExpect(request().attribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/1"));
 	}
@@ -52,20 +61,29 @@ public class RequestAttributeAssertionTests {
 	void requestAttributeMatcher() throws Exception {
 		String producibleMediaTypes = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
-		this.mockMvc.perform(get("/1"))
+		performRequest(client, "/1")
 			.andExpect(request().attribute(producibleMediaTypes, hasItem(MediaType.APPLICATION_JSON)))
 			.andExpect(request().attribute(producibleMediaTypes, not(hasItem(MediaType.APPLICATION_XML))));
 
-		this.mockMvc.perform(get("/main/1").servletPath("/main"))
+		performRequest(mainServletClient, "/main/1")
 			.andExpect(request().attribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, equalTo("/{id}")))
 			.andExpect(request().attribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, equalTo("/1")));
+	}
+
+	private ResultActions performRequest(WebTestClient client, String uri) {
+		EntityExchangeResult<Void> result = client.get().uri(uri)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().isEmpty();
+
+		return MockMvcTestClient.resultActionsFor(result);
 	}
 
 
 	@Controller
 	private static class SimpleController {
 
-		@RequestMapping(path="/{id}", produces="application/json")
+		@GetMapping(path="/{id}", produces="application/json")
 		String show() {
 			return "view";
 		}

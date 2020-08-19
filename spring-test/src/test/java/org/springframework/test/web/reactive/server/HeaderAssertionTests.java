@@ -244,7 +244,7 @@ class HeaderAssertionTests {
 		MonoProcessor<byte[]> emptyContent = MonoProcessor.fromSink(Sinks.one());
 		emptyContent.onComplete();
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
+		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

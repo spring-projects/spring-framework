@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
+package org.springframework.test.web.servlet.samples.client.standalone.resultmatches;
 
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.client.MockMvcTestClient;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,61 +35,56 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
- * Examples of expectations on created session attributes.
+ * MockMvcTestClient equivalent of the MockMvc
+ * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.SessionAttributeAssertionTests}.
  *
  * @author Rossen Stoyanchev
- * @author Sam Brannen
  */
 public class SessionAttributeAssertionTests {
 
-	private final MockMvc mockMvc = standaloneSetup(new SimpleController())
-										.defaultRequest(get("/"))
-										.alwaysExpect(status().isOk())
-										.build();
+	private final WebTestClient client =
+			MockMvcTestClient.bindToController(new SimpleController())
+					.alwaysExpect(status().isOk())
+					.build();
 
 
 	@Test
 	void sessionAttributeEqualTo() throws Exception {
-		this.mockMvc.perform(get("/"))
-			.andExpect(request().sessionAttribute("locale", Locale.UK));
+		performRequest().andExpect(request().sessionAttribute("locale", Locale.UK));
 
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() ->
-				this.mockMvc.perform(get("/"))
-					.andExpect(request().sessionAttribute("locale", Locale.US)))
+			.isThrownBy(() -> performRequest().andExpect(request().sessionAttribute("locale", Locale.US)))
 			.withMessage("Session attribute 'locale' expected:<en_US> but was:<en_GB>");
 	}
 
 	@Test
 	void sessionAttributeMatcher() throws Exception {
-		this.mockMvc.perform(get("/"))
+		performRequest()
 			.andExpect(request().sessionAttribute("bogus", is(nullValue())))
 			.andExpect(request().sessionAttribute("locale", is(notNullValue())))
 			.andExpect(request().sessionAttribute("locale", equalTo(Locale.UK)));
 
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() ->
-				this.mockMvc.perform(get("/"))
-					.andExpect(request().sessionAttribute("bogus", is(notNullValue()))))
+			.isThrownBy(() -> performRequest().andExpect(request().sessionAttribute("bogus", is(notNullValue()))))
 			.withMessageContaining("null");
 	}
 
 	@Test
 	void sessionAttributeDoesNotExist() throws Exception {
-		this.mockMvc.perform(get("/"))
-			.andExpect(request().sessionAttributeDoesNotExist("bogus", "enigma"));
+		performRequest().andExpect(request().sessionAttributeDoesNotExist("bogus", "enigma"));
 
 		assertThatExceptionOfType(AssertionError.class)
-			.isThrownBy(() ->
-				this.mockMvc.perform(get("/"))
-					.andExpect(request().sessionAttributeDoesNotExist("locale")))
+			.isThrownBy(() -> performRequest().andExpect(request().sessionAttributeDoesNotExist("locale")))
 			.withMessage("Session attribute 'locale' exists");
+	}
+
+	private ResultActions performRequest() {
+		EntityExchangeResult<Void> result = client.post().uri("/").exchange().expectBody().isEmpty();
+		return MockMvcTestClient.resultActionsFor(result);
 	}
 
 
