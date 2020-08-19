@@ -765,6 +765,12 @@ public interface WebTestClient {
 		HeaderAssertions expectHeader();
 
 		/**
+		 * Assertions on the cookies of the response.
+		 * @since 5.3
+		 */
+		CookieAssertions expectCookie();
+
+		/**
 		 * Consume and decode the response body to a single object of type
 		 * {@code <B>} and then apply assertions.
 		 * @param bodyType the expected body type

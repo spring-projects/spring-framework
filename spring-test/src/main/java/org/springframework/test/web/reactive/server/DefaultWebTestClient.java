@@ -338,6 +338,11 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
+		public CookieAssertions expectCookie() {
+			return new CookieAssertions(this.exchangeResult, this);
+		}
+
+		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
 			B body = this.response.bodyToMono(bodyType).block(this.timeout);
 			EntityExchangeResult<B> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
