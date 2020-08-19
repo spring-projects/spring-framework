@@ -67,6 +67,7 @@ public @interface TestExecutionListeners {
 	 * {@link #value}, but it may be used instead of {@link #value}.
 	 * @see org.springframework.test.context.web.ServletTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+	 * @see org.springframework.test.context.event.ApplicationEventsTestExecutionListener
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener

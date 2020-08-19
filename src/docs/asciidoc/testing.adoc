@@ -414,6 +414,7 @@ Spring's testing annotations include the following:
 * <<spring-testing-annotation-dynamicpropertysource>>
 * <<spring-testing-annotation-dirtiescontext>>
 * <<spring-testing-annotation-testexecutionlisteners>>
+* <<spring-testing-annotation-recordapplicationevents>>
 * <<spring-testing-annotation-commit>>
 * <<spring-testing-annotation-rollback>>
 * <<spring-testing-annotation-beforetransaction>>
@@ -1132,6 +1133,19 @@ By default, `@TestExecutionListeners` provides support for inheriting listeners 
 superclasses or enclosing classes. See
 <<testcontext-junit-jupiter-nested-test-configuration>> and the 
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
+javadoc] for an example and further details.
+
+[[spring-testing-annotation-recordapplicationevents]]
+===== `@RecordApplicationEvents`
+
+`@RecordApplicationEvents` is a class-level annotation that is used to instruct the
+_Spring TestContext Framework_ to record all application events that are published in the
+`ApplicationContext` during the execution of a single test.
+
+The recorded events can be accessed via the `ApplicationEvents` API within tests.
+
+See <<testcontext-application-events>> and the 
+{api-spring-framework}/test/context/event/RecordApplicationEvents.html[`@RecordApplicationEvents`
 javadoc] for an example and further details.
 
 [[spring-testing-annotation-commit]]
@@ -1880,6 +1894,7 @@ following annotations.
 * <<spring-testing-annotation-dynamicpropertysource>>
 * <<spring-testing-annotation-dirtiescontext>>
 * <<spring-testing-annotation-testexecutionlisteners>>
+* <<spring-testing-annotation-recordapplicationevents>>
 * <<testcontext-tx,`@Transactional`>>
 * <<spring-testing-annotation-commit>>
 * <<spring-testing-annotation-rollback>>
@@ -2401,6 +2416,8 @@ by default, exactly in the following order:
   `WebApplicationContext`.
 * `DirtiesContextBeforeModesTestExecutionListener`: Handles the `@DirtiesContext`
   annotation for "`before`" modes.
+* `ApplicationEventsTestExecutionListener`: Provides support for
+  <<testcontext-application-events, `ApplicationEvents`>>.
 * `DependencyInjectionTestExecutionListener`: Provides dependency injection for the test
   instance.
 * `DirtiesContextTestExecutionListener`: Handles the `@DirtiesContext` annotation for
@@ -2546,6 +2563,95 @@ be replaced with the following:
 		// class body...
 	}
 ----
+
+[[testcontext-application-events]]
+==== Application Events
+
+Since Spring Framework 5.3.3, the TestContext framework provides support for recording
+<<core.adoc#context-functionality-events, application events>> published in the
+`ApplicationContext` so that assertions can be performed against those events within
+tests. All events published during the execution of a single test are made available via
+the `ApplicationEvents` API which allows you to process the events as a
+`java.util.Stream`.
+
+To use `ApplicationEvents` in your tests, do the following.
+
+* Ensure that your test class is annotated or meta-annotated with
+  <<spring-testing-annotation-recordapplicationevents>>.
+* Ensure that the `ApplicationEventsTestExecutionListener` is registered. Note, however,
+  that `ApplicationEventsTestExecutionListener` is registered by default and only needs
+  to be manually registered if you have custom configuration via
+  `@TestExecutionListeners` that does not include the default listeners.
+* Annotate a field of type `ApplicationEvents` with `@Autowired` and use that instance of
+  `ApplicationEvents` in your test and lifecycle methods (such as `@BeforeEach` and
+  `@AfterEach` methods in JUnit Jupiter).
+** When using the <<testcontext-junit-jupiter-extension>>, you may declare a method
+   parameter of type `ApplicationEvents` in a test or lifecycle method as an alternative
+   to an `@Autowired` field in the test class.
+
+The following test class uses the `SpringExtension` for JUnit Jupiter and
+https://assertj.github.io/doc/[AssertJ] to assert the types of application events
+published while invoking a method in a Spring-managed component:
+
+// Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
+[source,java,indent=0,subs="verbatim",role="primary"]
+.Java
+----
+	@SpringJUnitConfig(/* ... */)
+	@RecordApplicationEvents // <1>
+	class OrderServiceTests {
+
+		@Autowired
+		OrderService orderService;
+
+		@Autowired
+		ApplicationEvents events; // <2>
+
+		@Test
+		void submitOrder() {
+			// Invoke method in OrderService that publishes an event
+			orderService.submitOrder(new Order(/* ... */));
+			// Verify that an OrderSubmitted event was published
+			int numEvents = events.stream(OrderSubmitted.class).count(); // <3>
+			assertThat(numEvents).isEqualTo(1);
+		}
+	}
+----
+<1> Annotate the test class with `@RecordApplicationEvents`.
+<2> Inject the `ApplicationEvents` instance for the current test.
+<3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
+
+// Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(/* ... */)
+	@RecordApplicationEvents // <1>
+	class OrderServiceTests {
+
+		@Autowired
+		lateinit var orderService: OrderService
+
+		@Autowired
+		lateinit var events: ApplicationEvents // <2>
+
+		@Test
+		fun submitOrder() {
+			// Invoke method in OrderService that publishes an event
+			orderService.submitOrder(Order(/* ... */))
+			// Verify that an OrderSubmitted event was published
+			val numEvents = events.stream(OrderSubmitted::class).count() // <3>
+			assertThat(numEvents).isEqualTo(1)
+		}
+	}
+----
+<1> Annotate the test class with `@RecordApplicationEvents`.
+<2> Inject the `ApplicationEvents` instance for the current test.
+<3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
+
+See the
+{api-spring-framework}/test/context/event/ApplicationEvents.html[`ApplicationEvents`
+javadoc] for further details regarding the `ApplicationEvents` API.
 
 [[testcontext-test-execution-events]]
 ==== Test Execution Events
@@ -7705,7 +7811,7 @@ to create a message, as the following example shows:
 ----
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the https://joel-costigliola.github.io/assertj/[AssertJ] library:
+assertions use the https://assertj.github.io/doc/[AssertJ] library:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -8172,7 +8278,7 @@ annotation to look up our submit button with a `css` selector (*input[type=submi
 
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the https://joel-costigliola.github.io/assertj/[AssertJ] assertion library:
+assertions use the https://assertj.github.io/doc/[AssertJ] assertion library:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -8618,7 +8724,7 @@ See the following resources for more information about testing:
 * https://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for test groups, data-driven testing, distributed testing, and other features. Supported
   in the <<testcontext-framework, Spring TestContext Framework>>
-* https://joel-costigliola.github.io/assertj/[AssertJ]: "`Fluent assertions for Java`",
+* https://assertj.github.io/doc/[AssertJ]: "`Fluent assertions for Java`",
   including support for Java 8 lambdas, streams, and other features.
 * https://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
 * http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
