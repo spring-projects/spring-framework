@@ -21,11 +21,13 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -723,6 +725,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
 		Assert.notNull(name, "Name must not be null");
 		this.queryParams.remove(name);
+		values = Arrays.stream(values).filter(Objects::nonNull).toArray(Object[]::new);
 		if (!ObjectUtils.isEmpty(values)) {
 			queryParam(name, values);
 		}

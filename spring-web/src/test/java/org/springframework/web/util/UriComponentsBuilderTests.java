@@ -795,6 +795,12 @@ class UriComponentsBuilderTests {
 		result = builder.build();
 
 		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
+
+		builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
+		builder.replaceQueryParam("baz", (Object) null);
+		result = builder.build();
+
+		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
 	}
 
 	@Test
@@ -810,6 +816,12 @@ class UriComponentsBuilderTests {
 		result = builder.build();
 
 		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
+
+		builder = UriComponentsBuilder.newInstance().queryParam("baz", Arrays.asList("qux", 42));
+		builder.replaceQueryParam("baz", null, 42);
+		result = builder.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=42");
 	}
 
 	@Test
