@@ -41,7 +41,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
@@ -712,12 +711,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return Collections.emptySet();
 		}
-		return doFindMatchingFileSystemResources(rootDir, subPattern);
+		return doFindMatchingFileSystemResources(rootDirResource, rootDir, subPattern);
 	}
 
 	/**
 	 * Find all resources in the file system that match the given location pattern
 	 * via the Ant-style PathMatcher.
+	 * @param rootDirResource the root directory as Resource
 	 * @param rootDir the root directory in the file system
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
@@ -725,16 +725,42 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #retrieveMatchingFiles
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Set<Resource> doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
+	protected Set<Resource> doFindMatchingFileSystemResources(Resource rootDirResource, File rootDir, String subPattern) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
 		}
 		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
 		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());
 		for (File file : matchingFiles) {
-			result.add(new FileSystemResource(file));
+			String relativePath = relativeTo(file, rootDir);
+			result.add(rootDirResource.createRelative(relativePath));
 		}
 		return result;
+	}
+
+	/**
+	 * Compute the relative path for given file based on the given root directory.
+	 * @param file the file to get relative path
+	 * @param rootDir the root file
+	 * @return the relative path
+	 */
+	private String relativeTo(File file, File rootDir) {
+		String filePath = getAbsolutePath(file);
+		String rootPath = getAbsolutePath(rootDir);
+		return filePath.substring(rootPath.length());
+	}
+
+	/**
+	 * Get the given file's absolute path. If the file is a directory then a slash is appended.
+	 * @param file the file to get absolute path
+	 * @return the absolute path
+	 */
+	private String getAbsolutePath(File file) {
+		String absolutePath = StringUtils.replace(file.getAbsolutePath(), File.separator, "/");
+		if (file.isDirectory() && !absolutePath.endsWith("/")) {
+			absolutePath += "/";
+		}
+		return absolutePath;
 	}
 
 	/**
