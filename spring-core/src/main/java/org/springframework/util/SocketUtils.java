@@ -197,10 +197,8 @@ public class SocketUtils {
 		TCP {
 			@Override
 			protected boolean isPortAvailable(int port) {
-				try {
-					ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(
-							port, 1, InetAddress.getByName("localhost"));
-					serverSocket.close();
+				try (ServerSocket ignore = ServerSocketFactory.getDefault().createServerSocket(
+						port, 1, InetAddress.getByName("localhost"))) {
 					return true;
 				}
 				catch (Exception ex) {
@@ -212,9 +210,7 @@ public class SocketUtils {
 		UDP {
 			@Override
 			protected boolean isPortAvailable(int port) {
-				try {
-					DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
-					socket.close();
+				try (DatagramSocket ignore = new DatagramSocket(port, InetAddress.getByName("localhost"))) {
 					return true;
 				}
 				catch (Exception ex) {
