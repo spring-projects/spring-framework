@@ -818,7 +818,7 @@ class UriComponentsBuilderTests {
 		assertThat(result.getQuery()).as("Query param should have been deleted").isNull();
 
 		builder = UriComponentsBuilder.newInstance().queryParam("baz", Arrays.asList("qux", 42));
-		builder.replaceQueryParam("baz", null, 42);
+		builder.replaceQueryParam("baz", Arrays.asList(null, 42));
 		result = builder.build();
 
 		assertThat(result.getQuery()).isEqualTo("baz=42");
