@@ -128,6 +128,16 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
+	public void httpRequest() {
+		this.builder.build().get().uri("/path")
+				.httpRequest(httpRequest -> {})
+				.exchange().block(Duration.ofSeconds(10));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertThat(request.httpRequest()).isNotNull();
+	}
+
+	@Test
 	public void defaultHeaderAndCookie() {
 		WebClient client = this.builder
 				.defaultHeader("Accept", "application/json").defaultCookie("id", "123")

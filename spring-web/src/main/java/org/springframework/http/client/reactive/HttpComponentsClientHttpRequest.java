@@ -95,6 +95,12 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this.httpRequest;
+	}
+
+	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
 			this.byteBufferFlux = Flux.from(body).map(DataBuffer::asByteBuffer);

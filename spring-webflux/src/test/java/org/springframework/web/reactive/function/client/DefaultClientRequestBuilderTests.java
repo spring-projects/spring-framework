@@ -46,6 +46,7 @@ import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 
 /**
+ * Unit tests for {@link DefaultClientRequestBuilder}.
  * @author Arjen Poutsma
  */
 public class DefaultClientRequestBuilderTests {
@@ -54,17 +55,20 @@ public class DefaultClientRequestBuilderTests {
 	public void from() throws URISyntaxException {
 		ClientRequest other = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("foo", "bar")
-				.cookie("baz", "qux").build();
+				.cookie("baz", "qux")
+				.httpRequest(request -> {})
+				.build();
 		ClientRequest result = ClientRequest.from(other)
 				.headers(httpHeaders -> httpHeaders.set("foo", "baar"))
 				.cookies(cookies -> cookies.set("baz", "quux"))
-		.build();
+				.build();
 		assertThat(result.url()).isEqualTo(new URI("https://example.com"));
 		assertThat(result.method()).isEqualTo(GET);
 		assertThat(result.headers().size()).isEqualTo(1);
 		assertThat(result.headers().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.cookies().size()).isEqualTo(1);
 		assertThat(result.cookies().getFirst("baz")).isEqualTo("quux");
+		assertThat(result.httpRequest()).isNotNull();
 	}
 
 	@Test
@@ -100,6 +104,10 @@ public class DefaultClientRequestBuilderTests {
 		ClientRequest result = ClientRequest.create(GET, URI.create("https://example.com"))
 				.header("MyKey", "MyValue")
 				.cookie("foo", "bar")
+				.httpRequest(request -> {
+					MockClientHttpRequest nativeRequest = (MockClientHttpRequest) request.getNativeRequest();
+					nativeRequest.getHeaders().add("MyKey2", "MyValue2");
+				})
 				.build();
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
@@ -108,7 +116,9 @@ public class DefaultClientRequestBuilderTests {
 		result.writeTo(request, strategies).block();
 
 		assertThat(request.getHeaders().getFirst("MyKey")).isEqualTo("MyValue");
+		assertThat(request.getHeaders().getFirst("MyKey2")).isEqualTo("MyValue2");
 		assertThat(request.getCookies().getFirst("foo").getValue()).isEqualTo("bar");
+
 		StepVerifier.create(request.getBody()).expectComplete().verify();
 	}
 

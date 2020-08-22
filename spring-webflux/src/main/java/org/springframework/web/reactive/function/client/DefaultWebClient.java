@@ -166,6 +166,10 @@ class DefaultWebClient implements WebClient {
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
+		@Nullable
+		private Consumer<ClientHttpRequest> httpRequestConsumer;
+
+
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
@@ -236,6 +240,13 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
 			attributesConsumer.accept(this.attributes);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec httpRequest(Consumer<ClientHttpRequest> requestConsumer) {
+			this.httpRequestConsumer = (this.httpRequestConsumer != null ?
+					this.httpRequestConsumer.andThen(requestConsumer) : requestConsumer);
 			return this;
 		}
 
@@ -344,10 +355,14 @@ class DefaultWebClient implements WebClient {
 			if (defaultRequest != null) {
 				defaultRequest.accept(this);
 			}
-			return ClientRequest.create(this.httpMethod, initUri())
+			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))
 					.attributes(attributes -> attributes.putAll(this.attributes));
+			if (this.httpRequestConsumer != null) {
+				builder.httpRequest(this.httpRequestConsumer);
+			}
+			return builder;
 		}
 
 		private URI initUri() {

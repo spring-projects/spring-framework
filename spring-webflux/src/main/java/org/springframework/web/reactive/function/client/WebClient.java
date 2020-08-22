@@ -471,6 +471,18 @@ public interface WebClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
+		 * Callback for access to the {@link ClientHttpRequest} that in turn
+		 * provides access to the native request of the underlying HTTP library.
+		 * This could be useful for setting advanced, per-request options that
+		 * exposed by the underlying library.
+		 * @param requestConsumer a consumer to access the
+		 * {@code ClientHttpRequest} with
+		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * @since 5.3
+		 */
+		S httpRequest(Consumer<ClientHttpRequest> requestConsumer);
+
+		/**
 		 * Perform the HTTP request and retrieve the response body:
 		 * <p><pre>
 		 * Mono&lt;Person&gt; bodyMono = client.get()
