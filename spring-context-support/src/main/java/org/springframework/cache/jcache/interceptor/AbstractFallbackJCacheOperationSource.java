@@ -96,9 +96,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			operation = findCacheOperation(method, targetClass);
-			if (operation != null) {
-				return operation;
-			}
+			return operation;
 		}
 		return null;
 	}
