@@ -34,6 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -270,6 +271,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			SockJsSession session = this.sessions.get(sessionId);
+			boolean newSession = false;
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
@@ -278,6 +280,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					}
 					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
+					newSession = true;
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -311,6 +314,14 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			transportHandler.handleRequest(request, response, handler, session);
+
+			if (newSession && (response instanceof ServletServerHttpResponse)) {
+				int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+				if (HttpStatus.valueOf(status).is4xxClientError()) {
+					sessions.remove(sessionId);
+				}
+			}
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {
