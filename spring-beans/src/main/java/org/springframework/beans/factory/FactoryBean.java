@@ -87,6 +87,7 @@ public interface FactoryBean<T> {
 	 * @see FactoryBeanNotInitializedException
 	 */
 	@Nullable
+	//获取容器管理的对象实例
 	T getObject() throws Exception;
 
 	/**
