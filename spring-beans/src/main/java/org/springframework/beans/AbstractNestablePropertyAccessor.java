@@ -397,17 +397,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 
 		if (propValue == null) {
-			// null map value case
-			if (isAutoGrowNestedPaths()) {
-				int lastKeyIndex = tokens.canonicalName.lastIndexOf('[');
-				getterTokens.canonicalName = tokens.canonicalName.substring(0, lastKeyIndex);
-				propValue = setDefaultValue(getterTokens);
-			}
-			else {
-				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
-						"Cannot access indexed value in property referenced " +
-						"in indexed property path '" + tokens.canonicalName + "': returned null");
-			}
+			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
+					"Cannot access indexed value in property referenced " +
+					"in indexed property path '" + tokens.canonicalName + "': returned null");
 		}
 		return propValue;
 	}
