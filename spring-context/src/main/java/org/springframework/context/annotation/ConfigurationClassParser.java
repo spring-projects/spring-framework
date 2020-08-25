@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
 
@@ -134,7 +135,7 @@ class ConfigurationClassParser {
 
 	private final ConditionEvaluator conditionEvaluator;
 
-	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses = new LinkedHashMap<>();
+	private final Set<ConfigurationClass> configurationClasses = new HashSet<>();
 
 	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<>();
 
@@ -211,13 +212,13 @@ class ConfigurationClassParser {
 	 * @see ConfigurationClass#validate
 	 */
 	public void validate() {
-		for (ConfigurationClass configClass : this.configurationClasses.keySet()) {
+		for (ConfigurationClass configClass : this.configurationClasses) {
 			configClass.validate(this.problemReporter);
 		}
 	}
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
-		return this.configurationClasses.keySet();
+		return this.configurationClasses;
 	}
 
 
@@ -226,7 +227,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
+		ConfigurationClass existingClass = this.configurationClasses.contains(configClass) ? configClass : null;
 		if (existingClass != null) {
 			if (configClass.isImported()) {
 				if (existingClass.isImported()) {
@@ -250,7 +251,7 @@ class ConfigurationClassParser {
 		}
 		while (sourceClass != null);
 
-		this.configurationClasses.put(configClass, configClass);
+		this.configurationClasses.add(configClass);
 	}
 
 	/**
