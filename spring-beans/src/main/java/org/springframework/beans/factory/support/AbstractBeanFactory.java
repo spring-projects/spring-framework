@@ -386,7 +386,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			catch (BeansException ex) {
 				beanCreation.tag("exception", ex.getClass().toString());
-				beanCreation.tag("message", ex.getMessage());
+				beanCreation.tag("message", String.valueOf(ex.getMessage()));
 				cleanupAfterBeanCreationFailure(beanName);
 				throw ex;
 			}
