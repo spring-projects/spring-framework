@@ -49,7 +49,7 @@ class DefaultRequestPath implements RequestPath {
 	}
 
 	private static PathContainer initContextPath(PathContainer path, @Nullable String contextPath) {
-		if (!StringUtils.hasText(contextPath) || "/".equals(contextPath)) {
+		if (!StringUtils.hasText(contextPath) || StringUtils.matchesCharacter(contextPath, '/')) {
 			return PathContainer.parsePath("");
 		}
 
@@ -58,7 +58,7 @@ class DefaultRequestPath implements RequestPath {
 		int length = contextPath.length();
 		int counter = 0;
 
-		for (int i=0; i < path.elements().size(); i++) {
+		for (int i = 0; i < path.elements().size(); i++) {
 			PathContainer.Element element = path.elements().get(i);
 			counter += element.value().length();
 			if (length == counter) {

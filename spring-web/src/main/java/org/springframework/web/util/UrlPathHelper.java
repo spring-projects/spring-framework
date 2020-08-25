@@ -233,7 +233,7 @@ public class UrlPathHelper {
 		}
 		// Else, use path within current servlet mapping if applicable
 		String rest = getPathWithinServletMapping(request);
-		if (!"".equals(rest)) {
+		if (StringUtils.hasLength(rest)) {
 			return rest;
 		}
 		else {
@@ -415,7 +415,7 @@ public class UrlPathHelper {
 		if (contextPath == null) {
 			contextPath = request.getContextPath();
 		}
-		if ("/".equals(contextPath)) {
+		if (StringUtils.matchesCharacter(contextPath, '/')) {
 			// Invalid case, but happens for includes on Jetty: silently adapt it.
 			contextPath = "";
 		}
