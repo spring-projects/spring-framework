@@ -212,7 +212,7 @@ class DefaultWebClient implements WebClient {
 
 		private MultiValueMap<String, String> getCookies() {
 			if (this.cookies == null) {
-				this.cookies = new LinkedMultiValueMap<>(4);
+				this.cookies = new LinkedMultiValueMap<>(3);
 			}
 			return this.cookies;
 		}

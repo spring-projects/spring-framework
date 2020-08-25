@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +51,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -70,7 +70,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = CollectionUtils.newHashMap(JsonEncoding.values().length);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}

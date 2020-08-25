@@ -20,7 +20,6 @@ import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +30,7 @@ import org.eclipse.jetty.http.HttpFields;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -83,7 +83,7 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
 		Iterator<HttpField> iterator = this.headers.iterator();
 		iterator.forEachRemaining(field -> {
 			if (!singleValueMap.containsKey(field.getName())) {

@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.apache.hc.core5.http.HttpResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -85,7 +85,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> map = new LinkedHashMap<>(size());
+		Map<String, String> map = CollectionUtils.newLinkedHashMap(size());
 		this.response.headerIterator().forEachRemaining(h -> map.putIfAbsent(h.getName(), h.getValue()));
 		return map;
 	}

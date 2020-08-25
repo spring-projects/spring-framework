@@ -66,7 +66,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<>(4);
 
-	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(4);
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(3);
 
 
 	public MethodMetadataReadingVisitor(String methodName, int access, String declaringClassName,

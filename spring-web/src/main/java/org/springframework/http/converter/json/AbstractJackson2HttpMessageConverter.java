@@ -24,7 +24,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -56,6 +55,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.TypeUtils;
 
 /**
@@ -77,7 +77,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = CollectionUtils.newHashMap(JsonEncoding.values().length);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}

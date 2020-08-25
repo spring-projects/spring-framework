@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -126,7 +126,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @return the resolved interface mappings (with Class objects as values)
 	 */
 	private Map<String, Class<?>[]> resolveInterfaceMappings(Properties mappings) {
-		Map<String, Class<?>[]> resolvedMappings = new HashMap<>(mappings.size());
+		Map<String, Class<?>[]> resolvedMappings = CollectionUtils.newHashMap(mappings.size());
 		for (Enumeration<?> en = mappings.propertyNames(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));

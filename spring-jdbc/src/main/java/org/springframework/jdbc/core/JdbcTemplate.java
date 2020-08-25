@@ -55,6 +55,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
@@ -1333,7 +1334,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
 			throws SQLException {
 
-		Map<String, Object> results = new LinkedHashMap<>(parameters.size());
+		Map<String, Object> results = CollectionUtils.newLinkedHashMap(parameters.size());
 		int sqlColIndex = 1;
 		for (SqlParameter param : parameters) {
 			if (param instanceof SqlOutParameter) {

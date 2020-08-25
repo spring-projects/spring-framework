@@ -106,7 +106,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
+	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(48);
 
 
 	/**

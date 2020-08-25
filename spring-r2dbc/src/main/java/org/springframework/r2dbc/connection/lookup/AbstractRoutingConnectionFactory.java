@@ -16,7 +16,6 @@
 
 package org.springframework.r2dbc.connection.lookup;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import io.r2dbc.spi.Connection;
@@ -27,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract {@link ConnectionFactory} implementation that routes
@@ -129,12 +129,12 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 		this.connectionFactoryLookup = connectionFactoryLookup;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
-
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
-		this.resolvedConnectionFactories = new HashMap<>(this.targetConnectionFactories.size());
+		this.resolvedConnectionFactories = CollectionUtils.newHashMap(this.targetConnectionFactories.size());
 		this.targetConnectionFactories.forEach((key, value) -> {
 			Object lookupKey = resolveSpecifiedLookupKey(key);
 			ConnectionFactory connectionFactory = resolveSpecifiedConnectionFactory(value);

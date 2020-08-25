@@ -34,9 +34,11 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Benchmarks for {@link GenericConversionService}.
+ *
  * @author Brian Clozel
  */
 @BenchmarkMode(Mode.Throughput)
@@ -78,10 +80,11 @@ public class GenericConversionServiceBenchmark {
 
 	@Benchmark
 	public void convertMapOfStringToListOfIntegerBaseline(MapBenchmarkState state, Blackhole bh) {
-		Map<String, Integer> target = new HashMap<>(state.source.size());
+		Map<String, Integer> target = CollectionUtils.newHashMap(state.source.size());
 		state.source.forEach((k, v) -> target.put(k, Integer.valueOf(v)));
 		bh.consume(target);
 	}
+
 
 	@State(Scope.Benchmark)
 	public static class MapBenchmarkState extends BenchmarkState {
@@ -90,13 +93,14 @@ public class GenericConversionServiceBenchmark {
 
 		@Setup(Level.Trial)
 		public void setup() throws Exception {
-			this.source = new HashMap<>(this.collectionSize);
+			this.source = CollectionUtils.newHashMap(this.collectionSize);
 			Map<String, Integer> target = new HashMap<>();
 			this.targetTypeDesc = TypeDescriptor.forObject(target);
 			this.source = IntStream.rangeClosed(1, collectionSize).mapToObj(String::valueOf)
 					.collect(Collectors.toMap(String::valueOf, String::valueOf));
 		}
 	}
+
 
 	@State(Scope.Benchmark)
 	public static class BenchmarkState {
@@ -107,6 +111,6 @@ public class GenericConversionServiceBenchmark {
 		int collectionSize;
 
 		TypeDescriptor targetTypeDesc;
-
 	}
+
 }

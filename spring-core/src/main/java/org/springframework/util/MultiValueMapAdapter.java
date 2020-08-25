@@ -18,7 +18,6 @@ package org.springframework.util;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +87,7 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
 	@Override
 	public Map<K, V> toSingleValueMap() {
-		Map<K, V> singleValueMap = new LinkedHashMap<>(this.targetMap.size());
+		Map<K, V> singleValueMap = CollectionUtils.newLinkedHashMap(this.targetMap.size());
 		this.targetMap.forEach((key, values) -> {
 			if (values != null && !values.isEmpty()) {
 				singleValueMap.put(key, values.get(0));

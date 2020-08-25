@@ -76,7 +76,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	/**
 	 * Create a new LinkedCaseInsensitiveMap that stores case-insensitive keys
-	 * according to the given Locale (by default in lower case).
+	 * according to the given Locale (in lower case).
 	 * @param locale the Locale to use for case-insensitive key conversion
 	 * @see #convertKey(String)
 	 */
@@ -86,25 +86,26 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	/**
 	 * Create a new LinkedCaseInsensitiveMap that wraps a {@link LinkedHashMap}
-	 * with the given initial capacity and stores case-insensitive keys
-	 * according to the default Locale (by default in lower case).
-	 * @param initialCapacity the initial capacity
+	 * with an initial capacity that can accommodate the given number of elements,
+	 * storing case-insensitive keys according to the default Locale (in lower case).
+	 * @param expectedSize the expected number of elements
 	 * @see #convertKey(String)
 	 */
-	public LinkedCaseInsensitiveMap(int initialCapacity) {
-		this(initialCapacity, null);
+	public LinkedCaseInsensitiveMap(int expectedSize) {
+		this(expectedSize, null);
 	}
 
 	/**
 	 * Create a new LinkedCaseInsensitiveMap that wraps a {@link LinkedHashMap}
-	 * with the given initial capacity and stores case-insensitive keys
-	 * according to the given Locale (by default in lower case).
-	 * @param initialCapacity the initial capacity
+	 * with an initial capacity that can accommodate the given number of elements,
+	 * storing case-insensitive keys according to the given Locale (in lower case).
+	 * @param expectedSize the expected number of elements
 	 * @param locale the Locale to use for case-insensitive key conversion
 	 * @see #convertKey(String)
 	 */
-	public LinkedCaseInsensitiveMap(int initialCapacity, @Nullable Locale locale) {
-		this.targetMap = new LinkedHashMap<String, V>(initialCapacity) {
+	public LinkedCaseInsensitiveMap(int expectedSize, @Nullable Locale locale) {
+		this.targetMap = new LinkedHashMap<String, V>(
+				(int) (expectedSize / CollectionUtils.DEFAULT_LOAD_FACTOR), CollectionUtils.DEFAULT_LOAD_FACTOR) {
 			@Override
 			public boolean containsKey(Object key) {
 				return LinkedCaseInsensitiveMap.this.containsKey(key);
@@ -118,7 +119,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 				return doRemove;
 			}
 		};
-		this.caseInsensitiveKeys = new HashMap<>(initialCapacity);
+		this.caseInsensitiveKeys = CollectionUtils.newHashMap(expectedSize);
 		this.locale = (locale != null ? locale : Locale.getDefault());
 	}
 
