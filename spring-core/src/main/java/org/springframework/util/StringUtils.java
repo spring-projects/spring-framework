@@ -332,6 +332,16 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Test if the given {@code String} matches the given single character.
+	 * @param str the {@code String} to check
+	 * @param singleCharacter the character to compare to
+	 * @since 5.2.9
+	 */
+	public static boolean matchesCharacter(@Nullable String str, char singleCharacter) {
+		return (str != null && str.length() == 1 && str.charAt(0) == singleCharacter);
+	}
+
+	/**
 	 * Test if the given {@code String} starts with the specified prefix,
 	 * ignoring upper/lower case.
 	 * @param str the {@code String} to check
@@ -713,7 +723,7 @@ public abstract class StringUtils {
 			pathElements.add(0, TOP_PATH);
 		}
 		// If nothing else left, at least explicitly point to current path.
-		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
+		if (pathElements.size() == 1 && pathElements.getLast().isEmpty() && !prefix.endsWith(FOLDER_SEPARATOR)) {
 			pathElements.add(0, CURRENT_PATH);
 		}
 
