@@ -17,11 +17,11 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -446,13 +446,13 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void add(String headerName, @Nullable String headerValue) {
-		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List<String> headerValues = this.headers.computeIfAbsent(headerName, k -> new ArrayList<>(1));
 		headerValues.add(headerValue);
 	}
 
 	@Override
 	public void addAll(String headerName, List<? extends String> headerValues) {
-		List<String> currentValues = this.headers.computeIfAbsent(headerName, k -> new LinkedList<>());
+		List<String> currentValues = this.headers.computeIfAbsent(headerName, k -> new ArrayList<>(1));
 		currentValues.addAll(headerValues);
 	}
 
@@ -471,7 +471,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 */
 	@Override
 	public void set(String headerName, @Nullable String headerValue) {
-		List<String> headerValues = new LinkedList<>();
+		List<String> headerValues = new ArrayList<>(1);
 		headerValues.add(headerValue);
 		this.headers.put(headerName, headerValues);
 	}

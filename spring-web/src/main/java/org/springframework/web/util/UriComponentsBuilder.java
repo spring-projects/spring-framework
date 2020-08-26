@@ -20,10 +20,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -908,7 +909,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
-		private final LinkedList<PathComponentBuilder> builders = new LinkedList<>();
+		private final Deque<PathComponentBuilder> builders = new ArrayDeque<>();
 
 		public void addPathSegments(String... pathSegments) {
 			if (!ObjectUtils.isEmpty(pathSegments)) {
@@ -1024,7 +1025,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 
 	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
 
-		private final List<String> pathSegments = new LinkedList<>();
+		private final List<String> pathSegments = new ArrayList<>();
 
 		public void append(String... pathSegments) {
 			for (String pathSegment : pathSegments) {

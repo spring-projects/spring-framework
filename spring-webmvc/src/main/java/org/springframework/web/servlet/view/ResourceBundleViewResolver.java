@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -230,10 +230,9 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		}
 
 		// Build list of ResourceBundle references for Locale.
-		List<ResourceBundle> bundles = new LinkedList<>();
+		List<ResourceBundle> bundles = new ArrayList<>(this.basenames.length);
 		for (String basename : this.basenames) {
-			ResourceBundle bundle = getBundle(basename, locale);
-			bundles.add(bundle);
+			bundles.add(getBundle(basename, locale));
 		}
 
 		// Try to find cached factory for ResourceBundle list:
