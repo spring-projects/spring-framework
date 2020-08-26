@@ -16,7 +16,7 @@
 
 package org.springframework.aop.scope;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 

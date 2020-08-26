@@ -21,8 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,28 +34,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class SystemEnvironmentPropertySourceTests {
+class SystemEnvironmentPropertySourceTests {
 
 	private Map<String, Object> envMap;
 
 	private PropertySource<?> ps;
 
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		envMap = new HashMap<>();
 		ps = new SystemEnvironmentPropertySource("sysEnv", envMap);
 	}
 
 
 	@Test
-	public void none() {
+	void none() {
 		assertThat(ps.containsProperty("a.key")).isEqualTo(false);
 		assertThat(ps.getProperty("a.key")).isNull();
 	}
 
 	@Test
-	public void normalWithoutPeriod() {
+	void normalWithoutPeriod() {
 		envMap.put("akey", "avalue");
 
 		assertThat(ps.containsProperty("akey")).isEqualTo(true);
@@ -63,7 +63,7 @@ public class SystemEnvironmentPropertySourceTests {
 	}
 
 	@Test
-	public void normalWithPeriod() {
+	void normalWithPeriod() {
 		envMap.put("a.key", "a.value");
 
 		assertThat(ps.containsProperty("a.key")).isEqualTo(true);
@@ -71,7 +71,7 @@ public class SystemEnvironmentPropertySourceTests {
 	}
 
 	@Test
-	public void withUnderscore() {
+	void withUnderscore() {
 		envMap.put("a_key", "a_value");
 
 		assertThat(ps.containsProperty("a_key")).isEqualTo(true);
@@ -82,7 +82,7 @@ public class SystemEnvironmentPropertySourceTests {
 	}
 
 	@Test
-	public void withBothPeriodAndUnderscore() {
+	void withBothPeriodAndUnderscore() {
 		envMap.put("a_key", "a_value");
 		envMap.put("a.key", "a.value");
 
@@ -91,7 +91,7 @@ public class SystemEnvironmentPropertySourceTests {
 	}
 
 	@Test
-	public void withUppercase() {
+	void withUppercase() {
 		envMap.put("A_KEY", "a_value");
 		envMap.put("A_LONG_KEY", "a_long_value");
 		envMap.put("A_DOT.KEY", "a_dot_value");
@@ -150,7 +150,7 @@ public class SystemEnvironmentPropertySourceTests {
 
 	@Test
 	@SuppressWarnings("serial")
-	public void withSecurityConstraints() throws Exception {
+	void withSecurityConstraints() throws Exception {
 		envMap = new HashMap<String, Object>() {
 			@Override
 			public boolean containsKey(Object key) {

@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 
@@ -86,6 +86,21 @@ public class RollbackRuleTests {
 	public void ctorArgExceptionStringNameVersionWithNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new RollbackRuleAttribute((String) null));
+	}
+
+	@Test
+	public void foundEnclosedExceptionWithEnclosingException() {
+		RollbackRuleAttribute rr = new RollbackRuleAttribute(EnclosingException.class);
+		assertThat(rr.getDepth(new EnclosingException.EnclosedException())).isEqualTo(0);
+	}
+
+	@SuppressWarnings("serial")
+	static class EnclosingException extends RuntimeException {
+
+		@SuppressWarnings("serial")
+		static class EnclosedException extends RuntimeException {
+
+		}
 	}
 
 }

@@ -18,10 +18,11 @@ package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEncoder> {
+class ByteArrayEncoderTests extends AbstractEncoderTests<ByteArrayEncoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
-	public ByteArrayEncoderTests() {
+	ByteArrayEncoderTests() {
 		super(new ByteArrayEncoder());
 	}
 
@@ -55,6 +56,7 @@ public class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEnco
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<byte[]> input = Flux.just(this.fooBytes, this.barBytes);
 
@@ -63,4 +65,5 @@ public class ByteArrayEncoderTests extends AbstractEncoderTestCase<ByteArrayEnco
 				.consumeNextWith(expectBytes(this.barBytes))
 				.verifyComplete());
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,30 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.BeanThatBroadcasts;
-import org.springframework.context.BeanThatListens;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.context.testfixture.beans.BeanThatBroadcasts;
+import org.springframework.context.testfixture.beans.BeanThatListens;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.support.TaskUtils;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,13 +79,13 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void multicastGenericEvent() {
 		multicastEvent(true, StringEventListener.class, createGenericTestEvent("test"),
-				getGenericApplicationEventType("stringEvent"));
+				ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class));
 	}
 
 	@Test
 	public void multicastGenericEventWrongType() {
 		multicastEvent(false, StringEventListener.class, createGenericTestEvent(123L),
-				getGenericApplicationEventType("longEvent"));
+				ResolvableType.forClassWithGenerics(GenericTestEvent.class, Long.class));
 	}
 
 	@Test
@@ -355,7 +356,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public void nonSingletonListenerInApplicationContext() {
 		StaticApplicationContext context = new StaticApplicationContext();
 		RootBeanDefinition listener = new RootBeanDefinition(MyNonSingletonListener.class);
-		listener.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		listener.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		context.registerBeanDefinition("listener", listener);
 		context.refresh();
 
@@ -578,6 +579,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
 
 		public final Set<Object> seenPayloads = new HashSet<>();
@@ -633,6 +635,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		private ApplicationContext applicationContext;
 
+		@Override
 		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}

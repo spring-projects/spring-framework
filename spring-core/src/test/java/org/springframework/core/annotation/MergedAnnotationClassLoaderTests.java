@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
 
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 5.2
  */
-public class MergedAnnotationClassLoaderTests {
+class MergedAnnotationClassLoaderTests {
 
 	private static final String TEST_ANNOTATION = TestAnnotation.class.getName();
 
@@ -45,7 +45,7 @@ public class MergedAnnotationClassLoaderTests {
 	private static final String TEST_REFERENCE = TestReference.class.getName();
 
 	@Test
-	public void synthesizedUsesCorrectClassLoader() throws Exception {
+	void synthesizedUsesCorrectClassLoader() throws Exception {
 		ClassLoader parent = getClass().getClassLoader();
 		TestClassLoader child = new TestClassLoader(parent);
 		Class<?> source = child.loadClass(WITH_TEST_ANNOTATION);
@@ -81,7 +81,6 @@ public class MergedAnnotationClassLoaderTests {
 		// Also check utils version
 		Annotation utilsMeta = AnnotatedElementUtils.getMergedAnnotation(source,
 				TestMetaAnnotation.class);
-		assertThat(utilsMeta.getClass().getClassLoader()).isEqualTo(parent);
 		assertThat(utilsMeta.getClass().getClassLoader()).isEqualTo(parent);
 		assertThat(getClassAttribute(utilsMeta).getClassLoader()).isEqualTo(child);
 		assertThat(getEnumAttribute(utilsMeta).getClass().getClassLoader()).isEqualTo(

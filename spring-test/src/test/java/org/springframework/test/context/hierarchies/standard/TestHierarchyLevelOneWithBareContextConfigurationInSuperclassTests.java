@@ -16,15 +16,15 @@
 
 package org.springframework.test.context.hierarchies.standard;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,20 +32,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.2.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
-public class TestHierarchyLevelOneWithBareContextConfigurationInSuperclassTests {
+class TestHierarchyLevelOneWithBareContextConfigurationInSuperclassTests {
 
 	@Configuration
 	static class Config {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo-level-1";
 		}
 
 		@Bean
-		public String bar() {
+		String bar() {
 			return "bar";
 		}
 	}
@@ -62,7 +62,7 @@ public class TestHierarchyLevelOneWithBareContextConfigurationInSuperclassTests 
 
 
 	@Test
-	public void loadContextHierarchy() {
+	void loadContextHierarchy() {
 		assertThat(context).as("child ApplicationContext").isNotNull();
 		assertThat(context.getParent()).as("parent ApplicationContext").isNull();
 		assertThat(foo).isEqualTo("foo-level-1");

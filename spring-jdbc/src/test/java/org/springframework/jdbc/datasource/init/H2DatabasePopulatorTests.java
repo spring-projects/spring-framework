@@ -16,20 +16,19 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
 /**
  * @author Sam Brannen
  * @since 4.0.3
  */
-public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
+class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 
+	@Override
 	protected EmbeddedDatabaseType getEmbeddedDatabaseType() {
 		return EmbeddedDatabaseType.H2;
 	}
@@ -40,7 +39,7 @@ public class H2DatabasePopulatorTests extends AbstractDatabasePopulatorTests {
 	 * @since 5.0
 	 */
 	@Test
-	public void scriptWithH2Alias() throws Exception {
+	void scriptWithH2Alias() throws Exception {
 		databasePopulator.addScript(usersSchema());
 		databasePopulator.addScript(resource("db-test-data-h2-alias.sql"));
 		// Set statement separator to double newline so that ";" is not

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.web.context;
 
 import java.util.Locale;
+
 import javax.servlet.ServletException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -27,14 +28,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.AbstractApplicationContextTests;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.TestListener;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.TestApplicationListener;
 import org.springframework.util.Assert;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -54,7 +55,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		root.getEnvironment().addActiveProfile("rootProfile1");
 		MockServletContext sc = new MockServletContext("");
 		root.setServletContext(sc);
-		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
+		root.setConfigLocations("/org/springframework/web/context/WEB-INF/applicationContext.xml");
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
 			@Override
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -79,7 +80,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		wac.setParent(root);
 		wac.setServletContext(sc);
 		wac.setNamespace("test-servlet");
-		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		wac.setConfigLocations("/org/springframework/web/context/WEB-INF/test-servlet.xml");
 		wac.refresh();
 		return wac;
 	}
@@ -95,13 +96,13 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 
 	/**
 	 * Overridden as we can't trust superclass method
-	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
+	 * @see org.springframework.context.testfixture.AbstractApplicationContextTests#testEvents()
 	 */
 	@Override
-	protected void doTestEvents(TestListener listener, TestListener parentListener,
+	protected void doTestEvents(TestApplicationListener listener, TestApplicationListener parentListener,
 			MyEvent event) {
-		TestListener listenerBean = (TestListener) this.applicationContext.getBean("testListener");
-		TestListener parentListenerBean = (TestListener) this.applicationContext.getParent().getBean("parentListener");
+		TestApplicationListener listenerBean = (TestApplicationListener) this.applicationContext.getBean("testListener");
+		TestApplicationListener parentListenerBean = (TestApplicationListener) this.applicationContext.getParent().getBean("parentListener");
 		super.doTestEvents(listenerBean, parentListenerBean, event);
 	}
 
@@ -119,7 +120,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		wac.setParent(root);
 		wac.setServletContext(sc);
 		wac.setNamespace("testNamespace");
-		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
+		wac.setConfigLocations("/org/springframework/web/context/WEB-INF/test-servlet.xml");
 		wac.refresh();
 		assertThatExceptionOfType(NoSuchMessageException.class).isThrownBy(() ->
 				wac.getMessage("someMessage", null, Locale.getDefault()));

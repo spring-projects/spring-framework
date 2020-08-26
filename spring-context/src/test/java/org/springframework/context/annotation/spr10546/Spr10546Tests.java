@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation.spr10546;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class Spr10546Tests {
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void closeContext() {
 		if (context != null) {
 			context.close();

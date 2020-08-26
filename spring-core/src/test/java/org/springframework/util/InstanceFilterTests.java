@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,17 +24,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class InstanceFilterTests {
+class InstanceFilterTests {
 
 	@Test
-	public void emptyFilterApplyMatchIfEmpty() {
+	void emptyFilterApplyMatchIfEmpty() {
 		InstanceFilter<String> filter = new InstanceFilter<>(null, null, true);
 		match(filter, "foo");
 		match(filter, "bar");
 	}
 
 	@Test
-	public void includesFilter() {
+	void includesFilter() {
 		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("First", "Second"), null, true);
 		match(filter, "Second");
@@ -42,7 +42,7 @@ public class InstanceFilterTests {
 	}
 
 	@Test
-	public void excludesFilter() {
+	void excludesFilter() {
 		InstanceFilter<String> filter = new InstanceFilter<>(
 				null, asList("First", "Second"), true);
 		doNotMatch(filter, "Second");
@@ -50,7 +50,7 @@ public class InstanceFilterTests {
 	}
 
 	@Test
-	public void includesAndExcludesFilters() {
+	void includesAndExcludesFilters() {
 		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("foo", "Bar"), asList("First", "Second"), true);
 		doNotMatch(filter, "Second");
@@ -58,7 +58,7 @@ public class InstanceFilterTests {
 	}
 
 	@Test
-	public void includesAndExcludesFiltersConflict() {
+	void includesAndExcludesFiltersConflict() {
 		InstanceFilter<String> filter = new InstanceFilter<>(
 				asList("First"), asList("First"), true);
 		doNotMatch(filter, "First");

@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.google.protobuf.Message;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -33,7 +33,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -46,6 +46,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
 import org.springframework.util.MimeType;
+import org.springframework.web.testfixture.xml.Pojo;
 
 /**
  * Test scenarios for data buffer leaks.
@@ -56,7 +57,7 @@ public class CancelWithoutDemandCodecTests {
 	private final LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.bufferFactory.checkForLeaks();
 	}

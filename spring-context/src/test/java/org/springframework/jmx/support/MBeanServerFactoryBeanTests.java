@@ -18,38 +18,36 @@ package org.springframework.jmx.support;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.MBeanTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Integration tests for {@link MBeanServerFactoryBean}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  */
-public class MBeanServerFactoryBeanTests {
+class MBeanServerFactoryBeanTests {
 
-
-	@Before
-	public void setUp() throws Exception {
-		MBeanTestUtils.resetMBeanServers();
-	}
-
-
-	@After
-	public void tearDown() throws Exception {
+	@BeforeEach
+	@AfterEach
+	void resetMBeanServers() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
 	@Test
-	public void getObject() throws Exception {
+	void defaultValues() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.afterPropertiesSet();
 		try {
@@ -62,7 +60,7 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	public void defaultDomain() throws Exception {
+	void defaultDomain() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setDefaultDomain("foo");
 		bean.afterPropertiesSet();
@@ -76,7 +74,7 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	public void withLocateExistingAndExistingServer() {
+	void locateExistingServerIfPossibleWithExistingServer() {
 		MBeanServer server = MBeanServerFactory.createMBeanServer();
 		try {
 			MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
@@ -96,7 +94,7 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	public void withLocateExistingAndFallbackToPlatformServer() {
+	void locateExistingServerIfPossibleWithFallbackToPlatformServer() {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
@@ -109,7 +107,7 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	public void withEmptyAgentIdAndFallbackToPlatformServer() {
+	void withEmptyAgentIdAndFallbackToPlatformServer() {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
@@ -122,16 +120,16 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	@Test
-	public void createMBeanServer() throws Exception {
-		testCreation(true, "The server should be available in the list");
+	void createMBeanServer() throws Exception {
+		assertCreation(true, "The server should be available in the list");
 	}
 
 	@Test
-	public void newMBeanServer() throws Exception {
-		testCreation(false, "The server should not be available in the list");
+	void newMBeanServer() throws Exception {
+		assertCreation(false, "The server should not be available in the list");
 	}
 
-	private void testCreation(boolean referenceShouldExist, String failMsg) throws Exception {
+	private void assertCreation(boolean referenceShouldExist, String failMsg) throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setRegisterWithFactory(referenceShouldExist);
 		bean.afterPropertiesSet();
@@ -146,12 +144,7 @@ public class MBeanServerFactoryBeanTests {
 	}
 
 	private boolean hasInstance(List<MBeanServer> servers, MBeanServer server) {
-		for (MBeanServer candidate : servers) {
-			if (candidate == server) {
-				return true;
-			}
-		}
-		return false;
+		return servers.stream().anyMatch(current -> current == server);
 	}
 
 }

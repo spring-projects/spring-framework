@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -37,7 +37,7 @@ public class ComponentScanParserBeanDefinitionDefaultsTests {
 	private static final String LOCATION_PREFIX = "org/springframework/context/annotation/";
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		DefaultsTestBean.INIT_COUNT = 0;
 	}

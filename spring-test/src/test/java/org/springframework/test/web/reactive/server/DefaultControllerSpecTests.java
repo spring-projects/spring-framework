@@ -18,7 +18,7 @@ package org.springframework.test.web.reactive.server;
 
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.ResponseEntity;

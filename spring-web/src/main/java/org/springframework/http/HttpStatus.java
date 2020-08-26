@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,6 +320,12 @@ public enum HttpStatus {
 	 */
 	FAILED_DEPENDENCY(424, "Failed Dependency"),
 	/**
+	 * {@code 425 Too Early}.
+	 * @since 5.2
+	 * @see <a href="https://tools.ietf.org/html/rfc8470">RFC 8470</a>
+	 */
+	TOO_EARLY(425, "Too Early"),
+	/**
 	 * {@code 426 Upgrade Required}.
 	 * @see <a href="https://tools.ietf.org/html/rfc2817#section-6">Upgrading to TLS Within HTTP/1.1</a>
 	 */
@@ -447,6 +453,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 4.0
 	 * @see #series()
 	 */
 	public boolean is1xxInformational() {
@@ -457,6 +464,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 4.0
 	 * @see #series()
 	 */
 	public boolean is2xxSuccessful() {
@@ -467,6 +475,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 4.0
 	 * @see #series()
 	 */
 	public boolean is3xxRedirection() {
@@ -477,6 +486,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 4.0
 	 * @see #series()
 	 */
 	public boolean is4xxClientError() {
@@ -487,6 +497,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
 	 * This is a shortcut for checking the value of {@link #series()}.
+	 * @since 4.0
 	 * @see #series()
 	 */
 	public boolean is5xxServerError() {

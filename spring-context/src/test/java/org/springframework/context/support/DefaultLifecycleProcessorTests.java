@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.context.support;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
@@ -27,10 +27,10 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Mark Fisher
@@ -252,9 +252,8 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void smartLifecycleGroupShutdown() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 300, stoppedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forShutdownTests(3, 100, stoppedBeans);
@@ -283,9 +282,8 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void singleSmartLifecycleShutdown() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forShutdownTests(99, 300, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -391,9 +389,8 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void dependentShutdownFirstEvenIfItsPhaseIsLower() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 100, stoppedBeans);
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
@@ -465,9 +462,8 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void dependentShutdownFirstAndIsSmartLifecycle() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 400, stoppedBeans);
 		TestSmartLifecycleBean beanNegative = TestSmartLifecycleBean.forShutdownTests(-99, 100, stoppedBeans);
@@ -530,9 +526,8 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void dependentShutdownFirstButNotSmartLifecycle() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
 		TestLifecycleBean simpleBean = TestLifecycleBean.forShutdownTests(stoppedBeans);
@@ -662,18 +657,15 @@ public class DefaultLifecycleProcessorTests {
 			// invocation order in the 'stoppedBeans' list
 			stop();
 			final int delay = this.shutdownDelay;
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(delay);
-					}
-					catch (InterruptedException e) {
-						// ignore
-					}
-					finally {
-						callback.run();
-					}
+			new Thread(() -> {
+				try {
+					Thread.sleep(delay);
+				}
+				catch (InterruptedException e) {
+					// ignore
+				}
+				finally {
+					callback.run();
 				}
 			}).start();
 		}

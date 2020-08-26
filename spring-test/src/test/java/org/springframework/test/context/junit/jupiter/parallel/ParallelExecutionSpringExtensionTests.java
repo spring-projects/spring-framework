@@ -20,6 +20,7 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -54,6 +55,7 @@ class ParallelExecutionSpringExtensionTests {
 		launcher.registerTestExecutionListeners(listener);
 
 		LauncherDiscoveryRequest request = request()//
+				.configurationParameter("junit.jupiter.conditions.deactivate", "org.junit.jupiter.engine.extension.DisabledCondition")//
 				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
 				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
 				.selectors(selectClass(TestCase.class))//
@@ -66,6 +68,7 @@ class ParallelExecutionSpringExtensionTests {
 	}
 
 	@SpringJUnitConfig
+	@Disabled
 	static class TestCase {
 
 		@BeforeEach

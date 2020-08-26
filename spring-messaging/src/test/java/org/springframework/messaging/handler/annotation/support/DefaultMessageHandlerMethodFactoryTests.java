@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.core.MethodParameter;
@@ -55,9 +53,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class DefaultMessageHandlerMethodFactoryTests {
 
 	private final SampleBean sample = new SampleBean();
-
-	@Rule
-	public final TestName name = new TestName();
 
 
 	@Test

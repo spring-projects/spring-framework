@@ -16,20 +16,20 @@
 
 package org.springframework.aop.aspectj;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect.AfterReturningAdviceBindingCollaborator;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Tests for various parameter binding scenarios with before advice.
@@ -50,7 +50,7 @@ public class AfterReturningAdviceBindingTests {
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -129,7 +129,7 @@ public class AfterReturningAdviceBindingTests {
 	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
-		verifyZeroInteractions(mockCollaborator);
+		verifyNoInteractions(mockCollaborator);
 	}
 
 	@Test

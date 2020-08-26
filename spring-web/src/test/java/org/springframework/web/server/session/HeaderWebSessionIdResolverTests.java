@@ -18,12 +18,12 @@ package org.springframework.web.server.session;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -39,7 +39,7 @@ public class HeaderWebSessionIdResolverTests {
 
 	private ServerWebExchange exchange;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.idResolver = new HeaderWebSessionIdResolver();
 		this.exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/path"));

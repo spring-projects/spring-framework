@@ -16,7 +16,7 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.core.io.Resource;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.web.cors.reactive;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,20 +30,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class UrlBasedCorsConfigurationSourceTests {
+class UrlBasedCorsConfigurationSourceTests {
 
 	private final UrlBasedCorsConfigurationSource configSource
 			= new UrlBasedCorsConfigurationSource();
 
 
 	@Test
-	public void empty() {
+	void empty() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/bar/test.html"));
 		assertThat(this.configSource.getCorsConfiguration(exchange)).isNull();
 	}
 
 	@Test
-	public void registerAndMatch() {
+	void registerAndMatch() {
 		CorsConfiguration config = new CorsConfiguration();
 		this.configSource.registerCorsConfiguration("/bar/**", config);
 

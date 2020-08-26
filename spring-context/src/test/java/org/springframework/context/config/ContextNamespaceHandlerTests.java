@@ -19,8 +19,8 @@ package org.springframework.context.config;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class ContextNamespaceHandlerTests {
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		System.getProperties().remove("foo");
 	}
@@ -129,9 +129,9 @@ public class ContextNamespaceHandlerTests {
 	public void propertyPlaceholderLocationWithSystemPropertyMissing() {
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
 				new ClassPathXmlApplicationContext("contextNamespaceHandlerTests-location-placeholder.xml", getClass()))
-			.satisfies(ex -> assertThat(ex.getRootCause())
-					.isInstanceOf(IllegalArgumentException.class)
-					.hasMessage("Could not resolve placeholder 'foo' in value \"${foo}\""));
+			.havingRootCause()
+			.isInstanceOf(IllegalArgumentException.class)
+			.withMessage("Could not resolve placeholder 'foo' in value \"${foo}\"");
 	}
 
 	@Test

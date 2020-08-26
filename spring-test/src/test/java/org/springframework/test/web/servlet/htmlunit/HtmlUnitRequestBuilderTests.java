@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import com.gargoylesoftware.htmlunit.FormEncodingType;
 import com.gargoylesoftware.htmlunit.HttpMethod;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.KeyDataPair;
+import com.gargoylesoftware.htmlunit.util.MimeType;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
@@ -69,9 +74,9 @@ public class HtmlUnitRequestBuilderTests {
 	private HtmlUnitRequestBuilder requestBuilder;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
+		webRequest = new WebRequest(new URL("https://example.com/test/this/here"));
 		webRequest.setHttpMethod(HttpMethod.GET);
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
 	}
@@ -174,7 +179,7 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestContextPathUsesNoFirstSegmentWithDefault() throws MalformedURLException {
-		webRequest.setUrl(new URL("http://example.com/"));
+		webRequest.setUrl(new URL("https://example.com/"));
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
 		assertThat(contextPath).isEqualTo("");
@@ -342,7 +347,8 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	public void buildRequestLocalPort() {
+	public void buildRequestLocalPort() throws Exception {
+		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getLocalPort()).isEqualTo(80);
@@ -414,6 +420,25 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getParameterMap().size()).isEqualTo(2);
 		assertThat(actualRequest.getParameter("name1")).isEqualTo("value1");
 		assertThat(actualRequest.getParameter("name2")).isEqualTo("value2");
+	}
+
+	@Test // gh-24926
+	public void buildRequestParameterMapViaWebRequestDotSetFileToUploadAsParameter() throws Exception {
+
+		webRequest.setRequestParameters(Collections.singletonList(
+				new KeyDataPair("key",
+						new ClassPathResource("org/springframework/test/web/htmlunit/test.txt").getFile(),
+						"test.txt", MimeType.TEXT_PLAIN, StandardCharsets.UTF_8)));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParts().size()).isEqualTo(1);
+		Part part = actualRequest.getPart("key");
+		assertThat(part).isNotNull();
+		assertThat(part.getName()).isEqualTo("key");
+		assertThat(IOUtils.toString(part.getInputStream(), StandardCharsets.UTF_8)).isEqualTo("test file");
+		assertThat(part.getSubmittedFileName()).isEqualTo("test.txt");
+		assertThat(part.getContentType()).isEqualTo(MimeType.TEXT_PLAIN);
 	}
 
 	@Test
@@ -599,6 +624,7 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestRemotePort() throws Exception {
+		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getRemotePort()).isEqualTo(80);
@@ -615,7 +641,7 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestRemotePort80WithDefault() throws Exception {
-		webRequest.setUrl(new URL("http://example.com/"));
+		webRequest.setUrl(new URL("http://company.example/"));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
@@ -647,11 +673,12 @@ public class HtmlUnitRequestBuilderTests {
 	@Test
 	public void buildRequestUrl() {
 		String uri = requestBuilder.buildRequest(servletContext).getRequestURL().toString();
-		assertThat(uri).isEqualTo("http://example.com/test/this/here");
+		assertThat(uri).isEqualTo("https://example.com/test/this/here");
 	}
 
 	@Test
 	public void buildRequestSchemeHttp() throws Exception {
+		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getScheme()).isEqualTo("http");
@@ -674,6 +701,7 @@ public class HtmlUnitRequestBuilderTests {
 
 	@Test
 	public void buildRequestServerPort() throws Exception {
+		webRequest.setUrl(new URL("http://localhost:80/test/this/here"));
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getServerPort()).isEqualTo(80);

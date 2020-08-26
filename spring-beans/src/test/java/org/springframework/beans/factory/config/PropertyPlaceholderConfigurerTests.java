@@ -18,15 +18,15 @@ package org.springframework.beans.factory.config;
 
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
@@ -52,7 +52,7 @@ public class PropertyPlaceholderConfigurerTests {
 	private AbstractBeanDefinition p1BeanDef;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		p1BeanDef = rootBeanDefinition(TestBean.class)
 				.addPropertyValue("name", "${" + P1 + "}")
@@ -68,7 +68,7 @@ public class PropertyPlaceholderConfigurerTests {
 
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		System.clearProperty(P1);
 	}

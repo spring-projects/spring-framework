@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -49,11 +49,23 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
+ * Integration tests for {@link AsyncRestTemplate}.
+ *
+ * <h3>Logging configuration for {@code MockWebServer}</h3>
+ *
+ * <p>In order for our log4j2 configuration to be used in an IDE, you must
+ * set the following system property before running any tests &mdash; for
+ * example, in <em>Run Configurations</em> in Eclipse.
+ *
+ * <pre class="code">
+ * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+ * </pre>
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("deprecation")
-public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTestCase {
+public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTests {
 
 	private final AsyncRestTemplate template = new AsyncRestTemplate(
 			new org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory());
@@ -578,7 +590,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 	}
 
 	@Test
-	public void multipart() throws Exception {
+	public void multipartFormData() throws Exception {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
 		parts.add("name 2", "value 2+1");
@@ -587,7 +599,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractMockWebServerTest
 		parts.add("logo", logo);
 
 		HttpEntity<MultiValueMap<String, Object>> requestBody = new HttpEntity<>(parts);
-		Future<URI> future = template.postForLocation(baseUrl + "/multipart", requestBody);
+		Future<URI> future = template.postForLocation(baseUrl + "/multipartFormData", requestBody);
 		future.get();
 	}
 

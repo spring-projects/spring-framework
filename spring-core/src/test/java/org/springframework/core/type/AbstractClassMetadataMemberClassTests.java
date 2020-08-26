@@ -16,7 +16,7 @@
 
 package org.springframework.core.type;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ public abstract class AbstractClassMetadataMemberClassTests {
 	public abstract ClassMetadata getClassMetadataFor(Class<?> clazz);
 
 	@Test
-	public void withNoMemberClasses() {
+	void withNoMemberClasses() {
 		ClassMetadata metadata = getClassMetadataFor(L0_a.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
 		assertThat(nestedClasses).isEqualTo(new String[]{});
@@ -44,7 +44,7 @@ public abstract class AbstractClassMetadataMemberClassTests {
 
 
 	@Test
-	public void withPublicMemberClasses() {
+	void withPublicMemberClasses() {
 		ClassMetadata metadata = getClassMetadataFor(L0_b.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
 		assertThat(nestedClasses).isEqualTo(new String[]{L0_b.L1.class.getName()});
@@ -56,7 +56,7 @@ public abstract class AbstractClassMetadataMemberClassTests {
 
 
 	@Test
-	public void withNonPublicMemberClasses() {
+	void withNonPublicMemberClasses() {
 		ClassMetadata metadata = getClassMetadataFor(L0_c.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
 		assertThat(nestedClasses).isEqualTo(new String[]{L0_c.L1.class.getName()});
@@ -68,7 +68,7 @@ public abstract class AbstractClassMetadataMemberClassTests {
 
 
 	@Test
-	public void againstMemberClass() {
+	void againstMemberClass() {
 		ClassMetadata metadata = getClassMetadataFor(L0_b.L1.class);
 		String[] nestedClasses = metadata.getMemberClassNames();
 		assertThat(nestedClasses).isEqualTo(new String[]{});

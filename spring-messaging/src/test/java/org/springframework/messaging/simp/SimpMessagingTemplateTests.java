@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -36,6 +36,7 @@ import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.util.LinkedMultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link org.springframework.messaging.simp.SimpMessagingTemplate}.
@@ -49,7 +50,7 @@ public class SimpMessagingTemplateTests {
 	private StubMessageChannel messageChannel;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.messageChannel = new StubMessageChannel();
 		this.messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
@@ -84,6 +85,12 @@ public class SimpMessagingTemplateTests {
 
 		assertThat(headerAccessor).isNotNull();
 		assertThat(headerAccessor.getDestination()).isEqualTo("/user/https:%2F%2Fjoe.openid.example.org%2F/queue/foo");
+	}
+
+	@Test // gh-23836
+	public void convertAndSendToUserWithInvalidSequence() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				this.messagingTemplate.convertAndSendToUser("joe%2F", "/queue/foo", "data"));
 	}
 
 	@Test

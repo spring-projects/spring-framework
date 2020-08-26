@@ -19,8 +19,8 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
 import org.springframework.beans.BeanUtils;
@@ -47,7 +47,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
  * @author Sam Brannen
  * @since 4.0
  */
-public class TransactionalTestExecutionListenerTests {
+class TransactionalTestExecutionListenerTests {
 
 	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
 
@@ -61,15 +61,16 @@ public class TransactionalTestExecutionListenerTests {
 	private final TestContext testContext = mock(TestContext.class);
 
 
-	@After
-	public void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
+	@AfterEach
+	void cleanUpThreadLocalStateForSubsequentTestClassesInSuite() {
 		TransactionContextHolder.removeCurrentTransactionContext();
 	}
 
 
 	@Test  // SPR-13895
-	public void transactionalTestWithoutTransactionManager() throws Exception {
+	void transactionalTestWithoutTransactionManager() throws Exception {
 		TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
+			@Override
 			protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 				return null;
 			}
@@ -90,17 +91,17 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassLocally() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnClassLocally() throws Exception {
 		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassLocallyTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotation() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotation() throws Exception {
 		assertBeforeTestMethodWithTransactionalTestMethod(TransactionalDeclaredOnClassViaMetaAnnotationTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotationWithOverride() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnClassViaMetaAnnotationWithOverride() throws Exception {
 		// Note: not actually invoked within a transaction since the test class is
 		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		assertBeforeTestMethodWithTransactionalTestMethod(
@@ -108,7 +109,7 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotationWithOverride() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotationWithOverride() throws Exception {
 		// Note: not actually invoked within a transaction since the method is
 		// annotated with @MetaTxWithOverride(propagation = NOT_SUPPORTED)
 		assertBeforeTestMethodWithTransactionalTestMethod(
@@ -117,87 +118,87 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodLocally() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnMethodLocally() throws Exception {
 		assertBeforeTestMethod(TransactionalDeclaredOnMethodLocallyTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotation() throws Exception {
+	void beforeTestMethodWithTransactionalDeclaredOnMethodViaMetaAnnotation() throws Exception {
 		assertBeforeTestMethod(TransactionalDeclaredOnMethodViaMetaAnnotationTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredLocally() throws Exception {
+	void beforeTestMethodWithBeforeTransactionDeclaredLocally() throws Exception {
 		assertBeforeTestMethod(BeforeTransactionDeclaredLocallyTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredViaMetaAnnotation() throws Exception {
+	void beforeTestMethodWithBeforeTransactionDeclaredViaMetaAnnotation() throws Exception {
 		assertBeforeTestMethod(BeforeTransactionDeclaredViaMetaAnnotationTestCase.class);
 	}
 
 	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredLocally() throws Exception {
+	void afterTestMethodWithAfterTransactionDeclaredLocally() throws Exception {
 		assertAfterTestMethod(AfterTransactionDeclaredLocallyTestCase.class);
 	}
 
 	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredViaMetaAnnotation() throws Exception {
+	void afterTestMethodWithAfterTransactionDeclaredViaMetaAnnotation() throws Exception {
 		assertAfterTestMethod(AfterTransactionDeclaredViaMetaAnnotationTestCase.class);
 	}
 
 	@Test
-	public void beforeTestMethodWithBeforeTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
+	void beforeTestMethodWithBeforeTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
 		assertBeforeTestMethod(BeforeTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
 	}
 
 	@Test
-	public void afterTestMethodWithAfterTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
+	void afterTestMethodWithAfterTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
 		assertAfterTestMethod(AfterTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
 	}
 
 	@Test
-	public void isRollbackWithMissingRollback() throws Exception {
+	void isRollbackWithMissingRollback() throws Exception {
 		assertIsRollback(MissingRollbackTestCase.class, true);
 	}
 
 	@Test
-	public void isRollbackWithEmptyMethodLevelRollback() throws Exception {
+	void isRollbackWithEmptyMethodLevelRollback() throws Exception {
 		assertIsRollback(EmptyMethodLevelRollbackTestCase.class, true);
 	}
 
 	@Test
-	public void isRollbackWithMethodLevelRollbackWithExplicitValue() throws Exception {
+	void isRollbackWithMethodLevelRollbackWithExplicitValue() throws Exception {
 		assertIsRollback(MethodLevelRollbackWithExplicitValueTestCase.class, false);
 	}
 
 	@Test
-	public void isRollbackWithMethodLevelRollbackViaMetaAnnotation() throws Exception {
+	void isRollbackWithMethodLevelRollbackViaMetaAnnotation() throws Exception {
 		assertIsRollback(MethodLevelRollbackViaMetaAnnotationTestCase.class, false);
 	}
 
 	@Test
-	public void isRollbackWithEmptyClassLevelRollback() throws Exception {
+	void isRollbackWithEmptyClassLevelRollback() throws Exception {
 		assertIsRollback(EmptyClassLevelRollbackTestCase.class, true);
 	}
 
 	@Test
-	public void isRollbackWithClassLevelRollbackWithExplicitValue() throws Exception {
+	void isRollbackWithClassLevelRollbackWithExplicitValue() throws Exception {
 		assertIsRollback(ClassLevelRollbackWithExplicitValueTestCase.class, false);
 	}
 
 	@Test
-	public void isRollbackWithClassLevelRollbackViaMetaAnnotation() throws Exception {
+	void isRollbackWithClassLevelRollbackViaMetaAnnotation() throws Exception {
 		assertIsRollback(ClassLevelRollbackViaMetaAnnotationTestCase.class, false);
 	}
 
 	@Test
-	public void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
+	void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
 		assertIsRollback(ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase.class, false);
 	}
 
 	@Test
-	public void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
+	void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
 		assertIsRollback(ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase.class, false);
 	}
 

@@ -19,19 +19,19 @@ package org.springframework.context.index.processor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-
 
 /**
  * Tests for {@link PropertiesMarshaller}.
  *
  * @author Stephane Nicoll
+ * @author Vedran Pavic
  */
 public class PropertiesMarshallerTests {
 
@@ -48,6 +48,19 @@ public class PropertiesMarshallerTests {
 		assertThat(readMetadata).has(Metadata.of("com.foo", "first", "second"));
 		assertThat(readMetadata).has(Metadata.of("com.bar", "first"));
 		assertThat(readMetadata.getItems()).hasSize(2);
+	}
+
+	@Test
+	public void metadataIsWrittenDeterministically() throws IOException {
+		CandidateComponentsMetadata metadata = new CandidateComponentsMetadata();
+		metadata.add(createItem("com.b", "type"));
+		metadata.add(createItem("com.c", "type"));
+		metadata.add(createItem("com.a", "type"));
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		PropertiesMarshaller.write(metadata, outputStream);
+		String contents = new String(outputStream.toByteArray(), StandardCharsets.ISO_8859_1);
+		assertThat(contents.split(System.lineSeparator())).containsExactly("com.a=type", "com.b=type", "com.c=type");
 	}
 
 	private static ItemMetadata createItem(String type, String... stereotypes) {

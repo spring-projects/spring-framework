@@ -24,8 +24,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.GregorianCalendar;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -41,7 +41,7 @@ public class StatementCreatorUtilsTests {
 	private PreparedStatement preparedStatement;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		preparedStatement = mock(PreparedStatement.class);
 	}

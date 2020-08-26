@@ -21,8 +21,8 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
@@ -59,7 +59,7 @@ public class ClientSockJsSessionTests {
 	private SettableListenableFuture<WebSocketSession> connectFuture;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
 		Transport transport = mock(Transport.class);

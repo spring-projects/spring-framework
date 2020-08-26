@@ -21,7 +21,7 @@ import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class NumberUtilsTests {
+class NumberUtilsTests {
 
 	@Test
-	public void parseNumber() {
+	void parseNumber() {
 		String aByte = "" + Byte.MAX_VALUE;
 		String aShort = "" + Short.MAX_VALUE;
 		String anInteger = "" + Integer.MAX_VALUE;
@@ -50,7 +50,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNumberUsingNumberFormat() {
+	void parseNumberUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aByte = "" + Byte.MAX_VALUE;
 		String aShort = "" + Short.MAX_VALUE;
@@ -68,7 +68,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNumberRequiringTrim() {
+	void parseNumberRequiringTrim() {
 		String aByte = " " + Byte.MAX_VALUE + " ";
 		String aShort = " " + Short.MAX_VALUE + " ";
 		String anInteger = " " + Integer.MAX_VALUE + " ";
@@ -85,7 +85,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNumberRequiringTrimUsingNumberFormat() {
+	void parseNumberRequiringTrimUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aByte = " " + Byte.MAX_VALUE + " ";
 		String aShort = " " + Short.MAX_VALUE + " ";
@@ -103,7 +103,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNumberAsHex() {
+	void parseNumberAsHex() {
 		String aByte = "0x" + Integer.toHexString(Byte.valueOf(Byte.MAX_VALUE).intValue());
 		String aShort = "0x" + Integer.toHexString(Short.valueOf(Short.MAX_VALUE).intValue());
 		String anInteger = "0x" + Integer.toHexString(Integer.MAX_VALUE);
@@ -118,7 +118,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNumberAsNegativeHex() {
+	void parseNumberAsNegativeHex() {
 		String aByte = "-0x80";
 		String aShort = "-0x8000";
 		String anInteger = "-0x80000000";
@@ -133,47 +133,47 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void convertDoubleToBigInteger() {
+	void convertDoubleToBigInteger() {
 		Double decimal = Double.valueOf(3.14d);
 		assertThat(NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class)).isEqualTo(new BigInteger("3"));
 	}
 
 	@Test
-	public void convertBigDecimalToBigInteger() {
+	void convertBigDecimalToBigInteger() {
 		String number = "987459837583750387355346";
 		BigDecimal decimal = new BigDecimal(number);
 		assertThat(NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class)).isEqualTo(new BigInteger(number));
 	}
 
 	@Test
-	public void convertNonExactBigDecimalToBigInteger() {
+	void convertNonExactBigDecimalToBigInteger() {
 		BigDecimal decimal = new BigDecimal("987459837583750387355346.14");
 		assertThat(NumberUtils.convertNumberToTargetClass(decimal, BigInteger.class)).isEqualTo(new BigInteger("987459837583750387355346"));
 	}
 
 	@Test
-	public void parseBigDecimalNumber1() {
+	void parseBigDecimalNumber1() {
 		String bigDecimalAsString = "0.10";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertThat(bigDecimal).isEqualTo(new BigDecimal(bigDecimalAsString));
 	}
 
 	@Test
-	public void parseBigDecimalNumber2() {
+	void parseBigDecimalNumber2() {
 		String bigDecimalAsString = "0.001";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertThat(bigDecimal).isEqualTo(new BigDecimal(bigDecimalAsString));
 	}
 
 	@Test
-	public void parseBigDecimalNumber3() {
+	void parseBigDecimalNumber3() {
 		String bigDecimalAsString = "3.14159265358979323846";
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class);
 		assertThat(bigDecimal).isEqualTo(new BigDecimal(bigDecimalAsString));
 	}
 
 	@Test
-	public void parseLocalizedBigDecimalNumber1() {
+	void parseLocalizedBigDecimalNumber1() {
 		String bigDecimalAsString = "0.10";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -181,7 +181,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseLocalizedBigDecimalNumber2() {
+	void parseLocalizedBigDecimalNumber2() {
 		String bigDecimalAsString = "0.001";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -189,7 +189,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseLocalizedBigDecimalNumber3() {
+	void parseLocalizedBigDecimalNumber3() {
 		String bigDecimalAsString = "3.14159265358979323846";
 		NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
 		Number bigDecimal = NumberUtils.parseNumber(bigDecimalAsString, BigDecimal.class, numberFormat);
@@ -197,7 +197,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseOverflow() {
+	void parseOverflow() {
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
 
@@ -215,7 +215,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNegativeOverflow() {
+	void parseNegativeOverflow() {
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
 
@@ -233,7 +233,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseOverflowUsingNumberFormat() {
+	void parseOverflowUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aLong = "" + Long.MAX_VALUE;
 		String aDouble = "" + Double.MAX_VALUE;
@@ -252,7 +252,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void parseNegativeOverflowUsingNumberFormat() {
+	void parseNegativeOverflowUsingNumberFormat() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 		String aLong = "" + Long.MIN_VALUE;
 		String aDouble = "" + Double.MIN_VALUE;
@@ -271,7 +271,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void convertToInteger() {
+	void convertToInteger() {
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(-1)));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(0)));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Integer.class)).isEqualTo(Integer.valueOf(Integer.valueOf(1)));
@@ -320,7 +320,7 @@ public class NumberUtilsTests {
 	}
 
 	@Test
-	public void convertToLong() {
+	void convertToLong() {
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(-1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(-1)));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(0), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(0)));
 		assertThat(NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), Long.class)).isEqualTo(Long.valueOf(Long.valueOf(1)));

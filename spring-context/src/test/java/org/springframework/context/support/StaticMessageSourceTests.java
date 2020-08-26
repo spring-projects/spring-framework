@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
-import org.springframework.context.ACATester;
-import org.springframework.context.AbstractApplicationContextTests;
-import org.springframework.context.BeanThatListens;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.testfixture.AbstractApplicationContextTests;
+import org.springframework.context.testfixture.beans.ACATester;
+import org.springframework.context.testfixture.beans.BeanThatListens;
 import org.springframework.core.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,15 +59,13 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	@Test
 	@Override
 	public void count() {
-		// These are only checked for current Ctx (not parent ctx)
 		assertCount(15);
 	}
 
 	@Test
 	@Override
+	@Disabled("Do nothing here since super is looking for errorCodes we do NOT have in the Context")
 	public void messageSource() throws NoSuchMessageException {
-		// Do nothing here since super is looking for errorCodes we
-		// do NOT have in the Context
 	}
 
 	@Test
@@ -93,7 +92,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	@Test
 	public void getMessageWithMessageAlreadyLookedFor() {
 		Object[] arguments = {
-			new Integer(7), new Date(System.currentTimeMillis()),
+			7, new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
 
@@ -106,7 +105,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 						contains("there was \"a disturbance in the Force\" on planet 7.")).as("2nd search within MsgFormat cache returned expected message for Locale.US").isTrue();
 
 		Object[] newArguments = {
-			new Integer(8), new Date(System.currentTimeMillis()),
+			8, new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
 
@@ -121,7 +120,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	@Test
 	public void getMessageWithNoDefaultPassedInAndFoundInMsgCatalog() {
 		Object[] arguments = {
-			new Integer(7), new Date(System.currentTimeMillis()),
+			7, new Date(System.currentTimeMillis()),
 			"a disturbance in the Force"
 		};
 
@@ -183,9 +182,9 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		Map<String, String> m = new HashMap<>();
 		m.put("name", "Roderick");
-		parent.registerPrototype("rod", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("rod", org.springframework.beans.testfixture.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
-		parent.registerPrototype("father", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("father", org.springframework.beans.testfixture.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
 		parent.addApplicationListener(parentListener);

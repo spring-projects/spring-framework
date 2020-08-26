@@ -21,13 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-
 
 /**
  * Test case for {@link CompositeIterator}.
@@ -35,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Erwin Vervaet
  * @author Juergen Hoeller
  */
-public class CompositeIteratorTests {
+class CompositeIteratorTests {
 
 	@Test
-	public void testNoIterators() {
+	void noIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		assertThat(it.hasNext()).isFalse();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
@@ -46,7 +45,7 @@ public class CompositeIteratorTests {
 	}
 
 	@Test
-	public void testSingleIterator() {
+	void singleIterator() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		for (int i = 0; i < 2; i++) {
@@ -59,7 +58,7 @@ public class CompositeIteratorTests {
 	}
 
 	@Test
-	public void testMultipleIterators() {
+	void multipleIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		it.add(Arrays.asList("2").iterator());
@@ -75,7 +74,7 @@ public class CompositeIteratorTests {
 	}
 
 	@Test
-	public void testInUse() {
+	void inUse() {
 		List<String> list = Arrays.asList("0", "1");
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(list.iterator());
@@ -90,7 +89,7 @@ public class CompositeIteratorTests {
 	}
 
 	@Test
-	public void testDuplicateIterators() {
+	void duplicateIterators() {
 		List<String> list = Arrays.asList("0", "1");
 		Iterator<String> iterator = list.iterator();
 		CompositeIterator<String> it = new CompositeIterator<>();

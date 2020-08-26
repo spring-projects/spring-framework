@@ -18,7 +18,7 @@ package org.springframework.jms.config;
 
 import javax.jms.MessageListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;

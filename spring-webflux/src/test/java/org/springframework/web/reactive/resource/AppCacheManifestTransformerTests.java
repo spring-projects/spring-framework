@@ -21,16 +21,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link AppCacheManifestTransformer}.
@@ -47,7 +47,7 @@ public class AppCacheManifestTransformerTests {
 	private ResourceTransformerChain chain;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -107,13 +107,13 @@ public class AppCacheManifestTransformerTests {
 
 		assertThat(content).as("not rewrite external resources")
 				.contains("//example.org/style.css")
-				.contains("http://example.org/image.png");
+				.contains("https://example.org/image.png");
 
 		// Not the same hash as Spring MVC
 		// Hash is computed from links, and not from the linked content
 
 		assertThat(content).as("generate fingerprint")
-				.contains("# Hash: 8eefc904df3bd46537fa7bdbbc5ab9fb");
+				.contains("# Hash: d4437f1d7ae9530ab3ae71d5375b46ff");
 	}
 
 	private Resource getResource(String filePath) {

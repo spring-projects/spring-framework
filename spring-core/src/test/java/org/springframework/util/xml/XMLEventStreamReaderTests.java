@@ -18,6 +18,7 @@ package org.springframework.util.xml;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Transformer;
@@ -25,16 +26,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class XMLEventStreamReaderTests {
+class XMLEventStreamReaderTests {
 
 	private static final String XML =
 			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>"
@@ -42,22 +43,22 @@ public class XMLEventStreamReaderTests {
 
 	private XMLEventStreamReader streamReader;
 
-	@Before
-	public void createStreamReader() throws Exception {
+	@BeforeEach
+	void createStreamReader() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(XML));
 		streamReader = new XMLEventStreamReader(eventReader);
 	}
 
 	@Test
-	public void readAll() throws Exception {
+	void readAll() throws Exception {
 		while (streamReader.hasNext()) {
 			streamReader.next();
 		}
 	}
 
 	@Test
-	public void readCorrect() throws Exception {
+	void readCorrect() throws Exception {
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		StAXSource source = new StAXSource(streamReader);
 		StringWriter writer = new StringWriter();

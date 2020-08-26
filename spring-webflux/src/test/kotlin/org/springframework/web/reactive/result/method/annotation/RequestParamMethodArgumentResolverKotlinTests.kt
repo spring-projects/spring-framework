@@ -16,14 +16,14 @@
 
 package org.springframework.web.reactive.result.method.annotation
 
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
 import org.springframework.core.ReactiveAdapterRegistry
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.format.support.DefaultFormattingConversionService
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest
-import org.springframework.mock.web.test.server.MockServerWebExchange
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
+import org.springframework.web.testfixture.server.MockServerWebExchange
 import org.springframework.util.ReflectionUtils
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
@@ -47,7 +47,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 	lateinit var nonNullableParamNotRequired: MethodParameter
 
 
-	@Before
+	@BeforeEach
 	fun setup() {
 		this.resolver = RequestParamMethodArgumentResolver(null, ReactiveAdapterRegistry.getSharedInstance(), true)
 		val initializer = ConfigurableWebBindingInitializer()

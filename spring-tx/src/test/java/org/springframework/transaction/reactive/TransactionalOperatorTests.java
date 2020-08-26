@@ -16,7 +16,9 @@
 
 package org.springframework.transaction.reactive;
 
-import org.junit.Test;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -44,6 +46,47 @@ public class TransactionalOperatorTests {
 				.verifyComplete();
 		assertThat(tm.commit).isTrue();
 		assertThat(tm.rollback).isFalse();
+	}
+
+	@Test
+	public void monoSubscriptionNotCancelled() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Mono.just(true).doOnCancel(() -> cancelled.set(true)).as(operator::transactional)
+				.as(StepVerifier::create)
+				.expectNext(true)
+				.verifyComplete();
+		assertThat(tm.commit).isTrue();
+		assertThat(tm.rollback).isFalse();
+		assertThat(cancelled).isFalse();
+	}
+
+	@Test
+	public void cancellationPropagatedToMono() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Mono.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
+				.as(StepVerifier::create)
+				.thenAwait()
+				.thenCancel()
+				.verify();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
+		assertThat(cancelled).isTrue();
+	}
+
+	@Test
+	public void cancellationPropagatedToFlux() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Flux.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
+				.as(StepVerifier::create)
+				.thenAwait()
+				.thenCancel()
+				.verify();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
+		assertThat(cancelled).isTrue();
 	}
 
 	@Test

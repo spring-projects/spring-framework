@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.core.env;
 
-import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.Permission;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -39,6 +38,7 @@ import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @SuppressWarnings("deprecation")
 public class StandardEnvironmentTests {
@@ -58,7 +58,7 @@ public class StandardEnvironmentTests {
 
 
 	@Test
-	public void merge() {
+	void merge() {
 		ConfigurableEnvironment child = new StandardEnvironment();
 		child.setActiveProfiles("c1", "c2");
 		child.getPropertySources().addLast(
@@ -99,7 +99,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void propertySourceOrder() {
+	void propertySourceOrder() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))).isEqualTo(0);
@@ -108,25 +108,25 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void propertySourceTypes() {
+	void propertySourceTypes() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 		assertThat(sources.get(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)).isInstanceOf(SystemEnvironmentPropertySource.class);
 	}
 
 	@Test
-	public void activeProfilesIsEmptyByDefault() {
+	void activeProfilesIsEmptyByDefault() {
 		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 	}
 
 	@Test
-	public void defaultProfilesContainsDefaultProfileByDefault() {
+	void defaultProfilesContainsDefaultProfileByDefault() {
 		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
 		assertThat(environment.getDefaultProfiles()[0]).isEqualTo("default");
 	}
 
 	@Test
-	public void setActiveProfiles() {
+	void setActiveProfiles() {
 		environment.setActiveProfiles("local", "embedded");
 		String[] activeProfiles = environment.getActiveProfiles();
 		assertThat(activeProfiles).contains("local", "embedded");
@@ -134,55 +134,47 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void setActiveProfiles_withNullProfileArray() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setActiveProfiles((String[]) null));
+	void setActiveProfiles_withNullProfileArray() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setActiveProfiles((String[]) null));
 	}
 
 	@Test
-	public void setActiveProfiles_withNullProfile() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setActiveProfiles((String) null));
+	void setActiveProfiles_withNullProfile() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setActiveProfiles((String) null));
 	}
 
 	@Test
-	public void setActiveProfiles_withEmptyProfile() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setActiveProfiles(""));
+	void setActiveProfiles_withEmptyProfile() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setActiveProfiles(""));
 	}
 
 	@Test
-	public void setActiveProfiles_withNotOperator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setActiveProfiles("p1", "!p2"));
+	void setActiveProfiles_withNotOperator() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setActiveProfiles("p1", "!p2"));
 	}
 
 	@Test
-	public void setDefaultProfiles_withNullProfileArray() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setDefaultProfiles((String[]) null));
+	void setDefaultProfiles_withNullProfileArray() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setDefaultProfiles((String[]) null));
 	}
 
 	@Test
-	public void setDefaultProfiles_withNullProfile() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setDefaultProfiles((String) null));
+	void setDefaultProfiles_withNullProfile() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setDefaultProfiles((String) null));
 	}
 
 	@Test
-	public void setDefaultProfiles_withEmptyProfile() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setDefaultProfiles(""));
+	void setDefaultProfiles_withEmptyProfile() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setDefaultProfiles(""));
 	}
 
 	@Test
-	public void setDefaultProfiles_withNotOperator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.setDefaultProfiles("d1", "!d2"));
+	void setDefaultProfiles_withNotOperator() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.setDefaultProfiles("d1", "!d2"));
 	}
 
 	@Test
-	public void addActiveProfile() {
+	void addActiveProfile() {
 		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 		environment.setActiveProfiles("local", "embedded");
 		assertThat(environment.getActiveProfiles()).contains("local", "embedded");
@@ -197,7 +189,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void addActiveProfile_whenActiveProfilesPropertyIsAlreadySet() {
+	void addActiveProfile_whenActiveProfilesPropertyIsAlreadySet() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME)).isNull();
 		env.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
@@ -207,58 +199,57 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void reservedDefaultProfile() {
+	void reservedDefaultProfile() {
 		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{RESERVED_DEFAULT_PROFILE_NAME});
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "d0");
 		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{"d0"});
 		environment.setDefaultProfiles("d1", "d2");
 		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[]{"d1","d2"});
-		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
+		System.clearProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
-	public void defaultProfileWithCircularPlaceholder() {
-		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
+	void defaultProfileWithCircularPlaceholder() {
 		try {
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					environment.getDefaultProfiles());
+			System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "${spring.profiles.default}");
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.getDefaultProfiles());
 		}
 		finally {
-			System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
+			System.clearProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 		}
 	}
 
 	@Test
-	public void getActiveProfiles_systemPropertiesEmpty() {
+	void getActiveProfiles_systemPropertiesEmpty() {
 		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
 		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
-		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
+		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
-	public void getActiveProfiles_fromSystemProperties() {
+	void getActiveProfiles_fromSystemProperties() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo");
 		assertThat(Arrays.asList(environment.getActiveProfiles())).contains("foo");
-		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
+		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
-	public void getActiveProfiles_fromSystemProperties_withMultipleProfiles() {
+	void getActiveProfiles_fromSystemProperties_withMultipleProfiles() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo,bar");
 		assertThat(environment.getActiveProfiles()).contains("foo", "bar");
-		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
+		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
-	public void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
+	void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
 		assertThat(environment.getActiveProfiles()).contains("bar", "baz");
-		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
+		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
 	@Test
-	public void getDefaultProfiles() {
+	void getDefaultProfiles() {
 		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[] {RESERVED_DEFAULT_PROFILE_NAME});
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(DEFAULT_PROFILES_PROPERTY_NAME, "pd1"));
 		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
@@ -266,7 +257,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void setDefaultProfiles() {
+	void setDefaultProfiles() {
 		environment.setDefaultProfiles();
 		assertThat(environment.getDefaultProfiles().length).isEqualTo(0);
 		environment.setDefaultProfiles("pd1");
@@ -277,31 +268,28 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void acceptsProfiles_withEmptyArgumentList() {
+	void acceptsProfiles_withEmptyArgumentList() {
 		assertThatIllegalArgumentException().isThrownBy(
 				environment::acceptsProfiles);
 	}
 
 	@Test
-	public void acceptsProfiles_withNullArgumentList() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.acceptsProfiles((String[]) null));
+	void acceptsProfiles_withNullArgumentList() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.acceptsProfiles((String[]) null));
 	}
 
 	@Test
-	public void acceptsProfiles_withNullArgument() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.acceptsProfiles((String) null));
+	void acceptsProfiles_withNullArgument() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.acceptsProfiles((String) null));
 	}
 
 	@Test
-	public void acceptsProfiles_withEmptyArgument() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.acceptsProfiles(""));
+	void acceptsProfiles_withEmptyArgument() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.acceptsProfiles(""));
 	}
 
 	@Test
-	public void acceptsProfiles_activeProfileSetProgrammatically() {
+	void acceptsProfiles_activeProfileSetProgrammatically() {
 		assertThat(environment.acceptsProfiles("p1", "p2")).isFalse();
 		environment.setActiveProfiles("p1");
 		assertThat(environment.acceptsProfiles("p1", "p2")).isTrue();
@@ -312,14 +300,14 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void acceptsProfiles_activeProfileSetViaProperty() {
+	void acceptsProfiles_activeProfileSetViaProperty() {
 		assertThat(environment.acceptsProfiles("p1")).isFalse();
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
 		assertThat(environment.acceptsProfiles("p1")).isTrue();
 	}
 
 	@Test
-	public void acceptsProfiles_defaultProfile() {
+	void acceptsProfiles_defaultProfile() {
 		assertThat(environment.acceptsProfiles("pd")).isFalse();
 		environment.setDefaultProfiles("pd");
 		assertThat(environment.acceptsProfiles("pd")).isTrue();
@@ -329,7 +317,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void acceptsProfiles_withNotOperator() {
+	void acceptsProfiles_withNotOperator() {
 		assertThat(environment.acceptsProfiles("p1")).isFalse();
 		assertThat(environment.acceptsProfiles("!p1")).isTrue();
 		environment.addActiveProfile("p1");
@@ -338,13 +326,12 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void acceptsProfiles_withInvalidNotOperator() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				environment.acceptsProfiles("p1", "!"));
+	void acceptsProfiles_withInvalidNotOperator() {
+		assertThatIllegalArgumentException().isThrownBy(() -> environment.acceptsProfiles("p1", "!"));
 	}
 
 	@Test
-	public void acceptsProfiles_withProfileExpression() {
+	void acceptsProfiles_withProfileExpression() {
 		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isFalse();
 		environment.addActiveProfile("p1");
 		assertThat(environment.acceptsProfiles(Profiles.of("p1 & p2"))).isFalse();
@@ -353,7 +340,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void environmentSubclass_withCustomProfileValidation() {
+	void environmentSubclass_withCustomProfileValidation() {
 		ConfigurableEnvironment env = new AbstractEnvironment() {
 			@Override
 			protected void validateProfile(String profile) {
@@ -373,28 +360,28 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	public void suppressGetenvAccessThroughSystemProperty() {
+	void suppressGetenvAccessThroughSystemProperty() {
 		System.setProperty("spring.getenv.ignore", "true");
 		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		System.clearProperty("spring.getenv.ignore");
 	}
 
 	@Test
-	public void suppressGetenvAccessThroughSpringProperty() {
+	void suppressGetenvAccessThroughSpringProperty() {
 		SpringProperties.setProperty("spring.getenv.ignore", "true");
 		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
 
 	@Test
-	public void suppressGetenvAccessThroughSpringFlag() {
+	void suppressGetenvAccessThroughSpringFlag() {
 		SpringProperties.setFlag("spring.getenv.ignore");
 		assertThat(environment.getSystemEnvironment().isEmpty()).isTrue();
 		SpringProperties.setProperty("spring.getenv.ignore", null);
 	}
 
 	@Test
-	public void getSystemProperties_withAndWithoutSecurityManager() {
+	void getSystemProperties_withAndWithoutSecurityManager() {
 		System.setProperty(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
 		System.setProperty(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 		System.getProperties().put(STRING_PROPERTY_NAME, NON_STRING_PROPERTY_VALUE);
@@ -432,41 +419,45 @@ public class StandardEnvironmentTests {
 				// allow everything else
 			}
 		};
-		System.setSecurityManager(securityManager);
 
-		{
-			Map<?, ?> systemProperties = environment.getSystemProperties();
-			assertThat(systemProperties).isNotNull();
-			assertThat(systemProperties).isInstanceOf(ReadOnlySystemAttributesMap.class);
-			assertThat((String)systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
-			assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isNull();
+		try {
+			System.setSecurityManager(securityManager);
 
-			// nothing we can do here in terms of warning the user that there was
-			// actually a (non-string) value available. By this point, we only
-			// have access to calling System.getProperty(), which itself returns null
-			// if the value is non-string.  So we're stuck with returning a potentially
-			// misleading null.
-			assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isNull();
+			{
+				Map<?, ?> systemProperties = environment.getSystemProperties();
+				assertThat(systemProperties).isNotNull();
+				assertThat(systemProperties).isInstanceOf(ReadOnlySystemAttributesMap.class);
+				assertThat((String)systemProperties.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
+				assertThat(systemProperties.get(DISALLOWED_PROPERTY_NAME)).isNull();
 
-			// in the case of a non-string *key*, however, we can do better.  Alert
-			// the user that under these very special conditions (non-object key +
-			// SecurityManager that disallows access to system properties), they
-			// cannot do what they're attempting.
-			assertThatIllegalArgumentException().as("searching with non-string key against ReadOnlySystemAttributesMap").isThrownBy(() ->
-					systemProperties.get(NON_STRING_PROPERTY_NAME));
+				// nothing we can do here in terms of warning the user that there was
+				// actually a (non-string) value available. By this point, we only
+				// have access to calling System.getProperty(), which itself returns null
+				// if the value is non-string.  So we're stuck with returning a potentially
+				// misleading null.
+				assertThat(systemProperties.get(STRING_PROPERTY_NAME)).isNull();
+
+				// in the case of a non-string *key*, however, we can do better.  Alert
+				// the user that under these very special conditions (non-object key +
+				// SecurityManager that disallows access to system properties), they
+				// cannot do what they're attempting.
+				assertThatIllegalArgumentException().as("searching with non-string key against ReadOnlySystemAttributesMap").isThrownBy(() ->
+				systemProperties.get(NON_STRING_PROPERTY_NAME));
+			}
 		}
-
-		System.setSecurityManager(oldSecurityManager);
-		System.clearProperty(ALLOWED_PROPERTY_NAME);
-		System.clearProperty(DISALLOWED_PROPERTY_NAME);
-		System.getProperties().remove(STRING_PROPERTY_NAME);
-		System.getProperties().remove(NON_STRING_PROPERTY_NAME);
+		finally {
+			System.setSecurityManager(oldSecurityManager);
+			System.clearProperty(ALLOWED_PROPERTY_NAME);
+			System.clearProperty(DISALLOWED_PROPERTY_NAME);
+			System.getProperties().remove(STRING_PROPERTY_NAME);
+			System.getProperties().remove(NON_STRING_PROPERTY_NAME);
+		}
 	}
 
 	@Test
-	public void getSystemEnvironment_withAndWithoutSecurityManager() {
-		getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
-		getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
+	void getSystemEnvironment_withAndWithoutSecurityManager() {
+		EnvironmentTestUtils.getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
+		EnvironmentTestUtils.getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 
 		{
 			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
@@ -485,83 +476,27 @@ public class StandardEnvironmentTests {
 				//see https://download.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getenv(java.lang.String)
 				if (("getenv."+DISALLOWED_PROPERTY_NAME).equals(perm.getName())) {
 					throw new AccessControlException(
-							String.format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
+						String.format("Accessing the system environment variable [%s] is disallowed", DISALLOWED_PROPERTY_NAME));
 				}
 			}
 		};
-		System.setSecurityManager(securityManager);
 
-		{
-			Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
-			assertThat(systemEnvironment).isNotNull();
-			assertThat(systemEnvironment).isInstanceOf(ReadOnlySystemAttributesMap.class);
-			assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
-			assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME)).isNull();
-		}
-
-		System.setSecurityManager(oldSecurityManager);
-		getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
-		getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
-	}
-
-
-	@SuppressWarnings("unchecked")
-	public static Map<String, String> getModifiableSystemEnvironment() {
-		// for os x / linux
-		Class<?>[] classes = Collections.class.getDeclaredClasses();
-		Map<String, String> env = System.getenv();
-		for (Class<?> cl : classes) {
-			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
-				try {
-					Field field = cl.getDeclaredField("m");
-					field.setAccessible(true);
-					Object obj = field.get(env);
-					if (obj != null && obj.getClass().getName().equals("java.lang.ProcessEnvironment$StringEnvironment")) {
-						return (Map<String, String>) obj;
-					}
-				}
-				catch (Exception ex) {
-					throw new RuntimeException(ex);
-				}
+		try {
+			System.setSecurityManager(securityManager);
+			{
+				Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
+				assertThat(systemEnvironment).isNotNull();
+				assertThat(systemEnvironment).isInstanceOf(ReadOnlySystemAttributesMap.class);
+				assertThat(systemEnvironment.get(ALLOWED_PROPERTY_NAME)).isEqualTo(ALLOWED_PROPERTY_VALUE);
+				assertThat(systemEnvironment.get(DISALLOWED_PROPERTY_NAME)).isNull();
 			}
 		}
-
-		// for windows
-		Class<?> processEnvironmentClass;
-		try {
-			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		finally {
+			System.setSecurityManager(oldSecurityManager);
 		}
 
-		try {
-			Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
-			theCaseInsensitiveEnvironmentField.setAccessible(true);
-			Object obj = theCaseInsensitiveEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		}
-		catch (NoSuchFieldException ex) {
-			// do nothing
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		try {
-			Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
-			theEnvironmentField.setAccessible(true);
-			Object obj = theEnvironmentField.get(null);
-			return (Map<String, String>) obj;
-		}
-		catch (NoSuchFieldException ex) {
-			// do nothing
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		throw new IllegalStateException();
+		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(ALLOWED_PROPERTY_NAME);
+		EnvironmentTestUtils.getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
 
 }

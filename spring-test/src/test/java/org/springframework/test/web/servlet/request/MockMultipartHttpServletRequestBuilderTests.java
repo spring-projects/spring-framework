@@ -16,7 +16,7 @@
 
 package org.springframework.test.web.servlet.request;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;

@@ -21,9 +21,9 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -87,7 +87,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 	}
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		if (applicationContext == null) {
 			applicationContext = new ClassPathXmlApplicationContext(getConfigLocations());
@@ -103,7 +103,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 		return ECLIPSELINK_CONFIG_LOCATIONS;
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		if (this.transactionStatus != null && !this.transactionStatus.isCompleted()) {
 			endTransaction();
@@ -115,7 +115,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests {
 		assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isFalse();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void closeContext() {
 		if (applicationContext != null) {
 			applicationContext.close();

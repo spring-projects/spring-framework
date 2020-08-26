@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
@@ -158,8 +158,7 @@ public class HttpRangeTests {
 		ByteArrayResource resource = mock(ByteArrayResource.class);
 		given(resource.contentLength()).willReturn(-1L);
 		HttpRange range = HttpRange.createByteRange(0, 9);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				range.toResourceRegion(resource));
+		assertThatIllegalArgumentException().isThrownBy(() -> range.toResourceRegion(resource));
 	}
 
 	@Test
@@ -167,8 +166,15 @@ public class HttpRangeTests {
 		InputStreamResource resource = mock(InputStreamResource.class);
 		given(resource.contentLength()).willThrow(IOException.class);
 		HttpRange range = HttpRange.createByteRange(0, 9);
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				range.toResourceRegion(resource));
+		assertThatIllegalArgumentException().isThrownBy(() -> range.toResourceRegion(resource));
+	}
+
+	@Test // gh-23576
+	public void toResourceRegionStartingAtResourceByteCount() {
+		byte[] bytes = "Spring Framework".getBytes(StandardCharsets.UTF_8);
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+		HttpRange range = HttpRange.createByteRange(resource.contentLength());
+		assertThatIllegalArgumentException().isThrownBy(() -> range.toResourceRegion(resource));
 	}
 
 	@Test

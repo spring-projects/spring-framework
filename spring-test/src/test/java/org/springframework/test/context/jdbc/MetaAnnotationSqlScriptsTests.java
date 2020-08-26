@@ -19,15 +19,13 @@ package org.springframework.test.context.jdbc;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests that verify support for using {@link Sql @Sql} and
@@ -38,35 +36,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-public class MetaAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class MetaAnnotationSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
 	@MetaSql
-	public void metaSqlAnnotation() {
+	void metaSqlAnnotation() {
 		assertNumUsers(1);
 	}
 
 	@Test
 	@MetaSqlGroup
-	public void metaSqlGroupAnnotation() {
+	void metaSqlGroupAnnotation() {
 		assertNumUsers(1);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(expected);
 	}
 
 
 	@Sql({ "drop-schema.sql", "schema.sql", "data.sql" })
 	@Retention(RUNTIME)
 	@Target(METHOD)
-	static @interface MetaSql {
+	@interface MetaSql {
 	}
 
 	@SqlGroup({ @Sql("drop-schema.sql"), @Sql("schema.sql"), @Sql("data.sql") })
 	@Retention(RUNTIME)
 	@Target(METHOD)
-	static @interface MetaSqlGroup {
+	@interface MetaSqlGroup {
 	}
 
 }

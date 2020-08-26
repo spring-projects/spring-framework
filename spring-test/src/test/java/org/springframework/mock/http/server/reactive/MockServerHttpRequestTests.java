@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.server.reactive;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link MockServerHttpRequest}.
  * @author Rossen Stoyanchev
  */
-public class MockServerHttpRequestTests {
+class MockServerHttpRequestTests {
 
 	@Test
-	public void cookieHeaderSet() throws Exception {
+	void cookieHeaderSet() {
 		HttpCookie foo11 = new HttpCookie("foo1", "bar1");
 		HttpCookie foo12 = new HttpCookie("foo1", "bar2");
 		HttpCookie foo21 = new HttpCookie("foo2", "baz1");
@@ -46,7 +54,7 @@ public class MockServerHttpRequestTests {
 	}
 
 	@Test
-	public void queryParams() throws Exception {
+	void queryParams() {
 		MockServerHttpRequest request = MockServerHttpRequest.get("/foo bar?a=b")
 				.queryParam("name A", "value A1", "value A2")
 				.queryParam("name B", "value B1")
@@ -55,4 +63,21 @@ public class MockServerHttpRequestTests {
 		assertThat(request.getURI().toString()).isEqualTo("/foo%20bar?a=b&name%20A=value%20A1&name%20A=value%20A2&name%20B=value%20B1");
 	}
 
+	@ParameterizedTest
+	@MethodSource
+	void httpMethodNotNullOrEmpty(Executable executable) {
+		Exception ex = Assertions.assertThrows(IllegalArgumentException.class, executable);
+		assertThat(ex.getMessage()).contains("HTTP method is required.");
+	}
+
+	static Stream<Executable> httpMethodNotNullOrEmpty() {
+		String uriTemplate = "/foo bar?a=b";
+		return Stream.of(
+				() -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build(),
+				() -> MockServerHttpRequest.method((HttpMethod) null, uriTemplate).build(),
+				() -> MockServerHttpRequest.method((String) null, uriTemplate).build(),
+				() -> MockServerHttpRequest.method("", uriTemplate).build(),
+				() -> MockServerHttpRequest.method("   ", uriTemplate).build()
+		);
+	}
 }

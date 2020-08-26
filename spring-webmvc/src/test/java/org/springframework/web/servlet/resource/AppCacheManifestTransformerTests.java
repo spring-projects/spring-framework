@@ -19,15 +19,16 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +47,7 @@ public class AppCacheManifestTransformerTests {
 	private HttpServletRequest request;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
@@ -109,10 +110,10 @@ public class AppCacheManifestTransformerTests {
 
 		assertThat(content).as("not rewrite external resources")
 				.contains("//example.org/style.css")
-				.contains("http://example.org/image.png");
+				.contains("https://example.org/image.png");
 
 		assertThat(content).as("generate fingerprint")
-				.contains("# Hash: 4bf0338bcbeb0a5b3a4ec9ed8864107d");
+				.contains("# Hash: 65ebc023e50b2b731fcace2871f0dae3");
 	}
 
 	private Resource getResource(String filePath) {

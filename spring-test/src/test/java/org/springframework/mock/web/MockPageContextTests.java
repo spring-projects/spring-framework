@@ -18,7 +18,7 @@ package org.springframework.mock.web;
 
 import javax.servlet.jsp.PageContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rick Evans
  */
-public class MockPageContextTests {
+class MockPageContextTests {
 
 	private final String key = "foo";
 
@@ -36,7 +36,7 @@ public class MockPageContextTests {
 	private final MockPageContext ctx = new MockPageContext();
 
 	@Test
-	public void setAttributeWithNoScopeUsesPageScope() throws Exception {
+	void setAttributeWithNoScopeUsesPageScope() throws Exception {
 		ctx.setAttribute(key, value);
 		assertThat(ctx.getAttribute(key, PageContext.PAGE_SCOPE)).isEqualTo(value);
 		assertThat(ctx.getAttribute(key, PageContext.APPLICATION_SCOPE)).isNull();
@@ -45,7 +45,7 @@ public class MockPageContextTests {
 	}
 
 	@Test
-	public void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
+	void removeAttributeWithNoScopeSpecifiedRemovesValueFromAllScopes() throws Exception {
 		ctx.setAttribute(key, value, PageContext.APPLICATION_SCOPE);
 		ctx.removeAttribute(key);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 
 /**
- * A TransportHandler for sending messages via Server-Sent events:
+ * A TransportHandler for sending messages via Server-Sent Events:
  * <a href="https://dev.w3.org/html5/eventsource/">https://dev.w3.org/html5/eventsource/</a>.
  *
  * @author Rossen Stoyanchev
@@ -50,7 +50,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 	@Override
 	public boolean checkSessionType(SockJsSession session) {
-		return session instanceof EventSourceStreamingSockJsSession;
+		return (session instanceof EventSourceStreamingSockJsSession);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 	}
 
 
-	private class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
+	private static class EventSourceStreamingSockJsSession extends StreamingSockJsSession {
 
 		public EventSourceStreamingSockJsSession(String sessionId, SockJsServiceConfig config,
 				WebSocketHandler wsHandler, Map<String, Object> attributes) {
@@ -76,7 +76,7 @@ public class EventSourceTransportHandler extends AbstractHttpSendingTransportHan
 
 		@Override
 		protected byte[] getPrelude(ServerHttpRequest request) {
-			return new byte[] { '\r', '\n' };
+			return new byte[] {'\r', '\n'};
 		}
 	}
 

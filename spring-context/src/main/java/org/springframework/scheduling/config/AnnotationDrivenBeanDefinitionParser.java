@@ -81,7 +81,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 				if (StringUtils.hasText(exceptionHandler)) {
 					builder.addPropertyReference("exceptionHandler", exceptionHandler);
 				}
-				if (Boolean.valueOf(element.getAttribute(AopNamespaceUtils.PROXY_TARGET_CLASS_ATTRIBUTE))) {
+				if (Boolean.parseBoolean(element.getAttribute(AopNamespaceUtils.PROXY_TARGET_CLASS_ATTRIBUTE))) {
 					builder.addPropertyValue("proxyTargetClass", true);
 				}
 				registerPostProcessor(parserContext, builder, TaskManagementConfigUtils.ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME);

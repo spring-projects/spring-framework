@@ -47,6 +47,15 @@ public interface Opcodes {
   int ASM5 = 5 << 16 | 0 << 8;
   int ASM6 = 6 << 16 | 0 << 8;
   int ASM7 = 7 << 16 | 0 << 8;
+  int ASM8 = 8 << 16 | 0 << 8;
+  int ASM9 = 9 << 16 | 0 << 8;
+
+  /**
+   * <i>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
+   * will break existing code using it. Only code compiled with --enable-preview can use this.</i>
+   * <p>SPRING PATCH: no preview mode check for ASM 9 experimental, enabling it by default.
+   */
+  int ASM10_EXPERIMENTAL = 1 << 24 | 10 << 16 | 0 << 8;
 
   /*
    * Internal flags used to redirect calls to deprecated methods. For instance, if a visitOldStuff
@@ -269,6 +278,9 @@ public interface Opcodes {
   int V11 = 0 << 16 | 55;
   int V12 = 0 << 16 | 56;
   int V13 = 0 << 16 | 57;
+  int V14 = 0 << 16 | 58;
+  int V15 = 0 << 16 | 59;
+  int V16 = 0 << 16 | 60;
 
   /**
    * Version flag indicating that the class is using 'preview' features.
@@ -305,7 +317,7 @@ public interface Opcodes {
   int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter, module *
   int ACC_ANNOTATION = 0x2000; // class
   int ACC_ENUM = 0x4000; // class(?) field inner
-  int ACC_MANDATED = 0x8000; // parameter, module, module *
+  int ACC_MANDATED = 0x8000; // field, method, parameter, module, module *
   int ACC_MODULE = 0x8000; // class
 
   // ASM specific access flags.
@@ -313,6 +325,7 @@ public interface Opcodes {
   // access flags, and also to make sure that these flags are automatically filtered out when
   // written in class files (because access flags are stored using 16 bits only).
 
+  int ACC_RECORD = 0x10000; // class
   int ACC_DEPRECATED = 0x20000; // class, field, method
 
   // Possible values for the type operand of the NEWARRAY instruction.

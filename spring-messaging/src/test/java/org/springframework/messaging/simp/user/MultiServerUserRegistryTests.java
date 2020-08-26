@@ -22,8 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.messaging.Message;
@@ -39,25 +38,17 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class MultiServerUserRegistryTests {
+class MultiServerUserRegistryTests {
 
-	private SimpUserRegistry localRegistry;
+	private final SimpUserRegistry localRegistry = Mockito.mock(SimpUserRegistry.class);
 
-	private MultiServerUserRegistry registry;
+	private final MultiServerUserRegistry registry = new MultiServerUserRegistry(this.localRegistry);
 
-	private MessageConverter converter;
-
-
-	@Before
-	public void setup() throws Exception {
-		this.localRegistry = Mockito.mock(SimpUserRegistry.class);
-		this.registry = new MultiServerUserRegistry(this.localRegistry);
-		this.converter = new MappingJackson2MessageConverter();
-	}
+	private final MessageConverter converter = new MappingJackson2MessageConverter();
 
 
 	@Test
-	public void getUserFromLocalRegistry() throws Exception {
+	void getUserFromLocalRegistry() {
 		SimpUser user = Mockito.mock(SimpUser.class);
 		Set<SimpUser> users = Collections.singleton(user);
 		given(this.localRegistry.getUsers()).willReturn(users);
@@ -69,7 +60,7 @@ public class MultiServerUserRegistryTests {
 	}
 
 	@Test
-	public void getUserFromRemoteRegistry() throws Exception {
+	void getUserFromRemoteRegistry() {
 		// Prepare broadcast message from remote server
 		TestSimpUser testUser = new TestSimpUser("joe");
 		TestSimpSession testSession = new TestSimpSession("remote-sess");
@@ -100,7 +91,7 @@ public class MultiServerUserRegistryTests {
 	}
 
 	@Test
-	public void findSubscriptionsFromRemoteRegistry() throws Exception {
+	void findSubscriptionsFromRemoteRegistry() {
 		// Prepare broadcast message from remote server
 		TestSimpUser user1 = new TestSimpUser("joe");
 		TestSimpUser user2 = new TestSimpUser("jane");
@@ -133,7 +124,7 @@ public class MultiServerUserRegistryTests {
 	}
 
 	@Test  // SPR-13800
-	public void getSessionsWhenUserIsConnectedToMultipleServers() throws Exception {
+	void getSessionsWhenUserIsConnectedToMultipleServers() {
 		// Add user to local registry
 		TestSimpUser localUser = new TestSimpUser("joe");
 		TestSimpSession localSession = new TestSimpSession("sess123");
@@ -169,7 +160,7 @@ public class MultiServerUserRegistryTests {
 	}
 
 	@Test
-	public void purgeExpiredRegistries() throws Exception {
+	void purgeExpiredRegistries() {
 		// Prepare broadcast message from remote server
 		TestSimpUser testUser = new TestSimpUser("joe");
 		testUser.addSessions(new TestSimpSession("remote-sub"));

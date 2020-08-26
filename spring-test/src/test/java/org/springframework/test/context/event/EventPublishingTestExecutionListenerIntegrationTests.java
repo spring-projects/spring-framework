@@ -23,9 +23,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,7 @@ import org.springframework.test.context.event.annotation.BeforeTestClass;
 import org.springframework.test.context.event.annotation.BeforeTestExecution;
 import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import org.springframework.test.context.event.annotation.PrepareTestInstance;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
 
 import static java.lang.annotation.ElementType.METHOD;
@@ -83,7 +83,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	private final Method traceableTestMethod = ReflectionUtils.findMethod(ExampleTestCase.class, "traceableTest");
 
 
-	@After
+	@AfterEach
 	public void closeApplicationContext() {
 		this.testContext.markApplicationContextDirty(null);
 	}
@@ -182,7 +182,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	@interface Traceable {
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@ContextConfiguration(classes = TestEventListenerConfiguration.class)
 	public static class ExampleTestCase {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.ThrowableTypeAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
@@ -42,19 +43,19 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Phillip Webb
  * @author Sam Brannen
  */
-public class MergedAnnotationsRepeatableAnnotationTests {
+class MergedAnnotationsRepeatableAnnotationTests {
 
 	// See SPR-13973
 
 	@Test
-	public void inheritedAnnotationsWhenNonRepeatableThrowsException() {
+	void inheritedAnnotationsWhenNonRepeatableThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				getAnnotations(null, NonRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
 			.satisfies(this::nonRepeatableRequirements);
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenContainerMissingValueAttributeThrowsException() {
+	void inheritedAnnotationsWhenContainerMissingValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerMissingValueAttribute.class, InvalidRepeatable.class,
 						SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
@@ -62,7 +63,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenWhenNonArrayValueAttributeThrowsException() {
+	void inheritedAnnotationsWhenWhenNonArrayValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithNonArrayValueAttribute.class, InvalidRepeatable.class,
 						SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
@@ -70,7 +71,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenWrongComponentTypeThrowsException() {
+	void inheritedAnnotationsWhenWrongComponentTypeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithArrayValueAttributeButWrongComponentType.class,
 						InvalidRepeatable.class, SearchStrategy.INHERITED_ANNOTATIONS, getClass()))
@@ -78,7 +79,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenOnClassReturnsAnnotations() {
+	void inheritedAnnotationsWhenOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.INHERITED_ANNOTATIONS, RepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
@@ -86,7 +87,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenWhenOnSuperclassReturnsAnnotations() {
+	void inheritedAnnotationsWhenWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.INHERITED_ANNOTATIONS, SubRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
@@ -94,7 +95,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenComposedOnClassReturnsAnnotations() {
+	void inheritedAnnotationsWhenComposedOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.INHERITED_ANNOTATIONS, ComposedRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
@@ -102,7 +103,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
+	void inheritedAnnotationsWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.INHERITED_ANNOTATIONS,
 				ComposedRepeatableMixedWithContainerClass.class);
@@ -111,7 +112,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
+	void inheritedAnnotationsWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				SearchStrategy.INHERITED_ANNOTATIONS, ComposedContainerClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
@@ -119,7 +120,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
+	void inheritedAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
 				SearchStrategy.INHERITED_ANNOTATIONS, NoninheritedRepeatableClass.class);
 		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A",
@@ -127,7 +128,7 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void inheritedAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
+	void inheritedAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
 				SearchStrategy.INHERITED_ANNOTATIONS,
 				SubNoninheritedRepeatableClass.class);
@@ -135,101 +136,122 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 	}
 
 	@Test
-	public void exhaustiveWhenNonRepeatableThrowsException() {
+	void typeHierarchyWhenNonRepeatableThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				getAnnotations(null, NonRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+				getAnnotations(null, NonRepeatable.class, SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::nonRepeatableRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenContainerMissingValueAttributeThrowsException() {
+	void typeHierarchyWhenContainerMissingValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerMissingValueAttribute.class, InvalidRepeatable.class,
-						SearchStrategy.EXHAUSTIVE, getClass()))
+						SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::missingValueAttributeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenWhenNonArrayValueAttributeThrowsException() {
+	void typeHierarchyWhenWhenNonArrayValueAttributeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithNonArrayValueAttribute.class, InvalidRepeatable.class,
-						SearchStrategy.EXHAUSTIVE, getClass()))
+						SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::nonArrayValueAttributeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenWrongComponentTypeThrowsException() {
+	void typeHierarchyWhenWrongComponentTypeThrowsException() {
 		assertThatAnnotationConfigurationException().isThrownBy(() ->
 				getAnnotations(ContainerWithArrayValueAttributeButWrongComponentType.class,
-						InvalidRepeatable.class, SearchStrategy.EXHAUSTIVE, getClass()))
+						InvalidRepeatable.class, SearchStrategy.TYPE_HIERARCHY, getClass()))
 			.satisfies(this::wrongComponentTypeRequirements);
 	}
 
 	@Test
-	public void exhaustiveWhenOnClassReturnsAnnotations() {
+	void typeHierarchyWhenOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, RepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, RepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenWhenOnSuperclassReturnsAnnotations() {
+	void typeHierarchyWhenWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, SubRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, SubRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedOnClassReturnsAnnotations() {
+	void typeHierarchyWhenComposedOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, ComposedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, ComposedRepeatableClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
+	void typeHierarchyWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE,
+				SearchStrategy.TYPE_HIERARCHY,
 				ComposedRepeatableMixedWithContainerClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
+	void typeHierarchyWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
-				SearchStrategy.EXHAUSTIVE, ComposedContainerClass.class);
+				SearchStrategy.TYPE_HIERARCHY, ComposedContainerClass.class);
 		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B",
 				"C");
 	}
 
 	@Test
-	public void exhaustiveAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
+	void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
-				SearchStrategy.EXHAUSTIVE, NoninheritedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, NoninheritedRepeatableClass.class);
 		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A",
 				"B", "C");
 	}
 
 	@Test
-	public void exhaustiveAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
+	void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
-				SearchStrategy.EXHAUSTIVE, SubNoninheritedRepeatableClass.class);
+				SearchStrategy.TYPE_HIERARCHY, SubNoninheritedRepeatableClass.class);
 		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A",
 				"B", "C");
 	}
 
-	private <A extends Annotation> Set<A> getAnnotations(
-			Class<? extends Annotation> container, Class<A> repeatable,
-			SearchStrategy searchStrategy, AnnotatedElement element) {
+	@Test
+	void typeHierarchyAnnotationsWithLocalComposedAnnotationWhoseRepeatableMetaAnnotationsAreFiltered() {
+		Class<WithRepeatedMetaAnnotationsClass> element = WithRepeatedMetaAnnotationsClass.class;
+		SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
+		AnnotationFilter annotationFilter = PeteRepeat.class.getName()::equals;
+
+		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class, searchStrategy, element, annotationFilter);
+		assertThat(annotations).isEmpty();
+
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(element, searchStrategy,
+				RepeatableContainers.standardRepeatables(), annotationFilter);
+		Stream<Class<? extends Annotation>> annotationTypes = mergedAnnotations.stream()
+				.map(MergedAnnotation::synthesize)
+				.map(Annotation::annotationType);
+		assertThat(annotationTypes).containsExactly(WithRepeatedMetaAnnotations.class, Noninherited.class, Noninherited.class);
+	}
+
+	private <A extends Annotation> Set<A> getAnnotations(Class<? extends Annotation> container,
+			Class<A> repeatable, SearchStrategy searchStrategy, AnnotatedElement element) {
+
+		return getAnnotations(container, repeatable, searchStrategy, element, AnnotationFilter.PLAIN);
+	}
+
+	private <A extends Annotation> Set<A> getAnnotations(Class<? extends Annotation> container,
+			Class<A> repeatable, SearchStrategy searchStrategy, AnnotatedElement element, AnnotationFilter annotationFilter) {
+
 		RepeatableContainers containers = RepeatableContainers.of(repeatable, container);
-		MergedAnnotations annotations = MergedAnnotations.from(element,
-				searchStrategy, containers, AnnotationFilter.PLAIN);
-		return annotations.stream(repeatable).collect(
-				MergedAnnotationCollectors.toAnnotationSet());
+		MergedAnnotations annotations = MergedAnnotations.from(element, searchStrategy, containers, annotationFilter);
+		return annotations.stream(repeatable).collect(MergedAnnotationCollectors.toAnnotationSet());
 	}
 
 	private void nonRepeatableRequirements(Exception ex) {
@@ -412,6 +434,19 @@ public class MergedAnnotationsRepeatableAnnotationTests {
 
 	static class SubNoninheritedRepeatableClass extends NoninheritedRepeatableClass {
 
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@PeteRepeat("A")
+	@PeteRepeat("B")
+	@interface WithRepeatedMetaAnnotations {
+	}
+
+	@WithRepeatedMetaAnnotations
+	@PeteRepeat("C")
+	@Noninherited("X")
+	@Noninherited("Y")
+	static class WithRepeatedMetaAnnotationsClass {
 	}
 
 }

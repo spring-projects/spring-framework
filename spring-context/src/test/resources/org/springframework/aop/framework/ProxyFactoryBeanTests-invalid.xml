@@ -5,7 +5,7 @@
 
 	<!-- Same effect as noInterceptor names: also invalid -->
 	<bean id="emptyInterceptorNames" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="interfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="interfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value></value></property>
 	</bean>
 
@@ -14,7 +14,7 @@
 		Must have target after *.
 	-->
 	<bean id="globalsWithoutTarget" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="interfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="interfaces"><value>org.springframework.beans.testfixture.beans.ITestBean</value></property>
 		<property name="interceptorNames"><value>global*</value></property>
 	</bean>
 

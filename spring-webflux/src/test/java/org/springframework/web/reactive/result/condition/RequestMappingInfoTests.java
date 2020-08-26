@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 import org.springframework.web.util.pattern.PatternParseException;
@@ -47,8 +47,7 @@ import static org.springframework.web.reactive.result.method.RequestMappingInfo.
  */
 public class RequestMappingInfoTests {
 
-	// TODO: CORS pre-flight (see @Ignore)
-
+	// TODO: CORS pre-flight (see @Disabled)
 
 	@Test
 	public void createEmpty() {
@@ -62,6 +61,24 @@ public class RequestMappingInfoTests {
 		assertThat(info.getParamsCondition()).isNotNull();
 		assertThat(info.getHeadersCondition()).isNotNull();
 		assertThat(info.getCustomCondition()).isNull();
+
+		RequestMappingInfo anotherInfo = paths().build();
+		assertThat(info.getPatternsCondition()).isSameAs(anotherInfo.getPatternsCondition());
+		assertThat(info.getMethodsCondition()).isSameAs(anotherInfo.getMethodsCondition());
+		assertThat(info.getParamsCondition()).isSameAs(anotherInfo.getParamsCondition());
+		assertThat(info.getHeadersCondition()).isSameAs(anotherInfo.getHeadersCondition());
+		assertThat(info.getConsumesCondition()).isSameAs(anotherInfo.getConsumesCondition());
+		assertThat(info.getProducesCondition()).isSameAs(anotherInfo.getProducesCondition());
+		assertThat(info.getCustomCondition()).isSameAs(anotherInfo.getCustomCondition());
+
+		RequestMappingInfo result = info.combine(anotherInfo);
+		assertThat(info.getPatternsCondition()).isSameAs(result.getPatternsCondition());
+		assertThat(info.getMethodsCondition()).isSameAs(result.getMethodsCondition());
+		assertThat(info.getParamsCondition()).isSameAs(result.getParamsCondition());
+		assertThat(info.getHeadersCondition()).isSameAs(result.getHeadersCondition());
+		assertThat(info.getConsumesCondition()).isSameAs(result.getConsumesCondition());
+		assertThat(info.getProducesCondition()).isSameAs(result.getProducesCondition());
+		assertThat(info.getCustomCondition()).isSameAs(result.getCustomCondition());
 	}
 
 	@Test
@@ -274,7 +291,7 @@ public class RequestMappingInfoTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void preFlightRequest() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options("/foo")
 				.header("Origin", "https://domain.com")

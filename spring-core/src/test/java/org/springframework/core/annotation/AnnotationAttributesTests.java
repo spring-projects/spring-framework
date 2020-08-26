@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
 
@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @since 3.1.1
  */
-public class AnnotationAttributesTests {
+class AnnotationAttributesTests {
 
 	private AnnotationAttributes attributes = new AnnotationAttributes();
 
 
 	@Test
-	public void typeSafeAttributeAccess() {
+	void typeSafeAttributeAccess() {
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
 		nestedAttributes.put("value", 10);
 		nestedAttributes.put("name", "algernon");
@@ -72,15 +72,25 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void unresolvableClass() throws Exception {
+	void unresolvableClassWithClassNotFoundException() throws Exception {
 		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getClass("unresolvableClass"))
-			.withMessageContaining("myclass");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
+			.withMessageContaining("myclass")
+			.withCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	@Test
-	public void singleElementToSingleElementArrayConversionSupport() throws Exception {
+	void unresolvableClassWithLinkageError() throws Exception {
+		attributes.put("unresolvableClass", new LinkageError("myclass"));
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getClass("unresolvableClass"))
+			.withMessageContaining("myclass")
+			.withCauseInstanceOf(LinkageError.class);
+	}
+
+	@Test
+	void singleElementToSingleElementArrayConversionSupport() throws Exception {
 		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
 
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
@@ -108,7 +118,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void nestedAnnotations() throws Exception {
+	void nestedAnnotations() throws Exception {
 		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
 
 		attributes.put("filter", filter);
@@ -125,36 +135,36 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void getEnumWithNullAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum(null))
+	void getEnumWithNullAttributeName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum(null))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
-	public void getEnumWithEmptyAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum(""))
+	void getEnumWithEmptyAttributeName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum(""))
 			.withMessageContaining("must not be null or empty");
 	}
 
 	@Test
-	public void getEnumWithUnknownAttributeName() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum("bogus"))
+	void getEnumWithUnknownAttributeName() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum("bogus"))
 			.withMessageContaining("Attribute 'bogus' not found");
 	}
 
 	@Test
-	public void getEnumWithTypeMismatch() {
+	void getEnumWithTypeMismatch() {
 		attributes.put("color", "RED");
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				attributes.getEnum("color"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> attributes.getEnum("color"))
 			.withMessageContaining("Attribute 'color' is of type String, but Enum was expected");
 	}
 
 	@Test
-	public void getAliasedStringWithImplicitAliases() {
+	void getAliasedStringWithImplicitAliases() {
 		String value = "metaverse";
 		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 
@@ -178,7 +188,7 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void getAliasedStringArrayWithImplicitAliases() {
+	void getAliasedStringArrayWithImplicitAliases() {
 		String[] value = new String[] {"test.xml"};
 		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 

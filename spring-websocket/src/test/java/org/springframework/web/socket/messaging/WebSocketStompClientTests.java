@@ -20,12 +20,12 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.stomp.ConnectionHandlingStompSession;
@@ -46,6 +46,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketClient;
+import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -64,7 +65,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class WebSocketStompClientTests {
 
 	@Mock
@@ -83,7 +84,7 @@ public class WebSocketStompClientTests {
 	private SettableListenableFuture<WebSocketSession> handshakeFuture;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		WebSocketClient webSocketClient = mock(WebSocketClient.class);
 		this.stompClient = new TestWebSocketStompClient(webSocketClient);
@@ -319,9 +320,12 @@ public class WebSocketStompClientTests {
 
 	@SuppressWarnings("unchecked")
 	private TcpConnection<byte[]> getTcpConnection() throws Exception {
-		WebSocketHandler webSocketHandler = connect();
-		webSocketHandler.afterConnectionEstablished(this.webSocketSession);
-		return (TcpConnection<byte[]>) webSocketHandler;
+		WebSocketHandler handler = connect();
+		handler.afterConnectionEstablished(this.webSocketSession);
+		if (handler instanceof WebSocketHandlerDecorator) {
+			handler = ((WebSocketHandlerDecorator) handler).getLastHandler();
+		}
+		return (TcpConnection<byte[]>) handler;
 	}
 
 	private void testInactivityTaskScheduling(Runnable runnable, long delay, long sleepTime)

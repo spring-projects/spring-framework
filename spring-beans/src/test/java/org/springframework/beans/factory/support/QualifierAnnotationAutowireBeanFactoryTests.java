@@ -21,8 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -73,7 +73,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 				new DependencyDescriptor(Person.class.getDeclaredField("name"), true))).isFalse();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithFieldDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -133,7 +133,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithConstructorDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -155,7 +155,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		assertThat(lbf.isAutowireCandidate(MARK, qualifiedDescriptor)).isFalse();
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testAutowireCandidateWithMethodDescriptor() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();

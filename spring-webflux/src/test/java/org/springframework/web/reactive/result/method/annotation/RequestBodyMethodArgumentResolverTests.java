@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,32 +22,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Maybe;
-import org.junit.Before;
-import org.junit.Test;
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Observable;
-import rx.RxReactiveStreams;
-import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.web.method.MvcAnnotationPredicates.requestBody;
+import static org.springframework.web.testfixture.method.MvcAnnotationPredicates.requestBody;
 
 /**
  * Unit tests for {@link RequestBodyMethodArgumentResolver}. When adding a test also
@@ -63,7 +63,7 @@ public class RequestBodyMethodArgumentResolverTests {
 	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(StringDecoder.allMimeTypes()));
@@ -150,14 +150,14 @@ public class RequestBodyMethodArgumentResolverTests {
 	public void emptyBodyWithSingle() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Single.class, String.class);
 		Single<String> single = resolveValueWithEmptyBody(param);
-		StepVerifier.create(RxReactiveStreams.toPublisher(single))
+		StepVerifier.create(single.toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
 		param = this.testMethod.annot(requestBody().notRequired()).arg(Single.class, String.class);
 		single = resolveValueWithEmptyBody(param);
-		StepVerifier.create(RxReactiveStreams.toPublisher(single))
+		StepVerifier.create(single.toFlowable())
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
@@ -184,14 +184,14 @@ public class RequestBodyMethodArgumentResolverTests {
 	public void emptyBodyWithObservable() {
 		MethodParameter param = this.testMethod.annot(requestBody()).arg(Observable.class, String.class);
 		Observable<String> observable = resolveValueWithEmptyBody(param);
-		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
+		StepVerifier.create(observable.toFlowable(BackpressureStrategy.BUFFER))
 				.expectNextCount(0)
 				.expectError(ServerWebInputException.class)
 				.verify();
 
 		param = this.testMethod.annot(requestBody().notRequired()).arg(Observable.class, String.class);
 		observable = resolveValueWithEmptyBody(param);
-		StepVerifier.create(RxReactiveStreams.toPublisher(observable))
+		StepVerifier.create(observable.toFlowable(BackpressureStrategy.BUFFER))
 				.expectNextCount(0)
 				.expectComplete()
 				.verify();
@@ -248,19 +248,15 @@ public class RequestBodyMethodArgumentResolverTests {
 			@RequestBody Mono<String> mono,
 			@RequestBody Flux<String> flux,
 			@RequestBody Single<String> single,
-			@RequestBody io.reactivex.Single<String> rxJava2Single,
-			@RequestBody Maybe<String> rxJava2Maybe,
-			@RequestBody Observable<String> obs,
-			@RequestBody io.reactivex.Observable<String> rxjava2Obs,
+			@RequestBody Maybe<String> maybe,
+			@RequestBody Observable<String> observable,
 			@RequestBody CompletableFuture<String> future,
 			@RequestBody(required = false) String stringNotRequired,
 			@RequestBody(required = false) Mono<String> monoNotRequired,
 			@RequestBody(required = false) Flux<String> fluxNotRequired,
 			@RequestBody(required = false) Single<String> singleNotRequired,
-			@RequestBody(required = false) io.reactivex.Single<String> rxJava2SingleNotRequired,
-			@RequestBody(required = false) Maybe<String> rxJava2MaybeNotRequired,
-			@RequestBody(required = false) Observable<String> obsNotRequired,
-			@RequestBody(required = false) io.reactivex.Observable<String> rxjava2ObsNotRequired,
+			@RequestBody(required = false) Maybe<String> maybeNotRequired,
+			@RequestBody(required = false) Observable<String> observableNotRequired,
 			@RequestBody(required = false) CompletableFuture<String> futureNotRequired,
 			@RequestBody(required = false) Map<?, ?> mapNotRequired,
 			String notAnnotated) {}

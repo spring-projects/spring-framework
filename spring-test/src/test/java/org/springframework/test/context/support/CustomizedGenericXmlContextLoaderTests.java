@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericApplicationContext;
 
@@ -34,13 +34,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.5
  */
-public class CustomizedGenericXmlContextLoaderTests {
+class CustomizedGenericXmlContextLoaderTests {
 
 	@Test
-	public void customizeContext() throws Exception {
-
-		final StringBuilder builder = new StringBuilder();
-		final String expectedContents = "customizeContext() was called";
+	void customizeContext() throws Exception {
+		StringBuilder builder = new StringBuilder();
+		String expectedContents = "customizeContext() was called";
 
 		new GenericXmlContextLoader() {
 

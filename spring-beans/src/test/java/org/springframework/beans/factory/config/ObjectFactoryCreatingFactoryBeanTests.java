@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,24 @@
 package org.springframework.beans.factory.config;
 
 import java.util.Date;
+
 import javax.inject.Provider;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Colin Sampaleanu
@@ -46,7 +47,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	private DefaultListableBeanFactory beanFactory;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
@@ -54,7 +55,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		this.beanFactory.setSerializationId("test");
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		this.beanFactory.setSerializationId(null);
 	}
@@ -71,12 +72,11 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	public void testFactorySerialization() throws Exception {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
 
-		objectFactory = (ObjectFactory) SerializationTestUtils.serializeAndDeserialize(objectFactory);
+		objectFactory = SerializationTestUtils.serializeAndDeserialize(objectFactory);
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
@@ -94,12 +94,11 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	public void testProviderSerialization() throws Exception {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();
 
-		provider = (Provider) SerializationTestUtils.serializeAndDeserialize(provider);
+		provider = SerializationTestUtils.serializeAndDeserialize(provider);
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();

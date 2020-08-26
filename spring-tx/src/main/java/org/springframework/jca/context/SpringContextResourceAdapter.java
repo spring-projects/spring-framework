@@ -246,7 +246,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof SpringContextResourceAdapter &&
 				ObjectUtils.nullSafeEquals(getContextConfigLocation(),
 						((SpringContextResourceAdapter) other).getContextConfigLocation())));

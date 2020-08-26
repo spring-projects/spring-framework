@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.http;
 
-import java.time.Duration;
+import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link ResponseCookie}.
@@ -29,37 +30,65 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ResponseCookieTests {
 
 	@Test
-	public void defaultValues() {
+	public void basic() {
+
+		assertThat(ResponseCookie.from("id", null).build().toString()).isEqualTo("id=");
 		assertThat(ResponseCookie.from("id", "1fWa").build().toString()).isEqualTo("id=1fWa");
+
+		ResponseCookie cookie = ResponseCookie.from("id", "1fWa")
+				.domain("abc").path("/path").maxAge(0).httpOnly(true).secure(true).sameSite("None")
+				.build();
+
+		assertThat(cookie.toString()).isEqualTo("id=1fWa; Path=/path; Domain=abc; " +
+				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
+				"Secure; HttpOnly; SameSite=None");
 	}
 
 	@Test
-	public void httpOnlyStrictSecureWithDomainAndPath() {
-		assertThat(ResponseCookie.from("id", "1fWa").domain("spring.io").path("/projects")
-				.httpOnly(true).secure(true).sameSite("strict").build().toString()).isEqualTo("id=1fWa; Path=/projects; Domain=spring.io; Secure; HttpOnly; SameSite=strict");
+	public void nameChecks() {
+
+		Arrays.asList("id", "i.d.", "i-d", "+id", "i*d", "i$d", "#id")
+				.forEach(name -> ResponseCookie.from(name, "value").build());
+
+		Arrays.asList("\"id\"", "id\t", "i\td", "i d", "i;d", "{id}", "[id]", "\"", "id\u0091")
+				.forEach(name -> assertThatThrownBy(() -> ResponseCookie.from(name, "value").build())
+						.hasMessageContaining("RFC2616 token"));
 	}
 
 	@Test
-	public void maxAge() {
+	public void valueChecks() {
 
-		Duration maxAge = Duration.ofDays(365);
-		String expires = HttpHeaders.formatDate(System.currentTimeMillis() + maxAge.toMillis());
-		expires = expires.substring(0, expires.indexOf(":") + 1);
+		Arrays.asList("1fWa", "", null, "1f=Wa", "1f-Wa", "1f/Wa", "1.f.W.a.")
+				.forEach(value -> ResponseCookie.from("id", value).build());
 
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge).build().toString())
-				.startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires)
-				.endsWith(" GMT");
-
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(maxAge.getSeconds()).build().toString())
-				.startsWith("id=1fWa; Max-Age=31536000; Expires=" + expires)
-				.endsWith(" GMT");
+		Arrays.asList("1f\tWa", "\t", "1f Wa", "1f;Wa", "\"1fWa", "1f\\Wa", "1f\"Wa", "\"", "1fWa\u0005", "1f\u0091Wa")
+				.forEach(value -> assertThatThrownBy(() -> ResponseCookie.from("id", value).build())
+						.hasMessageContaining("RFC2616 cookie value"));
 	}
 
 	@Test
-	public void maxAge0() {
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(Duration.ofSeconds(0)).build().toString()).isEqualTo("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+	public void domainChecks() {
 
-		assertThat(ResponseCookie.from("id", "1fWa").maxAge(0).build().toString()).isEqualTo("id=1fWa; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+		Arrays.asList("abc", "abc.org", "abc-def.org", "abc3.org", ".abc.org")
+				.forEach(domain -> ResponseCookie.from("n", "v").domain(domain).build());
+
+		Arrays.asList("-abc.org", "abc.org.", "abc.org-")
+				.forEach(domain -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").domain(domain).build())
+						.hasMessageContaining("Invalid first/last char"));
+
+		Arrays.asList("abc..org", "abc.-org", "abc-.org")
+				.forEach(domain -> assertThatThrownBy(() -> ResponseCookie.from("n", "v").domain(domain).build())
+						.hasMessageContaining("invalid cookie domain char"));
 	}
 
+	@Test // gh-24663
+	public void domainWithEmptyDoubleQuotes() {
+
+		Arrays.asList("\"\"", "\t\"\" ", " \" \t \"\t")
+				.forEach(domain -> {
+					ResponseCookie cookie = ResponseCookie.fromClientResponse("id", "1fWa").domain(domain).build();
+					assertThat(cookie.getDomain()).isNull();
+				});
+
+	}
 }

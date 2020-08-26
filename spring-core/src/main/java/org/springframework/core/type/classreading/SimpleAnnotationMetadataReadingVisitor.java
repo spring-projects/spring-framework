@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * ASM class visitor to create {@link SimpleAnnotationMetadata}.
+ * ASM class visitor that creates {@link SimpleAnnotationMetadata}.
  *
  * @author Phillip Webb
  * @since 5.2
@@ -189,7 +189,7 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (this == obj) {
 				return true;
 			}

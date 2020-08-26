@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package org.springframework.web.reactive.result.view.script
+package org.springframework.web.servlet.view.script
 
 import kotlin.script.templates.standard.ScriptTemplateWithBindings
 

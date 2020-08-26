@@ -22,11 +22,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.Nullable;
@@ -52,14 +51,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link WebSocketStompClient}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class WebSocketStompClientIntegrationTests {
+class WebSocketStompClientIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketStompClientIntegrationTests.class);
 
-	@Rule
-	public final TestName testName = new TestName();
 
 	private WebSocketStompClient stompClient;
 
@@ -68,10 +67,9 @@ public class WebSocketStompClientIntegrationTests {
 	private AnnotationConfigWebApplicationContext wac;
 
 
-	@Before
-	public void setUp() throws Exception {
-
-		logger.debug("Setting up before '" + this.testName.getMethodName() + "'");
+	@BeforeEach
+	void setUp(TestInfo testInfo) throws Exception {
+		logger.debug("Setting up before '" + testInfo.getTestMethod().get().getName() + "'");
 
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(TestConfig.class);
@@ -87,8 +85,8 @@ public class WebSocketStompClientIntegrationTests {
 		this.stompClient.setMessageConverter(new StringMessageConverter());
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		try {
 			this.server.undeployConfig();
 		}
@@ -111,7 +109,7 @@ public class WebSocketStompClientIntegrationTests {
 
 
 	@Test
-	public void publishSubscribe() throws Exception {
+	void publishSubscribe() throws Exception {
 
 		String url = "ws://127.0.0.1:" + this.server.getPort() + "/stomp";
 

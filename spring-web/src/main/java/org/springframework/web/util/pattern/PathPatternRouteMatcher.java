@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util.pattern;
 
 import java.util.Comparator;
@@ -39,6 +40,20 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 	private final Map<String, PathPattern> pathPatternCache = new ConcurrentHashMap<>();
 
 
+	/**
+	 * Default constructor with {@link PathPatternParser} customized for
+	 * {@link org.springframework.http.server.PathContainer.Options#MESSAGE_ROUTE MESSAGE_ROUTE}
+	 * and without matching of trailing separator.
+	 */
+	public PathPatternRouteMatcher() {
+		this.parser = new PathPatternParser();
+		this.parser.setPathOptions(PathContainer.Options.MESSAGE_ROUTE);
+		this.parser.setMatchOptionalTrailingSeparator(false);
+	}
+
+	/**
+	 * Constructor with given {@link PathPatternParser}.
+	 */
 	public PathPatternRouteMatcher(PathPatternParser parser) {
 		Assert.notNull(parser, "PathPatternParser must not be null");
 		this.parser = parser;
@@ -47,7 +62,7 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 
 	@Override
 	public Route parseRoute(String routeValue) {
-		return new PathContainerRoute(PathContainer.parsePath(routeValue));
+		return new PathContainerRoute(PathContainer.parsePath(routeValue, this.parser.getPathOptions()));
 	}
 
 	@Override
@@ -100,6 +115,12 @@ public class PathPatternRouteMatcher implements RouteMatcher {
 		@Override
 		public String value() {
 			return this.pathContainer.value();
+		}
+
+
+		@Override
+		public String toString() {
+			return value();
 		}
 	}
 

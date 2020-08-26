@@ -23,7 +23,7 @@ import javax.management.Notification;
 import javax.management.ObjectName;
 import javax.management.RuntimeOperationsException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.export.SpringModelMBean;
 

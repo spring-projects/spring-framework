@@ -18,8 +18,8 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -32,7 +32,7 @@ public class ByteArrayHttpMessageConverterTests {
 
 	private ByteArrayHttpMessageConverter converter;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		converter = new ByteArrayHttpMessageConverter();
 	}

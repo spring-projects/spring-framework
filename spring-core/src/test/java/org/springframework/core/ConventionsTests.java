@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import io.reactivex.Observable;
-import io.reactivex.Single;
-import org.junit.Test;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,43 +41,43 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rob Harrop
  * @author Sam Brannen
  */
-public class ConventionsTests {
+class ConventionsTests {
 
 	@Test
-	public void simpleObject() {
+	void simpleObject() {
 		assertThat(Conventions.getVariableName(new TestObject())).as("Incorrect singular variable name").isEqualTo("testObject");
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(TestObject.class))).as("Incorrect singular variable name").isEqualTo("testObject");
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(TestObject.class))).as("Incorrect singular variable name").isEqualTo("testObject");
 	}
 
 	@Test
-	public void array() {
+	void array() {
 		Object actual = Conventions.getVariableName(new TestObject[0]);
 		assertThat(actual).as("Incorrect plural array form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void list() {
+	void list() {
 		assertThat(Conventions.getVariableName(Collections.singletonList(new TestObject()))).as("Incorrect plural List form").isEqualTo("testObjectList");
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(List.class))).as("Incorrect plural List form").isEqualTo("testObjectList");
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(List.class))).as("Incorrect plural List form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void emptyList() {
+	void emptyList() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				Conventions.getVariableName(new ArrayList<>()));
 	}
 
 	@Test
-	public void set() {
+	void set() {
 		assertThat(Conventions.getVariableName(Collections.singleton(new TestObject()))).as("Incorrect plural Set form").isEqualTo("testObjectList");
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Set.class))).as("Incorrect plural Set form").isEqualTo("testObjectList");
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Set.class))).as("Incorrect plural Set form").isEqualTo("testObjectList");
 	}
 
 	@Test
-	public void reactiveParameters() {
+	void reactiveParameters() {
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Mono.class))).isEqualTo("testObjectMono");
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Flux.class))).isEqualTo("testObjectFlux");
 		assertThat(Conventions.getVariableNameForParameter(getMethodParameter(Single.class))).isEqualTo("testObjectSingle");
@@ -85,7 +85,7 @@ public class ConventionsTests {
 	}
 
 	@Test
-	public void reactiveReturnTypes() {
+	void reactiveReturnTypes() {
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Mono.class))).isEqualTo("testObjectMono");
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Flux.class))).isEqualTo("testObjectFlux");
 		assertThat(Conventions.getVariableNameForReturnType(getMethodForReturnType(Single.class))).isEqualTo("testObjectSingle");
@@ -93,14 +93,14 @@ public class ConventionsTests {
 	}
 
 	@Test
-	public void attributeNameToPropertyName() {
+	void attributeNameToPropertyName() {
 		assertThat(Conventions.attributeNameToPropertyName("transaction-manager")).isEqualTo("transactionManager");
 		assertThat(Conventions.attributeNameToPropertyName("pointcut-ref")).isEqualTo("pointcutRef");
 		assertThat(Conventions.attributeNameToPropertyName("lookup-on-startup")).isEqualTo("lookupOnStartup");
 	}
 
 	@Test
-	public void getQualifiedAttributeName() {
+	void getQualifiedAttributeName() {
 		String baseName = "foo";
 		Class<String> cls = String.class;
 		String desiredResult = "java.lang.String.foo";

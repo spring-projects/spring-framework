@@ -16,16 +16,14 @@
 
 package org.springframework.test.context.web;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.context.web.WebAppConfigurationBootstrapWithTests.CustomWebTestContextBootstrapper;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -39,18 +37,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @since 4.3
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@WebAppConfiguration
+@SpringJUnitWebConfig
 @BootstrapWith(CustomWebTestContextBootstrapper.class)
-public class WebAppConfigurationBootstrapWithTests {
+class WebAppConfigurationBootstrapWithTests {
 
 	@Autowired
 	WebApplicationContext wac;
 
 
 	@Test
-	public void webApplicationContextIsLoaded() {
+	void webApplicationContextIsLoaded() {
 		// from: src/test/webapp/resources/Spring.js
 		Resource resource = wac.getResource("/resources/Spring.js");
 		assertThat(resource).isNotNull();

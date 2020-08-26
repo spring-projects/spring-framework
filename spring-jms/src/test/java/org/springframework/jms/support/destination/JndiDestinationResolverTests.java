@@ -20,7 +20,7 @@ import javax.jms.Destination;
 import javax.jms.Session;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubTopic;
 

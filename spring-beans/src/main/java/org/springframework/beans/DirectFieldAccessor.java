@@ -52,7 +52,7 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
 	/**
 	 * Create a new DirectFieldAccessor for the given object.
-	 * @param object object wrapped by this DirectFieldAccessor
+	 * @param object the object wrapped by this DirectFieldAccessor
 	 */
 	public DirectFieldAccessor(Object object) {
 		super(object);
@@ -61,7 +61,7 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 	/**
 	 * Create a new DirectFieldAccessor for the given object,
 	 * registering a nested path that the object is in.
-	 * @param object object wrapped by this DirectFieldAccessor
+	 * @param object the object wrapped by this DirectFieldAccessor
 	 * @param nestedPath the nested path of the object
 	 * @param parent the containing DirectFieldAccessor (must not be {@code null})
 	 */

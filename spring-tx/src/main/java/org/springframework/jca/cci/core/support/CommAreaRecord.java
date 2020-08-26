@@ -19,6 +19,7 @@ package org.springframework.jca.cci.core.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.resource.cci.Record;
 import javax.resource.cci.Streamable;
 
@@ -31,7 +32,10 @@ import org.springframework.util.FileCopyUtils;
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.jca.cci.object.MappingCommAreaOperation
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class CommAreaRecord implements Record, Streamable {
 

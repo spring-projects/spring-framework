@@ -63,7 +63,9 @@ import org.springframework.util.Assert;
  * @see HessianProxyFactoryBean
  * @see com.caucho.hessian.client.HessianProxyFactory
  * @see com.caucho.hessian.server.HessianServlet
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements MethodInterceptor {
 
 	private HessianProxyFactory proxyFactory = new HessianProxyFactory();

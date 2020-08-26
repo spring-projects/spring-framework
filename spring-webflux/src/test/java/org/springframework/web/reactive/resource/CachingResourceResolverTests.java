@@ -21,24 +21,27 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
+import org.springframework.web.reactive.resource.GzipSupport.GzippedFiles;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.mock.http.server.reactive.test.MockServerHttpRequest.get;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link CachingResourceResolver}.
  *
  * @author Rossen Stoyanchev
  */
+@ExtendWith(GzipSupport.class)
 public class CachingResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
@@ -51,7 +54,7 @@ public class CachingResourceResolverTests {
 	private List<Resource> locations;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 
 		this.cache = new ConcurrentMapCache("resourceCache");
@@ -116,10 +119,10 @@ public class CachingResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceAcceptEncodingInCacheKey() throws IOException {
+	public void resolveResourceAcceptEncodingInCacheKey(GzippedFiles gzippedFiles) throws IOException {
 
 		String file = "bar.css";
-		EncodedResourceResolverTests.createGzippedFile(file);
+		gzippedFiles.create(file);
 
 		// 1. Resolve plain resource
 

@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation.aspectj;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.aspectj.ShouldBeConfiguredBySpring;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

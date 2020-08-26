@@ -36,25 +36,25 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.beans.testfixture.beans.BooleanTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.NumberTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.BooleanTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
-import org.springframework.tests.sample.beans.NumberTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -62,6 +62,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.
@@ -76,14 +77,12 @@ import static org.assertj.core.api.Assertions.within;
  */
 public abstract class AbstractPropertyAccessorTests {
 
-
 	protected abstract AbstractPropertyAccessor createAccessor(Object target);
 
 
 	@Test
 	public void createWithNullTarget() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				createAccessor(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> createAccessor(null));
 	}
 
 	@Test
@@ -114,8 +113,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isReadablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isReadableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isReadableProperty(null));
 	}
 
 	@Test
@@ -129,8 +127,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void isWritablePropertyNull() {
 		AbstractPropertyAccessor accessor = createAccessor(new NoRead());
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				accessor.isWritableProperty(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> accessor.isWritableProperty(null));
 	}
 
 	@Test
@@ -303,7 +300,7 @@ public abstract class AbstractPropertyAccessorTests {
 
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		accessor.setPropertyValue("spouse", kerry);
-		accessor.setPropertyValue("spouse.age", new Integer(35));
+		accessor.setPropertyValue("spouse.age", 35);
 		accessor.setPropertyValue("spouse.name", "Kerry");
 		accessor.setPropertyValue("spouse.company", "Lewisham");
 		assertThat(kerry.getName().equals("Kerry")).as("kerry name is Kerry").isTrue();
@@ -392,7 +389,7 @@ public abstract class AbstractPropertyAccessorTests {
 		ITestBean target = new TestBean("rod", 31);
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		assertThatExceptionOfType(NullValueInNestedPathException.class).isThrownBy(() ->
-				accessor.setPropertyValue("spouse.age", new Integer(31)))
+				accessor.setPropertyValue("spouse.age", 31))
 			.satisfies(ex -> assertThat(ex.getPropertyName()).isEqualTo("spouse"));
 	}
 
@@ -485,7 +482,7 @@ public abstract class AbstractPropertyAccessorTests {
 		int newAge = 65;
 		String newTouchy = "valid";
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		accessor.setPropertyValue("age", new Integer(newAge));
+		accessor.setPropertyValue("age", newAge);
 		accessor.setPropertyValue(new PropertyValue("name", newName));
 		accessor.setPropertyValue(new PropertyValue("touchy", newTouchy));
 		assertThat(target.getName().equals(newName)).as("Name property should have changed").isTrue();
@@ -518,7 +515,6 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("spouse", null);
 		assertThat(target.getSpouse() == null).as("spouse is now null").isTrue();
 	}
-
 
 	@Test
 	public void setIndexedPropertyIgnored() {
@@ -622,13 +618,13 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setNumberPropertiesWithCoercion() {
 		NumberTestBean target = new NumberTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		accessor.setPropertyValue("short2", new Integer(2));
-		accessor.setPropertyValue("int2", new Long(8));
+		accessor.setPropertyValue("short2", 2);
+		accessor.setPropertyValue("int2", 8L);
 		accessor.setPropertyValue("long2", new BigInteger("6"));
-		accessor.setPropertyValue("bigInteger", new Integer(3));
-		accessor.setPropertyValue("float2", new Double(8.1));
+		accessor.setPropertyValue("bigInteger", 3L);
+		accessor.setPropertyValue("float2", 8.1D);
 		accessor.setPropertyValue("double2", new BigDecimal(6.1));
-		accessor.setPropertyValue("bigDecimal", new Float(4.0));
+		accessor.setPropertyValue("bigDecimal", 4.0F);
 		assertThat(new Short("2").equals(accessor.getPropertyValue("short2"))).as("Correct short2 value").isTrue();
 		assertThat(new Short("2").equals(target.getShort2())).as("Correct short2 value").isTrue();
 		assertThat(new Integer("8").equals(accessor.getPropertyValue("int2"))).as("Correct int2 value").isTrue();
@@ -692,7 +688,6 @@ public abstract class AbstractPropertyAccessorTests {
 
 		assertThat(target.getMyPrimitiveDouble()).isCloseTo(Double.MAX_VALUE, within(0.001));
 		assertThat(target.getMyDouble().doubleValue()).isCloseTo(Double.MAX_VALUE, within(0.001));
-
 	}
 
 	@Test
@@ -891,14 +886,14 @@ public abstract class AbstractPropertyAccessorTests {
 		result.add(target.intArray[0]);
 		result.add(target.intArray[1]);
 		result.add(target.intArray[2]);
-		assertThat(result.contains(new Integer(4)) && result.contains(new Integer(5)) &&
-		result.contains(new Integer(3))).as("correct values").isTrue();
+		assertThat(result.contains(4) && result.contains(5) &&
+		result.contains(3)).as("correct values").isTrue();
 
 		accessor.setPropertyValue("intArray", new Integer[] {1});
 		assertThat(target.intArray.length == 1).as("intArray length = 4").isTrue();
 		assertThat(target.intArray[0] == 1).as("correct values").isTrue();
 
-		accessor.setPropertyValue("intArray", new Integer(1));
+		accessor.setPropertyValue("intArray", 1);
 		assertThat(target.intArray.length == 1).as("intArray length = 4").isTrue();
 		assertThat(target.intArray[0] == 1).as("correct values").isTrue();
 
@@ -918,7 +913,7 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.registerCustomEditor(int.class, new PropertyEditorSupport() {
 			@Override
 			public void setAsText(String text) {
-				setValue(new Integer(Integer.parseInt(text) + 1));
+				setValue(Integer.parseInt(text) + 1);
 			}
 		});
 
@@ -932,7 +927,7 @@ public abstract class AbstractPropertyAccessorTests {
 		assertThat(target.intArray[0] == 4 && target.intArray[1] == 5 &&
 		target.intArray[2] == 2 && target.intArray[3] == 3).as("correct values").isTrue();
 
-		accessor.setPropertyValue("intArray", new Integer(1));
+		accessor.setPropertyValue("intArray", 1);
 		assertThat(target.intArray.length == 1).as("intArray length = 4").isTrue();
 		assertThat(target.intArray[0] == 1).as("correct values").isTrue();
 
@@ -966,8 +961,8 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void setPrimitiveArrayPropertyLargeMatching() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
 
 		PrimitiveArrayBean target = new PrimitiveArrayBean();
@@ -1027,7 +1022,7 @@ public abstract class AbstractPropertyAccessorTests {
 			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
-					super.setValue(new Integer((Integer) value + 1));
+					super.setValue((Integer) value + 1);
 				}
 			}
 		});
@@ -1046,7 +1041,7 @@ public abstract class AbstractPropertyAccessorTests {
 			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
-					super.setValue(new Integer((Integer) value + 1));
+					super.setValue((Integer) value + 1);
 				}
 			}
 		});
@@ -1104,7 +1099,6 @@ public abstract class AbstractPropertyAccessorTests {
 		accessor.setPropertyValue("object", array);
 		assertThat(target.getObject()).isEqualTo(array);
 	}
-
 
 	@Test
 	public void setCollectionProperty() {
@@ -1216,16 +1210,16 @@ public abstract class AbstractPropertyAccessorTests {
 		AbstractPropertyAccessor accessor = createAccessor(target);
 		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
-		accessor.setPropertyValue("collection", new Integer(0));
+		accessor.setPropertyValue("collection", 0);
 		List<Integer> set = new LinkedList<>();
 		set.add(1);
-		accessor.setPropertyValue("set", new Integer(1));
+		accessor.setPropertyValue("set", 1);
 		List<Integer> sortedSet = new ArrayList<>();
 		sortedSet.add(2);
-		accessor.setPropertyValue("sortedSet", new Integer(2));
+		accessor.setPropertyValue("sortedSet", 2);
 		Set<Integer> list = new HashSet<>();
 		list.add(3);
-		accessor.setPropertyValue("list", new Integer(3));
+		accessor.setPropertyValue("list", 3);
 		assertThat(target.getCollection().size()).isEqualTo(1);
 		assertThat(target.getCollection().containsAll(coll)).isTrue();
 		assertThat(target.getSet().size()).isEqualTo(1);
@@ -1915,9 +1909,8 @@ public abstract class AbstractPropertyAccessorTests {
 
 	@SuppressWarnings("unused")
 	private static class DifferentTestBean extends TestBean {
-		// class to test naming of beans in a error message
+		// class to test naming of beans in an error message
 	}
-
 
 	@SuppressWarnings("unused")
 	private static class NumberPropertyBean {

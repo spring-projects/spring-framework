@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link MonoToListenableFutureAdapter}.
  * @author Rossen Stoyanchev
  */
-public class MonoToListenableFutureAdapterTests {
+class MonoToListenableFutureAdapterTests {
 
 	@Test
-	public void success() {
+	void success() {
 		String expected = "one";
 		AtomicReference<Object> actual = new AtomicReference<>();
 		ListenableFuture<String> future = new MonoToListenableFutureAdapter<>(Mono.just(expected));
@@ -41,7 +41,7 @@ public class MonoToListenableFutureAdapterTests {
 	}
 
 	@Test
-	public void failure() {
+	void failure() {
 		Throwable expected = new IllegalStateException("oops");
 		AtomicReference<Object> actual = new AtomicReference<>();
 		ListenableFuture<String> future = new MonoToListenableFutureAdapter<>(Mono.error(expected));
@@ -51,7 +51,7 @@ public class MonoToListenableFutureAdapterTests {
 	}
 
 	@Test
-	public void cancellation() {
+	void cancellation() {
 		Mono<Long> mono = Mono.delay(Duration.ofSeconds(60));
 		Future<Long> future = new MonoToListenableFutureAdapter<>(mono);
 
@@ -60,7 +60,7 @@ public class MonoToListenableFutureAdapterTests {
 	}
 
 	@Test
-	public void cancellationAfterTerminated() {
+	void cancellationAfterTerminated() {
 		Future<Void> future = new MonoToListenableFutureAdapter<>(Mono.empty());
 
 		assertThat(future.cancel(true)).as("Should return false if task already completed").isFalse();

@@ -18,6 +18,7 @@ package org.springframework.ejb.access;
 
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
+
 import javax.ejb.CreateException;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
@@ -27,7 +28,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Basic invoker for a remote Stateless Session Bean.
@@ -94,11 +94,12 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	 */
 	@Override
 	@Nullable
+	@SuppressWarnings("deprecation")
 	protected Object doInvoke(MethodInvocation invocation) throws Throwable {
 		Object ejb = null;
 		try {
 			ejb = getSessionBeanInstance();
-			return RmiClientInterceptorUtils.invokeRemoteMethod(invocation, ejb);
+			return org.springframework.remoting.rmi.RmiClientInterceptorUtils.invokeRemoteMethod(invocation, ejb);
 		}
 		catch (NamingException ex) {
 			throw new RemoteLookupFailureException("Failed to locate remote EJB [" + getJndiName() + "]", ex);
@@ -107,12 +108,12 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof RemoteException) {
 				RemoteException rex = (RemoteException) targetEx;
-				throw RmiClientInterceptorUtils.convertRmiAccessException(
-					invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
+				throw org.springframework.remoting.rmi.RmiClientInterceptorUtils.convertRmiAccessException(
+						invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
 			}
 			else if (targetEx instanceof CreateException) {
-				throw RmiClientInterceptorUtils.convertRmiAccessException(
-					invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
+				throw org.springframework.remoting.rmi.RmiClientInterceptorUtils.convertRmiAccessException(
+						invocation.getMethod(), targetEx, "Could not create remote EJB [" + getJndiName() + "]");
 			}
 			throw targetEx;
 		}

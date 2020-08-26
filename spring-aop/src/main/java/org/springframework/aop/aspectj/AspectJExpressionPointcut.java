@@ -519,7 +519,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -544,9 +544,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("AspectJExpressionPointcut: ");
-		sb.append("(");
+		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
 			sb.append(" ");
@@ -555,8 +553,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 				sb.append(", ");
 			}
 		}
-		sb.append(")");
-		sb.append(" ");
+		sb.append(") ");
 		if (getExpression() != null) {
 			sb.append(getExpression());
 		}

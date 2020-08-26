@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -30,16 +30,16 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
-public class FutureAdapterTests {
+class FutureAdapterTests {
 
 	private FutureAdapter<String, Integer> adapter;
 
 	private Future<Integer> adaptee;
 
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("unchecked")
-	public void setUp() {
+	void setUp() {
 		adaptee = mock(Future.class);
 		adapter = new FutureAdapter<String, Integer>(adaptee) {
 			@Override
@@ -50,35 +50,35 @@ public class FutureAdapterTests {
 	}
 
 	@Test
-	public void cancel() throws Exception {
+	void cancel() throws Exception {
 		given(adaptee.cancel(true)).willReturn(true);
 		boolean result = adapter.cancel(true);
 		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void isCancelled() {
+	void isCancelled() {
 		given(adaptee.isCancelled()).willReturn(true);
 		boolean result = adapter.isCancelled();
 		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void isDone() {
+	void isDone() {
 		given(adaptee.isDone()).willReturn(true);
 		boolean result = adapter.isDone();
 		assertThat(result).isTrue();
 	}
 
 	@Test
-	public void get() throws Exception {
+	void get() throws Exception {
 		given(adaptee.get()).willReturn(42);
 		String result = adapter.get();
 		assertThat(result).isEqualTo("42");
 	}
 
 	@Test
-	public void getTimeOut() throws Exception {
+	void getTimeOut() throws Exception {
 		given(adaptee.get(1, TimeUnit.SECONDS)).willReturn(42);
 		String result = adapter.get(1, TimeUnit.SECONDS);
 		assertThat(result).isEqualTo("42");

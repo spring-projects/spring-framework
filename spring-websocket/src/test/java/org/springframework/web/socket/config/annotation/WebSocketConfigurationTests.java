@@ -16,25 +16,18 @@
 
 package org.springframework.web.socket.config.annotation;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
-import org.springframework.web.socket.JettyWebSocketTestServer;
-import org.springframework.web.socket.TomcatWebSocketTestServer;
-import org.springframework.web.socket.UndertowTestServer;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.WebSocketTestServer;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
@@ -45,27 +38,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for WebSocket Java server-side configuration.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
-
-	@Parameters(name = "server [{0}], client [{1}]")
-	public static Iterable<Object[]> arguments() {
-		return Arrays.asList(new Object[][] {
-				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
-				{new UndertowTestServer(), new StandardWebSocketClient()}
-		});
-	}
-
+class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTests {
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
 		return new Class<?>[] {TestConfig.class};
 	}
 
-	@Test
-	public void registerWebSocketHandler() throws Exception {
+
+	@ParameterizedWebSocketTest
+	void registerWebSocketHandler(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/ws").get();
 
@@ -75,8 +61,10 @@ public class WebSocketConfigurationTests extends AbstractWebSocketIntegrationTes
 		session.close();
 	}
 
-	@Test
-	public void registerWebSocketHandlerWithSockJS() throws Exception {
+	@ParameterizedWebSocketTest
+	void registerWebSocketHandlerWithSockJS(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		WebSocketSession session = this.webSocketClient.doHandshake(
 				new AbstractWebSocketHandler() {}, getWsBaseUrl() + "/sockjs/websocket").get();
 

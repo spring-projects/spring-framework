@@ -50,7 +50,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

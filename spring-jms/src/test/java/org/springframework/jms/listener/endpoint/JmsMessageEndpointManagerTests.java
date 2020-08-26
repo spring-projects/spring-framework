@@ -16,7 +16,7 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.support.QosSettings;
 

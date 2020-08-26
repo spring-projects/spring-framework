@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.cache;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -43,15 +43,15 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.asser
  * @author Michail Nikolaev
  * @since 3.1
  * @see LruContextCacheTests
- * @see SpringRunnerContextCacheTests
+ * @see SpringExtensionContextCacheTests
  */
-public class ContextCacheTests {
+class ContextCacheTests {
 
 	private ContextCache contextCache = new DefaultContextCache();
 
 
-	@Before
-	public void initialCacheState() {
+	@BeforeEach
+	void initialCacheState() {
 		assertContextCacheStatistics(contextCache, "initial state", 0, 0, 0);
 		assertParentContextCount(0);
 	}
@@ -76,7 +76,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void verifyCacheKeyIsBasedOnContextLoader() {
+	void verifyCacheKeyIsBasedOnContextLoader() {
 		loadCtxAndAssertStats(AnnotationConfigContextLoaderTestCase.class, 1, 0, 1);
 		loadCtxAndAssertStats(AnnotationConfigContextLoaderTestCase.class, 1, 1, 1);
 		loadCtxAndAssertStats(CustomAnnotationConfigContextLoaderTestCase.class, 2, 1, 2);
@@ -86,7 +86,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void verifyCacheKeyIsBasedOnActiveProfiles() {
+	void verifyCacheKeyIsBasedOnActiveProfiles() {
 		int size = 0, hit = 0, miss = 0;
 		loadCtxAndAssertStats(FooBarProfilesTestCase.class, ++size, hit, ++miss);
 		loadCtxAndAssertStats(FooBarProfilesTestCase.class, size, ++hit, miss);
@@ -99,7 +99,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void verifyCacheBehaviorForContextHierarchies() {
+	void verifyCacheBehaviorForContextHierarchies() {
 		int size = 0;
 		int hits = 0;
 		int misses = 0;
@@ -126,7 +126,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel1() {
+	void removeContextHierarchyCacheLevel1() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(
@@ -151,7 +151,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel1WithExhaustiveMode() {
+	void removeContextHierarchyCacheLevel1WithExhaustiveMode() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(
@@ -176,7 +176,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel2() {
+	void removeContextHierarchyCacheLevel2() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(
@@ -202,7 +202,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel2WithExhaustiveMode() {
+	void removeContextHierarchyCacheLevel2WithExhaustiveMode() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(
@@ -226,7 +226,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel3Then2() {
+	void removeContextHierarchyCacheLevel3Then2() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(
@@ -255,7 +255,7 @@ public class ContextCacheTests {
 	}
 
 	@Test
-	public void removeContextHierarchyCacheLevel3Then2WithExhaustiveMode() {
+	void removeContextHierarchyCacheLevel3Then2WithExhaustiveMode() {
 
 		// Load Level 3-A
 		TestContext testContext3a = TestContextTestUtils.buildTestContext(

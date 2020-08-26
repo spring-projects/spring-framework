@@ -20,11 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConverterNotFoundException;
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Chris Beams
  * @since 3.1
  */
-public class PropertySourcesPropertyResolverTests {
+class PropertySourcesPropertyResolverTests {
 
 	private Properties testProperties;
 
@@ -44,8 +44,8 @@ public class PropertySourcesPropertyResolverTests {
 	private ConfigurablePropertyResolver propertyResolver;
 
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		propertySources = new MutablePropertySources();
 		propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 		testProperties = new Properties();
@@ -54,28 +54,28 @@ public class PropertySourcesPropertyResolverTests {
 
 
 	@Test
-	public void containsProperty() {
+	void containsProperty() {
 		assertThat(propertyResolver.containsProperty("foo")).isFalse();
 		testProperties.put("foo", "bar");
 		assertThat(propertyResolver.containsProperty("foo")).isTrue();
 	}
 
 	@Test
-	public void getProperty() {
+	void getProperty() {
 		assertThat(propertyResolver.getProperty("foo")).isNull();
 		testProperties.put("foo", "bar");
 		assertThat(propertyResolver.getProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void getProperty_withDefaultValue() {
+	void getProperty_withDefaultValue() {
 		assertThat(propertyResolver.getProperty("foo", "myDefault")).isEqualTo("myDefault");
 		testProperties.put("foo", "bar");
 		assertThat(propertyResolver.getProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void getProperty_propertySourceSearchOrderIsFIFO() {
+	void getProperty_propertySourceSearchOrderIsFIFO() {
 		MutablePropertySources sources = new MutablePropertySources();
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(sources);
 		sources.addFirst(new MockPropertySource("ps1").withProperty("pName", "ps1Value"));
@@ -87,7 +87,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getProperty_withExplicitNullValue() {
+	void getProperty_withExplicitNullValue() {
 		// java.util.Properties does not allow null values (because Hashtable does not)
 		Map<String, Object> nullableProperties = new HashMap<>();
 		propertySources.addLast(new MapPropertySource("nullableProperties", nullableProperties));
@@ -96,20 +96,20 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getProperty_withTargetType_andDefaultValue() {
+	void getProperty_withTargetType_andDefaultValue() {
 		assertThat(propertyResolver.getProperty("foo", Integer.class, 42)).isEqualTo(42);
 		testProperties.put("foo", 13);
 		assertThat(propertyResolver.getProperty("foo", Integer.class, 42)).isEqualTo(13);
 	}
 
 	@Test
-	public void getProperty_withStringArrayConversion() {
+	void getProperty_withStringArrayConversion() {
 		testProperties.put("foo", "bar,baz");
 		assertThat(propertyResolver.getProperty("foo", String[].class)).isEqualTo(new String[] { "bar", "baz" });
 	}
 
 	@Test
-	public void getProperty_withNonConvertibleTargetType() {
+	void getProperty_withNonConvertibleTargetType() {
 		testProperties.put("foo", "bar");
 
 		class TestType { }
@@ -119,7 +119,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getProperty_doesNotCache_replaceExistingKeyPostConstruction() {
+	void getProperty_doesNotCache_replaceExistingKeyPostConstruction() {
 		String key = "foo";
 		String value1 = "bar";
 		String value2 = "biz";
@@ -135,7 +135,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getProperty_doesNotCache_addNewKeyPostConstruction() {
+	void getProperty_doesNotCache_addNewKeyPostConstruction() {
 		HashMap<String, Object> map = new HashMap<>();
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
@@ -146,7 +146,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getPropertySources_replacePropertySource() {
+	void getPropertySources_replacePropertySource() {
 		propertySources = new MutablePropertySources();
 		propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 		propertySources.addLast(new MockPropertySource("local").withProperty("foo", "localValue"));
@@ -165,7 +165,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getRequiredProperty() {
+	void getRequiredProperty() {
 		testProperties.put("exists", "xyz");
 		assertThat(propertyResolver.getRequiredProperty("exists")).isEqualTo("xyz");
 
@@ -174,7 +174,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void getRequiredProperty_withStringArrayConversion() {
+	void getRequiredProperty_withStringArrayConversion() {
 		testProperties.put("exists", "abc,123");
 		assertThat(propertyResolver.getRequiredProperty("exists", String[].class)).isEqualTo(new String[] { "abc", "123" });
 
@@ -183,7 +183,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolvePlaceholders() {
+	void resolvePlaceholders() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -191,7 +191,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolvePlaceholders_withUnresolvable() {
+	void resolvePlaceholders_withUnresolvable() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -200,7 +200,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolvePlaceholders_withDefaultValue() {
+	void resolvePlaceholders_withDefaultValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -209,13 +209,13 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolvePlaceholders_withNullInput() {
+	void resolvePlaceholders_withNullInput() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolvePlaceholders(null));
 	}
 
 	@Test
-	public void resolveRequiredPlaceholders() {
+	void resolveRequiredPlaceholders() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -223,7 +223,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredPlaceholders_withUnresolvable() {
+	void resolveRequiredPlaceholders_withUnresolvable() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -232,7 +232,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredPlaceholders_withDefaultValue() {
+	void resolveRequiredPlaceholders_withDefaultValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -241,13 +241,13 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredPlaceholders_withNullInput() {
+	void resolveRequiredPlaceholders_withNullInput() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null));
 	}
 
 	@Test
-	public void setRequiredProperties_andValidateRequiredProperties() {
+	void setRequiredProperties_andValidateRequiredProperties() {
 		// no properties have been marked as required -> validation should pass
 		propertyResolver.validateRequiredProperties();
 
@@ -273,7 +273,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolveNestedPropertyPlaceholders() {
+	void resolveNestedPropertyPlaceholders() {
 		MutablePropertySources ps = new MutablePropertySources();
 		ps.addFirst(new MockPropertySource()
 			.withProperty("p1", "v1")
@@ -300,7 +300,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void ignoreUnresolvableNestedPlaceholdersIsConfigurable() {
+	void ignoreUnresolvableNestedPlaceholdersIsConfigurable() {
 		MutablePropertySources ps = new MutablePropertySources();
 		ps.addFirst(new MockPropertySource()
 			.withProperty("p1", "v1")

@@ -19,7 +19,7 @@ package org.springframework.test.web.servlet.result
 import io.mockk.mockk
 import io.mockk.verify
 import org.hamcrest.Matcher
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class StatusResultMatchersExtensionsTests {
 

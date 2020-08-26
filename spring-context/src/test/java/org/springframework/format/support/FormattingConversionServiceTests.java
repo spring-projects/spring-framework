@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.format.support;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,9 +27,9 @@ import java.util.Properties;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.ConfigurablePropertyAccessor;
@@ -69,30 +68,30 @@ public class FormattingConversionServiceTests {
 	private FormattingConversionService formattingService;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		formattingService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(formattingService);
 		LocaleContextHolder.setLocale(Locale.US);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		LocaleContextHolder.setLocale(null);
 	}
 
 
 	@Test
-	public void formatFieldForTypeWithFormatter() throws ParseException {
+	public void formatFieldForTypeWithFormatter() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		String formatted = formattingService.convert(3, String.class);
 		assertThat(formatted).isEqualTo("3");
 		Integer i = formattingService.convert("3", Integer.class);
-		assertThat(i).isEqualTo(new Integer(3));
+		assertThat(i).isEqualTo(3);
 	}
 
 	@Test
-	public void formatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
+	public void formatFieldForTypeWithPrinterParserWithCoercion() {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
 			@Override
 			public LocalDate convert(DateTime source) {
@@ -241,58 +240,58 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void printNull() throws ParseException {
+	public void printNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo("");
 	}
 
 	@Test
-	public void parseNull() throws ParseException {
+	public void parseNull() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyString() throws ParseException {
+	public void parseEmptyString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseBlankString() throws ParseException {
+	public void parseBlankString() {
 		formattingService.addFormatterForFieldType(Number.class, new NumberStyleFormatter());
 		assertThat(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseParserReturnsNull() throws ParseException {
+	public void parseParserReturnsNull() {
 		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
 				formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
-	public void parseNullPrimitiveProperty() throws ParseException {
+	public void parseNullPrimitiveProperty() {
 		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
 				formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test
-	public void printNullDefault() throws ParseException {
+	public void printNullDefault() {
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class))).isEqualTo(null);
 	}
 
 	@Test
-	public void parseNullDefault() throws ParseException {
+	public void parseNullDefault() {
 		assertThat(formattingService
 				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
 	@Test
-	public void parseEmptyStringDefault() throws ParseException {
+	public void parseEmptyStringDefault() {
 		assertThat(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
 	}
 
@@ -330,7 +329,7 @@ public class FormattingConversionServiceTests {
 	private <T> void registerDefaultValue(Class<T> clazz, final T defaultValue) {
 		formattingService.addFormatterForFieldType(clazz, new Formatter<T>() {
 			@Override
-			public T parse(String text, Locale locale) throws ParseException {
+			public T parse(String text, Locale locale) {
 				return defaultValue;
 			}
 			@Override
@@ -345,13 +344,30 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
-	public void introspectedFormatter() throws ParseException {
-		formattingService.addFormatter(new NumberStyleFormatter());
-		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
+	public void introspectedFormatter() {
+		formattingService.addFormatter(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
+		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
 	}
 
 	@Test
-	public void proxiedFormatter() throws ParseException {
+	public void introspectedPrinter() {
+		formattingService.addPrinter(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123.0");
+		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
+				formattingService.convert("123.0", Integer.class))
+			.withCauseInstanceOf(NumberFormatException.class);
+	}
+
+	@Test
+	public void introspectedParser() {
+		formattingService.addParser(new NumberStyleFormatter("#,#00.0#"));
+		assertThat(formattingService.convert("123.0", Integer.class)).isEqualTo(123);
+		assertThat(formattingService.convert(123, String.class)).isEqualTo("123");
+	}
+
+	@Test
+	public void proxiedFormatter() {
 		Formatter<?> formatter = new NumberStyleFormatter();
 		formattingService.addFormatter((Formatter<?>) new ProxyFactory(formatter).getProxy());
 		assertThat(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class))).isNull();
@@ -466,7 +482,7 @@ public class FormattingConversionServiceTests {
 		}
 
 		@Override
-		public Integer parse(String text, Locale locale) throws ParseException {
+		public Integer parse(String text, Locale locale) {
 			return null;
 		}
 	}

@@ -23,8 +23,8 @@ import java.util.Locale;
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
@@ -49,7 +49,7 @@ public class GroovyMarkupConfigurerTests {
 	private GroovyMarkupConfigurer configurer;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.applicationContext = new StaticApplicationContext();
 		this.configurer = new GroovyMarkupConfigurer();

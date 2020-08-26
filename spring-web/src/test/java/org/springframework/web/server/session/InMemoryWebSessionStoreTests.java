@@ -22,7 +22,10 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.web.server.WebSession;
@@ -54,6 +57,14 @@ public class InMemoryWebSessionStoreTests {
 		session.start();
 		session.getAttributes().put("foo", "bar");
 		assertThat(session.isStarted()).isTrue();
+	}
+
+	@Disabled // TODO: remove if/when Blockhound is enabled
+	@Test // gh-24027
+	public void createSessionDoesNotBlock() {
+		Mono.defer(() -> this.store.createWebSession())
+				.subscribeOn(Schedulers.parallel())
+				.block();
 	}
 
 	@Test

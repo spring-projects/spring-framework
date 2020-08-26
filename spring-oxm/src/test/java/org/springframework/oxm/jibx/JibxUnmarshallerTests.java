@@ -17,15 +17,16 @@
 package org.springframework.oxm.jibx;
 
 import java.io.ByteArrayInputStream;
+
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.condition.JRE.JAVA_8;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
@@ -35,18 +36,12 @@ import static org.junit.Assume.assumeTrue;
  * @author Sam Brannen
  */
 @Deprecated
+@EnabledOnJre(JAVA_8) // JiBX compiler is currently not compatible with JDK 9
 public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshaller> {
 
 	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
-
-
-	@BeforeClass
-	public static void compilerAssumptions() {
-		// JiBX compiler is currently not compatible with JDK 9
-		assumeTrue(System.getProperty("java.version").startsWith("1.8."));
-	}
 
 
 	@Override

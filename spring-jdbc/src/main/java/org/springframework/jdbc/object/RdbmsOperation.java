@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -386,7 +387,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * Validate the parameters passed to an execute method based on declared parameters.
 	 * Subclasses should invoke this method before every {@code executeQuery()}
 	 * or {@code update()} method.
-	 * @param parameters parameters supplied (may be {@code null})
+	 * @param parameters the parameters supplied (may be {@code null})
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateParameters(@Nullable Object[] parameters) throws InvalidDataAccessApiUsageException {

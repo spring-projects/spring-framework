@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,13 +27,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import io.reactivex.Flowable;
-import org.junit.Test;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import rx.Completable;
-import rx.Observable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.ByteBufferEncoder;
@@ -47,17 +46,17 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.io.buffer.support.DataBufferTestUtils.dumpString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.method.ResolvableMethod.on;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -118,11 +117,11 @@ public class MessageWriterResultHandlerTests {
 		testVoid(Completable.complete(), on(TestController.class).resolveReturnType(Completable.class));
 		testVoid(Observable.empty(), on(TestController.class).resolveReturnType(Observable.class, Void.class));
 
-		MethodParameter type = on(TestController.class).resolveReturnType(io.reactivex.Completable.class);
-		testVoid(io.reactivex.Completable.complete(), type);
+		MethodParameter type = on(TestController.class).resolveReturnType(Completable.class);
+		testVoid(Completable.complete(), type);
 
-		type = on(TestController.class).resolveReturnType(io.reactivex.Observable.class, Void.class);
-		testVoid(io.reactivex.Observable.empty(), type);
+		type = on(TestController.class).resolveReturnType(Observable.class, Void.class);
+		testVoid(Observable.empty(), type);
 
 		type = on(TestController.class).resolveReturnType(Flowable.class, Void.class);
 		testVoid(Flowable.empty(), type);
@@ -184,7 +183,7 @@ public class MessageWriterResultHandlerTests {
 
 	private void assertResponseBody(String responseBody) {
 		StepVerifier.create(this.exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertThat(dumpString(buf, StandardCharsets.UTF_8)).isEqualTo(responseBody))
+				.consumeNextWith(buf -> assertThat(buf.toString(UTF_8)).isEqualTo(responseBody))
 				.expectComplete()
 				.verify();
 	}
@@ -275,13 +274,9 @@ public class MessageWriterResultHandlerTests {
 
 		Completable completable() { return null; }
 
-		io.reactivex.Completable rxJava2Completable() { return null; }
-
 		Flux<Void> fluxVoid() { return null; }
 
 		Observable<Void> observableVoid() { return null; }
-
-		io.reactivex.Observable<Void> rxJava2ObservableVoid() { return null; }
 
 		Flowable<Void> flowableVoid() { return null; }
 

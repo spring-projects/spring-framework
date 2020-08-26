@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import test.annotation.EmptySpringAnnotation;
 import test.annotation.transaction.Tx;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +44,7 @@ public class TigerAspectJExpressionPointcutTests {
 	private final Map<String, Method> methodsOnHasGeneric = new HashMap<>();
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge");
 		// Assumes no overloading
@@ -56,7 +56,7 @@ public class TigerAspectJExpressionPointcutTests {
 
 	@Test
 	public void testMatchGenericArgument() {
-		String expression = "execution(* set*(java.util.List<org.springframework.tests.sample.beans.TestBean>) )";
+		String expression = "execution(* set*(java.util.List<org.springframework.beans.testfixture.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
 

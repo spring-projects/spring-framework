@@ -18,13 +18,14 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -53,7 +54,7 @@ public class MethodValidationTests {
 		ProxyFactory proxyFactory = new ProxyFactory(bean);
 		proxyFactory.addAdvice(new MethodValidationInterceptor());
 		proxyFactory.addAdvisor(new AsyncAnnotationAdvisor());
-		doTestProxyValidation((MyValidInterface) proxyFactory.getProxy());
+		doTestProxyValidation((MyValidInterface<?>) proxyFactory.getProxy());
 	}
 
 	@Test
@@ -69,6 +70,7 @@ public class MethodValidationTests {
 		ac.close();
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void doTestProxyValidation(MyValidInterface proxy) {
 		assertThat(proxy.myValidMethod("value", 5)).isNotNull();
 		assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
@@ -88,6 +90,7 @@ public class MethodValidationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testLazyValidatorForMethodValidation() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfig.class, CustomValidatorBean.class,
@@ -96,6 +99,7 @@ public class MethodValidationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,

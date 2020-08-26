@@ -81,6 +81,14 @@ class InvocableHelper {
 	}
 
 	/**
+	 * Return the configured resolvers.
+	 * @since 5.2.2
+	 */
+	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.argumentResolvers;
+	}
+
+	/**
 	 * Add the return value handlers to use for message handling and exception
 	 * handling methods.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -58,6 +58,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -627,12 +628,12 @@ public class SpelReproTests extends AbstractExpressionTests {
 			}
 		}
 
-		final Integer INTEGER = Integer.valueOf(7);
+		final Integer INTEGER = 7;
 
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
 		List<TypeDescriptor> args = new ArrayList<>();
-		args.add(TypeDescriptor.forObject(new Integer(42)));
+		args.add(TypeDescriptor.forObject(42));
 
 		ConversionPriority1 target = new ConversionPriority1();
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
@@ -1177,9 +1178,13 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR9994_bridgeMethods() throws Exception {
 		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		Object target = new GenericImplementation();
+		GenericImplementation target = new GenericImplementation();
+		accessor.write(context, target, "property", "1");
+		assertThat(target.value).isEqualTo(1);
 		TypedValue value = accessor.read(context, target, "property");
+		assertThat(value.getValue()).isEqualTo(1);
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
+		assertThat(value.getTypeDescriptor().getAnnotations()).isNotEmpty();
 	}
 
 	@Test
@@ -1188,6 +1193,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		Object target = new OnlyBridgeMethod();
 		TypedValue value = accessor.read(context, target, "property");
+		assertThat(value.getValue()).isNull();
 		assertThat(value.getTypeDescriptor().getType()).isEqualTo(Integer.class);
 	}
 
@@ -1196,7 +1202,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("simpleProperty").getValueType(evaluationContext);
-		assertThat(valueType).isNotNull();
+		assertThat(valueType).isEqualTo(Boolean.class);
 	}
 
 	@Test
@@ -1204,7 +1210,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("simpleProperty").getValue(evaluationContext);
-		assertThat(value).isNotNull();
+		assertThat(value).isInstanceOf(Boolean.class);
 	}
 
 	@Test
@@ -1212,7 +1218,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Class<?> valueType = parser.parseExpression("primitiveProperty").getValueType(evaluationContext);
-		assertThat(valueType).isNotNull();
+		assertThat(valueType).isEqualTo(Boolean.class);
 	}
 
 	@Test
@@ -1220,7 +1226,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
-		assertThat(value).isNotNull();
+		assertThat(value).isInstanceOf(Boolean.class);
 	}
 
 	@Test
@@ -1320,18 +1326,14 @@ public class SpelReproTests extends AbstractExpressionTests {
 			@Override
 			public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 					List<TypeDescriptor> argumentTypes) throws AccessException {
-				return new MethodExecutor() {
-					@Override
-					public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
-							throws AccessException {
-						try {
-							Method method = XYZ.class.getMethod("values");
-							Object value = method.invoke(target, arguments);
-							return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
-						}
-						catch (Exception ex) {
-							throw new AccessException(ex.getMessage(), ex);
-						}
+				return (context1, target, arguments) -> {
+					try {
+						Method method = XYZ.class.getMethod("values");
+						Object value = method.invoke(target, arguments);
+						return new TypedValue(value, new TypeDescriptor(new MethodParameter(method, -1)).narrow(value));
+					}
+					catch (Exception ex) {
+						throw new AccessException(ex.getMessage(), ex);
 					}
 				};
 			}
@@ -1483,10 +1485,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
 		StandardEvaluationContext sec = new StandardEvaluationContext();
-		sec.setVariable("no", new Integer(1));
+		sec.setVariable("no", 1);
 		assertThat(expression.getValue(sec).toString().startsWith("Integer")).isTrue();
 		sec = new StandardEvaluationContext();
-		sec.setVariable("no", new Float(1.0));
+		sec.setVariable("no", 1.0F);
 		assertThat(expression.getValue(sec).toString().startsWith("Number")).isTrue();
 		sec = new StandardEvaluationContext();
 		sec.setVariable("no", "1.0");
@@ -1692,7 +1694,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		public Integer tryToInvokeWithNull2(int i) {
-			return new Integer(i);
+			return i;
 		}
 
 		public String tryToInvokeWithNull3(Integer value, String... strings) {
@@ -2172,15 +2174,25 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	private interface GenericInterface<T extends Number> {
 
+		void setProperty(T value);
+
 		T getProperty();
 	}
 
 
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
+		int value;
+
 		@Override
+		public void setProperty(Integer value) {
+			this.value = value;
+		}
+
+		@Override
+		@Nullable
 		public Integer getProperty() {
-			return null;
+			return this.value;
 		}
 	}
 
@@ -2245,6 +2257,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			this.string = string;
 		}
 
+		@Override
 		public boolean equals(Object other) {
 			return (this == other || (other instanceof TestClass2 &&
 					this.string.equals(((TestClass2) other).string)));

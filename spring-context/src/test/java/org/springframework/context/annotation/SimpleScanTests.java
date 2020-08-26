@@ -18,7 +18,7 @@ package org.springframework.context.annotation;
 
 import example.scannable.FooService;
 import example.scannable.ServiceInvocationCounter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

@@ -18,10 +18,10 @@ package org.springframework.beans.factory.support;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,9 +36,9 @@ public class BeanDefinitionBuilderTests {
 		String[] dependsOn = new String[] { "A", "B", "C" };
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
 		bdb.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		bdb.addPropertyReference("age", "15");
-		for (int i = 0; i < dependsOn.length; i++) {
-			bdb.addDependsOn(dependsOn[i]);
+		bdb.addPropertyValue("age", "15");
+		for (String dependsOnEntry : dependsOn) {
+			bdb.addDependsOn(dependsOnEntry);
 		}
 
 		RootBeanDefinition rbd = (RootBeanDefinition) bdb.getBeanDefinition();

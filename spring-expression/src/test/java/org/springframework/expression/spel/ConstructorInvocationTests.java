@@ -19,8 +19,8 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -139,9 +139,9 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 		// 1 will make it throw a RuntimeException - SpEL will let this through
 		eContext.setVariable("bar", 1);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expr.getValue(eContext))
-			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(() -> expr.getValue(eContext))
+			.isNotInstanceOf(SpelEvaluationException.class);
 		// A problem occurred whilst attempting to construct an object of type
 		// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
 		// using arguments '(java.lang.Integer)'
@@ -162,8 +162,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		ctx.addConstructorResolver(dummy);
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(2);
 
-		List<ConstructorResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getConstructorResolvers());
+		List<ConstructorResolver> copy = new ArrayList<>(ctx.getConstructorResolvers());
 		assertThat(ctx.removeConstructorResolver(dummy)).isTrue();
 		assertThat(ctx.removeConstructorResolver(dummy)).isFalse();
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(1);
@@ -229,7 +228,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testArgumentConversion01() {
 		// Closest ctor will be new String(String) and converter supports Double>String
 		// TODO currently failing as with new ObjectToArray converter closest constructor

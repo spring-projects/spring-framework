@@ -18,7 +18,7 @@ package org.springframework.core.annotation;
 
 import javax.annotation.Priority;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,40 +26,40 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class OrderUtilsTests {
+class OrderUtilsTests {
 
 	@Test
-	public void getSimpleOrder() {
+	void getSimpleOrder() {
 		assertThat(OrderUtils.getOrder(SimpleOrder.class, null)).isEqualTo(Integer.valueOf(50));
 		assertThat(OrderUtils.getOrder(SimpleOrder.class, null)).isEqualTo(Integer.valueOf(50));
 	}
 
 	@Test
-	public void getPriorityOrder() {
+	void getPriorityOrder() {
 		assertThat(OrderUtils.getOrder(SimplePriority.class, null)).isEqualTo(Integer.valueOf(55));
 		assertThat(OrderUtils.getOrder(SimplePriority.class, null)).isEqualTo(Integer.valueOf(55));
 	}
 
 	@Test
-	public void getOrderWithBoth() {
+	void getOrderWithBoth() {
 		assertThat(OrderUtils.getOrder(OrderAndPriority.class, null)).isEqualTo(Integer.valueOf(50));
 		assertThat(OrderUtils.getOrder(OrderAndPriority.class, null)).isEqualTo(Integer.valueOf(50));
 	}
 
 	@Test
-	public void getDefaultOrder() {
+	void getDefaultOrder() {
 		assertThat(OrderUtils.getOrder(NoOrder.class, 33)).isEqualTo(33);
 		assertThat(OrderUtils.getOrder(NoOrder.class, 33)).isEqualTo(33);
 	}
 
 	@Test
-	public void getPriorityValueNoAnnotation() {
+	void getPriorityValueNoAnnotation() {
 		assertThat(OrderUtils.getPriority(SimpleOrder.class)).isNull();
 		assertThat(OrderUtils.getPriority(SimpleOrder.class)).isNull();
 	}
 
 	@Test
-	public void getPriorityValue() {
+	void getPriorityValue() {
 		assertThat(OrderUtils.getPriority(OrderAndPriority.class)).isEqualTo(Integer.valueOf(55));
 		assertThat(OrderUtils.getPriority(OrderAndPriority.class)).isEqualTo(Integer.valueOf(55));
 	}

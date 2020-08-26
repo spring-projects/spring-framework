@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileUrlResource;
@@ -104,6 +104,13 @@ public class PathResourceResolverTests {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
 		assertThat(actual).isNull();
+	}
+
+	@Test // gh-23463
+	public void ignoreInvalidEscapeSequence() throws IOException {
+		UrlResource location = new UrlResource(getClass().getResource("./test/"));
+		Resource resource = location.createRelative("test%file.txt");
+		assertThat(this.resolver.checkResource(resource, location)).isTrue();
 	}
 
 	@Test

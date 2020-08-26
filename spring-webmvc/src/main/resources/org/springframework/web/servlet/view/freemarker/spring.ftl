@@ -11,7 +11,7 @@
  * FreeMarkerConfigurer.
  *
  * To take advantage of these macros, the "exposeSpringMacroHelpers" property
- * of the FreeMarker class needs to be set to "true". This will expose a
+ * of the FreeMarkerView class needs to be set to "true". This will expose a
  * RequestContext under the name "springMacroRequestContext", as needed by
  * the macros in this library.
  *

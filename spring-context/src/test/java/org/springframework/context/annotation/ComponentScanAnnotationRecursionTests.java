@@ -16,7 +16,7 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.componentscan.cycle.left.LeftConfig;
 import org.springframework.context.annotation.componentscan.level1.Level1Config;

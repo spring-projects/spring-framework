@@ -19,7 +19,7 @@ package org.springframework.aop.aspectj;
 import java.lang.reflect.Method;
 
 import org.aspectj.lang.JoinPoint;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.aspectj.AspectJAdviceParameterNameDiscoverer.AmbiguousBindingException;
 
@@ -275,7 +275,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 
 
 	private static String format(String[] names) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("(");
 		for (int i = 0; i < names.length; i++) {
 			sb.append(names[i]);

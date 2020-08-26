@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
@@ -46,7 +46,7 @@ public class HeadersWrapperTests {
 	private ServerRequestWrapper.HeadersWrapper wrapper;
 
 
-	@Before
+	@BeforeEach
 	public void createWrapper() {
 		mockHeaders = mock(ServerRequest.Headers.class);
 		wrapper = new ServerRequestWrapper.HeadersWrapper(mockHeaders);

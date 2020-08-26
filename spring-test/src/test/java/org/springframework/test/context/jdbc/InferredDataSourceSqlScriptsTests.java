@@ -19,10 +19,10 @@ package org.springframework.test.context.jdbc;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.sql.DataSource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +31,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,28 +45,27 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @since 4.1
  * @see InferredDataSourceTransactionalSqlScriptsTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @DirtiesContext
-public class InferredDataSourceSqlScriptsTests {
+class InferredDataSourceSqlScriptsTests {
 
 	@Autowired
-	private DataSource dataSource1;
+	DataSource dataSource1;
 
 	@Autowired
-	private DataSource dataSource2;
+	DataSource dataSource2;
 
 
 	@Test
 	@Sql(scripts = "data-add-dogbert.sql", config = @SqlConfig(transactionManager = "txMgr1"))
-	public void database1() {
+	void database1() {
 		assertThatTransaction().isNotActive();
 		assertUsers(new JdbcTemplate(dataSource1), "Dilbert", "Dogbert");
 	}
 
 	@Test
 	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(transactionManager = "txMgr2"))
-	public void database2() {
+	void database2() {
 		assertThatTransaction().isNotActive();
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");
 	}
@@ -85,31 +83,31 @@ public class InferredDataSourceSqlScriptsTests {
 	static class Config {
 
 		@Bean
-		public PlatformTransactionManager txMgr1() {
+		PlatformTransactionManager txMgr1() {
 			return new DataSourceTransactionManager(dataSource1());
 		}
 
 		@Bean
-		public PlatformTransactionManager txMgr2() {
+		PlatformTransactionManager txMgr2() {
 			return new DataSourceTransactionManager(dataSource2());
 		}
 
 		@Bean
-		public DataSource dataSource1() {
+		DataSource dataSource1() {
 			return new EmbeddedDatabaseBuilder()//
-			.setName("database1")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-			.build();
+					.setName("database1")//
+					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
+					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
+					.build();
 		}
 
 		@Bean
-		public DataSource dataSource2() {
+		DataSource dataSource2() {
 			return new EmbeddedDatabaseBuilder()//
-			.setName("database2")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
-			.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
-			.build();
+					.setName("database2")//
+					.addScript("classpath:/org/springframework/test/context/jdbc/schema.sql")//
+					.addScript("classpath:/org/springframework/test/context/jdbc/data.sql")//
+					.build();
 		}
 	}
 

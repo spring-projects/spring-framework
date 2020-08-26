@@ -19,7 +19,7 @@ package org.springframework.jmx.export.naming;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.util.ClassUtils;

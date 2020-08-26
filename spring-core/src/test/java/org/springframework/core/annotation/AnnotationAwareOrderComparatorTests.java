@@ -18,9 +18,10 @@ package org.springframework.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Priority;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,15 +29,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Oliver Gierke
  */
-public class AnnotationAwareOrderComparatorTests {
+class AnnotationAwareOrderComparatorTests {
 
 	@Test
-	public void instanceVariableIsAnAnnotationAwareOrderComparator() {
+	void instanceVariableIsAnAnnotationAwareOrderComparator() {
 		assertThat(AnnotationAwareOrderComparator.INSTANCE).isInstanceOf(AnnotationAwareOrderComparator.class);
 	}
 
 	@Test
-	public void sortInstances() {
+	void sortInstances() {
 		List<Object> list = new ArrayList<>();
 		list.add(new B());
 		list.add(new A());
@@ -46,7 +47,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortInstancesWithPriority() {
+	void sortInstancesWithPriority() {
 		List<Object> list = new ArrayList<>();
 		list.add(new B2());
 		list.add(new A2());
@@ -56,7 +57,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortInstancesWithOrderAndPriority() {
+	void sortInstancesWithOrderAndPriority() {
 		List<Object> list = new ArrayList<>();
 		list.add(new B());
 		list.add(new A2());
@@ -66,7 +67,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortInstancesWithSubclass() {
+	void sortInstancesWithSubclass() {
 		List<Object> list = new ArrayList<>();
 		list.add(new B());
 		list.add(new C());
@@ -76,7 +77,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortClasses() {
+	void sortClasses() {
 		List<Object> list = new ArrayList<>();
 		list.add(B.class);
 		list.add(A.class);
@@ -86,7 +87,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortClassesWithSubclass() {
+	void sortClassesWithSubclass() {
 		List<Object> list = new ArrayList<>();
 		list.add(B.class);
 		list.add(C.class);
@@ -96,7 +97,7 @@ public class AnnotationAwareOrderComparatorTests {
 	}
 
 	@Test
-	public void sortWithNulls() {
+	void sortWithNulls() {
 		List<Object> list = new ArrayList<>();
 		list.add(null);
 		list.add(B.class);

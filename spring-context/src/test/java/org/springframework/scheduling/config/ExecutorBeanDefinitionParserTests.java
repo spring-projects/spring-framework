@@ -20,8 +20,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.BeanCreationException;
@@ -43,7 +43,7 @@ public class ExecutorBeanDefinitionParserTests {
 	private ApplicationContext context;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.context = new ClassPathXmlApplicationContext(
 				"executorContext.xml", ExecutorBeanDefinitionParserTests.class);

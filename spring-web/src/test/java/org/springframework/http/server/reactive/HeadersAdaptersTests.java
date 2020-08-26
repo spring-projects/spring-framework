@@ -16,97 +16,99 @@
 
 package org.springframework.http.server.reactive;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.undertow.util.HeaderMap;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.eclipse.jetty.http.HttpFields;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Unit tests for {@code HeadersAdapters} {@code MultiValueMap} implementations.
  *
  * @author Brian Clozel
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class HeadersAdaptersTests {
+class HeadersAdaptersTests {
 
-	@Parameterized.Parameter(0)
-	public MultiValueMap<String, String> headers;
-
-	@Parameterized.Parameters(name = "headers [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{CollectionUtils.toMultiValueMap(
-						new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))},
-				{new NettyHeadersAdapter(new DefaultHttpHeaders())},
-				{new TomcatHeadersAdapter(new MimeHeaders())},
-				{new UndertowHeadersAdapter(new HeaderMap())},
-				{new JettyHeadersAdapter(new HttpFields())}
-		};
+	@ParameterizedHeadersTest
+	void getWithUnknownHeaderShouldReturnNull(String displayName, MultiValueMap<String, String> headers) {
+		assertThat(headers.get("Unknown")).isNull();
 	}
 
-	@After
-	public void tearDown() {
-		this.headers.clear();
+	@ParameterizedHeadersTest
+	void getFirstWithUnknownHeaderShouldReturnNull(String displayName, MultiValueMap<String, String> headers) {
+		assertThat(headers.getFirst("Unknown")).isNull();
 	}
 
-	@Test
-	public void getWithUnknownHeaderShouldReturnNull() {
-		assertThat(this.headers.get("Unknown")).isNull();
+	@ParameterizedHeadersTest
+	void sizeWithMultipleValuesForHeaderShouldCountHeaders(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHeader", "second");
+		assertThat(headers.size()).isEqualTo(1);
 	}
 
-	@Test
-	public void getFirstWithUnknownHeaderShouldReturnNull() {
-		assertThat(this.headers.getFirst("Unknown")).isNull();
+	@ParameterizedHeadersTest
+	void keySetShouldNotDuplicateHeaderNames(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("OtherHeader", "test");
+		headers.add("TestHeader", "second");
+		assertThat(headers.keySet().size()).isEqualTo(2);
 	}
 
-	@Test
-	public void sizeWithMultipleValuesForHeaderShouldCountHeaders() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("TestHeader", "second");
-		assertThat(this.headers.size()).isEqualTo(1);
+	@ParameterizedHeadersTest
+	void containsKeyShouldBeCaseInsensitive(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		assertThat(headers.containsKey("testheader")).isTrue();
 	}
 
-	@Test
-	public void keySetShouldNotDuplicateHeaderNames() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("OtherHeader", "test");
-		this.headers.add("TestHeader", "second");
-		assertThat(this.headers.keySet().size()).isEqualTo(2);
+	@ParameterizedHeadersTest
+	void addShouldKeepOrdering(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.add("TestHeader", "second");
+		assertThat(headers.getFirst("TestHeader")).isEqualTo("first");
+		assertThat(headers.get("TestHeader").get(0)).isEqualTo("first");
 	}
 
-	@Test
-	public void containsKeyShouldBeCaseInsensitive() {
-		this.headers.add("TestHeader", "first");
-		assertThat(this.headers.containsKey("testheader")).isTrue();
+	@ParameterizedHeadersTest
+	void putShouldOverrideExisting(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", "first");
+		headers.put("TestHeader", Arrays.asList("override"));
+		assertThat(headers.getFirst("TestHeader")).isEqualTo("override");
+		assertThat(headers.get("TestHeader").size()).isEqualTo(1);
 	}
 
-	@Test
-	public void addShouldKeepOrdering() {
-		this.headers.add("TestHeader", "first");
-		this.headers.add("TestHeader", "second");
-		assertThat(this.headers.getFirst("TestHeader")).isEqualTo("first");
-		assertThat(this.headers.get("TestHeader").get(0)).isEqualTo("first");
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] {0}")
+	@MethodSource("headers")
+	@interface ParameterizedHeadersTest {
 	}
 
-	@Test
-	public void putShouldOverrideExisting() {
-		this.headers.add("TestHeader", "first");
-		this.headers.put("TestHeader", Arrays.asList("override"));
-		assertThat(this.headers.getFirst("TestHeader")).isEqualTo("override");
-		assertThat(this.headers.get("TestHeader").size()).isEqualTo(1);
+	static Stream<Arguments> headers() {
+		return Stream.of(
+			arguments("Map", CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH))),
+			arguments("Netty", new NettyHeadersAdapter(new DefaultHttpHeaders())),
+			arguments("Tomcat", new TomcatHeadersAdapter(new MimeHeaders())),
+			arguments("Undertow", new UndertowHeadersAdapter(new HeaderMap())),
+			arguments("Jetty", new JettyHeadersAdapter(new HttpFields()))
+		);
 	}
 
 }

@@ -17,20 +17,21 @@
 package org.springframework.util.xml;
 
 import java.io.StringWriter;
+
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 import org.xmlunit.util.Predicate;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class XMLEventStreamWriterTests {
+class XMLEventStreamWriterTests {
 
 	private static final String XML =
 			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'><!--comment-->content</prefix:child></root>";
@@ -39,8 +40,8 @@ public class XMLEventStreamWriterTests {
 
 	private StringWriter stringWriter;
 
-	@Before
-	public void createStreamReader() throws Exception {
+	@BeforeEach
+	void createStreamReader() throws Exception {
 		stringWriter = new StringWriter();
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(stringWriter);
@@ -48,7 +49,7 @@ public class XMLEventStreamWriterTests {
 	}
 
 	@Test
-	public void write() throws Exception {
+	void write() throws Exception {
 		streamWriter.writeStartDocument();
 		streamWriter.writeProcessingInstruction("pi", "content");
 		streamWriter.writeStartElement("namespace", "root");

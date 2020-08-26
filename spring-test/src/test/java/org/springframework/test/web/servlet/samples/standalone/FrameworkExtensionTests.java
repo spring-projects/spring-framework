@@ -18,8 +18,8 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import java.security.Principal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -56,7 +56,7 @@ public class FrameworkExtensionTests {
 	private MockMvc mockMvc;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.mockMvc = standaloneSetup(new SampleController()).apply(defaultSetup()).build();
 	}

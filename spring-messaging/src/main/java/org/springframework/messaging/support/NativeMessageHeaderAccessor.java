@@ -163,7 +163,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return;
 		}
 		if (map == null) {
-			map = new LinkedMultiValueMap<>(4);
+			map = new LinkedMultiValueMap<>(3);
 			setHeader(NATIVE_HEADERS, map);
 		}
 		List<String> values = new LinkedList<>();
@@ -184,7 +184,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
 		if (nativeHeaders == null) {
-			nativeHeaders = new LinkedMultiValueMap<>(4);
+			nativeHeaders = new LinkedMultiValueMap<>(3);
 			setHeader(NATIVE_HEADERS, nativeHeaders);
 		}
 		List<String> values = nativeHeaders.computeIfAbsent(name, k -> new LinkedList<>());

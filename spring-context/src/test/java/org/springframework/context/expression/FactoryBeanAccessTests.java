@@ -16,7 +16,7 @@
 
 package org.springframework.context.expression;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.FactoryBean;
@@ -77,14 +77,17 @@ public class FactoryBeanAccessTests {
 
 		static class CarFactoryBean implements FactoryBean<Car> {
 
+			@Override
 			public Car getObject() {
 				return new Car();
 			}
 
+			@Override
 			public Class<Car> getObjectType() {
 				return Car.class;
 			}
 
+			@Override
 			public boolean isSingleton() {
 				return false;
 			}

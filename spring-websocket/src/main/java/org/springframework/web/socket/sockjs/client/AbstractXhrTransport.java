@@ -82,6 +82,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	/**
 	 * Whether XHR streaming is disabled or not.
 	 */
+	@Override
 	public boolean isXhrStreamingDisabled() {
 		return this.xhrStreamingDisabled;
 	}

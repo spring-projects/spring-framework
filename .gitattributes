@@ -1,0 +1,16 @@
+# Normalize line endings to LF.
+* text eol=lf
+
+# Ensure that line endings for multipart files in spring-web are not modified.
+*.multipart -text
+
+# Ensure that line endings for DOS batch files are not modified.
+*.bat -text
+
+# Ensure the following are treated as binary.
+*.gif   binary
+*.jar   binary
+*.jpeg  binary
+*.jpg   binary
+*.png   binary
+*.vsd   binary

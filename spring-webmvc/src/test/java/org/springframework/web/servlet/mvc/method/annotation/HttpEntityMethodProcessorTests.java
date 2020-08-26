@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,21 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -35,8 +41,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,8 +48,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +82,7 @@ public class HttpEntityMethodProcessorTests {
 	private MockHttpServletResponse servletResponse;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
@@ -198,6 +205,41 @@ public class HttpEntityMethodProcessorTests {
 
 		assertThat(servletResponse.getHeader("Content-Type")).isEqualTo("text/plain;charset=ISO-8859-1");
 		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
+	}
+
+	@Test  // SPR-13423
+	public void handleReturnValueWithETagAndETagFilter() throws Exception {
+
+		String eTagValue = "\"deadb33f8badf00d\"";
+		String content = "body";
+
+		Method method = getClass().getDeclaredMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		FilterChain chain = (req, res) -> {
+			ResponseEntity<String> returnValue = ResponseEntity.ok().eTag(eTagValue).body(content);
+			try {
+				ServletWebRequest requestToUse =
+						new ServletWebRequest((HttpServletRequest) req, (HttpServletResponse) res);
+
+				new HttpEntityMethodProcessor(Collections.singletonList(new StringHttpMessageConverter()))
+						.handleReturnValue(returnValue, returnType, mavContainer, requestToUse);
+
+				assertThat(this.servletResponse.getContentAsString())
+						.as("Response body was cached? It should be written directly to the raw response")
+						.isEqualTo(content);
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+		};
+
+		this.servletRequest.setMethod("GET");
+		new ShallowEtagHeaderFilter().doFilter(this.servletRequest, this.servletResponse, chain);
+
+		assertThat(this.servletResponse.getStatus()).isEqualTo(200);
+		assertThat(this.servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(eTagValue);
+		assertThat(this.servletResponse.getContentAsString()).isEqualTo(content);
 	}
 
 

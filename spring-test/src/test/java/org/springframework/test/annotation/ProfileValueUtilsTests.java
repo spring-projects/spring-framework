@@ -20,8 +20,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.0
  */
-public class ProfileValueUtilsTests {
+class ProfileValueUtilsTests {
 
 	private static final String NON_ANNOTATED_METHOD = "nonAnnotatedMethod";
 	private static final String ENABLED_ANNOTATED_METHOD = "enabledAnnotatedMethod";
@@ -41,8 +41,8 @@ public class ProfileValueUtilsTests {
 	private static final String VALUE = "enigma";
 
 
-	@BeforeClass
-	public static void setProfileValue() {
+	@BeforeAll
+	static void setProfileValue() {
 		System.setProperty(NAME, VALUE);
 	}
 
@@ -81,7 +81,7 @@ public class ProfileValueUtilsTests {
 	// -------------------------------------------------------------------
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedClass() throws Exception {
 		assertClassIsEnabled(NonAnnotated.class);
 		assertClassIsEnabled(EnabledAnnotatedSingleValue.class);
 		assertClassIsEnabled(EnabledAnnotatedMultiValue.class);
@@ -97,7 +97,7 @@ public class ProfileValueUtilsTests {
 	}
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedMethodAndClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedMethodAndClass() throws Exception {
 		assertMethodIsEnabled(NON_ANNOTATED_METHOD, NonAnnotated.class);
 
 		assertMethodIsEnabled(NON_ANNOTATED_METHOD, EnabledAnnotatedSingleValue.class);
@@ -129,7 +129,7 @@ public class ProfileValueUtilsTests {
 	}
 
 	@Test
-	public void isTestEnabledInThisEnvironmentForProvidedProfileValueSourceMethodAndClass() throws Exception {
+	void isTestEnabledInThisEnvironmentForProvidedProfileValueSourceMethodAndClass() throws Exception {
 
 		ProfileValueSource profileValueSource = SystemProfileValueSource.getInstance();
 

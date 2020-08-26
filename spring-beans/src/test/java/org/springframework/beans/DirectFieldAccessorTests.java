@@ -16,9 +16,9 @@
 
 package org.springframework.beans;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +41,6 @@ public class DirectFieldAccessorTests extends AbstractPropertyAccessorTests {
 	public void withShadowedField() {
 		final StringBuilder sb = new StringBuilder();
 
-		@SuppressWarnings("serial")
 		TestBean target = new TestBean() {
 			@SuppressWarnings("unused")
 			StringBuilder name = sb;

@@ -18,7 +18,7 @@ package org.springframework.test.context;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -33,22 +33,22 @@ import static org.assertj.core.api.Assertions.fail;
  * @since 5.0
  * @see Throwable#getSuppressed()
  */
-public class TestContextManagerSuppressedExceptionsTests {
+class TestContextManagerSuppressedExceptionsTests {
 
 	@Test
-	public void afterTestExecution() throws Exception {
+	void afterTestExecution() throws Exception {
 		test("afterTestExecution", FailingAfterTestExecutionTestCase.class,
 			(tcm, c, m) -> tcm.afterTestExecution(this, m, null));
 	}
 
 	@Test
-	public void afterTestMethod() throws Exception {
+	void afterTestMethod() throws Exception {
 		test("afterTestMethod", FailingAfterTestMethodTestCase.class,
 			(tcm, c, m) -> tcm.afterTestMethod(this, m, null));
 	}
 
 	@Test
-	public void afterTestClass() throws Exception {
+	void afterTestClass() throws Exception {
 		test("afterTestClass", FailingAfterTestClassTestCase.class, (tcm, c, m) -> tcm.afterTestClass());
 	}
 

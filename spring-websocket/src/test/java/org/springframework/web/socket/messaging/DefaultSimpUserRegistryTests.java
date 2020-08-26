@@ -16,14 +16,14 @@
 
 package org.springframework.web.socket.messaging;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
@@ -189,22 +189,6 @@ public class DefaultSimpUserRegistryTests {
 			accessor.setSubscriptionId(subscriptionId);
 		}
 		return MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
-	}
-
-
-	private static class TestPrincipal implements Principal {
-
-		private String name;
-
-		public TestPrincipal(String name) {
-			this.name = name;
-		}
-
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
 	}
 
 }

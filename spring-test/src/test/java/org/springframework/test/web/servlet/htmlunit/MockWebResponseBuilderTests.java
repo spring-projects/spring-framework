@@ -19,13 +19,14 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
 import javax.servlet.http.Cookie;
 
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -48,9 +49,9 @@ public class MockWebResponseBuilderTests {
 	private MockWebResponseBuilder responseBuilder;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		this.webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
+		this.webRequest = new WebRequest(new URL("http://company.example:80/test/this/here"));
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
 
@@ -66,7 +67,7 @@ public class MockWebResponseBuilderTests {
 	@Test
 	public void constructorWithNullResponse() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://example.com:80/test/this/here")), null));
+				new MockWebResponseBuilder(0L, new WebRequest(new URL("http://company.example:80/test/this/here")), null));
 	}
 
 

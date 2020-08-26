@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.within;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MediaTypeTests {
 
@@ -157,6 +158,13 @@ public class MediaTypeTests {
 		mediaTypes = MediaType.parseMediaTypes("");
 		assertThat(mediaTypes).as("No media types returned").isNotNull();
 		assertThat(mediaTypes.size()).as("Invalid amount of media types").isEqualTo(0);
+	}
+
+	@Test // gh-23241
+	public void parseMediaTypesWithTrailingComma() {
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes("text/plain, text/html, ");
+		assertThat(mediaTypes).as("No media types returned").isNotNull();
+		assertThat(mediaTypes.size()).as("Incorrect number of media types").isEqualTo(2);
 	}
 
 	@Test

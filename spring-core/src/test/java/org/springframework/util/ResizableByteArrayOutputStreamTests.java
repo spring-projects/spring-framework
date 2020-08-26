@@ -16,8 +16,8 @@
 
 package org.springframework.util;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Brian Clozel
  * @author Juergen Hoeller
  */
-public class ResizableByteArrayOutputStreamTests {
+class ResizableByteArrayOutputStreamTests {
 
 	private static final int INITIAL_CAPACITY = 256;
 
@@ -35,15 +35,15 @@ public class ResizableByteArrayOutputStreamTests {
 	private byte[] helloBytes;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		this.baos = new ResizableByteArrayOutputStream(INITIAL_CAPACITY);
 		this.helloBytes = "Hello World".getBytes("UTF-8");
 	}
 
 
 	@Test
-	public void resize() throws Exception {
+	void resize() throws Exception {
 		assertThat(this.baos.capacity()).isEqualTo(INITIAL_CAPACITY);
 		this.baos.write(helloBytes);
 		int size = 64;
@@ -53,7 +53,7 @@ public class ResizableByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void autoGrow() {
+	void autoGrow() {
 		assertThat(this.baos.capacity()).isEqualTo(INITIAL_CAPACITY);
 		for (int i = 0; i < 129; i++) {
 			this.baos.write(0);
@@ -62,7 +62,7 @@ public class ResizableByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void grow() throws Exception {
+	void grow() throws Exception {
 		assertThat(this.baos.capacity()).isEqualTo(INITIAL_CAPACITY);
 		this.baos.write(helloBytes);
 		this.baos.grow(1000);
@@ -71,13 +71,13 @@ public class ResizableByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void write() throws Exception{
+	void write() throws Exception{
 		this.baos.write(helloBytes);
 		assertByteArrayEqualsString(this.baos);
 	}
 
 	@Test
-	public void failResize() throws Exception{
+	void failResize() throws Exception{
 		this.baos.write(helloBytes);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.baos.resize(5));

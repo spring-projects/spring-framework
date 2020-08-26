@@ -17,7 +17,7 @@ package org.springframework.web.method;
 
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;

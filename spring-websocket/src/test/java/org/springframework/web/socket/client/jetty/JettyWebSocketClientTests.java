@@ -25,9 +25,9 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.CollectionUtils;
@@ -55,7 +55,7 @@ public class JettyWebSocketClientTests {
 	private WebSocketSession wsSession;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 
 		this.server = new TestJettyWebSocketServer(new TextWebSocketHandler());
@@ -67,7 +67,7 @@ public class JettyWebSocketClientTests {
 		this.wsUrl = "ws://localhost:" + this.server.getPort() + "/test";
 	}
 
-	@After
+	@AfterEach
 	public void teardown() throws Exception {
 		this.wsSession.close();
 		this.client.stop();

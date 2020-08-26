@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,17 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.security.Principal;
 
-import io.reactivex.Single;
-import org.junit.Test;
+import io.reactivex.rxjava3.core.Single;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
-import org.springframework.web.method.ResolvableMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +42,7 @@ public class PrincipalMethodArgumentResolverTests {
 	private final PrincipalMethodArgumentResolver resolver =
 			new PrincipalMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
+	private final ResolvableMethod testMethod = ResolvableMethod.on(getClass()).named("handle").build();
 
 
 	@Test
@@ -55,24 +55,22 @@ public class PrincipalMethodArgumentResolverTests {
 
 	@Test
 	public void resolverArgument() {
-		BindingContext context = new BindingContext();
 		Principal user = () -> "Joe";
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"))
 				.mutate().principal(Mono.just(user)).build();
 
+		BindingContext context = new BindingContext();
 		MethodParameter param = this.testMethod.arg(Principal.class);
 		Object actual = this.resolver.resolveArgument(param, context, exchange).block();
 		assertThat(actual).isSameAs(user);
 
 		param = this.testMethod.arg(Mono.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(Mono.class.isAssignableFrom(actual.getClass())).isTrue();
-		assertThat(((Mono<?>) actual).block()).isSameAs(user);
+		assertThat(actual).isInstanceOf(Mono.class).extracting(o -> ((Mono<?>) o).block()).isSameAs(user);
 
 		param = this.testMethod.arg(Single.class, Principal.class);
 		actual = this.resolver.resolveArgument(param, context, exchange).block();
-		assertThat(Single.class.isAssignableFrom(actual.getClass())).isTrue();
-		assertThat(((Single<?>) actual).blockingGet()).isSameAs(user);
+		assertThat(actual).isInstanceOf(Single.class).extracting(o -> ((Single<?>) o).blockingGet()).isSameAs(user);
 	}
 
 

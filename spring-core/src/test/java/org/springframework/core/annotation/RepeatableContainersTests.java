@@ -21,7 +21,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Phillip Webb
  */
-public class RepeatableContainersTests {
+class RepeatableContainersTests {
 
 	@Test
-	public void standardRepeatablesWhenNonRepeatableReturnsNull() {
+	void standardRepeatablesWhenNonRepeatableReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.standardRepeatables(), WithNonRepeatable.class,
 				NonRepeatable.class);
@@ -43,7 +43,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void standardRepeatablesWhenSingleReturnsNull() {
+	void standardRepeatablesWhenSingleReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.standardRepeatables(),
 				WithSingleStandardRepeatable.class, StandardRepeatable.class);
@@ -51,7 +51,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void standardRepeatablesWhenContainerReturnsRepeats() {
+	void standardRepeatablesWhenContainerReturnsRepeats() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.standardRepeatables(), WithStandardRepeatables.class,
 				StandardContainer.class);
@@ -59,7 +59,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void standardRepeatablesWhenContainerButNotRepeatableReturnsNull() {
+	void standardRepeatablesWhenContainerButNotRepeatableReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.standardRepeatables(), WithExplicitRepeatables.class,
 				ExplicitContainer.class);
@@ -67,7 +67,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenNonRepeatableReturnsNull() {
+	void ofExplicitWhenNonRepeatableReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.of(ExplicitRepeatable.class,
 						ExplicitContainer.class),
@@ -76,7 +76,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenStandardRepeatableContainerReturnsNull() {
+	void ofExplicitWhenStandardRepeatableContainerReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.of(ExplicitRepeatable.class,
 						ExplicitContainer.class),
@@ -85,7 +85,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenContainerReturnsRepeats() {
+	void ofExplicitWhenContainerReturnsRepeats() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.of(ExplicitRepeatable.class,
 						ExplicitContainer.class),
@@ -94,7 +94,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenHasNoValueThrowsException() {
+	void ofExplicitWhenHasNoValueThrowsException() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				RepeatableContainers.of(ExplicitRepeatable.class, InvalidNoValue.class))
 			.withMessageContaining("Invalid declaration of container type ["
@@ -104,7 +104,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenValueIsNotArrayThrowsException() {
+	void ofExplicitWhenValueIsNotArrayThrowsException() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				RepeatableContainers.of(ExplicitRepeatable.class, InvalidNotArray.class))
 			.withMessage("Container type ["
@@ -114,7 +114,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenValueIsArrayOfWrongTypeThrowsException() {
+	void ofExplicitWhenValueIsArrayOfWrongTypeThrowsException() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				RepeatableContainers.of(ExplicitRepeatable.class, InvalidWrongArrayType.class))
 			.withMessage("Container type ["
@@ -124,14 +124,14 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenAnnotationIsNullThrowsException() {
+	void ofExplicitWhenAnnotationIsNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				RepeatableContainers.of(null, null))
 			.withMessage("Repeatable must not be null");
 	}
 
 	@Test
-	public void ofExplicitWhenContainerIsNullDeducesContainer() {
+	void ofExplicitWhenContainerIsNullDeducesContainer() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.of(StandardRepeatable.class, null),
 				WithStandardRepeatables.class, StandardContainer.class);
@@ -139,7 +139,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void ofExplicitWhenContainerIsNullAndNotRepeatableThrowsException() {
+	void ofExplicitWhenContainerIsNullAndNotRepeatableThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				RepeatableContainers.of(ExplicitRepeatable.class, null))
 			.withMessage("Annotation type must be a repeatable annotation: " +
@@ -148,7 +148,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void standardAndExplicitReturnsRepeats() {
+	void standardAndExplicitReturnsRepeats() {
 		RepeatableContainers repeatableContainers = RepeatableContainers.standardRepeatables().and(
 				ExplicitContainer.class, ExplicitRepeatable.class);
 		assertThat(findRepeatedAnnotationValues(repeatableContainers,
@@ -160,7 +160,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void noneAlwaysReturnsNull() {
+	void noneAlwaysReturnsNull() {
 		Object[] values = findRepeatedAnnotationValues(
 				RepeatableContainers.none(), WithStandardRepeatables.class,
 				StandardContainer.class);
@@ -168,7 +168,7 @@ public class RepeatableContainersTests {
 	}
 
 	@Test
-	public void equalsAndHashcode() {
+	void equalsAndHashcode() {
 		RepeatableContainers c1 = RepeatableContainers.of(ExplicitRepeatable.class,
 				ExplicitContainer.class);
 		RepeatableContainers c2 = RepeatableContainers.of(ExplicitRepeatable.class,

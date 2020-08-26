@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationConfigurationException;
@@ -52,10 +52,10 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  * @author Sam Brannen
  * @since 2.5
  */
-public class TestExecutionListenersTests {
+class TestExecutionListenersTests {
 
 	@Test
-	public void defaultListeners() {
+	void defaultListeners() {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
@@ -67,7 +67,7 @@ public class TestExecutionListenersTests {
 	 * @since 4.1
 	 */
 	@Test
-	public void defaultListenersMergedWithCustomListenerPrepended() {
+	void defaultListenersMergedWithCustomListenerPrepended() {
 		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
@@ -79,7 +79,7 @@ public class TestExecutionListenersTests {
 	 * @since 4.1
 	 */
 	@Test
-	public void defaultListenersMergedWithCustomListenerAppended() {
+	void defaultListenersMergedWithCustomListenerAppended() {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
@@ -92,7 +92,7 @@ public class TestExecutionListenersTests {
 	 * @since 4.1
 	 */
 	@Test
-	public void defaultListenersMergedWithCustomListenerInserted() {
+	void defaultListenersMergedWithCustomListenerInserted() {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				BarTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
@@ -102,12 +102,12 @@ public class TestExecutionListenersTests {
 	}
 
 	@Test
-	public void nonInheritedDefaultListeners() {
+	void nonInheritedDefaultListeners() {
 		assertRegisteredListeners(NonInheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
 	}
 
 	@Test
-	public void inheritedDefaultListeners() {
+	void inheritedDefaultListeners() {
 		assertRegisteredListeners(InheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
 		assertRegisteredListeners(SubInheritedDefaultListenersTestCase.class, asList(QuuxTestExecutionListener.class));
 		assertRegisteredListeners(SubSubInheritedDefaultListenersTestCase.class,
@@ -115,58 +115,58 @@ public class TestExecutionListenersTests {
 	}
 
 	@Test
-	public void customListeners() {
+	void customListeners() {
 		assertNumRegisteredListeners(ExplicitListenersTestCase.class, 3);
 	}
 
 	@Test
-	public void customListenersDeclaredOnInterface() {
+	void customListenersDeclaredOnInterface() {
 		assertRegisteredListeners(ExplicitListenersOnTestInterfaceTestCase.class,
 			asList(FooTestExecutionListener.class, BarTestExecutionListener.class));
 	}
 
 	@Test
-	public void nonInheritedListeners() {
+	void nonInheritedListeners() {
 		assertNumRegisteredListeners(NonInheritedListenersTestCase.class, 1);
 	}
 
 	@Test
-	public void inheritedListeners() {
+	void inheritedListeners() {
 		assertNumRegisteredListeners(InheritedListenersTestCase.class, 4);
 	}
 
 	@Test
-	public void customListenersRegisteredViaMetaAnnotation() {
+	void customListenersRegisteredViaMetaAnnotation() {
 		assertNumRegisteredListeners(MetaTestCase.class, 3);
 	}
 
 	@Test
-	public void nonInheritedListenersRegisteredViaMetaAnnotation() {
+	void nonInheritedListenersRegisteredViaMetaAnnotation() {
 		assertNumRegisteredListeners(MetaNonInheritedListenersTestCase.class, 1);
 	}
 
 	@Test
-	public void inheritedListenersRegisteredViaMetaAnnotation() {
+	void inheritedListenersRegisteredViaMetaAnnotation() {
 		assertNumRegisteredListeners(MetaInheritedListenersTestCase.class, 4);
 	}
 
 	@Test
-	public void customListenersRegisteredViaMetaAnnotationWithOverrides() {
+	void customListenersRegisteredViaMetaAnnotationWithOverrides() {
 		assertNumRegisteredListeners(MetaWithOverridesTestCase.class, 3);
 	}
 
 	@Test
-	public void customsListenersRegisteredViaMetaAnnotationWithInheritedListenersWithOverrides() {
+	void customsListenersRegisteredViaMetaAnnotationWithInheritedListenersWithOverrides() {
 		assertNumRegisteredListeners(MetaInheritedListenersWithOverridesTestCase.class, 5);
 	}
 
 	@Test
-	public void customListenersRegisteredViaMetaAnnotationWithNonInheritedListenersWithOverrides() {
+	void customListenersRegisteredViaMetaAnnotationWithNonInheritedListenersWithOverrides() {
 		assertNumRegisteredListeners(MetaNonInheritedListenersWithOverridesTestCase.class, 8);
 	}
 
 	@Test
-	public void listenersAndValueAttributesDeclared() {
+	void listenersAndValueAttributesDeclared() {
 		assertThatExceptionOfType(AnnotationConfigurationException.class).isThrownBy(() ->
 				new TestContextManager(DuplicateListenersConfigTestCase.class));
 	}

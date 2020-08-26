@@ -17,8 +17,8 @@ package org.springframework.test.web.reactive.server.samples;
 
 import java.security.Principal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -43,7 +43,7 @@ public class ExchangeMutatorTests {
 	private WebTestClient webTestClient;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		this.webTestClient = WebTestClient.bindToController(new TestController())

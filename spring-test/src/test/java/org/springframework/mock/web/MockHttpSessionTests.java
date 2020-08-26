@@ -17,10 +17,11 @@
 package org.springframework.mock.web;
 
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -32,104 +33,104 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Vedran Pavic
  * @since 3.2
  */
-public class MockHttpSessionTests {
+class MockHttpSessionTests {
 
 	private MockHttpSession session = new MockHttpSession();
 
 
 	@Test
-	public void invalidateOnce() {
+	void invalidateOnce() {
 		assertThat(session.isInvalid()).isFalse();
 		session.invalidate();
 		assertThat(session.isInvalid()).isTrue();
 	}
 
 	@Test
-	public void invalidateTwice() {
+	void invalidateTwice() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::invalidate);
 	}
 
 	@Test
-	public void getCreationTimeOnInvalidatedSession() {
+	void getCreationTimeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::getCreationTime);
 	}
 
 	@Test
-	public void getLastAccessedTimeOnInvalidatedSession() {
+	void getLastAccessedTimeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::getLastAccessedTime);
 	}
 
 	@Test
-	public void getAttributeOnInvalidatedSession() {
+	void getAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.getAttribute("foo"));
 	}
 
 	@Test
-	public void getAttributeNamesOnInvalidatedSession() {
+	void getAttributeNamesOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::getAttributeNames);
 	}
 
 	@Test
-	public void getValueOnInvalidatedSession() {
+	void getValueOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.getValue("foo"));
 	}
 
 	@Test
-	public void getValueNamesOnInvalidatedSession() {
+	void getValueNamesOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::getValueNames);
 	}
 
 	@Test
-	public void setAttributeOnInvalidatedSession() {
+	void setAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.setAttribute("name", "value"));
 	}
 
 	@Test
-	public void putValueOnInvalidatedSession() {
+	void putValueOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.putValue("name", "value"));
 	}
 
 	@Test
-	public void removeAttributeOnInvalidatedSession() {
+	void removeAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.removeAttribute("name"));
 	}
 
 	@Test
-	public void removeValueOnInvalidatedSession() {
+	void removeValueOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.removeValue("name"));
 	}
 
 	@Test
-	public void isNewOnInvalidatedSession() {
+	void isNewOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(
 				session::isNew);
 	}
 
 	@Test
-	public void bindingListenerBindListener() {
+	void bindingListenerBindListener() {
 		String bindingListenerName = "bindingListener";
 		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
 
@@ -139,7 +140,7 @@ public class MockHttpSessionTests {
 	}
 
 	@Test
-	public void bindingListenerBindListenerThenUnbind() {
+	void bindingListenerBindListenerThenUnbind() {
 		String bindingListenerName = "bindingListener";
 		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
 
@@ -150,7 +151,7 @@ public class MockHttpSessionTests {
 	}
 
 	@Test
-	public void bindingListenerBindSameListenerTwice() {
+	void bindingListenerBindSameListenerTwice() {
 		String bindingListenerName = "bindingListener";
 		CountingHttpSessionBindingListener bindingListener = new CountingHttpSessionBindingListener();
 
@@ -161,7 +162,7 @@ public class MockHttpSessionTests {
 	}
 
 	@Test
-	public void bindingListenerBindListenerOverwrite() {
+	void bindingListenerBindListenerOverwrite() {
 		String bindingListenerName = "bindingListener";
 		CountingHttpSessionBindingListener bindingListener1 = new CountingHttpSessionBindingListener();
 		CountingHttpSessionBindingListener bindingListener2 = new CountingHttpSessionBindingListener();

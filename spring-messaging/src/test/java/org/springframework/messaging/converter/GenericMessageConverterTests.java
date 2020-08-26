@@ -18,7 +18,7 @@ package org.springframework.messaging.converter;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;

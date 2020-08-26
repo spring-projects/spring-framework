@@ -16,7 +16,7 @@
 
 package org.springframework.aop.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXParseException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;

@@ -18,16 +18,14 @@ package org.springframework.test.context.jdbc;
 
 import java.lang.annotation.Retention;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 /**
@@ -37,9 +35,9 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
  * @author Sam Brannen
  * @since 4.3
  */
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
 @DirtiesContext
-public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
 	@ComposedSql(
@@ -47,8 +45,8 @@ public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUni
 		statements = "INSERT INTO user VALUES('Dilbert')",
 		executionPhase = BEFORE_TEST_METHOD
 	)
-	public void composedSqlAnnotation() {
-		assertThat(countRowsInTable("user")).as("Number of rows in the 'user' table.").isEqualTo(1);
+	void composedSqlAnnotation() {
+		assertNumUsers(1);
 	}
 
 

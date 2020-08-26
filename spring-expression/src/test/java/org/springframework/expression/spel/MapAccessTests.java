@@ -19,8 +19,9 @@ package org.springframework.expression.spel;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -29,11 +30,10 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Testing variations on map access.
@@ -99,8 +99,8 @@ public class MapAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(PERFORMANCE)
 	public void testGetValuePerformance() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
 		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 		EvaluationContext context = new StandardEvaluationContext(map);

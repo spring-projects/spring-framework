@@ -205,7 +205,7 @@
 			<value>1</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
-			<value>1205</value>
+			<value>1205,3572</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>1213</value>

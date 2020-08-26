@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;

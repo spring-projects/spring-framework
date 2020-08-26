@@ -23,13 +23,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
@@ -56,8 +58,9 @@ import static org.mockito.Mockito.verify;
  *
  * @author Alef Arendsen
  */
-@RunWith(MockitoJUnitRunner.class)
-public class SqlLobValueTests  {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class SqlLobValueTests  {
 
 	@Mock
 	private PreparedStatement preparedStatement;
@@ -71,13 +74,13 @@ public class SqlLobValueTests  {
 	@Captor
 	private ArgumentCaptor<InputStream> inputStreamCaptor;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		given(handler.getLobCreator()).willReturn(creator);
 	}
 
 	@Test
-	public void test1() throws SQLException {
+	void test1() throws SQLException {
 		byte[] testBytes = "Bla".getBytes();
 		SqlLobValue lob = new SqlLobValue(testBytes, handler);
 		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
@@ -85,7 +88,7 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void test2() throws SQLException {
+	void test2() throws SQLException {
 		String testString = "Bla";
 		SqlLobValue lob = new SqlLobValue(testString, handler);
 		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
@@ -93,14 +96,14 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void test3() throws SQLException {
+	void test3() throws SQLException {
 		SqlLobValue lob = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream("Bla".getBytes())), 12);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test"));
 	}
 
 	@Test
-	public void test4() throws SQLException {
+	void test4() throws SQLException {
 		String testContent = "Bla";
 		SqlLobValue lob = new SqlLobValue(testContent, handler);
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
@@ -108,7 +111,7 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void test5() throws Exception {
+	void test5() throws Exception {
 		byte[] testContent = "Bla".getBytes();
 		SqlLobValue lob = new SqlLobValue(new ByteArrayInputStream(testContent), 3, handler);
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
@@ -119,7 +122,7 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void test6() throws SQLException {
+	void test6() throws SQLException {
 		byte[] testContent = "Bla".getBytes();
 		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
 		InputStreamReader reader = new InputStreamReader(bais);
@@ -129,14 +132,14 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void test7() throws SQLException {
+	void test7() throws SQLException {
 		SqlLobValue lob = new SqlLobValue("bla".getBytes());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test"));
 	}
 
 	@Test
-	public void testOtherConstructors() throws SQLException {
+	void testOtherConstructors() throws SQLException {
 		// a bit BS, but we need to test them, as long as they don't throw exceptions
 
 		SqlLobValue lob = new SqlLobValue("bla");
@@ -170,7 +173,7 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void testCorrectCleanup() throws SQLException {
+	void testCorrectCleanup() throws SQLException {
 		SqlLobValue lob = new SqlLobValue("Bla", handler);
 		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 		lob.cleanup();
@@ -179,7 +182,7 @@ public class SqlLobValueTests  {
 	}
 
 	@Test
-	public void testOtherSqlType() throws SQLException {
+	void testOtherSqlType() throws SQLException {
 		SqlLobValue lob = new SqlLobValue("Bla", handler);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				lob.setTypeValue(preparedStatement, 1, Types.SMALLINT, "test"));

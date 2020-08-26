@@ -19,8 +19,8 @@ package org.springframework.beans;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -36,7 +36,7 @@ public class BeanWrapperAutoGrowingTests {
 	private final BeanWrapperImpl wrapper = new BeanWrapperImpl(bean);
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		wrapper.setAutoGrowNestedPaths(true);
 	}

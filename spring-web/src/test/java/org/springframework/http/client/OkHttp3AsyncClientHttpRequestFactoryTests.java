@@ -16,14 +16,14 @@
 
 package org.springframework.http.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 
 /**
  * @author Roy Clarkson
  */
-public class OkHttp3AsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
+public class OkHttp3AsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTests {
 
 	@SuppressWarnings("deprecation")
 	@Override

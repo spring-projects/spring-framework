@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,52 +31,57 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class LinkedMultiValueMapTests {
+class LinkedMultiValueMapTests {
 
 	private final LinkedMultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
 
 	@Test
-	public void add() {
+	void add() {
 		map.add("key", "value1");
 		map.add("key", "value2");
-		assertThat(map.size()).isEqualTo(1);
-		List<String> expected = new ArrayList<>(2);
-		expected.add("value1");
-		expected.add("value2");
-		assertThat(map.get("key")).isEqualTo(expected);
+		assertThat(map).hasSize(1);
+		assertThat(map.get("key")).containsExactly("value1", "value2");
 	}
 
 	@Test
-	public void set() {
+	void addIfAbsentWhenAbsent() {
+		map.addIfAbsent("key", "value1");
+		assertThat(map.get("key")).containsExactly("value1");
+	}
+
+	@Test
+	void addIfAbsentWhenPresent() {
+		map.add("key", "value1");
+		map.addIfAbsent("key", "value2");
+		assertThat(map.get("key")).containsExactly("value1");
+	}
+
+	@Test
+	void set() {
 		map.set("key", "value1");
 		map.set("key", "value2");
-		assertThat(map.size()).isEqualTo(1);
-		assertThat(map.get("key")).isEqualTo(Collections.singletonList("value2"));
+		assertThat(map.get("key")).containsExactly("value2");
 	}
 
 	@Test
-	public void addAll() {
+	void addAll() {
 		map.add("key", "value1");
 		map.addAll("key", Arrays.asList("value2", "value3"));
-		assertThat(map.size()).isEqualTo(1);
-		List<String> expected = new ArrayList<>(2);
-		expected.add("value1");
-		expected.add("value2");
-		expected.add("value3");
-		assertThat(map.get("key")).isEqualTo(expected);
+		assertThat(map).hasSize(1);
+		assertThat(map.get("key")).containsExactly("value1","value2","value3");
 	}
 
 	@Test
-	public void addAllWithEmptyList() {
+	void addAllWithEmptyList() {
 		map.addAll("key", Collections.emptyList());
-		assertThat(map.size()).isEqualTo(1);
-		assertThat(map.get("key")).isEqualTo(Collections.emptyList());
+		assertThat(map).hasSize(1);
+		assertThat(map.get("key")).isEmpty();
 		assertThat(map.getFirst("key")).isNull();
 	}
 
 	@Test
-	public void getFirst() {
+	void getFirst() {
 		List<String> values = new ArrayList<>(2);
 		values.add("value1");
 		values.add("value2");
@@ -86,33 +91,33 @@ public class LinkedMultiValueMapTests {
 	}
 
 	@Test
-	public void getFirstWithEmptyList() {
+	void getFirstWithEmptyList() {
 		map.put("key", Collections.emptyList());
 		assertThat(map.getFirst("key")).isNull();
 		assertThat(map.getFirst("other")).isNull();
 	}
 
 	@Test
-	public void toSingleValueMap() {
+	void toSingleValueMap() {
 		List<String> values = new ArrayList<>(2);
 		values.add("value1");
 		values.add("value2");
 		map.put("key", values);
-		Map<String, String> svm = map.toSingleValueMap();
-		assertThat(svm.size()).isEqualTo(1);
-		assertThat(svm.get("key")).isEqualTo("value1");
+		Map<String, String> singleValueMap = map.toSingleValueMap();
+		assertThat(singleValueMap).hasSize(1);
+		assertThat(singleValueMap.get("key")).isEqualTo("value1");
 	}
 
 	@Test
-	public void toSingleValueMapWithEmptyList() {
+	void toSingleValueMapWithEmptyList() {
 		map.put("key", Collections.emptyList());
-		Map<String, String> svm = map.toSingleValueMap();
-		assertThat(svm.size()).isEqualTo(0);
-		assertThat(svm.get("key")).isNull();
+		Map<String, String> singleValueMap = map.toSingleValueMap();
+		assertThat(singleValueMap).isEmpty();
+		assertThat(singleValueMap.get("key")).isNull();
 	}
 
 	@Test
-	public void equals() {
+	void equals() {
 		map.set("key1", "value1");
 		assertThat(map).isEqualTo(map);
 		MultiValueMap<String, String> o1 = new LinkedMultiValueMap<>();

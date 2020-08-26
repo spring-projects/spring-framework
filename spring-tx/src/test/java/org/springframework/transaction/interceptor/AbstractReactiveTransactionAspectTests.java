@@ -18,8 +18,8 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * Abstract support class to test {@link TransactionAspectSupport} with reactive methods.
@@ -54,7 +54,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	protected Method exceptionalMethod;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		getNameMethod = TestBean.class.getMethod("getName");
 		setNameMethod = TestBean.class.getMethod("setName", String.class);
@@ -79,7 +79,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		checkReactiveTransaction(false);
 
 		// expect no calls
-		verifyZeroInteractions(rtm);
+		verifyNoInteractions(rtm);
 	}
 
 	/**
@@ -371,7 +371,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 	 * have been created, as there's no distinction between target and proxy.
 	 * In the case of Spring's own AOP framework, a proxy must be created
 	 * using a suitably configured transaction interceptor
-	 * @param target target if there's a distinct target. If not (AspectJ),
+	 * @param target the target if there's a distinct target. If not (AspectJ),
 	 * return target.
 	 * @return transactional advised object
 	 */

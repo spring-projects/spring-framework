@@ -25,9 +25,6 @@ import org.mockito.invocation.Invocation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-
-
 /**
  * General test utilities for use with {@link Mockito}.
  *

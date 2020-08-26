@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,32 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.util.Random;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  */
-public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	public static final int REQUEST_SIZE = 4096 * 3;
+	private static final int REQUEST_SIZE = 4096 * 3;
 
-	public static final int RESPONSE_SIZE = 1024 * 4;
+	private static final int RESPONSE_SIZE = 1024 * 4;
 
 	private final Random rnd = new Random();
 
 	private final RandomHandler handler = new RandomHandler();
-
-	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
 	@Override
@@ -55,8 +53,10 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 	}
 
 
-	@Test
-	public void random() throws Throwable {
+	@ParameterizedHttpServerTest
+	void random(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		// TODO: fix Reactor support
 
 		RestTemplate restTemplate = new RestTemplate();
@@ -79,17 +79,15 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 
 	private class RandomHandler implements HttpHandler {
 
-		public static final int CHUNKS = 16;
+		static final int CHUNKS = 16;
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			Mono<Integer> requestSizeMono = request.getBody().
 					reduce(0, (integer, dataBuffer) -> integer +
 							dataBuffer.readableByteCount()).
-					doOnSuccessOrError((size, throwable) -> {
-						assertThat(throwable).isNull();
-						assertThat(size).isEqualTo(REQUEST_SIZE);
-					});
+					doOnNext(size -> assertThat(size).isEqualTo(REQUEST_SIZE)).
+					doOnError(throwable -> assertThat(throwable).isNull());
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);
 
@@ -104,10 +102,11 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		private DataBuffer randomBuffer(int size) {
 			byte[] bytes = new byte[size];
 			rnd.nextBytes(bytes);
-			DataBuffer buffer = dataBufferFactory.allocateBuffer(size);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer(size);
 			buffer.write(bytes);
 			return buffer;
 		}
 
 	}
+
 }

@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
  * A simple log message type for use with Commons Logging, allowing
  * for convenient lazy resolution of a given {@link Supplier} instance
  * (typically bound to a Java 8 lambda expression) or a printf-style
- * format string ({@link String#format})in its {@link #toString()}.
+ * format string ({@link String#format}) in its {@link #toString()}.
  *
  * @author Juergen Hoeller
  * @since 5.2

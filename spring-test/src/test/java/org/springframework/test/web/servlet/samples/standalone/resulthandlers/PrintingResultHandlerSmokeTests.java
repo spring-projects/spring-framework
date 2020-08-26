@@ -17,11 +17,12 @@
 package org.springframework.test.web.servlet.samples.standalone.resulthandlers;
 
 import java.io.StringWriter;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.result.PrintingResultHandler;
@@ -40,15 +41,18 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * various output streams.
  *
  * <p><strong>NOTE</strong>: this <em>smoke test</em> is not intended to be
- * executed with the build. To run this test, comment out the {@code @Ignore}
+ * executed with the build. To run this test, comment out the {@code @Disabled}
  * declaration and inspect the output manually.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @see org.springframework.test.web.servlet.result.PrintingResultHandlerTests
  */
-@Ignore("Not intended to be executed with the build. Comment out this line to inspect the output manually.")
+@Disabled
 public class PrintingResultHandlerSmokeTests {
+
+	// Not intended to be executed with the build.
+	// Comment out class-level @Disabled to see the output.
 
 	@Test
 	public void testPrint() throws Exception {

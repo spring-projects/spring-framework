@@ -28,7 +28,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
@@ -43,6 +43,10 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.INestedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.NestedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -50,13 +54,10 @@ import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.testfixture.Assume;
+import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.TestGroup;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
-import org.springframework.tests.sample.beans.INestedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.NestedTestBean;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,8 +113,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
@@ -134,8 +135,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
@@ -156,8 +157,8 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
+	@EnabledForTestGroups(TestGroup.PERFORMANCE)
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
 
 		GenericApplicationContext ac = new GenericApplicationContext();

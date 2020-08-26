@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * Please note that Spring's {@link LocalSessionFactoryBean} is an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
- * JPA purposes: In particular with Hibernate 5.3, the Hibernate {@code SessionFactory}
+ * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
  * will natively expose the JPA {@code EntityManagerFactory} interface as well, and
  * Hibernate {@code BeanContainer} integration will be registered out of the box.
  *

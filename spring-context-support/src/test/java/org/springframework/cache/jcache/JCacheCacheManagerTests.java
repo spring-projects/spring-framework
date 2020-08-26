@@ -18,10 +18,11 @@ package org.springframework.cache.jcache;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManagerTests;
 
@@ -40,7 +41,7 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 	private JCacheCacheManager transactionalCacheManager;
 
 
-	@Before
+	@BeforeEach
 	public void setupOnce() {
 		cacheManagerMock = new CacheManagerMock();
 		cacheManagerMock.addCache(CACHE_NAME);

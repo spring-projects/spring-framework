@@ -18,6 +18,8 @@ package org.springframework.jms.core;
 
 import javax.jms.Session;
 
+import org.junit.jupiter.api.BeforeEach;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -26,13 +28,14 @@ import static org.mockito.Mockito.mock;
  * @author Stephane Nicoll
  * @since 06.01.2005
  */
-public class JmsTemplateTransactedTests extends JmsTemplateTests {
+class JmsTemplateTransactedTests extends JmsTemplateTests {
 
 	private Session localSession;
 
 
 	@Override
-	public void setupMocks() throws Exception {
+	@BeforeEach
+	void setupMocks() throws Exception {
 		super.setupMocks();
 		this.localSession = mock(Session.class);
 		given(this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(this.localSession);

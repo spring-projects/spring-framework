@@ -23,7 +23,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 11.01.2005
  */
-public class PropertiesPersisterTests {
+class PropertiesPersisterTests {
 
 	@Test
-	public void propertiesPersister() throws IOException {
+	void propertiesPersister() throws IOException {
 		String propString = "code1=message1\ncode2:message2";
 		Properties props = loadProperties(propString, false);
 		String propCopy = storeProperties(props, null, false);
@@ -42,7 +42,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithWhitespace() throws IOException {
+	void propertiesPersisterWithWhitespace() throws IOException {
 		String propString = " code1\t= \tmessage1\n  code2 \t  :\t mess\\\n \t  age2";
 		Properties props = loadProperties(propString, false);
 		String propCopy = storeProperties(props, null, false);
@@ -50,7 +50,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithHeader() throws IOException {
+	void propertiesPersisterWithHeader() throws IOException {
 		String propString = "code1=message1\ncode2:message2";
 		Properties props = loadProperties(propString, false);
 		String propCopy = storeProperties(props, "myHeader", false);
@@ -58,7 +58,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithEmptyValue() throws IOException {
+	void propertiesPersisterWithEmptyValue() throws IOException {
 		String propString = "code1=message1\ncode2:message2\ncode3=";
 		Properties props = loadProperties(propString, false);
 		String propCopy = storeProperties(props, null, false);
@@ -66,7 +66,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithReader() throws IOException {
+	void propertiesPersisterWithReader() throws IOException {
 		String propString = "code1=message1\ncode2:message2";
 		Properties props = loadProperties(propString, true);
 		String propCopy = storeProperties(props, null, true);
@@ -74,7 +74,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithReaderAndWhitespace() throws IOException {
+	void propertiesPersisterWithReaderAndWhitespace() throws IOException {
 		String propString = " code1\t= \tmessage1\n  code2 \t  :\t mess\\\n \t  age2";
 		Properties props = loadProperties(propString, true);
 		String propCopy = storeProperties(props, null, true);
@@ -82,7 +82,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithReaderAndHeader() throws IOException {
+	void propertiesPersisterWithReaderAndHeader() throws IOException {
 		String propString = "code1\t=\tmessage1\n  code2 \t  : \t message2";
 		Properties props = loadProperties(propString, true);
 		String propCopy = storeProperties(props, "myHeader", true);
@@ -90,7 +90,7 @@ public class PropertiesPersisterTests {
 	}
 
 	@Test
-	public void propertiesPersisterWithReaderAndEmptyValue() throws IOException {
+	void propertiesPersisterWithReaderAndEmptyValue() throws IOException {
 		String propString = "code1=message1\ncode2:message2\ncode3=";
 		Properties props = loadProperties(propString, true);
 		String propCopy = storeProperties(props, null, true);

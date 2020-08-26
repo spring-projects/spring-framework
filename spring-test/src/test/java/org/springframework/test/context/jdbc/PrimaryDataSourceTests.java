@@ -18,8 +18,7 @@ package org.springframework.test.context.jdbc;
 
 import javax.sql.DataSource;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +27,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.jdbc.JdbcTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,17 +41,16 @@ import static org.springframework.test.transaction.TransactionAssert.assertThatT
  * @since 4.3
  * @see org.springframework.test.context.transaction.PrimaryTransactionManagerTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
+@SpringJUnitConfig
 @DirtiesContext
-public class PrimaryDataSourceTests {
+class PrimaryDataSourceTests {
 
 	@Configuration
 	static class Config {
 
 		@Primary
 		@Bean
-		public DataSource primaryDataSource() {
+		DataSource primaryDataSource() {
 			// @formatter:off
 			return new EmbeddedDatabaseBuilder()
 					.generateUniqueName(true)
@@ -63,7 +60,7 @@ public class PrimaryDataSourceTests {
 		}
 
 		@Bean
-		public DataSource additionalDataSource() {
+		DataSource additionalDataSource() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
 		}
 
@@ -74,13 +71,13 @@ public class PrimaryDataSourceTests {
 
 
 	@Autowired
-	public void setDataSource(DataSource dataSource) {
+	void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	@Test
 	@Sql("data.sql")
-	public void dataSourceTest() {
+	void dataSourceTest() {
 		assertThatTransaction().isNotActive();
 		assertThat(JdbcTestUtils.countRowsInTable(this.jdbcTemplate, "user")).as("Number of rows in the 'user' table.").isEqualTo(1);
 	}

@@ -16,7 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.context.ApplicationContext;

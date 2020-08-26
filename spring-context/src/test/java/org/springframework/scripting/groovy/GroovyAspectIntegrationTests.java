@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.groovy;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -87,7 +87,7 @@ public class GroovyAspectIntegrationTests {
 		assertThat(logAdvice.getCountThrows()).isEqualTo(1);
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		if (context != null) {
 			context.close();

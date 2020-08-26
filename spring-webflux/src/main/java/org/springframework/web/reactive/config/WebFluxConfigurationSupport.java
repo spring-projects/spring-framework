@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -92,10 +93,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Nullable
 	private ApplicationContext applicationContext;
 
-	@Nullable
-	public final ApplicationContext getApplicationContext() {
-		return this.applicationContext;
-	}
 
 	@Override
 	public void setApplicationContext(@Nullable ApplicationContext applicationContext) {
@@ -106,6 +103,12 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 						"e.g. via @EnableWebMvc and @EnableWebFlux, in the same application.");
 		}
 	}
+
+	@Nullable
+	public final ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 
 	@Bean
 	public DispatcherHandler webHandler() {
@@ -120,13 +123,23 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
-		mapping.setContentTypeResolver(webFluxContentTypeResolver);
-		mapping.setCorsConfigurations(getCorsConfigurations());
-
+		mapping.setContentTypeResolver(contentTypeResolver);
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
+		configureAbstractHandlerMapping(mapping, configurer);
+		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
+		if (pathPrefixes != null) {
+			mapping.setPathPrefixes(pathPrefixes);
+		}
+
+		return mapping;
+	}
+
+	private void configureAbstractHandlerMapping(AbstractHandlerMapping mapping, PathMatchConfigurer configurer) {
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		Boolean useTrailingSlashMatch = configurer.isUseTrailingSlashMatch();
 		if (useTrailingSlashMatch != null) {
 			mapping.setUseTrailingSlashMatch(useTrailingSlashMatch);
@@ -135,12 +148,6 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 		if (useCaseSensitiveMatch != null) {
 			mapping.setUseCaseSensitiveMatch(useCaseSensitiveMatch);
 		}
-		Map<String, Predicate<Class<?>>> pathPrefixes = configurer.getPathPrefixes();
-		if (pathPrefixes != null) {
-			mapping.setPathPrefixes(pathPrefixes);
-		}
-
-		return mapping;
 	}
 
 	/**
@@ -204,10 +211,9 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public RouterFunctionMapping routerFunctionMapping(ServerCodecConfigurer serverCodecConfigurer) {
 		RouterFunctionMapping mapping = createRouterFunctionMapping();
-		mapping.setOrder(-1); // go before RequestMappingHandlerMapping
+		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setMessageReaders(serverCodecConfigurer.getReaders());
-		mapping.setCorsConfigurations(getCorsConfigurations());
-
+		configureAbstractHandlerMapping(mapping, getPathMatchConfigurer());
 		return mapping;
 	}
 
@@ -265,14 +271,15 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter(
-			ReactiveAdapterRegistry webFluxAdapterRegistry,
+			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
 			ServerCodecConfigurer serverCodecConfigurer,
-			FormattingConversionService webFluxConversionService,
-			Validator webfluxValidator) {
+			@Qualifier("webFluxConversionService") FormattingConversionService conversionService,
+			@Qualifier("webFluxValidator") Validator validator) {
+
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setMessageReaders(serverCodecConfigurer.getReaders());
-		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(webFluxConversionService, webfluxValidator));
-		adapter.setReactiveAdapterRegistry(webFluxAdapterRegistry);
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer(conversionService, validator));
+		adapter.setReactiveAdapterRegistry(reactiveAdapterRegistry);
 
 		ArgumentResolverConfigurer configurer = new ArgumentResolverConfigurer();
 		configureArgumentResolvers(configurer);
@@ -329,8 +336,8 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	 * initializing all {@link WebDataBinder} instances.
 	 */
 	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer(
-			FormattingConversionService webFluxConversionService,
-			Validator webFluxValidator) {
+			FormattingConversionService webFluxConversionService, Validator webFluxValidator) {
+
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(webFluxConversionService);
 		initializer.setValidator(webFluxValidator);
@@ -426,38 +433,40 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler(
-			ReactiveAdapterRegistry webFluxAdapterRegistry,
+			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
 			ServerCodecConfigurer serverCodecConfigurer,
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+
 		return new ResponseEntityResultHandler(serverCodecConfigurer.getWriters(),
-				webFluxContentTypeResolver, webFluxAdapterRegistry);
+				contentTypeResolver, reactiveAdapterRegistry);
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler(
-			ReactiveAdapterRegistry webFluxAdapterRegistry,
+			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
 			ServerCodecConfigurer serverCodecConfigurer,
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+
 		return new ResponseBodyResultHandler(serverCodecConfigurer.getWriters(),
-				webFluxContentTypeResolver, webFluxAdapterRegistry);
+				contentTypeResolver, reactiveAdapterRegistry);
 	}
 
 	@Bean
 	public ViewResolutionResultHandler viewResolutionResultHandler(
-			ReactiveAdapterRegistry webFluxAdapterRegistry,
-			RequestedContentTypeResolver webFluxContentTypeResolver) {
+			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
+			@Qualifier("webFluxContentTypeResolver") RequestedContentTypeResolver contentTypeResolver) {
+
 		ViewResolverRegistry registry = getViewResolverRegistry();
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(
-				resolvers, webFluxContentTypeResolver, webFluxAdapterRegistry);
+				resolvers, contentTypeResolver, reactiveAdapterRegistry);
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
 	}
 
 	@Bean
-	public ServerResponseResultHandler serverResponseResultHandler(
-			ServerCodecConfigurer serverCodecConfigurer) {
+	public ServerResponseResultHandler serverResponseResultHandler(ServerCodecConfigurer serverCodecConfigurer) {
 		List<ViewResolver> resolvers = getViewResolverRegistry().getViewResolvers();
 		ServerResponseResultHandler handler = new ServerResponseResultHandler();
 		handler.setMessageWriters(serverCodecConfigurer.getWriters());

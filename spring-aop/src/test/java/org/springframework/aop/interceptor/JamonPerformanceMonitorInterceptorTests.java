@@ -19,9 +19,9 @@ package org.springframework.aop.interceptor;
 import com.jamonapi.MonitorFactory;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -41,12 +41,12 @@ public class JamonPerformanceMonitorInterceptorTests {
 	private final Log log = mock(Log.class);
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MonitorFactory.reset();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		MonitorFactory.reset();
 	}

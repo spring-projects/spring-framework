@@ -19,7 +19,7 @@ package org.springframework.core;
 import java.util.Locale;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rick Evans
  * @since 28.04.2003
  */
-public class ConstantsTests {
+class ConstantsTests {
 
 	@Test
-	public void constants() {
+	void constants() {
 		Constants c = new Constants(A.class);
 		assertThat(c.getClassName()).isEqualTo(A.class.getName());
 		assertThat(c.getSize()).isEqualTo(9);
@@ -52,7 +52,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void getNames() {
+	void getNames() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNames("");
@@ -71,7 +71,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void getValues() {
+	void getValues() {
 		Constants c = new Constants(A.class);
 
 		Set<?> values = c.getValues("");
@@ -96,7 +96,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void getValuesInTurkey() {
+	void getValuesInTurkey() {
 		Locale oldLocale = Locale.getDefault();
 		Locale.setDefault(new Locale("tr", ""));
 		try {
@@ -128,7 +128,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void suffixAccess() {
+	void suffixAccess() {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNamesForSuffix("_PROPERTY");
@@ -143,7 +143,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void toCode() {
+	void toCode() {
 		Constants c = new Constants(A.class);
 
 		assertThat(c.toCode(Integer.valueOf(0), "")).isEqualTo("DOG");
@@ -191,28 +191,28 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void getValuesWithNullPrefix() throws Exception {
+	void getValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(null);
 		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void getValuesWithEmptyStringPrefix() throws Exception {
+	void getValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<Object> values = c.getValues("");
 		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void getValuesWithWhitespacedStringPrefix() throws Exception {
+	void getValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(" ");
 		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
 	}
 
 	@Test
-	public void withClassThatExposesNoConstants() throws Exception {
+	void withClassThatExposesNoConstants() throws Exception {
 		Constants c = new Constants(NoConstants.class);
 		assertThat(c.getSize()).isEqualTo(0);
 		final Set<?> values = c.getValues("");
@@ -221,7 +221,7 @@ public class ConstantsTests {
 	}
 
 	@Test
-	public void ctorWithNullClass() throws Exception {
+	void ctorWithNullClass() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new Constants(null));
 	}

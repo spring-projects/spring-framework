@@ -18,7 +18,7 @@ package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;

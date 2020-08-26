@@ -18,9 +18,9 @@ package org.springframework.core.env;
 
 import java.util.Iterator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.env.MockPropertySource;
+import org.springframework.core.testfixture.env.MockPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class MutablePropertySourcesTests {
+class MutablePropertySourcesTests {
 
 	@Test
-	public void test() {
+	void test() {
 		MutablePropertySources sources = new MutablePropertySources();
 		sources.addLast(new MockPropertySource("b").withProperty("p1", "bValue"));
 		sources.addLast(new MockPropertySource("d").withProperty("p1", "dValue"));
@@ -135,13 +135,13 @@ public class MutablePropertySourcesTests {
 	}
 
 	@Test
-	public void getNonExistentPropertySourceReturnsNull() {
+	void getNonExistentPropertySourceReturnsNull() {
 		MutablePropertySources sources = new MutablePropertySources();
 		assertThat(sources.get("bogus")).isNull();
 	}
 
 	@Test
-	public void iteratorContainsPropertySource() {
+	void iteratorContainsPropertySource() {
 		MutablePropertySources sources = new MutablePropertySources();
 		sources.addLast(new MockPropertySource("test"));
 
@@ -155,14 +155,14 @@ public class MutablePropertySourcesTests {
 	}
 
 	@Test
-	public void iteratorIsEmptyForEmptySources() {
+	void iteratorIsEmptyForEmptySources() {
 		MutablePropertySources sources = new MutablePropertySources();
 		Iterator<PropertySource<?>> it = sources.iterator();
 		assertThat(it.hasNext()).isFalse();
 	}
 
 	@Test
-	public void streamContainsPropertySource() {
+	void streamContainsPropertySource() {
 		MutablePropertySources sources = new MutablePropertySources();
 		sources.addLast(new MockPropertySource("test"));
 
@@ -173,7 +173,7 @@ public class MutablePropertySourcesTests {
 	}
 
 	@Test
-	public void streamIsEmptyForEmptySources() {
+	void streamIsEmptyForEmptySources() {
 		MutablePropertySources sources = new MutablePropertySources();
 		assertThat(sources.stream()).isNotNull();
 		assertThat(sources.stream().count()).isEqualTo(0L);

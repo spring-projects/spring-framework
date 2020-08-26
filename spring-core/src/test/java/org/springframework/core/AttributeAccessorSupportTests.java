@@ -18,7 +18,7 @@ package org.springframework.core;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 2.0
  */
-public class AttributeAccessorSupportTests {
+class AttributeAccessorSupportTests {
 
 	private static final String NAME = "foo";
 
@@ -36,20 +36,20 @@ public class AttributeAccessorSupportTests {
 	private AttributeAccessor attributeAccessor = new SimpleAttributeAccessorSupport();
 
 	@Test
-	public void setAndGet() throws Exception {
+	void setAndGet() throws Exception {
 		this.attributeAccessor.setAttribute(NAME, VALUE);
 		assertThat(this.attributeAccessor.getAttribute(NAME)).isEqualTo(VALUE);
 	}
 
 	@Test
-	public void setAndHas() throws Exception {
+	void setAndHas() throws Exception {
 		assertThat(this.attributeAccessor.hasAttribute(NAME)).isFalse();
 		this.attributeAccessor.setAttribute(NAME, VALUE);
 		assertThat(this.attributeAccessor.hasAttribute(NAME)).isTrue();
 	}
 
 	@Test
-	public void remove() throws Exception {
+	void remove() throws Exception {
 		assertThat(this.attributeAccessor.hasAttribute(NAME)).isFalse();
 		this.attributeAccessor.setAttribute(NAME, VALUE);
 		assertThat(this.attributeAccessor.removeAttribute(NAME)).isEqualTo(VALUE);
@@ -57,7 +57,7 @@ public class AttributeAccessorSupportTests {
 	}
 
 	@Test
-	public void attributeNames() throws Exception {
+	void attributeNames() throws Exception {
 		this.attributeAccessor.setAttribute(NAME, VALUE);
 		this.attributeAccessor.setAttribute("abc", "123");
 		String[] attributeNames = this.attributeAccessor.attributeNames();

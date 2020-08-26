@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jms.listener.adapter;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+
 import javax.jms.BytesMessage;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -30,7 +31,7 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -54,7 +55,7 @@ public class MessageListenerAdapterTests {
 
 	private static final String TEXT = "I fancy a good cuppa right now";
 
-	private static final Integer NUMBER = new Integer(1);
+	private static final Integer NUMBER = 1;
 
 	private static final SerializableObject OBJECT = new SerializableObject();
 

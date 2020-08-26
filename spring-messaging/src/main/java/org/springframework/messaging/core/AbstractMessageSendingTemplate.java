@@ -156,7 +156,7 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 	 * {@link MessageConverter}, wrap it as a message with the given
 	 * headers and apply the given post processor.
 	 * @param payload the Object to use as payload
-	 * @param headers headers for the message to send
+	 * @param headers the headers for the message to send
 	 * @param postProcessor the post processor to apply to the message
 	 * @return the converted message
 	 */

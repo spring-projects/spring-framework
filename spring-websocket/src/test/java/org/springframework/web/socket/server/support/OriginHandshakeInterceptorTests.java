@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -53,8 +53,8 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originValueMatch() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.com");
-		List<String> allowed = Collections.singletonList("https://mydomain1.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
+		List<String> allowed = Collections.singletonList("https://mydomain1.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
 		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
@@ -62,8 +62,8 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originValueNoMatch() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.com");
-		List<String> allowed = Collections.singletonList("https://mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
+		List<String> allowed = Collections.singletonList("https://mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isFalse();
 		assertThat(HttpStatus.FORBIDDEN.value()).isEqualTo(servletResponse.getStatus());
@@ -71,8 +71,8 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originListMatch() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.com");
-		List<String> allowed = Arrays.asList("https://mydomain1.com", "https://mydomain2.com", "http://mydomain3.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain2.example");
+		List<String> allowed = Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
 		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
@@ -80,8 +80,8 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originListNoMatch() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.com/");
-		List<String> allowed = Arrays.asList("https://mydomain1.com", "https://mydomain2.com", "http://mydomain3.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.example/");
+		List<String> allowed = Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isFalse();
 		assertThat(HttpStatus.FORBIDDEN.value()).isEqualTo(servletResponse.getStatus());
@@ -89,10 +89,10 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originNoMatchWithNullHostileCollection() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.com/");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://www.mydomain4.example/");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		Set<String> allowedOrigins = new ConcurrentSkipListSet<>();
-		allowedOrigins.add("https://mydomain1.com");
+		allowedOrigins.add("https://mydomain1.example");
 		interceptor.setAllowedOrigins(allowedOrigins);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isFalse();
 		assertThat(HttpStatus.FORBIDDEN.value()).isEqualTo(servletResponse.getStatus());
@@ -100,7 +100,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void originMatchAll() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "https://mydomain1.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		interceptor.setAllowedOrigins(Collections.singletonList("*"));
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
@@ -109,8 +109,8 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void sameOriginMatchWithEmptyAllowedOrigins() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
-		this.servletRequest.setServerName("mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
+		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Collections.emptyList());
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
 		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
@@ -118,17 +118,17 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void sameOriginMatchWithAllowedOrigins() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
-		this.servletRequest.setServerName("mydomain2.com");
-		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.com"));
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.example");
+		this.servletRequest.setServerName("mydomain2.example");
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.example"));
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
 		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
 	}
 
 	@Test
 	public void sameOriginNoMatch() throws Exception {
-		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain3.com");
-		this.servletRequest.setServerName("mydomain2.com");
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain3.example");
+		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Collections.emptyList());
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isFalse();
 		assertThat(HttpStatus.FORBIDDEN.value()).isEqualTo(servletResponse.getStatus());

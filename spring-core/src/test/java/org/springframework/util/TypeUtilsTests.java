@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public class TypeUtilsTests {
+class TypeUtilsTests {
 
 	public static Object object;
 
@@ -57,7 +57,7 @@ public class TypeUtilsTests {
 
 
 	@Test
-	public void withClasses() {
+	void withClasses() {
 		assertThat(TypeUtils.isAssignable(Object.class, Object.class)).isTrue();
 		assertThat(TypeUtils.isAssignable(Object.class, String.class)).isTrue();
 		assertThat(TypeUtils.isAssignable(String.class, Object.class)).isFalse();
@@ -68,7 +68,7 @@ public class TypeUtilsTests {
 	}
 
 	@Test
-	public void withParameterizedTypes() throws Exception {
+	void withParameterizedTypes() throws Exception {
 		Type objectsType = getClass().getField("objects").getGenericType();
 		Type openObjectsType = getClass().getField("openObjects").getGenericType();
 		Type stringsType = getClass().getField("strings").getGenericType();
@@ -91,7 +91,7 @@ public class TypeUtilsTests {
 	}
 
 	@Test
-	public void withWildcardTypes() throws Exception {
+	void withWildcardTypes() throws Exception {
 		ParameterizedType openObjectsType = (ParameterizedType) getClass().getField("openObjects").getGenericType();
 		ParameterizedType openNumbersType = (ParameterizedType) getClass().getField("openNumbers").getGenericType();
 		Type storableObjectListType = getClass().getField("storableObjectList").getGenericType();
@@ -110,7 +110,7 @@ public class TypeUtilsTests {
 	}
 
 	@Test
-	public void withGenericArrayTypes() throws Exception {
+	void withGenericArrayTypes() throws Exception {
 		Type arrayType = getClass().getField("array").getGenericType();
 		Type openArrayType = getClass().getField("openArray").getGenericType();
 		assertThat(TypeUtils.isAssignable(Object.class, arrayType)).isTrue();

@@ -22,8 +22,8 @@ import java.nio.charset.Charset;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -57,7 +57,7 @@ public class ProtobufHttpMessageConverterTests {
 	private Msg testMsg;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registryInitializer = mock(ExtensionRegistryInitializer.class);
 		this.extensionRegistry = mock(ExtensionRegistry.class);

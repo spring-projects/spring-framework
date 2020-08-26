@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.support.TestPropertySourceUtils.INLINED_PROPERTIES_PROPERTY_SOURCE_NAME;
@@ -37,11 +37,11 @@ import static org.springframework.test.context.support.TestPropertySourceUtils.I
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource(properties = { "", "foo = bar", "baz quux", "enigma: 42", "x.y.z = a=b=c",
 	"server.url = https://example.com", "key.value.1: key=value", "key.value.2 key=value", "key.value.3 key:value" })
-public class InlinedPropertiesTestPropertySourceTests {
+class InlinedPropertiesTestPropertySourceTests {
 
 	@Autowired
 	private ConfigurableEnvironment env;
@@ -52,7 +52,7 @@ public class InlinedPropertiesTestPropertySourceTests {
 	}
 
 	@Test
-	public void propertiesAreAvailableInEnvironment() {
+	void propertiesAreAvailableInEnvironment() {
 		// Simple key/value pairs
 		assertThat(property("foo")).isEqualTo("bar");
 		assertThat(property("baz")).isEqualTo("quux");
@@ -68,7 +68,7 @@ public class InlinedPropertiesTestPropertySourceTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void propertyNameOrderingIsPreservedInEnvironment() {
+	void propertyNameOrderingIsPreservedInEnvironment() {
 		final String[] expectedPropertyNames = new String[] { "foo", "baz", "enigma", "x.y.z", "server.url",
 			"key.value.1", "key.value.2", "key.value.3" };
 		EnumerablePropertySource eps = (EnumerablePropertySource) env.getPropertySources().get(

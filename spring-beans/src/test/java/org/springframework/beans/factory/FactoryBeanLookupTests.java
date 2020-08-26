@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FactoryBeanLookupTests {
 	private BeanFactory beanFactory;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader((BeanDefinitionRegistry) beanFactory).loadBeanDefinitions(

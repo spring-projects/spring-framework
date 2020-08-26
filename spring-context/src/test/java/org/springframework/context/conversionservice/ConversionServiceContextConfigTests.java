@@ -16,7 +16,7 @@
 
 package org.springframework.context.conversionservice;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
@@ -86,7 +87,7 @@ class KeyGeneratorAdapter implements KeyGenerator {
 	@Override
 	public Object generate(Object target, Method method, Object... params) {
 		JCacheOperation<?> operation = this.cacheOperationSource.getCacheOperation(method, target.getClass());
-		if (!(AbstractJCacheKeyOperation.class.isInstance(operation))) {
+		if (!(operation instanceof AbstractJCacheKeyOperation)) {
 			throw new IllegalStateException("Invalid operation, should be a key-based operation " + operation);
 		}
 		CacheKeyInvocationContext<?> invocationContext = createCacheKeyInvocationContext(target, operation, params);
@@ -100,7 +101,6 @@ class KeyGeneratorAdapter implements KeyGenerator {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Object doGenerate(KeyGenerator keyGenerator, CacheKeyInvocationContext<?> context) {
 		List<Object> parameters = new ArrayList<>();
 		for (CacheInvocationParameter param : context.getKeyParameters()) {

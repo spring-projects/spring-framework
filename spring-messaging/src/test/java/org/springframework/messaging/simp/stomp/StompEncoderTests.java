@@ -16,7 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;

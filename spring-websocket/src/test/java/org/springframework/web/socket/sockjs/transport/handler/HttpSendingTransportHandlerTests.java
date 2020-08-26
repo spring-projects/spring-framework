@@ -18,8 +18,8 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
@@ -50,7 +50,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 
 	@Override
-	@Before
+	@BeforeEach
 	public void setup() {
 		super.setup();
 

@@ -18,9 +18,9 @@ package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
@@ -41,21 +42,21 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
 import static org.springframework.test.context.junit4.JUnitTestingUtils.runTestsAndAssertCounters;
 
 /**
- * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
- * application context caching} in conjunction with the {@link SpringRunner} and
+ * JUnit based integration test which verifies correct {@linkplain ContextCache
+ * application context caching} in conjunction with the {@link SpringExtension} and
  * {@link DirtiesContext @DirtiesContext} at the class level.
  *
  * @author Sam Brannen
  * @since 3.0
  */
-public class ClassLevelDirtiesContextTests {
+class ClassLevelDirtiesContextTests {
 
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
 
-	@BeforeClass
-	public static void verifyInitialCacheState() {
+	@BeforeAll
+	static void verifyInitialCacheState() {
 		resetContextCache();
 		// Reset static counters in case tests are run multiple times in a test suite --
 		// for example, via JUnit's @Suite.
@@ -65,7 +66,7 @@ public class ClassLevelDirtiesContextTests {
 	}
 
 	@Test
-	public void verifyDirtiesContextBehavior() throws Exception {
+	void verifyDirtiesContextBehavior() throws Exception {
 
 		assertBehaviorForCleanTestCase();
 
@@ -139,8 +140,8 @@ public class ClassLevelDirtiesContextTests {
 		assertContextCacheStatistics("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
 	}
 
-	@AfterClass
-	public static void verifyFinalCacheState() {
+	@AfterAll
+	static void verifyFinalCacheState() {
 		assertContextCacheStatistics("AfterClass", 0, cacheHits.get(), cacheMisses.get());
 	}
 
@@ -176,7 +177,7 @@ public class ClassLevelDirtiesContextTests {
 
 	public static final class CleanTestCase extends BaseTestCase {
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -186,7 +187,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext
 	public static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -199,7 +200,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 	public static class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
@@ -212,17 +213,17 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 	public static class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired1() {
 			assertApplicationContextWasAutowired();
 		}
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired2() {
 			assertApplicationContextWasAutowired();
 		}
 
-		@Test
+		@org.junit.Test
 		public void verifyContextWasAutowired3() {
 			assertApplicationContextWasAutowired();
 		}
@@ -235,7 +236,7 @@ public class ClassLevelDirtiesContextTests {
 	@DirtiesContext
 	public static class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
 
-		@Test
+		@org.junit.Test
 		@DirtiesContext
 		public void dirtyContext() {
 			assertApplicationContextWasAutowired();

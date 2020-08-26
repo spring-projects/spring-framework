@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -38,15 +38,15 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Stephane Nicoll
  * @since 4.2
  */
-public class StreamConverterTests {
+class StreamConverterTests {
 
 	private final GenericConversionService conversionService = new GenericConversionService();
 
 	private final StreamConverter streamConverter = new StreamConverter(this.conversionService);
 
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		this.conversionService.addConverter(new CollectionToCollectionConverter(this.conversionService));
 		this.conversionService.addConverter(new ArrayToCollectionConverter(this.conversionService));
 		this.conversionService.addConverter(new CollectionToArrayConverter(this.conversionService));
@@ -55,7 +55,7 @@ public class StreamConverterTests {
 
 
 	@Test
-	public void convertFromStreamToList() throws NoSuchFieldException {
+	void convertFromStreamToList() throws NoSuchFieldException {
 		this.conversionService.addConverter(Number.class, String.class, new ObjectToStringConverter());
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor listOfStrings = new TypeDescriptor(Types.class.getField("listOfStrings"));
@@ -73,7 +73,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
-	public void convertFromStreamToArray() throws NoSuchFieldException {
+	void convertFromStreamToArray() throws NoSuchFieldException {
 		this.conversionService.addConverterFactory(new NumberToNumberConverterFactory());
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor arrayOfLongs = new TypeDescriptor(Types.class.getField("arrayOfLongs"));
@@ -89,7 +89,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
-	public void convertFromStreamToRawList() throws NoSuchFieldException {
+	void convertFromStreamToRawList() throws NoSuchFieldException {
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor listOfStrings = new TypeDescriptor(Types.class.getField("rawList"));
 		Object result = this.conversionService.convert(stream, listOfStrings);
@@ -106,7 +106,7 @@ public class StreamConverterTests {
 	}
 
 	@Test
-	public void convertFromStreamToArrayNoConverter() throws NoSuchFieldException {
+	void convertFromStreamToArrayNoConverter() throws NoSuchFieldException {
 		Stream<Integer> stream = Arrays.asList(1, 2, 3).stream();
 		TypeDescriptor arrayOfLongs = new TypeDescriptor(Types.class.getField("arrayOfLongs"));
 		assertThatExceptionOfType(ConversionFailedException.class).isThrownBy(() ->
@@ -116,7 +116,7 @@ public class StreamConverterTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void convertFromListToStream() throws NoSuchFieldException {
+	void convertFromListToStream() throws NoSuchFieldException {
 		this.conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		List<String> stream = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("streamOfIntegers"));
@@ -132,7 +132,7 @@ public class StreamConverterTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void convertFromArrayToStream() throws NoSuchFieldException {
+	void convertFromArrayToStream() throws NoSuchFieldException {
 		Integer[] stream = new Integer[] {1, 0, 1};
 		this.conversionService.addConverter(new Converter<Integer, Boolean>() {
 			@Override
@@ -153,7 +153,7 @@ public class StreamConverterTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void convertFromListToRawStream() throws NoSuchFieldException {
+	void convertFromListToRawStream() throws NoSuchFieldException {
 		List<String> stream = Arrays.asList("1", "2", "3");
 		TypeDescriptor streamOfInteger = new TypeDescriptor(Types.class.getField("rawStream"));
 		Object result = this.conversionService.convert(stream, streamOfInteger);
@@ -169,14 +169,14 @@ public class StreamConverterTests {
 	}
 
 	@Test
-	public void doesNotMatchIfNoStream() throws NoSuchFieldException {
+	void doesNotMatchIfNoStream() throws NoSuchFieldException {
 		assertThat(this.streamConverter.matches(
 				new TypeDescriptor(Types.class.getField("listOfStrings")),
 				new TypeDescriptor(Types.class.getField("arrayOfLongs")))).as("Should not match non stream type").isFalse();
 	}
 
 	@Test
-	public void shouldFailToConvertIfNoStream() throws NoSuchFieldException {
+	void shouldFailToConvertIfNoStream() throws NoSuchFieldException {
 		TypeDescriptor sourceType = new TypeDescriptor(Types.class.getField("listOfStrings"));
 		TypeDescriptor targetType = new TypeDescriptor(Types.class.getField("arrayOfLongs"));
 		assertThatIllegalStateException().isThrownBy(() ->

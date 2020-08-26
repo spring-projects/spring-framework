@@ -18,7 +18,7 @@ package org.springframework.core.codec;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -28,6 +28,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractEncoderTests;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -38,12 +39,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncoder> {
+class ResourceEncoderTests extends AbstractEncoderTests<ResourceEncoder> {
 
 	private final byte[] bytes = "foo".getBytes(UTF_8);
 
 
-	public ResourceEncoderTests() {
+	ResourceEncoderTests() {
 		super(new ResourceEncoder());
 	}
 
@@ -64,6 +65,7 @@ public class ResourceEncoderTests extends AbstractEncoderTestCase<ResourceEncode
 	}
 
 	@Override
+	@Test
 	public void encode() {
 		Flux<Resource> input = Flux.just(new ByteArrayResource(this.bytes));
 

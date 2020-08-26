@@ -23,7 +23,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 12.03.2005
  */
-public class FileCopyUtilsTests {
+class FileCopyUtilsTests {
 
 	@Test
-	public void copyFromInputStream() throws IOException {
+	void copyFromInputStream() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayInputStream in = new ByteArrayInputStream(content);
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
@@ -46,7 +46,7 @@ public class FileCopyUtilsTests {
 	}
 
 	@Test
-	public void copyFromByteArray() throws IOException {
+	void copyFromByteArray() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
 		FileCopyUtils.copy(content, out);
@@ -54,7 +54,7 @@ public class FileCopyUtilsTests {
 	}
 
 	@Test
-	public void copyToByteArray() throws IOException {
+	void copyToByteArray() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayInputStream in = new ByteArrayInputStream(content);
 		byte[] result = FileCopyUtils.copyToByteArray(in);
@@ -62,7 +62,7 @@ public class FileCopyUtilsTests {
 	}
 
 	@Test
-	public void copyFromReader() throws IOException {
+	void copyFromReader() throws IOException {
 		String content = "content";
 		StringReader in = new StringReader(content);
 		StringWriter out = new StringWriter();
@@ -72,7 +72,7 @@ public class FileCopyUtilsTests {
 	}
 
 	@Test
-	public void copyFromString() throws IOException {
+	void copyFromString() throws IOException {
 		String content = "content";
 		StringWriter out = new StringWriter();
 		FileCopyUtils.copy(content, out);
@@ -80,7 +80,7 @@ public class FileCopyUtilsTests {
 	}
 
 	@Test
-	public void copyToString() throws IOException {
+	void copyToString() throws IOException {
 		String content = "content";
 		StringReader in = new StringReader(content);
 		String result = FileCopyUtils.copyToString(in);

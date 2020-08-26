@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,6 +221,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	/**
 	 * Handle incoming WebSocket messages from clients.
 	 */
+	@Override
 	public void handleMessageFromClient(WebSocketSession session,
 			WebSocketMessage<?> webSocketMessage, MessageChannel outputChannel) {
 
@@ -239,6 +240,10 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 			BufferingStompDecoder decoder = this.decoders.get(session.getId());
 			if (decoder == null) {
+				if (!session.isOpen()) {
+					logger.trace("Dropped inbound WebSocket message due to closed session");
+					return;
+				}
 				throw new IllegalStateException("No decoder for session id '" + session.getId() + "'");
 			}
 
@@ -267,9 +272,19 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 				Assert.state(headerAccessor != null, "No StompHeaderAccessor");
 
+				StompCommand command = headerAccessor.getCommand();
+				boolean isConnect = StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command);
+
 				headerAccessor.setSessionId(session.getId());
 				headerAccessor.setSessionAttributes(session.getAttributes());
 				headerAccessor.setUser(getUser(session));
+				if (isConnect) {
+					headerAccessor.setUserChangeCallback(user -> {
+						if (user != null && user != session.getPrincipal()) {
+							this.stompAuthentications.put(session.getId(), user);
+						}
+					});
+				}
 				headerAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, headerAccessor.getHeartbeat());
 				if (!detectImmutableMessageInterceptor(outputChannel)) {
 					headerAccessor.setImmutable();
@@ -279,8 +294,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					logger.trace("From client: " + headerAccessor.getShortLogMessage(message.getPayload()));
 				}
 
-				StompCommand command = headerAccessor.getCommand();
-				boolean isConnect = StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command);
 				if (isConnect) {
 					this.stats.incrementConnectCount();
 				}
@@ -293,12 +306,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 					boolean sent = outputChannel.send(message);
 
 					if (sent) {
-						if (isConnect) {
-							Principal user = headerAccessor.getUser();
-							if (user != null && user != session.getPrincipal()) {
-								this.stompAuthentications.put(session.getId(), user);
-							}
-						}
 						if (this.eventPublisher != null) {
 							Principal user = getUser(session);
 							if (isConnect) {
@@ -649,6 +656,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		return MessageBuilder.createMessage(EMPTY_PAYLOAD, headerAccessor.getMessageHeaders());
 	}
 
+
 	@Override
 	public String toString() {
 		return "StompSubProtocolHandler" + getSupportedProtocols();
@@ -686,7 +694,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 		private final AtomicInteger disconnect = new AtomicInteger();
 
-
 		public void incrementConnectCount() {
 			this.connect.incrementAndGet();
 		}
@@ -714,6 +721,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return this.disconnect.get();
 		}
 
+		@Override
 		public String toString() {
 			return "processed CONNECT(" + this.connect.get() + ")-CONNECTED(" +
 					this.connected.get() + ")-DISCONNECT(" + this.disconnect.get() + ")";

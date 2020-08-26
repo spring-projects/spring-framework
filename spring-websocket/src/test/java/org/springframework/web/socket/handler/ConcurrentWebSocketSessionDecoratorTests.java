@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -203,6 +203,8 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	}
 
 	private void sendBlockingMessage(ConcurrentWebSocketSessionDecorator session) throws InterruptedException {
+		BlockingSession delegate = (BlockingSession) session.getDelegate();
+		CountDownLatch sentMessageLatch = delegate.getSentMessageLatch();
 		Executors.newSingleThreadExecutor().submit(() -> {
 			TextMessage message = new TextMessage("slow message");
 			try {
@@ -212,17 +214,16 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 				e.printStackTrace();
 			}
 		});
-		BlockingSession delegate = (BlockingSession) session.getDelegate();
-		assertThat(delegate.getSentMessageLatch().await(5, TimeUnit.SECONDS)).isTrue();
+		assertThat(sentMessageLatch.await(5, TimeUnit.SECONDS)).isTrue();
 	}
 
 
 
 	private static class BlockingSession extends TestWebSocketSession {
 
-		private AtomicReference<CountDownLatch> nextMessageLatch = new AtomicReference<>();
+		private final AtomicReference<CountDownLatch> nextMessageLatch = new AtomicReference<>();
 
-		private AtomicReference<CountDownLatch> releaseLatch = new AtomicReference<>();
+		private final AtomicReference<CountDownLatch> releaseLatch = new AtomicReference<>();
 
 
 		public CountDownLatch getSentMessageLatch() {

@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Craig Andrews
  */
-public class FastByteArrayOutputStreamTests {
+class FastByteArrayOutputStreamTests {
 
 	private static final int INITIAL_CAPACITY = 256;
 
@@ -43,13 +43,13 @@ public class FastByteArrayOutputStreamTests {
 
 
 	@Test
-	public void size() throws Exception {
+	void size() throws Exception {
 		this.os.write(this.helloBytes);
 		assertThat(this.helloBytes.length).isEqualTo(this.os.size());
 	}
 
 	@Test
-	public void resize() throws Exception {
+	void resize() throws Exception {
 		this.os.write(this.helloBytes);
 		int sizeBefore = this.os.size();
 		this.os.resize(64);
@@ -58,7 +58,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void autoGrow() throws IOException {
+	void autoGrow() throws IOException {
 		this.os.resize(1);
 		for (int i = 0; i < 10; i++) {
 			this.os.write(1);
@@ -68,13 +68,13 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void write() throws Exception {
+	void write() throws Exception {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 	}
 
 	@Test
-	public void reset() throws Exception {
+	void reset() throws Exception {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 		this.os.reset();
@@ -84,14 +84,14 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void close() throws Exception {
+	void close() throws Exception {
 		this.os.close();
 		assertThatIOException().isThrownBy(() ->
 				this.os.write(this.helloBytes));
 	}
 
 	@Test
-	public void toByteArrayUnsafe() throws Exception {
+	void toByteArrayUnsafe() throws Exception {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 		assertThat(this.os.toByteArrayUnsafe()).isSameAs(this.os.toByteArrayUnsafe());
@@ -99,7 +99,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void writeTo() throws Exception {
+	void writeTo() throws Exception {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -108,26 +108,26 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void failResize() throws Exception {
+	void failResize() throws Exception {
 		this.os.write(this.helloBytes);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.os.resize(5));
 	}
 
 	@Test
-	public void getInputStream() throws Exception {
+	void getInputStream() throws Exception {
 		this.os.write(this.helloBytes);
 		assertThat(this.os.getInputStream()).isNotNull();
 	}
 
 	@Test
-	public void getInputStreamAvailable() throws Exception {
+	void getInputStreamAvailable() throws Exception {
 		this.os.write(this.helloBytes);
 		assertThat(this.helloBytes.length).isEqualTo(this.os.getInputStream().available());
 	}
 
 	@Test
-	public void getInputStreamRead() throws Exception {
+	void getInputStreamRead() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertThat(this.helloBytes[0]).isEqualTo((byte) inputStream.read());
@@ -137,7 +137,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void getInputStreamReadBytePromotion() throws Exception {
+	void getInputStreamReadBytePromotion() throws Exception {
 		byte[] bytes = new byte[] { -1 };
 		this.os.write(bytes);
 		InputStream inputStream = this.os.getInputStream();
@@ -146,7 +146,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void getInputStreamReadAll() throws Exception {
+	void getInputStreamReadAll() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		byte[] actual = new byte[inputStream.available()];
@@ -157,7 +157,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void getInputStreamReadBeyondEndOfStream() throws Exception {
+	void getInputStreamReadBeyondEndOfStream() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = os.getInputStream();
 		byte[] actual = new byte[inputStream.available() + 1];
@@ -171,7 +171,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void getInputStreamSkip() throws Exception {
+	void getInputStreamSkip() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertThat(this.helloBytes[0]).isEqualTo((byte) inputStream.read());
@@ -181,7 +181,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void getInputStreamSkipAll() throws Exception {
+	void getInputStreamSkipAll() throws Exception {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertThat(this.helloBytes.length).isEqualTo(inputStream.skip(1000));
@@ -189,7 +189,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void updateMessageDigest() throws Exception {
+	void updateMessageDigest() throws Exception {
 		StringBuilder builder = new StringBuilder("\"0");
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
@@ -200,7 +200,7 @@ public class FastByteArrayOutputStreamTests {
 	}
 
 	@Test
-	public void updateMessageDigestManyBuffers() throws Exception {
+	void updateMessageDigestManyBuffers() throws Exception {
 		StringBuilder builder = new StringBuilder("\"0");
 		// filling at least one 256 buffer
 		for ( int i = 0; i < 30; i++) {

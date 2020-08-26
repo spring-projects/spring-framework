@@ -16,8 +16,8 @@
 
 package org.springframework.web.method.support;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
+ *
  * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
@@ -46,9 +47,8 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	private MethodParameter stringType;
 
 
-	@Before
-	public void setUp() throws Exception {
-
+	@BeforeEach
+	public void setup() throws Exception {
 		this.integerType = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.stringType = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 
@@ -60,6 +60,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 
 		mavContainer = new ModelAndViewContainer();
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -84,9 +85,8 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		verifyNoMoreInteractions(anotherIntegerHandler);
 	}
 
-	@Test // SPR-13083
+	@Test  // SPR-13083
 	public void handleReturnValueWithAsyncHandler() throws Exception {
-
 		Promise<Integer> promise = new Promise<>();
 		MethodParameter promiseType = new MethodParameter(getClass().getDeclaredMethod("handlePromise"), -1);
 

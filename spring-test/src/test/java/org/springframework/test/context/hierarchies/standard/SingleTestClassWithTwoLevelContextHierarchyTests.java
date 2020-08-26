@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.hierarchies.standard;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 3.2.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextHierarchy({
 	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ParentConfig.class),
 	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ChildConfig.class) })
@@ -43,12 +43,12 @@ public class SingleTestClassWithTwoLevelContextHierarchyTests {
 	public static class ParentConfig {
 
 		@Bean
-		public String foo() {
+		String foo() {
 			return "foo";
 		}
 
 		@Bean
-		public String baz() {
+		String baz() {
 			return "baz-parent";
 		}
 	}
@@ -57,12 +57,12 @@ public class SingleTestClassWithTwoLevelContextHierarchyTests {
 	public static class ChildConfig {
 
 		@Bean
-		public String bar() {
+		String bar() {
 			return "bar";
 		}
 
 		@Bean
-		public String baz() {
+		String baz() {
 			return "baz-child";
 		}
 	}
@@ -82,7 +82,7 @@ public class SingleTestClassWithTwoLevelContextHierarchyTests {
 
 
 	@Test
-	public void loadContextHierarchy() {
+	void loadContextHierarchy() {
 		assertThat(context).as("child ApplicationContext").isNotNull();
 		assertThat(context.getParent()).as("parent ApplicationContext").isNotNull();
 		assertThat(context.getParent().getParent()).as("grandparent ApplicationContext").isNull();

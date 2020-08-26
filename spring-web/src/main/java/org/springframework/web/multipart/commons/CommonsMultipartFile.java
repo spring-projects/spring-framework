@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,4 +232,11 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "MultipartFile[field=\"" + this.fileItem.getFieldName() + "\"" +
+				(this.fileItem.getName() != null ? ", filename=" + this.fileItem.getName() : "" ) +
+				(this.fileItem.getContentType() != null ? ", contentType=" + this.fileItem.getContentType() : "") +
+				", size=" + this.fileItem.getSize() + "]";
+	}
 }

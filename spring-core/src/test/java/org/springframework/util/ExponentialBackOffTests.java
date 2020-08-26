@@ -16,7 +16,7 @@
 
 package org.springframework.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.ExponentialBackOff;
@@ -25,13 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- *
  * @author Stephane Nicoll
  */
-public class ExponentialBackOffTests {
+class ExponentialBackOffTests {
 
 	@Test
-	public void defaultInstance() {
+	void defaultInstance() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.nextBackOff()).isEqualTo(2000L);
@@ -40,7 +39,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void simpleIncrease() {
+	void simpleIncrease() {
 		ExponentialBackOff backOff = new ExponentialBackOff(100L, 2.0);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.nextBackOff()).isEqualTo(100L);
@@ -50,7 +49,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void fixedIncrease() {
+	void fixedIncrease() {
 		ExponentialBackOff backOff = new ExponentialBackOff(100L, 1.0);
 		backOff.setMaxElapsedTime(300L);
 
@@ -62,7 +61,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void maxIntervalReached() {
+	void maxIntervalReached() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		backOff.setMaxInterval(4000L);
 
@@ -75,7 +74,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void maxAttemptsReached() {
+	void maxAttemptsReached() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		backOff.setMaxElapsedTime(4000L);
 
@@ -87,7 +86,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void startReturnDifferentInstances() {
+	void startReturnDifferentInstances() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		backOff.setInitialInterval(2000L);
 		backOff.setMultiplier(2.0);
@@ -105,14 +104,14 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void invalidInterval() {
+	void invalidInterval() {
 		ExponentialBackOff backOff = new ExponentialBackOff();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				backOff.setMultiplier(0.9));
 	}
 
 	@Test
-	public void maxIntervalReachedImmediately() {
+	void maxIntervalReachedImmediately() {
 		ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
 		backOff.setMaxInterval(50L);
 
@@ -122,7 +121,7 @@ public class ExponentialBackOffTests {
 	}
 
 	@Test
-	public void toStringContent() {
+	void toStringContent() {
 		ExponentialBackOff backOff = new ExponentialBackOff(2000L, 2.0);
 		BackOffExecution execution = backOff.start();
 		assertThat(execution.toString()).isEqualTo("ExponentialBackOff{currentInterval=n/a, multiplier=2.0}");

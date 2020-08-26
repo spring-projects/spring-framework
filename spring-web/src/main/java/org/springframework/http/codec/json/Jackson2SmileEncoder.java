@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -43,6 +44,11 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 			new MimeType("application", "x-jackson-smile"),
 			new MimeType("application", "*+x-jackson-smile")};
 
+	private static final MimeType STREAM_MIME_TYPE =
+			MediaType.parseMediaType("application/stream+x-jackson-smile");
+
+	private static final byte[] STREAM_SEPARATOR = new byte[0];
+
 
 	public Jackson2SmileEncoder() {
 		this(Jackson2ObjectMapperBuilder.smile().build(), DEFAULT_SMILE_MIME_TYPES);
@@ -54,4 +60,22 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 		setStreamingMediaTypes(Collections.singletonList(new MediaType("application", "stream+x-jackson-smile")));
 	}
 
+
+	/**
+	 * Return the separator to use for the given mime type.
+	 * <p>By default, this method returns a single byte 0 if the given
+	 * mime type is one of the configured {@link #setStreamingMediaTypes(List)
+	 * streaming} mime types.
+	 * @since 5.3
+	 */
+	@Nullable
+	@Override
+	protected byte[] getStreamingMediaTypeSeparator(@Nullable MimeType mimeType) {
+		for (MediaType streamingMediaType : getStreamingMediaTypes()) {
+			if (streamingMediaType.isCompatibleWith(mimeType)) {
+				return STREAM_SEPARATOR;
+			}
+		}
+		return null;
+	}
 }

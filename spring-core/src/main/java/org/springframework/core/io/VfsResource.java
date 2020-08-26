@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -130,7 +131,7 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof VfsResource &&
 				this.resource.equals(((VfsResource) other).resource)));
 	}

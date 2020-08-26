@@ -18,7 +18,7 @@ package org.springframework.beans.propertyeditors;
 
 import java.io.InputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 

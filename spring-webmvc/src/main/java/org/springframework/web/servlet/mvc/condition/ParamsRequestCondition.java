@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
@@ -47,20 +48,22 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * 	if 0, the condition will match to every request.
 	 */
 	public ParamsRequestCondition(String... params) {
-		this(parseExpressions(params));
+		this.expressions = parseExpressions(params);
 	}
 
-	private ParamsRequestCondition(Collection<ParamExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
-	}
-
-
-	private static Collection<ParamExpression> parseExpressions(String... params) {
-		Set<ParamExpression> expressions = new LinkedHashSet<>();
+	private static Set<ParamExpression> parseExpressions(String... params) {
+		if (ObjectUtils.isEmpty(params)) {
+			return Collections.emptySet();
+		}
+		Set<ParamExpression> expressions = new LinkedHashSet<>(params.length);
 		for (String param : params) {
 			expressions.add(new ParamExpression(param));
 		}
 		return expressions;
+	}
+
+	private ParamsRequestCondition(Set<ParamExpression> conditions) {
+		this.expressions = conditions;
 	}
 
 
@@ -87,6 +90,15 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 */
 	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
+		if (isEmpty() && other.isEmpty()) {
+			return this;
+		}
+		else if (other.isEmpty()) {
+			return this;
+		}
+		else if (isEmpty()) {
+			return other;
+		}
 		Set<ParamExpression> set = new LinkedHashSet<>(this.expressions);
 		set.addAll(other.expressions);
 		return new ParamsRequestCondition(set);

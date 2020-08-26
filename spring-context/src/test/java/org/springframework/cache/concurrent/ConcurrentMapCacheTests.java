@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.cache.AbstractValueAdaptingCacheTests;
+import org.springframework.context.testfixture.cache.AbstractValueAdaptingCacheTests;
 import org.springframework.core.serializer.support.SerializationDelegate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentMapCacheTests
-		extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
+public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<ConcurrentMapCache> {
 
 	protected ConcurrentMap<Object, Object> nativeCache;
 
@@ -48,13 +47,12 @@ public class ConcurrentMapCacheTests
 	protected ConcurrentMapCache cacheNoNull;
 
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	public void setup() {
 		this.nativeCache = new ConcurrentHashMap<>();
 		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
 		this.nativeCacheNoNull = new ConcurrentHashMap<>();
-		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL,
-				this.nativeCacheNoNull, false);
+		this.cacheNoNull = new ConcurrentMapCache(CACHE_NAME_NO_NULL, this.nativeCacheNoNull, false);
 		this.cache.clear();
 	}
 
@@ -73,6 +71,7 @@ public class ConcurrentMapCacheTests
 		return this.nativeCache;
 	}
 
+
 	@Test
 	public void testIsStoreByReferenceByDefault() {
 		assertThat(this.cache.isStoreByValue()).isFalse();
@@ -85,8 +84,7 @@ public class ConcurrentMapCacheTests
 		assertThat(serializeCache.isStoreByValue()).isTrue();
 
 		Object key = createRandomKey();
-		List<String> content = new ArrayList<>();
-		content.addAll(Arrays.asList("one", "two", "three"));
+		List<String> content = new ArrayList<>(Arrays.asList("one", "two", "three"));
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();

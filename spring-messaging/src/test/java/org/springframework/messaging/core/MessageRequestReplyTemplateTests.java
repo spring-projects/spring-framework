@@ -19,8 +19,8 @@ package org.springframework.messaging.core;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
@@ -44,7 +44,7 @@ public class MessageRequestReplyTemplateTests {
 	private Map<String, Object> headers;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.template = new TestMessagingTemplate();
 		this.postProcessor = new TestMessagePostProcessor();

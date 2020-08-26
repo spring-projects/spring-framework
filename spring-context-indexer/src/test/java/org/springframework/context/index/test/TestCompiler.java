@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.context.index.test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import javax.annotation.processing.Processor;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -29,12 +29,11 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
-import org.junit.rules.TemporaryFolder;
-
 /**
  * Wrapper to make the {@link JavaCompiler} easier to use in tests.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class TestCompiler {
 
@@ -47,14 +46,14 @@ public class TestCompiler {
 	private final File outputLocation;
 
 
-	public TestCompiler(TemporaryFolder temporaryFolder) throws IOException {
-		this(ToolProvider.getSystemJavaCompiler(), temporaryFolder);
+	public TestCompiler(Path tempDir) throws IOException {
+		this(ToolProvider.getSystemJavaCompiler(), tempDir);
 	}
 
-	public TestCompiler(JavaCompiler compiler, TemporaryFolder temporaryFolder) throws IOException {
+	public TestCompiler(JavaCompiler compiler, Path tempDir) throws IOException {
 		this.compiler = compiler;
 		this.fileManager = compiler.getStandardFileManager(null, null, null);
-		this.outputLocation = temporaryFolder.newFolder();
+		this.outputLocation = tempDir.toFile();
 		Iterable<? extends File> temp = Collections.singletonList(this.outputLocation);
 		this.fileManager.setLocation(StandardLocation.CLASS_OUTPUT, temp);
 		this.fileManager.setLocation(StandardLocation.SOURCE_OUTPUT, temp);
@@ -62,8 +61,7 @@ public class TestCompiler {
 
 
 	public TestCompilationTask getTask(Class<?>... types) {
-		List<String> names = Arrays.stream(types).map(Class::getName).collect(Collectors.toList());
-		return getTask(names.toArray(new String[names.size()]));
+		return getTask(Arrays.stream(types).map(Class::getName).toArray(String[]::new));
 	}
 
 	public TestCompilationTask getTask(String... types) {

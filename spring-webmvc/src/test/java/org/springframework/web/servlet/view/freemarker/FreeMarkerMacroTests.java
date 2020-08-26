@@ -20,6 +20,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -28,15 +29,12 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -45,13 +43,18 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Darren Davison
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 25.01.2005
  */
 public class FreeMarkerMacroTests {
@@ -67,7 +70,7 @@ public class FreeMarkerMacroTests {
 	private FreeMarkerConfigurer fc;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		ServletContext sc = new MockServletContext();
 		wac = new StaticWebApplicationContext();
@@ -98,8 +101,7 @@ public class FreeMarkerMacroTests {
 			protected void processTemplate(Template template, SimpleHash fmModel, HttpServletResponse response)
 					throws TemplateException {
 				Map model = fmModel.toMap();
-				boolean condition = model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext;
-				assertThat(condition).isTrue();
+				assertThat(model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)).isInstanceOf(RequestContext.class);
 				RequestContext rc = (RequestContext) model.get(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 				BindStatus status = rc.getBindStatus("tb.name");
 				assertThat(status.getExpression()).isEqualTo("name");
@@ -108,7 +110,6 @@ public class FreeMarkerMacroTests {
 		};
 		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
-		fv.setExposeSpringMacroHelpers(true);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put("tb", new TestBean("juergen", 99));
@@ -127,7 +128,6 @@ public class FreeMarkerMacroTests {
 		};
 		fv.setUrl(TEMPLATE_FILE);
 		fv.setApplicationContext(wac);
-		fv.setExposeSpringMacroHelpers(true);
 
 		Map<String, Object> model = new HashMap<>();
 		model.put(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, helperTool);
@@ -136,9 +136,8 @@ public class FreeMarkerMacroTests {
 			fv.render(model, request, response);
 		}
 		catch (Exception ex) {
-			boolean condition = ex instanceof ServletException;
-			assertThat(condition).isTrue();
-			assertThat(ex.getMessage().contains(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE)).isTrue();
+			assertThat(ex).isInstanceOf(ServletException.class);
+			assertThat(ex.getMessage()).contains(FreeMarkerView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 		}
 	}
 
@@ -222,7 +221,7 @@ public class FreeMarkerMacroTests {
 		assertThat(getMacroOutput("FORM4")).isEqualTo("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>");
 	}
 
-	// TODO verify remaining output (fix whitespace)
+	// TODO verify remaining output for forms 5, 6, 7, 8, and 14 (fix whitespace)
 
 	@Test
 	public void testForm9() throws Exception {
@@ -315,7 +314,7 @@ public class FreeMarkerMacroTests {
 		Configuration config = fc.getConfiguration();
 		Map<String, Object> model = new HashMap<>();
 		model.put("command", darren);
-		model.put("springMacroRequestContext", rc);
+		model.put(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE, rc);
 		model.put("msgArgs", new Object[] { "World" });
 		model.put("nameOptionMap", names);
 		model.put("options", names.values());

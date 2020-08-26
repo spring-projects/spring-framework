@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -51,20 +51,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.MethodReplacer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.DependenciesBean;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.FactoryMethods;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.IndexedTestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.tests.sample.beans.DependenciesBean;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.tests.sample.beans.ResourceTestBean;
-import org.springframework.tests.sample.beans.TestBean;
-import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,7 +80,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class XmlBeanFactoryTests {
+class XmlBeanFactoryTests {
 
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -125,14 +126,14 @@ public class XmlBeanFactoryTests {
 
 
 	@Test  // SPR-2368
-	public void testCollectionsReferredToAsRefLocals() {
+	void collectionsReferredToAsRefLocals() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(COLLECTIONS_XSD_CONTEXT);
 		factory.preInstantiateSingletons();
 	}
 
 	@Test
-	public void testRefToSeparatePrototypeInstances() {
+	void refToSeparatePrototypeInstances() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -151,7 +152,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testRefToSingleton() {
+	void refToSingleton() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -167,17 +168,13 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInnerBeans() throws IOException {
+	void innerBeans() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-		InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath());
-		try {
+		try (InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath())) {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
-		}
-		finally {
-			inputStream.close();
 		}
 
 		// Let's create the outer bean named "innerBean",
@@ -245,7 +242,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInnerBeansWithoutDestroy() {
+	void innerBeansWithoutDestroy() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -279,7 +276,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testFailsOnInnerBean() {
+	void failsOnInnerBean() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -307,7 +304,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInheritanceFromParentFactoryPrototype() {
+	void inheritanceFromParentFactoryPrototype() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -323,7 +320,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInheritanceWithDifferentClass() {
+	void inheritanceWithDifferentClass() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -338,7 +335,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInheritanceWithClass() {
+	void inheritanceWithClass() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -353,7 +350,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testPrototypeInheritanceFromParentFactoryPrototype() {
+	void prototypeInheritanceFromParentFactoryPrototype() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -373,7 +370,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testPrototypeInheritanceFromParentFactorySingleton() {
+	void prototypeInheritanceFromParentFactorySingleton() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -392,7 +389,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireModeNotInherited() {
+	void autowireModeNotInherited() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
@@ -407,7 +404,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAbstractParentBeans() {
+	void abstractParentBeans() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		parent.preInstantiateSingletons();
@@ -428,7 +425,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testDependenciesMaterializeThis() {
+	void dependenciesMaterializeThis() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEP_MATERIALIZE_CONTEXT);
 
@@ -447,7 +444,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testChildOverridesParentBean() {
+	void childOverridesParentBean() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -466,7 +463,7 @@ public class XmlBeanFactoryTests {
 	 * If a singleton does this the factory will fail to load.
 	 */
 	@Test
-	public void testBogusParentageFromParentFactory() {
+	void bogusParentageFromParentFactory() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -483,7 +480,7 @@ public class XmlBeanFactoryTests {
 	 * instances even if derived from a prototype
 	 */
 	@Test
-	public void testSingletonInheritsFromParentFactoryPrototype() {
+	void singletonInheritsFromParentFactoryPrototype() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -498,7 +495,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testSingletonFromParent() {
+	void singletonFromParent() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		TestBean beanFromParent = (TestBean) parent.getBean("inheritedTestBeanSingleton");
@@ -509,7 +506,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testNestedPropertyValue() {
+	void nestedPropertyValue() {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(PARENT_CONTEXT);
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
@@ -519,7 +516,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferences() {
+	void circularReferences() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -537,7 +534,47 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferenceWithFactoryBeanFirst() {
+	void circularReferencesWithConstructor() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("jenny_constructor"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("david_constructor"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+	@Test
+	void circularReferencesWithPrototype() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("jenny_prototype"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("david_prototype"))
+				.matches(ex -> ex.contains(BeanCurrentlyInCreationException.class));
+	}
+
+	@Test
+	void circularReferencesWithDependOn() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
+		reader.loadBeanDefinitions(REFTYPES_CONTEXT);
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("jenny_depends_on"));
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> xbf.getBean("david_depends_on"));
+	}
+
+	@Test
+	void circularReferenceWithFactoryBeanFirst() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -548,7 +585,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferenceWithTwoFactoryBeans() {
+	void circularReferenceWithTwoFactoryBeans() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -560,7 +597,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferencesWithNotAllowed() {
+	void circularReferencesWithNotAllowed() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowCircularReferences(false);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -572,7 +609,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferencesWithWrapping() {
+	void circularReferencesWithWrapping() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
@@ -584,7 +621,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCircularReferencesWithWrappingAndRawInjectionAllowed() {
+	void circularReferencesWithWrappingAndRawInjectionAllowed() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		xbf.setAllowRawInjectionDespiteWrapping(true);
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
@@ -605,7 +642,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testFactoryReferenceCircle() {
+	void factoryReferenceCircle() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(FACTORY_CIRCLE_CONTEXT);
 		TestBean tb = (TestBean) xbf.getBean("singletonFactory");
@@ -614,14 +651,14 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testFactoryReferenceWithDoublePrefix() {
+	void factoryReferenceWithDoublePrefix() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(FACTORY_CIRCLE_CONTEXT);
 		assertThat(xbf.getBean("&&singletonFactory")).isInstanceOf(DummyFactory.class);
 	}
 
 	@Test
-	public void testComplexFactoryReferenceCircle() {
+	void complexFactoryReferenceCircle() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(COMPLEX_FACTORY_CIRCLE_CONTEXT);
 		xbf.getBean("proxy1");
@@ -633,7 +670,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void noSuchFactoryBeanMethod() {
+	void noSuchFactoryBeanMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(NO_SUCH_FACTORY_METHOD_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
@@ -641,7 +678,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInitMethodIsInvoked() {
+	void initMethodIsInvoked() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
 		DoubleInitializer in = (DoubleInitializer) xbf.getBean("init-method1");
@@ -653,7 +690,7 @@ public class XmlBeanFactoryTests {
 	 * Test that if a custom initializer throws an exception, it's handled correctly
 	 */
 	@Test
-	public void testInitMethodThrowsException() {
+	void initMethodThrowsException() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
@@ -666,7 +703,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testNoSuchInitMethod() {
+	void noSuchInitMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
 		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
@@ -680,7 +717,7 @@ public class XmlBeanFactoryTests {
 	 * Check that InitializingBean method is called first.
 	 */
 	@Test
-	public void testInitializingBeanAndInitMethod() {
+	void initializingBeanAndInitMethod() {
 		InitAndIB.constructed = false;
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
@@ -701,7 +738,7 @@ public class XmlBeanFactoryTests {
 	 * Check that InitializingBean method is not called twice.
 	 */
 	@Test
-	public void testInitializingBeanAndSameInitMethod() {
+	void initializingBeanAndSameInitMethod() {
 		InitAndIB.constructed = false;
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INITIALIZERS_CONTEXT);
@@ -719,7 +756,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testDefaultLazyInit() {
+	void defaultLazyInit() {
 		InitAndIB.constructed = false;
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEFAULT_LAZY_CONTEXT);
@@ -735,21 +772,21 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void noSuchXmlFile() {
+	void noSuchXmlFile() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(MISSING_CONTEXT));
 	}
 
 	@Test
-	public void invalidXmlFile() {
+	void invalidXmlFile() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INVALID_CONTEXT));
 	}
 
 	@Test
-	public void testAutowire() {
+	void autowire() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(AUTOWIRE_CONTEXT);
 		TestBean spouse = new TestBean("kerry", 0);
@@ -758,7 +795,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireWithParent() {
+	void autowireWithParent() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(AUTOWIRE_CONTEXT);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
@@ -815,7 +852,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireWithDefault() {
+	void autowireWithDefault() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEFAULT_AUTOWIRE_CONTEXT);
 
@@ -831,7 +868,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireByConstructor() {
+	void autowireByConstructor() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorDependenciesBean rod1 = (ConstructorDependenciesBean) xbf.getBean("rod1");
@@ -869,7 +906,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testAutowireByConstructorWithSimpleValues() {
+	void autowireByConstructorWithSimpleValues() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 
@@ -899,7 +936,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testRelatedCausesFromConstructorResolution() {
+	void relatedCausesFromConstructorResolution() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 
@@ -914,7 +951,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testConstructorArgResolution() {
+	void constructorArgResolution() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		TestBean kerry1 = (TestBean) xbf.getBean("kerry1");
@@ -963,7 +1000,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testPrototypeWithExplicitArguments() {
+	void prototypeWithExplicitArguments() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		SimpleConstructorArgBean cd1 = (SimpleConstructorArgBean) xbf.getBean("rod18");
@@ -979,7 +1016,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testConstructorArgWithSingleMatch() {
+	void constructorArgWithSingleMatch() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		File file = (File) xbf.getBean("file");
@@ -987,7 +1024,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void throwsExceptionOnTooManyArguments() {
+	void throwsExceptionOnTooManyArguments() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
@@ -995,7 +1032,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void throwsExceptionOnAmbiguousResolution() {
+	void throwsExceptionOnAmbiguousResolution() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(() ->
@@ -1003,52 +1040,52 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testDependsOn() {
+	void dependsOn() {
 		doTestDependencies(DEP_DEPENDSON_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependsOnInInnerBean() {
+	void dependsOnInInnerBean() {
 		doTestDependencies(DEP_DEPENDSON_INNER_CONTEXT, 4);
 	}
 
 	@Test
-	public void testDependenciesThroughConstructorArguments() {
+	void dependenciesThroughConstructorArguments() {
 		doTestDependencies(DEP_CARG_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughConstructorArgumentAutowiring() {
+	void dependenciesThroughConstructorArgumentAutowiring() {
 		doTestDependencies(DEP_CARG_AUTOWIRE_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughConstructorArgumentsInInnerBean() {
+	void dependenciesThroughConstructorArgumentsInInnerBean() {
 		doTestDependencies(DEP_CARG_INNER_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughProperties() {
+	void dependenciesThroughProperties() {
 		doTestDependencies(DEP_PROP, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughPropertiesWithInTheMiddle() {
+	void dependenciesThroughPropertiesWithInTheMiddle() {
 		doTestDependencies(DEP_PROP_MIDDLE_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughPropertyAutowiringByName() {
+	void dependenciesThroughPropertyAutowiringByName() {
 		doTestDependencies(DEP_PROP_ABN_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughPropertyAutowiringByType() {
+	void dependenciesThroughPropertyAutowiringByType() {
 		doTestDependencies(DEP_PROP_ABT_CONTEXT, 1);
 	}
 
 	@Test
-	public void testDependenciesThroughPropertiesInInnerBean() {
+	void dependenciesThroughPropertiesInInnerBean() {
 		doTestDependencies(DEP_PROP_INNER_CONTEXT, 1);
 	}
 
@@ -1080,7 +1117,7 @@ public class XmlBeanFactoryTests {
 	 * must rather only be picked up when the bean is instantiated.
 	 */
 	@Test
-	public void testClassNotFoundWithDefaultBeanClassLoader() {
+	void classNotFoundWithDefaultBeanClassLoader() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(CLASS_NOT_FOUND_CONTEXT);
 		// cool, no errors, so the rubbish class name in the bean def was not resolved
@@ -1092,7 +1129,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testClassNotFoundWithNoBeanClassLoader() {
+	void classNotFoundWithNoBeanClassLoader() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
 		reader.setBeanClassLoader(null);
@@ -1101,7 +1138,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testResourceAndInputStream() throws IOException {
+	void resourceAndInputStream() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(RESOURCE_CONTEXT);
 		// comes from "resourceImport.xml"
@@ -1125,7 +1162,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testClassPathResourceWithImport() {
+	void classPathResourceWithImport() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(RESOURCE_CONTEXT);
 		// comes from "resourceImport.xml"
@@ -1135,7 +1172,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testUrlResourceWithImport() {
+	void urlResourceWithImport() {
 		URL url = getClass().getResource(RESOURCE_CONTEXT.getPath());
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new UrlResource(url));
@@ -1146,7 +1183,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testFileSystemResourceWithImport() throws URISyntaxException {
+	void fileSystemResourceWithImport() throws URISyntaxException {
 		String file = getClass().getResource(RESOURCE_CONTEXT.getPath()).toURI().getPath();
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new FileSystemResource(file));
@@ -1157,7 +1194,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void recursiveImport() {
+	void recursiveImport() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(RECURSIVE_IMPORT_CONTEXT));
@@ -1169,7 +1206,8 @@ public class XmlBeanFactoryTests {
 	 * @since 3.2.8 and 4.0.2
 	 */
 	@Test
-	public void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {
+	@SuppressWarnings("deprecation")
+	void methodInjectedBeanMustBeOfSameEnhancedCglibSubclassTypeAcrossBeanFactories() {
 		Class<?> firstClass = null;
 
 		for (int i = 0; i < 10; i++) {
@@ -1189,7 +1227,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void lookupOverrideMethodsWithSetterInjection() {
+	void lookupOverrideMethodsWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
@@ -1256,7 +1294,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testReplaceMethodOverrideWithSetterInjection() {
+	void replaceMethodOverrideWithSetterInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
@@ -1303,7 +1341,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void lookupOverrideOneMethodWithConstructorInjection() {
+	void lookupOverrideOneMethodWithConstructorInjection() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(CONSTRUCTOR_OVERRIDES_CONTEXT);
@@ -1326,7 +1364,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testRejectsOverrideOfBogusMethodName() {
+	void rejectsOverrideOfBogusMethodName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(INVALID_NO_SUCH_METHOD_CONTEXT);
@@ -1336,7 +1374,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void serializableMethodReplacerAndSuperclass() throws IOException {
+	void serializableMethodReplacerAndSuperclass() throws IOException {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
@@ -1349,7 +1387,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testInnerBeanInheritsScopeFromConcreteChildDefinition() {
+	void innerBeanInheritsScopeFromConcreteChildDefinition() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
@@ -1369,7 +1407,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testConstructorArgWithSingleSimpleTypeMatch() {
+	void constructorArgWithSingleSimpleTypeMatch() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 
@@ -1381,7 +1419,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testConstructorArgWithDoubleSimpleTypeMatch() {
+	void constructorArgWithDoubleSimpleTypeMatch() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 
@@ -1395,7 +1433,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testDoubleBooleanAutowire() {
+	void doubleBooleanAutowire() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBoolean");
@@ -1404,7 +1442,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testDoubleBooleanAutowireWithIndex() {
+	void doubleBooleanAutowireWithIndex() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		DoubleBooleanConstructorBean bean = (DoubleBooleanConstructorBean) xbf.getBean("beanWithDoubleBooleanAndIndex");
@@ -1413,7 +1451,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testLenientDependencyMatching() {
+	void lenientDependencyMatching() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		LenientDependencyTestBean bean = (LenientDependencyTestBean) xbf.getBean("lenientDependencyTestBean");
@@ -1421,7 +1459,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testLenientDependencyMatchingFactoryMethod() {
+	void lenientDependencyMatchingFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		LenientDependencyTestBean bean = (LenientDependencyTestBean) xbf.getBean("lenientDependencyTestBeanFactoryMethod");
@@ -1429,7 +1467,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testNonLenientDependencyMatching() {
+	void nonLenientDependencyMatching() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBean");
@@ -1440,7 +1478,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testNonLenientDependencyMatchingFactoryMethod() {
+	void nonLenientDependencyMatchingFactoryMethod() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("lenientDependencyTestBeanFactoryMethod");
@@ -1451,7 +1489,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testJavaLangStringConstructor() {
+	void javaLangStringConstructor() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("string");
@@ -1461,7 +1499,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testCustomStringConstructor() {
+	void customStringConstructor() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("stringConstructor");
@@ -1471,7 +1509,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testPrimitiveConstructorArray() {
+	void primitiveConstructorArray() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
@@ -1481,7 +1519,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testIndexedPrimitiveConstructorArray() {
+	void indexedPrimitiveConstructorArray() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("indexedConstructorArray");
@@ -1491,7 +1529,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testStringConstructorArrayNoType() {
+	void stringConstructorArrayNoType() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
@@ -1500,7 +1538,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testStringConstructorArrayNoTypeNonLenient() {
+	void stringConstructorArrayNoTypeNonLenient() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) xbf.getBeanDefinition("constructorArrayNoType");
@@ -1511,7 +1549,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testConstructorWithUnresolvableParameterName() {
+	void constructorWithUnresolvableParameterName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		AtomicInteger bean = (AtomicInteger) xbf.getBean("constructorUnresolvableName");
@@ -1521,7 +1559,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testWithDuplicateName() {
+	void withDuplicateName() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAMES_CONTEXT))
@@ -1529,7 +1567,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testWithDuplicateNameInAlias() {
+	void withDuplicateNameInAlias() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(TEST_WITH_DUP_NAME_IN_ALIAS_CONTEXT))
@@ -1537,7 +1575,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testOverrideMethodByArgTypeAttribute() {
+	void overrideMethodByArgTypeAttribute() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
@@ -1547,7 +1585,7 @@ public class XmlBeanFactoryTests {
 	}
 
 	@Test
-	public void testOverrideMethodByArgTypeElement() {
+	void overrideMethodByArgTypeElement() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
@@ -1556,7 +1594,7 @@ public class XmlBeanFactoryTests {
 		assertThat(oom.replaceMe("abc")).as("should replace").isEqualTo("cba");
 	}
 
-	public static class DoSomethingReplacer implements MethodReplacer {
+	static class DoSomethingReplacer implements MethodReplacer {
 
 		public Object lastArg;
 
@@ -1570,7 +1608,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class BadInitializer {
+	static class BadInitializer {
 
 		/** Init method */
 		public void init2() throws IOException {
@@ -1579,7 +1617,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class DoubleInitializer {
+	static class DoubleInitializer {
 
 		private int num;
 
@@ -1598,7 +1636,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class InitAndIB implements InitializingBean, DisposableBean {
+	static class InitAndIB implements InitializingBean, DisposableBean {
 
 		public static boolean constructed;
 
@@ -1645,7 +1683,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class PreparingBean1 implements DisposableBean {
+	static class PreparingBean1 implements DisposableBean {
 
 		public static boolean prepared = false;
 
@@ -1662,7 +1700,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class PreparingBean2 implements DisposableBean {
+	static class PreparingBean2 implements DisposableBean {
 
 		public static boolean prepared = false;
 
@@ -1679,7 +1717,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class DependingBean implements InitializingBean, DisposableBean {
+	static class DependingBean implements InitializingBean, DisposableBean {
 
 		public static int destroyCount = 0;
 
@@ -1718,7 +1756,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class InTheMiddleBean {
+	static class InTheMiddleBean {
 
 		public void setBean1(PreparingBean1 bean1) {
 		}
@@ -1728,7 +1766,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class HoldingBean implements DisposableBean {
+	static class HoldingBean implements DisposableBean {
 
 		public static int destroyCount = 0;
 
@@ -1751,7 +1789,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class DoubleBooleanConstructorBean {
+	static class DoubleBooleanConstructorBean {
 
 		private Boolean boolean1;
 		private Boolean boolean2;
@@ -1775,7 +1813,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class LenientDependencyTestBean {
+	static class LenientDependencyTestBean {
 
 		public final ITestBean tb;
 
@@ -1810,7 +1848,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class ConstructorArrayTestBean {
+	static class ConstructorArrayTestBean {
 
 		public final Object array;
 
@@ -1832,7 +1870,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class StringConstructorTestBean {
+	static class StringConstructorTestBean {
 
 		public final String name;
 
@@ -1842,7 +1880,7 @@ public class XmlBeanFactoryTests {
 	}
 
 
-	public static class WrappingPostProcessor implements BeanPostProcessor {
+	static class WrappingPostProcessor implements BeanPostProcessor {
 
 		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

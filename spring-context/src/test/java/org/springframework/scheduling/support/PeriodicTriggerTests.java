@@ -19,7 +19,7 @@ package org.springframework.scheduling.support;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.NumberUtils;

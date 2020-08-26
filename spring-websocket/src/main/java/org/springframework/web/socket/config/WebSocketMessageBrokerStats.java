@@ -96,7 +96,7 @@ public class WebSocketMessageBrokerStats {
 			}
 		}
 		SubProtocolHandler defaultHandler = this.webSocketHandler.getDefaultProtocolHandler();
-		if (defaultHandler != null && defaultHandler instanceof StompSubProtocolHandler) {
+		if (defaultHandler instanceof StompSubProtocolHandler) {
 			return (StompSubProtocolHandler) defaultHandler;
 		}
 		return null;
@@ -209,6 +209,7 @@ public class WebSocketMessageBrokerStats {
 		return str.substring(str.indexOf("pool"), str.length() - 1);
 	}
 
+	@Override
 	public String toString() {
 		return "WebSocketSession[" + getWebSocketSessionStatsInfo() + "]" +
 				", stompSubProtocol[" + getStompSubProtocolStatsInfo() + "]" +

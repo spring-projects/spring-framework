@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,10 +37,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class CollectionUtilsTests {
+class CollectionUtilsTests {
 
 	@Test
-	public void testIsEmpty() {
+	void isEmpty() {
 		assertThat(CollectionUtils.isEmpty((Set<Object>) null)).isTrue();
 		assertThat(CollectionUtils.isEmpty((Map<String, String>) null)).isTrue();
 		assertThat(CollectionUtils.isEmpty(new HashMap<String, String>())).isTrue();
@@ -56,7 +56,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testMergeArrayIntoCollection() {
+	void mergeArrayIntoCollection() {
 		Object[] arr = new Object[] {"value1", "value2"};
 		List<Comparable<?>> list = new LinkedList<>();
 		list.add("value3");
@@ -68,7 +68,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testMergePrimitiveArrayIntoCollection() {
+	void mergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
 		List<Comparable<?>> list = new LinkedList<>();
 		list.add(Integer.valueOf(3));
@@ -80,7 +80,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testMergePropertiesIntoMap() {
+	void mergePropertiesIntoMap() {
 		Properties defaults = new Properties();
 		defaults.setProperty("prop1", "value1");
 		Properties props = new Properties(defaults);
@@ -98,7 +98,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testContains() {
+	void contains() {
 		assertThat(CollectionUtils.contains((Iterator<String>) null, "myElement")).isFalse();
 		assertThat(CollectionUtils.contains((Enumeration<String>) null, "myElement")).isFalse();
 		assertThat(CollectionUtils.contains(new LinkedList<String>().iterator(), "myElement")).isFalse();
@@ -114,7 +114,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testContainsAny() throws Exception {
+	void containsAny() throws Exception {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
@@ -133,19 +133,19 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testContainsInstanceWithNullCollection() throws Exception {
+	void containsInstanceWithNullCollection() throws Exception {
 		assertThat(CollectionUtils.containsInstance(null, this)).as("Must return false if supplied Collection argument is null").isFalse();
 	}
 
 	@Test
-	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
+	void containsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("fiona"));
 		assertThat(CollectionUtils.containsInstance(list, new Instance("fiona"))).as("Must return false if instance is not in the supplied Collection argument").isFalse();
 	}
 
 	@Test
-	public void testContainsInstanceWithSameInstance() throws Exception {
+	void containsInstanceWithSameInstance() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		Instance instance = new Instance("fiona");
@@ -154,7 +154,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testContainsInstanceWithNullInstance() throws Exception {
+	void containsInstanceWithNullInstance() throws Exception {
 		List<Instance> list = new ArrayList<>();
 		list.add(new Instance("apple"));
 		list.add(new Instance("fiona"));
@@ -162,7 +162,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testFindFirstMatch() throws Exception {
+	void findFirstMatch() throws Exception {
 		List<String> source = new ArrayList<>();
 		source.add("abc");
 		source.add("def");
@@ -177,7 +177,7 @@ public class CollectionUtilsTests {
 	}
 
 	@Test
-	public void testHasUniqueObject() {
+	void hasUniqueObject() {
 		List<String> list = new LinkedList<>();
 		list.add("myElement");
 		list.add("myOtherElement");

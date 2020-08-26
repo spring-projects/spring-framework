@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,19 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -41,6 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriBuilder;
@@ -156,7 +160,8 @@ public interface ServerRequest {
 	Map<String, Object> attributes();
 
 	/**
-	 * Get the first parameter with the given name, if present.
+	 * Get the first parameter with the given name, if present. Servlet
+	 * parameters are contained in the query string or posted form data.
 	 * @param name the parameter name
 	 * @return the parameter value
 	 * @see HttpServletRequest#getParameter(String)
@@ -176,10 +181,22 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Get all parameters for this request.
+	 * Get all parameters for this request. Servlet parameters are contained
+	 * in the query string or posted form data.
 	 * @see HttpServletRequest#getParameterMap()
 	 */
 	MultiValueMap<String, String> params();
+
+	/**
+	 * Get the parts of a multipart request, provided the Content-Type is
+	 * {@code "multipart/form-data"}, or an exception otherwise.
+	 * @return the multipart data, mapping from name to part(s)
+	 * @throws IOException           if an I/O error occurred during the retrieval
+	 * @throws ServletException      if this request is not of type {@code "multipart/form-data"}
+	 * @since 5.3
+	 * @see HttpServletRequest#getParts()
+	 */
+	MultiValueMap<String, Part> multipartData() throws IOException, ServletException;
 
 	/**
 	 * Get the path variable with the given name, if present.
@@ -221,6 +238,109 @@ public interface ServerRequest {
 	 */
 	HttpServletRequest servletRequest();
 
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied last-modified timestamp (as determined by the application).
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public ServerResponse myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 *	 return request.checkNotModified(lastModified)
+	 *	   .orElseGet(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   });
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@code #checkNotModified(Instant)} method; or
+	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param lastModified the last-modified timestamp that the
+	 * application determined for the underlying resource
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Optional<ServerResponse> checkNotModified(Instant lastModified) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		return DefaultServerRequest.checkNotModified(servletRequest(), lastModified, null);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag), as determined by the application.
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public ServerResponse myHandleMethod(ServerRequest request) {
+	 *   String eTag = // application-specific calculation
+	 *	 return request.checkNotModified(eTag)
+	 *	   .orElseGet(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   });
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@link #checkNotModified(Instant)} method; or
+	 * {@code #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param etag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Optional<ServerResponse> checkNotModified(String etag) {
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(servletRequest(), null, etag);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
+	 * as determined by the application.
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public ServerResponse myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 *   String eTag = // application-specific calculation
+	 *	 return request.checkNotModified(lastModified, eTag)
+	 *	   .orElseGet(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   });
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * @param lastModified the last-modified timestamp that the
+	 * application determined for the underlying resource
+	 * @param etag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Optional<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(servletRequest(), lastModified, etag);
+	}
+
 
 	// Static methods
 
@@ -243,6 +363,7 @@ public interface ServerRequest {
 	static Builder from(ServerRequest other) {
 		return new DefaultServerRequestBuilder(other);
 	}
+
 
 
 	/**
@@ -303,6 +424,18 @@ public interface ServerRequest {
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);
+
+		/**
+		 * Get the first header value, if any, for the header for the given name.
+		 * <p>Returns {@code null} if no header values are found.
+		 * @param headerName the header name
+		 * @since 5.2.5
+		 */
+		@Nullable
+		default String firstHeader(String headerName) {
+			List<String> list = header(headerName);
+			return list.isEmpty() ? null : list.get(0);
+		}
 
 		/**
 		 * Get the headers as an instance of {@link HttpHeaders}.

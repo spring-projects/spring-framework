@@ -16,8 +16,8 @@
 
 package org.springframework.jms.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
@@ -37,7 +37,7 @@ public class JmsListenerEndpointRegistrarTests {
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.registrar.setEndpointRegistry(this.registry);
 		this.registrar.setBeanFactory(new StaticListableBeanFactory());

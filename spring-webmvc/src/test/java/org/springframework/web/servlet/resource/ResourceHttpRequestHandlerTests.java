@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -32,14 +33,14 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,20 +67,22 @@ public class ResourceHttpRequestHandlerTests {
 	private MockHttpServletResponse response;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
 		paths.add(new ClassPathResource("META-INF/resources/webjars/"));
 
+		TestServletContext servletContext = new TestServletContext();
+
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(paths);
 		this.handler.setCacheSeconds(3600);
-		this.handler.setServletContext(new TestServletContext());
+		this.handler.setServletContext(servletContext);
 		this.handler.afterPropertiesSet();
 
-		this.request = new MockHttpServletRequest("GET", "");
+		this.request = new MockHttpServletRequest(servletContext, "GET", "");
 		this.response = new MockHttpServletResponse();
 	}
 
@@ -149,7 +152,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "versionString/foo.css");
 		this.handler.handleRequest(this.request, this.response);
 
-		assertThat(this.response.getHeader("ETag")).isEqualTo("\"versionString\"");
+		assertThat(this.response.getHeader("ETag")).isEqualTo("W/\"versionString\"");
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
 	}
@@ -239,6 +242,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-13658
+	@SuppressWarnings("deprecation")
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("bar", new MediaType("foo", "bar"));
@@ -260,6 +264,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test  // SPR-14577
+	@SuppressWarnings("deprecation")
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);
@@ -282,14 +287,11 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test  // SPR-14368
 	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
+
 		MockServletContext servletContext = new MockServletContext() {
 			@Override
 			public String getMimeType(String filePath) {
 				return "foo/bar";
-			}
-			@Override
-			public String getVirtualServerName() {
-				return "";
 			}
 		};
 
@@ -299,8 +301,9 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setLocations(paths);
 		handler.afterPropertiesSet();
 
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		handler.handleRequest(this.request, this.response);
+		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "");
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		handler.handleRequest(request, this.response);
 
 		assertThat(this.response.getContentType()).isEqualTo("foo/bar");
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package org.springframework.http.server;
 
-import java.net.URI;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link DefaultRequestPath}.
  * @author Rossen Stoyanchev
  */
-public class DefaultRequestPathTests {
+class DefaultRequestPathTests {
 
 	@Test
-	public void requestPath() throws Exception {
+	void requestPath() {
 		// basic
 		testRequestPath("/app/a/b/c", "/app", "/a/b/c");
 
@@ -52,8 +50,7 @@ public class DefaultRequestPathTests {
 
 	private void testRequestPath(String fullPath, String contextPath, String pathWithinApplication) {
 
-		URI uri = URI.create("http://localhost:8080" + fullPath);
-		RequestPath requestPath = RequestPath.parse(uri, contextPath);
+		RequestPath requestPath = RequestPath.parse(fullPath, contextPath);
 
 		Object expected = contextPath.equals("/") ? "" : contextPath;
 		assertThat(requestPath.contextPath().value()).isEqualTo(expected);
@@ -61,10 +58,9 @@ public class DefaultRequestPathTests {
 	}
 
 	@Test
-	public void updateRequestPath() throws Exception {
+	void updateRequestPath() {
 
-		URI uri = URI.create("http://localhost:8080/aA/bB/cC");
-		RequestPath requestPath = RequestPath.parse(uri, null);
+		RequestPath requestPath = RequestPath.parse("/aA/bB/cC", null);
 
 		assertThat(requestPath.contextPath().value()).isEqualTo("");
 		assertThat(requestPath.pathWithinApplication().value()).isEqualTo("/aA/bB/cC");

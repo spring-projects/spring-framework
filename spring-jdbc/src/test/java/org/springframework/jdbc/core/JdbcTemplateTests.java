@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -89,7 +90,7 @@ public class JdbcTemplateTests {
 	private CallableStatement callableStatement;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.connection = mock(Connection.class);
 		this.dataSource = mock(DataSource.class);
@@ -174,12 +175,14 @@ public class JdbcTemplateTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
 		doTestStrings(null, null, null, null,
 				(template, sql, rch) -> template.query(sql, (Object[]) null, rch));
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
 		doTestStrings(null, null, null, argument,

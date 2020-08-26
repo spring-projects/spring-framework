@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,13 +41,10 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.AbstractWebSocketIntegrationTests;
-import org.springframework.web.socket.JettyWebSocketTestServer;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.TomcatWebSocketTestServer;
-import org.springframework.web.socket.UndertowTestServer;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.WebSocketTestServer;
+import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -64,21 +58,11 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.c
  * Integration tests with annotated message-handling methods.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
-public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	private static final long TIMEOUT = 10;
-
-
-	@Parameters(name = "server [{0}], client [{1}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
-				{new TomcatWebSocketTestServer(), new StandardWebSocketClient()},
-				{new UndertowTestServer(), new StandardWebSocketClient()}
-		};
-	}
 
 
 	@Override
@@ -87,22 +71,23 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	}
 
 
-	@Test
-	public void sendMessageToController() throws Exception {
-		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
-		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
+	@ParameterizedWebSocketTest
+	void sendMessageToController(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
 
-		SimpleController controller = this.wac.getBean(SimpleController.class);
-		try {
+		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
+
+		try (WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+			assertThat(session).isNotNull();
+			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
-	@Test
-	public void sendMessageToControllerAndReceiveReplyViaTopic() throws Exception {
+	@ParameterizedWebSocketTest
+	void sendMessageToControllerAndReceiveReplyViaTopic(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
 		TextMessage m1 = create(StompCommand.SUBSCRIBE)
 				.headers("id:subs1", "destination:/topic/increment").build();
@@ -110,80 +95,76 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 				.headers("destination:/app/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
-	@Test  // SPR-10930
-	public void sendMessageToBrokerAndReceiveReplyViaTopic() throws Exception {
+	@ParameterizedWebSocketTest  // SPR-10930
+	void sendMessageToBrokerAndReceiveReplyViaTopic(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).as("Expected STOMP MESSAGE, got " + payload).isTrue();
 		}
-		finally {
-			session.close();
-		}
 	}
 
-	@Test  // SPR-11648
-	public void sendSubscribeToControllerAndReceiveReply() throws Exception {
+	@ParameterizedWebSocketTest  // SPR-11648
+	void sendSubscribeToControllerAndReceiveReply(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
 		String destHeader = "destination:/app/number";
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.contains(destHeader)).as("Expected STOMP destination=/app/number, got " + payload).isTrue();
 			assertThat(payload.contains("42")).as("Expected STOMP Payload=42, got " + payload).isTrue();
 		}
-		finally {
-			session.close();
-		}
 	}
 
-	@Test
-	public void handleExceptionAndSendToUser() throws Exception {
+	@ParameterizedWebSocketTest
+	void handleExceptionAndSendToUser(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		String destHeader = "destination:/user/queue/error";
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/exception").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
 			assertThat(payload.contains("destination:/user/queue/error\n")).isTrue();
 			assertThat(payload.endsWith("Got error: Bad input\0")).isTrue();
 		}
-		finally {
-			session.close();
-		}
 	}
 
-	@Test
-	public void webSocketScope() throws Exception {
+	@ParameterizedWebSocketTest
+	void webSocketScope(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+		super.setup(server, webSocketClient, testInfo);
+
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
 		TextMessage m1 = create(StompCommand.SUBSCRIBE)
 				.headers("id:subs1", "destination:/topic/scopedBeanValue").build();
@@ -191,17 +172,14 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 				.headers("destination:/app/scopedBeanValue").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
 			assertThat(payload.contains("destination:/topic/scopedBeanValue\n")).isTrue();
 			assertThat(payload.endsWith("55\0")).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 

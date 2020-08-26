@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	@Nullable
 	private String targetRequestPath;
 
-	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(4);
+	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<>(3);
 
 	private long expirationTime = -1;
 
@@ -161,7 +161,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

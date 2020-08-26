@@ -19,7 +19,7 @@ package org.springframework.web.socket.config.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;
@@ -115,7 +115,7 @@ public class WebSocketHandlerRegistrationTests {
 		WebSocketHandler handler = new TextWebSocketHandler();
 		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
 
-		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins("https://mydomain1.com");
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins("https://mydomain1.example");
 
 		List<Mapping> mappings = this.registration.getMappings();
 		assertThat(mappings.size()).isEqualTo(1);
@@ -136,7 +136,7 @@ public class WebSocketHandlerRegistrationTests {
 
 		this.registration.addHandler(handler, "/foo")
 				.addInterceptors(interceptor)
-				.setAllowedOrigins("https://mydomain1.com")
+				.setAllowedOrigins("https://mydomain1.example")
 				.withSockJS();
 
 		this.registration.getSockJsServiceRegistration().setTaskScheduler(this.taskScheduler);
@@ -148,7 +148,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertThat(mapping.webSocketHandler).isEqualTo(handler);
 		assertThat(mapping.path).isEqualTo("/foo/**");
 		assertThat(mapping.sockJsService).isNotNull();
-		assertThat(mapping.sockJsService.getAllowedOrigins().contains("https://mydomain1.com")).isTrue();
+		assertThat(mapping.sockJsService.getAllowedOrigins().contains("https://mydomain1.example")).isTrue();
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
 		assertThat(interceptors.get(0)).isEqualTo(interceptor);
 		assertThat(interceptors.get(1).getClass()).isEqualTo(OriginHandshakeInterceptor.class);

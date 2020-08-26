@@ -21,8 +21,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Random;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
+public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -69,7 +69,7 @@ public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRe
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void largeFileUpload() throws Exception {
 		Random rnd = new Random();
 		ClientHttpResponse response = null;

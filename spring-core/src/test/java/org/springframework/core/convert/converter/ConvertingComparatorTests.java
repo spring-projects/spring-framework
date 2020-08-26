@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package org.springframework.core.convert.converter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -32,13 +31,12 @@ import org.springframework.util.comparator.ComparableComparator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * Tests for {@link ConvertingComparator}.
  *
  * @author Phillip Webb
  */
-public class ConvertingComparatorTests {
+class ConvertingComparatorTests {
 
 	private final StringToInteger converter = new StringToInteger();
 
@@ -47,45 +45,45 @@ public class ConvertingComparatorTests {
 	private final TestComparator comparator = new TestComparator();
 
 	@Test
-	public void shouldThrowOnNullComparator() throws Exception {
+	void shouldThrowOnNullComparator() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<>(null, this.converter));
 	}
 
 	@Test
-	public void shouldThrowOnNullConverter() throws Exception {
+	void shouldThrowOnNullConverter() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, null));
 	}
 
 	@Test
-	public void shouldThrowOnNullConversionService() throws Exception {
+	void shouldThrowOnNullConversionService() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class));
 	}
 
 	@Test
-	public void shouldThrowOnNullType() throws Exception {
+	void shouldThrowOnNullType() throws Exception {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new ConvertingComparator<String, Integer>(this.comparator, this.conversionService, null));
 	}
 
 	@Test
-	public void shouldUseConverterOnCompare() throws Exception {
+	void shouldUseConverterOnCompare() throws Exception {
 		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
 				this.comparator, this.converter);
 		testConversion(convertingComparator);
 	}
 
 	@Test
-	public void shouldUseConversionServiceOnCompare() throws Exception {
+	void shouldUseConversionServiceOnCompare() throws Exception {
 		ConvertingComparator<String, Integer> convertingComparator = new ConvertingComparator<>(
 				comparator, conversionService, Integer.class);
 		testConversion(convertingComparator);
 	}
 
 	@Test
-	public void shouldGetForConverter() throws Exception {
+	void shouldGetForConverter() throws Exception {
 		testConversion(new ConvertingComparator<>(comparator, converter));
 	}
 
@@ -97,18 +95,18 @@ public class ConvertingComparatorTests {
 	}
 
 	@Test
-	public void shouldGetMapEntryKeys() throws Exception {
+	void shouldGetMapEntryKeys() throws Exception {
 		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
 		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryKeys(new ComparableComparator<String>());
-		Collections.sort(list, comparator);
+		list.sort(comparator);
 		assertThat(list.get(0).getKey()).isEqualTo("a");
 	}
 
 	@Test
-	public void shouldGetMapEntryValues() throws Exception {
+	void shouldGetMapEntryValues() throws Exception {
 		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
 		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(new ComparableComparator<Integer>());
-		Collections.sort(list, comparator);
+		list.sort(comparator);
 		assertThat(list.get(0).getValue()).isEqualTo(1);
 	}
 

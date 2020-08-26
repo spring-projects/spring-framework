@@ -16,7 +16,7 @@
 
 package org.springframework.web.socket.sockjs.transport.session;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.WebSocketHandler;
@@ -40,7 +40,7 @@ public abstract class AbstractSockJsSessionTests<S extends AbstractSockJsSession
 	protected S session;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.webSocketHandler = mock(WebSocketHandler.class);
 		this.taskScheduler = mock(TaskScheduler.class);

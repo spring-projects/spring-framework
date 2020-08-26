@@ -20,13 +20,15 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.context.testfixture.jndi.SimpleNamingContextBuilder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -34,7 +36,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
-import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -253,7 +254,7 @@ public class PersistenceXmlParsingTests {
 		assertThat(info[0].excludeUnlistedClasses()).as("Exclude unlisted should default false in 1.0.").isFalse();
 	}
 
-	@Ignore  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Disabled("not doing schema parsing anymore for JPA 2.0 compatibility")
 	@Test
 	public void testInvalidPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(
@@ -263,7 +264,7 @@ public class PersistenceXmlParsingTests {
 				reader.readPersistenceUnitInfos(resource));
 	}
 
-	@Ignore  // not doing schema parsing anymore for JPA 2.0 compatibility
+	@Disabled("not doing schema parsing anymore for JPA 2.0 compatibility")
 	@Test
 	public void testNoSchemaPersistence() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(

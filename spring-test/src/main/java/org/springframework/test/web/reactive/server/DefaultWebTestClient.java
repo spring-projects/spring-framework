@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,8 +261,8 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-			this.bodySpec.body(inserter);
+		public RequestHeadersSpec<?> bodyValue(Object body) {
+			this.bodySpec.bodyValue(body);
 			return this;
 		}
 
@@ -273,17 +273,41 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public RequestHeadersSpec<?> syncBody(Object body) {
-			this.bodySpec.syncBody(body);
+		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef) {
+			this.bodySpec.body(publisher, elementTypeRef);
 			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
+			this.bodySpec.body(producer, elementClass);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
+			this.bodySpec.body(producer, elementTypeRef);
+			return this;
+		}
+
+		@Override
+		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
+			this.bodySpec.body(inserter);
+			return this;
+		}
+
+		@Override
+		@Deprecated
+		public RequestHeadersSpec<?> syncBody(Object body) {
+			return bodyValue(body);
 		}
 
 		@Override
 		public ResponseSpec exchange() {
 			ClientResponse clientResponse = this.bodySpec.exchange().block(getTimeout());
 			Assert.state(clientResponse != null, "No ClientResponse");
-			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+			ExchangeResult result = wiretapConnector.getExchangeResult(this.requestId, this.uriTemplate, getTimeout());
+			return new DefaultResponseSpec(result, clientResponse, getTimeout());
 		}
 	}
 
@@ -297,10 +321,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 
-		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
-				@Nullable String uriTemplate, Duration timeout) {
-
-			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
+		DefaultResponseSpec(ExchangeResult exchangeResult, ClientResponse response, Duration timeout) {
+			this.exchangeResult = exchangeResult;
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -313,6 +335,11 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public HeaderAssertions expectHeader() {
 			return new HeaderAssertions(this.exchangeResult, this);
+		}
+
+		@Override
+		public CookieAssertions expectCookie() {
+			return new CookieAssertions(this.exchangeResult, this);
 		}
 
 		@Override
@@ -355,14 +382,21 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(Class<T> elementType) {
-			Flux<T> body = this.response.bodyToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
+			Flux<T> body;
+			if (elementClass.equals(Void.class)) {
+				this.response.releaseBody().block();
+				body = Flux.empty();
+			}
+			else {
+				body = this.response.bodyToFlux(elementClass);
+			}
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
 		@Override
-		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementType) {
-			Flux<T> body = this.response.bodyToFlux(elementType);
+		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
+			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 	}

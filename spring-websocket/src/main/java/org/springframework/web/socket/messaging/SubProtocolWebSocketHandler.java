@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class SubProtocolWebSocketHandler
 
 	private final DefaultStats stats = new DefaultStats();
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
 	private final Object lifecycleMonitor = new Object();
 
@@ -187,6 +187,7 @@ public class SubProtocolWebSocketHandler
 	/**
 	 * Return all supported protocols.
 	 */
+	@Override
 	public List<String> getSubProtocols() {
 		return new ArrayList<>(this.protocolHandlerLookup.keySet());
 	}
@@ -368,6 +369,9 @@ public class SubProtocolWebSocketHandler
 			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Terminating '" + session + "'", ex);
+				}
+				else if (logger.isWarnEnabled()) {
+					logger.warn("Terminating '" + session + "': " + ex.getMessage());
 				}
 				this.stats.incrementLimitExceededCount();
 				clearSession(session, ex.getStatus()); // clear first, session may be unresponsive
@@ -591,6 +595,7 @@ public class SubProtocolWebSocketHandler
 		int getTransportErrorSessions();
 	}
 
+
 	private class DefaultStats implements Stats {
 
 		private final AtomicInteger total = new AtomicInteger();
@@ -606,7 +611,6 @@ public class SubProtocolWebSocketHandler
 		private final AtomicInteger noMessagesReceived = new AtomicInteger();
 
 		private final AtomicInteger transportError = new AtomicInteger();
-
 
 		@Override
 		public int getTotalSessions() {
@@ -676,6 +680,7 @@ public class SubProtocolWebSocketHandler
 			}
 		}
 
+		@Override
 		public String toString() {
 			return SubProtocolWebSocketHandler.this.sessions.size() +
 					" current WS(" + this.webSocket.get() +

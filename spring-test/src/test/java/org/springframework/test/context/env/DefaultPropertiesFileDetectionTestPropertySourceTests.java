@@ -16,15 +16,15 @@
 
 package org.springframework.test.context.env;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,17 +35,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 4.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @TestPropertySource
-public class DefaultPropertiesFileDetectionTestPropertySourceTests {
+class DefaultPropertiesFileDetectionTestPropertySourceTests {
 
 	@Autowired
 	protected Environment env;
 
 
 	@Test
-	public void verifyPropertiesAreAvailableInEnvironment() {
+	void verifyPropertiesAreAvailableInEnvironment() {
 		// from DefaultPropertiesFileDetectionTestPropertySourceTests.properties
 		assertEnvironmentValue("riddle", "auto detected");
 	}

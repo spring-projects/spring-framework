@@ -36,7 +36,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Context about a type to convert from or to.
+ * Contextual descriptor about a type to convert from or to.
+ * Capable of representing arrays and generic collection types.
  *
  * @author Keith Donald
  * @author Andy Clement
@@ -45,6 +46,8 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @author Stephane Nicoll
  * @since 3.0
+ * @see ConversionService#canConvert(TypeDescriptor, TypeDescriptor)
+ * @see ConversionService#convert(Object, TypeDescriptor, TypeDescriptor)
  */
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
@@ -322,9 +325,9 @@ public class TypeDescriptor implements Serializable {
 	 * If this type is a {@code Stream}, returns the stream's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns {@code null} indicating the element type is not declared.
-	 * @return the array component type or Collection element type, or {@code null} if this type is a
-	 * Collection but its element type is not parameterized
-	 * @throws IllegalStateException if this type is not a {@code java.util.Collection} or array type
+	 * @return the array component type or Collection element type, or {@code null} if this type is not
+	 * an array type or a {@code java.util.Collection} or if its element type is not parameterized
+	 * @see #elementTypeDescriptor(Object)
 	 */
 	@Nullable
 	public TypeDescriptor getElementTypeDescriptor() {
@@ -351,8 +354,7 @@ public class TypeDescriptor implements Serializable {
 	 * TypeDescriptor that is returned.
 	 * @param element the collection or array element
 	 * @return a element type descriptor, narrowed to the type of the provided element
-	 * @throws IllegalStateException if this type is not a {@code java.util.Collection}
-	 * or array type
+	 * @see #getElementTypeDescriptor()
 	 * @see #narrow(Object)
 	 */
 	@Nullable
@@ -452,7 +454,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -778,7 +780,7 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof AnnotatedElementAdapter &&
 					Arrays.equals(this.annotations, ((AnnotatedElementAdapter) other).annotations)));
 		}

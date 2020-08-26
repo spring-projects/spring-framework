@@ -16,8 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -39,7 +39,7 @@ public class ListenerReadPublisherTests {
 	private final TestSubscriber subscriber = new TestSubscriber();
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.publisher.subscribe(this.subscriber);
 	}

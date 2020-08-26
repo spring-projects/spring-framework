@@ -30,6 +30,24 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 public interface FormatterRegistry extends ConverterRegistry {
 
 	/**
+	 * Adds a Printer to print fields of a specific type.
+	 * The field type is implied by the parameterized Printer instance.
+	 * @param printer the printer to add
+	 * @since 5.2
+	 * @see #addFormatter(Formatter)
+	 */
+	void addPrinter(Printer<?> printer);
+
+	/**
+	 * Adds a Parser to parse fields of a specific type.
+	 * The field type is implied by the parameterized Parser instance.
+	 * @param parser the parser to add
+	 * @since 5.2
+	 * @see #addFormatter(Formatter)
+	 */
+	void addParser(Parser<?> parser);
+
+	/**
 	 * Adds a Formatter to format fields of a specific type.
 	 * The field type is implied by the parameterized Formatter instance.
 	 * @param formatter the formatter to add

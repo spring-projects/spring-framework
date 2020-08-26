@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -63,9 +63,9 @@ public class CustomCollectionEditorTests {
 		assertThat(condition).isTrue();
 		List<?> list = (List<?>) value;
 		assertThat(list.size()).as("There must be 3 elements in the converted collection").isEqualTo(3);
-		assertThat(list.get(0)).isEqualTo(new Integer(0));
-		assertThat(list.get(1)).isEqualTo(new Integer(1));
-		assertThat(list.get(2)).isEqualTo(new Integer(2));
+		assertThat(list.get(0)).isEqualTo(0);
+		assertThat(list.get(1)).isEqualTo(1);
+		assertThat(list.get(2)).isEqualTo(2);
 	}
 
 	@Test

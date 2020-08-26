@@ -18,7 +18,7 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;

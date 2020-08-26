@@ -24,8 +24,8 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.core.JmsTemplate;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
  */
 public class JmsTransactionManagerTests {
 
-	@After
+	@AfterEach
 	public void verifyTransactionSynchronizationManagerState() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();

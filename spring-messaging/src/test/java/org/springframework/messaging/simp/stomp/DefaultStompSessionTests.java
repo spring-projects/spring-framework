@@ -17,21 +17,24 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.converter.ByteArrayMessageConverter;
+import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Receiptable;
@@ -61,7 +64,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DefaultStompSessionTests {
 
 	private DefaultStompSession session;
@@ -79,11 +82,13 @@ public class DefaultStompSessionTests {
 	private ArgumentCaptor<Message<byte[]>> messageCaptor;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
-		this.session.setMessageConverter(new StringMessageConverter());
+		this.session.setMessageConverter(
+				new CompositeMessageConverter(
+						Arrays.asList(new StringMessageConverter(), new ByteArrayMessageConverter())));
 
 		SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 		future.set(null);
@@ -111,7 +116,7 @@ public class DefaultStompSessionTests {
 	@Test // SPR-16844
 	public void afterConnectedWithSpecificVersion() {
 		assertThat(this.session.isConnected()).isFalse();
-		this.connectHeaders.setAcceptVersion(new String[] {"1.1"});
+		this.connectHeaders.setAcceptVersion("1.1");
 
 		this.session.afterConnected(this.connection);
 
@@ -390,6 +395,26 @@ public class DefaultStompSessionTests {
 		assertThat(accessor.getReceipt()).isEqualTo("my-receipt");
 	}
 
+	@Test // gh-23358
+	public void sendByteArray() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected());
+
+		String destination = "/topic/foo";
+		String payload = "sample payload";
+		this.session.send(destination, payload.getBytes(StandardCharsets.UTF_8));
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(stompHeaders.size()).as(stompHeaders.toString()).isEqualTo(2);
+
+		assertThat(stompHeaders.getDestination()).isEqualTo(destination);
+		assertThat(stompHeaders.getContentType()).isEqualTo(MimeTypeUtils.APPLICATION_OCTET_STREAM);
+		assertThat(new String(message.getPayload(), StandardCharsets.UTF_8)).isEqualTo(payload);
+	}
+
 	@Test
 	public void sendWithConversionException() {
 		this.session.afterConnected(this.connection);
@@ -630,6 +655,27 @@ public class DefaultStompSessionTests {
 		assertThat(this.session.isConnected()).isTrue();
 
 		this.session.disconnect();
+		assertThat(this.session.isConnected()).isFalse();
+		verifyNoMoreInteractions(this.sessionHandler);
+	}
+
+	@Test
+	public void disconnectWithHeaders() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected()).isTrue();
+
+		StompHeaders headers = new StompHeaders();
+		headers.add("foo", "bar");
+
+		this.session.disconnect(headers);
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(headers.size()).as(headers.toString()).isEqualTo(1);
+		assertThat(headers.get("foo").size()).isEqualTo(1);
+		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
+
 		assertThat(this.session.isConnected()).isFalse();
 		verifyNoMoreInteractions(this.sessionHandler);
 	}

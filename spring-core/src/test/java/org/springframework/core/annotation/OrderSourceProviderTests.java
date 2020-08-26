@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.springframework.core.annotation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 
@@ -31,41 +30,41 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class OrderSourceProviderTests {
+class OrderSourceProviderTests {
 
 	private final AnnotationAwareOrderComparator comparator = AnnotationAwareOrderComparator.INSTANCE;
 
 
 	@Test
-	public void plainComparator() {
+	void plainComparator() {
 		List<Object> items = new ArrayList<>();
 		C c = new C(5);
 		C c2 = new C(-5);
 		items.add(c);
 		items.add(c2);
-		Collections.sort(items, comparator);
+		items.sort(comparator);
 		assertOrder(items, c2, c);
 	}
 
 	@Test
-	public void listNoFactoryMethod() {
+	void listNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		Collections.sort(items, comparator.withSourceProvider(obj -> null));
+		items.sort(comparator.withSourceProvider(obj -> null));
 		assertOrder(items, c, a, b);
 	}
 
 	@Test
-	public void listFactoryMethod() {
+	void listFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
 
 		List<?> items = Arrays.asList(a, c, b);
-		Collections.sort(items, comparator.withSourceProvider(obj -> {
+		items.sort(comparator.withSourceProvider(obj -> {
 			if (obj == a) {
 				return new C(4);
 			}
@@ -78,13 +77,13 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void listFactoryMethodOverridesStaticOrder() {
+	void listFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);
 
 		List<?> items = Arrays.asList(a, c, c2);
-		Collections.sort(items, comparator.withSourceProvider(obj -> {
+		items.sort(comparator.withSourceProvider(obj -> {
 			if (obj == a) {
 				return 4;
 			}
@@ -97,7 +96,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayNoFactoryMethod() {
+	void arrayNoFactoryMethod() {
 		A a = new A();
 		C c = new C(-50);
 		B b = new B();
@@ -108,7 +107,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethod() {
+	void arrayFactoryMethod() {
 		A a = new A();
 		C c = new C(3);
 		B b = new B();
@@ -127,7 +126,7 @@ public class OrderSourceProviderTests {
 	}
 
 	@Test
-	public void arrayFactoryMethodOverridesStaticOrder() {
+	void arrayFactoryMethodOverridesStaticOrder() {
 		A a = new A();
 		C c = new C(5);
 		C c2 = new C(-5);

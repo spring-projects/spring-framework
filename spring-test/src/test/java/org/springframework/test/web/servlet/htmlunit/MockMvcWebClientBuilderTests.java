@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,19 +27,13 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.core.testfixture.TestGroup;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,7 +46,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-
 /**
  * Integration tests for {@link MockMvcWebClientBuilder}.
  *
@@ -60,54 +54,51 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@WebAppConfiguration
-public class MockMvcWebClientBuilderTests {
-
-	@Autowired
-	private WebApplicationContext wac;
+@SpringJUnitWebConfig
+class MockMvcWebClientBuilderTests {
 
 	private MockMvc mockMvc;
 
-
-	@Before
-	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	MockMvcWebClientBuilderTests(WebApplicationContext wac) {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 	}
 
 
 	@Test
-	public void mockMvcSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcWebClientBuilder.mockMvcSetup(null));
+	void mockMvcSetupNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcWebClientBuilder.mockMvcSetup(null));
 	}
 
 	@Test
-	public void webAppContextSetupNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				MockMvcWebClientBuilder.webAppContextSetup(null));
+	void webAppContextSetupNull() {
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcWebClientBuilder.webAppContextSetup(null));
 	}
 
 	@Test
-	public void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
+	void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed(client, "https://spring.io/");
+		}
 	}
 
 	@Test
-	public void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
+	void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
 		WebClient otherClient = new WebClient();
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "https://example.com/"));
+
+		if (TestGroup.PERFORMANCE.isActive()) {
+			assertMockMvcNotUsed(client, "https://spring.io/");
+		}
 	}
 
 	@Test // SPR-14066
-	public void cookieManagerShared() throws Exception {
+	void cookieManagerShared() throws Exception {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
@@ -117,7 +108,7 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	@Test // SPR-14265
-	public void cookiesAreManaged() throws Exception {
+	void cookiesAreManaged() throws Exception {
 		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
@@ -161,7 +152,7 @@ public class MockMvcWebClientBuilderTests {
 		static class ContextPathController {
 
 			@RequestMapping("/test")
-			public String contextPath(HttpServletRequest request) {
+			String contextPath(HttpServletRequest request) {
 				return "mvc";
 			}
 		}

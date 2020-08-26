@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -44,7 +44,7 @@ public class ChannelInterceptorTests {
 	private TestMessageHandler messageHandler;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.channel = new ExecutorSubscribableChannel();
 		this.messageHandler = new TestMessageHandler();

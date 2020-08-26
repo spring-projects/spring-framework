@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -226,8 +226,8 @@ public class HandlersBeanDefinitionParserTests {
 		List<HandshakeInterceptor> interceptors = transportService.getHandshakeInterceptors();
 		assertThat(interceptors).extracting("class").containsExactly(OriginHandshakeInterceptor.class);
 		assertThat(transportService.shouldSuppressCors()).isTrue();
-		assertThat(transportService.getAllowedOrigins().contains("https://mydomain1.com")).isTrue();
-		assertThat(transportService.getAllowedOrigins().contains("https://mydomain2.com")).isTrue();
+		assertThat(transportService.getAllowedOrigins().contains("https://mydomain1.example")).isTrue();
+		assertThat(transportService.getAllowedOrigins().contains("https://mydomain2.example")).isTrue();
 	}
 
 

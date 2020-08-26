@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,13 +247,12 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 		if (!StringUtils.hasLength(name)) {
 			return "";
 		}
+
 		StringBuilder result = new StringBuilder();
-		result.append(lowerCaseName(name.substring(0, 1)));
-		for (int i = 1; i < name.length(); i++) {
-			String s = name.substring(i, i + 1);
-			String slc = lowerCaseName(s);
-			if (!s.equals(slc)) {
-				result.append("_").append(slc);
+		for (int i = 0; i < name.length(); i++) {
+			char s = name.charAt(i);
+			if (Character.isUpperCase(s)) {
+				result.append('_').append(Character.toLowerCase(s));
 			}
 			else {
 				result.append(s);
@@ -383,9 +382,28 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * Static factory method to create a new {@code BeanPropertyRowMapper}
 	 * (with the mapped class specified only once).
 	 * @param mappedClass the class that each row should be mapped to
+	 * @see #newInstance(Class, ConversionService)
 	 */
 	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
 		return new BeanPropertyRowMapper<>(mappedClass);
+	}
+
+	/**
+	 * Static factory method to create a new {@code BeanPropertyRowMapper}
+	 * (with the required type specified only once).
+	 * @param mappedClass the class that each row should be mapped to
+	 * @param conversionService the {@link ConversionService} for binding
+	 * JDBC values to bean properties, or {@code null} for none
+	 * @since 5.2.3
+	 * @see #newInstance(Class)
+	 * @see #setConversionService
+	 */
+	public static <T> BeanPropertyRowMapper<T> newInstance(
+			Class<T> mappedClass, @Nullable ConversionService conversionService) {
+
+		BeanPropertyRowMapper<T> rowMapper = newInstance(mappedClass);
+		rowMapper.setConversionService(conversionService);
+		return rowMapper;
 	}
 
 }

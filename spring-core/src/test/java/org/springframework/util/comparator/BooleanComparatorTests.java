@@ -18,7 +18,7 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,31 +30,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Phillip Webb
  */
-public class BooleanComparatorTests {
+class BooleanComparatorTests {
 
 	@Test
-	public void shouldCompareWithTrueLow() {
+	void shouldCompareWithTrueLow() {
 		Comparator<Boolean> c = new BooleanComparator(true);
 		assertThat(c.compare(true, false)).isEqualTo(-1);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldCompareWithTrueHigh() {
+	void shouldCompareWithTrueHigh() {
 		Comparator<Boolean> c = new BooleanComparator(false);
 		assertThat(c.compare(true, false)).isEqualTo(1);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldCompareFromTrueLow() {
+	void shouldCompareFromTrueLow() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_LOW;
 		assertThat(c.compare(true, false)).isEqualTo(-1);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);
 	}
 
 	@Test
-	public void shouldCompareFromTrueHigh() {
+	void shouldCompareFromTrueHigh() {
 		Comparator<Boolean> c = BooleanComparator.TRUE_HIGH;
 		assertThat(c.compare(true, false)).isEqualTo(1);
 		assertThat(c.compare(Boolean.TRUE, Boolean.TRUE)).isEqualTo(0);

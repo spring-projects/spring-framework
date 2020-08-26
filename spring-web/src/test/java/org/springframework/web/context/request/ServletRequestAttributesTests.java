@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@ package org.springframework.web.context.request;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpSession;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -162,12 +163,12 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void skipImmutableInteger() {
-		doSkipImmutableValue(new Integer(1));
+		doSkipImmutableValue(1);
 	}
 
 	@Test
 	public void skipImmutableFloat() {
-		doSkipImmutableValue(new Float(1.1));
+		doSkipImmutableValue(1.1F);
 	}
 
 	@Test

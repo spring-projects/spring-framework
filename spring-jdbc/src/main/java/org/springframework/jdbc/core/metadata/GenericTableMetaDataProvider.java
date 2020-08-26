@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -415,8 +415,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				TableParameterMetaData meta = new TableParameterMetaData(columnName, dataType, nullable);
 				this.tableParameterMetaData.add(meta);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Retrieved meta-data: " + meta.getParameterName() + " " +
-							meta.getSqlType() + " " + meta.isNullable());
+					logger.debug("Retrieved meta-data: '" + meta.getParameterName() + "', sqlType=" +
+							meta.getSqlType() + ", nullable=" + meta.isNullable());
 				}
 			}
 		}

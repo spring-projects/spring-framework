@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 import javax.annotation.Nonnull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
@@ -32,73 +33,74 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  */
-public class AnnotationFilterTests {
+class AnnotationFilterTests {
 
 	private static final AnnotationFilter FILTER = annotationType ->
 			ObjectUtils.nullSafeEquals(annotationType, TestAnnotation.class.getName());
 
 
 	@Test
-	public void matchesAnnotationWhenMatchReturnsTrue() {
+	void matchesAnnotationWhenMatchReturnsTrue() {
 		TestAnnotation annotation = WithTestAnnotation.class.getDeclaredAnnotation(TestAnnotation.class);
 		assertThat(FILTER.matches(annotation)).isTrue();
 	}
 
 	@Test
-	public void matchesAnnotationWhenNoMatchReturnsFalse() {
+	void matchesAnnotationWhenNoMatchReturnsFalse() {
 		OtherAnnotation annotation = WithOtherAnnotation.class.getDeclaredAnnotation(OtherAnnotation.class);
 		assertThat(FILTER.matches(annotation)).isFalse();
 	}
 
 	@Test
-	public void matchesAnnotationClassWhenMatchReturnsTrue() {
+	void matchesAnnotationClassWhenMatchReturnsTrue() {
 		Class<TestAnnotation> annotationType = TestAnnotation.class;
 		assertThat(FILTER.matches(annotationType)).isTrue();
 	}
 
 	@Test
-	public void matchesAnnotationClassWhenNoMatchReturnsFalse() {
+	void matchesAnnotationClassWhenNoMatchReturnsFalse() {
 		Class<OtherAnnotation> annotationType = OtherAnnotation.class;
 		assertThat(FILTER.matches(annotationType)).isFalse();
 	}
 
 	@Test
-	public void plainWhenJavaLangAnnotationReturnsTrue() {
+	void plainWhenJavaLangAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.PLAIN.matches(Retention.class)).isTrue();
 	}
 
 	@Test
-	public void plainWhenSpringLangAnnotationReturnsTrue() {
+	void plainWhenSpringLangAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.PLAIN.matches(Nullable.class)).isTrue();
 	}
 
 	@Test
-	public void plainWhenOtherAnnotationReturnsFalse() {
+	void plainWhenOtherAnnotationReturnsFalse() {
 		assertThat(AnnotationFilter.PLAIN.matches(TestAnnotation.class)).isFalse();
 	}
 
 	@Test
-	public void javaWhenJavaLangAnnotationReturnsTrue() {
+	void javaWhenJavaLangAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.JAVA.matches(Retention.class)).isTrue();
 	}
 
 	@Test
-	public void javaWhenJavaxAnnotationReturnsTrue() {
+	void javaWhenJavaxAnnotationReturnsTrue() {
 		assertThat(AnnotationFilter.JAVA.matches(Nonnull.class)).isTrue();
 	}
 
 	@Test
-	public void javaWhenSpringLangAnnotationReturnsFalse() {
+	void javaWhenSpringLangAnnotationReturnsFalse() {
 		assertThat(AnnotationFilter.JAVA.matches(Nullable.class)).isFalse();
 	}
 
 	@Test
-	public void javaWhenOtherAnnotationReturnsFalse() {
+	void javaWhenOtherAnnotationReturnsFalse() {
 		assertThat(AnnotationFilter.JAVA.matches(TestAnnotation.class)).isFalse();
 	}
 
 	@Test
-	public void noneReturnsFalse() {
+	@SuppressWarnings("deprecation")
+	void noneReturnsFalse() {
 		assertThat(AnnotationFilter.NONE.matches(Retention.class)).isFalse();
 		assertThat(AnnotationFilter.NONE.matches(Nullable.class)).isFalse();
 		assertThat(AnnotationFilter.NONE.matches(TestAnnotation.class)).isFalse();

@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.util.Collection;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;

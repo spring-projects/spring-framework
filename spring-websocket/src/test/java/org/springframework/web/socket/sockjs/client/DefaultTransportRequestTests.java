@@ -21,8 +21,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.http.HttpHeaders;
@@ -60,7 +60,7 @@ public class DefaultTransportRequestTests {
 
 
 	@SuppressWarnings("unchecked")
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.connectCallback = mock(ListenableFutureCallback.class);
 		this.connectFuture = new SettableListenableFuture<>();

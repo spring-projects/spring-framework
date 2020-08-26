@@ -16,13 +16,12 @@
 
 package org.springframework.jmx.support;
 
-import java.net.MalformedURLException;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
@@ -32,31 +31,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
+ * Integration tests for {@link MBeanServerConnectionFactoryBean}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
+class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTests {
 
-	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + SocketUtils.findAvailableTcpPort(9800, 9900);
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + SocketUtils.findAvailableTcpPort();
 
 
-	private JMXServiceURL getJMXServiceUrl() throws MalformedURLException {
-		return new JMXServiceURL(serviceUrl);
-	}
-
-	private JMXConnectorServer getConnectorServer() throws Exception {
-		return JMXConnectorServerFactory.newJMXConnectorServer(getJMXServiceUrl(), null, getServer());
+	@Test
+	void noServiceUrl() throws Exception {
+		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
+		assertThatIllegalArgumentException()
+			.isThrownBy(bean::afterPropertiesSet)
+			.withMessage("Property 'serviceUrl' is required");
 	}
 
 	@Test
-	public void testTestValidConnection() throws Exception {
-		JMXConnectorServer connectorServer = getConnectorServer();
-		connectorServer.start();
+	void validConnection() throws Exception {
+		JMXConnectorServer connectorServer = startConnectorServer();
 
 		try {
 			MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-			bean.setServiceUrl(serviceUrl);
+			bean.setServiceUrl(this.serviceUrl);
 			bean.afterPropertiesSet();
 
 			try {
@@ -76,16 +76,9 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	}
 
 	@Test
-	public void testWithNoServiceUrl() throws Exception {
+	void lazyConnection() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		assertThatIllegalArgumentException().isThrownBy(
-				bean::afterPropertiesSet);
-	}
-
-	@Test
-	public void testTestWithLazyConnection() throws Exception {
-		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.setServiceUrl(serviceUrl);
+		bean.setServiceUrl(this.serviceUrl);
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
@@ -94,8 +87,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 
 		JMXConnectorServer connector = null;
 		try {
-			connector = getConnectorServer();
-			connector.start();
+			connector = startConnectorServer();
 			assertThat(connection.getMBeanCount()).as("Incorrect MBean count").isEqualTo(getServer().getMBeanCount());
 		}
 		finally {
@@ -107,15 +99,22 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 	}
 
 	@Test
-	public void testWithLazyConnectionAndNoAccess() throws Exception {
+	void lazyConnectionAndNoAccess() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
-		bean.setServiceUrl(serviceUrl);
+		bean.setServiceUrl(this.serviceUrl);
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
 		MBeanServerConnection connection = bean.getObject();
 		assertThat(AopUtils.isAopProxy(connection)).isTrue();
 		bean.destroy();
+	}
+
+	private JMXConnectorServer startConnectorServer() throws Exception {
+		JMXServiceURL jmxServiceUrl = new JMXServiceURL(this.serviceUrl);
+		JMXConnectorServer connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(jmxServiceUrl, null, getServer());
+		connectorServer.start();
+		return connectorServer;
 	}
 
 }

@@ -81,8 +81,8 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 
 	@Override
-	public boolean equals(Object other) {
-		return (this == other || other instanceof JtaTransactionAnnotationParser);
+	public boolean equals(@Nullable Object other) {
+		return (other instanceof JtaTransactionAnnotationParser);
 	}
 
 	@Override

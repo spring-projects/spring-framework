@@ -20,6 +20,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
@@ -27,9 +28,9 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -42,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Arjen Poutsma
  * @author Andrzej Hołowko
  */
-public class ListBasedXMLEventReaderTests {
+class ListBasedXMLEventReaderTests {
 
 	private final XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 
@@ -50,7 +51,7 @@ public class ListBasedXMLEventReaderTests {
 
 
 	@Test
-	public void standard() throws Exception {
+	void standard() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 
@@ -64,7 +65,7 @@ public class ListBasedXMLEventReaderTests {
 	}
 
 	@Test
-	public void testGetElementText() throws Exception {
+	void getElementText() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 
@@ -79,7 +80,7 @@ public class ListBasedXMLEventReaderTests {
 	}
 
 	@Test
-	public void testGetElementTextThrowsExceptionAtWrongPosition() throws Exception {
+	void getElementTextThrowsExceptionAtWrongPosition() throws Exception {
 		String xml = "<foo><bar>baz</bar></foo>";
 		List<XMLEvent> events = readEvents(xml);
 

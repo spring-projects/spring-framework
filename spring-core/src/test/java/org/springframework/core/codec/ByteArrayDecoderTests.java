@@ -19,11 +19,12 @@ package org.springframework.core.codec;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,14 +32,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Arjen Poutsma
  */
-public class ByteArrayDecoderTests extends AbstractDecoderTestCase<ByteArrayDecoder> {
+class ByteArrayDecoderTests extends AbstractDecoderTests<ByteArrayDecoder> {
 
 	private final byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 
 	private final byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 
 
-	public ByteArrayDecoderTests() {
+	ByteArrayDecoderTests() {
 		super(new ByteArrayDecoder());
 	}
 

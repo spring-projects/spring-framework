@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.jmx.export.annotation;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -31,30 +31,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AnnotationLazyInitMBeanTests {
+class AnnotationLazyInitMBeanTests {
 
 	@Test
-	public void lazyNaming() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
-		try {
+	void lazyNaming() throws Exception {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertThat(server.getObjectInstance(oname)).isNotNull();
 			String name = (String) server.getAttribute(oname, "Name");
 			assertThat(name).as("Invalid name returned").isEqualTo("TEST");
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
-	public void lazyAssembling() throws Exception {
+	void lazyAssembling() throws Exception {
 		System.setProperty("domain", "bean");
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
-		try {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
@@ -79,23 +72,17 @@ public class AnnotationLazyInitMBeanTests {
 		}
 		finally {
 			System.clearProperty("domain");
-			ctx.close();
 		}
 	}
 
 	@Test
-	public void componentScan() throws Exception {
-		ConfigurableApplicationContext ctx =
-				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml");
-		try {
+	void componentScan() throws Exception {
+		try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml")) {
 			MBeanServer server = (MBeanServer) ctx.getBean("server");
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertThat(server.getObjectInstance(oname)).isNotNull();
 			String name = (String) server.getAttribute(oname, "Name");
 			assertThat(name).isNull();
-		}
-		finally {
-			ctx.close();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import org.springframework.jdbc.Customer;
@@ -95,7 +98,7 @@ public class NamedParameterJdbcTemplateTests {
 	private NamedParameterJdbcTemplate namedParameterTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);
@@ -150,7 +153,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).close();
 	}
 
-	@Ignore("SPR-16340")
+	@Disabled("SPR-16340")
 	@Test
 	public void testExecuteArray() throws SQLException {
 		given(preparedStatement.executeUpdate()).willReturn(1);
@@ -236,6 +239,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -258,6 +262,7 @@ public class NamedParameterJdbcTemplateTests {
 		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -284,6 +289,7 @@ public class NamedParameterJdbcTemplateTests {
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -306,6 +312,7 @@ public class NamedParameterJdbcTemplateTests {
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -325,12 +332,14 @@ public class NamedParameterJdbcTemplateTests {
 					cust.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust;
 				});
+
 		assertThat(customers.size()).isEqualTo(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -348,10 +357,12 @@ public class NamedParameterJdbcTemplateTests {
 					cust.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust;
 				});
+
 		assertThat(customers.size()).isEqualTo(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -364,6 +375,7 @@ public class NamedParameterJdbcTemplateTests {
 
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
+
 		Customer cust = namedParameterTemplate.queryForObject(SELECT_NAMED_PARAMETERS, params,
 				(rs, rownum) -> {
 					Customer cust1 = new Customer();
@@ -371,11 +383,46 @@ public class NamedParameterJdbcTemplateTests {
 					cust1.setForename(rs.getString(COLUMN_NAMES[1]));
 					return cust1;
 				});
+
 		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
 		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
 		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
+		verify(preparedStatement).close();
+		verify(connection).close();
+	}
+
+	@Test
+	public void testQueryForStreamWithRowMapper() throws SQLException {
+		given(resultSet.next()).willReturn(true, false);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+
+		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
+		params.put("country", "UK");
+		AtomicInteger count = new AtomicInteger();
+
+		try (Stream<Customer> s = namedParameterTemplate.queryForStream(SELECT_NAMED_PARAMETERS, params,
+				(rs, rownum) -> {
+					Customer cust1 = new Customer();
+					cust1.setId(rs.getInt(COLUMN_NAMES[0]));
+					cust1.setForename(rs.getString(COLUMN_NAMES[1]));
+					return cust1;
+				})) {
+			s.forEach(cust -> {
+				count.incrementAndGet();
+				assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
+				assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
+			});
+		}
+
+		assertThat(count.get()).isEqualTo(1);
+		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
+		verify(preparedStatement).setObject(1, 1, Types.DECIMAL);
+		verify(preparedStatement).setString(2, "UK");
+		verify(resultSet).close();
 		verify(preparedStatement).close();
 		verify(connection).close();
 	}
@@ -475,11 +522,12 @@ public class NamedParameterJdbcTemplateTests {
 	@Test
 	public void testBatchUpdateWithInClause() throws Exception {
 		@SuppressWarnings("unchecked")
-		Map<String, Object>[] parameters = new Map[2];
+		Map<String, Object>[] parameters = new Map[3];
 		parameters[0] = Collections.singletonMap("ids", Arrays.asList(1, 2));
-		parameters[1] = Collections.singletonMap("ids", Arrays.asList(3, 4));
+		parameters[1] = Collections.singletonMap("ids", Arrays.asList("3", "4"));
+		parameters[2] = Collections.singletonMap("ids", (Iterable<Integer>) () -> Arrays.asList(5, 6).iterator());
 
-		final int[] rowsAffected = new int[] {1, 2};
+		final int[] rowsAffected = new int[] {1, 2, 3};
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
@@ -491,7 +539,7 @@ public class NamedParameterJdbcTemplateTests {
 				parameters
 		);
 
-		assertThat(actualRowsAffected.length).as("executed 2 updates").isEqualTo(2);
+		assertThat(actualRowsAffected.length).as("executed 3 updates").isEqualTo(3);
 
 		InOrder inOrder = inOrder(preparedStatement);
 
@@ -499,8 +547,12 @@ public class NamedParameterJdbcTemplateTests {
 		inOrder.verify(preparedStatement).setObject(2, 2);
 		inOrder.verify(preparedStatement).addBatch();
 
-		inOrder.verify(preparedStatement).setObject(1, 3);
-		inOrder.verify(preparedStatement).setObject(2, 4);
+		inOrder.verify(preparedStatement).setString(1, "3");
+		inOrder.verify(preparedStatement).setString(2, "4");
+		inOrder.verify(preparedStatement).addBatch();
+
+		inOrder.verify(preparedStatement).setObject(1, 5);
+		inOrder.verify(preparedStatement).setObject(2, 6);
 		inOrder.verify(preparedStatement).addBatch();
 
 		inOrder.verify(preparedStatement, atLeastOnce()).close();

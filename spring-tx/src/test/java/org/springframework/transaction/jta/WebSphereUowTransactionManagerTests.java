@@ -23,10 +23,10 @@ import javax.transaction.UserTransaction;
 import com.ibm.wsspi.uow.UOWAction;
 import com.ibm.wsspi.uow.UOWException;
 import com.ibm.wsspi.uow.UOWManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.TransactionDefinition;

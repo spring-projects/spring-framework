@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
-	private DataBufferFactory defaultBufferFactory = new DefaultDataBufferFactory();
-
 
 	protected AbstractEncoderMethodReturnValueHandler(List<Encoder<?>> encoders, ReactiveAdapterRegistry registry) {
 		Assert.notEmpty(encoders, "At least one Encoder is required");
@@ -114,7 +112,8 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 
 		DataBufferFactory bufferFactory = (DataBufferFactory) message.getHeaders()
-				.getOrDefault(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER, this.defaultBufferFactory);
+				.getOrDefault(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER,
+						DefaultDataBufferFactory.sharedInstance);
 
 		MimeType mimeType = (MimeType) message.getHeaders().get(MessageHeaders.CONTENT_TYPE);
 		Flux<DataBuffer> encodedContent = encodeContent(
@@ -154,7 +153,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		}
 
 		Encoder<?> encoder = getEncoder(elementType, mimeType);
-		return Flux.from((Publisher) publisher).map(value ->
+		return Flux.from(publisher).map(value ->
 				encodeValue(value, elementType, encoder, bufferFactory, mimeType, hints));
 	}
 
@@ -225,7 +224,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(@Nullable Method method) {
+		private static boolean isSuspend(@Nullable Method method) {
 			if (method == null) {
 				return false;
 			}

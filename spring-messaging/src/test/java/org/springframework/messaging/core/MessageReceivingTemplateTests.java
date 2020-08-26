@@ -18,8 +18,8 @@ package org.springframework.messaging.core;
 
 import java.io.Writer;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.messaging.Message;
@@ -42,7 +42,7 @@ public class MessageReceivingTemplateTests {
 	private TestMessagingTemplate template;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.template = new TestMessagingTemplate();
 	}

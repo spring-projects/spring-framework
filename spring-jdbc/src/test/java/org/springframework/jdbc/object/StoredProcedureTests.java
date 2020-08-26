@@ -26,11 +26,12 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -73,7 +74,7 @@ public class StoredProcedureTests {
 
 	private boolean verifyClosedAfter = true;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dataSource = mock(DataSource.class);
 		connection = mock(Connection.class);
@@ -82,7 +83,7 @@ public class StoredProcedureTests {
 		given(callableStatement.getConnection()).willReturn(connection);
 	}
 
-	@After
+	@AfterEach
 	public void verifyClosed() throws Exception {
 		if (verifyClosedAfter) {
 			verify(callableStatement).close();

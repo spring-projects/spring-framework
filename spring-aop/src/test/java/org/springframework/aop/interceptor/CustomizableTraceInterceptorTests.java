@@ -18,7 +18,7 @@ package org.springframework.aop.interceptor;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -136,7 +136,7 @@ public class CustomizableTraceInterceptorTests {
 
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 		given(methodInvocation.getThis()).willReturn(this);
-		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", new Long(2)});
+		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", 2L});
 		given(methodInvocation.proceed()).willReturn("Hello!");
 
 		Log log = mock(Log.class);

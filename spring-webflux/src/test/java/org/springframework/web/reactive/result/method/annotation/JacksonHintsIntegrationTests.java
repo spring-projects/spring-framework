@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,13 +35,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sebastien Deleuze
  */
-public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrationTests {
+class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -53,54 +53,70 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 	}
 
 
-	@Test
-	public void jsonViewResponse() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\"}";
 		assertThat(performGet("/response/raw", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void jsonViewWithMonoResponse() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewWithMonoResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\"}";
 		assertThat(performGet("/response/mono", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test  // SPR-16098
-	public void jsonViewWithMonoResponseEntity() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-16098
+	void jsonViewWithMonoResponseEntity(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\"}";
 		assertThat(performGet("/response/entity", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void jsonViewWithFluxResponse() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewWithFluxResponse(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "[{\"withView1\":\"with\"},{\"withView1\":\"with\"}]";
 		assertThat(performGet("/response/flux", MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void jsonViewWithRequest() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewWithRequest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertThat(performPost("/request/raw", MediaType.APPLICATION_JSON,
 				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void jsonViewWithMonoRequest() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewWithMonoRequest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertThat(performPost("/request/mono", MediaType.APPLICATION_JSON,
 				new JacksonViewBean("with", "with", "without"), MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test  // SPR-16098
-	public void jsonViewWithEntityMonoRequest() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-16098
+	void jsonViewWithEntityMonoRequest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}";
 		assertThat(performPost("/request/entity/mono", MediaType.APPLICATION_JSON,
 				new JacksonViewBean("with", "with", "without"),
 				MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test  // SPR-16098
-	public void jsonViewWithEntityFluxRequest() throws Exception {
+	@ParameterizedHttpServerTest  // SPR-16098
+	void jsonViewWithEntityFluxRequest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "[" +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";
@@ -110,8 +126,10 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 				MediaType.APPLICATION_JSON, String.class).getBody()).isEqualTo(expected);
 	}
 
-	@Test
-	public void jsonViewWithFluxRequest() throws Exception {
+	@ParameterizedHttpServerTest
+	void jsonViewWithFluxRequest(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		String expected = "[" +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}," +
 				"{\"withView1\":\"with\",\"withView2\":null,\"withoutView\":null}]";

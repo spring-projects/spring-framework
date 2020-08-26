@@ -19,7 +19,7 @@ package org.springframework.core;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public class NestedExceptionTests {
+class NestedExceptionTests {
 
 	@Test
-	public void nestedRuntimeExceptionWithNoRootCause() {
+	void nestedRuntimeExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedRuntimeException nex = new NestedRuntimeException(mesg) {};
@@ -48,7 +48,7 @@ public class NestedExceptionTests {
 	}
 
 	@Test
-	public void nestedRuntimeExceptionWithRootCause() {
+	void nestedRuntimeExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMsg = "this is the obscure message of the root cause";
 		Exception rootCause = new Exception(rootCauseMsg);
@@ -69,7 +69,7 @@ public class NestedExceptionTests {
 	}
 
 	@Test
-	public void nestedCheckedExceptionWithNoRootCause() {
+	void nestedCheckedExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nex = new NestedCheckedException(mesg) {};
@@ -86,7 +86,7 @@ public class NestedExceptionTests {
 	}
 
 	@Test
-	public void nestedCheckedExceptionWithRootCause() {
+	void nestedCheckedExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMsg = "this is the obscure message of the root cause";
 		Exception rootCause = new Exception(rootCauseMsg);

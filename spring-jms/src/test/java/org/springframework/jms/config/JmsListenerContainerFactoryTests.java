@@ -21,7 +21,7 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.transaction.TransactionManager;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.jms.StubConnectionFactory;
