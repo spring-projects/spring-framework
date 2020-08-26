@@ -17,22 +17,21 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.json.Json;
-import kotlinx.serialization.json.JsonConfiguration;
-import kotlinx.serialization.json.JsonDecodingException;
-import kotlinx.serialization.modules.EmptyModule;
 import org.jetbrains.annotations.NotNull;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.http.converter.KotlinSerializationResolver;
+import org.springframework.http.converter.KotlinSerializationTypeResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
@@ -45,11 +44,11 @@ import org.springframework.util.StreamUtils;
  *
  * @author Andreas Ahlenstorf
  */
-public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+public class KotlinSerializationJsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private final KotlinSerializationResolver resolver = new KotlinSerializationResolver();
+	private final KotlinSerializationTypeResolver resolver = new KotlinSerializationTypeResolver();
 
 	private final Json json;
 
@@ -57,7 +56,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 	 * Construct a new {@code KotlinSerializationJsonHttpMessageConverter} with default configuration.
 	 */
 	public KotlinSerializationJsonHttpMessageConverter() {
-		this(new Json(JsonConfiguration.getDefault(), EmptyModule.INSTANCE));
+		this(Json.Default);
 	}
 
 	/**
@@ -85,13 +84,22 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 			@NotNull Class<?> clazz,
 			@NotNull HttpInputMessage inputMessage
 	) throws IOException, HttpMessageNotReadableException {
+		return this.read(clazz, null, inputMessage);
+	}
+
+	@Override
+	public Object read(
+			Type type,
+			@Nullable Class<?> contextClass,
+			HttpInputMessage inputMessage
+	) throws IOException, HttpMessageNotReadableException {
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		String jsonText = StreamUtils.copyToString(inputMessage.getBody(), getCharsetToUse(contentType));
 
 		try {
-			return this.json.parse(this.resolver.resolve(clazz), jsonText);
+			return this.json.decodeFromString(this.resolver.resolve(type), jsonText);
 		}
-		catch (JsonDecodingException ex) {
+		catch (SerializationException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
@@ -102,10 +110,27 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractHttpMes
 			@NotNull HttpOutputMessage outputMessage
 	) throws HttpMessageNotWritableException {
 		try {
-			String json = this.json.stringify(this.resolver.resolve(o.getClass()), o);
+			this.writeInternal(o, o.getClass(), outputMessage);
+		}
+		catch (IOException ex) {
+			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
+		}
+	}
+
+	@Override
+	protected void writeInternal(
+			Object o,
+			@Nullable Type type,
+			HttpOutputMessage outputMessage
+	) throws IOException, HttpMessageNotWritableException {
+		try {
+			String json = this.json.encodeToString(this.resolver.resolve(type), o);
 			MediaType contentType = outputMessage.getHeaders().getContentType();
 			outputMessage.getBody().write(json.getBytes(getCharsetToUse(contentType)));
 			outputMessage.getBody().flush();
+		}
+		catch (IOException ex) {
+			throw ex;
 		}
 		catch (Exception ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);

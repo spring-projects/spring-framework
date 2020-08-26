@@ -25,6 +25,8 @@ import org.springframework.http.MockHttpInputMessage
 import org.springframework.http.MockHttpOutputMessage
 import org.springframework.http.converter.HttpMessageNotReadableException
 import java.nio.charset.StandardCharsets
+import kotlin.reflect.javaType
+import kotlin.reflect.typeOf
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.
@@ -36,27 +38,27 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	private val converter = KotlinSerializationJsonHttpMessageConverter()
 
 	@Test
-	internal fun canReadJson() {
+	fun canReadJson() {
 		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(SerializableBean::class.java, MediaType.APPLICATION_PDF)).isFalse()
 		assertThat(converter.canRead(String::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(NotSerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
-		// By default, kotlin.serialization cannot write generics. This should change in the future which is going to
-		// require new tests.
-		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canRead(List::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canRead(Set::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(List::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(Set::class.java, MediaType.APPLICATION_JSON)).isTrue()
 	}
 
 	@Test
 	fun canWriteJson() {
 		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(SerializableBean::class.java, MediaType.APPLICATION_PDF)).isFalse()
 		assertThat(converter.canWrite(String::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(NotSerializableBean::class.java, MediaType.APPLICATION_JSON)).isFalse()
 
-		// By default, kotlin.serialization cannot write generics. This should change in the future which is going to
-		// require new tests.
-		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_JSON)).isFalse()
-		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_JSON)).isFalse()
+		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_JSON)).isTrue()
 	}
 
 	@Test
@@ -136,7 +138,43 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	}
 
 	@Test
-	internal fun readObjectInUtf16() {
+	@Suppress("UNCHECKED_CAST")
+	@ExperimentalStdlibApi
+	fun readGenericCollection() {
+		val body = """
+			[
+				{
+					"bytes": [
+						1,
+						2
+					],
+					"array": [
+						"Foo",
+						"Bar"
+					],
+					"number": 42,
+					"string": "Foo",
+					"bool": true,
+					"fraction": 42
+				}
+			]
+		""".trimIndent()
+		val inputMessage = MockHttpInputMessage(body.toByteArray(charset("UTF-8")))
+		inputMessage.headers.contentType = MediaType.APPLICATION_JSON
+		val result = converter.read(typeOf<List<SerializableBean>>().javaType, null, inputMessage)
+				as List<SerializableBean>
+
+		assertThat(result).hasSize(1)
+		assertThat(result[0].bytes).containsExactly(0x1, 0x2)
+		assertThat(result[0].array).containsExactly("Foo", "Bar")
+		assertThat(result[0].number).isEqualTo(42)
+		assertThat(result[0].string).isEqualTo("Foo")
+		assertThat(result[0].bool).isTrue()
+		assertThat(result[0].fraction).isEqualTo(42.0f)
+	}
+
+	@Test
+	fun readObjectInUtf16() {
 		val body = "\"H\u00e9llo W\u00f6rld\""
 		val inputMessage = MockHttpInputMessage(body.toByteArray(StandardCharsets.UTF_16BE))
 		inputMessage.headers.contentType = MediaType("application", "json", StandardCharsets.UTF_16BE)
@@ -147,7 +185,7 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	}
 
 	@Test
-	internal fun readFailsOnInvalidJson() {
+	fun readFailsOnInvalidJson() {
 		val body = """
 			this is an invalid JSON document
 		""".trimIndent()
@@ -160,7 +198,7 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	}
 
 	@Test
-	internal fun writeObject() {
+	fun writeObject() {
 		val outputMessage = MockHttpOutputMessage()
 		val serializableBean = SerializableBean(byteArrayOf(0x1, 0x2), arrayOf("Foo", "Bar"), 42, "Foo", true, 42.0f)
 
@@ -179,7 +217,7 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	}
 
 	@Test
-	internal fun writeArrayOfObjects() {
+	fun writeArrayOfObjects() {
 		val outputMessage = MockHttpOutputMessage()
 		val serializableBean = SerializableBean(byteArrayOf(0x1, 0x2), arrayOf("Foo", "Bar"), 42, "Foo", true, 42.0f)
 		val expectedJson = """
@@ -195,7 +233,25 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 	}
 
 	@Test
-	internal fun writeObjectInUtf16() {
+	@ExperimentalStdlibApi
+	fun writeGenericCollection() {
+		val outputMessage = MockHttpOutputMessage()
+		val serializableBean = SerializableBean(byteArrayOf(0x1, 0x2), arrayOf("Foo", "Bar"), 42, "Foo", true, 42.0f)
+		val expectedJson = """
+			[{"bytes":[1,2],"array":["Foo","Bar"],"number":42,"string":"Foo","bool":true,"fraction":42.0}]
+		""".trimIndent()
+
+		this.converter.write(arrayListOf(serializableBean), typeOf<List<SerializableBean>>().javaType, null,
+				outputMessage)
+
+		val result = outputMessage.getBodyAsString(StandardCharsets.UTF_8)
+
+		assertThat(outputMessage.headers).containsEntry("Content-Type", listOf("application/json"))
+		assertThat(result).isEqualTo(expectedJson)
+	}
+
+	@Test
+	fun writeObjectInUtf16() {
 		val outputMessage = MockHttpOutputMessage()
 		val utf16 = "H\u00e9llo W\u00f6rld"
 		val contentType = MediaType("application", "json", StandardCharsets.UTF_16BE)
@@ -218,4 +274,6 @@ class KotlinSerializationJsonHttpMessageConverterTest {
 			val bool: Boolean,
 			val fraction: Float
 	)
+
+	data class NotSerializableBean(val string: String)
 }

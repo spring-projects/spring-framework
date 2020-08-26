@@ -16,20 +16,21 @@
 
 package org.springframework.http.converter;
 
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import kotlinx.serialization.JvmResolvingKt;
 import kotlinx.serialization.KSerializer;
+import kotlinx.serialization.SerializersKt;
 
 /**
  * Caching resolver for kotlinx.serialization serializers.
  *
  * @author Andreas Ahlenstorf
  */
-public class KotlinSerializationResolver {
+public class KotlinSerializationTypeResolver {
 
-	private static final Map<Class<?>, KSerializer<Object>> RESOLVER_CACHE = new LinkedHashMap<>();
+	private static final Map<Type, KSerializer<Object>> RESOLVER_CACHE = new LinkedHashMap<>();
 
 	/**
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type using
@@ -42,12 +43,12 @@ public class KotlinSerializationResolver {
 	 * @return resolved serializer for the given type.
 	 * @throws RuntimeException if no serializer supporting the given type can be found.
 	 */
-	public synchronized KSerializer<Object> resolve(Class<?> type) {
+	public synchronized KSerializer<Object> resolve(Type type) {
 		KSerializer<Object> cachedSerializer = RESOLVER_CACHE.get(type);
 		if (cachedSerializer != null) {
 			return cachedSerializer;
 		}
-		KSerializer<Object> resolvedSerializer = JvmResolvingKt.serializerByTypeToken(type);
+		KSerializer<Object> resolvedSerializer = SerializersKt.serializer(type);
 		RESOLVER_CACHE.put(type, resolvedSerializer);
 		return resolvedSerializer;
 	}
