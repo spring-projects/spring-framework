@@ -48,6 +48,18 @@ public final class ContentDisposition {
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
 
+	/**
+	 * The {@literal attachment} content-disposition type.
+	 */
+	private static final String ATTACHMENT = "attachment";
+	/**
+	 * The {@literal form-data} content-disposition type.
+	 */
+	private static final String FORM_DATA = "form-data";
+	/**
+	 * The {@literal inline} content-disposition type.
+	 */
+	private static final String INLINE = "inline";
 
 	@Nullable
 	private final String type;
@@ -174,6 +186,29 @@ public final class ContentDisposition {
 		return this.readDate;
 	}
 
+	/**
+	 * Return whether the {@link #getType() type} is {@literal attachment}.
+	 * @since 5.3
+	 */
+	public boolean isAttachment() {
+		return ATTACHMENT.equals(this.type);
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal form-data}.
+	 * @since 5.3
+	 */
+	public boolean isFormData() {
+		return FORM_DATA.equals(this.type);
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal inline}.
+	 * @since 5.3
+	 */
+	public boolean isInline() {
+		return INLINE.equals(this.type);
+	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -262,6 +297,36 @@ public final class ContentDisposition {
 	 */
 	public static Builder builder(String type) {
 		return new BuilderImpl(type);
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} with
+	 * the {@link #ATTACHMENT attachment} type.
+	 * @return the builder
+	 * @since 5.3
+	 */
+	public static Builder attachment() {
+		return builder(ATTACHMENT);
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} with
+	 * the {@link #FORM_DATA form-data} type.
+	 * @return the builder
+	 * @since 5.3
+	 */
+	public static Builder formData() {
+		return builder(FORM_DATA);
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} with
+	 * the {@link #INLINE inline} type.
+	 * @return the builder
+	 * @since 5.3
+	 */
+	public static Builder inline() {
+		return builder(INLINE);
 	}
 
 	/**
