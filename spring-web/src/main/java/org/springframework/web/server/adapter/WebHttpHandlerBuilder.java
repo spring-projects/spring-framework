@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -97,6 +98,9 @@ public final class WebHttpHandlerBuilder {
 
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
+
+	@Nullable
+	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
 
 
 	/**
@@ -344,6 +348,31 @@ public final class WebHttpHandlerBuilder {
 		return (this.forwardedHeaderTransformer != null);
 	}
 
+	/**
+	 * Configure a {@link Function} to decorate the {@link HttpHandler} returned
+	 * by this builder which effectively wraps the entire
+	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
+	 * processing chain. This provides access to the request and response before
+	 * the entire chain and likewise the ability to observe the result of
+	 * the entire chain.
+	 * @param handlerDecorator the decorator to apply
+	 * @since 5.1
+	 */
+	public WebHttpHandlerBuilder httpHandlerDecorator(Function<HttpHandler, HttpHandler> handlerDecorator) {
+		this.httpHandlerDecorator = (this.httpHandlerDecorator != null ?
+				handlerDecorator.andThen(this.httpHandlerDecorator) : handlerDecorator);
+		return this;
+	}
+
+	/**
+	 * Whether a {@code ForwardedHeaderTransformer} is configured or not, either
+	 * detected from an {@code ApplicationContext} or explicitly configured via
+	 * {@link #forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
+	 * @since 5.1
+	 */
+	public boolean hasHttpHandlerDecorator() {
+		return (this.httpHandlerDecorator != null);
+	}
 
 	/**
 	 * Build the {@link HttpHandler}.
@@ -371,7 +400,7 @@ public final class WebHttpHandlerBuilder {
 		}
 		adapted.afterPropertiesSet();
 
-		return adapted;
+		return (this.httpHandlerDecorator != null ? this.httpHandlerDecorator.apply(adapted) : adapted);
 	}
 
 	/**
