@@ -838,14 +838,14 @@ public interface WebTestClient {
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Matcher<B> matcher);
+		<T extends S> T value(Matcher<? super B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, e.g. extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher);
+		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.

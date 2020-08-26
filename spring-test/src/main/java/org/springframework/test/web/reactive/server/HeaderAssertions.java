@@ -160,7 +160,7 @@ public class HeaderAssertions {
 	 * @param matcher the matcher to use
 	 * @since 5.3
 	 */
-	public WebTestClient.ResponseSpec values(String name, Matcher<Iterable<String>> matcher) {
+	public WebTestClient.ResponseSpec values(String name, Matcher<? super Iterable<String>> matcher) {
 		List<String> values = getHeaders().get(name);
 		this.exchangeResult.assertWithDiagnostics(() -> {
 			String message = getMessage(name);

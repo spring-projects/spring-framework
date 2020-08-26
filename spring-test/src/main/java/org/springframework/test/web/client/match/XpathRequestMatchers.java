@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class XpathRequestMatchers {
 	 * Apply the XPath and assert the number of nodes found with the given
 	 * {@code Matcher<Integer>}.
 	 */
-	public RequestMatcher nodeCount(Matcher<Integer> matcher) {
+	public RequestMatcher nodeCount(Matcher<? super Integer> matcher) {
 		return (XpathRequestMatcher) request ->
 				this.xpathHelper.assertNodeCount(request.getBodyAsBytes(), DEFAULT_ENCODING, matcher);
 	}

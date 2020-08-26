@@ -422,13 +422,13 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Matcher<B> matcher) {
+		public <T extends S> T value(Matcher<? super B> matcher) {
 			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
 			return self();
 		}
 
 		@Override
-		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher) {
+		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
 				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);
