@@ -81,14 +81,17 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 	 * @see #convertKey(String)
 	 */
 	public LinkedCaseInsensitiveMap(@Nullable Locale locale) {
-		this(16, locale);
+		this(12, locale);  // equivalent to LinkedHashMap's initial capacity of 16
 	}
 
 	/**
 	 * Create a new LinkedCaseInsensitiveMap that wraps a {@link LinkedHashMap}
-	 * with an initial capacity that can accommodate the given number of elements,
+	 * with an initial capacity that can accommodate the specified number of
+	 * elements without any immediate resize/rehash operations to be expected,
 	 * storing case-insensitive keys according to the default Locale (in lower case).
-	 * @param expectedSize the expected number of elements
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @see CollectionUtils#newHashMap(int)
 	 * @see #convertKey(String)
 	 */
 	public LinkedCaseInsensitiveMap(int expectedSize) {
@@ -97,10 +100,13 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	/**
 	 * Create a new LinkedCaseInsensitiveMap that wraps a {@link LinkedHashMap}
-	 * with an initial capacity that can accommodate the given number of elements,
+	 * with an initial capacity that can accommodate the specified number of
+	 * elements without any immediate resize/rehash operations to be expected,
 	 * storing case-insensitive keys according to the given Locale (in lower case).
-	 * @param expectedSize the expected number of elements
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
 	 * @param locale the Locale to use for case-insensitive key conversion
+	 * @see CollectionUtils#newHashMap(int)
 	 * @see #convertKey(String)
 	 */
 	public LinkedCaseInsensitiveMap(int expectedSize, @Nullable Locale locale) {

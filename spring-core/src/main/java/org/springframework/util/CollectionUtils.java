@@ -73,33 +73,36 @@ public abstract class CollectionUtils {
 
 	/**
 	 * Instantiate a new {@link HashMap} with an initial capacity
-	 * that can accommodate the given number of elements.
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
 	 * <p>This differs from the regular {@link HashMap} constructor
 	 * which takes an initial capacity relative to a load factor
 	 * but is effectively aligned with the JDK's
 	 * {@link java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)}.
-	 * @param expectedSize the expected number of elements
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
 	 * @since 5.3
 	 * @see #newLinkedHashMap(int)
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
-		return new HashMap((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+		return new HashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
 	 * Instantiate a new {@link LinkedHashMap} with an initial capacity
-	 * that can accommodate the given number of elements.
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
 	 * <p>This differs from the regular {@link LinkedHashMap} constructor
 	 * which takes an initial capacity relative to a load factor but is
 	 * aligned with Spring's own {@link LinkedCaseInsensitiveMap} and
 	 * {@link LinkedMultiValueMap} constructor semantics as of 5.3.
-	 * @param expectedSize the expected number of elements
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
 	 * @since 5.3
+	 * @see #newHashMap(int)
 	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
-		return new LinkedHashMap((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+		return new LinkedHashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
 	}
 
 	/**

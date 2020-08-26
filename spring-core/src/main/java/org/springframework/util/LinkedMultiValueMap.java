@@ -49,8 +49,11 @@ public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implem
 
 	/**
 	 * Create a new LinkedMultiValueMap that wraps a {@link LinkedHashMap}
-	 * with an initial capacity that can accommodate the given number of elements.
-	 * @param expectedSize the expected number of elements
+	 * with an initial capacity that can accommodate the specified number of
+	 * elements without any immediate resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @see CollectionUtils#newLinkedHashMap(int)
 	 */
 	public LinkedMultiValueMap(int expectedSize) {
 		super(CollectionUtils.newLinkedHashMap(expectedSize));
