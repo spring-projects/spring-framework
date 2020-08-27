@@ -178,7 +178,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * a non-classpath location.
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
-		this.cacheMillis = (cacheSeconds * 1000);
+		this.cacheMillis = cacheSeconds * 1000L;
 	}
 
 	/**
