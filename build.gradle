@@ -117,7 +117,7 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.20.Final"
+			dependency "org.hibernate:hibernate-core:5.4.21.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.5.Final"
 			dependency "org.webjars:webjars-locator-core:0.45"
 			dependency "org.webjars:underscorejs:1.8.3"
@@ -202,7 +202,7 @@ configure(allprojects) { project ->
 			dependency("net.sourceforge.htmlunit:htmlunit:2.43.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.43.0") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.43.1") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
