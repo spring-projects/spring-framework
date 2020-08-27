@@ -220,7 +220,7 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
+		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata, beanName);
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 
 		if (metadata.isStatic()) {
@@ -285,7 +285,7 @@ class ConfigurationClassBeanDefinitionReader {
 					new BeanDefinitionHolder(beanDef, beanName), this.registry,
 					proxyMode == ScopedProxyMode.TARGET_CLASS);
 			beanDefToRegister = new ConfigurationClassBeanDefinition(
-					(RootBeanDefinition) proxyDef.getBeanDefinition(), configClass, metadata);
+					(RootBeanDefinition) proxyDef.getBeanDefinition(), configClass, metadata, beanName);
 		}
 
 		if (logger.isTraceEnabled()) {
@@ -410,24 +410,31 @@ class ConfigurationClassBeanDefinitionReader {
 
 		private final MethodMetadata factoryMethodMetadata;
 
-		public ConfigurationClassBeanDefinition(ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
+		private final String derivedBeanName;
+
+		public ConfigurationClassBeanDefinition(
+				ConfigurationClass configClass, MethodMetadata beanMethodMetadata, String derivedBeanName) {
+
 			this.annotationMetadata = configClass.getMetadata();
 			this.factoryMethodMetadata = beanMethodMetadata;
+			this.derivedBeanName = derivedBeanName;
 			setResource(configClass.getResource());
 			setLenientConstructorResolution(false);
 		}
 
-		public ConfigurationClassBeanDefinition(
-				RootBeanDefinition original, ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
+		public ConfigurationClassBeanDefinition(RootBeanDefinition original,
+				ConfigurationClass configClass, MethodMetadata beanMethodMetadata, String derivedBeanName) {
 			super(original);
 			this.annotationMetadata = configClass.getMetadata();
 			this.factoryMethodMetadata = beanMethodMetadata;
+			this.derivedBeanName = derivedBeanName;
 		}
 
 		private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
 			super(original);
 			this.annotationMetadata = original.annotationMetadata;
 			this.factoryMethodMetadata = original.factoryMethodMetadata;
+			this.derivedBeanName = original.derivedBeanName;
 		}
 
 		@Override
@@ -443,7 +450,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 		@Override
 		public boolean isFactoryMethod(Method candidate) {
-			return (super.isFactoryMethod(candidate) && BeanAnnotationHelper.isBeanAnnotated(candidate));
+			return (super.isFactoryMethod(candidate) && BeanAnnotationHelper.isBeanAnnotated(candidate) &&
+					BeanAnnotationHelper.determineBeanNameFor(candidate).equals(this.derivedBeanName));
 		}
 
 		@Override

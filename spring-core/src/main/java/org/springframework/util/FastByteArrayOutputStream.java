@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
  * its sibling {@link ResizableByteArrayOutputStream}.
  *
  * <p>Unlike {@link java.io.ByteArrayOutputStream}, this implementation is backed
- * by a {@link java.util.LinkedList} of {@code byte[]} instead of 1 constantly
+ * by an {@link java.util.ArrayDeque} of {@code byte[]} instead of 1 constantly
  * resizing {@code byte[]}. It does not copy buffers when it gets expanded.
  *
  * <p>The initial buffer is only created when the stream is first written.
@@ -290,7 +290,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Create a new buffer and store it in the LinkedList
+	 * Create a new buffer and store it in the ArrayDeque.
 	 * <p>Adds a new buffer that can store at least {@code minCapacity} bytes.
 	 */
 	private void addBuffer(int minCapacity) {
