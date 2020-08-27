@@ -292,7 +292,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Create a new buffer and store it in the LinkedList
+	 * Create a new buffer and store it in the LinkedList.
 	 * <p>Adds a new buffer that can store at least {@code minCapacity} bytes.
 	 */
 	private void addBuffer(int minCapacity) {

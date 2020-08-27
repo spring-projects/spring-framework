@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	private RootBeanDefinition parseAttributeSource(Element attrEle, ParserContext parserContext) {
 		List<Element> methods = DomUtils.getChildElementsByTagName(attrEle, METHOD_ELEMENT);
 		ManagedMap<TypedStringValue, RuleBasedTransactionAttribute> transactionAttributeMap =
-			new ManagedMap<TypedStringValue, RuleBasedTransactionAttribute>(methods.size());
+				new ManagedMap<TypedStringValue, RuleBasedTransactionAttribute>(methods.size());
 		transactionAttributeMap.setSource(parserContext.extractSource(attrEle));
 
 		for (Element methodEle : methods) {
@@ -124,17 +124,17 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 				}
 			}
 			if (StringUtils.hasText(readOnly)) {
-				attribute.setReadOnly(Boolean.valueOf(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
+				attribute.setReadOnly(Boolean.parseBoolean(methodEle.getAttribute(READ_ONLY_ATTRIBUTE)));
 			}
 
 			List<RollbackRuleAttribute> rollbackRules = new LinkedList<RollbackRuleAttribute>();
 			if (methodEle.hasAttribute(ROLLBACK_FOR_ATTRIBUTE)) {
 				String rollbackForValue = methodEle.getAttribute(ROLLBACK_FOR_ATTRIBUTE);
-				addRollbackRuleAttributesTo(rollbackRules,rollbackForValue);
+				addRollbackRuleAttributesTo(rollbackRules, rollbackForValue);
 			}
 			if (methodEle.hasAttribute(NO_ROLLBACK_FOR_ATTRIBUTE)) {
 				String noRollbackForValue = methodEle.getAttribute(NO_ROLLBACK_FOR_ATTRIBUTE);
-				addNoRollbackRuleAttributesTo(rollbackRules,noRollbackForValue);
+				addNoRollbackRuleAttributesTo(rollbackRules, noRollbackForValue);
 			}
 			attribute.setRollbackRules(rollbackRules);
 

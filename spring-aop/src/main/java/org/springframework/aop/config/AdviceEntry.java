@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,13 @@ public class AdviceEntry implements ParseState.Entry {
 
 
 	/**
-	 * Creates a new instance of the {@link AdviceEntry} class.
-	 * @param kind the kind of advice represented by this entry (before, after, around, etc.)
+	 * Create a new {@code AdviceEntry} instance.
+	 * @param kind the kind of advice represented by this entry (before, after, around)
 	 */
 	public AdviceEntry(String kind) {
 		this.kind = kind;
 	}
+
 
 	@Override
 	public String toString() {

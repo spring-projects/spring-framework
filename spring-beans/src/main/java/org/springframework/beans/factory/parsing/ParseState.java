@@ -20,22 +20,16 @@ import java.util.Stack;
 
 /**
  * Simple {@link Stack}-based structure for tracking the logical position during
- * a parsing process. {@link Entry entries} are added to the stack at
- * each point during the parse phase in a reader-specific manner.
+ * a parsing process. {@link Entry entries} are added to the stack at each point
+ * during the parse phase in a reader-specific manner.
  *
  * <p>Calling {@link #toString()} will render a tree-style view of the current logical
- * position in the parse phase. This representation is intended for use in
- * error messages.
+ * position in the parse phase. This representation is intended for use in error messages.
  *
  * @author Rob Harrop
  * @since 2.0
  */
 public final class ParseState {
-
-	/**
-	 * Tab character used when rendering the tree-style representation.
-	 */
-	private static final char TAB = '\t';
 
 	/**
 	 * Internal {@link Stack} storage.
@@ -51,7 +45,7 @@ public final class ParseState {
 	}
 
 	/**
-	 * Create a new {@code ParseState} whose {@link Stack} is a {@link Object#clone clone}
+	 * Create a new {@code ParseState} whose {@link Stack} is a clone
 	 * of that of the passed in {@code ParseState}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -79,7 +73,7 @@ public final class ParseState {
 	 * {@code null} if the {@link Stack} is empty.
 	 */
 	public Entry peek() {
-		return this.state.empty() ? null : this.state.peek();
+		return (this.state.empty() ? null : this.state.peek());
 	}
 
 	/**
@@ -96,16 +90,18 @@ public final class ParseState {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (int x = 0; x < this.state.size(); x++) {
-			if (x > 0) {
+		StringBuilder sb = new StringBuilder(64);
+		int i = 0;
+		for (ParseState.Entry entry : this.state) {
+			if (i > 0) {
 				sb.append('\n');
-				for (int y = 0; y < x; y++) {
-					sb.append(TAB);
+				for (int j = 0; j < i; j++) {
+					sb.append('\t');
 				}
 				sb.append("-> ");
 			}
-			sb.append(this.state.get(x));
+			sb.append(entry);
+			i++;
 		}
 		return sb.toString();
 	}
