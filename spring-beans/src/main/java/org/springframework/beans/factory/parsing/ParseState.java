@@ -16,12 +16,12 @@
 
 package org.springframework.beans.factory.parsing;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Simple {@link LinkedList}-based structure for tracking the logical position during
+ * Simple {@link ArrayDeque}-based structure for tracking the logical position during
  * a parsing process. {@link Entry entries} are added to the LinkedList at
  * each point during the parse phase in a reader-specific manner.
  *
@@ -30,6 +30,7 @@ import org.springframework.lang.Nullable;
  * error messages.
  *
  * @author Rob Harrop
+ * @author Juergen Hoeller
  * @since 2.0
  */
 public final class ParseState {
@@ -40,45 +41,44 @@ public final class ParseState {
 	private static final char TAB = '\t';
 
 	/**
-	 * Internal {@link LinkedList} storage.
+	 * Internal {@link ArrayDeque} storage.
 	 */
-	private final LinkedList<Entry> state;
+	private final ArrayDeque<Entry> state;
 
 
 	/**
-	 * Create a new {@code ParseState} with an empty {@link LinkedList}.
+	 * Create a new {@code ParseState} with an empty {@link ArrayDeque}.
 	 */
 	public ParseState() {
-		this.state = new LinkedList<>();
+		this.state = new ArrayDeque<>();
 	}
 
 	/**
-	 * Create a new {@code ParseState} whose {@link LinkedList} is a {@link Object#clone clone}
+	 * Create a new {@code ParseState} whose {@link ArrayDeque} is a {@link Object#clone clone}
 	 * of that of the passed in {@code ParseState}.
 	 */
-	@SuppressWarnings("unchecked")
 	private ParseState(ParseState other) {
-		this.state = (LinkedList<Entry>) other.state.clone();
+		this.state = other.state.clone();
 	}
 
 
 	/**
-	 * Add a new {@link Entry} to the {@link LinkedList}.
+	 * Add a new {@link Entry} to the {@link ArrayDeque}.
 	 */
 	public void push(Entry entry) {
 		this.state.push(entry);
 	}
 
 	/**
-	 * Remove an {@link Entry} from the {@link LinkedList}.
+	 * Remove an {@link Entry} from the {@link ArrayDeque}.
 	 */
 	public void pop() {
 		this.state.pop();
 	}
 
 	/**
-	 * Return the {@link Entry} currently at the top of the {@link LinkedList} or
-	 * {@code null} if the {@link LinkedList} is empty.
+	 * Return the {@link Entry} currently at the top of the {@link ArrayDeque} or
+	 * {@code null} if the {@link ArrayDeque} is empty.
 	 */
 	@Nullable
 	public Entry peek() {
@@ -100,15 +100,17 @@ public final class ParseState {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (int x = 0; x < this.state.size(); x++) {
-			if (x > 0) {
+		int i = 0;
+		for (ParseState.Entry entry : this.state) {
+			if (i > 0) {
 				sb.append('\n');
-				for (int y = 0; y < x; y++) {
+				for (int j = 0; j < i; j++) {
 					sb.append(TAB);
 				}
 				sb.append("-> ");
 			}
-			sb.append(this.state.get(x));
+			sb.append(entry);
+			i++;
 		}
 		return sb.toString();
 	}
@@ -118,7 +120,6 @@ public final class ParseState {
 	 * Marker interface for entries into the {@link ParseState}.
 	 */
 	public interface Entry {
-
 	}
 
 }
