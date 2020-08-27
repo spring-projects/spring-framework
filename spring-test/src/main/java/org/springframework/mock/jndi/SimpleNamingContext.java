@@ -357,7 +357,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static class NameClassPairEnumeration extends AbstractNamingEnumeration<NameClassPair> {
+	private static final class NameClassPairEnumeration extends AbstractNamingEnumeration<NameClassPair> {
 
 		private NameClassPairEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);
@@ -370,7 +370,7 @@ public class SimpleNamingContext implements Context {
 	}
 
 
-	private static class BindingEnumeration extends AbstractNamingEnumeration<Binding> {
+	private static final class BindingEnumeration extends AbstractNamingEnumeration<Binding> {
 
 		private BindingEnumeration(SimpleNamingContext context, String root) throws NamingException {
 			super(context, root);
