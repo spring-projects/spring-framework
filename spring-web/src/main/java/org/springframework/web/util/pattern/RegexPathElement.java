@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class RegexPathElement extends PathElement {
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 
-	private char[] regex;
+	private final char[] regex;
 
 	private final boolean caseSensitive;
 
@@ -136,7 +136,7 @@ class RegexPathElement extends PathElement {
 		if (matches) {
 			if (isNoMorePattern()) {
 				if (matchingContext.determineRemainingPath &&
-					(this.variableNames.isEmpty() ? true : textToMatch.length() > 0)) {
+					(this.variableNames.isEmpty() || textToMatch.length() > 0)) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}
@@ -203,6 +203,7 @@ class RegexPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}
