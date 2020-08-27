@@ -35,6 +35,7 @@ public class BeanEntry implements ParseState.Entry {
 		this.beanDefinitionName = beanDefinitionName;
 	}
 
+
 	@Override
 	public String toString() {
 		return "Bean '" + this.beanDefinitionName + "'";
