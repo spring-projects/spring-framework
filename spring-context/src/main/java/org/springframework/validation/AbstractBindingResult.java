@@ -18,11 +18,11 @@ package org.springframework.validation;
 
 import java.beans.PropertyEditor;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +50,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
-	private final List<ObjectError> errors = new LinkedList<>();
+	private final List<ObjectError> errors = new ArrayList<>();
 
 	private final Map<String, Class<?>> fieldTypes = new HashMap<>();
 
@@ -145,7 +145,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<ObjectError> getGlobalErrors() {
-		List<ObjectError> result = new LinkedList<>();
+		List<ObjectError> result = new ArrayList<>();
 		for (ObjectError objectError : this.errors) {
 			if (!(objectError instanceof FieldError)) {
 				result.add(objectError);
@@ -167,7 +167,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<FieldError> getFieldErrors() {
-		List<FieldError> result = new LinkedList<>();
+		List<FieldError> result = new ArrayList<>();
 		for (ObjectError objectError : this.errors) {
 			if (objectError instanceof FieldError) {
 				result.add((FieldError) objectError);
@@ -189,7 +189,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
-		List<FieldError> result = new LinkedList<>();
+		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
 			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
