@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
-			dependency "com.google.protobuf:protobuf-java-util:3.12.4"
+			dependency "com.google.protobuf:protobuf-java-util:3.13.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
 			dependency("com.thoughtworks.xstream:xstream:1.4.12") {
 				exclude group: "xpp3", name: "xpp3_min"
@@ -158,7 +158,7 @@ configure(allprojects) { project ->
 			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.1'
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.4"
 
-			dependency "org.jruby:jruby:9.2.12.0"
+			dependency "org.jruby:jruby:9.2.13.0"
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
@@ -191,7 +191,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.4.6') {
+			dependencySet(group: 'org.mockito', version: '3.5.7') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
