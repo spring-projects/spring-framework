@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,16 @@ import org.springframework.lang.Nullable;
 
 /**
  * Simple {@link LinkedList}-based structure for tracking the logical position during
- * a parsing process. {@link Entry entries} are added to the LinkedList at
- * each point during the parse phase in a reader-specific manner.
+ * a parsing process. {@link Entry entries} are added to the LinkedList at each point
+ * during the parse phase in a reader-specific manner.
  *
  * <p>Calling {@link #toString()} will render a tree-style view of the current logical
- * position in the parse phase. This representation is intended for use in
- * error messages.
+ * position in the parse phase. This representation is intended for use in error messages.
  *
  * @author Rob Harrop
  * @since 2.0
  */
 public final class ParseState {
-
-	/**
-	 * Tab character used when rendering the tree-style representation.
-	 */
-	private static final char TAB = '\t';
 
 	/**
 	 * Internal {@link LinkedList} storage.
@@ -53,8 +47,8 @@ public final class ParseState {
 	}
 
 	/**
-	 * Create a new {@code ParseState} whose {@link LinkedList} is a {@link Object#clone clone}
-	 * of that of the passed in {@code ParseState}.
+	 * Create a new {@code ParseState} whose {@link LinkedList} is a clone
+	 * of the state in the passed in {@code ParseState}.
 	 */
 	@SuppressWarnings("unchecked")
 	private ParseState(ParseState other) {
@@ -99,16 +93,18 @@ public final class ParseState {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (int x = 0; x < this.state.size(); x++) {
-			if (x > 0) {
+		StringBuilder sb = new StringBuilder(64);
+		int i = 0;
+		for (ParseState.Entry entry : this.state) {
+			if (i > 0) {
 				sb.append('\n');
-				for (int y = 0; y < x; y++) {
-					sb.append(TAB);
+				for (int j = 0; j < i; j++) {
+					sb.append('\t');
 				}
 				sb.append("-> ");
 			}
-			sb.append(this.state.get(x));
+			sb.append(entry);
+			i++;
 		}
 		return sb.toString();
 	}
@@ -118,7 +114,6 @@ public final class ParseState {
 	 * Marker interface for entries into the {@link ParseState}.
 	 */
 	public interface Entry {
-
 	}
 
 }

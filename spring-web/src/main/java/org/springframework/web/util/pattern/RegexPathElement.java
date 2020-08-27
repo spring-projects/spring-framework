@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class RegexPathElement extends PathElement {
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 
-	private char[] regex;
+	private final char[] regex;
 
 	private final boolean caseSensitive;
 
@@ -75,7 +75,7 @@ class RegexPathElement extends PathElement {
 				patternBuilder.append(".*");
 				int pos = matcher.start();
 				if (pos < 1 || text.charAt(pos-1) != '.') {
-					// To be compatible with the AntPathMatcher comparator, 
+					// To be compatible with the AntPathMatcher comparator,
 					// '.*' is not considered a wildcard usage
 					this.wildcardCount++;
 				}
@@ -129,14 +129,14 @@ class RegexPathElement extends PathElement {
 
 	@Override
 	public boolean matches(int pathIndex, MatchingContext matchingContext) {
-		String textToMatch = matchingContext.pathElementValue(pathIndex);		
+		String textToMatch = matchingContext.pathElementValue(pathIndex);
 		Matcher matcher = this.pattern.matcher(textToMatch);
 		boolean matches = matcher.matches();
 
 		if (matches) {
 			if (isNoMorePattern()) {
-				if (matchingContext.determineRemainingPath && 
-					(this.variableNames.isEmpty() ? true : textToMatch.length() > 0)) {
+				if (matchingContext.determineRemainingPath &&
+					(this.variableNames.isEmpty() || textToMatch.length() > 0)) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}
@@ -176,7 +176,7 @@ class RegexPathElement extends PathElement {
 		}
 		return matches;
 	}
-	
+
 	@Override
 	public int getNormalizedLength() {
 		int varsLength = 0;
@@ -202,6 +202,7 @@ class RegexPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}
