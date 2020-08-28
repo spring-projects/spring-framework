@@ -82,8 +82,6 @@ import org.springframework.web.multipart.support.StandardServletPartUtils;
  */
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final boolean annotationNotRequired;
@@ -258,13 +256,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
-		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+		String[] paramNames = BeanUtils.getParameterNames(ctor);
 		Class<?>[] paramTypes = ctor.getParameterTypes();
-		Assert.state(paramNames.length == paramTypes.length,
-				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
-
 		Object[] args = new Object[paramTypes.length];
 		WebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName);
 		String fieldDefaultPrefix = binder.getFieldDefaultPrefix();

@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.ConstructorProperties;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
@@ -43,8 +44,10 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -73,6 +76,9 @@ import org.springframework.util.StringUtils;
 public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
+
+	private static final ParameterNameDiscoverer parameterNameDiscoverer =
+			new DefaultParameterNameDiscoverer();
 
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
@@ -443,8 +449,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
 	public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) throws BeansException {
-		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-		return cr.getPropertyDescriptors();
+		return CachedIntrospectionResults.forClass(clazz).getPropertyDescriptors();
 	}
 
 	/**
@@ -455,11 +460,8 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	@Nullable
-	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
-			throws BeansException {
-
-		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-		return cr.getPropertyDescriptor(propertyName);
+	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName) throws BeansException {
+		return CachedIntrospectionResults.forClass(clazz).getPropertyDescriptor(propertyName);
 	}
 
 	/**
@@ -586,6 +588,24 @@ public abstract class BeanUtils {
 			Assert.state(writeMethod != null, "No write method available");
 			return new MethodParameter(writeMethod, 0);
 		}
+	}
+
+	/**
+	 * Determine required parameter names for the given constructor,
+	 * considering the JavaBeans {@link ConstructorProperties} annotation
+	 * as well as Spring's {@link DefaultParameterNameDiscoverer}.
+	 * @param ctor the constructor to find parameter names for
+	 * @return the parameter names (matching the constructor's parameter count)
+	 * @throws IllegalStateException if the parameter names are not resolvable
+	 * @since 5.3
+	 */
+	public static String[] getParameterNames(Constructor<?> ctor) {
+		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
+		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
+		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+		Assert.state(paramNames.length == ctor.getParameterCount(),
+				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
+		return paramNames;
 	}
 
 	/**

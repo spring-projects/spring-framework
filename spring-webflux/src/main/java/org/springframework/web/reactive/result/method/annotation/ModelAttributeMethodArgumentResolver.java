@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -28,9 +27,7 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -68,8 +65,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final boolean useDefaultResolution;
 
@@ -235,12 +230,8 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		// A single data class constructor -> resolve constructor arguments from request parameters.
 		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, attributeName);
 		return getValuesToBind(binder, exchange).map(bindValues -> {
-			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
-			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+			String[] paramNames = BeanUtils.getParameterNames(ctor);
 			Class<?>[] paramTypes = ctor.getParameterTypes();
-			Assert.state(paramNames.length == paramTypes.length,
-					() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 			Object[] args = new Object[paramTypes.length];
 			String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
 			String fieldMarkerPrefix = binder.getFieldMarkerPrefix();
