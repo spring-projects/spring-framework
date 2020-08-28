@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,6 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Create a new {@code SingleColumnRowMapper}.
-	 * <p>Consider using the {@link #newInstance} factory method instead,
-	 * which allows for specifying the required type once only.
 	 * @param requiredType the type that each result object is expected to match
 	 */
 	public SingleColumnRowMapper(Class<T> requiredType) {
@@ -216,8 +214,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Static factory method to create a new {@code SingleColumnRowMapper}
-	 * (with the required type specified only once).
+	 * Static factory method to create a new {@code SingleColumnRowMapper}.
 	 * @param requiredType the type that each result object is expected to match
 	 * @since 4.1
 	 * @see #newInstance(Class, ConversionService)
@@ -227,8 +224,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Static factory method to create a new {@code SingleColumnRowMapper}
-	 * (with the required type specified only once).
+	 * Static factory method to create a new {@code SingleColumnRowMapper}.
 	 * @param requiredType the type that each result object is expected to match
 	 * @param conversionService the {@link ConversionService} for converting a
 	 * fetched value, or {@code null} for none

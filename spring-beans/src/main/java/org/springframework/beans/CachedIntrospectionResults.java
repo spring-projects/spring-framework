@@ -92,6 +92,8 @@ public final class CachedIntrospectionResults {
 	 */
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
+	private static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
+
 
 	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
 			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
@@ -253,7 +255,7 @@ public final class CachedIntrospectionResults {
 	private final BeanInfo beanInfo;
 
 	/** PropertyDescriptor objects keyed by property name String. */
-	private final Map<String, PropertyDescriptor> propertyDescriptorCache;
+	private final Map<String, PropertyDescriptor> propertyDescriptors;
 
 	/** TypeDescriptor objects keyed by PropertyDescriptor. */
 	private final ConcurrentMap<PropertyDescriptor, TypeDescriptor> typeDescriptorCache;
@@ -274,7 +276,7 @@ public final class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new LinkedHashMap<>();
+			this.propertyDescriptors = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
@@ -291,7 +293,7 @@ public final class CachedIntrospectionResults {
 									"; editor [" + pd.getPropertyEditorClass().getName() + "]" : ""));
 				}
 				pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-				this.propertyDescriptorCache.put(pd.getName(), pd);
+				this.propertyDescriptors.put(pd.getName(), pd);
 			}
 
 			// Explicitly check implemented interfaces for setter/getter methods as well,
@@ -313,13 +315,13 @@ public final class CachedIntrospectionResults {
 		for (Class<?> ifc : currClass.getInterfaces()) {
 			if (!ClassUtils.isJavaLanguageInterface(ifc)) {
 				for (PropertyDescriptor pd : getBeanInfo(ifc).getPropertyDescriptors()) {
-					PropertyDescriptor existingPd = this.propertyDescriptorCache.get(pd.getName());
+					PropertyDescriptor existingPd = this.propertyDescriptors.get(pd.getName());
 					if (existingPd == null ||
 							(existingPd.getReadMethod() == null && pd.getReadMethod() != null)) {
 						// GenericTypeAwarePropertyDescriptor leniently resolves a set* write method
 						// against a declared read method, so we prefer read method descriptors here.
 						pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-						this.propertyDescriptorCache.put(pd.getName(), pd);
+						this.propertyDescriptors.put(pd.getName(), pd);
 					}
 				}
 				introspectInterfaces(ifc, ifc);
@@ -338,27 +340,19 @@ public final class CachedIntrospectionResults {
 
 	@Nullable
 	PropertyDescriptor getPropertyDescriptor(String name) {
-		PropertyDescriptor pd = this.propertyDescriptorCache.get(name);
+		PropertyDescriptor pd = this.propertyDescriptors.get(name);
 		if (pd == null && StringUtils.hasLength(name)) {
 			// Same lenient fallback checking as in Property...
-			pd = this.propertyDescriptorCache.get(StringUtils.uncapitalize(name));
+			pd = this.propertyDescriptors.get(StringUtils.uncapitalize(name));
 			if (pd == null) {
-				pd = this.propertyDescriptorCache.get(StringUtils.capitalize(name));
+				pd = this.propertyDescriptors.get(StringUtils.capitalize(name));
 			}
 		}
-		return (pd == null || pd instanceof GenericTypeAwarePropertyDescriptor ? pd :
-				buildGenericTypeAwarePropertyDescriptor(getBeanClass(), pd));
+		return pd;
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
-		PropertyDescriptor[] pds = new PropertyDescriptor[this.propertyDescriptorCache.size()];
-		int i = 0;
-		for (PropertyDescriptor pd : this.propertyDescriptorCache.values()) {
-			pds[i] = (pd instanceof GenericTypeAwarePropertyDescriptor ? pd :
-					buildGenericTypeAwarePropertyDescriptor(getBeanClass(), pd));
-			i++;
-		}
-		return pds;
+		return this.propertyDescriptors.values().toArray(EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
 
 	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {
