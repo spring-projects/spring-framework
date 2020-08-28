@@ -3834,11 +3834,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class DataClass {
 
 		@NotNull
-		public final String param1;
+		private final String param1;
 
-		public final boolean param2;
+		private final boolean param2;
 
-		public int param3;
+		private int param3;
 
 		@ConstructorProperties({"param1", "param2", "optionalParam"})
 		public DataClass(String param1, boolean p2, Optional<Integer> optionalParam) {
@@ -3848,8 +3848,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			optionalParam.ifPresent(integer -> this.param3 = integer);
 		}
 
+		public String param1() {
+			return param1;
+		}
+
+		public boolean param2() {
+			return param2;
+		}
+
 		public void setParam3(int param3) {
 			this.param3 = param3;
+		}
+
+		public int getParam3() {
+			return param3;
 		}
 	}
 
@@ -3876,7 +3888,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
-			binder.initDirectFieldAccess();
 			binder.setConversionService(new DefaultFormattingConversionService());
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
