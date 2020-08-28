@@ -124,6 +124,7 @@ public final class WebHttpHandlerBuilder {
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
 		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
+		this.httpHandlerDecorator = other.httpHandlerDecorator;
 	}
 
 
@@ -356,7 +357,7 @@ public final class WebHttpHandlerBuilder {
 	 * the entire chain and likewise the ability to observe the result of
 	 * the entire chain.
 	 * @param handlerDecorator the decorator to apply
-	 * @since 5.1
+	 * @since 5.3
 	 */
 	public WebHttpHandlerBuilder httpHandlerDecorator(Function<HttpHandler, HttpHandler> handlerDecorator) {
 		this.httpHandlerDecorator = (this.httpHandlerDecorator != null ?
@@ -365,10 +366,9 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Whether a {@code ForwardedHeaderTransformer} is configured or not, either
-	 * detected from an {@code ApplicationContext} or explicitly configured via
-	 * {@link #forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
-	 * @since 5.1
+	 * Whether a decorator for {@link HttpHandler} is configured or not via
+	 * {@link #httpHandlerDecorator(Function)}.
+	 * @since 5.3
 	 */
 	public boolean hasHttpHandlerDecorator() {
 		return (this.httpHandlerDecorator != null);

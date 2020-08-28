@@ -18,6 +18,7 @@ package org.springframework.web.server.adapter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
@@ -122,15 +123,20 @@ public class WebHttpHandlerBuilderTests {
 		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
 				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();
 
-		WebHttpHandlerBuilder
+		AtomicBoolean success = new AtomicBoolean(false);
+		HttpHandler httpHandler = WebHttpHandlerBuilder
 				.webHandler(exchange -> {
 					HttpHeaders headers = exchange.getRequest().getHeaders();
-					assertThat(headers.getFirst("My-Header")).isEqualTo("1-2-3");
+					assertThat(headers.get("My-Header")).containsExactlyInAnyOrder("1", "2", "3");
+					success.set(true);
 					return Mono.empty();
 				})
 				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "1"), res))
 				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "2"), res))
-				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "3"), res));
+				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "3"), res)).build();
+
+		httpHandler.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
+		assertThat(success.get()).isTrue();
 	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
