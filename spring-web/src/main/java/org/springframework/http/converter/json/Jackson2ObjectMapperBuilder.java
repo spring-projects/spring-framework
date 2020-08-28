@@ -809,8 +809,8 @@ public class Jackson2ObjectMapperBuilder {
 			// jackson-datatype-jsr310 not available
 		}
 
-		// Joda-Time present?
-		if (ClassUtils.isPresent("org.joda.time.LocalDate", this.moduleClassLoader)) {
+		// Joda-Time 2.x present?
+		if (ClassUtils.isPresent("org.joda.time.YearMonth", this.moduleClassLoader)) {
 			try {
 				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
