@@ -598,6 +598,8 @@ public abstract class BeanUtils {
 	 * @return the parameter names (matching the constructor's parameter count)
 	 * @throws IllegalStateException if the parameter names are not resolvable
 	 * @since 5.3
+	 * @see ConstructorProperties
+	 * @see DefaultParameterNameDiscoverer
 	 */
 	public static String[] getParameterNames(Constructor<?> ctor) {
 		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);

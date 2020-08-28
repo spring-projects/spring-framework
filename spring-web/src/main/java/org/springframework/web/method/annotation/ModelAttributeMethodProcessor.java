@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -36,9 +35,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -189,7 +186,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * with subsequent parameter binding through bean properties (unless suppressed).
 	 * <p>The default implementation typically uses the unique public no-arg constructor
 	 * if available but also handles a "primary constructor" approach for data classes:
-	 * It understands the JavaBeans {@link ConstructorProperties} annotation as well as
+	 * It understands the JavaBeans {@code ConstructorProperties} annotation as well as
 	 * runtime-retained parameter names in the bytecode, associating request parameters
 	 * with constructor arguments by name. If no such constructor is found, the default
 	 * constructor will be used (even if not public), assuming subsequent bean property
