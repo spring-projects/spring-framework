@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.StringValueResolver;
  * {@link DefaultConversionService#addDefaultConverters addDefaultConverters} method.
  *
  * <p>Automatically registers formatters for JSR-354 Money & Currency, JSR-310 Date-Time
- * and/or Joda-Time, depending on the presence of the corresponding API on the classpath.
+ * and/or Joda-Time 2.x, depending on the presence of the corresponding API on the classpath.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 	static {
 		ClassLoader classLoader = DefaultFormattingConversionService.class.getClassLoader();
 		jsr354Present = ClassUtils.isPresent("javax.money.MonetaryAmount", classLoader);
-		jodaTimePresent = ClassUtils.isPresent("org.joda.time.LocalDate", classLoader);
+		jodaTimePresent = ClassUtils.isPresent("org.joda.time.YearMonth", classLoader);
 	}
 
 
