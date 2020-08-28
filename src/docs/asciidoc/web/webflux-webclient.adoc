@@ -326,7 +326,7 @@ To configure a response timeout for a specific request:
 .Java
 ----
 	WebClient.create().get()
-			.uri("http://example.org/path")
+			.uri("https://example.org/path")
 			.httpRequest(httpRequest -> {
 				HttpClientRequest reactorRequest = httpRequest.getNativeRequest();
 				reactorRequest.responseTimeout(Duration.ofSeconds(2));
@@ -338,7 +338,7 @@ To configure a response timeout for a specific request:
 .Kotlin
 ----
 	WebClient.create().get()
-			.uri("http://example.org/path")
+			.uri("https://example.org/path")
 			.httpRequest { httpRequest: ClientHttpRequest ->
 				val reactorRequest = httpRequest.getNativeRequest<HttpClientRequest>()
 				reactorRequest.responseTimeout(Duration.ofSeconds(2))
