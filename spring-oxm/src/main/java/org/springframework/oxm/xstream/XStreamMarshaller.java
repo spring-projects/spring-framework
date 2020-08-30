@@ -46,7 +46,6 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.ClassLoaderReference;
 import com.thoughtworks.xstream.core.DefaultConverterLookup;
-import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -186,7 +185,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Nullable
 	private Class<?>[] supportedClasses;
 
-	private ClassLoader beanClassLoader = new CompositeClassLoader();
+	@Nullable
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private final SingletonSupplier<XStream> xstream = SingletonSupplier.of(this::buildXStream);
 
