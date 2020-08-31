@@ -19,7 +19,7 @@ package org.springframework.aop.framework;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
@@ -654,7 +654,7 @@ public class ProxyFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public static class PointcutForVoid extends DefaultPointcutAdvisor {
 
-		public static List<String> methodNames = new LinkedList<>();
+		public static List<String> methodNames = new ArrayList<>();
 
 		public static void reset() {
 			methodNames.clear();
