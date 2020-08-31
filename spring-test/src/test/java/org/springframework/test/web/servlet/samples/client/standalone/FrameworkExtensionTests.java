@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurerAdapter;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.FrameworkExtensionTests}.
  *
  * @author Rossen Stoyanchev
@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FrameworkExtensionTests {
 
 	private final WebTestClient client =
-			MockMvcTestClient.bindToController(new SampleController())
+			MockMvcWebTestClient.bindToController(new SampleController())
 					.apply(defaultSetup())
 					.build();
 

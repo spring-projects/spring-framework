@@ -25,7 +25,7 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -37,7 +37,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.StatusAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -45,7 +45,7 @@ import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 public class StatusAssertionTests {
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new StatusController()).build();
+			MockMvcWebTestClient.bindToController(new StatusController()).build();
 
 
 	@Test

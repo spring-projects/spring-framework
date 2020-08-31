@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.CookieAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -51,7 +51,7 @@ public class CookieAssertionTests {
 		localeResolver.setCookieDomain("domain");
 		localeResolver.setCookieHttpOnly(true);
 
-		client = MockMvcTestClient.bindToController(new SimpleController())
+		client = MockMvcWebTestClient.bindToController(new SimpleController())
 				.interceptors(new LocaleChangeInterceptor())
 				.localeResolver(localeResolver)
 				.alwaysExpect(status().isOk())

@@ -24,7 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.RedirectTests}.
  *
  * @author Rossen Stoyanchev
@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class RedirectTests {
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new PersonController()).build();
+			MockMvcWebTestClient.bindToController(new PersonController()).build();
 
 
 	@Test
@@ -60,7 +60,7 @@ public class RedirectTests {
 						.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("name"))
 				.andExpect(flash().attributeCount(1))
@@ -77,7 +77,7 @@ public class RedirectTests {
 						.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("name"))
 				.andExpect(flash().attributeCount(1))
@@ -89,7 +89,7 @@ public class RedirectTests {
 		EntityExchangeResult<Void> result =
 				testClient.post().uri("/persons").exchange().expectStatus().isOk().expectBody().isEmpty();
 
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(forwardedUrl("persons/add"))
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("person"))
@@ -101,7 +101,7 @@ public class RedirectTests {
 		EntityExchangeResult<Void> result =
 				testClient.post().uri("/people").exchange().expectStatus().isOk().expectBody().isEmpty();
 
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(forwardedUrl("persons/add"))
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("person"))
@@ -111,7 +111,7 @@ public class RedirectTests {
 	@Test
 	public void getPerson() throws Exception {
 		EntityExchangeResult<Void> result =
-				MockMvcTestClient.bindToController(new PersonController())
+				MockMvcWebTestClient.bindToController(new PersonController())
 						.defaultRequest(get("/").flashAttr("message", "success!"))
 						.build()
 						.get().uri("/persons/Joe")
@@ -120,7 +120,7 @@ public class RedirectTests {
 						.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andDo(MockMvcResultHandlers.print())
 				.andExpect(forwardedUrl("persons/index"))
 				.andExpect(model().size(2))

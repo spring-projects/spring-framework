@@ -34,7 +34,7 @@ import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -46,7 +46,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.context.AsyncControllerJavaConfigTests}.
  *
  * @author Rossen Stoyanchev
@@ -67,7 +67,7 @@ public class AsyncControllerJavaConfigTests {
 
 	@BeforeEach
 	public void setup() {
-		this.testClient = MockMvcTestClient.bindToApplicationContext(this.wac).build();
+		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 	}
 
 	@Test

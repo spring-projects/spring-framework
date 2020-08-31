@@ -30,7 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
@@ -48,7 +48,7 @@ import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
 import static org.springframework.http.HttpHeaders.VARY;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.HeaderAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -78,7 +78,7 @@ public class HeaderAssertionTests {
 
 		PersonController controller = new PersonController();
 		controller.setStubTimestamp(this.currentTime);
-		this.testClient = MockMvcTestClient.bindToController(controller).build();
+		this.testClient = MockMvcWebTestClient.bindToController(controller).build();
 	}
 
 

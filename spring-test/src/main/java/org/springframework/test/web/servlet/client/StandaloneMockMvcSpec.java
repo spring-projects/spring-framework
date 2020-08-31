@@ -38,13 +38,13 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Simple wrapper around a {@link StandaloneMockMvcBuilder} that implements
- * {@link MockMvcTestClient.ControllerSpec}.
+ * {@link MockMvcWebTestClient.ControllerSpec}.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcTestClient.ControllerSpec>
-		implements MockMvcTestClient.ControllerSpec {
+class StandaloneMockMvcSpec extends AbstractMockMvcServerSpec<MockMvcWebTestClient.ControllerSpec>
+		implements MockMvcWebTestClient.ControllerSpec {
 
 	private final StandaloneMockMvcBuilder mockMvcBuilder;
 

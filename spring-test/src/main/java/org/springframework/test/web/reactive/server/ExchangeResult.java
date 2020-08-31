@@ -206,7 +206,7 @@ public class ExchangeResult {
 	 * Return the result from the mock server exchange, if applicable, for
 	 * further assertions on the state of the server response.
 	 * @since 5.3
-	 * @see org.springframework.test.web.servlet.client.MockMvcTestClient#resultActionsFor(ExchangeResult)
+	 * @see org.springframework.test.web.servlet.client.MockMvcWebTestClient#resultActionsFor(ExchangeResult)
 	 */
 	@Nullable
 	public Object getMockServerResult() {

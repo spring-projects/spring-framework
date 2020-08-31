@@ -27,12 +27,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests}.
  *
  * @author Rossen Stoyanchev
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PrintingResultHandlerSmokeTests {
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new SimpleController()).build();
+			MockMvcWebTestClient.bindToController(new SimpleController()).build();
 
 
 	// Not intended to be executed with the build.

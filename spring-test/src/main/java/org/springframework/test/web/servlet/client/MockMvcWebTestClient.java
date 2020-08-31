@@ -57,7 +57,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * <p>Provides static factory methods and specs to initialize {@code MockMvc}
  * to which the {@code WebTestClient} connects to. For example:
  * <pre class="code">
- * WebTestClient client = MockMvcTestClient.bindToController(myController)
+ * WebTestClient client = MockMvcWebTestClient.bindToController(myController)
  *         .controllerAdvice(myControllerAdvice)
  *         .validator(myValidator)
  *         .build()
@@ -65,7 +65,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * <p>The client itself can also be configured. For example:
  * <pre class="code">
- * WebTestClient client = MockMvcTestClient.bindToController(myController)
+ * WebTestClient client = MockMvcWebTestClient.bindToController(myController)
  *         .validator(myValidator)
  *         .configureClient()
  *         .baseUrl("/path")
@@ -75,7 +75,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-public interface MockMvcTestClient {
+public interface MockMvcWebTestClient {
 
 	/**
 	 * Begin creating a {@link WebTestClient} by providing the {@code @Controller}
@@ -128,7 +128,7 @@ public interface MockMvcTestClient {
 	 * 				.expectHeader().location("/persons/Joe")
 	 * 				.expectBody().isEmpty();
 	 *
-	 * MockMvcTestClient.resultActionsFor(result)
+	 * MockMvcWebTestClient.resultActionsFor(result)
 	 * 		.andExpect(model().size(1))
 	 * 		.andExpect(model().attributeExists("name"))
 	 * 		.andExpect(flash().attributeCount(1))

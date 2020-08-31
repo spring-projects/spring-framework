@@ -24,7 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.FlashAttributeAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FlashAttributeAssertionTests {
 
 	private final WebTestClient client =
-			MockMvcTestClient.bindToController(new PersonController())
+			MockMvcWebTestClient.bindToController(new PersonController())
 					.alwaysExpect(status().isFound())
 					.alwaysExpect(flash().attributeCount(3))
 					.build();
@@ -84,7 +84,7 @@ public class FlashAttributeAssertionTests {
 
 	private ResultActions performRequest() {
 		EntityExchangeResult<Void> result = client.post().uri("/persons").exchange().expectBody().isEmpty();
-		return MockMvcTestClient.resultActionsFor(result);
+		return MockMvcWebTestClient.resultActionsFor(result);
 	}
 
 

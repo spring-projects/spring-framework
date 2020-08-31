@@ -27,7 +27,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.ui.Model;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.RequestParameterTests}.
  *
  * @author Rossen Stoyanchev
@@ -57,7 +57,7 @@ class ViewResolutionTests {
 	@Test
 	void jspOnly() throws Exception {
 		WebTestClient testClient =
-				MockMvcTestClient.bindToController(new PersonController())
+				MockMvcWebTestClient.bindToController(new PersonController())
 						.viewResolvers(new InternalResourceViewResolver("/WEB-INF/", ".jsp"))
 						.build();
 
@@ -67,7 +67,7 @@ class ViewResolutionTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(status().isOk())
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("person"))
@@ -77,7 +77,7 @@ class ViewResolutionTests {
 	@Test
 	void jsonOnly() {
 		WebTestClient testClient =
-				MockMvcTestClient.bindToController(new PersonController())
+				MockMvcWebTestClient.bindToController(new PersonController())
 						.singleView(new MappingJackson2JsonView())
 						.build();
 
@@ -94,7 +94,7 @@ class ViewResolutionTests {
 		marshaller.setClassesToBeBound(Person.class);
 
 		WebTestClient testClient =
-				MockMvcTestClient.bindToController(new PersonController())
+				MockMvcWebTestClient.bindToController(new PersonController())
 						.singleView(new MarshallingView(marshaller))
 						.build();
 
@@ -123,7 +123,7 @@ class ViewResolutionTests {
 		cnViewResolver.afterPropertiesSet();
 
 		WebTestClient testClient =
-				MockMvcTestClient.bindToController(new PersonController())
+				MockMvcWebTestClient.bindToController(new PersonController())
 						.viewResolvers(cnViewResolver, new InternalResourceViewResolver())
 						.build();
 
@@ -133,7 +133,7 @@ class ViewResolutionTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("person"))
 				.andExpect(forwardedUrl("person/show"));
@@ -155,7 +155,7 @@ class ViewResolutionTests {
 
 	@Test
 	void defaultViewResolver() throws Exception {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController()).build();
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController()).build();
 
 		EntityExchangeResult<Void> result = client.get().uri("/person/Corea")
 				.exchange()
@@ -163,7 +163,7 @@ class ViewResolutionTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(model().attribute("person", hasProperty("name", equalTo("Corea"))))
 				.andExpect(forwardedUrl("person/show"));  // InternalResourceViewResolver
 	}

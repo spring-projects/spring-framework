@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +37,7 @@ public class ResponseBodyTests {
 
 	@Test
 	void json() {
-		MockMvcTestClient.bindToController(new PersonController()).build()
+		MockMvcWebTestClient.bindToController(new PersonController()).build()
 				.get()
 				.uri("/person/Lee")
 				.accept(MediaType.APPLICATION_JSON)

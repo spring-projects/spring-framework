@@ -27,7 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.context.WebAppResourceTests}.
  *
  * @author Rossen Stoyanchev
@@ -57,7 +57,7 @@ public class WebAppResourceTests {
 
 	@BeforeEach
 	public void setup() {
-		this.testClient = MockMvcTestClient.bindToApplicationContext(this.wac).build();
+		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 	}
 
 	// TilesConfigurer: resources under "/WEB-INF/**/tiles.xml"
@@ -90,7 +90,7 @@ public class WebAppResourceTests {
 				.expectStatus().isOk()
 				.expectBody().isEmpty();
 
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(handler().handlerType(DefaultServletHttpRequestHandler.class))
 				.andExpect(forwardedUrl("default"));
 	}

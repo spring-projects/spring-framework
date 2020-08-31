@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.hamcrest.Matchers.containsString;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.UrlAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -38,21 +38,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ViewNameAssertionTests {
 
 	private final WebTestClient client =
-			MockMvcTestClient.bindToController(new SimpleController())
+			MockMvcWebTestClient.bindToController(new SimpleController())
 					.alwaysExpect(status().isOk())
 					.build();
 
 
 	@Test
 	public void testEqualTo() throws Exception {
-		MockMvcTestClient.resultActionsFor(performRequest())
+		MockMvcWebTestClient.resultActionsFor(performRequest())
 			.andExpect(view().name("mySpecialView"))
 			.andExpect(view().name(equalTo("mySpecialView")));
 	}
 
 	@Test
 	public void testHamcrestMatcher() throws Exception {
-		MockMvcTestClient.resultActionsFor(performRequest())
+		MockMvcWebTestClient.resultActionsFor(performRequest())
 				.andExpect(view().name(containsString("Special")));
 	}
 

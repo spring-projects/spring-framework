@@ -24,7 +24,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.ExceptionHandlerTests}.
  *
  * @author Rossen Stoyanchev
@@ -45,7 +45,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void localExceptionHandlerMethod() {
-			WebTestClient client = MockMvcTestClient.bindToController(new PersonController()).build();
+			WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController()).build();
 
 			client.get().uri("/person/Clyde")
 					.exchange()
@@ -55,7 +55,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void globalExceptionHandlerMethod() {
-			WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 					.controllerAdvice(new GlobalExceptionHandler())
 					.build();
 
@@ -102,7 +102,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void noException() {
-			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new RestPersonController())
 					.controllerAdvice(new RestPersonControllerExceptionHandler())
 					.build();
 
@@ -115,7 +115,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void localExceptionHandlerMethod() {
-			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new RestPersonController())
 					.controllerAdvice(new RestPersonControllerExceptionHandler())
 					.build();
 
@@ -128,7 +128,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void globalExceptionHandlerMethod() {
-			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new RestPersonController())
 					.controllerAdvice(new RestGlobalExceptionHandler())
 					.build();
 
@@ -141,7 +141,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void globalRestPersonControllerExceptionHandlerTakesPrecedenceOverGlobalExceptionHandler() {
-			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new RestPersonController())
 					.controllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
 					.build();
 
@@ -154,7 +154,7 @@ class ExceptionHandlerTests {
 
 		@Test
 		void noHandlerFound() {
-			WebTestClient client = MockMvcTestClient.bindToController(new RestPersonController())
+			WebTestClient client = MockMvcWebTestClient.bindToController(new RestPersonController())
 					.controllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
 					.dispatcherServletCustomizer(servlet -> servlet.setThrowExceptionIfNoHandlerFound(true))
 					.build();

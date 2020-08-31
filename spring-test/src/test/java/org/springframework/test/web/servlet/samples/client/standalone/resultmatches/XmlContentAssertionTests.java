@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.XmlContentAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -58,7 +58,7 @@ public class XmlContentAssertionTests {
 
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new MusicController())
+			MockMvcWebTestClient.bindToController(new MusicController())
 					.alwaysExpect(status().isOk())
 					.alwaysExpect(content().contentType(MediaType.parseMediaType("application/xml;charset=UTF-8")))
 					.configureClient()

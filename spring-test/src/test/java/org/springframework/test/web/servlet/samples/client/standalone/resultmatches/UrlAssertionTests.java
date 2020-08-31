@@ -21,14 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.resultmatchers.UrlAssertionTests}.
  *
  * @author Rossen Stoyanchev
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UrlAssertionTests {
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new SimpleController()).build();
+			MockMvcWebTestClient.bindToController(new SimpleController()).build();
 
 
 	@Test
@@ -52,7 +52,7 @@ public class UrlAssertionTests {
 		EntityExchangeResult<Void> result =
 				testClient.get().uri("/persons").exchange().expectBody().isEmpty();
 
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(redirectedUrlPattern("/persons/*"));
 	}
 
@@ -69,7 +69,7 @@ public class UrlAssertionTests {
 		EntityExchangeResult<Void> result =
 				testClient.get().uri("/").exchange().expectBody().isEmpty();
 
-		MockMvcTestClient.resultActionsFor(result)
+		MockMvcWebTestClient.resultActionsFor(result)
 				.andExpect(forwardedUrlPattern("/ho?e"));
 	}
 

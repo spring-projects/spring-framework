@@ -37,7 +37,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,14 +50,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.MultipartControllerTests}.
  *
  * @author Rossen Stoyanchev
  */
 public class MultipartControllerTests {
 
-	private final WebTestClient testClient = MockMvcTestClient.bindToController(new MultipartController()).build();
+	private final WebTestClient testClient = MockMvcWebTestClient.bindToController(new MultipartController()).build();
 
 
 	@Test
@@ -77,7 +77,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -106,7 +106,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -134,7 +134,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -153,7 +153,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attributeDoesNotExist("fileContent"))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -175,7 +175,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -194,7 +194,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attributeDoesNotExist("fileContent"))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -216,7 +216,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -235,7 +235,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attributeDoesNotExist("fileContent"))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -256,7 +256,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("fileContent", fileContent))
 				.andExpect(model().attribute("jsonContent", json));
 	}
@@ -268,7 +268,7 @@ public class MultipartControllerTests {
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.part("json", json, MediaType.APPLICATION_JSON);
 
-		WebTestClient client = MockMvcTestClient.bindToController(new MultipartController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new MultipartController())
 				.filter(new RequestWrappingFilter())
 				.build();
 
@@ -279,7 +279,7 @@ public class MultipartControllerTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("jsonContent", json));
 	}
 

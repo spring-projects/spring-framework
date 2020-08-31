@@ -40,7 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.FilterTests}.
  *
  * @author Rossen Stoyanchev
@@ -63,7 +63,7 @@ public class FilterTests {
 
 	@Test
 	public void whenFiltersCompleteMvcProcessesRequest() throws Exception {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new ContinueFilter())
 				.build();
 
@@ -74,7 +74,7 @@ public class FilterTests {
 				.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("id"))
 				.andExpect(flash().attributeCount(1))
@@ -83,7 +83,7 @@ public class FilterTests {
 
 	@Test
 	public void filtersProcessRequest() {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new ContinueFilter(), new RedirectFilter())
 				.build();
 
@@ -95,7 +95,7 @@ public class FilterTests {
 
 	@Test
 	public void filterMappedBySuffix() {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "*.html")
 				.build();
 
@@ -107,7 +107,7 @@ public class FilterTests {
 
 	@Test
 	public void filterWithExactMapping() {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "/p", "/persons")
 				.build();
 
@@ -119,7 +119,7 @@ public class FilterTests {
 
 	@Test
 	public void filterSkipped() throws Exception {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new RedirectFilter(), "/p", "/person")
 				.build();
 
@@ -131,7 +131,7 @@ public class FilterTests {
 						.expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().size(1))
 				.andExpect(model().attributeExists("id"))
 				.andExpect(flash().attributeCount(1))
@@ -140,7 +140,7 @@ public class FilterTests {
 
 	@Test
 	public void filterWrapsRequestResponse() throws Exception {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filter(new WrappingRequestResponseFilter())
 				.build();
 
@@ -148,13 +148,13 @@ public class FilterTests {
 				client.post().uri("/user").exchange().expectBody().isEmpty();
 
 		// Further assertions on the server response
-		MockMvcTestClient.resultActionsFor(exchangeResult)
+		MockMvcWebTestClient.resultActionsFor(exchangeResult)
 				.andExpect(model().attribute("principal", WrappingRequestResponseFilter.PRINCIPAL_NAME));
 	}
 
 	@Test
 	public void filterWrapsRequestResponseAndPerformsAsyncDispatch() {
-		WebTestClient client = MockMvcTestClient.bindToController(new PersonController())
+		WebTestClient client = MockMvcWebTestClient.bindToController(new PersonController())
 				.filters(new WrappingRequestResponseFilter(), new ShallowEtagHeaderFilter())
 				.build();
 

@@ -23,14 +23,14 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.ReactiveReturnTypeTests}.
  *
  * @author Rossen Stoyanchev
@@ -41,7 +41,7 @@ public class ReactiveReturnTypeTests {
 	public void sseWithFlux() {
 
 		WebTestClient testClient =
-				MockMvcTestClient.bindToController(new ReactiveController()).build();
+				MockMvcWebTestClient.bindToController(new ReactiveController()).build();
 
 		Flux<String> bodyFlux = testClient.get().uri("/spr16869")
 				.exchange()

@@ -28,7 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,7 +39,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.standalone.AsyncTests}.
  *
  * @author Rossen Stoyanchev
@@ -47,7 +47,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 public class AsyncTests {
 
 	private final WebTestClient testClient =
-			MockMvcTestClient.bindToController(new AsyncController()).build();
+			MockMvcWebTestClient.bindToController(new AsyncController()).build();
 
 
 	@Test

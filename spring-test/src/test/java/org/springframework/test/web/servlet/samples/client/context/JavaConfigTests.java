@@ -31,7 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcTestClient;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.test.web.servlet.samples.context.PersonController;
 import org.springframework.test.web.servlet.samples.context.PersonDao;
 import org.springframework.web.context.WebApplicationContext;
@@ -46,7 +46,7 @@ import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import static org.mockito.BDDMockito.given;
 
 /**
- * MockMvcTestClient equivalent of the MockMvc
+ * {@link MockMvcWebTestClient} equivalent of the MockMvc
  * {@link org.springframework.test.web.servlet.samples.context.JavaConfigTests}.
  *
  * @author Rossen Stoyanchev
@@ -73,7 +73,7 @@ public class JavaConfigTests {
 
 	@BeforeEach
 	public void setup() {
-		this.testClient = MockMvcTestClient.bindToApplicationContext(this.wac).build();
+		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
 	}
 
