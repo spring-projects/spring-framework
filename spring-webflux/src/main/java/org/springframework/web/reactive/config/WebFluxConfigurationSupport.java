@@ -65,6 +65,8 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.reactive.socket.server.WebSocketService;
+import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
@@ -429,6 +431,24 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	@Bean
 	public SimpleHandlerAdapter simpleHandlerAdapter() {
 		return new SimpleHandlerAdapter();
+	}
+
+	@Bean
+	public WebSocketHandlerAdapter webFluxWebSocketHandlerAdapter() {
+		WebSocketService service = getWebSocketService();
+		WebSocketHandlerAdapter adapter = (service != null ?
+				new WebSocketHandlerAdapter(service) : new WebSocketHandlerAdapter());
+
+		// For backwards compatibility, lower the (default) priority
+		int defaultOrder = adapter.getOrder();
+		adapter.setOrder(defaultOrder + 1);
+
+		return adapter;
+	}
+
+	@Nullable
+	protected WebSocketService getWebSocketService() {
+		return null;
 	}
 
 	@Bean

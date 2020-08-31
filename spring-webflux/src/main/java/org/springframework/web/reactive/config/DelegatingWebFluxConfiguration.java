@@ -27,6 +27,7 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+import org.springframework.web.reactive.socket.server.WebSocketService;
 
 /**
  * A subclass of {@code WebFluxConfigurationSupport} that detects and delegates
@@ -96,6 +97,12 @@ public class DelegatingWebFluxConfiguration extends WebFluxConfigurationSupport 
 	protected MessageCodesResolver getMessageCodesResolver() {
 		MessageCodesResolver messageCodesResolver = this.configurers.getMessageCodesResolver();
 		return (messageCodesResolver != null ? messageCodesResolver : super.getMessageCodesResolver());
+	}
+
+	@Override
+	protected WebSocketService getWebSocketService() {
+		WebSocketService service = this.configurers.getWebSocketService();
+		return (service != null ? service : super.getWebSocketService());
 	}
 
 	@Override

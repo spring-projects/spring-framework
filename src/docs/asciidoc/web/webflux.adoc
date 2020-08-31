@@ -4289,6 +4289,53 @@ reliance on it.
 
 
 
+[[webflux-config-websocket-service]]
+=== WebSocketService
+
+The WebFlux Java config declares of a `WebSocketHandlerAdapter` bean which provides
+support for the invocation of WebSocket handlers. That means all that remains to do in
+order to handle a WebSocket handshake request is to map a `WebSocketHandler` to a URL
+via `SimpleUrlHandlerMapping`.
+
+In some cases it may be necessary to create the `WebSocketHandlerAdapter` bean with a
+provided `WebSocketService` service which allows configuring WebSocket server properties.
+For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public WebSocketService getWebSocketService() {
+			TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
+			strategy.setMaxSessionIdleTimeout(0L);
+			return new HandshakeWebSocketService(strategy);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		@Override
+		fun webSocketService(): WebSocketService {
+			val strategy = TomcatRequestUpgradeStrategy().apply {
+				setMaxSessionIdleTimeout(0L)
+			}
+			return HandshakeWebSocketService(strategy)
+		}
+	}
+----
+
+
+
+
 [[webflux-config-advanced-java]]
 === Advanced Configuration Mode
 [.small]#<<web.adoc#mvc-config-advanced-java, Web MVC>>#
