@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.aspectj.lang.JoinPoint;
@@ -136,7 +135,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		int realAge = 65;
 		target.setAge(realAge);
 
-		List<Advisor> advisors = new LinkedList<>();
+		List<Advisor> advisors = new ArrayList<>();
 		PerTargetAspect aspect1 = new PerTargetAspect();
 		aspect1.count = 100;
 		aspect1.setOrder(10);
@@ -164,7 +163,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 		int realAge = 65;
 		target.setAge(realAge);
 
-		List<Advisor> advisors = new LinkedList<>();
+		List<Advisor> advisors = new ArrayList<>();
 		PerTargetAspectWithOrderAnnotation10 aspect1 = new PerTargetAspectWithOrderAnnotation10();
 		aspect1.count = 100;
 		advisors.addAll(
@@ -392,7 +391,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	void introductionOnTargetExcludedByTypePattern() {
-		LinkedList<Object> target = new LinkedList<>();
+		ArrayList<Object> target = new ArrayList<>();
 		List<?> proxy = (List<?>) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
