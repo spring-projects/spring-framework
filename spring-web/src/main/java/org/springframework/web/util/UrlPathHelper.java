@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,17 +164,18 @@ public class UrlPathHelper {
 	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
+		String pathWithinApp = getPathWithinApplication(request);
 		// Always use full path within current servlet context?
 		if (this.alwaysUseFullPath) {
-			return getPathWithinApplication(request);
+			return pathWithinApp;
 		}
 		// Else, use path within current servlet mapping if applicable
-		String rest = getPathWithinServletMapping(request);
+		String rest = getPathWithinServletMapping(request, pathWithinApp);
 		if (StringUtils.hasLength(rest)) {
 			return rest;
 		}
 		else {
-			return getPathWithinApplication(request);
+			return pathWithinApp;
 		}
 	}
 
@@ -202,6 +203,18 @@ public class UrlPathHelper {
 	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
 	 * or "" if the whole URL has been used to identify the servlet.
+	 * @param request current HTTP request
+	 * @return the path within the servlet mapping, or ""
+	 * @see #getPathWithinServletMapping(HttpServletRequest, String)
+	 */
+	public String getPathWithinServletMapping(HttpServletRequest request) {
+		return getPathWithinServletMapping(request, getPathWithinApplication(request));
+	}
+
+	/**
+	 * Return the path within the servlet mapping for the given request,
+	 * i.e. the part of the request's URL beyond the part that called the servlet,
+	 * or "" if the whole URL has been used to identify the servlet.
 	 * <p>Detects include request URL if called within a RequestDispatcher include.
 	 * <p>E.g.: servlet mapping = "/*"; request URI = "/test/a" -> "/test/a".
 	 * <p>E.g.: servlet mapping = "/"; request URI = "/test/a" -> "/test/a".
@@ -209,11 +222,12 @@ public class UrlPathHelper {
 	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
 	 * @param request current HTTP request
+	 * @param pathWithinApp a precomputed path within the application
 	 * @return the path within the servlet mapping, or ""
+	 * @since 5.2.9
 	 * @see #getLookupPathForRequest
 	 */
-	public String getPathWithinServletMapping(HttpServletRequest request) {
-		String pathWithinApp = getPathWithinApplication(request);
+	protected String getPathWithinServletMapping(HttpServletRequest request, String pathWithinApp) {
 		String servletPath = getServletPath(request);
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
 		String path;
