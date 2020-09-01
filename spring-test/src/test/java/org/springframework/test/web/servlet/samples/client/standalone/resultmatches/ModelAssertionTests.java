@@ -59,6 +59,22 @@ public class ModelAssertionTests {
 					.build();
 
 	@Test
+	void name() throws Exception {
+
+	EntityExchangeResult<Void> result = client.get().uri("/path")
+			.exchange()
+			.expectBody().isEmpty();
+
+	MockMvcWebTestClient.resultActionsFor(result)
+			.andExpect(model().attribute("integer", 3))
+			.andExpect(model().attribute("string", "a string value"))
+			.andExpect(model().attribute("integer", equalTo(3))) // Hamcrest...
+			.andExpect(model().attribute("string", equalTo("a string value")))
+			.andExpect(model().attribute("globalAttrName", equalTo("Global Attribute Value")));
+
+	}
+
+	@Test
 	void attributeEqualTo() throws Exception {
 		performRequest(HttpMethod.GET, "/")
 			.andExpect(model().attribute("integer", 3))
