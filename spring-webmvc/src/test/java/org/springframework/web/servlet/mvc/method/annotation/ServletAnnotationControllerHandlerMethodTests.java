@@ -2061,6 +2061,31 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	void dataClassBindingWithNullable(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(NullableDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("param3", "3");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-3");
+	}
+
+	@PathPatternsParameterizedTest
+	void dataClassBindingWithNullableAndConversionError(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(NullableDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "x");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-x-null");
+	}
+
+	@PathPatternsParameterizedTest
 	void dataClassBindingWithOptional(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(OptionalDataClassController.class, usePathPatterns);
 
@@ -3895,6 +3920,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping("/bind")
 		public BindStatusView handle(@Valid DataClass data, BindingResult result) {
+			assertThat(data).isNotNull();
 			if (result.hasErrors()) {
 				return new BindStatusView(result.getErrorCount() + ":" + result.getFieldValue("param1") + "-" +
 						result.getFieldValue("param2") + "-" + result.getFieldValue("param3"));
@@ -3984,6 +4010,21 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public String handle(ServletPartDataClass data) throws IOException {
 			return StreamUtils.copyToString(data.param1.getInputStream(), StandardCharsets.UTF_8) +
 					"-" + data.param2 + "-" + data.param3;
+		}
+	}
+
+	@RestController
+	public static class NullableDataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(@Nullable DataClass data, BindingResult result) {
+			if (result.hasErrors()) {
+				assertThat(data).isNull();
+				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
+						result.getFieldValue("param3");
+			}
+			assertThat(data).isNotNull();
+			return data.param1 + "-" + data.param2 + "-" + data.param3;
 		}
 	}
 

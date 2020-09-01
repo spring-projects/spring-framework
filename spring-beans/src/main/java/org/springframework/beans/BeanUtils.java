@@ -227,6 +227,35 @@ public abstract class BeanUtils {
 	}
 
 	/**
+	 * Return a resolvable constructor for the provided class, either a primary constructor
+	 * or single public constructor or simply a default constructor. Callers have to be
+	 * prepared to resolve arguments for the returned constructor's parameters, if any.
+	 * @param clazz the class to check
+	 * @since 5.3
+	 * @see #findPrimaryConstructor
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
+		Constructor<T> ctor = findPrimaryConstructor(clazz);
+		if (ctor == null) {
+			Constructor<?>[] ctors = clazz.getConstructors();
+			if (ctors.length == 1) {
+				ctor = (Constructor<T>) ctors[0];
+			}
+			else {
+				try {
+					ctor = clazz.getDeclaredConstructor();
+				}
+				catch (NoSuchMethodException ex) {
+					throw new IllegalStateException("No primary or single public constructor found for " +
+							clazz + " - and no default constructor found either");
+				}
+			}
+		}
+		return ctor;
+	}
+
+	/**
 	 * Return the primary constructor of the provided class. For Kotlin classes, this
 	 * returns the Java constructor corresponding to the Kotlin primary constructor
 	 * (as defined in the Kotlin specification). Otherwise, in particular for non-Kotlin

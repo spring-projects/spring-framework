@@ -33,6 +33,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
@@ -149,6 +150,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				if (parameter.getParameterType() == Optional.class) {
 					attribute = Optional.empty();
 				}
+				else {
+					attribute = ex.getTarget();
+				}
 				bindingResult = ex.getBindingResult();
 			}
 		}
@@ -207,22 +211,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 		Class<?> clazz = nestedParameter.getNestedParameterType();
 
-		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
-			if (ctors.length == 1) {
-				ctor = ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or default constructor found for " + clazz, ex);
-				}
-			}
-		}
-
+		Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
 		Object attribute = constructAttribute(ctor, attributeName, parameter, binderFactory, webRequest);
 		if (parameter != nestedParameter) {
 			attribute = Optional.of(attribute);
@@ -244,6 +233,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @throws Exception in case of constructor invocation failure
 	 * @since 5.1
 	 */
+	@SuppressWarnings("serial")
 	protected Object constructAttribute(Constructor<?> ctor, String attributeName, MethodParameter parameter,
 			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
 
@@ -290,7 +280,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 			catch (TypeMismatchException ex) {
 				ex.initPropertyName(paramName);
-				args[i] = value;
+				args[i] = null;
 				failedParams.add(paramName);
 				binder.getBindingResult().recordFieldValue(paramName, paramType, value);
 				binder.getBindingErrorProcessor().processPropertyAccessException(ex, binder.getBindingResult());
@@ -306,6 +296,20 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 					Object value = args[i];
 					result.recordFieldValue(paramName, paramTypes[i], value);
 					validateValueIfApplicable(binder, parameter, ctor.getDeclaringClass(), paramName, value);
+				}
+			}
+			if (!parameter.isOptional()) {
+				try {
+					Object target = BeanUtils.instantiateClass(ctor, args);
+					throw new BindException(result) {
+						@Override
+						public Object getTarget() {
+							return target;
+						}
+					};
+				}
+				catch (BeanInstantiationException ex) {
+					// swallow and proceed without target instance
 				}
 			}
 			throw new BindException(result);

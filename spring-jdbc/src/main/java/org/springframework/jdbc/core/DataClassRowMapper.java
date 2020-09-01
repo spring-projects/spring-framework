@@ -79,23 +79,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	protected void initialize(Class<T> mappedClass) {
 		super.initialize(mappedClass);
 
-		this.mappedConstructor = BeanUtils.findPrimaryConstructor(mappedClass);
-
-		if (this.mappedConstructor == null) {
-			Constructor<?>[] ctors = mappedClass.getConstructors();
-			if (ctors.length == 1) {
-				this.mappedConstructor = (Constructor<T>) ctors[0];
-			}
-			else {
-				try {
-					this.mappedConstructor = mappedClass.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or default constructor found for " + mappedClass, ex);
-				}
-			}
-		}
-
+		this.mappedConstructor = BeanUtils.getResolvableConstructor(mappedClass);
 		if (this.mappedConstructor.getParameterCount() > 0) {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
 			this.constructorParameterTypes = this.mappedConstructor.getParameterTypes();
