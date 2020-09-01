@@ -226,7 +226,6 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	private void updateFilters() {
-
 		if (this.filters.isEmpty()) {
 			return;
 		}
@@ -349,7 +348,6 @@ public final class WebHttpHandlerBuilder {
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
