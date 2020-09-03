@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,22 +126,14 @@ public class UrlPathHelperTests {
 	}
 
 	@Test
-	public void getRequestKeepSemicolonContent() throws UnsupportedEncodingException {
+	public void getRequestKeepSemicolonContent() {
 		helper.setRemoveSemicolonContent(false);
 
 		request.setRequestURI("/foo;a=b;c=d");
 		assertEquals("/foo;a=b;c=d", helper.getRequestUri(request));
 
 		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
-		assertEquals("jsessionid should always be removed", "/foo", helper.getRequestUri(request));
-
-		request.setRequestURI("/foo;a=b;jsessionid=c0o7fszeb1;c=d");
-		assertEquals("jsessionid should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
-
-		// SPR-10398
-
-		request.setRequestURI("/foo;a=b;JSESSIONID=c0o7fszeb1;c=d");
-		assertEquals("JSESSIONID should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
+		assertEquals("/foo;jsessionid=c0o7fszeb1", helper.getRequestUri(request));
 	}
 
 	@Test

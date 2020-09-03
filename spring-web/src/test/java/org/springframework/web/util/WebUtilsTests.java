@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,19 @@ public class WebUtilsTests {
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
 		assertEquals(1, variables.size());
 		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+
+		variables = WebUtils.parseMatrixVariables("jsessionid=c0o7fszeb1");
+		assertTrue(variables.isEmpty());
+
+		variables = WebUtils.parseMatrixVariables("a=b;jsessionid=c0o7fszeb1;c=d");
+		assertEquals(2, variables.size());
+		assertEquals(Collections.singletonList("b"), variables.get("a"));
+		assertEquals(Collections.singletonList("d"), variables.get("c"));
+
+		variables = WebUtils.parseMatrixVariables("a=b;jsessionid=c0o7fszeb1;c=d");
+		assertEquals(2, variables.size());
+		assertEquals(Collections.singletonList("b"), variables.get("a"));
+		assertEquals(Collections.singletonList("d"), variables.get("c"));
 	}
 
 	@Test
