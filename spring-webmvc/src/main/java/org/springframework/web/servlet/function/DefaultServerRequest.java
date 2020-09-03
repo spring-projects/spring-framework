@@ -51,7 +51,6 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -132,13 +131,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public String path() {
-		return pathContainer().value();
-	}
-
-	@Override
-	public PathContainer pathContainer() {
-		return this.requestPath.pathWithinApplication();
+	public RequestPath requestPath() {
+		return this.requestPath;
 	}
 
 	@Override
