@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -199,24 +200,25 @@ class ConstructorResolver {
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
-			LinkedList<UnsatisfiedDependencyException> causes = null;
+			Deque<UnsatisfiedDependencyException> causes = null;
 
 			for (Constructor<?> candidate : candidates) {
-				Class<?>[] paramTypes = candidate.getParameterTypes();
+				int parameterCount = candidate.getParameterCount();
 
-				if (constructorToUse != null && argsToUse != null && argsToUse.length > paramTypes.length) {
+				if (constructorToUse != null && argsToUse != null && argsToUse.length > parameterCount) {
 					// Already found greedy constructor that can be satisfied ->
 					// do not look any further, there are only less greedy constructors left.
 					break;
 				}
-				if (paramTypes.length < minNrOfArgs) {
+				if (parameterCount < minNrOfArgs) {
 					continue;
 				}
 
 				ArgumentsHolder argsHolder;
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (resolvedValues != null) {
 					try {
-						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
+						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, parameterCount);
 						if (paramNames == null) {
 							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
 							if (pnd != null) {
@@ -232,7 +234,7 @@ class ConstructorResolver {
 						}
 						// Swallow and try next constructor.
 						if (causes == null) {
-							causes = new LinkedList<>();
+							causes = new ArrayDeque<>(1);
 						}
 						causes.add(ex);
 						continue;
@@ -240,7 +242,7 @@ class ConstructorResolver {
 				}
 				else {
 					// Explicit arguments given -> arguments length must match exactly.
-					if (paramTypes.length != explicitArgs.length) {
+					if (parameterCount != explicitArgs.length) {
 						continue;
 					}
 					argsHolder = new ArgumentsHolder(explicitArgs);
@@ -340,13 +342,20 @@ class ConstructorResolver {
 				if (uniqueCandidate == null) {
 					uniqueCandidate = candidate;
 				}
-				else if (!Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes())) {
+				else if (isParamMismatch(uniqueCandidate, candidate)) {
 					uniqueCandidate = null;
 					break;
 				}
 			}
 		}
 		mbd.factoryMethodToIntrospect = uniqueCandidate;
+	}
+
+	private boolean isParamMismatch(Method uniqueCandidate, Method candidate) {
+		int uniqueCandidateParameterCount = uniqueCandidate.getParameterCount();
+		int candidateParameterCount = candidate.getParameterCount();
+		return (uniqueCandidateParameterCount != candidateParameterCount ||
+				!Arrays.equals(uniqueCandidate.getParameterTypes(), candidate.getParameterTypes()));
 	}
 
 	/**
@@ -444,27 +453,27 @@ class ConstructorResolver {
 			// Try all methods with this name to see if they match the given arguments.
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
-			List<Method> candidateList = null;
+			List<Method> candidates = null;
 			if (mbd.isFactoryMethodUnique) {
 				if (factoryMethodToUse == null) {
 					factoryMethodToUse = mbd.getResolvedFactoryMethod();
 				}
 				if (factoryMethodToUse != null) {
-					candidateList = Collections.singletonList(factoryMethodToUse);
+					candidates = Collections.singletonList(factoryMethodToUse);
 				}
 			}
-			if (candidateList == null) {
-				candidateList = new ArrayList<>();
+			if (candidates == null) {
+				candidates = new ArrayList<>();
 				Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
 				for (Method candidate : rawCandidates) {
 					if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
-						candidateList.add(candidate);
+						candidates.add(candidate);
 					}
 				}
 			}
 
-			if (candidateList.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
-				Method uniqueCandidate = candidateList.get(0);
+			if (candidates.size() == 1 && explicitArgs == null && !mbd.hasConstructorArgumentValues()) {
+				Method uniqueCandidate = candidates.get(0);
 				if (uniqueCandidate.getParameterCount() == 0) {
 					mbd.factoryMethodToIntrospect = uniqueCandidate;
 					synchronized (mbd.constructorArgumentLock) {
@@ -477,8 +486,9 @@ class ConstructorResolver {
 				}
 			}
 
-			Method[] candidates = candidateList.toArray(new Method[0]);
-			AutowireUtils.sortFactoryMethods(candidates);
+			if (candidates.size() > 1) {  // explicitly skip immutable singletonList
+				candidates.sort(AutowireUtils.EXECUTABLE_COMPARATOR);
+			}
 
 			ConstructorArgumentValues resolvedValues = null;
 			boolean autowiring = (mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
@@ -502,14 +512,15 @@ class ConstructorResolver {
 				}
 			}
 
-			LinkedList<UnsatisfiedDependencyException> causes = null;
+			Deque<UnsatisfiedDependencyException> causes = null;
 
 			for (Method candidate : candidates) {
-				Class<?>[] paramTypes = candidate.getParameterTypes();
+				int parameterCount = candidate.getParameterCount();
 
-				if (paramTypes.length >= minNrOfArgs) {
+				if (parameterCount >= minNrOfArgs) {
 					ArgumentsHolder argsHolder;
 
+					Class<?>[] paramTypes = candidate.getParameterTypes();
 					if (explicitArgs != null) {
 						// Explicit arguments given -> arguments length must match exactly.
 						if (paramTypes.length != explicitArgs.length) {
@@ -526,7 +537,7 @@ class ConstructorResolver {
 								paramNames = pnd.getParameterNames(candidate);
 							}
 							argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw,
-									paramTypes, paramNames, candidate, autowiring, candidates.length == 1);
+									paramTypes, paramNames, candidate, autowiring, candidates.size() == 1);
 						}
 						catch (UnsatisfiedDependencyException ex) {
 							if (logger.isTraceEnabled()) {
@@ -534,7 +545,7 @@ class ConstructorResolver {
 							}
 							// Swallow and try next overloaded factory method.
 							if (causes == null) {
-								causes = new LinkedList<>();
+								causes = new ArrayDeque<>(1);
 							}
 							causes.add(ex);
 							continue;
@@ -668,7 +679,7 @@ class ConstructorResolver {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid constructor argument index: " + index);
 			}
-			if (index > minNrOfArgs) {
+			if (index + 1 > minNrOfArgs) {
 				minNrOfArgs = index + 1;
 			}
 			ConstructorArgumentValues.ValueHolder valueHolder = entry.getValue();

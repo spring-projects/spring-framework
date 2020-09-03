@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,25 +35,24 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -72,11 +70,7 @@ public class ResourceWebHandlerTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(1);
 
-
 	private ResourceWebHandler handler;
-
-	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	@BeforeEach
 	public void setup() throws Exception {
@@ -166,7 +160,7 @@ public class ResourceWebHandlerTests {
 		setPathWithinHandlerMapping(exchange, "versionString/foo.css");
 		this.handler.handle(exchange).block(TIMEOUT);
 
-		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("\"versionString\"");
+		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("W/\"versionString\"");
 		assertThat(exchange.getResponse().getHeaders().getFirst("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(exchange.getResponse().getHeaders().get("Accept-Ranges").size()).isEqualTo(1);
 	}
@@ -281,7 +275,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				}).verify(TIMEOUT);
 	}
 
@@ -327,7 +321,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				})
 				.verify(TIMEOUT);
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
@@ -422,7 +416,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				}).verify(TIMEOUT);
 	}
 
@@ -433,7 +427,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				}).verify(TIMEOUT);
 	}
 
@@ -444,7 +438,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				}).verify(TIMEOUT);
 	}
 
@@ -479,7 +473,7 @@ public class ResourceWebHandlerTests {
 		StepVerifier.create(mono)
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
-					assertThat(((ResponseStatusException) err).getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+					assertThat(((ResponseStatusException) err).getRawStatusCode()).isEqualTo(404);
 				}).verify(TIMEOUT);
 
 		// SPR-17475
@@ -597,7 +591,7 @@ public class ResourceWebHandlerTests {
 		String boundary = "--" + exchange.getResponse().getHeaders().getContentType().toString().substring(30);
 
 		Mono<DataBuffer> reduced = Flux.from(exchange.getResponse().getBody())
-				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+				.reduce(DefaultDataBufferFactory.sharedInstance.allocateBuffer(), (previous, current) -> {
 					previous.write(current);
 					DataBufferUtils.release(current);
 					return previous;
@@ -605,7 +599,7 @@ public class ResourceWebHandlerTests {
 
 		StepVerifier.create(reduced)
 				.consumeNextWith(buf -> {
-					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
+					String content = buf.toString(UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
 					assertThat(ranges[0]).isEqualTo(boundary);
@@ -653,7 +647,7 @@ public class ResourceWebHandlerTests {
 
 	private void assertResponseBody(MockServerWebExchange exchange, String responseBody) {
 		StepVerifier.create(exchange.getResponse().getBody())
-				.consumeNextWith(buf -> assertThat(DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)).isEqualTo(responseBody))
+				.consumeNextWith(buf -> assertThat(buf.toString(UTF_8)).isEqualTo(responseBody))
 				.expectComplete()
 				.verify();
 	}

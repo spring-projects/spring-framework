@@ -65,7 +65,9 @@ import org.springframework.lang.Nullable;
  * @see java.rmi.RemoteException
  * @see org.springframework.remoting.caucho.HessianServiceExporter
  * @see org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class RmiServiceExporter extends RmiBasedExporter implements InitializingBean, DisposableBean {
 
 	private String serviceName;

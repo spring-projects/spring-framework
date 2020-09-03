@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.springframework.web.method.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,11 +35,12 @@ import org.springframework.web.util.UriComponentsBuilder;
  * use for formatting method argument values to Strings.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class CompositeUriComponentsContributor implements UriComponentsContributor {
 
-	private final List<Object> contributors = new LinkedList<>();
+	private final List<Object> contributors;
 
 	private final ConversionService conversionService;
 
@@ -53,7 +55,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * or {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
 	 */
 	public CompositeUriComponentsContributor(UriComponentsContributor... contributors) {
-		Collections.addAll(this.contributors, contributors);
+		this.contributors = Arrays.asList((Object[]) contributors);
 		this.conversionService = new DefaultFormattingConversionService();
 	}
 
@@ -85,9 +87,7 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	 * need to be formatted as Strings before being added to the URI
 	 */
 	public CompositeUriComponentsContributor(@Nullable Collection<?> contributors, @Nullable ConversionService cs) {
-		if (contributors != null) {
-			this.contributors.addAll(contributors);
-		}
+		this.contributors = (contributors != null ? new ArrayList<>(contributors) : Collections.emptyList());
 		this.conversionService = (cs != null ? cs : new DefaultFormattingConversionService());
 	}
 

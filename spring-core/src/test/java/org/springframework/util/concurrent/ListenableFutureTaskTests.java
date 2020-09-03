@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
  * @author Arjen Poutsma
@@ -79,12 +79,14 @@ class ListenableFutureTaskTests {
 		});
 		task.run();
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				task::get)
-			.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo(s));
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				task.completable()::get)
-		.satisfies(ex -> assertThat(ex.getCause().getMessage()).isEqualTo(s));
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(task::get)
+			.havingCause()
+			.withMessage(s);
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(task.completable()::get)
+			.havingCause()
+			.withMessage(s);
 	}
 
 	@Test
@@ -98,7 +100,7 @@ class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(successCallback).onSuccess(s);
-		verifyZeroInteractions(failureCallback);
+		verifyNoInteractions(failureCallback);
 
 		assertThat(task.get()).isSameAs(s);
 		assertThat(task.completable().get()).isSameAs(s);
@@ -119,7 +121,7 @@ class ListenableFutureTaskTests {
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(failureCallback).onFailure(ex);
-		verifyZeroInteractions(successCallback);
+		verifyNoInteractions(successCallback);
 
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
 				task::get)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Sebastien Deleuze
  * @since 5.1
- * @see <a href="https://github.com/jetty-project/jetty-reactive-httpclient">Jetty ReactiveStreams HttpClient</a>
+ * @see <a href="https://github.com/jetty-project/jetty-reactive-httpclient">
+ *     Jetty ReactiveStreams HttpClient</a>
  */
 class JettyClientHttpResponse implements ClientHttpResponse {
 
@@ -44,10 +45,15 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	private final Flux<DataBuffer> content;
 
+	private final HttpHeaders headers;
+
 
 	public JettyClientHttpResponse(ReactiveResponse reactiveResponse, Publisher<DataBuffer> content) {
 		this.reactiveResponse = reactiveResponse;
 		this.content = Flux.from(content);
+
+		MultiValueMap<String, String> adapter = new JettyHeadersAdapter(reactiveResponse.getHeaders());
+		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 	}
 
 
@@ -66,16 +72,14 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
 		if (cookieHeader != null) {
-			cookieHeader.forEach(header ->
-				HttpCookie.parse(header)
-						.forEach(cookie -> result.add(cookie.getName(),
-								ResponseCookie.from(cookie.getName(), cookie.getValue())
-						.domain(cookie.getDomain())
-						.path(cookie.getPath())
-						.maxAge(cookie.getMaxAge())
-						.secure(cookie.getSecure())
-						.httpOnly(cookie.isHttpOnly())
-						.build()))
+			cookieHeader.forEach(header -> HttpCookie.parse(header)
+					.forEach(c -> result.add(c.getName(), ResponseCookie.fromClientResponse(c.getName(), c.getValue())
+							.domain(c.getDomain())
+							.path(c.getPath())
+							.maxAge(c.getMaxAge())
+							.secure(c.getSecure())
+							.httpOnly(c.isHttpOnly())
+							.build()))
 			);
 		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
@@ -88,10 +92,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		this.reactiveResponse.getHeaders().stream()
-				.forEach(field -> headers.add(field.getName(), field.getValue()));
-		return headers;
+		return this.headers;
 	}
 
 }

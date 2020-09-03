@@ -21,14 +21,15 @@ import java.security.Principal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -111,6 +112,15 @@ public class DefaultUserDestinationResolverTests {
 		assertThat(actual.getTargetDestinations().iterator().next()).isEqualTo(("/queue/foo-user" + "123"));
 		assertThat(actual.getSubscribeDestination()).isEqualTo(sourceDestination);
 		assertThat(actual.getUser()).isNull();
+	}
+
+	@Test // gh-23836
+	public void handleSubscribeInvalidUserName() {
+		TestPrincipal user = new TestPrincipal("joe%2F");
+		String sourceDestination = "/user/queue/foo";
+
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "123", sourceDestination);
+		assertThatIllegalArgumentException().isThrownBy(() -> this.resolver.resolveDestination(message));
 	}
 
 	@Test

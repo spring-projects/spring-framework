@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.xnio.IoFuture;
 import org.xnio.XnioWorker;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -65,8 +66,6 @@ public class UndertowWebSocketClient implements WebSocketClient {
 
 	private final Consumer<ConnectionBuilder> builderConsumer;
 
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	/**
 	 * Constructor with the {@link XnioWorker} to pass to
@@ -74,7 +73,8 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	 * @param worker the Xnio worker
 	 */
 	public UndertowWebSocketClient(XnioWorker worker) {
-		this(worker, builder -> {});
+		this(worker, builder -> {
+		});
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completion = MonoProcessor.create();
+		MonoProcessor<Void> completion = MonoProcessor.fromSink(Sinks.one());
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {
@@ -198,7 +198,8 @@ public class UndertowWebSocketClient implements WebSocketClient {
 			DefaultNegotiation negotiation, WebSocketChannel channel) {
 
 		HandshakeInfo info = createHandshakeInfo(url, negotiation);
-		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, this.bufferFactory, completion);
+		DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
+		UndertowWebSocketSession session = new UndertowWebSocketSession(channel, info, bufferFactory, completion);
 		UndertowWebSocketHandlerAdapter adapter = new UndertowWebSocketHandlerAdapter(session);
 
 		channel.getReceiveSetter().set(adapter);

@@ -26,13 +26,13 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -147,7 +147,7 @@ public class ImportResourceTests {
 
 	@Aspect
 	static class AnAspect {
-		@Before("execution(* org.springframework.tests.sample.beans.TestBean.*(..))")
+		@Before("execution(* org.springframework.beans.testfixture.beans.TestBean.*(..))")
 		public void advice() { }
 	}
 

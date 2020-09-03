@@ -26,9 +26,9 @@ import javax.persistence.Query;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
-import org.springframework.util.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

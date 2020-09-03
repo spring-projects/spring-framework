@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class TaskExecutorFactoryBean implements
 				int separatorIndex = this.poolSize.indexOf('-');
 				if (separatorIndex != -1) {
 					corePoolSize = Integer.parseInt(this.poolSize.substring(0, separatorIndex));
-					maxPoolSize = Integer.parseInt(this.poolSize.substring(separatorIndex + 1, this.poolSize.length()));
+					maxPoolSize = Integer.parseInt(this.poolSize.substring(separatorIndex + 1));
 					if (corePoolSize > maxPoolSize) {
 						throw new IllegalArgumentException(
 								"Lower bound of pool-size range must not exceed the upper bound");
@@ -128,7 +128,7 @@ public class TaskExecutorFactoryBean implements
 					}
 				}
 				else {
-					Integer value = Integer.valueOf(this.poolSize);
+					int value = Integer.parseInt(this.poolSize);
 					corePoolSize = value;
 					maxPoolSize = value;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class JsonPathRequestMatchers {
 	 * Evaluate the JSON path expression against the request content and
 	 * assert the resulting value with the given Hamcrest {@link Matcher}.
 	 */
-	public <T> RequestMatcher value(Matcher<T> matcher) {
+	public <T> RequestMatcher value(Matcher<? super T> matcher) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
@@ -78,7 +78,7 @@ public class JsonPathRequestMatchers {
 	 * to coerce an integer into a double.
 	 * @since 4.3.3
 	 */
-	public <T> RequestMatcher value(Matcher<T> matcher, Class<T> targetType) {
+	public <T> RequestMatcher value(Matcher<? super T> matcher, Class<T> targetType) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {

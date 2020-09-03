@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,9 @@ import org.springframework.core.annotation.AliasFor;
  * or some other means). Thus, test property sources can be used to selectively
  * override properties defined in system and application property sources.
  * Furthermore, inlined {@link #properties} have higher precedence than
- * properties loaded from resource {@link #locations}.
+ * properties loaded from resource {@link #locations}. Note, however, that
+ * properties registered via {@link DynamicPropertySource @DynamicPropertySource}
+ * have higher precedence than those loaded via {@code @TestPropertySource}.
  *
  * <h3>Default Properties File Detection</h3>
  * <p>If {@code @TestPropertySource} is declared as an <em>empty</em> annotation
@@ -81,6 +83,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.1
  * @see ContextConfiguration
+ * @see DynamicPropertySource
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see org.springframework.context.annotation.PropertySource

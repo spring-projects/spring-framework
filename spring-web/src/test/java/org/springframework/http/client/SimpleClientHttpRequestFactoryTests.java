@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,9 +32,11 @@ import static org.mockito.Mockito.verify;
  */
 public class SimpleClientHttpRequestFactoryTests {
 
-	@Test  // SPR-13225
+
+	@Test // SPR-13225
 	public void headerWithNullValue() {
 		HttpURLConnection urlConnection = mock(HttpURLConnection.class);
+		given(urlConnection.getRequestMethod()).willReturn("GET");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
 		SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);

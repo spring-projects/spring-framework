@@ -25,15 +25,14 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractDecoderTests;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.codec.Pojo;
+import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.MimeType;
+import org.springframework.web.testfixture.xml.Pojo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
@@ -58,11 +57,11 @@ public class Jackson2CborDecoderTests extends AbstractDecoderTests<Jackson2CborD
 	@Override
 	@Test
 	public void canDecode() {
-		assertThat(decoder.canDecode(forClass(Pojo.class), CBOR_MIME_TYPE)).isTrue();
-		assertThat(decoder.canDecode(forClass(Pojo.class), null)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), CBOR_MIME_TYPE)).isTrue();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), null)).isTrue();
 
-		assertThat(decoder.canDecode(forClass(String.class), null)).isFalse();
-		assertThat(decoder.canDecode(forClass(Pojo.class), APPLICATION_JSON)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(String.class), null)).isFalse();
+		assertThat(decoder.canDecode(ResolvableType.forClass(Pojo.class), APPLICATION_JSON)).isFalse();
 	}
 
 	@Override

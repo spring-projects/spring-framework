@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +52,7 @@ import org.springframework.core.SmartClassLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -258,15 +258,17 @@ class CglibAopProxy implements AopProxy, Serializable {
 				int mod = method.getModifiers();
 				if (!Modifier.isStatic(mod) && !Modifier.isPrivate(mod)) {
 					if (Modifier.isFinal(mod)) {
-						if (implementsInterface(method, ifcs)) {
+						if (logger.isInfoEnabled() && implementsInterface(method, ifcs)) {
 							logger.info("Unable to proxy interface-implementing method [" + method + "] because " +
 									"it is marked as final: Consider using interface-based JDK proxies instead!");
 						}
-						logger.debug("Final method [" + method + "] cannot get proxied via CGLIB: " +
-								"Calls to this method will NOT be routed to the target instance and " +
-								"might lead to NPEs against uninitialized fields in the proxy instance.");
+						if (logger.isDebugEnabled()) {
+							logger.debug("Final method [" + method + "] cannot get proxied via CGLIB: " +
+									"Calls to this method will NOT be routed to the target instance and " +
+									"might lead to NPEs against uninitialized fields in the proxy instance.");
+						}
 					}
-					else if (!Modifier.isPublic(mod) && !Modifier.isProtected(mod) &&
+					else if (logger.isDebugEnabled() && !Modifier.isPublic(mod) && !Modifier.isProtected(mod) &&
 							proxyClassLoader != null && proxySuperClass.getClassLoader() != proxyClassLoader) {
 						logger.debug("Method [" + method + "] is package-visible across different ClassLoaders " +
 								"and cannot get proxied via CGLIB: Declare this method as public or protected " +
@@ -323,7 +325,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = new HashMap<>(methods.length);
+			this.fixedInterceptorMap = CollectionUtils.newHashMap(methods.length);
 
 			// TODO: small memory optimization here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {
@@ -365,7 +367,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static boolean implementsInterface(Method method, Set<Class<?>> ifcs) {
 		for (Class<?> ifc : ifcs) {
-			if (ClassUtils.hasMethod(ifc, method.getName(), method.getParameterTypes())) {
+			if (ClassUtils.hasMethod(ifc, method)) {
 				return true;
 			}
 		}
@@ -526,7 +528,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private static class StaticDispatcher implements Dispatcher, Serializable {
 
 		@Nullable
-		private Object target;
+		private final Object target;
 
 		public StaticDispatcher(@Nullable Object target) {
 			this.target = target;
@@ -552,7 +554,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		}
 
 		@Override
-		public Object loadObject() throws Exception {
+		public Object loadObject() {
 			return this.advised;
 		}
 	}
@@ -872,15 +874,14 @@ class CglibAopProxy implements AopProxy, Serializable {
 					}
 					return AOP_PROXY;
 				}
-				Method key = method;
 				// Check to see if we have fixed interceptor to serve this method.
 				// Else use the AOP_PROXY.
-				if (isStatic && isFrozen && this.fixedInterceptorMap.containsKey(key)) {
+				if (isStatic && isFrozen && this.fixedInterceptorMap.containsKey(method)) {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Method has advice and optimizations are enabled: " + method);
 					}
 					// We know that we are optimizing so we can use the FixedStaticChainInterceptors.
-					int index = this.fixedInterceptorMap.get(key);
+					int index = this.fixedInterceptorMap.get(method);
 					return (index + this.fixedInterceptorOffset);
 				}
 				else {
@@ -959,11 +960,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 			return true;
 		}
 
-		private boolean equalsAdviceClasses(Advisor a, Advisor b) {
+		private static boolean equalsAdviceClasses(Advisor a, Advisor b) {
 			return (a.getAdvice().getClass() == b.getAdvice().getClass());
 		}
 
-		private boolean equalsPointcuts(Advisor a, Advisor b) {
+		private static boolean equalsPointcuts(Advisor a, Advisor b) {
 			// If only one of the advisor (but not both) is PointcutAdvisor, then it is a mismatch.
 			// Takes care of the situations where an IntroductionAdvisor is used (see SPR-3959).
 			return (!(a instanceof PointcutAdvisor) ||

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class CaffeineCacheManagerTests {
 		Cache cache1x = cm.getCache("c1");
 		assertThat(cache1x != cache1).isTrue();
 
-		cm.setCaffeine(caffeine); // Set same instance
+		cm.setCaffeine(caffeine);  // Set same instance
 		Cache cache1xx = cm.getCache("c1");
 		assertThat(cache1xx).isSameAs(cache1x);
 	}
@@ -155,12 +155,14 @@ public class CaffeineCacheManagerTests {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
-		CacheLoader<Object, Object> loader = mockCacheLoader();
+		@SuppressWarnings("unchecked")
+		CacheLoader<Object, Object> loader = mock(CacheLoader.class);
+
 		cm.setCacheLoader(loader);
 		Cache cache1x = cm.getCache("c1");
 		assertThat(cache1x != cache1).isTrue();
 
-		cm.setCacheLoader(loader); // Set same instance
+		cm.setCacheLoader(loader);  // Set same instance
 		Cache cache1xx = cm.getCache("c1");
 		assertThat(cache1xx).isSameAs(cache1x);
 	}
@@ -194,9 +196,19 @@ public class CaffeineCacheManagerTests {
 			.withMessageContaining("I only know ping");
 	}
 
-	@SuppressWarnings("unchecked")
-	private CacheLoader<Object, Object> mockCacheLoader() {
-		return mock(CacheLoader.class);
+	@Test
+	public void customCacheRegistration() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		com.github.benmanes.caffeine.cache.Cache<Object, Object> nc = Caffeine.newBuilder().build();
+		cm.registerCustomCache("c2", nc);
+
+		Cache cache1 = cm.getCache("c1");
+		Cache cache2 = cm.getCache("c2");
+		assertThat(nc == cache2.getNativeCache()).isTrue();
+
+		cm.setCaffeine(Caffeine.newBuilder().maximumSize(10));
+		assertThat(cm.getCache("c1") != cache1).isTrue();
+		assertThat(cm.getCache("c2") == cache2).isTrue();
 	}
 
 }

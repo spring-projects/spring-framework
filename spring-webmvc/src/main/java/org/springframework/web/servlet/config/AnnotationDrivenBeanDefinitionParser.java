@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 
 		if (element.hasAttribute("enable-matrix-variables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
+			boolean enableMatrixVariables = Boolean.parseBoolean(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
@@ -234,8 +234,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, context);
 		String asyncTimeout = getAsyncTimeout(element);
 		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element);
-		ManagedList<?> callableInterceptors = getCallableInterceptors(element, source, context);
-		ManagedList<?> deferredResultInterceptors = getDeferredResultInterceptors(element, source, context);
+		ManagedList<?> callableInterceptors = getInterceptors(element, source, context, "callable-interceptors");
+		ManagedList<?> deferredResultInterceptors = getInterceptors(element, source, context, "deferred-result-interceptors");
 
 		RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		handlerAdapterDef.setSource(source);
@@ -480,34 +480,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private ManagedList<?> getCallableInterceptors(
-			Element element, @Nullable Object source, ParserContext context) {
+	private ManagedList<?> getInterceptors(
+			Element element, @Nullable Object source, ParserContext context, String interceptorElementName) {
 
 		ManagedList<Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
-			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "callable-interceptors");
-			if (interceptorsElement != null) {
-				interceptors.setSource(source);
-				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
-					BeanDefinitionHolder beanDef = context.getDelegate().parseBeanDefinitionElement(converter);
-					if (beanDef != null) {
-						beanDef = context.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
-						interceptors.add(beanDef);
-					}
-				}
-			}
-		}
-		return interceptors;
-	}
-
-	private ManagedList<?> getDeferredResultInterceptors(
-			Element element, @Nullable Object source, ParserContext context) {
-
-		ManagedList<Object> interceptors = new ManagedList<>();
-		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
-		if (asyncElement != null) {
-			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "deferred-result-interceptors");
+			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, interceptorElementName);
 			if (interceptorsElement != null) {
 				interceptors.setSource(source);
 				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {

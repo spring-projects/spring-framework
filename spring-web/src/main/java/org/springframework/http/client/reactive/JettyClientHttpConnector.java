@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
 
-	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 
 	/**
@@ -91,11 +91,12 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		}
 	}
 
-
+	/**
+	 * Set the buffer factory to be used.
+	 */
 	public void setBufferFactory(DataBufferFactory bufferFactory) {
 		this.bufferFactory = bufferFactory;
 	}
-
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -125,16 +126,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	private DataBuffer toDataBuffer(ContentChunk chunk) {
-
-		// We must copy until this is resolved:
-		// https://github.com/eclipse/jetty.project/issues/2429
-
-		// Use copy instead of buffer wrapping because Callback#succeeded() is
-		// used not only to release the buffer but also to request more data
-		// which is a problem for codecs that buffer data.
-
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(chunk.buffer.capacity());
-		buffer.write(chunk.buffer);
+		DataBuffer buffer = this.bufferFactory.wrap(chunk.buffer);
 		chunk.callback.succeeded();
 		return buffer;
 	}

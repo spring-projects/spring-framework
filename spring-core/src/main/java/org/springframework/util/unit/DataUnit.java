@@ -16,8 +16,6 @@
 
 package org.springframework.util.unit;
 
-import java.util.Objects;
-
 /**
  * A standard set of {@link DataSize} units.
  *
@@ -92,7 +90,7 @@ public enum DataUnit {
 	 */
 	public static DataUnit fromSuffix(String suffix) {
 		for (DataUnit candidate : values()) {
-			if (Objects.equals(candidate.suffix, suffix)) {
+			if (candidate.suffix.equals(suffix)) {
 				return candidate;
 			}
 		}

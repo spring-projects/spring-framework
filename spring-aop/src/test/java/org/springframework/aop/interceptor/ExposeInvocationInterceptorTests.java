@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package org.springframework.aop.interceptor;
 
-import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests
@@ -47,34 +45,4 @@ public class ExposeInvocationInterceptorTests {
 		assertThat(tb.getName()).isEqualTo(name);
 	}
 
-}
-
-
-abstract class ExposedInvocationTestBean extends TestBean {
-
-	@Override
-	public String getName() {
-		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
-		assertions(invocation);
-		return super.getName();
-	}
-
-	@Override
-	public void absquatulate() {
-		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
-		assertions(invocation);
-		super.absquatulate();
-	}
-
-	protected abstract void assertions(MethodInvocation invocation);
-}
-
-
-class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
-
-	@Override
-	protected void assertions(MethodInvocation invocation) {
-		assertThat(invocation.getThis() == this).isTrue();
-		assertThat(ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass())).as("Invocation should be on ITestBean: " + invocation.getMethod()).isTrue();
-	}
 }

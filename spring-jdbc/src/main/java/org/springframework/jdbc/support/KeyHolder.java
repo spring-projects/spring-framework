@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,14 @@ import org.springframework.lang.Nullable;
  * for each row of keys.
  *
  * <p>Most applications only use one key per row and process only one row at a
- * time in an insert statement. In these cases, just call {@code getKey}
- * to retrieve the key. The returned value is a Number here, which is the
- * usual type for auto-generated keys.
+ * time in an insert statement. In these cases, just call {@link #getKey() getKey}
+ * or {@link #getKeyAs(Class) getKeyAs} to retrieve the key. The value returned
+ * by {@code getKey} is a {@link Number}, which is the usual type for auto-generated
+ * keys. For any other auto-generated key type, use {@code getKeyAs} instead.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Slawomir Dymitrow
  * @since 1.1
  * @see org.springframework.jdbc.core.JdbcTemplate
  * @see org.springframework.jdbc.object.SqlUpdate
@@ -54,9 +56,28 @@ public interface KeyHolder {
 	 * then an InvalidDataAccessApiUsageException is thrown.
 	 * @return the generated key as a number
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
+	 * @see #getKeyAs(Class)
 	 */
 	@Nullable
 	Number getKey() throws InvalidDataAccessApiUsageException;
+
+	/**
+	 * Retrieve the first item from the first map, assuming that there is just
+	 * one item and just one map, and that the item is an instance of specified type.
+	 * This is a common case: a single generated key of the specified type.
+	 * <p>Keys are held in a List of Maps, where each item in the list represents
+	 * the keys for each row. If there are multiple columns, then the Map will have
+	 * multiple entries as well. If this method encounters multiple entries in
+	 * either the map or the list meaning that multiple keys were returned,
+	 * then an InvalidDataAccessApiUsageException is thrown.
+	 * @param keyType the type of the auto-generated key
+	 * @return the generated key as an instance of specified type
+	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered
+	 * @since 5.3
+	 * @see #getKey()
+	 */
+	@Nullable
+	<T> T getKeyAs(Class<T> keyType) throws InvalidDataAccessApiUsageException;
 
 	/**
 	 * Retrieve the first map of keys.

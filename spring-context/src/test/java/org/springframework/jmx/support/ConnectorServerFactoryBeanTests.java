@@ -31,23 +31,29 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
+import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
+ * Integration tests for {@link ConnectorServerFactoryBean}.
+ *
  * @author Rob Harrop
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
+class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
+	private final String serviceUrl = "service:jmx:jmxmp://localhost:" + SocketUtils.findAvailableTcpPort();
+
 
 	@Test
-	public void startupWithLocatedServer() throws Exception {
+	void startupWithLocatedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setServiceUrl(this.serviceUrl);
 		bean.afterPropertiesSet();
 
 		try {
@@ -59,12 +65,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void startupWithSuppliedServer() throws Exception {
-		//Added a brief snooze here - seems to fix occasional
-		//java.net.BindException: Address already in use errors
-		Thread.sleep(1);
-
+	void startupWithSuppliedServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setServiceUrl(this.serviceUrl);
 		bean.setServer(getServer());
 		bean.afterPropertiesSet();
 
@@ -77,11 +80,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void registerWithMBeanServer() throws Exception {
-		//Added a brief snooze here - seems to fix occasional
-		//java.net.BindException: Address already in use errors
-		Thread.sleep(1);
+	void registerWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setServiceUrl(this.serviceUrl);
 		bean.setObjectName(OBJECT_NAME);
 		bean.afterPropertiesSet();
 
@@ -96,8 +97,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 	}
 
 	@Test
-	public void noRegisterWithMBeanServer() throws Exception {
+	void noRegisterWithMBeanServer() throws Exception {
 		ConnectorServerFactoryBean bean = new ConnectorServerFactoryBean();
+		bean.setServiceUrl(this.serviceUrl);
 		bean.afterPropertiesSet();
 		try {
 			// Try to get the connector bean.
@@ -111,7 +113,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private void checkServerConnection(MBeanServer hostedServer) throws IOException, MalformedURLException {
 		// Try to connect using client.
-		JMXServiceURL serviceURL = new JMXServiceURL(ConnectorServerFactoryBean.DEFAULT_SERVICE_URL);
+		JMXServiceURL serviceURL = new JMXServiceURL(this.serviceUrl);
 		JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
 
 		assertThat(connector).as("Client Connector should not be null").isNotNull();

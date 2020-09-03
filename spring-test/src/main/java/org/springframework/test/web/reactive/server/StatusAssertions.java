@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,15 +204,15 @@ public class StatusAssertions {
 	 * @param matcher the matcher to use
 	 * @since 5.1
 	 */
-	public WebTestClient.ResponseSpec value(Matcher<Integer> matcher) {
+	public WebTestClient.ResponseSpec value(Matcher<? super Integer> matcher) {
 		int value = this.exchangeResult.getStatus().value();
 		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat("Response status", value, matcher));
 		return this.responseSpec;
 	}
 
 	/**
-	 * Match the response status value with a Hamcrest matcher.
-	 * @param consumer the matcher to use
+	 * Consume the response status value as an integer.
+	 * @param consumer the consumer to use
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(Consumer<Integer> consumer) {

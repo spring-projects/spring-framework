@@ -69,13 +69,13 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Constructor<?> matchRequiringConversion = null;
 
 			for (Constructor<?> ctor : ctors) {
-				Class<?>[] paramTypes = ctor.getParameterTypes();
-				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramTypes.length);
-				for (int i = 0; i < paramTypes.length; i++) {
+				int paramCount = ctor.getParameterCount();
+				List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
+				for (int i = 0; i < paramCount; i++) {
 					paramDescriptors.add(new TypeDescriptor(new MethodParameter(ctor, i)));
 				}
 				ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
-				if (ctor.isVarArgs() && argumentTypes.size() >= paramTypes.length - 1) {
+				if (ctor.isVarArgs() && argumentTypes.size() >= paramCount - 1) {
 					// *sigh* complicated
 					// Basically.. we have to have all parameters match up until the varargs one, then the rest of what is
 					// being provided should be
@@ -84,7 +84,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 					// we are supplied does match exactly (it is an array already).
 					matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
 				}
-				else if (paramTypes.length == argumentTypes.size()) {
+				else if (paramCount == argumentTypes.size()) {
 					// worth a closer look
 					matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 */
 	@Test
 	void resolveActiveProfilesWithOverridenInheritedResolver() {
-		assertResolvedProfiles(OverridenInheritedFooActiveProfilesResolverTestCase.class, "bar");
+		assertResolvedProfiles(OverriddenInheritedFooActiveProfilesResolverTestCase.class, "bar");
 	}
 
 	/**
@@ -304,7 +304,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	}
 
 	@ActiveProfiles(resolver = BarActiveProfilesResolver.class, inheritProfiles = false)
-	private static class OverridenInheritedFooActiveProfilesResolverTestCase extends
+	private static class OverriddenInheritedFooActiveProfilesResolverTestCase extends
 			InheritedFooActiveProfilesResolverTestCase {
 	}
 

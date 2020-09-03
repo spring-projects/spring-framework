@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -197,6 +198,26 @@ public class IndexingTests {
 		catch (EvaluationException ex) {
 			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
 		}
+	}
+
+	public List<BigDecimal> decimals;
+
+	@Test
+	public void autoGrowListOfElementsWithoutDefaultConstructor() {
+		this.decimals = new ArrayList<>();
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "123.4");
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(123.4));
+	}
+
+	@Test
+	public void indexIntoPropertyContainingListContainingNullElement() {
+		this.decimals = new ArrayList<>();
+		this.decimals.add(null);
+		this.decimals.add(BigDecimal.ONE);
+		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
+		parser.parseExpression("decimals[0]").setValue(this, "9876.5");
+		assertThat(decimals).containsExactly(BigDecimal.valueOf(9876.5), BigDecimal.ONE);
 	}
 
 	@Test

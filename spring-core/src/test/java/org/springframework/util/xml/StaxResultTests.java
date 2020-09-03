@@ -31,7 +31,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.XmlContent;
+import org.springframework.core.testfixture.xml.XmlContent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

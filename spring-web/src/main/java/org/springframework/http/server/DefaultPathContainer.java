@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ final class DefaultPathContainer implements PathContainer {
 
 
 	static PathContainer createFromUrlPath(String path, Options options) {
-		if (path.equals("")) {
+		if (path.isEmpty()) {
 			return EMPTY_PATH;
 		}
 		char separator = options.separator();
@@ -107,7 +107,7 @@ final class DefaultPathContainer implements PathContainer {
 		}
 		List<Element> elements = new ArrayList<>();
 		int begin;
-		if (path.length() > 0 && path.charAt(0) == separator) {
+		if (path.charAt(0) == separator) {
 			begin = 1;
 			elements.add(separatorElement);
 		}
@@ -117,7 +117,7 @@ final class DefaultPathContainer implements PathContainer {
 		while (begin < path.length()) {
 			int end = path.indexOf(separator, begin);
 			String segment = (end != -1 ? path.substring(begin, end) : path.substring(begin));
-			if (!segment.equals("")) {
+			if (!segment.isEmpty()) {
 				elements.add(options.shouldDecodeAndParseSegments() ?
 						decodeAndParsePathSegment(segment) :
 						new DefaultPathSegment(segment, separatorElement));

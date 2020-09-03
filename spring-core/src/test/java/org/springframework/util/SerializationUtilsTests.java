@@ -25,14 +25,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
- * Test for static utility to help with serialization.
+ * Unit tests for {@link SerializationUtils}.
  *
  * @author Dave Syer
  * @since 3.0.5
  */
 class SerializationUtilsTests {
 
-	private static BigInteger FOO = new BigInteger(
+	private static final BigInteger FOO = new BigInteger(
 			"-9702942423549012526722364838327831379660941553432801565505143675386108883970811292563757558516603356009681061" +
 			"5697574744209306031461371833798723505120163874786203211176873686513374052845353833564048");
 
@@ -44,21 +44,17 @@ class SerializationUtilsTests {
 
 	@Test
 	void deserializeUndefined() throws Exception {
-		byte[] bytes = FOO.toByteArray();
-		assertThatIllegalStateException().isThrownBy(() ->
-				SerializationUtils.deserialize(bytes));
+		assertThatIllegalStateException().isThrownBy(() -> SerializationUtils.deserialize(FOO.toByteArray()));
 	}
 
 	@Test
 	void serializeNonSerializable() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				SerializationUtils.serialize(new Object()));
+		assertThatIllegalArgumentException().isThrownBy(() -> SerializationUtils.serialize(new Object()));
 	}
 
 	@Test
 	void deserializeNonSerializable() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				SerializationUtils.deserialize("foo".getBytes()));
+		assertThatIllegalArgumentException().isThrownBy(() -> SerializationUtils.deserialize("foo".getBytes()));
 	}
 
 	@Test

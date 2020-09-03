@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
  * @author Juergen Hoeller
  * @since 5.0.5
  */
-public class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
+class ThreadPoolTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Override
 	protected AsyncListenableTaskExecutor buildExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setThreadNamePrefix(THREAD_NAME_PREFIX);
+		executor.setThreadNamePrefix(this.threadNamePrefix);
 		executor.setMaxPoolSize(1);
 		executor.afterPropertiesSet();
 		return executor;

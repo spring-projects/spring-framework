@@ -166,7 +166,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 				scheduleHeartbeat();
 				this.openFrameSent = true;
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 			}
 		}
@@ -186,7 +186,7 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 		try {
 			messages = getSockJsServiceConfig().getMessageCodec().decode(payload);
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			logger.error("Broken data received. Terminating WebSocket connection abruptly", ex);
 			tryCloseWithSockJsTransportError(ex, CloseStatus.BAD_DATA);
 			return;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.util;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ class AutoPopulatingListTests {
 
 	@Test
 	void withClassAndUserSuppliedBackingList() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<>(), TestObject.class));
+		doTestWithClass(new AutoPopulatingList<Object>(new ArrayList<>(), TestObject.class));
 	}
 
 	@Test
@@ -47,7 +48,7 @@ class AutoPopulatingListTests {
 
 	@Test
 	void withElementFactoryAndUserSuppliedBackingList() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<>(), new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<Object>(new ArrayList<>(), new MockElementFactory()));
 	}
 
 	private void doTestWithClass(AutoPopulatingList<Object> list) {

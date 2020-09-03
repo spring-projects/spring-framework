@@ -28,12 +28,11 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.AbstractEnvironment;
-import org.springframework.core.env.StandardEnvironmentTests;
+import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * Tests integration between Environment and SecurityManagers. See SPR-9970.
@@ -50,7 +49,7 @@ public class EnvironmentSecurityManagerIntegrationTests {
 	@BeforeEach
 	public void setUp() {
 		originalSecurityManager = System.getSecurityManager();
-		env = StandardEnvironmentTests.getModifiableSystemEnvironment();
+		env = EnvironmentTestUtils.getModifiableSystemEnvironment();
 		env.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, "p1");
 	}
 

@@ -38,6 +38,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 
 
 	// RouterFunctions.Visitor
+
 	@Override
 	public void startNested(RequestPredicate predicate) {
 		indent();
@@ -74,10 +75,11 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	}
 
 	private void indent() {
-		for (int i=0; i < this.indent; i++) {
+		for (int i = 0; i < this.indent; i++) {
 			this.builder.append(' ');
 		}
 	}
+
 
 	// RequestPredicates.Visitor
 
@@ -156,6 +158,7 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 	public void unknown(RequestPredicate predicate) {
 		this.builder.append(predicate);
 	}
+
 	@Override
 	public String toString() {
 		String result = this.builder.toString();
@@ -164,4 +167,5 @@ class ToStringVisitor implements RouterFunctions.Visitor, RequestPredicates.Visi
 		}
 		return result;
 	}
+
 }

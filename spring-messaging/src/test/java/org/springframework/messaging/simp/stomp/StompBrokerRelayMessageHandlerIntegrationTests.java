@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,12 +130,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 			return;
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
-		this.activeMQBroker.addShutdownHook(new Runnable() {
-			@Override
-			public void run() {
-				latch.countDown();
-			}
-		});
+		this.activeMQBroker.addShutdownHook(latch::countDown);
 		this.activeMQBroker.stop();
 		assertThat(latch.await(5, TimeUnit.SECONDS)).as("Broker did not stop").isTrue();
 		logger.debug("Broker stopped");

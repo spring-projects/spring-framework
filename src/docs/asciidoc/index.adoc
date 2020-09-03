@@ -16,7 +16,7 @@ Validation, Data Binding, Type Conversion, SpEL, AOP.
 <<testing.adoc#testing, Testing>> :: Mock Objects, TestContext Framework,
 Spring MVC Test, WebTestClient.
 <<data-access.adoc#spring-data-tier, Data Access>> :: Transactions, DAO Support,
-JDBC, O/R Mapping, XML Marshalling.
+JDBC, R2DBC, O/R Mapping, XML Marshalling.
 <<web.adoc#spring-web, Web Servlet>> :: Spring MVC, WebSocket, SockJS,
 STOMP Messaging.
 <<web-reactive.adoc#spring-webflux, Web Reactive>> :: Spring WebFlux, WebClient,
@@ -30,9 +30,9 @@ Alef Arendsen, Darren Davison, Dmitriy Kopylenko, Mark Pollack, Thierry Templier
 Vervaet, Portia Tung, Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
 Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo, Andy Clement, Dave
 Syer, Oliver Gierke, Rossen Stoyanchev, Phillip Webb, Rob Winch, Brian Clozel, Stephane
-Nicoll, Sebastien Deleuze, Jay Bryant
+Nicoll, Sebastien Deleuze, Jay Bryant, Mark Paluch
 
-Copyright © 2002 - 2019 Pivotal, Inc. All Rights Reserved.
+Copyright © 2002 - 2020 Pivotal, Inc. All Rights Reserved.
 
 Copies of this document may be made for your own use and for distribution to others,
 provided that you do not charge any fee for such copies and further provided that each

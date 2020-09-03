@@ -24,15 +24,16 @@ import javax.management.ObjectName;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.LifecycleMethodExecutionExceptionHandler;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.opentest4j.TestAbortedException;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.jmx.AbstractMBeanServerTests.BindExceptionHandler;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.util.MBeanTestUtils;
 
@@ -57,10 +58,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
+@ExtendWith(BindExceptionHandler.class)
 public abstract class AbstractMBeanServerTests {
-
-	@RegisterExtension
-	BindExceptionHandler bindExceptionHandler = new BindExceptionHandler();
 
 	protected MBeanServer server;
 
@@ -77,14 +76,6 @@ public abstract class AbstractMBeanServerTests {
 		}
 	}
 
-	protected ConfigurableApplicationContext loadContext(String configLocation) {
-		GenericApplicationContext ctx = new GenericApplicationContext();
-		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(configLocation);
-		ctx.getDefaultListableBeanFactory().registerSingleton("server", this.server);
-		ctx.refresh();
-		return ctx;
-	}
-
 	@AfterEach
 	public void tearDown() throws Exception {
 		releaseServer();
@@ -92,17 +83,32 @@ public abstract class AbstractMBeanServerTests {
 	}
 
 	private void releaseServer() throws Exception {
-		MBeanServerFactory.releaseMBeanServer(getServer());
+		try {
+			MBeanServerFactory.releaseMBeanServer(getServer());
+		}
+		catch (IllegalArgumentException ex) {
+			if (!ex.getMessage().contains("not in list")) {
+				throw ex;
+			}
+		}
 		MBeanTestUtils.resetMBeanServers();
 	}
 
-	protected void onTearDown() throws Exception {
+	protected final ConfigurableApplicationContext loadContext(String configLocation) {
+		GenericApplicationContext ctx = new GenericApplicationContext();
+		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(configLocation);
+		ctx.getDefaultListableBeanFactory().registerSingleton("server", getServer());
+		ctx.refresh();
+		return ctx;
 	}
 
 	protected void onSetUp() throws Exception {
 	}
 
-	public MBeanServer getServer() {
+	protected void onTearDown() throws Exception {
+	}
+
+	protected final MBeanServer getServer() {
 		return this.server;
 	}
 
@@ -123,7 +129,7 @@ public abstract class AbstractMBeanServerTests {
 	}
 
 
-	private static class BindExceptionHandler implements TestExecutionExceptionHandler, LifecycleMethodExecutionExceptionHandler {
+	static class BindExceptionHandler implements TestExecutionExceptionHandler, LifecycleMethodExecutionExceptionHandler {
 
 		@Override
 		public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable {

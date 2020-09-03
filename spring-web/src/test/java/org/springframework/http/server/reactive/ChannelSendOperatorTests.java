@@ -35,7 +35,7 @@ import reactor.core.publisher.Signal;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.LeakAwareDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

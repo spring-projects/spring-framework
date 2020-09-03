@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.CacheTestUtils;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -36,14 +35,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.testfixture.cache.CacheTestUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.springframework.cache.CacheTestUtils.assertCacheHit;
-import static org.springframework.cache.CacheTestUtils.assertCacheMiss;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheHit;
+import static org.springframework.context.testfixture.cache.CacheTestUtils.assertCacheMiss;
 
 /**
  * Provides various {@link CacheResolver} customisations scenario

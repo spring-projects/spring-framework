@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import javax.naming.NamingException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
-import org.springframework.tests.sample.beans.DerivedTestBean;
-import org.springframework.tests.sample.beans.ITestBean;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.ITestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.testfixture.jndi.ExpectedLookupTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -177,7 +177,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setExpectedType(Integer.class);
 		jof.setDefaultObject("5");
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject()).isEqualTo(new Integer(5));
+		assertThat(jof.getObject()).isEqualTo(5);
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setDefaultObject("5");
 		jof.setBeanFactory(new DefaultListableBeanFactory());
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject()).isEqualTo(new Integer(5));
+		assertThat(jof.getObject()).isEqualTo(5);
 	}
 
 	@Test
@@ -365,7 +365,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setProxyInterface(ITestBean.class);
 		assertThatExceptionOfType(NamingException.class).isThrownBy(
 				jof::afterPropertiesSet)
-			.withMessageContaining("org.springframework.tests.sample.beans.DerivedTestBean");
+			.withMessageContaining("org.springframework.beans.testfixture.beans.DerivedTestBean");
 	}
 
 	@Test

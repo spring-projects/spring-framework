@@ -32,7 +32,7 @@ import org.springframework.ui.Model;
  */
 class DefaultRendering implements Rendering {
 
-	private static final HttpHeaders EMPTY_HEADERS = HttpHeaders.readOnlyHttpHeaders(new HttpHeaders());
+	private static final HttpHeaders EMPTY_HEADERS = HttpHeaders.EMPTY;
 
 
 	private final Object view;

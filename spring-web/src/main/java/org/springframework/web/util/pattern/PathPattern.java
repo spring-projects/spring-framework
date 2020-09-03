@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,13 @@ import org.springframework.util.StringUtils;
  * and captures it as a variable named "spring"</li>
  * </ul>
  *
+ * <p><strong>Note:</strong> In contrast to
+ * {@link org.springframework.util.AntPathMatcher}, {@code **} is supported only
+ * at the end of a pattern. For example {@code /pages/{**}} is valid but
+ * {@code /pages/{**}/details} is not. The same applies also to the capturing
+ * variant <code>{*spring}</code>. The aim is to eliminate ambiguity when
+ * comparing patterns for specificity.
+ *
  * <h3>Examples</h3>
  * <ul>
  * <li>{@code /pages/t?st.html} &mdash; matches {@code /pages/test.html} as well as
@@ -59,8 +66,8 @@ import org.springframework.util.StringUtils;
  * <li><code>/resources/{&#42;path}</code> &mdash; matches all files
  * underneath the {@code /resources/} path and captures their relative path in
  * a variable named "path"; {@code /resources/image.png} will match with
- * "spring" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
- * with "spring" &rarr; "/css/spring.css"</li>
+ * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
+ * with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
  * and assign the value {@code "spring"} to the {@code filename} variable</li>
  * </ul>
@@ -160,8 +167,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			if (elem instanceof CaptureTheRestPathElement || elem instanceof WildcardTheRestPathElement) {
 				this.catchAll = true;
 			}
-			if (elem instanceof SeparatorPathElement && elem.next != null &&
-					elem.next instanceof WildcardPathElement && elem.next.next == null) {
+			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
 				this.endsWithSeparatorWildcard = true;
 			}
 			elem = elem.next;
@@ -183,7 +189,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @since 5.2
 	 */
 	public boolean hasPatternSyntax() {
-		return (this.score > 0 || this.patternString.indexOf('?') != -1);
+		return (this.score > 0 || this.catchAll || this.patternString.indexOf('?') != -1);
 	}
 
 	/**
@@ -411,8 +417,8 @@ public class PathPattern implements Comparable<PathPattern> {
 		int dotPos2 = p2string.indexOf('.');
 		String file2 = (dotPos2 == -1 ? p2string : p2string.substring(0, dotPos2));
 		String secondExtension = (dotPos2 == -1 ? "" : p2string.substring(dotPos2));
-		boolean firstExtensionWild = (firstExtension.equals(".*") || firstExtension.equals(""));
-		boolean secondExtensionWild = (secondExtension.equals(".*") || secondExtension.equals(""));
+		boolean firstExtensionWild = (firstExtension.equals(".*") || firstExtension.isEmpty());
+		boolean secondExtensionWild = (secondExtension.equals(".*") || secondExtension.isEmpty());
 		if (!firstExtensionWild && !secondExtensionWild) {
 			throw new IllegalArgumentException(
 					"Cannot combine patterns: " + this.patternString + " and " + pattern2string);

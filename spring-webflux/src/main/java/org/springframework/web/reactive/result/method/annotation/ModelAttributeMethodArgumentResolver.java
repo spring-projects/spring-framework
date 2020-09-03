@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -25,11 +24,10 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -41,7 +39,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -68,8 +65,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final boolean useDefaultResolution;
 
@@ -117,12 +112,12 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		Map<String, Object> model = context.getModel().asMap();
-		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.create();
+		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.fromSink(Sinks.one());
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
-			return binder.bind(exchange)
+			return bindRequestParameters(binder, exchange)
 					.doOnError(bindingResultMono::onError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
@@ -145,6 +140,16 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}));
 		});
+	}
+
+	/**
+	 * Extension point to bind the request to the target object.
+	 * @param binder the data binder instance to use for the binding
+	 * @param exchange the current request
+	 * @since 5.2.6
+	 */
+	protected Mono<Void> bindRequestParameters(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder.bind(exchange);
 	}
 
 	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
@@ -196,21 +201,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	private Mono<?> createAttribute(
 			String attributeName, Class<?> clazz, BindingContext context, ServerWebExchange exchange) {
 
-		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
-			if (ctors.length == 1) {
-				ctor = ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or default constructor found for " + clazz, ex);
-				}
-			}
-		}
+		Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
 		return constructAttribute(ctor, attributeName, context, exchange);
 	}
 
@@ -223,15 +214,11 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		}
 
 		// A single data class constructor -> resolve constructor arguments from request parameters.
-		return WebExchangeDataBinder.extractValuesToBind(exchange).map(bindValues -> {
-			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
-			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, attributeName);
+		return getValuesToBind(binder, exchange).map(bindValues -> {
+			String[] paramNames = BeanUtils.getParameterNames(ctor);
 			Class<?>[] paramTypes = ctor.getParameterTypes();
-			Assert.state(paramNames.length == paramTypes.length,
-					() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 			Object[] args = new Object[paramTypes.length];
-			WebDataBinder binder = context.createDataBinder(exchange, null, attributeName);
 			String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
 			String fieldMarkerPrefix = binder.getFieldMarkerPrefix();
 			for (int i = 0; i < paramNames.length; i++) {
@@ -259,6 +246,18 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			}
 			return BeanUtils.instantiateClass(ctor, args);
 		});
+	}
+
+	/**
+	 * Protected method to obtain the values for data binding. By default this
+	 * method delegates to {@link WebExchangeDataBinder#getValuesToBind}.
+	 * @param binder the data binder in use
+	 * @param exchange the current exchange
+	 * @return a map of bind values
+	 * @since 5.3
+	 */
+	public Mono<Map<String, Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder.getValuesToBind(exchange);
 	}
 
 	private boolean hasErrorsArgument(MethodParameter parameter) {

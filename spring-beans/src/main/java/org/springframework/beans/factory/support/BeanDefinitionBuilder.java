@@ -315,6 +315,15 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * @since 5.1.11
+	 */
+	public BeanDefinitionBuilder setPrimary(boolean primary) {
+		this.beanDefinition.setPrimary(primary);
+		return this;
+	}
+
+	/**
 	 * Set the role of this definition.
 	 */
 	public BeanDefinitionBuilder setRole(int role) {

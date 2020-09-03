@@ -19,8 +19,8 @@ package org.springframework.beans.factory.xml;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.tests.sample.beans.TestBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Chris Beams
  * @since 3.1
- * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#testWithDuplicateName
- * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#testWithDuplicateNameInAlias
+ * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#withDuplicateName
+ * @see org.springframework.beans.factory.xml.XmlBeanFactoryTests#withDuplicateNameInAlias
  */
 public class DuplicateBeanIdTests {
 

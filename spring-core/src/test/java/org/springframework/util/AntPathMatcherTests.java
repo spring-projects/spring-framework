@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -510,56 +510,56 @@ class AntPathMatcherTests {
 
 		paths.add(null);
 		paths.add("/hotels/new");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isNull();
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add(null);
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isNull();
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/new");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/*");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isEqualTo("/hotels/*");
 		paths.clear();
 
 		paths.add("/hotels/**");
 		paths.add("/hotels/*");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/*");
 		assertThat(paths.get(1)).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/*");
 		paths.add("/hotels/**");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/*");
 		assertThat(paths.get(1)).isEqualTo("/hotels/**");
 		paths.clear();
 
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
 
 		paths.add("/hotels/new");
 		paths.add("/hotels/{hotel}");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
@@ -567,7 +567,7 @@ class AntPathMatcherTests {
 		paths.add("/hotels/*");
 		paths.add("/hotels/{hotel}");
 		paths.add("/hotels/new");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new");
 		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		assertThat(paths.get(2)).isEqualTo("/hotels/*");
@@ -576,7 +576,7 @@ class AntPathMatcherTests {
 		paths.add("/hotels/ne*");
 		paths.add("/hotels/n*");
 		Collections.shuffle(paths);
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/ne*");
 		assertThat(paths.get(1)).isEqualTo("/hotels/n*");
 		paths.clear();
@@ -585,7 +585,7 @@ class AntPathMatcherTests {
 		paths.add("/hotels/new.*");
 		paths.add("/hotels/{hotel}");
 		Collections.shuffle(paths);
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/hotels/new.*");
 		assertThat(paths.get(1)).isEqualTo("/hotels/{hotel}");
 		paths.clear();
@@ -593,7 +593,7 @@ class AntPathMatcherTests {
 		comparator = pathMatcher.getPatternComparator("/web/endUser/action/login.html");
 		paths.add("/**/login.*");
 		paths.add("/**/endUser/action/login.*");
-		Collections.sort(paths, comparator);
+		paths.sort(comparator);
 		assertThat(paths.get(0)).isEqualTo("/**/endUser/action/login.*");
 		assertThat(paths.get(1)).isEqualTo("/**/login.*");
 		paths.clear();

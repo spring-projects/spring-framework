@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -60,8 +59,8 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()
-				&& TransactionSynchronizationManager.isActualTransactionActive()) {
+		if (TransactionSynchronizationManager.isSynchronizationActive() &&
+				TransactionSynchronizationManager.isActualTransactionActive()) {
 			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
 			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
 		}
@@ -84,7 +83,7 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 	}
 
 
-	private static class TransactionSynchronizationEventAdapter extends TransactionSynchronizationAdapter {
+	private static class TransactionSynchronizationEventAdapter implements TransactionSynchronization {
 
 		private final ApplicationListenerMethodAdapter listener;
 

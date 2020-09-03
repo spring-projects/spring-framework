@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
-	private volatile boolean closing = false;
+	private volatile boolean closing;
 
 
 	/**
@@ -362,9 +362,17 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public void disconnect() {
+		disconnect(null);
+	}
+
+	@Override
+	public void disconnect(@Nullable StompHeaders headers) {
 		this.closing = true;
 		try {
 			StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.DISCONNECT);
+			if (headers != null) {
+				accessor.addNativeHeaders(headers);
+			}
 			Message<byte[]> message = createMessage(accessor, EMPTY_PAYLOAD);
 			execute(message);
 		}

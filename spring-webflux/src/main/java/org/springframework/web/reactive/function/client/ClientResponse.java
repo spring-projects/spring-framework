@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -62,9 +63,11 @@ import org.springframework.web.reactive.function.BodyExtractor;
 *  <li>{@link #toBodilessEntity()}</li>
  * <li>{@link #releaseBody()}</li>
  * </ul>
- * You can use {@code bodyToMono(Void.class)} if no response content is
- * expected. However keep in mind that if the response does have content, the
- * connection will be closed and will not be placed back in the pool.
+ * You can also use {@code bodyToMono(Void.class)} if no response content is
+ * expected. However keep in mind the connection will be closed, instead of
+ * being placed back in the pool, if any content does arrive. This is in
+ * contrast to {@link #releaseBody()} which does consume the full body and
+ * releases any content received.
  *
  * @author Brian Clozel
  * @author Arjen Poutsma
@@ -96,7 +99,7 @@ public interface ClientResponse {
 	Headers headers();
 
 	/**
-	 * Return cookies of this response.
+	 * Return the cookies of this response.
 	 */
 	MultiValueMap<String, ResponseCookie> cookies();
 
@@ -146,7 +149,7 @@ public interface ClientResponse {
 	<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 	/**
-	 * Releases the body of this response.
+	 * Release the body of this response.
 	 * @return a completion signal
 	 * @since 5.2
 	 * @see org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer)
@@ -195,23 +198,50 @@ public interface ClientResponse {
 	Mono<ResponseEntity<Void>> toBodilessEntity();
 
 	/**
-	 * Creates a {@link WebClientResponseException} based on the status code,
-	 * headers, and body of this response as well as the corresponding request.
-	 * @return a {@code Mono} with a {@code WebClientResponseException} based on this response
+	 * Create a {@link WebClientResponseException} that contains the response
+	 * status, headers, body, and the originating request.
+	 * @return a {@code Mono} with the created exception
 	 * @since 5.2
 	 */
 	Mono<WebClientResponseException> createException();
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * <p>The prefix is based on {@linkplain ClientRequest#logPrefix()}, which
+	 * itself is based on the value of the {@link ClientRequest#LOG_ID_ATTRIBUTE
+	 * LOG_ID_ATTRIBUTE} request attribute, further surrounded with "[" and "]".
+	 * @return the log message prefix or an empty String if the
+	 * {@link ClientRequest#LOG_ID_ATTRIBUTE LOG_ID_ATTRIBUTE} is not set
+	 * @since 5.2.3
+	 */
+	String logPrefix();
+
+	/**
+	 * Return a builder to mutate the this response, for example to change
+	 * the status, headers, cookies, and replace or transform the body.
+	 * @return a builder to mutate the request with
+	 * @since 5.3
+	 */
+	default Builder mutate() {
+		return new DefaultClientResponseBuilder(this, true);
+	}
 
 
 	// Static builder methods
 
 	/**
 	 * Create a builder with the status, headers, and cookies of the given response.
+	 * <p><strong>Note:</strong> Note that the body in the returned builder is
+	 * {@link Flux#empty()} by default. To carry over the one from the original
+	 * response, use {@code otherResponse.bodyToFlux(DataBuffer.class)} or
+	 * simply use the instance based {@link #mutate()} method.
 	 * @param other the response to copy the status, headers, and cookies from
 	 * @return the created builder
+	 * @deprecated as of 5.3 in favor of the instance based {@link #mutate()}.
 	 */
+	@Deprecated
 	static Builder from(ClientResponse other) {
-		return new DefaultClientResponseBuilder(other);
+		return new DefaultClientResponseBuilder(other, false);
 	}
 
 	/**
@@ -292,7 +322,7 @@ public interface ClientResponse {
 		List<String> header(String headerName);
 
 		/**
-		 * Return the headers as a {@link HttpHeaders} instance.
+		 * Return the headers as an {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
 	}
@@ -305,14 +335,14 @@ public interface ClientResponse {
 
 		/**
 		 * Set the status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 */
 		Builder statusCode(HttpStatus statusCode);
 
 		/**
 		 * Set the raw status code of the response.
-		 * @param statusCode the new status code.
+		 * @param statusCode the new status code
 		 * @return this builder
 		 * @since 5.1.9
 		 */
@@ -320,7 +350,7 @@ public interface ClientResponse {
 
 		/**
 		 * Add the given header value(s) under the given name.
-		 * @param headerName  the header name
+		 * @param headerName the header name
 		 * @param headerValues the header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#add(String, String)
@@ -328,11 +358,11 @@ public interface ClientResponse {
 		Builder header(String headerName, String... headerValues);
 
 		/**
-		 * Manipulate this response's headers with the given consumer. The
-		 * headers provided to the consumer are "live", so that the consumer can be used to
-		 * {@linkplain HttpHeaders#set(String, String) overwrite} existing header values,
-		 * {@linkplain HttpHeaders#remove(Object) remove} values, or use any of the other
-		 * {@link HttpHeaders} methods.
+		 * Manipulate this response's headers with the given consumer.
+		 * <p>The headers provided to the consumer are "live", so that the consumer
+		 * can be used to {@linkplain HttpHeaders#set(String, String) overwrite}
+		 * existing header values, {@linkplain HttpHeaders#remove(Object) remove}
+		 * values, or use any of the other {@link HttpHeaders} methods.
 		 * @param headersConsumer a function that consumes the {@code HttpHeaders}
 		 * @return this builder
 		 */
@@ -347,9 +377,9 @@ public interface ClientResponse {
 		Builder cookie(String name, String... values);
 
 		/**
-		 * Manipulate this response's cookies with the given consumer. The
-		 * map provided to the consumer is "live", so that the consumer can be used to
-		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing header values,
+		 * Manipulate this response's cookies with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookie values,
 		 * {@linkplain MultiValueMap#remove(Object) remove} values, or use any of the other
 		 * {@link MultiValueMap} methods.
 		 * @param cookiesConsumer a function that consumes the cookies map
@@ -358,19 +388,26 @@ public interface ClientResponse {
 		Builder cookies(Consumer<MultiValueMap<String, ResponseCookie>> cookiesConsumer);
 
 		/**
-		 * Set the body of the response. Calling this methods will
-		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
-		 * the existing body of the builder.
-		 * @param body the new body.
+		 * Transform the response body, if set in the builder.
+		 * @param transformer the transformation function to use
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder body(Function<Flux<DataBuffer>, Flux<DataBuffer>> transformer);
+
+		/**
+		 * Set the body of the response.
+		 * <p><strong>Note:</strong> This method will drain the existing body,
+		 * if set in the builder.
+		 * @param body the new body to use
 		 * @return this builder
 		 */
 		Builder body(Flux<DataBuffer> body);
 
 		/**
 		 * Set the body of the response to the UTF-8 encoded bytes of the given string.
-		 * Calling this methods will
-		 * {@linkplain org.springframework.core.io.buffer.DataBufferUtils#release(DataBuffer) release}
-		 * the existing body of the builder.
+		 * <p><strong>Note:</strong> This method will drain the existing body,
+		 * if set in the builder.
 		 * @param body the new body.
 		 * @return this builder
 		 */

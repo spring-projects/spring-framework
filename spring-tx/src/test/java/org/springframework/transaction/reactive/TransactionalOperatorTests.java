@@ -62,6 +62,34 @@ public class TransactionalOperatorTests {
 	}
 
 	@Test
+	public void cancellationPropagatedToMono() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Mono.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
+				.as(StepVerifier::create)
+				.thenAwait()
+				.thenCancel()
+				.verify();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
+		assertThat(cancelled).isTrue();
+	}
+
+	@Test
+	public void cancellationPropagatedToFlux() {
+		AtomicBoolean cancelled = new AtomicBoolean();
+		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
+		Flux.create(sink -> sink.onCancel(() -> cancelled.set(true))).as(operator::transactional)
+				.as(StepVerifier::create)
+				.thenAwait()
+				.thenCancel()
+				.verify();
+		assertThat(tm.commit).isFalse();
+		assertThat(tm.rollback).isTrue();
+		assertThat(cancelled).isTrue();
+	}
+
+	@Test
 	public void rollbackWithMono() {
 		TransactionalOperator operator = TransactionalOperator.create(tm, new DefaultTransactionDefinition());
 		Mono.error(new IllegalStateException()).as(operator::transactional)

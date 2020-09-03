@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -54,8 +55,6 @@ public class StandardWebSocketClient implements WebSocketClient {
 
 	private static final Log logger = LogFactory.getLog(StandardWebSocketClient.class);
 
-
-	private final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 	private final WebSocketContainer webSocketContainer;
 
@@ -97,7 +96,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		MonoProcessor<Void> completionMono = MonoProcessor.fromSink(Sinks.one());
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {
@@ -129,7 +128,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
 			MonoProcessor<Void> completion) {
 
-		return new StandardWebSocketSession(session, info, this.bufferFactory, completion);
+		return new StandardWebSocketSession(session, info, DefaultDataBufferFactory.sharedInstance, completion);
 	}
 
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
@@ -140,7 +139,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	protected DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return DefaultDataBufferFactory.sharedInstance;
 	}
 
 

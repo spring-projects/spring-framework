@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,15 @@ package org.springframework.util;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -79,7 +80,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Check whether the given object (possibly a {@code String}) is empty.
-	 * This is effectly a shortcut for {@code !hasLength(String)}.
+	 * This is effectively a shortcut for {@code !hasLength(String)}.
 	 * <p>This method accepts any Object as an argument, comparing it to
 	 * {@code null} and the empty String. As a consequence, this method
 	 * will never return {@code true} for a non-null non-String object.
@@ -332,6 +333,16 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Test if the given {@code String} matches the given single character.
+	 * @param str the {@code String} to check
+	 * @param singleCharacter the character to compare to
+	 * @since 5.2.9
+	 */
+	public static boolean matchesCharacter(@Nullable String str, char singleCharacter) {
+		return (str != null && str.length() == 1 && str.charAt(0) == singleCharacter);
+	}
+
+	/**
 	 * Test if the given {@code String} starts with the specified prefix,
 	 * ignoring upper/lower case.
 	 * @param str the {@code String} to check
@@ -420,14 +431,14 @@ public abstract class StringUtils {
 		int pos = 0;  // our position in the old string
 		int patLen = oldPattern.length();
 		while (index >= 0) {
-			sb.append(inString.substring(pos, index));
+			sb.append(inString, pos, index);
 			sb.append(newPattern);
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
 
 		// append any characters to the right of a match
-		sb.append(inString.substring(pos));
+		sb.append(inString, pos, inString.length());
 		return sb.toString();
 	}
 
@@ -453,16 +464,19 @@ public abstract class StringUtils {
 			return inString;
 		}
 
-		StringBuilder sb = new StringBuilder(inString.length());
+		int lastCharIndex = 0;
+		char[] result = new char[inString.length()];
 		for (int i = 0; i < inString.length(); i++) {
 			char c = inString.charAt(i);
 			if (charsToDelete.indexOf(c) == -1) {
-				sb.append(c);
+				result[lastCharIndex++] = c;
 			}
 		}
-		return sb.toString();
+		if (lastCharIndex == inString.length()) {
+			return inString;
+		}
+		return new String(result, 0, lastCharIndex);
 	}
-
 
 	//---------------------------------------------------------------------
 	// Convenience methods for working with formatted Strings
@@ -642,6 +656,9 @@ public abstract class StringUtils {
 	 * inner simple dots.
 	 * <p>The result is convenient for path comparison. For other uses,
 	 * notice that Windows separators ("\") are replaced by simple slashes.
+	 * <p><strong>NOTE</strong> that {@code cleanPath} should not be depended
+	 * upon in a security context. Other mechanisms should be used to prevent
+	 * path-traversal issues.
 	 * @param path the original path
 	 * @return the normalized path
 	 */
@@ -677,7 +694,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		LinkedList<String> pathElements = new LinkedList<>();
+		Deque<String> pathElements = new ArrayDeque<>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -696,18 +713,22 @@ public abstract class StringUtils {
 				}
 				else {
 					// Normal path element found.
-					pathElements.add(0, element);
+					pathElements.addFirst(element);
 				}
 			}
 		}
 
+		// All path elements stayed the same - shortcut
+		if (pathArray.length == pathElements.size()) {
+			return prefix + pathToUse;
+		}
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
-			pathElements.add(0, TOP_PATH);
+			pathElements.addFirst(TOP_PATH);
 		}
 		// If nothing else left, at least explicitly point to current path.
-		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
-			pathElements.add(0, CURRENT_PATH);
+		if (pathElements.size() == 1 && pathElements.getLast().isEmpty() && !prefix.endsWith(FOLDER_SEPARATOR)) {
+			pathElements.addFirst(CURRENT_PATH);
 		}
 
 		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
@@ -745,7 +766,7 @@ public abstract class StringUtils {
 		}
 		Assert.notNull(charset, "Charset must not be null");
 
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(length);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
 		boolean changed = false;
 		for (int i = 0; i < length; i++) {
 			int ch = source.charAt(i);
@@ -758,7 +779,7 @@ public abstract class StringUtils {
 					if (u == -1 || l == -1) {
 						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
 					}
-					bos.write((char) ((u << 4) + l));
+					baos.write((char) ((u << 4) + l));
 					i += 2;
 					changed = true;
 				}
@@ -767,10 +788,10 @@ public abstract class StringUtils {
 				}
 			}
 			else {
-				bos.write(ch);
+				baos.write(ch);
 			}
 		}
-		return (changed ? new String(bos.toByteArray(), charset) : source);
+		return (changed ? StreamUtils.copyToString(baos, charset) : source);
 	}
 
 	/**
@@ -1002,8 +1023,8 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Trim the elements of the given {@code String} array,
-	 * calling {@code String.trim()} on each of them.
+	 * Trim the elements of the given {@code String} array, calling
+	 * {@code String.trim()} on each non-null element.
 	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */

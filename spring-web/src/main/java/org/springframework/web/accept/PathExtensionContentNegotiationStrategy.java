@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,11 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @deprecated as of 5.2.4. See class-level note in
+ * {@link ContentNegotiationManagerFactoryBean} on the deprecation of path
+ * extension config options.
  */
+@Deprecated
 public class PathExtensionContentNegotiationStrategy extends AbstractMappingContentNegotiationStrategy {
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();

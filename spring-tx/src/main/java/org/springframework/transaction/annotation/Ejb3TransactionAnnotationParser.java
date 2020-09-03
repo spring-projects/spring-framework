@@ -61,7 +61,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || other instanceof Ejb3TransactionAnnotationParser);
+		return (other instanceof Ejb3TransactionAnnotationParser);
 	}
 
 	@Override

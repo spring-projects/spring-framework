@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -41,24 +43,28 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 5.0.5
  */
-public abstract class AbstractSchedulingTaskExecutorTests {
-
-	static final String THREAD_NAME_PREFIX = "test-";
+abstract class AbstractSchedulingTaskExecutorTests {
 
 	private AsyncListenableTaskExecutor executor;
+
+	protected String testName;
+
+	protected String threadNamePrefix;
 
 	private volatile Object outcome;
 
 
 	@BeforeEach
-	public void initExecutor() {
-		executor = buildExecutor();
+	void setUp(TestInfo testInfo) {
+		this.testName = testInfo.getTestMethod().get().getName();
+		this.threadNamePrefix = this.testName + "-";
+		this.executor = buildExecutor();
 	}
 
 	protected abstract AsyncListenableTaskExecutor buildExecutor();
 
 	@AfterEach
-	public void shutdownExecutor() throws Exception {
+	void shutdownExecutor() throws Exception {
 		if (executor instanceof DisposableBean) {
 			((DisposableBean) executor).destroy();
 		}
@@ -66,23 +72,28 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 
 
 	@Test
-	public void executeRunnable() {
-		TestTask task = new TestTask(1);
+	void executeRunnable() {
+		TestTask task = new TestTask(this.testName, 1);
 		executor.execute(task);
 		await(task);
 		assertThreadNamePrefix(task);
 	}
 
 	@Test
-	public void executeFailingRunnable() {
-		TestTask task = new TestTask(0);
+	void executeFailingRunnable() {
+		TestTask task = new TestTask(this.testName, 0);
 		executor.execute(task);
-		// nothing to assert
+		Awaitility.await()
+			.dontCatchUncaughtExceptions()
+			.atMost(1, TimeUnit.SECONDS)
+			.pollInterval(10, TimeUnit.MILLISECONDS)
+			.until(() -> task.exception.get() != null && task.exception.get().getMessage().equals(
+				"TestTask failure for test 'executeFailingRunnable': expectedRunCount:<0>, actualRunCount:<1>"));
 	}
 
 	@Test
-	public void submitRunnable() throws Exception {
-		TestTask task = new TestTask(1);
+	void submitRunnable() throws Exception {
+		TestTask task = new TestTask(this.testName, 1);
 		Future<?> future = executor.submit(task);
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
 		assertThat(result).isNull();
@@ -90,8 +101,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitFailingRunnable() throws Exception {
-		TestTask task = new TestTask(0);
+	void submitFailingRunnable() throws Exception {
+		TestTask task = new TestTask(this.testName, 0);
 		Future<?> future = executor.submit(task);
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				future.get(1000, TimeUnit.MILLISECONDS));
@@ -99,9 +110,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitRunnableWithGetAfterShutdown() throws Exception {
-		Future<?> future1 = executor.submit(new TestTask(-1));
-		Future<?> future2 = executor.submit(new TestTask(-1));
+	void submitRunnableWithGetAfterShutdown() throws Exception {
+		Future<?> future1 = executor.submit(new TestTask(this.testName, -1));
+		Future<?> future2 = executor.submit(new TestTask(this.testName, -1));
 		shutdownExecutor();
 		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
 			future1.get(1000, TimeUnit.MILLISECONDS);
@@ -110,8 +121,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitListenableRunnable() throws Exception {
-		TestTask task = new TestTask(1);
+	void submitListenableRunnable() throws Exception {
+		TestTask task = new TestTask(this.testName, 1);
 		// Act
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
@@ -125,8 +136,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitFailingListenableRunnable() throws Exception {
-		TestTask task = new TestTask(0);
+	void submitFailingListenableRunnable() throws Exception {
+		TestTask task = new TestTask(this.testName, 0);
 		ListenableFuture<?> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
 
@@ -139,9 +150,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitListenableRunnableWithGetAfterShutdown() throws Exception {
-		ListenableFuture<?> future1 = executor.submitListenable(new TestTask(-1));
-		ListenableFuture<?> future2 = executor.submitListenable(new TestTask(-1));
+	void submitListenableRunnableWithGetAfterShutdown() throws Exception {
+		ListenableFuture<?> future1 = executor.submitListenable(new TestTask(this.testName, -1));
+		ListenableFuture<?> future2 = executor.submitListenable(new TestTask(this.testName, -1));
 		shutdownExecutor();
 
 		try {
@@ -159,16 +170,16 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitCallable() throws Exception {
-		TestCallable task = new TestCallable(1);
+	void submitCallable() throws Exception {
+		TestCallable task = new TestCallable(this.testName, 1);
 		Future<String> future = executor.submit(task);
 		String result = future.get(1000, TimeUnit.MILLISECONDS);
-		assertThat(result.substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+		assertThat(result.substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	@Test
-	public void submitFailingCallable() throws Exception {
-		TestCallable task = new TestCallable(0);
+	void submitFailingCallable() throws Exception {
+		TestCallable task = new TestCallable(this.testName, 0);
 		Future<String> future = executor.submit(task);
 		assertThatExceptionOfType(ExecutionException.class).isThrownBy(() ->
 				future.get(1000, TimeUnit.MILLISECONDS));
@@ -176,9 +187,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitCallableWithGetAfterShutdown() throws Exception {
-		Future<?> future1 = executor.submit(new TestCallable(-1));
-		Future<?> future2 = executor.submit(new TestCallable(-1));
+	void submitCallableWithGetAfterShutdown() throws Exception {
+		Future<?> future1 = executor.submit(new TestCallable(this.testName, -1));
+		Future<?> future2 = executor.submit(new TestCallable(this.testName, -1));
 		shutdownExecutor();
 
 		try {
@@ -196,8 +207,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitListenableCallable() throws Exception {
-		TestCallable task = new TestCallable(1);
+	void submitListenableCallable() throws Exception {
+		TestCallable task = new TestCallable(this.testName, 1);
 		// Act
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
@@ -206,12 +217,12 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 					.atMost(1, TimeUnit.SECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> future.isDone() && outcome != null);
-		assertThat(outcome.toString().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+		assertThat(outcome.toString().substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	@Test
-	public void submitFailingListenableCallable() throws Exception {
-		TestCallable task = new TestCallable(0);
+	void submitFailingListenableCallable() throws Exception {
+		TestCallable task = new TestCallable(this.testName, 0);
 		// Act
 		ListenableFuture<String> future = executor.submitListenable(task);
 		future.addCallback(result -> outcome = result, ex -> outcome = ex);
@@ -225,9 +236,9 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	public void submitListenableCallableWithGetAfterShutdown() throws Exception {
-		ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(-1));
-		ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(-1));
+	void submitListenableCallableWithGetAfterShutdown() throws Exception {
+		ListenableFuture<?> future1 = executor.submitListenable(new TestCallable(this.testName, -1));
+		ListenableFuture<?> future2 = executor.submitListenable(new TestCallable(this.testName, -1));
 		shutdownExecutor();
 		assertThatExceptionOfType(CancellationException.class).isThrownBy(() -> {
 			future1.get(1000, TimeUnit.MILLISECONDS);
@@ -236,8 +247,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 
-	private void assertThreadNamePrefix(TestTask task) {
-		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
+	protected void assertThreadNamePrefix(TestTask task) {
+		assertThat(task.lastThread.getName().substring(0, this.threadNamePrefix.length())).isEqualTo(this.threadNamePrefix);
 	}
 
 	private void await(TestTask task) {
@@ -255,17 +266,22 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 
-	private static class TestTask implements Runnable {
+	static class TestTask implements Runnable {
 
 		private final int expectedRunCount;
 
+		private final String testName;
+
 		private final AtomicInteger actualRunCount = new AtomicInteger();
 
-		private final CountDownLatch latch;
+		private final AtomicReference<Exception> exception = new AtomicReference<>();
 
-		private Thread lastThread;
+		final CountDownLatch latch;
 
-		TestTask(int expectedRunCount) {
+		Thread lastThread;
+
+		TestTask(String testName, int expectedRunCount) {
+			this.testName = testName;
 			this.expectedRunCount = expectedRunCount;
 			this.latch = (expectedRunCount > 0 ? new CountDownLatch(expectedRunCount) : null);
 		}
@@ -280,7 +296,10 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {
-					throw new RuntimeException("intentional test failure");
+					RuntimeException exception = new RuntimeException(String.format("%s failure for test '%s': expectedRunCount:<%d>, actualRunCount:<%d>",
+						getClass().getSimpleName(), this.testName, expectedRunCount, actualRunCount.get()));
+					this.exception.set(exception);
+					throw exception;
 				}
 				latch.countDown();
 			}
@@ -288,13 +307,16 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 	}
 
 
-	private static class TestCallable implements Callable<String> {
+	static class TestCallable implements Callable<String> {
+
+		private final String testName;
 
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
 
-		TestCallable(int expectedRunCount) {
+		TestCallable(String testName, int expectedRunCount) {
+			this.testName = testName;
 			this.expectedRunCount = expectedRunCount;
 		}
 
@@ -307,7 +329,8 @@ public abstract class AbstractSchedulingTaskExecutorTests {
 			}
 			if (expectedRunCount >= 0) {
 				if (actualRunCount.incrementAndGet() > expectedRunCount) {
-					throw new RuntimeException("intentional test failure");
+					throw new RuntimeException(String.format("%s failure for test '%s': expectedRunCount:<%d>, actualRunCount:<%d>",
+						getClass().getSimpleName(), this.testName, expectedRunCount, actualRunCount.get()));
 				}
 			}
 			return Thread.currentThread().getName();

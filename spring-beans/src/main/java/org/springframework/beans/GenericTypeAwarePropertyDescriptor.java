@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,13 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	@Nullable
 	private Class<?> propertyType;
 
+	@Nullable
 	private final Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
-			@Nullable Method readMethod, @Nullable Method writeMethod, Class<?> propertyEditorClass)
-			throws IntrospectionException {
+			@Nullable Method readMethod, @Nullable Method writeMethod,
+			@Nullable Class<?> propertyEditorClass) throws IntrospectionException {
 
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
@@ -156,6 +157,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getPropertyEditorClass() {
 		return this.propertyEditorClass;
 	}

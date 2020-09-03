@@ -18,10 +18,10 @@ package org.springframework.test.context.junit4.annotation;
 
 import org.junit.Test;
 
+import org.springframework.beans.testfixture.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.tests.sample.beans.Employee;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

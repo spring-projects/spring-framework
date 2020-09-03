@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.util.StringUtils;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  * @see StandardEvaluationContext
  * @see SimpleEvaluationContext
@@ -765,8 +766,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 
 			if (this.member instanceof Method) {
-				mv.visitMethodInsn((isStatic ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, this.member.getName(),
-						CodeFlow.createSignatureDescriptor((Method) this.member), false);
+				Method method = (Method) this.member;
+				boolean isInterface = method.getDeclaringClass().isInterface();
+				int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
+				mv.visitMethodInsn(opcode, classDesc, method.getName(),
+						CodeFlow.createSignatureDescriptor(method), isInterface);
 			}
 			else {
 				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, this.member.getName(),

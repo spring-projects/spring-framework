@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * An interceptor that exposes the {@link ResourceUrlProvider} instance it
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class ResourceUrlProviderExposingInterceptor extends HandlerInterceptorAdapter {
+public class ResourceUrlProviderExposingInterceptor implements HandlerInterceptor {
 
 	/**
 	 * Name of the request attribute that holds the {@link ResourceUrlProvider}.

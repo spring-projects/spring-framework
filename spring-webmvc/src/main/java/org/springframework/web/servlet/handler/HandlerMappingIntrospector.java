@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -44,6 +46,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Helper class to get information from the {@code HandlerMapping} that would
@@ -57,6 +60,12 @@ import org.springframework.web.servlet.HandlerMapping;
  * request.
  * </ul>
  *
+ * <p><strong>Note:</strong> This is primarily an SPI to allow Spring Security
+ * to align its pattern matching with the same pattern matching that would be
+ * used in Spring MVC for a given request, in order to avoid security issues.
+ * Use of this introspector should be avoided for other purposes because it
+ * incurs the overhead of resolving the handler for a request.
+ *
  * @author Rossen Stoyanchev
  * @since 4.3.1
  */
@@ -68,6 +77,10 @@ public class HandlerMappingIntrospector
 
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
+
+	@Nullable
+	private Map<HandlerMapping, MatchableHandlerMapping> pathPatternMatchableHandlerMappings =
+			new ConcurrentHashMap<>();
 
 
 	/**
@@ -89,7 +102,7 @@ public class HandlerMappingIntrospector
 
 
 	/**
-	 * Return the configured HandlerMapping's.
+	 * Return the configured or detected HandlerMapping's.
 	 */
 	public List<HandlerMapping> getHandlerMappings() {
 		return (this.handlerMappings != null ? this.handlerMappings : Collections.emptyList());
@@ -106,6 +119,7 @@ public class HandlerMappingIntrospector
 		if (this.handlerMappings == null) {
 			Assert.notNull(this.applicationContext, "No ApplicationContext");
 			this.handlerMappings = initHandlerMappings(this.applicationContext);
+			this.pathPatternMatchableHandlerMappings = initPathPatternMatchableHandlerMappings(this.handlerMappings);
 		}
 	}
 
@@ -123,6 +137,7 @@ public class HandlerMappingIntrospector
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
+		Assert.notNull(this.pathPatternMatchableHandlerMappings, "Handler mappings with PathPatterns not initialized");
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			Object handler = handlerMapping.getHandler(wrapper);
@@ -130,7 +145,8 @@ public class HandlerMappingIntrospector
 				continue;
 			}
 			if (handlerMapping instanceof MatchableHandlerMapping) {
-				return ((MatchableHandlerMapping) handlerMapping);
+				return this.pathPatternMatchableHandlerMappings.getOrDefault(
+						handlerMapping, (MatchableHandlerMapping) handlerMapping);
 			}
 			throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
 		}
@@ -141,7 +157,7 @@ public class HandlerMappingIntrospector
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
-		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
+		RequestAttributeChangeIgnoringWrapper wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			HandlerExecutionChain handler = null;
 			try {
@@ -153,11 +169,9 @@ public class HandlerMappingIntrospector
 			if (handler == null) {
 				continue;
 			}
-			if (handler.getInterceptors() != null) {
-				for (HandlerInterceptor interceptor : handler.getInterceptors()) {
-					if (interceptor instanceof CorsConfigurationSource) {
-						return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
-					}
+			for (HandlerInterceptor interceptor : handler.getInterceptorList()) {
+				if (interceptor instanceof CorsConfigurationSource) {
+					return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
 				}
 			}
 			if (handler.getHandler() instanceof CorsConfigurationSource) {
@@ -189,7 +203,6 @@ public class HandlerMappingIntrospector
 		catch (IOException ex) {
 			throw new IllegalStateException("Could not load '" + path + "': " + ex.getMessage());
 		}
-
 		String value = props.getProperty(HandlerMapping.class.getName());
 		String[] names = StringUtils.commaDelimitedListToStringArray(value);
 		List<HandlerMapping> result = new ArrayList<>(names.length);
@@ -206,20 +219,32 @@ public class HandlerMappingIntrospector
 		return result;
 	}
 
+	private static Map<HandlerMapping, MatchableHandlerMapping> initPathPatternMatchableHandlerMappings(
+			List<HandlerMapping> mappings) {
+
+		return mappings.stream()
+				.filter(mapping -> mapping instanceof MatchableHandlerMapping)
+				.map(mapping -> (MatchableHandlerMapping) mapping)
+				.filter(mapping -> mapping.getPatternParser() != null)
+				.collect(Collectors.toMap(mapping -> mapping, PathPatternMatchableHandlerMapping::new));
+	}
+
 
 	/**
 	 * Request wrapper that ignores request attribute changes.
 	 */
 	private static class RequestAttributeChangeIgnoringWrapper extends HttpServletRequestWrapper {
 
-		public RequestAttributeChangeIgnoringWrapper(HttpServletRequest request) {
+		RequestAttributeChangeIgnoringWrapper(HttpServletRequest request) {
 			super(request);
 		}
 
 		@Override
 		public void setAttribute(String name, Object value) {
-			// Ignore attribute change...
+			// Allow UrlPathHelper-resolved lookupPath to be saved for efficiency
+			if (name.equals(UrlPathHelper.PATH_ATTRIBUTE)) {
+				super.setAttribute(name, value);
+			}
 		}
 	}
-
 }

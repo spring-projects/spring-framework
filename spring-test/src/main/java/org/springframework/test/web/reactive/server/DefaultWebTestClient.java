@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,8 +306,8 @@ class DefaultWebTestClient implements WebTestClient {
 		public ResponseSpec exchange() {
 			ClientResponse clientResponse = this.bodySpec.exchange().block(getTimeout());
 			Assert.state(clientResponse != null, "No ClientResponse");
-			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+			ExchangeResult result = wiretapConnector.getExchangeResult(this.requestId, this.uriTemplate, getTimeout());
+			return new DefaultResponseSpec(result, clientResponse, getTimeout());
 		}
 	}
 
@@ -321,10 +321,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 
-		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
-				@Nullable String uriTemplate, Duration timeout) {
-
-			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
+		DefaultResponseSpec(ExchangeResult exchangeResult, ClientResponse response, Duration timeout) {
+			this.exchangeResult = exchangeResult;
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -337,6 +335,11 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public HeaderAssertions expectHeader() {
 			return new HeaderAssertions(this.exchangeResult, this);
+		}
+
+		@Override
+		public CookieAssertions expectCookie() {
+			return new CookieAssertions(this.exchangeResult, this);
 		}
 
 		@Override
@@ -380,7 +383,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
-			Flux<T> body = this.response.bodyToFlux(elementClass);
+			Flux<T> body;
+			if (elementClass.equals(Void.class)) {
+				this.response.releaseBody().block();
+				body = Flux.empty();
+			}
+			else {
+				body = this.response.bodyToFlux(elementClass);
+			}
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
@@ -412,13 +422,13 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Matcher<B> matcher) {
+		public <T extends S> T value(Matcher<? super B> matcher) {
 			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
 			return self();
 		}
 
 		@Override
-		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher) {
+		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
 				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);

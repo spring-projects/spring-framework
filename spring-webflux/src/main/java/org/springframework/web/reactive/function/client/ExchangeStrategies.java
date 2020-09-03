@@ -47,6 +47,15 @@ public interface ExchangeStrategies {
 	 */
 	List<HttpMessageWriter<?>> messageWriters();
 
+	/**
+	 * Return a builder to create a new {@link ExchangeStrategies} instance
+	 * replicated from the current instance.
+	 * @since 5.1.12
+	 */
+	default Builder mutate() {
+		throw new UnsupportedOperationException();
+	}
+
 
 	// Static builder methods
 

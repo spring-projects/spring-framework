@@ -1,8 +1,0 @@
-buildCache {
-	local {
-		enabled = true
-	}
-	remote(HttpBuildCache) {
-		enabled = false
-	}
-}

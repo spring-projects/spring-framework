@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.tests.EnabledForTestGroups;
+import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.tests.sample.objects.TestObject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.tests.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Rob Harrop
@@ -362,7 +362,7 @@ class ReflectionUtilsTests {
 	}
 
 	@Test
-	void getDecalredMethodsReturnsCopy() {
+	void getDeclaredMethodsReturnsCopy() {
 		Method[] m1 = ReflectionUtils.getDeclaredMethods(A.class);
 		Method[] m2 = ReflectionUtils.getDeclaredMethods(A.class);
 		assertThat(m1). isNotSameAs(m2);
@@ -370,9 +370,9 @@ class ReflectionUtilsTests {
 
 	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
 
-		private List<String> methodNames = new LinkedList<>();
+		private List<String> methodNames = new ArrayList<>();
 
-		private List<Method> methods = new LinkedList<>();
+		private List<Method> methods = new ArrayList<>();
 
 		@Override
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {

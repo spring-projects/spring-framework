@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * A {@code MockMvcBuilder} that accepts {@code @Controller} registrations
@@ -125,6 +126,9 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	@Nullable
 	private FlashMapManager flashMapManager;
+
+	@Nullable
+	private PathPatternParser patternParser;
 
 	private boolean useSuffixPatternMatch = true;
 
@@ -213,7 +217,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 			@Nullable String[] pathPatterns, HandlerInterceptor... interceptors) {
 
 		for (HandlerInterceptor interceptor : interceptors) {
-			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, interceptor));
+			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, null, interceptor));
 		}
 		return this;
 	}
@@ -307,10 +311,25 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	}
 
 	/**
+	 * Enable URL path matching with parsed
+	 * {@link org.springframework.web.util.pattern.PathPattern PathPatterns}
+	 * instead of String pattern matching with a {@link org.springframework.util.PathMatcher}.
+	 * @param parser the parser to use
+	 * @since 5.3
+	 */
+	public void setPatternParser(PathPatternParser parser) {
+		this.patternParser = parser;
+	}
+
+	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>The default value is {@code true}.
+	 * @deprecated as of 5.2.4. See class-level note in
+	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
+	 * config options.
 	 */
+	@Deprecated
 	public StandaloneMockMvcBuilder setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		return this;
@@ -442,18 +461,25 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	/** Using the MVC Java configuration as the starting point for the "standalone" setup. */
 	private class StandaloneConfiguration extends WebMvcConfigurationSupport {
 
+		@SuppressWarnings("deprecation")
 		public RequestMappingHandlerMapping getHandlerMapping(
 				FormattingConversionService mvcConversionService,
 				ResourceUrlProvider mvcResourceUrlProvider) {
+
 			RequestMappingHandlerMapping handlerMapping = handlerMappingFactory.get();
 			handlerMapping.setEmbeddedValueResolver(new StaticStringValueResolver(placeholderValues));
-			handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+			if (patternParser != null) {
+				handlerMapping.setPatternParser(patternParser);
+			}
+			else {
+				handlerMapping.setUseSuffixPatternMatch(useSuffixPatternMatch);
+				if (removeSemicolonContent != null) {
+					handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
+				}
+			}
 			handlerMapping.setUseTrailingSlashMatch(useTrailingSlashPatternMatch);
 			handlerMapping.setOrder(0);
 			handlerMapping.setInterceptors(getInterceptors(mvcConversionService, mvcResourceUrlProvider));
-			if (removeSemicolonContent != null) {
-				handlerMapping.setRemoveSemicolonContent(removeSemicolonContent);
-			}
 			return handlerMapping;
 		}
 

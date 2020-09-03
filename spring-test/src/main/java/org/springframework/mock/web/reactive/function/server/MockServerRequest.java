@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,9 @@ public final class MockServerRequest implements ServerRequest {
 	@Nullable
 	private final InetSocketAddress remoteAddress;
 
+	@Nullable
+	private final InetSocketAddress localAddress;
+
 	private final List<HttpMessageReader<?>> messageReaders;
 
 	@Nullable
@@ -103,8 +106,8 @@ public final class MockServerRequest implements ServerRequest {
 			MultiValueMap<String, HttpCookie> cookies, @Nullable Object body,
 			Map<String, Object> attributes, MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables, @Nullable WebSession session, @Nullable Principal principal,
-			@Nullable InetSocketAddress remoteAddress, List<HttpMessageReader<?>> messageReaders,
-			@Nullable ServerWebExchange exchange) {
+			@Nullable InetSocketAddress remoteAddress, @Nullable InetSocketAddress localAddress,
+			List<HttpMessageReader<?>> messageReaders, @Nullable ServerWebExchange exchange) {
 
 		this.method = method;
 		this.uri = uri;
@@ -118,6 +121,7 @@ public final class MockServerRequest implements ServerRequest {
 		this.session = session;
 		this.principal = principal;
 		this.remoteAddress = remoteAddress;
+		this.localAddress = localAddress;
 		this.messageReaders = messageReaders;
 		this.exchange = exchange;
 	}
@@ -161,6 +165,11 @@ public final class MockServerRequest implements ServerRequest {
 	@Override
 	public Optional<InetSocketAddress> remoteAddress() {
 		return Optional.ofNullable(this.remoteAddress);
+	}
+
+	@Override
+	public Optional<InetSocketAddress> localAddress() {
+		return Optional.ofNullable(this.localAddress);
 	}
 
 	@Override
@@ -303,6 +312,8 @@ public final class MockServerRequest implements ServerRequest {
 
 		Builder remoteAddress(InetSocketAddress remoteAddress);
 
+		Builder localAddress(InetSocketAddress localAddress);
+
 		Builder messageReaders(List<HttpMessageReader<?>> messageReaders);
 
 		Builder exchange(ServerWebExchange exchange);
@@ -342,6 +353,9 @@ public final class MockServerRequest implements ServerRequest {
 
 		@Nullable
 		private InetSocketAddress remoteAddress;
+
+		@Nullable
+		private InetSocketAddress localAddress;
 
 		private List<HttpMessageReader<?>> messageReaders = HandlerStrategies.withDefaults().messageReaders();
 
@@ -471,6 +485,13 @@ public final class MockServerRequest implements ServerRequest {
 		}
 
 		@Override
+		public Builder localAddress(InetSocketAddress localAddress) {
+			Assert.notNull(localAddress, "'localAddress' must not be null");
+			this.localAddress = localAddress;
+			return this;
+		}
+
+		@Override
 		public Builder messageReaders(List<HttpMessageReader<?>> messageReaders) {
 			Assert.notNull(messageReaders, "'messageReaders' must not be null");
 			this.messageReaders = messageReaders;
@@ -489,16 +510,16 @@ public final class MockServerRequest implements ServerRequest {
 			this.body = body;
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, this.body, this.attributes, this.queryParams, this.pathVariables,
-					this.session, this.principal, this.remoteAddress, this.messageReaders,
-					this.exchange);
+					this.session, this.principal, this.remoteAddress, this.localAddress,
+					this.messageReaders, this.exchange);
 		}
 
 		@Override
 		public MockServerRequest build() {
 			return new MockServerRequest(this.method, this.uri, this.contextPath, this.headers,
 					this.cookies, null, this.attributes, this.queryParams, this.pathVariables,
-					this.session, this.principal, this.remoteAddress, this.messageReaders,
-					this.exchange);
+					this.session, this.principal, this.remoteAddress, this.localAddress,
+					this.messageReaders, this.exchange);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private boolean bodyUsed = false;
 
+	@Nullable
+	private HttpHeaders readOnlyHeaders;
+
 
 	/**
 	 * Construct a new instance of the ServletServerHttpResponse based on the given {@link HttpServletResponse}.
@@ -74,7 +77,16 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		if (this.readOnlyHeaders != null) {
+			return this.readOnlyHeaders;
+		}
+		else if (this.headersWritten) {
+			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			return this.readOnlyHeaders;
+		}
+		else {
+			return this.headers;
+		}
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	/**
 	 * Initialize this instance.
 	 */
-	void init(ApplicationContext applicationContext, EventExpressionEvaluator evaluator) {
+	void init(ApplicationContext applicationContext, @Nullable EventExpressionEvaluator evaluator) {
 		this.applicationContext = applicationContext;
 		this.evaluator = evaluator;
 	}
@@ -295,6 +295,11 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	protected Object doInvoke(Object... args) {
 		Object bean = getTargetBean();
+		// Detect package-protected NullBean instance through equals(null) check
+		if (bean.equals(null)) {
+			return null;
+		}
+
 		ReflectionUtils.makeAccessible(this.method);
 		try {
 			return this.method.invoke(bean, args);

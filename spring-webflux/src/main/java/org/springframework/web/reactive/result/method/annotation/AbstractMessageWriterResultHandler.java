@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import kotlin.reflect.KFunction;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -36,6 +37,8 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.HandlerResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -163,7 +166,9 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
-		if (contentType != null && contentType.equals(bestMediaType)) {
+		boolean isPresentMediaType = (contentType != null && contentType.equals(bestMediaType));
+		Set<MediaType> producibleTypes = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (isPresentMediaType || !CollectionUtils.isEmpty(producibleTypes)) {
 			return Mono.error(new HttpMessageNotWritableException(
 					"No Encoder for [" + elementType + "] with preset Content-Type '" + contentType + "'"));
 		}
@@ -204,7 +209,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(Method method) {
+		private static boolean isSuspend(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			return function != null && function.isSuspend();
 		}

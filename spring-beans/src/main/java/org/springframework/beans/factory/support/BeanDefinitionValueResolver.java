@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -400,9 +400,10 @@ class BeanDefinitionValueResolver {
 	private String adaptInnerBeanName(String innerBeanName) {
 		String actualInnerBeanName = innerBeanName;
 		int counter = 0;
+		String prefix = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR;
 		while (this.beanFactory.isBeanNameInUse(actualInnerBeanName)) {
 			counter++;
-			actualInnerBeanName = innerBeanName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
+			actualInnerBeanName = prefix + counter;
 		}
 		return actualInnerBeanName;
 	}
@@ -446,7 +447,7 @@ class BeanDefinitionValueResolver {
 	 * For each element in the managed map, resolve reference if necessary.
 	 */
 	private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
-		Map<Object, Object> resolved = new LinkedHashMap<>(mm.size());
+		Map<Object, Object> resolved = CollectionUtils.newLinkedHashMap(mm.size());
 		mm.forEach((key, value) -> {
 			Object resolvedKey = resolveValueIfNecessary(argName, key);
 			Object resolvedValue = resolveValueIfNecessary(new KeyedArgName(argName, key), value);

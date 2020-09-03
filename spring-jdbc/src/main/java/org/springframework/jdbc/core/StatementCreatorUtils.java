@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,7 +312,6 @@ public abstract class StatementCreatorUtils {
 				else {
 					ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
 				}
-				return;
 			}
 			else {
 				// Fallback: setString or setNString binding
@@ -460,11 +459,16 @@ public abstract class StatementCreatorUtils {
 	public static void cleanupParameters(@Nullable Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
-				if (inValue instanceof DisposableSqlTypeValue) {
-					((DisposableSqlTypeValue) inValue).cleanup();
+				// Unwrap SqlParameterValue first...
+				if (inValue instanceof SqlParameterValue) {
+					inValue = ((SqlParameterValue) inValue).getValue();
 				}
-				else if (inValue instanceof SqlValue) {
+				// Check for disposable value types
+				if (inValue instanceof SqlValue) {
 					((SqlValue) inValue).cleanup();
+				}
+				else if (inValue instanceof DisposableSqlTypeValue) {
+					((DisposableSqlTypeValue) inValue).cleanup();
 				}
 			}
 		}

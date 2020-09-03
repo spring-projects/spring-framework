@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public abstract class DataAccessUtils {
 			if (String.class == requiredType) {
 				result = result.toString();
 			}
-			else if (Number.class.isAssignableFrom(requiredType) && Number.class.isInstance(result)) {
+			else if (Number.class.isAssignableFrom(requiredType) && result instanceof Number) {
 				try {
 					result = NumberUtils.convertNumberToTargetClass(((Number) result), (Class<? extends Number>) requiredType);
 				}
