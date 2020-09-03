@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,6 @@ public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 
 	private final String method;
@@ -697,7 +695,7 @@ public class MockHttpServletRequestBuilder
 			}
 			String extraPath = requestUri.substring(this.contextPath.length() + this.servletPath.length());
 			this.pathInfo = (StringUtils.hasText(extraPath) ?
-					urlPathHelper.decodeRequestString(request, extraPath) : null);
+					UrlPathHelper.defaultInstance.decodeRequestString(request, extraPath) : null);
 		}
 		request.setPathInfo(this.pathInfo);
 	}

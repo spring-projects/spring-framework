@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,13 +74,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
 	private static final UrlPathHelper DECODING_URL_PATH_HELPER = new UrlPathHelper();
-
-	private static final UrlPathHelper RAW_URL_PATH_HELPER = new UrlPathHelper();
-
-	static {
-		RAW_URL_PATH_HELPER.setRemoveSemicolonContent(false);
-		RAW_URL_PATH_HELPER.setUrlDecode(false);
-	}
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
@@ -364,7 +357,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		HttpServletRequest servletRequest = request.getServletRequest();
-		String requestUri = RAW_URL_PATH_HELPER.getOriginatingRequestUri(servletRequest);
+		String requestUri = UrlPathHelper.rawPathInstance.getOriginatingRequestUri(servletRequest);
 
 		int index = requestUri.lastIndexOf('/') + 1;
 		String filename = requestUri.substring(index);
@@ -376,10 +369,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			filename = filename.substring(0, index);
 		}
 
-		filename = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, filename);
+		filename = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, filename);
 		String ext = StringUtils.getFilenameExtension(filename);
 
-		pathParams = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, pathParams);
+		pathParams = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, pathParams);
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
