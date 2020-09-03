@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
 package org.springframework.jdbc.support;
 
 import java.sql.BatchUpdateException;
+import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
@@ -36,6 +41,9 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.lang.Nullable;
 
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Rod Johnson
@@ -179,6 +187,30 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 		// Shouldn't custom translate this - invalid class
 		exception.expect(IllegalArgumentException.class);
 		customTranslation.setExceptionClass(String.class);
+	}
+
+	@Test
+	public void dataSourceInitialization() throws Exception {
+		SQLException connectionException = new SQLException();
+		SQLException duplicateKeyException = new SQLException("test", "", 1);
+
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willThrow(connectionException);
+
+		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+		assertFalse(sext.translate("test", null, duplicateKeyException) instanceof DuplicateKeyException);
+
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
+
+		Connection connection = mock(Connection.class);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+
+		Mockito.reset(dataSource);
+		given(dataSource.getConnection()).willReturn(connection);
+		assertTrue(sext.translate("test", null, duplicateKeyException) instanceof DuplicateKeyException);
+
+		verify(connection).close();
 	}
 
 }

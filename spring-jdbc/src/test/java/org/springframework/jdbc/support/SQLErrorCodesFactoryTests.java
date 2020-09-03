@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class SQLErrorCodesFactoryTests {
 
@@ -238,7 +239,11 @@ public class SQLErrorCodesFactoryTests {
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
+		verify(connection).close();
 
+		reset(connection);
+		sec = SQLErrorCodesFactory.getInstance().resolveErrorCodes(dataSource);
+		assertNull(sec);
 		verify(connection).close();
 	}
 
@@ -251,12 +256,9 @@ public class SQLErrorCodesFactoryTests {
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
-	}
 
-	private void assertIsEmpty(SQLErrorCodes sec) {
-		// Codes should be empty
-		assertEquals(0, sec.getBadSqlGrammarCodes().length);
-		assertEquals(0, sec.getDataIntegrityViolationCodes().length);
+		sec = SQLErrorCodesFactory.getInstance().resolveErrorCodes(dataSource);
+		assertNull(sec);
 	}
 
 	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
@@ -269,16 +271,8 @@ public class SQLErrorCodesFactoryTests {
 		DataSource dataSource = mock(DataSource.class);
 		given(dataSource.getConnection()).willReturn(connection);
 
-		SQLErrorCodesFactory secf = null;
-		if (factory != null) {
-			secf = factory;
-		}
-		else {
-			secf = SQLErrorCodesFactory.getInstance();
-		}
-
+		SQLErrorCodesFactory secf = (factory != null ? factory : SQLErrorCodesFactory.getInstance());
 		SQLErrorCodes sec = secf.getErrorCodes(dataSource);
-
 
 		SQLErrorCodes sec2 = secf.getErrorCodes(dataSource);
 		assertSame("Cached per DataSource", sec2, sec);
@@ -372,6 +366,11 @@ public class SQLErrorCodesFactoryTests {
 		assertIsEmpty(sec);
 		sec = getErrorCodesFromDataSource("/DB0/", factory);
 		assertIsEmpty(sec);
+	}
+
+	private void assertIsEmpty(SQLErrorCodes sec) {
+		assertEquals(0, sec.getBadSqlGrammarCodes().length);
+		assertEquals(0, sec.getDataIntegrityViolationCodes().length);
 	}
 
 }

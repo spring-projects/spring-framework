@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,18 +299,19 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Extract database meta-data via the given DatabaseMetaDataCallback.
-	 * <p>This method will open a connection to the database and retrieve the database meta-data.
-	 * Since this method is called before the exception translation feature is configured for
-	 * a datasource, this method can not rely on the SQLException translation functionality.
-	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked exception
-	 * and any calling code should catch and handle this exception. You can just log the
-	 * error and hope for the best, but there is probably a more serious error that will
-	 * reappear when you try to access the database again.
+	 * <p>This method will open a connection to the database and retrieve its meta-data.
+	 * Since this method is called before the exception translation feature is configured
+	 * for a DataSource, this method can not rely on SQLException translation itself.
+	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked
+	 * exception and any calling code should catch and handle this exception. You can just
+	 * log the error and hope for the best, but there is probably a more serious error that
+	 * will reappear when you try to access the database again.
 	 * @param dataSource the DataSource to extract meta-data for
 	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information, as returned by
 	 * the DatabaseMetaDataCallback's {@code processMetaData} method
 	 * @throws MetaDataAccessException if meta-data access failed
+	 * @see java.sql.DatabaseMetaData
 	 */
 	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
 			throws MetaDataAccessException {
@@ -318,7 +319,24 @@ public abstract class JdbcUtils {
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(dataSource);
-			DatabaseMetaData metaData = con.getMetaData();
+			DatabaseMetaData metaData;
+			try {
+				metaData = con.getMetaData();
+			}
+			catch (SQLException ex) {
+				if (DataSourceUtils.isConnectionTransactional(con, dataSource)) {
+					// Probably a closed thread-bound Connection - retry against fresh Connection
+					DataSourceUtils.releaseConnection(con, dataSource);
+					con = null;
+					logger.debug("Failed to obtain DatabaseMetaData from transactional Connection - " +
+							"retrying against fresh Connection", ex);
+					con = dataSource.getConnection();
+					metaData = con.getMetaData();
+				}
+				else {
+					throw ex;
+				}
+			}
 			if (metaData == null) {
 				// should only happen in test environments
 				throw new MetaDataAccessException("DatabaseMetaData returned by Connection [" + con + "] was null");
