@@ -154,7 +154,6 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		Map<String, Object> handlerMappings = this.handlerMappings;
 		if (handlerMappings == null) {
 			synchronized (this) {
-				handlerMappings = this.handlerMappings;
 				if (handlerMappings == null) {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
