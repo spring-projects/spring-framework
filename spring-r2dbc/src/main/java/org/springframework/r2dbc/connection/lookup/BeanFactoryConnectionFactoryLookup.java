@@ -72,6 +72,7 @@ public class BeanFactoryConnectionFactoryLookup implements ConnectionFactoryLook
 	@Override
 	public ConnectionFactory getConnectionFactory(String connectionFactoryName)
 			throws ConnectionFactoryLookupFailureException {
+
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
 			return this.beanFactory.getBean(connectionFactoryName, ConnectionFactory.class);

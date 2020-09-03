@@ -47,11 +47,9 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 
 
 	/**
-	 * The {@link ConnectionFactory} for the database to populate when this component is initialized and to clean up when
-	 * this component is shut down.
-	 * <p/>
-	 * This property is mandatory with no default provided.
-	 *
+	 * The {@link ConnectionFactory} for the database to populate when this
+	 * component is initialized and to clean up when this component is shut down.
+	 * <p>This property is mandatory with no default provided.
 	 * @param connectionFactory the R2DBC {@link ConnectionFactory}.
 	 */
 	public void setConnectionFactory(ConnectionFactory connectionFactory) {
@@ -60,7 +58,6 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 
 	/**
 	 * Set the {@link DatabasePopulator} to execute during the bean initialization phase.
-	 *
 	 * @param databasePopulator the {@link DatabasePopulator} to use during initialization
 	 * @see #setDatabaseCleaner
 	 */
@@ -80,15 +77,15 @@ public class ConnectionFactoryInitializer implements InitializingBean, Disposabl
 	}
 
 	/**
-	 * Flag to explicitly enable or disable the {@link #setDatabasePopulator database populator} and
-	 * {@link #setDatabaseCleaner database cleaner}.
-	 *
-	 * @param enabled {@code true} if the database populator and database cleaner should be called on startup and
-	 *          shutdown, respectively
+	 * Flag to explicitly enable or disable the {@link #setDatabasePopulator database populator}
+	 * and {@link #setDatabaseCleaner database cleaner}.
+	 * @param enabled {@code true} if the database populator and database cleaner
+	 * should be called on startup and shutdown, respectively
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+
 
 	/**
 	 * Use the {@link #setDatabasePopulator database populator} to set up the database.
