@@ -79,18 +79,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 
-	private final UrlPathHelper pathHelper;
-
 	private boolean removeOnly;
 
 	private boolean relativeRedirects;
-
-
-	public ForwardedHeaderFilter() {
-		this.pathHelper = new UrlPathHelper();
-		this.pathHelper.setUrlDecode(false);
-		this.pathHelper.setRemoveSemicolonContent(false);
-	}
 
 
 	/**
@@ -149,7 +140,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 		else {
 			HttpServletRequest wrappedRequest =
-					new ForwardedHeaderExtractingRequest(request, this.pathHelper);
+					new ForwardedHeaderExtractingRequest(request);
 
 			HttpServletResponse wrappedResponse = this.relativeRedirects ?
 					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
@@ -230,7 +221,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final ForwardedPrefixExtractor forwardedPrefixExtractor;
 
 
-		ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
+		ForwardedHeaderExtractingRequest(HttpServletRequest request) {
 			super(request);
 
 			HttpRequest httpRequest = new ServletServerHttpRequest(request);
@@ -244,7 +235,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 			String baseUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port);
 			Supplier<HttpServletRequest> delegateRequest = () -> (HttpServletRequest) getRequest();
-			this.forwardedPrefixExtractor = new ForwardedPrefixExtractor(delegateRequest, pathHelper, baseUrl);
+			this.forwardedPrefixExtractor = new ForwardedPrefixExtractor(delegateRequest, baseUrl);
 		}
 
 
@@ -296,8 +287,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Supplier<HttpServletRequest> delegate;
 
-		private final UrlPathHelper pathHelper;
-
 		private final String baseUrl;
 
 		private String actualRequestUri;
@@ -316,14 +305,10 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		 * @param delegateRequest supplier for the current
 		 * {@link HttpServletRequestWrapper#getRequest() delegate request} which
 		 * may change during a forward (e.g. Tomcat.
-		 * @param pathHelper the path helper instance
 		 * @param baseUrl the host, scheme, and port based on forwarded headers
 		 */
-		public ForwardedPrefixExtractor(
-				Supplier<HttpServletRequest> delegateRequest, UrlPathHelper pathHelper, String baseUrl) {
-
+		public ForwardedPrefixExtractor(Supplier<HttpServletRequest> delegateRequest, String baseUrl) {
 			this.delegate = delegateRequest;
-			this.pathHelper = pathHelper;
 			this.baseUrl = baseUrl;
 			this.actualRequestUri = delegateRequest.get().getRequestURI();
 
@@ -353,7 +338,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Nullable
 		private String initRequestUri() {
 			if (this.forwardedPrefix != null) {
-				return this.forwardedPrefix + this.pathHelper.getPathWithinApplication(this.delegate.get());
+				return this.forwardedPrefix +
+						UrlPathHelper.rawPathInstance.getPathWithinApplication(this.delegate.get());
 			}
 			return null;
 		}

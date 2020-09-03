@@ -121,7 +121,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 			boolean useTrailingSlashMatch, @Nullable List<String> fileExtensions) {
 
 		this.patterns = initPatterns(patterns);
-		this.pathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
+		this.pathHelper = urlPathHelper != null ? urlPathHelper : UrlPathHelper.defaultInstance;
 		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
