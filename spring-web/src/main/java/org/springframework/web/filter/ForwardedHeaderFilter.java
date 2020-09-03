@@ -76,18 +76,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	}
 
 
-	private final UrlPathHelper pathHelper;
-
 	private boolean removeOnly;
 
 	private boolean relativeRedirects;
-
-
-	public ForwardedHeaderFilter() {
-		this.pathHelper = new UrlPathHelper();
-		this.pathHelper.setUrlDecode(false);
-		this.pathHelper.setRemoveSemicolonContent(false);
-	}
 
 
 	/**
@@ -145,7 +136,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			filterChain.doFilter(theRequest, response);
 		}
 		else {
-			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request, this.pathHelper);
+			HttpServletRequest theRequest = new ForwardedHeaderExtractingRequest(request);
 			HttpServletResponse theResponse = (this.relativeRedirects ?
 					RelativeRedirectResponseWrapper.wrapIfNecessary(response, HttpStatus.SEE_OTHER) :
 					new ForwardedHeaderExtractingResponse(response, theRequest));
@@ -221,7 +212,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final String requestUrl;
 
-		public ForwardedHeaderExtractingRequest(HttpServletRequest request, UrlPathHelper pathHelper) {
+		public ForwardedHeaderExtractingRequest(HttpServletRequest request) {
 			super(request);
 
 			HttpRequest httpRequest = new ServletServerHttpRequest(request);
@@ -235,7 +226,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 			String prefix = getForwardedPrefix(request);
 			this.contextPath = (prefix != null ? prefix : request.getContextPath());
-			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
+			this.requestUri = this.contextPath + UrlPathHelper.rawPathInstance.getPathWithinApplication(request);
 			this.requestUrl = this.scheme + "://" + this.host + (port == -1 ? "" : ":" + port) + this.requestUri;
 		}
 
