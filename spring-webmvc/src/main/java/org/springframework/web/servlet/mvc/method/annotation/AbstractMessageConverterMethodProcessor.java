@@ -90,16 +90,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
 
 
-	private static final UrlPathHelper decodingUrlPathHelper = new UrlPathHelper();
-
-	private static final UrlPathHelper rawUrlPathHelper = new UrlPathHelper();
-
-	static {
-		rawUrlPathHelper.setRemoveSemicolonContent(false);
-		rawUrlPathHelper.setUrlDecode(false);
-	}
-
-
 	private final ContentNegotiationManager contentNegotiationManager;
 
 	private final PathExtensionContentNegotiationStrategy pathStrategy;
@@ -426,7 +416,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		HttpServletRequest servletRequest = request.getServletRequest();
-		String requestUri = rawUrlPathHelper.getOriginatingRequestUri(servletRequest);
+		String requestUri = UrlPathHelper.rawPathInstance.getOriginatingRequestUri(servletRequest);
 
 		int index = requestUri.lastIndexOf('/') + 1;
 		String filename = requestUri.substring(index);
@@ -438,10 +428,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			filename = filename.substring(0, index);
 		}
 
-		filename = decodingUrlPathHelper.decodeRequestString(servletRequest, filename);
+		filename = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, filename);
 		String ext = StringUtils.getFilenameExtension(filename);
 
-		pathParams = decodingUrlPathHelper.decodeRequestString(servletRequest, pathParams);
+		pathParams = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, pathParams);
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {

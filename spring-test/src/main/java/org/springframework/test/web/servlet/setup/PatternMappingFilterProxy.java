@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@ final class PatternMappingFilterProxy implements Filter {
 	private static final String EXTENSION_MAPPING_PATTERN = "*.";
 
 	private static final String PATH_MAPPING_PATTERN = "/*";
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private final Filter delegate;
 
@@ -96,7 +94,7 @@ final class PatternMappingFilterProxy implements Filter {
 			throws IOException, ServletException {
 
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String requestPath = urlPathHelper.getPathWithinApplication(httpRequest);
+		String requestPath = UrlPathHelper.defaultInstance.getPathWithinApplication(httpRequest);
 
 		if (matches(requestPath)) {
 			this.delegate.doFilter(request, response, filterChain);
