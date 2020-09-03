@@ -1324,7 +1324,7 @@ class XmlBeanFactoryTests {
 
 		// Now test replace
 		String s = "this is not a palindrome";
-		String reverse = new StringBuffer(s).reverse().toString();
+		String reverse = new StringBuilder(s).reverse().toString();
 		assertThat(oom.replaceMe(s)).as("Should have overridden to reverse, not echo").isEqualTo(reverse);
 
 		assertThat(oom.replaceMe()).as("Should have overridden no-arg overloaded replaceMe method to return fixed value").isEqualTo(FixedMethodReplacer.VALUE);
@@ -1380,7 +1380,7 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
 		SerializableMethodReplacerCandidate s = (SerializableMethodReplacerCandidate) xbf.getBean("serializableReplacer");
 		String forwards = "this is forwards";
-		String backwards = new StringBuffer(forwards).reverse().toString();
+		String backwards = new StringBuilder(forwards).reverse().toString();
 		assertThat(s.replaceMe(forwards)).isEqualTo(backwards);
 		// SPR-356: lookup methods & method replacers are not serializable.
 		assertThat(SerializationTestUtils.isSerializable(s)).as("Lookup methods and method replacers are not meant to be serializable.").isFalse();

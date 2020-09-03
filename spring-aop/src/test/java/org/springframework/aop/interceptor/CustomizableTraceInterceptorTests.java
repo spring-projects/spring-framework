@@ -143,13 +143,13 @@ public class CustomizableTraceInterceptorTests {
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
-		interceptor.setEnterMessage(new StringBuffer()
+		interceptor.setEnterMessage(new StringBuilder()
 			.append("Entering the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
 			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_NAME)
 			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)
 			.append(") and arg types (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENT_TYPES)
 			.append(").").toString());
-		interceptor.setExitMessage(new StringBuffer()
+		interceptor.setExitMessage(new StringBuilder()
 			.append("Exiting the '").append(CustomizableTraceInterceptor.PLACEHOLDER_METHOD_NAME)
 			.append("' method of the [").append(CustomizableTraceInterceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME)
 			.append("] class with the following args (").append(CustomizableTraceInterceptor.PLACEHOLDER_ARGUMENTS)
