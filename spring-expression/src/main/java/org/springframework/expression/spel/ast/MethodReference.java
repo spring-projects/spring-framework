@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,8 +348,8 @@ public class MethodReference extends SpelNodeImpl {
 
 		generateCodeForArguments(mv, cf, method, this.children);
 		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : (method.isDefault() ? INVOKEINTERFACE : INVOKEVIRTUAL)),
-				classDesc, method.getName(),
-				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
+				classDesc, method.getName(), CodeFlow.createSignatureDescriptor(method),
+				method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 
 		if (this.originalPrimitiveExitTypeDescriptor != null) {
