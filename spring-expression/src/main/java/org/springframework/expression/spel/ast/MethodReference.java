@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,7 +244,7 @@ public class MethodReference extends SpelNodeImpl {
 			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
 			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
-				originalPrimitiveExitTypeDescriptor = descriptor;
+				this.originalPrimitiveExitTypeDescriptor = descriptor;
 				this.exitTypeDescriptor = CodeFlow.toBoxedDescriptor(descriptor);
 			}
 			else {
@@ -296,7 +296,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		return true;
 	}
-	
+
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
@@ -327,7 +327,7 @@ public class MethodReference extends SpelNodeImpl {
 			// Something on the stack when nothing is needed
 			mv.visitInsn(POP);
 		}
-		
+
 		if (CodeFlow.isPrimitive(descriptor)) {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
@@ -340,8 +340,10 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
-		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
-				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
+		mv.visitMethodInsn(
+				(isStaticMethod ? INVOKESTATIC : (isJava8DefaultMethod(method) ? INVOKEINTERFACE : INVOKEVIRTUAL)),
+				classDesc, method.getName(), CodeFlow.createSignatureDescriptor(method),
+				method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 
 		if (this.originalPrimitiveExitTypeDescriptor != null) {
@@ -352,6 +354,11 @@ public class MethodReference extends SpelNodeImpl {
 		if (skipIfNull != null) {
 			mv.visitLabel(skipIfNull);
 		}
+	}
+
+	private static boolean isJava8DefaultMethod(Method method) {
+		return (method.getDeclaringClass().isInterface() && Modifier.isPublic(method.getModifiers()) &&
+				!Modifier.isAbstract(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()));
 	}
 
 
