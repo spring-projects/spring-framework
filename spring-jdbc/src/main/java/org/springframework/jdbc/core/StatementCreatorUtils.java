@@ -72,9 +72,9 @@ public abstract class StatementCreatorUtils {
 	 * {@link PreparedStatement#setNull} / {@link PreparedStatement#setObject} calls based on well-known
 	 * behavior of common databases. Spring records JDBC drivers with non-working {@code getParameterType}
 	 * implementations and won't attempt to call that method for that driver again, always falling back.
-	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime, e.g. with
-	 * a connection pool setting back the {@link PreparedStatement} instance in case of an exception
-	 * thrown from {@code getParameterType} (as reported on JBoss AS 7).
+	 * <p>Consider switching this flag to "true" if you experience misbehavior at runtime,
+	 * e.g. with connection pool issues in case of an exception thrown from {@code getParameterType}
+	 * (as reported on JBoss AS 7) or in case of performance problems (as reported on PostgreSQL).
 	 * <p>Note that this flag is "true" by default on Oracle 12c since there can be leaks created by
 	 * {@code getParameterType} calls in such a scenario. You need to explicitly set the flag to
 	 * "false" in order to enforce the use of {@code getParameterType} against Oracle drivers.
@@ -309,7 +309,7 @@ public abstract class StatementCreatorUtils {
 					}
 					else if (databaseProductName.startsWith("DB2") ||
 							jdbcDriverName.startsWith("jConnect") ||
-							jdbcDriverName.startsWith("SQLServer")||
+							jdbcDriverName.startsWith("SQLServer") ||
 							jdbcDriverName.startsWith("Apache Derby")) {
 						sqlTypeToUse = Types.VARCHAR;
 					}
