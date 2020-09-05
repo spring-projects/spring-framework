@@ -22,20 +22,23 @@ import org.junit.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.SpelCompilationCoverageTests;
 import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link SpelCompiler}.
  *
  * @author Sam Brannen
+ * @author Andy Clement
  * @since 5.1.14
  */
 public class SpelCompilerTests {
 
-	@Test // gh-24357
+	@Test  // gh-24357
 	public void expressionCompilesWhenMethodComesFromPublicInterface() {
 		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
 		SpelExpressionParser parser = new SpelExpressionParser(config);
@@ -47,6 +50,31 @@ public class SpelCompilerTests {
 		IntStream.rangeClosed(1, 5).forEach(i -> assertEquals(42, expression.getValue(component)));
 	}
 
+	@Test  // gh-25706
+	public void defaultMethodInvocation() {
+		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelExpressionParser parser = new SpelExpressionParser(config);
+
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Item item = new Item();
+		context.setRootObject(item);
+
+		Expression expression = parser.parseExpression("#root.isEditable2()");
+		assertFalse(SpelCompiler.compile(expression));
+		assertEquals(false, expression.getValue(context));
+		assertTrue(SpelCompiler.compile(expression));
+		SpelCompilationCoverageTests.assertIsCompiled(expression);
+		assertEquals(false, expression.getValue(context));
+
+		context.setVariable("user", new User());
+		expression = parser.parseExpression("#root.isEditable(#user)");
+		assertFalse(SpelCompiler.compile(expression));
+		assertEquals(true, expression.getValue(context));
+		assertTrue(SpelCompiler.compile(expression));
+		SpelCompilationCoverageTests.assertIsCompiled(expression);
+		assertEquals(true, expression.getValue(context));
+	}
+
 
 	static class OrderedComponent implements Ordered {
 
@@ -54,6 +82,42 @@ public class SpelCompilerTests {
 		public int getOrder() {
 			return 42;
 		}
+	}
+
+
+	public static class User {
+
+		boolean isAdmin() {
+			return true;
+		}
+	}
+
+
+	public static class Item implements Editable {
+
+		// some fields
+		private String someField = "";
+
+		// some getters and setters
+
+		@Override
+		public boolean hasSomeProperty() {
+			return someField != null;
+		}
+	}
+
+
+	public interface Editable {
+
+		default boolean isEditable(User user) {
+			return user.isAdmin() && hasSomeProperty();
+		}
+
+		default boolean isEditable2() {
+			return false;
+		}
+
+		boolean hasSomeProperty();
 	}
 
 }

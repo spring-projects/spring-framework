@@ -5183,7 +5183,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-	private void assertIsCompiled(Expression expression) {
+	public static void assertIsCompiled(Expression expression) {
 		try {
 			Field field = SpelExpression.class.getDeclaredField("compiledAst");
 			field.setAccessible(true);
