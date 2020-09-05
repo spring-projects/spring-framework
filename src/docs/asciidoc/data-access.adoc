@@ -3379,7 +3379,7 @@ While this usually works well, there is a potential for issues, e.g. with Map-co
 case which may be expensive with your JDBC driver. Please make sure to use a recent driver
 version, and consider setting the "spring.jdbc.getParameterType.ignore" property to "true"
 (as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue, e.g. as reported on Oracle 12c (SPR-16139).
+if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
 
 Alternatively, simply consider specifying the corresponding JDBC types explicitly:
 either via a 'BatchPreparedStatementSetter' as shown above, or via an explicit type
