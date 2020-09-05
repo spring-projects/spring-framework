@@ -22,8 +22,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.expression.Expression;
+import org.springframework.expression.spel.SpelCompilationCoverageTests;
 import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelParserConfiguration;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for the {@link SpelCompiler}.
  *
  * @author Sam Brannen
+ * @author Andy Clement
  * @since 5.1.14
  */
 class SpelCompilerTests {
@@ -54,6 +57,61 @@ class SpelCompilerTests {
 		public int getOrder() {
 			return 42;
 		}
+	}
+	
+	@Test // gh-25706
+	void defaultMethodInvocation() {
+		SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, null);
+		SpelExpressionParser parser = new SpelExpressionParser(config);
+
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Item item = new Item();
+		context.setRootObject(item);
+
+		Expression expression = parser.parseExpression("#root.isEditable2()");
+		assertThat(SpelCompiler.compile(expression)).isFalse();
+		assertThat(expression.getValue(context)).isEqualTo(false);
+		assertThat(SpelCompiler.compile(expression)).isTrue();
+		SpelCompilationCoverageTests.assertIsCompiled(expression);
+		assertThat(expression.getValue(context)).isEqualTo(false);
+
+		context.setVariable("user", new User());
+		expression = parser.parseExpression("#root.isEditable(#user)");
+		assertThat(SpelCompiler.compile(expression)).isFalse();
+		assertThat(expression.getValue(context)).isEqualTo(true);
+		assertThat(SpelCompiler.compile(expression)).isTrue();
+		SpelCompilationCoverageTests.assertIsCompiled(expression);
+		assertThat(expression.getValue(context)).isEqualTo(true);
+	}
+	
+	public static class User {
+		boolean isAdmin() { 
+			return true; 
+		}
+	}
+	
+	public static class Item implements Editable {
+	    // some fields
+	    private String someField = "";
+
+	    // some getters and setters
+
+	   @Override
+	   public boolean hasSomeProperty() {
+	       return someField != null;
+	    }
+	}
+
+	public interface Editable {
+	   default boolean isEditable(User user) {
+	        return user.isAdmin() && hasSomeProperty();
+	   }
+
+	   default boolean isEditable2() {
+		   return false;
+	   }
+
+	   boolean hasSomeProperty();
 	}
 
 }

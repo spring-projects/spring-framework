@@ -347,7 +347,8 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		generateCodeForArguments(mv, cf, method, this.children);
-		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
+		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : (method.isDefault() ? INVOKEINTERFACE : INVOKEVIRTUAL)),
+				classDesc, method.getName(),
 				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 
