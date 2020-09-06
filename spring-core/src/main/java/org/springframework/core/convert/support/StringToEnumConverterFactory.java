@@ -16,10 +16,12 @@
 
 package org.springframework.core.convert.support;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
-	private static final ConcurrentHashMap<Class<?>, StringToEnum<?>> cache = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, StringToEnum<?>> cache = new ConcurrentHashMap<>();
 
 	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
