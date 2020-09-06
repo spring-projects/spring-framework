@@ -22,6 +22,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.util.NumberUtils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Converts from any JDK-standard Number implementation to any other JDK-standard Number implementation.
  *
@@ -41,10 +44,16 @@ import org.springframework.util.NumberUtils;
  * @see NumberUtils
  */
 final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>, ConditionalConverter {
+	private final static Map<Class<?>, NumberToNumber<?>> cache = new ConcurrentHashMap<>();
 
 	@Override
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
-		return new NumberToNumber<>(targetType);
+		NumberToNumber converter = cache.get(targetType);
+		if (converter == null) {
+			converter = new NumberToNumber<>(targetType);
+			cache.put(targetType, converter);
+		}
+		return converter;
 	}
 
 	@Override
