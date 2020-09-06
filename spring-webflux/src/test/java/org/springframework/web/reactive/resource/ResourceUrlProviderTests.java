@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,30 +18,27 @@ package org.springframework.web.reactive.resource;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.web.test.MockServletContext;
-import org.springframework.mock.web.test.server.MockServerWebExchange;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.pattern.PathPattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * Unit tests for {@link ResourceUrlProvider}.
@@ -49,6 +46,9 @@ import static org.junit.Assert.assertThat;
  * @author Rossen Stoyanchev
  */
 public class ResourceUrlProviderTests {
+
+	private static final Duration TIMEOUT = Duration.ofSeconds(5);
+
 
 	private final List<Resource> locations = new ArrayList<>();
 
@@ -58,12 +58,14 @@ public class ResourceUrlProviderTests {
 
 	private final ResourceUrlProvider urlProvider = new ResourceUrlProvider();
 
+	private final MockServerWebExchange exchange = MockServerWebExchange.from(get("/"));
 
-	@Before
+
+	@BeforeEach
 	public void setup() throws Exception {
 		this.locations.add(new ClassPathResource("test/", getClass()));
 		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
-		this.handler.setLocations(locations);
+		this.handler.setLocations(this.locations);
 		this.handler.afterPropertiesSet();
 		this.handlerMap.put("/resources/**", this.handler);
 		this.urlProvider.registerHandlers(this.handlerMap);
@@ -72,52 +74,46 @@ public class ResourceUrlProviderTests {
 
 	@Test
 	public void getStaticResourceUrl() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
-		String uriString = "/resources/foo.css";
-		String actual = this.urlProvider.getForUriString(uriString, exchange).block(Duration.ofSeconds(5));
-		assertEquals(uriString, actual);
+		String expected = "/resources/foo.css";
+		String actual = this.urlProvider.getForUriString(expected, this.exchange).block(TIMEOUT);
+
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test  // SPR-13374
 	public void getStaticResourceUrlRequestWithQueryOrHash() {
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 
-		String url = "/resources/foo.css?foo=bar&url=http://example.org";
-		String resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
-		assertEquals(url, resolvedUrl);
+		String url = "/resources/foo.css?foo=bar&url=https://example.org";
+		String resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
+		assertThat(resolvedUrl).isEqualTo(url);
 
 		url = "/resources/foo.css#hash";
-		resolvedUrl = this.urlProvider.getForUriString(url, exchange).block(Duration.ofSeconds(5));
-		assertEquals(url, resolvedUrl);
+		resolvedUrl = this.urlProvider.getForUriString(url, this.exchange).block(TIMEOUT);
+		assertThat(resolvedUrl).isEqualTo(url);
 	}
 
 	@Test
-	public void getFingerprintedResourceUrl() {
-		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-		versionStrategyMap.put("/**", new ContentVersionStrategy());
+	public void getVersionedResourceUrl() {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(versionStrategyMap);
-
+		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		String path = "/resources/foo.css";
-		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		String url = this.urlProvider.getForUriString(path, this.exchange).block(TIMEOUT);
+
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test  // SPR-12647
-	public void bestPatternMatch() throws Exception {
+	public void bestPatternMatch() {
 		ResourceWebHandler otherHandler = new ResourceWebHandler();
 		otherHandler.setLocations(this.locations);
-		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
-		versionStrategyMap.put("/**", new ContentVersionStrategy());
-		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(versionStrategyMap);
 
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
 		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
@@ -126,23 +122,29 @@ public class ResourceUrlProviderTests {
 		this.handlerMap.put("/resources/*.css", otherHandler);
 		this.urlProvider.registerHandlers(this.handlerMap);
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		String path = "/resources/foo.css";
-		String url = this.urlProvider.getForUriString(path, exchange).block(Duration.ofSeconds(5));
-		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
+		String url = this.urlProvider.getForUriString(path, this.exchange).block(TIMEOUT);
+		assertThat(url).isEqualTo("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css");
 	}
 
 	@Test  // SPR-12592
-	public void initializeOnce() throws Exception {
+	@SuppressWarnings("resource")
+	public void initializeOnce() {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(HandlerMappingConfiguration.class);
 		context.refresh();
 
-		ResourceUrlProvider urlProviderBean = context.getBean(ResourceUrlProvider.class);
-		assertThat(urlProviderBean.getHandlerMap(), Matchers.hasKey(pattern("/resources/**")));
+		assertThat(context.getBean(ResourceUrlProvider.class).getHandlerMap())
+				.hasKeySatisfying(pathPatternStringOf("/resources/**"));
 	}
 
+
+	private Condition<PathPattern> pathPatternStringOf(String expected) {
+		return new Condition<PathPattern>(
+				actual -> actual != null && actual.getPatternString().equals(expected),
+				"Pattern %s", expected);
+	}
 
 	@Configuration
 	@SuppressWarnings({"unused", "WeakerAccess"})
@@ -150,43 +152,12 @@ public class ResourceUrlProviderTests {
 
 		@Bean
 		public SimpleUrlHandlerMapping simpleUrlHandlerMapping() {
-			ResourceWebHandler handler = new ResourceWebHandler();
-			HashMap<String, ResourceWebHandler> handlerMap = new HashMap<>();
-			handlerMap.put("/resources/**", handler);
-			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
-			hm.setUrlMap(handlerMap);
-			return hm;
+			return new SimpleUrlHandlerMapping(Collections.singletonMap("/resources/**", new ResourceWebHandler()));
 		}
 
 		@Bean
 		public ResourceUrlProvider resourceUrlProvider() {
 			return new ResourceUrlProvider();
-		}
-	}
-
-	private static PathPatternMatcher pattern(String pattern) {
-		return new PathPatternMatcher(pattern);
-	}
-
-	private static class PathPatternMatcher extends BaseMatcher<PathPattern> {
-
-		private final String pattern;
-
-		public PathPatternMatcher(String pattern) {
-			this.pattern = pattern;
-		}
-
-		@Override
-		public boolean matches(Object item) {
-			if (item != null && item instanceof PathPattern) {
-				return ((PathPattern) item).getPatternString().equals(pattern);
-			}
-			return false;
-		}
-
-		@Override
-		public void describeTo(Description description) {
-
 		}
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
  */
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
-	/** Expectations in the order of declaration (count may be > 1) */
+	/** Expectations in the order of declaration (count may be > 1). */
 	@Nullable
 	private Iterator<RequestExpectation> expectationIterator;
 
-	/** Track expectations that have a remaining count */
+	/** Track expectations that have a remaining count. */
 	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.websocket.CloseReason;
 import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Extension;
@@ -50,8 +51,7 @@ import org.springframework.web.socket.adapter.AbstractWebSocketSession;
  */
 public class StandardWebSocketSession extends AbstractWebSocketSession<Session> {
 
-	@Nullable
-	private String id;
+	private final String id;
 
 	@Nullable
 	private URI uri;
@@ -77,7 +77,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	/**
 	 * Constructor for a standard WebSocket session.
 	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket
 	 * session; the provided attributes are copied, the original map is not used.
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
@@ -91,7 +91,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	/**
 	 * Constructor that associates a user with the WebSocket session.
 	 * @param headers the headers of the handshake request
-	 * @param attributes attributes from the HTTP handshake to associate with the WebSocket session
+	 * @param attributes the attributes from the HTTP handshake to associate with the WebSocket session
 	 * @param localAddress the address on which the request was received
 	 * @param remoteAddress the address of the remote client
 	 * @param user the user associated with the session; if {@code null} we'll
@@ -102,6 +102,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 			@Nullable Principal user) {
 
 		super(attributes);
+		this.id = idGenerator.generateId().toString();
 		headers = (headers != null ? headers : new HttpHeaders());
 		this.handshakeHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		this.user = user;
@@ -112,7 +113,6 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 
 	@Override
 	public String getId() {
-		Assert.state(this.id != null, "WebSocket session is not yet initialized");
 		return this.id;
 	}
 
@@ -140,6 +140,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 		return this.extensions;
 	}
 
+	@Override
 	public Principal getPrincipal() {
 		return this.user;
 	}
@@ -189,9 +190,7 @@ public class StandardWebSocketSession extends AbstractWebSocketSession<Session> 
 	public void initializeNativeSession(Session session) {
 		super.initializeNativeSession(session);
 
-		this.id = session.getId();
 		this.uri = session.getRequestURI();
-
 		this.acceptedProtocol = session.getNegotiatedSubprotocol();
 
 		List<Extension> standardExtensions = getNativeSession().getNegotiatedExtensions();

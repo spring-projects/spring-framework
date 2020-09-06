@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,16 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rod Johnson
@@ -67,68 +67,68 @@ public class ComposablePointcutTests {
 	@Test
 	public void testMatchAll() throws NoSuchMethodException {
 		Pointcut pc = new ComposablePointcut();
-		assertTrue(pc.getClassFilter().matches(Object.class));
-		assertTrue(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode"), Exception.class));
+		assertThat(pc.getClassFilter().matches(Object.class)).isTrue();
+		assertThat(pc.getMethodMatcher().matches(Object.class.getMethod("hashCode"), Exception.class)).isTrue();
 	}
 
 	@Test
 	public void testFilterByClass() throws NoSuchMethodException {
 		ComposablePointcut pc = new ComposablePointcut();
 
-		assertTrue(pc.getClassFilter().matches(Object.class));
+		assertThat(pc.getClassFilter().matches(Object.class)).isTrue();
 
 		ClassFilter cf = new RootClassFilter(Exception.class);
 		pc.intersection(cf);
-		assertFalse(pc.getClassFilter().matches(Object.class));
-		assertTrue(pc.getClassFilter().matches(Exception.class));
+		assertThat(pc.getClassFilter().matches(Object.class)).isFalse();
+		assertThat(pc.getClassFilter().matches(Exception.class)).isTrue();
 		pc.intersection(new RootClassFilter(NestedRuntimeException.class));
-		assertFalse(pc.getClassFilter().matches(Exception.class));
-		assertTrue(pc.getClassFilter().matches(NestedRuntimeException.class));
-		assertFalse(pc.getClassFilter().matches(String.class));
+		assertThat(pc.getClassFilter().matches(Exception.class)).isFalse();
+		assertThat(pc.getClassFilter().matches(NestedRuntimeException.class)).isTrue();
+		assertThat(pc.getClassFilter().matches(String.class)).isFalse();
 		pc.union(new RootClassFilter(String.class));
-		assertFalse(pc.getClassFilter().matches(Exception.class));
-		assertTrue(pc.getClassFilter().matches(String.class));
-		assertTrue(pc.getClassFilter().matches(NestedRuntimeException.class));
+		assertThat(pc.getClassFilter().matches(Exception.class)).isFalse();
+		assertThat(pc.getClassFilter().matches(String.class)).isTrue();
+		assertThat(pc.getClassFilter().matches(NestedRuntimeException.class)).isTrue();
 	}
 
 	@Test
 	public void testUnionMethodMatcher() {
 		// Matches the getAge() method in any class
 		ComposablePointcut pc = new ComposablePointcut(ClassFilter.TRUE, GET_AGE_METHOD_MATCHER);
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isFalse();
 
 		pc.union(GETTER_METHOD_MATCHER);
 		// Should now match all getter methods
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isTrue();
 
 		pc.union(ABSQUATULATE_METHOD_MATCHER);
 		// Should now match absquatulate() as well
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isTrue();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isTrue();
 		// But it doesn't match everything
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_SET_AGE, TestBean.class));
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_SET_AGE, TestBean.class)).isFalse();
 	}
 
 	@Test
 	public void testIntersectionMethodMatcher() {
 		ComposablePointcut pc = new ComposablePointcut();
-		assertTrue(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertTrue(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isTrue();
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isTrue();
 		pc.intersection(GETTER_METHOD_MATCHER);
-		assertFalse(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertTrue(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(pc.getMethodMatcher().matches(PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isTrue();
 		pc.intersection(GET_AGE_METHOD_MATCHER);
 		// Use the Pointcuts matches method
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class));
-		assertTrue(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class));
-		assertFalse(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class));
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_ABSQUATULATE, TestBean.class)).isFalse();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_AGE, TestBean.class)).isTrue();
+		assertThat(Pointcuts.matches(pc, PointcutsTests.TEST_BEAN_GET_NAME, TestBean.class)).isFalse();
 	}
 
 	@Test
@@ -136,24 +136,24 @@ public class ComposablePointcutTests {
 		ComposablePointcut pc1 = new ComposablePointcut();
 		ComposablePointcut pc2 = new ComposablePointcut();
 
-		assertEquals(pc1, pc2);
-		assertEquals(pc1.hashCode(), pc2.hashCode());
+		assertThat(pc2).isEqualTo(pc1);
+		assertThat(pc2.hashCode()).isEqualTo(pc1.hashCode());
 
 		pc1.intersection(GETTER_METHOD_MATCHER);
 
-		assertFalse(pc1.equals(pc2));
-		assertFalse(pc1.hashCode() == pc2.hashCode());
+		assertThat(pc1.equals(pc2)).isFalse();
+		assertThat(pc1.hashCode() == pc2.hashCode()).isFalse();
 
 		pc2.intersection(GETTER_METHOD_MATCHER);
 
-		assertEquals(pc1, pc2);
-		assertEquals(pc1.hashCode(), pc2.hashCode());
+		assertThat(pc2).isEqualTo(pc1);
+		assertThat(pc2.hashCode()).isEqualTo(pc1.hashCode());
 
 		pc1.union(GET_AGE_METHOD_MATCHER);
 		pc2.union(GET_AGE_METHOD_MATCHER);
 
-		assertEquals(pc1, pc2);
-		assertEquals(pc1.hashCode(), pc2.hashCode());
+		assertThat(pc2).isEqualTo(pc1);
+		assertThat(pc2.hashCode()).isEqualTo(pc1.hashCode());
 	}
 
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -217,10 +217,7 @@ public abstract class JmsUtils {
 		try {
 			session.commit();
 		}
-		catch (javax.jms.TransactionInProgressException ex) {
-			// Ignore -> can only happen in case of a JTA transaction.
-		}
-		catch (javax.jms.IllegalStateException ex) {
+		catch (javax.jms.TransactionInProgressException | javax.jms.IllegalStateException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}
@@ -235,10 +232,7 @@ public abstract class JmsUtils {
 		try {
 			session.rollback();
 		}
-		catch (javax.jms.TransactionInProgressException ex) {
-			// Ignore -> can only happen in case of a JTA transaction.
-		}
-		catch (javax.jms.IllegalStateException ex) {
+		catch (javax.jms.TransactionInProgressException | javax.jms.IllegalStateException ex) {
 			// Ignore -> can only happen in case of a JTA transaction.
 		}
 	}

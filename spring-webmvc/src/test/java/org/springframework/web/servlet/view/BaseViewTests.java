@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,17 +25,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.View;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockServletContext;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * Base tests for {@link AbstractView}.
@@ -68,7 +70,7 @@ public class BaseViewTests {
 
 		checkContainsAll(model, tv.model);
 
-		assertTrue(tv.initialized);
+		assertThat(tv.initialized).isTrue();
 	}
 
 	/**
@@ -97,7 +99,7 @@ public class BaseViewTests {
 		checkContainsAll(model, tv.model);
 		checkContainsAll(p, tv.model);
 
-		assertTrue(tv.initialized);
+		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
@@ -125,9 +127,9 @@ public class BaseViewTests {
 
 		checkContainsAll(pathVars, tv.model);
 
-		assertEquals(3, tv.model.size());
-		assertEquals("else", tv.model.get("something"));
-		assertTrue(tv.initialized);
+		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model.get("something")).isEqualTo("else");
+		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
@@ -153,9 +155,9 @@ public class BaseViewTests {
 		// Check it contains all
 		checkContainsAll(model, tv.model);
 
-		assertEquals(3, tv.model.size());
-		assertEquals("else", tv.model.get("something"));
-		assertTrue(tv.initialized);
+		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model.get("something")).isEqualTo("else");
+		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
@@ -181,16 +183,16 @@ public class BaseViewTests {
 		tv.render(model, request, response);
 
 		checkContainsAll(model, tv.model);
-		assertEquals(3, tv.model.size());
-		assertEquals("else", tv.model.get("something"));
-		assertTrue(tv.initialized);
+		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model.get("something")).isEqualTo("else");
+		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
 	public void ignoresNullAttributes() {
 		AbstractView v = new ConcreteView();
 		v.setAttributes(null);
-		assertEquals(0, v.getStaticAttributes().size());
+		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
 	}
 
 	/**
@@ -200,14 +202,14 @@ public class BaseViewTests {
 	public void attributeCSVParsingIgnoresNull() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV(null);
-		assertEquals(0, v.getStaticAttributes().size());
+		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
 	}
 
 	@Test
 	public void attributeCSVParsingIgnoresEmptyString() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("");
-		assertEquals(0, v.getStaticAttributes().size());
+		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
 	}
 
 	/**
@@ -217,9 +219,9 @@ public class BaseViewTests {
 	public void attributeCSVParsingValid() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[bar],king=[kong]");
-		assertTrue(v.getStaticAttributes().size() == 2);
-		assertTrue(v.getStaticAttributes().get("foo").equals("bar"));
-		assertTrue(v.getStaticAttributes().get("king").equals("kong"));
+		assertThat(v.getStaticAttributes().size() == 2).isTrue();
+		assertThat(v.getStaticAttributes().get("foo").equals("bar")).isTrue();
+		assertThat(v.getStaticAttributes().get("king").equals("kong")).isTrue();
 	}
 
 	@Test
@@ -229,51 +231,36 @@ public class BaseViewTests {
 		// Also tests empty value
 		String kingval = "";
 		v.setAttributesCSV("foo=(" + fooval + "),king={" + kingval + "},f1=[we]");
-		assertTrue(v.getStaticAttributes().size() == 3);
-		assertTrue(v.getStaticAttributes().get("foo").equals(fooval));
-		assertTrue(v.getStaticAttributes().get("king").equals(kingval));
+		assertThat(v.getStaticAttributes().size() == 3).isTrue();
+		assertThat(v.getStaticAttributes().get("foo").equals(fooval)).isTrue();
+		assertThat(v.getStaticAttributes().get("king").equals(kingval)).isTrue();
 	}
 
 	@Test
 	public void attributeCSVParsingInvalid() {
 		AbstractView v = new ConcreteView();
-		try {
-			// No equals
-			v.setAttributesCSV("fweoiruiu");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No equals
+		assertThatIllegalArgumentException().isThrownBy(() ->
+			v.setAttributesCSV("fweoiruiu"));
 
-		try {
-			// No value
-			v.setAttributesCSV("fweoiruiu=");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No value
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu="));
 
-		try {
-			// No closing ]
-			v.setAttributesCSV("fweoiruiu=[");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
-		try {
-			// Second one is bogus
-			v.setAttributesCSV("fweoiruiu=[de],=");
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-		}
+		// No closing ]
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu=["));
+
+		// Second one is bogus
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				v.setAttributesCSV("fweoiruiu=[de],="));
 	}
 
 	@Test
-	public void attributeCSVParsingIgoresTrailingComma() {
+	public void attributeCSVParsingIgnoresTrailingComma() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[de],");
-		assertEquals(1, v.getStaticAttributes().size());
+		assertThat(v.getStaticAttributes().size()).isEqualTo(1);
 	}
 
 	/**
@@ -281,8 +268,8 @@ public class BaseViewTests {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void checkContainsAll(Map expected, Map<String, Object> actual) {
-		expected.forEach((k, v) -> assertEquals("Values for model key '" + k
-				+ "' must match", expected.get(k), actual.get(k)));
+		expected.forEach((k, v) -> assertThat(actual.get(k)).as("Values for model key '" + k
+						+ "' must match").isEqualTo(expected.get(k)));
 	}
 
 
@@ -333,7 +320,7 @@ public class BaseViewTests {
 				throw new RuntimeException("Already initialized");
 			}
 			this.initialized = true;
-			assertTrue(getApplicationContext() == wac);
+			assertThat(getApplicationContext() == wac).isTrue();
 		}
 	}
 

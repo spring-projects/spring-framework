@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jmx.support;
 
 import java.beans.PropertyDescriptor;
+
 import javax.management.DynamicMBean;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -25,7 +26,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
@@ -33,88 +34,100 @@ import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link JmxUtils}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class JmxUtilsTests {
+class JmxUtilsTests {
 
 	@Test
-	public void testIsMBeanWithDynamicMBean() throws Exception {
+	void isMBean() {
+		// Correctly returns true for a class
+		assertThat(JmxUtils.isMBean(JmxClass.class)).isTrue();
+
+		// Correctly returns false since JmxUtils won't navigate to the extended interface
+		assertThat(JmxUtils.isMBean(SpecializedJmxInterface.class)).isFalse();
+
+		// Incorrectly returns true since it doesn't detect that this is an interface
+		assertThat(JmxUtils.isMBean(JmxInterface.class)).isFalse();
+	}
+
+	@Test
+	void isMBeanWithDynamicMBean() throws Exception {
 		DynamicMBean mbean = new TestDynamicMBean();
-		assertTrue("Dynamic MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
+		assertThat(JmxUtils.isMBean(mbean.getClass())).as("Dynamic MBean not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testIsMBeanWithStandardMBeanWrapper() throws Exception {
+	void isMBeanWithStandardMBeanWrapper() throws Exception {
 		StandardMBean mbean = new StandardMBean(new JmxTestBean(), IJmxTestBean.class);
-		assertTrue("Standard MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
+		assertThat(JmxUtils.isMBean(mbean.getClass())).as("Standard MBean not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testIsMBeanWithStandardMBeanInherited() throws Exception {
+	void isMBeanWithStandardMBeanInherited() throws Exception {
 		StandardMBean mbean = new StandardMBeanImpl();
-		assertTrue("Standard MBean not detected correctly", JmxUtils.isMBean(mbean.getClass()));
+		assertThat(JmxUtils.isMBean(mbean.getClass())).as("Standard MBean not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testNotAnMBean() throws Exception {
-		assertFalse("Object incorrectly identified as an MBean", JmxUtils.isMBean(Object.class));
+	void notAnMBean() throws Exception {
+		assertThat(JmxUtils.isMBean(Object.class)).as("Object incorrectly identified as an MBean").isFalse();
 	}
 
 	@Test
-	public void testSimpleMBean() throws Exception {
+	void simpleMBean() throws Exception {
 		Foo foo = new Foo();
-		assertTrue("Simple MBean not detected correctly", JmxUtils.isMBean(foo.getClass()));
+		assertThat(JmxUtils.isMBean(foo.getClass())).as("Simple MBean not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testSimpleMXBean() throws Exception {
+	void simpleMXBean() throws Exception {
 		FooX foo = new FooX();
-		assertTrue("Simple MXBean not detected correctly", JmxUtils.isMBean(foo.getClass()));
+		assertThat(JmxUtils.isMBean(foo.getClass())).as("Simple MXBean not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testSimpleMBeanThroughInheritance() throws Exception {
+	void simpleMBeanThroughInheritance() throws Exception {
 		Bar bar = new Bar();
 		Abc abc = new Abc();
-		assertTrue("Simple MBean (through inheritance) not detected correctly",
-				JmxUtils.isMBean(bar.getClass()));
-		assertTrue("Simple MBean (through 2 levels of inheritance) not detected correctly",
-				JmxUtils.isMBean(abc.getClass()));
+		assertThat(JmxUtils.isMBean(bar.getClass())).as("Simple MBean (through inheritance) not detected correctly").isTrue();
+		assertThat(JmxUtils.isMBean(abc.getClass())).as("Simple MBean (through 2 levels of inheritance) not detected correctly").isTrue();
 	}
 
 	@Test
-	public void testGetAttributeNameWithStrictCasing() {
+	void getAttributeNameWithStrictCasing() {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTestBean.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, true);
-		assertEquals("Incorrect casing on attribute name", "Name", attributeName);
+		assertThat(attributeName).as("Incorrect casing on attribute name").isEqualTo("Name");
 	}
 
 	@Test
-	public void testGetAttributeNameWithoutStrictCasing() {
+	void getAttributeNameWithoutStrictCasing() {
 		PropertyDescriptor pd = new BeanWrapperImpl(AttributeTestBean.class).getPropertyDescriptor("name");
 		String attributeName = JmxUtils.getAttributeName(pd, false);
-		assertEquals("Incorrect casing on attribute name", "name", attributeName);
+		assertThat(attributeName).as("Incorrect casing on attribute name").isEqualTo("name");
 	}
 
 	@Test
-	public void testAppendIdentityToObjectName() throws MalformedObjectNameException {
+	void appendIdentityToObjectName() throws MalformedObjectNameException {
 		ObjectName objectName = ObjectNameManager.getInstance("spring:type=Test");
 		Object managedResource = new Object();
 		ObjectName uniqueName = JmxUtils.appendIdentityToObjectName(objectName, managedResource);
 
 		String typeProperty = "type";
 
-		assertEquals("Domain of transformed name is incorrect", objectName.getDomain(), uniqueName.getDomain());
-		assertEquals("Type key is incorrect", objectName.getKeyProperty(typeProperty), uniqueName.getKeyProperty("type"));
-		assertEquals("Identity key is incorrect", ObjectUtils.getIdentityHexString(managedResource), uniqueName.getKeyProperty(JmxUtils.IDENTITY_OBJECT_NAME_KEY));
+		assertThat(uniqueName.getDomain()).as("Domain of transformed name is incorrect").isEqualTo(objectName.getDomain());
+		assertThat(uniqueName.getKeyProperty("type")).as("Type key is incorrect").isEqualTo(objectName.getKeyProperty(typeProperty));
+		assertThat(uniqueName.getKeyProperty(JmxUtils.IDENTITY_OBJECT_NAME_KEY)).as("Identity key is incorrect").isEqualTo(ObjectUtils.getIdentityHexString(managedResource));
 	}
 
 	@Test
-	public void testLocatePlatformMBeanServer() {
+	void locatePlatformMBeanServer() {
 		MBeanServer server = null;
 		try {
 			server = JmxUtils.locateMBeanServer();
@@ -124,18 +137,6 @@ public class JmxUtilsTests {
 				MBeanServerFactory.releaseMBeanServer(server);
 			}
 		}
-	}
-
-	@Test
-	public void testIsMBean() {
-		// Correctly returns true for a class
-		assertTrue(JmxUtils.isMBean(JmxClass.class));
-
-		// Correctly returns false since JmxUtils won't navigate to the extended interface
-		assertFalse(JmxUtils.isMBean(SpecializedJmxInterface.class));
-
-		// Incorrectly returns true since it doesn't detect that this is an interface
-		assertFalse(JmxUtils.isMBean(JmxInterface.class));
 	}
 
 

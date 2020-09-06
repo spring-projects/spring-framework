@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,25 +87,26 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
+		// Quick check for existing cache...
 		Cache cache = this.cacheMap.get(name);
 		if (cache != null) {
 			return cache;
 		}
-		else {
-			// Fully synchronize now for missing cache creation...
+
+		// The provider may support on-demand cache creation...
+		Cache missingCache = getMissingCache(name);
+		if (missingCache != null) {
+			// Fully synchronize now for missing cache registration
 			synchronized (this.cacheMap) {
 				cache = this.cacheMap.get(name);
 				if (cache == null) {
-					cache = getMissingCache(name);
-					if (cache != null) {
-						cache = decorateCache(cache);
-						this.cacheMap.put(name, cache);
-						updateCacheNames(name);
-					}
+					cache = decorateCache(missingCache);
+					this.cacheMap.put(name, cache);
+					updateCacheNames(name);
 				}
-				return cache;
 			}
 		}
+		return cache;
 	}
 
 	@Override
@@ -174,15 +175,15 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	}
 
 	/**
-	 * Return a missing cache with the specified {@code name} or {@code null} if
-	 * such cache does not exist or could not be created on the fly.
-	 * <p>Some caches may be created at runtime if the native provider supports
-	 * it. If a lookup by name does not yield any result, a subclass gets a chance
-	 * to register such a cache at runtime. The returned cache will be automatically
-	 * added to this instance.
+	 * Return a missing cache with the specified {@code name}, or {@code null} if
+	 * such a cache does not exist or could not be created on demand.
+	 * <p>Caches may be lazily created at runtime if the native provider supports it.
+	 * If a lookup by name does not yield any result, an {@code AbstractCacheManager}
+	 * subclass gets a chance to register such a cache at runtime. The returned cache
+	 * will be automatically added to this cache manager.
 	 * @param name the name of the cache to retrieve
-	 * @return the missing cache or {@code null} if no such cache exists or could be
-	 * created
+	 * @return the missing cache, or {@code null} if no such cache exists or could be
+	 * created on demand
 	 * @since 4.1
 	 * @see #getCache(String)
 	 */

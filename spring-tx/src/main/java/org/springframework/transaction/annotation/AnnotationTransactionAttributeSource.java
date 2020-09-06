@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -55,11 +56,15 @@ import org.springframework.util.ClassUtils;
 public class AnnotationTransactionAttributeSource extends AbstractFallbackTransactionAttributeSource
 		implements Serializable {
 
-	private static final boolean jta12Present = ClassUtils.isPresent(
-			"javax.transaction.Transactional", AnnotationTransactionAttributeSource.class.getClassLoader());
+	private static final boolean jta12Present;
 
-	private static final boolean ejb3Present = ClassUtils.isPresent(
-			"javax.ejb.TransactionAttribute", AnnotationTransactionAttributeSource.class.getClassLoader());
+	private static final boolean ejb3Present;
+
+	static {
+		ClassLoader classLoader = AnnotationTransactionAttributeSource.class.getClassLoader();
+		jta12Present = ClassUtils.isPresent("javax.transaction.Transactional", classLoader);
+		ejb3Present = ClassUtils.isPresent("javax.ejb.TransactionAttribute", classLoader);
+	}
 
 	private final boolean publicMethodsOnly;
 
@@ -86,13 +91,18 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
-		this.annotationParsers = new LinkedHashSet<>(2);
-		this.annotationParsers.add(new SpringTransactionAnnotationParser());
-		if (jta12Present) {
-			this.annotationParsers.add(new JtaTransactionAnnotationParser());
+		if (jta12Present || ejb3Present) {
+			this.annotationParsers = new LinkedHashSet<>(4);
+			this.annotationParsers.add(new SpringTransactionAnnotationParser());
+			if (jta12Present) {
+				this.annotationParsers.add(new JtaTransactionAnnotationParser());
+			}
+			if (ejb3Present) {
+				this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
+			}
 		}
-		if (ejb3Present) {
-			this.annotationParsers.add(new Ejb3TransactionAnnotationParser());
+		else {
+			this.annotationParsers = Collections.singleton(new SpringTransactionAnnotationParser());
 		}
 	}
 
@@ -113,9 +123,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser... annotationParsers) {
 		this.publicMethodsOnly = true;
 		Assert.notEmpty(annotationParsers, "At least one TransactionAnnotationParser needs to be specified");
-		Set<TransactionAnnotationParser> parsers = new LinkedHashSet<>(annotationParsers.length);
-		Collections.addAll(parsers, annotationParsers);
-		this.annotationParsers = parsers;
+		this.annotationParsers = new LinkedHashSet<>(Arrays.asList(annotationParsers));
 	}
 
 	/**
@@ -130,15 +138,25 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 
 	@Override
-	@Nullable
-	protected TransactionAttribute findTransactionAttribute(Method method) {
-		return determineTransactionAttribute(method);
+	public boolean isCandidateClass(Class<?> targetClass) {
+		for (TransactionAnnotationParser parser : this.annotationParsers) {
+			if (parser.isCandidateClass(targetClass)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return determineTransactionAttribute(clazz);
+	}
+
+	@Override
+	@Nullable
+	protected TransactionAttribute findTransactionAttribute(Method method) {
+		return determineTransactionAttribute(method);
 	}
 
 	/**
@@ -148,14 +166,13 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * for parsing known annotations into Spring's metadata attribute class.
 	 * Returns {@code null} if it's not transactional.
 	 * <p>Can be overridden to support custom annotations that carry transaction metadata.
-	 * @param ae the annotated method or class
-	 * @return TransactionAttribute the configured transaction attribute,
-	 * or {@code null} if none was found
+	 * @param element the annotated method or class
+	 * @return the configured transaction attribute, or {@code null} if none was found
 	 */
 	@Nullable
-	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
-		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
-			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
+	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+		for (TransactionAnnotationParser parser : this.annotationParsers) {
+			TransactionAttribute attr = parser.parseTransactionAnnotation(element);
 			if (attr != null) {
 				return attr;
 			}
@@ -173,7 +190,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

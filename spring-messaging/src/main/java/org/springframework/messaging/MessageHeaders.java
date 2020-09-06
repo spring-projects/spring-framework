@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.AlternativeJdkIdGenerator;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.IdGenerator;
 
 /**
@@ -71,6 +72,9 @@ import org.springframework.util.IdGenerator;
  */
 public class MessageHeaders implements Map<String, Object>, Serializable {
 
+	/**
+	 * UUID for none.
+	 */
 	public static final UUID ID_VALUE_NONE = new UUID(0,0);
 
 	/**
@@ -81,12 +85,24 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 */
 	public static final String ID = "id";
 
+	/**
+	 * The key for the message timestamp.
+	 */
 	public static final String TIMESTAMP = "timestamp";
 
+	/**
+	 * The key for the message content type.
+	 */
 	public static final String CONTENT_TYPE = "contentType";
 
+	/**
+	 * The key for the message reply channel.
+	 */
 	public static final String REPLY_CHANNEL = "replyChannel";
 
+	/**
+	 * The key for the message error channel.
+	 */
 	public static final String ERROR_CHANNEL = "errorChannel";
 
 
@@ -149,7 +165,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param keysToIgnore the keys of the entries to ignore
 	 */
 	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
-		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
+		this.headers = CollectionUtils.newHashMap(original.headers.size());
 		original.headers.forEach((key, value) -> {
 			if (!keysToIgnore.contains(key)) {
 				this.headers.put(key, value);
@@ -205,35 +221,43 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 
 	// Delegating Map implementation
 
+	@Override
 	public boolean containsKey(Object key) {
 		return this.headers.containsKey(key);
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		return this.headers.containsValue(value);
 	}
 
+	@Override
 	public Set<Map.Entry<String, Object>> entrySet() {
 		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
+	@Override
 	@Nullable
 	public Object get(Object key) {
 		return this.headers.get(key);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return this.headers.isEmpty();
 	}
 
+	@Override
 	public Set<String> keySet() {
 		return Collections.unmodifiableSet(this.headers.keySet());
 	}
 
+	@Override
 	public int size() {
 		return this.headers.size();
 	}
 
+	@Override
 	public Collection<Object> values() {
 		return Collections.unmodifiableCollection(this.headers.values());
 	}
@@ -245,6 +269,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
+	@Override
 	public Object put(String key, Object value) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
@@ -253,6 +278,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
+	@Override
 	public void putAll(Map<? extends String, ? extends Object> map) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
@@ -261,6 +287,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
+	@Override
 	public Object remove(Object key) {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
@@ -269,6 +296,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * Since MessageHeaders are immutable, the call to this method
 	 * will result in {@link UnsupportedOperationException}.
 	 */
+	@Override
 	public void clear() {
 		throw new UnsupportedOperationException("MessageHeaders is immutable");
 	}
@@ -305,7 +333,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	// equals, hashCode, toString
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other ||
 				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
 	}

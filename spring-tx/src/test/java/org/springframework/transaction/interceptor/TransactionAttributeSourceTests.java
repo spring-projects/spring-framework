@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,11 +19,11 @@ package org.springframework.transaction.interceptor;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionDefinition;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for the various {@link TransactionAttributeSource} implementations.
@@ -40,68 +40,58 @@ public class TransactionAttributeSourceTests {
 	@Test
 	public void matchAlwaysTransactionAttributeSource() throws Exception {
 		MatchAlwaysTransactionAttributeSource tas = new MatchAlwaysTransactionAttributeSource();
-		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
-		assertNotNull(ta);
-		assertTrue(TransactionDefinition.PROPAGATION_REQUIRED == ta.getPropagationBehavior());
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
+		assertThat(ta).isNotNull();
+		assertThat(TransactionDefinition.PROPAGATION_REQUIRED == ta.getPropagationBehavior()).isTrue();
 
 		tas.setTransactionAttribute(new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_SUPPORTS));
-		ta = tas.getTransactionAttribute(
-				IOException.class.getMethod("getMessage", (Class[]) null), IOException.class);
-		assertNotNull(ta);
-		assertTrue(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior());
+		ta = tas.getTransactionAttribute(IOException.class.getMethod("getMessage"), IOException.class);
+		assertThat(ta).isNotNull();
+		assertThat(TransactionDefinition.PROPAGATION_SUPPORTS == ta.getPropagationBehavior()).isTrue();
 	}
 
 	@Test
-	public void nameMatchTransactionAttributeSourceWithStarAtStartOfMethodName()
-			throws NoSuchMethodException {
+	public void nameMatchTransactionAttributeSourceWithStarAtStartOfMethodName() throws Exception {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
 		attributes.put("*ashCode", "PROPAGATION_REQUIRED");
 		tas.setProperties(attributes);
-		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
-		assertNotNull(ta);
-		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
+		assertThat(ta).isNotNull();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRED);
 	}
 
 	@Test
-	public void nameMatchTransactionAttributeSourceWithStarAtEndOfMethodName()
-			throws NoSuchMethodException {
+	public void nameMatchTransactionAttributeSourceWithStarAtEndOfMethodName() throws Exception {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
 		attributes.put("hashCod*", "PROPAGATION_REQUIRED");
 		tas.setProperties(attributes);
-		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
-		assertNotNull(ta);
-		assertEquals(TransactionDefinition.PROPAGATION_REQUIRED, ta.getPropagationBehavior());
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
+		assertThat(ta).isNotNull();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_REQUIRED);
 	}
 
 	@Test
-	public void nameMatchTransactionAttributeSourceMostSpecificMethodNameIsDefinitelyMatched()
-			throws NoSuchMethodException {
+	public void nameMatchTransactionAttributeSourceMostSpecificMethodNameIsDefinitelyMatched() throws Exception {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
 		attributes.put("*", "PROPAGATION_REQUIRED");
 		attributes.put("hashCode", "PROPAGATION_MANDATORY");
 		tas.setProperties(attributes);
-		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
-		assertNotNull(ta);
-		assertEquals(TransactionDefinition.PROPAGATION_MANDATORY, ta.getPropagationBehavior());
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
+		assertThat(ta).isNotNull();
+		assertThat(ta.getPropagationBehavior()).isEqualTo(TransactionDefinition.PROPAGATION_MANDATORY);
 	}
 
 	@Test
-	public void nameMatchTransactionAttributeSourceWithEmptyMethodName()
-			throws NoSuchMethodException {
+	public void nameMatchTransactionAttributeSourceWithEmptyMethodName() throws Exception {
 		NameMatchTransactionAttributeSource tas = new NameMatchTransactionAttributeSource();
 		Properties attributes = new Properties();
 		attributes.put("", "PROPAGATION_MANDATORY");
 		tas.setProperties(attributes);
-		TransactionAttribute ta = tas.getTransactionAttribute(
-				Object.class.getMethod("hashCode", (Class[]) null), null);
-		assertNull(ta);
+		TransactionAttribute ta = tas.getTransactionAttribute(Object.class.getMethod("hashCode"), null);
+		assertThat(ta).isNull();
 	}
 
 }

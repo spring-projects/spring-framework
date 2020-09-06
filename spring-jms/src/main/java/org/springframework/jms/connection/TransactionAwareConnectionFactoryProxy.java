@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
@@ -37,6 +38,7 @@ import javax.jms.TransactionInProgressException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Proxy for a target JMS {@link javax.jms.ConnectionFactory}, adding awareness of
@@ -70,6 +72,11 @@ import org.springframework.util.Assert;
  * intended for accessing vendor-specific Session API or for testing purposes
  * (e.g. to perform manual transaction control). For typical application purposes,
  * simply use the standard JMS Session interface.
+ *
+ * <p>As of Spring Framework 5, this class delegates JMS 2.0 {@code JMSContext}
+ * calls and therefore requires the JMS 2.0 API to be present at runtime.
+ * It may nevertheless run against a JMS 1.1 driver (bound to the JMS 2.0 API)
+ * as long as no actual JMS 2.0 calls are triggered by the application's setup.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -229,10 +236,8 @@ public class TransactionAwareConnectionFactoryProxy
 		if (target instanceof TopicConnection) {
 			classes.add(TopicConnection.class);
 		}
-		return (Connection) Proxy.newProxyInstance(
-				Connection.class.getClassLoader(),
-				classes.toArray(new Class<?>[classes.size()]),
-				new TransactionAwareConnectionInvocationHandler(target));
+		return (Connection) Proxy.newProxyInstance(Connection.class.getClassLoader(),
+				ClassUtils.toClassArray(classes), new TransactionAwareConnectionInvocationHandler(target));
 	}
 
 
@@ -251,15 +256,16 @@ public class TransactionAwareConnectionFactoryProxy
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Connection proxy.
+					return System.identityHashCode(proxy);
 			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (Session.class == method.getReturnType()) {
+
+			if (Session.class == method.getReturnType()) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
 						getTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
 				if (session != null) {
@@ -301,10 +307,8 @@ public class TransactionAwareConnectionFactoryProxy
 			if (target instanceof TopicSession) {
 				classes.add(TopicSession.class);
 			}
-			return (Session) Proxy.newProxyInstance(
-					SessionProxy.class.getClassLoader(),
-					classes.toArray(new Class<?>[classes.size()]),
-					new CloseSuppressingSessionInvocationHandler(target));
+			return (Session) Proxy.newProxyInstance(SessionProxy.class.getClassLoader(),
+					ClassUtils.toClassArray(classes), new CloseSuppressingSessionInvocationHandler(target));
 		}
 	}
 
@@ -325,27 +329,23 @@ public class TransactionAwareConnectionFactoryProxy
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 
-			if (method.getName().equals("equals")) {
-				// Only consider equal when proxies are identical.
-				return (proxy == args[0]);
-			}
-			else if (method.getName().equals("hashCode")) {
-				// Use hashCode of Connection proxy.
-				return System.identityHashCode(proxy);
-			}
-			else if (method.getName().equals("commit")) {
-				throw new TransactionInProgressException("Commit call not allowed within a managed transaction");
-			}
-			else if (method.getName().equals("rollback")) {
-				throw new TransactionInProgressException("Rollback call not allowed within a managed transaction");
-			}
-			else if (method.getName().equals("close")) {
-				// Handle close method: not to be closed within a transaction.
-				return null;
-			}
-			else if (method.getName().equals("getTargetSession")) {
-				// Handle getTargetSession method: return underlying Session.
-				return this.target;
+			switch (method.getName()) {
+				case "equals":
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				case "hashCode":
+					// Use hashCode of Connection proxy.
+					return System.identityHashCode(proxy);
+				case "commit":
+					throw new TransactionInProgressException("Commit call not allowed within a managed transaction");
+				case "rollback":
+					throw new TransactionInProgressException("Rollback call not allowed within a managed transaction");
+				case "close":
+					// Handle close method: not to be closed within a transaction.
+					return null;
+				case "getTargetSession":
+					// Handle getTargetSession method: return underlying Session.
+					return this.target;
 			}
 
 			// Invoke method on target Session.

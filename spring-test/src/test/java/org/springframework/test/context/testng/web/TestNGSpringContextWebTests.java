@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.context.testng.web;
 
 import java.io.File;
+
 import javax.servlet.ServletContext;
 
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * TestNG-based integration tests that verify support for loading a
@@ -89,31 +90,32 @@ public class TestNGSpringContextWebTests extends AbstractTestNGSpringContextTest
 
 	@Test
 	void basicWacFeatures() throws Exception {
-		assertNotNull("ServletContext should be set in the WAC.", wac.getServletContext());
+		assertThat(wac.getServletContext()).as("ServletContext should be set in the WAC.").isNotNull();
 
-		assertNotNull("ServletContext should have been set via ServletContextAware.", servletContext);
+		assertThat(servletContext).as("ServletContext should have been set via ServletContextAware.").isNotNull();
 
-		assertNotNull("ServletContext should have been autowired from the WAC.", mockServletContext);
-		assertNotNull("MockHttpServletRequest should have been autowired from the WAC.", request);
-		assertNotNull("MockHttpServletResponse should have been autowired from the WAC.", response);
-		assertNotNull("MockHttpSession should have been autowired from the WAC.", session);
-		assertNotNull("ServletWebRequest should have been autowired from the WAC.", webRequest);
+		assertThat(mockServletContext).as("ServletContext should have been autowired from the WAC.").isNotNull();
+		assertThat(request).as("MockHttpServletRequest should have been autowired from the WAC.").isNotNull();
+		assertThat(response).as("MockHttpServletResponse should have been autowired from the WAC.").isNotNull();
+		assertThat(session).as("MockHttpSession should have been autowired from the WAC.").isNotNull();
+		assertThat(webRequest).as("ServletWebRequest should have been autowired from the WAC.").isNotNull();
 
 		Object rootWac = mockServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		assertNotNull("Root WAC must be stored in the ServletContext as: "
-				+ WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, rootWac);
-		assertSame("test WAC and Root WAC in ServletContext must be the same object.", wac, rootWac);
-		assertSame("ServletContext instances must be the same object.", mockServletContext, wac.getServletContext());
-		assertSame("ServletContext in the WAC and in the mock request", mockServletContext, request.getServletContext());
+		assertThat(rootWac)
+			.as("Root WAC must be stored in the ServletContext as: " + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE)
+			.isNotNull();
+		assertThat(rootWac).as("test WAC and Root WAC in ServletContext must be the same object.").isSameAs(wac);
+		assertThat(wac.getServletContext()).as("ServletContext instances must be the same object.").isSameAs(mockServletContext);
+		assertThat(request.getServletContext()).as("ServletContext in the WAC and in the mock request").isSameAs(mockServletContext);
 
-		assertEquals("Getting real path for ServletContext resource.",
-			new File("src/main/webapp/index.jsp").getCanonicalPath(), mockServletContext.getRealPath("index.jsp"));
-
+		assertThat(mockServletContext.getRealPath("index.jsp"))
+			.as("Getting real path for ServletContext resource.")
+			.isEqualTo(new File("src/main/webapp/index.jsp").getCanonicalPath());
 	}
 
 	@Test
 	void fooEnigmaAutowired() {
-		assertEquals("enigma", foo);
+		assertThat(foo).isEqualTo("enigma");
 	}
 
 }

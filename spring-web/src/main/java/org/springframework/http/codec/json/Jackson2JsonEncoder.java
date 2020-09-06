@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -47,15 +48,16 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 
 	@Nullable
 	private final PrettyPrinter ssePrettyPrinter;
-	
+
 
 	public Jackson2JsonEncoder() {
 		this(Jackson2ObjectMapperBuilder.json().build());
 	}
 
+	@SuppressWarnings("deprecation")
 	public Jackson2JsonEncoder(ObjectMapper mapper, MimeType... mimeTypes) {
 		super(mapper, mimeTypes);
-		this.streamingMediaTypes.add(MediaType.APPLICATION_STREAM_JSON);
+		setStreamingMediaTypes(Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON));
 		this.ssePrettyPrinter = initSsePrettyPrinter();
 	}
 
@@ -69,7 +71,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Encoder {
 	@Override
 	protected ObjectWriter customizeWriter(ObjectWriter writer, @Nullable MimeType mimeType,
 			ResolvableType elementType, @Nullable Map<String, Object> hints) {
-		
+
 		return (this.ssePrettyPrinter != null &&
 				MediaType.TEXT_EVENT_STREAM.isCompatibleWith(mimeType) &&
 				writer.getConfig().isEnabled(SerializationFeature.INDENT_OUTPUT) ?

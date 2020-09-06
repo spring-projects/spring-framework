@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -28,10 +28,10 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public class Spr16217Tests {
 
 	@Test
-	@Ignore("TODO")
+	@Disabled("TODO")
 	public void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInRegisterBeanPhase() {
 		try (AnnotationConfigApplicationContext context =
-					 new AnnotationConfigApplicationContext(RegisterBeanPhaseImportingConfiguration.class)) {
+					new AnnotationConfigApplicationContext(RegisterBeanPhaseImportingConfiguration.class)) {
 			context.getBean("someBean");
 		}
 	}
@@ -39,7 +39,7 @@ public class Spr16217Tests {
 	@Test
 	public void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInParseConfigurationPhase() {
 		try (AnnotationConfigApplicationContext context =
-					 new AnnotationConfigApplicationContext(ParseConfigurationPhaseImportingConfiguration.class)) {
+					new AnnotationConfigApplicationContext(ParseConfigurationPhaseImportingConfiguration.class)) {
 			context.getBean("someBean");
 		}
 	}
@@ -58,7 +58,7 @@ public class Spr16217Tests {
 		}
 	}
 
- 
+
 	public static class RegisterBeanPhaseCondition implements ConfigurationCondition {
 
 		@Override
@@ -72,7 +72,7 @@ public class Spr16217Tests {
 		}
 	}
 
- 
+
 	public static class ParseConfigurationPhaseCondition implements ConfigurationCondition {
 
 		@Override
@@ -91,7 +91,7 @@ public class Spr16217Tests {
 	public static class RegisterBeanPhaseImportingConfiguration {
 	}
 
- 
+
 	@Import({ParseConfigurationPhaseConditionConfiguration.class, BarConfiguration.class})
 	public static class ParseConfigurationPhaseImportingConfiguration {
 	}
@@ -101,7 +101,7 @@ public class Spr16217Tests {
 	public static class UnconditionalImportingConfiguration {
 	}
 
- 
+
 	public static class BaseConfiguration {
 
 		@Bean

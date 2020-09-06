@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,10 +30,10 @@ import org.springframework.lang.Nullable;
 public class ObjectOptimisticLockingFailureException extends OptimisticLockingFailureException {
 
 	@Nullable
-	private Object persistentClass;
+	private final Object persistentClass;
 
 	@Nullable
-	private Object identifier;
+	private final Object identifier;
 
 
 	/**
@@ -44,6 +44,8 @@ public class ObjectOptimisticLockingFailureException extends OptimisticLockingFa
 	 */
 	public ObjectOptimisticLockingFailureException(String msg, Throwable cause) {
 		super(msg, cause);
+		this.persistentClass = null;
+		this.identifier = null;
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,17 +55,17 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	public static final String DEFAULT_HANDLER_MAPPINGS_LOCATION = "META-INF/spring.handlers";
 
 
-	/** Logger available to subclasses */
+	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** ClassLoader to use for NamespaceHandler classes */
+	/** ClassLoader to use for NamespaceHandler classes. */
 	@Nullable
 	private final ClassLoader classLoader;
 
-	/** Resource location to search for */
+	/** Resource location to search for. */
 	private final String handlerMappingsLocation;
 
-	/** Stores the mappings from namespace URI to NamespaceHandler class name / instance */
+	/** Stores the mappings from namespace URI to NamespaceHandler class name / instance. */
 	@Nullable
 	private volatile Map<String, Object> handlerMappings;
 
@@ -156,15 +156,17 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 			synchronized (this) {
 				handlerMappings = this.handlerMappings;
 				if (handlerMappings == null) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Loading NamespaceHandler mappings from [" + this.handlerMappingsLocation + "]");
+					}
 					try {
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Loaded NamespaceHandler mappings: " + mappings);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Loaded NamespaceHandler mappings: " + mappings);
 						}
-						Map<String, Object> mappingsToUse = new ConcurrentHashMap<>(mappings.size());
-						CollectionUtils.mergePropertiesIntoMap(mappings, mappingsToUse);
-						handlerMappings = mappingsToUse;
+						handlerMappings = new ConcurrentHashMap<>(mappings.size());
+						CollectionUtils.mergePropertiesIntoMap(mappings, handlerMappings);
 						this.handlerMappings = handlerMappings;
 					}
 					catch (IOException ex) {

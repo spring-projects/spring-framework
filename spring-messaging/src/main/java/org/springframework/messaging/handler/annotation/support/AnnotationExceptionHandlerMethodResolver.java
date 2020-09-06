@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 
@@ -35,6 +35,7 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
  * or from the method signature as a fallback option.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
@@ -50,13 +51,12 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 	private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
 		Map<Method, MessageExceptionHandler> methods = MethodIntrospector.selectMethods(handlerType,
 				(MethodIntrospector.MetadataLookup<MessageExceptionHandler>) method ->
-						AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class));
+						AnnotatedElementUtils.findMergedAnnotation(method, MessageExceptionHandler.class));
 
 		Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {
 			Method method = entry.getKey();
-			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<>();
-			exceptionTypes.addAll(Arrays.asList(entry.getValue().value()));
+			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<>(Arrays.asList(entry.getValue().value()));
 			if (exceptionTypes.isEmpty()) {
 				exceptionTypes.addAll(getExceptionsFromMethodSignature(method));
 			}

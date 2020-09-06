@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.test.web.reactive.server;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,9 +27,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -50,12 +51,9 @@ import org.springframework.util.Assert;
  */
 class WiretapConnector implements ClientHttpConnector {
 
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
-
 	private final ClientHttpConnector delegate;
 
-	private final Map<String, Info> exchanges = new ConcurrentHashMap<>();
+	private final Map<String, ClientExchangeInfo> exchanges = new ConcurrentHashMap<>();
 
 
 	WiretapConnector(ClientHttpConnector delegate) {
@@ -81,40 +79,142 @@ class WiretapConnector implements ClientHttpConnector {
 					String requestId = wrappedRequest.getHeaders().getFirst(header);
 					Assert.state(requestId != null, () -> "No \"" + header + "\" header");
 					WiretapClientHttpResponse wrappedResponse = new WiretapClientHttpResponse(response);
-					this.exchanges.put(requestId, new Info(wrappedRequest, wrappedResponse));
+					this.exchanges.put(requestId, new ClientExchangeInfo(wrappedRequest, wrappedResponse));
 					return wrappedResponse;
 				});
 	}
 
 	/**
-	 * Retrieve the {@link Info} for the given "request-id" header value.
+	 * Create the {@link ExchangeResult} for the given "request-id" header value.
 	 */
-	public Info claimRequest(String requestId) {
-		Info info = this.exchanges.remove(requestId);
-		Assert.state(info != null, () -> {
+	ExchangeResult getExchangeResult(String requestId, @Nullable String uriTemplate, Duration timeout) {
+		ClientExchangeInfo clientInfo = this.exchanges.remove(requestId);
+		Assert.state(clientInfo != null, () -> {
 			String header = WebTestClient.WEBTESTCLIENT_REQUEST_ID;
 			return "No match for " + header + "=" + requestId;
 		});
-		return info;
+		return new ExchangeResult(clientInfo.getRequest(), clientInfo.getResponse(),
+				clientInfo.getRequest().getRecorder().getContent(),
+				clientInfo.getResponse().getRecorder().getContent(),
+				timeout, uriTemplate,
+				clientInfo.getResponse().getMockServerResult());
 	}
 
 
-	class Info {
+	/**
+	 * Holder for {@link WiretapClientHttpRequest} and {@link WiretapClientHttpResponse}.
+	 */
+	private static class ClientExchangeInfo {
 
 		private final WiretapClientHttpRequest request;
 
 		private final WiretapClientHttpResponse response;
 
-
-		public Info(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
+		public ClientExchangeInfo(WiretapClientHttpRequest request, WiretapClientHttpResponse response) {
 			this.request = request;
 			this.response = response;
 		}
 
+		public WiretapClientHttpRequest getRequest() {
+			return this.request;
+		}
 
-		public ExchangeResult createExchangeResult(@Nullable  String uriTemplate) {
-			return new ExchangeResult(this.request, this.response,
-					this.request.getContent(), this.response.getContent(), uriTemplate);
+		public WiretapClientHttpResponse getResponse() {
+			return this.response;
+		}
+	}
+
+
+	/**
+	 * Tap into a Publisher of data buffers to save the content.
+	 */
+	final static class WiretapRecorder {
+
+		@Nullable
+		private final Flux<? extends DataBuffer> publisher;
+
+		@Nullable
+		private final Flux<? extends Publisher<? extends DataBuffer>> publisherNested;
+
+		private final DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer();
+
+		private final MonoProcessor<byte[]> content = MonoProcessor.fromSink(Sinks.one());
+
+		private boolean hasContentConsumer;
+
+
+		public WiretapRecorder(@Nullable Publisher<? extends DataBuffer> publisher,
+				@Nullable Publisher<? extends Publisher<? extends DataBuffer>> publisherNested) {
+
+			if (publisher != null && publisherNested != null) {
+				throw new IllegalArgumentException("At most one publisher expected");
+			}
+
+			this.publisher = publisher != null ?
+					Flux.from(publisher)
+							.doOnSubscribe(s -> this.hasContentConsumer = true)
+							.doOnNext(this.buffer::write)
+							.doOnError(this::handleOnError)
+							.doOnCancel(this::handleOnComplete)
+							.doOnComplete(this::handleOnComplete) : null;
+
+			this.publisherNested = publisherNested != null ?
+					Flux.from(publisherNested)
+							.doOnSubscribe(s -> this.hasContentConsumer = true)
+							.map(p -> Flux.from(p).doOnNext(this.buffer::write).doOnError(this::handleOnError))
+							.doOnError(this::handleOnError)
+							.doOnCancel(this::handleOnComplete)
+							.doOnComplete(this::handleOnComplete) : null;
+
+			if (publisher == null && publisherNested == null) {
+				this.content.onComplete();
+			}
+		}
+
+
+		public Publisher<? extends DataBuffer> getPublisherToUse() {
+			Assert.notNull(this.publisher, "Publisher not in use.");
+			return this.publisher;
+		}
+
+		public Publisher<? extends Publisher<? extends DataBuffer>> getNestedPublisherToUse() {
+			Assert.notNull(this.publisherNested, "Nested publisher not in use.");
+			return this.publisherNested;
+		}
+
+		public Mono<byte[]> getContent() {
+			return Mono.defer(() -> {
+				if (this.content.isTerminated()) {
+					return this.content;
+				}
+				if (!this.hasContentConsumer) {
+					// Couple of possible cases:
+					//  1. Mock server never consumed request body (e.g. error before read)
+					//  2. FluxExchangeResult: getResponseBodyContent called before getResponseBody
+					//noinspection ConstantConditions
+					(this.publisher != null ? this.publisher : this.publisherNested)
+							.onErrorMap(ex -> new IllegalStateException(
+									"Content has not been consumed, and " +
+											"an error was raised while attempting to produce it.", ex))
+							.subscribe();
+				}
+				return this.content;
+			});
+		}
+
+
+		private void handleOnError(Throwable ex) {
+			if (!this.content.isTerminated()) {
+				this.content.onError(ex);
+			}
+		}
+
+		private void handleOnComplete() {
+			if (!this.content.isTerminated()) {
+				byte[] bytes = new byte[this.buffer.readableByteCount()];
+				this.buffer.read(bytes);
+				this.content.onNext(bytes);
+			}
 		}
 	}
 
@@ -124,67 +224,35 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	private static class WiretapClientHttpRequest extends ClientHttpRequestDecorator {
 
-		private final DataBuffer buffer;
-
-		private final MonoProcessor<byte[]> body = MonoProcessor.create();
+		@Nullable
+		private WiretapRecorder recorder;
 
 
 		public WiretapClientHttpRequest(ClientHttpRequest delegate) {
 			super(delegate);
-			this.buffer = bufferFactory.allocateBuffer();
 		}
 
-
-		/**
-		 * Return a "promise" with the request body content written to the server.
-		 */
-		public MonoProcessor<byte[]> getContent() {
-			return this.body;
+		public WiretapRecorder getRecorder() {
+			Assert.notNull(this.recorder, "No WiretapRecorder: was the client request written?");
+			return this.recorder;
 		}
-
 
 		@Override
 		public Mono<Void> writeWith(Publisher<? extends DataBuffer> publisher) {
-			return super.writeWith(
-					Flux.from(publisher)
-							.doOnNext(this::handleOnNext)
-							.doOnError(this::handleError)
-							.doOnCancel(this::handleOnComplete)
-							.doOnComplete(this::handleOnComplete));
+			this.recorder = new WiretapRecorder(publisher, null);
+			return super.writeWith(this.recorder.getPublisherToUse());
 		}
 
 		@Override
 		public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> publisher) {
-			return super.writeAndFlushWith(
-					Flux.from(publisher)
-							.map(p -> Flux.from(p).doOnNext(this::handleOnNext).doOnError(this::handleError))
-							.doOnError(this::handleError)
-							.doOnCancel(this::handleOnComplete)
-							.doOnComplete(this::handleOnComplete));
+			this.recorder = new WiretapRecorder(null, publisher);
+			return super.writeAndFlushWith(this.recorder.getNestedPublisherToUse());
 		}
 
 		@Override
 		public Mono<Void> setComplete() {
-			handleOnComplete();
+			this.recorder = new WiretapRecorder(null, null);
 			return super.setComplete();
-		}
-
-		private void handleOnNext(DataBuffer buffer) {
-			this.buffer.write(buffer);
-		}
-
-		private void handleError(Throwable ex) {
-			if (!this.body.isTerminated()) {
-				this.body.onError(ex);
-			}
-		}
-
-		private void handleOnComplete() {
-			if (!this.body.isTerminated()) {
-				byte[] bytes = new byte[this.buffer.readableByteCount()];
-				this.buffer.read(bytes);
-				this.body.onNext(bytes);
-			}
 		}
 	}
 
@@ -194,39 +262,29 @@ class WiretapConnector implements ClientHttpConnector {
 	 */
 	private static class WiretapClientHttpResponse extends ClientHttpResponseDecorator {
 
-		private final DataBuffer buffer;
-
-		private final MonoProcessor<byte[]> body = MonoProcessor.create();
+		private final WiretapRecorder recorder;
 
 
 		public WiretapClientHttpResponse(ClientHttpResponse delegate) {
 			super(delegate);
-			this.buffer = bufferFactory.allocateBuffer();
+			this.recorder = new WiretapRecorder(super.getBody(), null);
 		}
 
 
-		/**
-		 * Return a "promise" with the response body content read from the server.
-		 */
-		public MonoProcessor<byte[]> getContent() {
-			return this.body;
+		public WiretapRecorder getRecorder() {
+			return this.recorder;
 		}
 
 		@Override
+		@SuppressWarnings("ConstantConditions")
 		public Flux<DataBuffer> getBody() {
-			return super.getBody()
-					.doOnNext(buffer::write)
-					.doOnError(body::onError)
-					.doOnCancel(this::handleOnComplete)
-					.doOnComplete(this::handleOnComplete);
+			return Flux.from(this.recorder.getPublisherToUse());
 		}
 
-		private void handleOnComplete() {
-			if (!this.body.isTerminated()) {
-				byte[] bytes = new byte[this.buffer.readableByteCount()];
-				this.buffer.read(bytes);
-				this.body.onNext(bytes);
-			}
+		@Nullable
+		public Object getMockServerResult() {
+			return (getDelegate() instanceof MockServerClientHttpResponse ?
+					((MockServerClientHttpResponse) getDelegate()).getServerResult() : null);
 		}
 	}
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -57,7 +56,6 @@ public interface RenderingResponse extends ServerResponse {
 	 * @return the created builder
 	 */
 	static Builder from(RenderingResponse other) {
-		Assert.notNull(other, "Other RenderingResponse must not be null");
 		return new DefaultRenderingResponseBuilder(other);
 	}
 
@@ -67,7 +65,6 @@ public interface RenderingResponse extends ServerResponse {
 	 * @return the created builder
 	 */
 	static Builder create(String name) {
-		Assert.notNull(name, "'name' must not be null");
 		return new DefaultRenderingResponseBuilder(name);
 	}
 
@@ -80,10 +77,10 @@ public interface RenderingResponse extends ServerResponse {
 		/**
 		 * Add the supplied attribute to the model using a
 		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
-		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * <p><em>Note: Empty {@link Collection Collections} are not added to
 		 * the model when using this method because we cannot correctly determine
 		 * the true convention name. View code should check for {@code null} rather
-		 * than for empty collections.</emphasis>
+		 * than for empty collections.</em>
 		 * @param attribute the model attribute value (never {@code null})
 		 */
 		Builder modelAttribute(Object attribute);

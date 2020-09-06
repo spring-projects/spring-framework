@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,18 +15,27 @@
  */
 package org.springframework.test.web.client.samples;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.io.IOException;
+import java.util.Collections;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.ExpectedCount.never;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -48,14 +57,14 @@ public class SampleTests {
 
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.restTemplate = new RestTemplate();
 		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
 	}
 
 	@Test
-	public void performGet() throws Exception {
+	public void performGet() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -73,7 +82,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void performGetManyTimes() throws Exception {
+	public void performGetManyTimes() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -95,7 +104,7 @@ public class SampleTests {
 	}
 
 	@Test
-	public void expectNever() throws Exception {
+	public void expectNever() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -109,8 +118,8 @@ public class SampleTests {
 		this.mockServer.verify();
 	}
 
-	@Test(expected = AssertionError.class)
-	public void expectNeverViolated() throws Exception {
+	@Test
+	public void expectNeverViolated() {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
@@ -120,11 +129,12 @@ public class SampleTests {
 				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
-		this.restTemplate.getForObject("/composers/{id}", Person.class, 43);
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
+				this.restTemplate.getForObject("/composers/{id}", Person.class, 43));
 	}
 
 	@Test
-	public void performGetWithResponseBodyFromFile() throws Exception {
+	public void performGetWithResponseBodyFromFile() {
 
 		Resource responseBody = new ClassPathResource("ludwig.json", this.getClass());
 
@@ -167,7 +177,51 @@ public class SampleTests {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
+			assertThat(error.getMessage().contains("2 unsatisfied expectation(s)")).as(error.getMessage()).isTrue();
 		}
 	}
+
+	@Test // SPR-14694
+	public void repeatedAccessToResponseViaResource() {
+
+		Resource resource = new ClassPathResource("ludwig.json", this.getClass());
+
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setInterceptors(Collections.singletonList(new ContentInterceptor(resource)));
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate)
+				.ignoreExpectOrder(true)
+				.bufferContent()  // enable repeated reads of response body
+				.build();
+
+		mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(resource, MediaType.APPLICATION_JSON));
+
+		restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		mockServer.verify();
+	}
+
+
+	private static class ContentInterceptor implements ClientHttpRequestInterceptor {
+
+		private final Resource resource;
+
+
+		private ContentInterceptor(Resource resource) {
+			this.resource = resource;
+		}
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body,
+				ClientHttpRequestExecution execution) throws IOException {
+
+			ClientHttpResponse response = execution.execute(request, body);
+			byte[] expected = FileCopyUtils.copyToByteArray(this.resource.getInputStream());
+			byte[] actual = FileCopyUtils.copyToByteArray(response.getBody());
+			assertThat(new String(actual)).isEqualTo(new String(expected));
+			return response;
+		}
+	}
+
 }

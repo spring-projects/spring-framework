@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import org.springframework.lang.UsesSunHttpServer;
 import org.springframework.util.FileCopyUtils;
 
 /**
@@ -33,7 +32,7 @@ import org.springframework.util.FileCopyUtils;
  *
  * <p>Hessian is a slim, binary RPC protocol.
  * For information on Hessian, see the
- * <a href="http://www.caucho.com/hessian">Hessian website</a>.
+ * <a href="http://hessian.caucho.com">Hessian website</a>.
  * <b>Note: As of Spring 4.0, this exporter requires Hessian 4.0 or above.</b>
  *
  * <p>Hessian services exported with this class can be accessed by
@@ -43,9 +42,10 @@ import org.springframework.util.FileCopyUtils;
  * @since 2.5.1
  * @see org.springframework.remoting.caucho.HessianClientInterceptor
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
- * @see org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter
+ * @deprecated as of Spring Framework 5.1, in favor of {@link HessianServiceExporter}
  */
-@UsesSunHttpServer
+@Deprecated
+@org.springframework.lang.UsesSunHttpServer
 public class SimpleHessianServiceExporter extends HessianExporter implements HttpHandler {
 
 	/**

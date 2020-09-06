@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@
 package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
+
 import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -264,19 +264,16 @@ public abstract class MockMvcRequestBuilders {
 	 * </pre>
 	 * @param mvcResult the result from the request that started async processing
 	 */
-	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
+	public static RequestBuilder asyncDispatch(MvcResult mvcResult) {
 
 		// There must be an async result before dispatching
 		mvcResult.getAsyncResult();
 
-		return new RequestBuilder() {
-			@Override
-			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
-				MockHttpServletRequest request = mvcResult.getRequest();
-				request.setDispatcherType(DispatcherType.ASYNC);
-				request.setAsyncStarted(false);
-				return request;
-			}
+		return servletContext -> {
+			MockHttpServletRequest request = mvcResult.getRequest();
+			request.setDispatcherType(DispatcherType.ASYNC);
+			request.setAsyncStarted(false);
+			return request;
 		};
 	}
 

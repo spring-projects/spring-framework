@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -130,10 +131,6 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 				this.connection = this.entityManager.unwrap(Connection.class);
 			}
 			return this.connection;
-		}
-
-		@Override
-		public void releaseConnection(Connection con) {
 		}
 	}
 

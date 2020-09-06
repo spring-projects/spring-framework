@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -244,7 +244,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				this.webSocketHandler.afterConnectionEstablished(this);
 				this.connectFuture.set(this);
 			}
-			catch (Throwable ex) {
+			catch (Exception ex) {
 				if (logger.isErrorEnabled()) {
 					logger.error("WebSocketHandler.afterConnectionEstablished threw exception in " + this, ex);
 				}
@@ -293,7 +293,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 				try {
 					this.webSocketHandler.handleMessage(this, new TextMessage(message));
 				}
-				catch (Throwable ex) {
+				catch (Exception ex) {
 					logger.error("WebSocketHandler.handleMessage threw an exception on " + frame + " in " + this, ex);
 				}
 			}
@@ -307,7 +307,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 			if (frameData != null) {
 				String[] data = getMessageCodec().decode(frameData);
 				if (data != null && data.length == 2) {
-					closeStatus = new CloseStatus(Integer.valueOf(data[0]), data[1]);
+					closeStatus = new CloseStatus(Integer.parseInt(data[0]), data[1]);
 				}
 				if (logger.isDebugEnabled()) {
 					logger.debug("Processing SockJS close frame with " + closeStatus + " in " + this);

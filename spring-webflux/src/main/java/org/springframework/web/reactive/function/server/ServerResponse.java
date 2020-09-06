@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.server;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -38,7 +40,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -57,12 +58,22 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface ServerResponse {
 
-	// Instance methods
-
 	/**
 	 * Return the status code of this response.
+	 * @return the status as an HttpStatus enum value
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see HttpStatus#valueOf(int)
 	 */
 	HttpStatus statusCode();
+
+	/**
+	 * Return the (potentially non-standard) status code of this response.
+	 * @return the status as an integer
+	 * @since 5.2
+	 * @see #statusCode()
+	 * @see HttpStatus#resolve(int)
+	 */
+	int rawStatusCode();
 
 	/**
 	 * Return the headers of this response.
@@ -83,7 +94,7 @@ public interface ServerResponse {
 	Mono<Void> writeTo(ServerWebExchange exchange, Context context);
 
 
-	// Static builder methods
+	// Static methods
 
 	/**
 	 * Create a builder with the status code and headers of the given response.
@@ -91,7 +102,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder from(ServerResponse other) {
-		Assert.notNull(other, "Other ServerResponse must not be null");
 		return new DefaultServerResponseBuilder(other);
 	}
 
@@ -101,7 +111,6 @@ public interface ServerResponse {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
 		return new DefaultServerResponseBuilder(status);
 	}
 
@@ -193,7 +202,6 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a {@linkplain HttpStatus#NOT_FOUND 404 Not Found} status.
-	 *
 	 * @return the created builder
 	 */
 	static HeadersBuilder<?> notFound() {
@@ -291,6 +299,16 @@ public interface ServerResponse {
 		B lastModified(ZonedDateTime lastModified);
 
 		/**
+		 * Set the time the resource was last changed, as specified by the
+		 * {@code Last-Modified} header.
+		 * @param lastModified the last modified date
+		 * @return this builder
+		 * @since 5.1.4
+		 * @see HttpHeaders#setLastModified(long)
+		 */
+		B lastModified(Instant lastModified);
+
+		/**
 		 * Set the location of a resource, as specified by the {@code Location} header.
 		 * @param location the location
 		 * @return this builder
@@ -322,22 +340,19 @@ public interface ServerResponse {
 
 		/**
 		 * Build the response entity with no body.
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build();
 
 		/**
 		 * Build the response entity with no body.
-		 * The response will be committed when the given {@code voidPublisher} completes.
-		 * @param voidPublisher publisher publisher to indicate when the response should be committed
-		 * @return the built response
+		 * <p>The response will be committed when the given {@code voidPublisher} completes.
+		 * @param voidPublisher the publisher to indicate when the response should be committed
 		 */
 		Mono<ServerResponse> build(Publisher<Void> voidPublisher);
 
 		/**
 		 * Build the response entity with a custom writer function.
 		 * @param writeFunction the function used to write to the {@link ServerWebExchange}
-		 * @return the built response
 		 */
 		Mono<ServerResponse> build(BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction);
 	}
@@ -375,11 +390,31 @@ public interface ServerResponse {
 		BodyBuilder hint(String key, Object value);
 
 		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * Customize the serialization hints with the given consumer.
+		 * @param hintsConsumer a function that consumes the hints
+		 * @return this builder
+		 * @since 5.1.6
+		 */
+		BodyBuilder hints(Consumer<Map<String, Object>> hintsConsumer);
+
+		/**
+		 * Set the body of the response to the given {@code Object} and return it.
+		 * This is a shortcut for using a {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromValue value inserter}.
+		 * @param body the body of the response
+		 * @return the built response
+		 * @throws IllegalArgumentException if {@code body} is a
+		 * {@link Publisher} or producer known to {@link ReactiveAdapterRegistry}
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> bodyValue(Object body);
+
+		/**
+		 * Set the body from the given {@code Publisher}. Shortcut for
+		 * {@link #body(BodyInserter)} with a
+		 * {@linkplain BodyInserters#fromPublisher Publisher inserter}.
 		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementClass the class of elements contained in the publisher
+		 * @param elementClass the type of elements published
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built response
@@ -387,28 +422,39 @@ public interface ServerResponse {
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher, Class<T> elementClass);
 
 		/**
-		 * Set the body of the response to the given asynchronous {@code Publisher} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
-		 * @param publisher the {@code Publisher} to write to the response
-		 * @param typeReference a type reference describing the elements contained in the publisher
+		 * Variant of {@link #body(Publisher, Class)} that allows using any
+		 * producer that can be resolved to {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param publisher the {@code Publisher} to use to write the response
+		 * @param elementTypeRef the type of elements produced
 		 * @param <T> the type of the elements contained in the publisher
 		 * @param <P> the type of the {@code Publisher}
 		 * @return the built response
 		 */
 		<T, P extends Publisher<T>> Mono<ServerResponse> body(P publisher,
-				ParameterizedTypeReference<T> typeReference);
+				ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Set the body of the response to the given synchronous {@code Object} and return it.
-		 * This convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromObject(Object)}.
-		 * @param body the body of the response
+		 * Variant of {@link #body(Publisher, Class)} that allows using any
+		 * producer that can be resolved to {@link Publisher} via
+		 * {@link ReactiveAdapterRegistry}.
+		 * @param producer the producer to write to the request
+		 * @param elementClass the type of elements produced
 		 * @return the built response
-		 * @throws IllegalArgumentException if {@code body} is a {@link Publisher}, for which
-		 * {@link #body(Publisher, Class)} should be used.
+		 * @since 5.2
 		 */
-		Mono<ServerResponse> syncBody(Object body);
+		Mono<ServerResponse> body(Object producer, Class<?> elementClass);
+
+		/**
+		 * Variant of {@link #body(Publisher, ParameterizedTypeReference)} that
+		 * allows using any producer that can be resolved to {@link Publisher}
+		 * via {@link ReactiveAdapterRegistry}.
+		 * @param producer the producer to write to the response
+		 * @param elementTypeRef the type of elements produced
+		 * @return the built response
+		 * @since 5.2
+		 */
+		Mono<ServerResponse> body(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
@@ -418,12 +464,20 @@ public interface ServerResponse {
 		Mono<ServerResponse> body(BodyInserter<?, ? super ServerHttpResponse> inserter);
 
 		/**
+		 * Set the response body to the given {@code Object} and return it.
+		 * As of 5.2 this method delegates to {@link #bodyValue(Object)}.
+		 * @deprecated as of Spring Framework 5.2 in favor of {@link #bodyValue(Object)}
+		 */
+		@Deprecated
+		Mono<ServerResponse> syncBody(Object body);
+
+		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
 		 * The model attributes are mapped under a
 		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
-		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * <p><em>Note: Empty {@link Collection Collections} are not added to
 		 * the model when using this method because we cannot correctly determine
-		 * the true convention name.</emphasis>
+		 * the true convention name.</em>
 		 * @param name the name of the template to be rendered
 		 * @param modelAttributes the modelAttributes used to render the template
 		 * @return the built response
@@ -446,13 +500,13 @@ public interface ServerResponse {
 	interface Context {
 
 		/**
-		 * Return the {@link HttpMessageWriter}s to be used for response body conversion.
+		 * Return the {@link HttpMessageWriter HttpMessageWriters} to be used for response body conversion.
 		 * @return the list of message writers
 		 */
 		List<HttpMessageWriter<?>> messageWriters();
 
 		/**
-		 * Return the  {@link ViewResolver}s to be used for view name resolution.
+		 * Return the  {@link ViewResolver ViewResolvers} to be used for view name resolution.
 		 * @return the list of view resolvers
 		 */
 		List<ViewResolver> viewResolvers();

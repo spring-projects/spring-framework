@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -194,7 +194,7 @@ import org.springframework.core.annotation.AliasFor;
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
  * semantics as mentioned above. This works out in {@code BFPP} cases, as they are not typically
- * referenced by other {@code @Bean} methods. As a reminder, a WARN-level log message will be
+ * referenced by other {@code @Bean} methods. As a reminder, an INFO-level log message will be
  * issued for any non-static {@code @Bean} methods having a return type assignable to
  * {@code BeanFactoryPostProcessor}.
  *
@@ -248,8 +248,19 @@ public @interface Bean {
 	 * bean class itself expresses through annotations.
 	 * @see Autowire#BY_NAME
 	 * @see Autowire#BY_TYPE
+	 * @deprecated as of 5.1, since {@code @Bean} factory method argument resolution and
+	 * {@code @Autowired} processing supersede name/type-based bean property injection
 	 */
+	@Deprecated
 	Autowire autowire() default Autowire.NO;
+
+	/**
+	 * Is this bean a candidate for getting autowired into some other bean?
+	 * <p>Default is {@code true}; set this to {@code false} for internal delegates
+	 * that are not meant to get in the way of beans of the same type in other places.
+	 * @since 5.1
+	 */
+	boolean autowireCandidate() default true;
 
 	/**
 	 * The optional name of a method to call on the bean instance during initialization.

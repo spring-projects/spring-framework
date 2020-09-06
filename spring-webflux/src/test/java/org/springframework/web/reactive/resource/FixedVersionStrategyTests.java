@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,11 @@
 
 package org.springframework.web.reactive.resource;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link FixedVersionStrategy}.
@@ -29,44 +29,46 @@ import static org.junit.Assert.assertNull;
  */
 public class FixedVersionStrategyTests {
 
-	private final String version = "1df341f";
+	private static final String VERSION = "1df341f";
 
-	private final String path = "js/foo.js";
+	private static final String PATH = "js/foo.js";
+
 
 	private FixedVersionStrategy strategy;
 
 
-	@Before
+	@BeforeEach
 	public void setup() {
-		this.strategy = new FixedVersionStrategy(this.version);
+		this.strategy = new FixedVersionStrategy(VERSION);
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
-	public void emptyPrefixVersion() throws Exception {
-		new FixedVersionStrategy("  ");
+	@Test
+	public void emptyPrefixVersion() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new FixedVersionStrategy("  "));
 	}
 
 	@Test
-	public void extractVersion() throws Exception {
-		assertEquals(this.version, this.strategy.extractVersion(this.version + "/" + this.path));
-		assertNull(this.strategy.extractVersion(this.path));
+	public void extractVersion() {
+		assertThat(this.strategy.extractVersion(VERSION + "/" + PATH)).isEqualTo(VERSION);
+		assertThat(this.strategy.extractVersion(PATH)).isNull();
 	}
 
 	@Test
-	public void removeVersion() throws Exception {
-		assertEquals("/" + this.path, this.strategy.removeVersion(this.version + "/" + this.path, this.version));
+	public void removeVersion() {
+		assertThat(this.strategy.removeVersion(VERSION + "/" + PATH, VERSION)).isEqualTo(("/" + PATH));
 	}
 
 	@Test
-	public void addVersion() throws Exception {
-		assertEquals(this.version + "/" + this.path, this.strategy.addVersion("/" + this.path, this.version));
+	public void addVersion() {
+		assertThat(this.strategy.addVersion("/" + PATH, VERSION)).isEqualTo((VERSION + "/" + PATH));
 	}
 
 	@Test  // SPR-13727
-	public void addVersionRelativePath() throws Exception {
-		String relativePath = "../" + this.path;
-		assertEquals(relativePath, this.strategy.addVersion(relativePath, this.version));
+	public void addVersionRelativePath() {
+		String relativePath = "../" + PATH;
+		assertThat(this.strategy.addVersion(relativePath, VERSION)).isEqualTo(relativePath);
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors
+ * Copyright 2002-2019 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 	https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,8 @@
 
 package org.springframework.ui
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 
 /**
  * Tests for [ModelMap] Kotlin extensions.
@@ -31,8 +30,8 @@ class ModelMapExtensionsTests {
 	fun setAttribute() {
 		val model = ModelMap()
 		model["foo"] = "bing"
-		assertTrue(model.containsAttribute("foo"))
-		assertEquals("bing", model["foo"])
+		assertThat(model.containsAttribute("foo"))
+		assertThat(model["foo"]).isEqualTo("bing")
 	}
 
 }

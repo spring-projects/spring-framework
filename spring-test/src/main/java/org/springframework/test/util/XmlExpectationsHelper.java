@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.test.util;
 
 import java.io.StringReader;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
@@ -32,7 +33,7 @@ import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.ElementSelectors;
 
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * A helper class for assertions on XML content.
@@ -72,7 +73,7 @@ public class XmlExpectationsHelper {
 	 * two are "similar" -- i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this method assumes the
-	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit<a/> library is available.
+	 * <a href="https://github.com/xmlunit/xmlunit">XMLUnit</a> library is available.
 	 * @param expected the expected XML content
 	 * @param actual the actual XML content
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Object...)
@@ -104,12 +105,12 @@ public class XmlExpectationsHelper {
 
 
 		public boolean hasDifferences() {
-			return diff.hasDifferences();
+			return this.diff.hasDifferences();
 		}
 
 		@Override
 		public String toString() {
-			return diff.toString();
+			return this.diff.toString();
 		}
 
 	}

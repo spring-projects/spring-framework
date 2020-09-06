@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,18 +41,23 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.
  *
+ * <p>All beans in the containing {@code BeanFactory} are made available as
+ * predefined variables with their common bean name, including standard context
+ * beans such as "environment", "systemProperties" and "systemEnvironment".
+ *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see BeanExpressionContext#getBeanFactory()
  * @see org.springframework.expression.ExpressionParser
  * @see org.springframework.expression.spel.standard.SpelExpressionParser
  * @see org.springframework.expression.spel.support.StandardEvaluationContext
  */
 public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
-	/** Default expression prefix: "#{" */
+	/** Default expression prefix: "#{". */
 	public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
 
-	/** Default expression suffix: "}" */
+	/** Default expression suffix: "}". */
 	public static final String DEFAULT_EXPRESSION_SUFFIX = "}";
 
 
@@ -64,8 +69,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
-	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache =
-			new ConcurrentHashMap<>(8);
+	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache = new ConcurrentHashMap<>(8);
 
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
 		@Override
@@ -145,8 +149,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			}
 			StandardEvaluationContext sec = this.evaluationCache.get(evalContext);
 			if (sec == null) {
-				sec = new StandardEvaluationContext();
-				sec.setRootObject(evalContext);
+				sec = new StandardEvaluationContext(evalContext);
 				sec.addPropertyAccessor(new BeanExpressionContextAccessor());
 				sec.addPropertyAccessor(new BeanFactoryAccessor());
 				sec.addPropertyAccessor(new MapAccessor());

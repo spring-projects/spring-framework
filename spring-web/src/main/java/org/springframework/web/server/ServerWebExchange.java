@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,6 +44,16 @@ import org.springframework.util.MultiValueMap;
 public interface ServerWebExchange {
 
 	/**
+	 * Name of {@link #getAttributes() attribute} whose value can be used to
+	 * correlate log messages for this exchange. Use {@link #getLogPrefix()} to
+	 * obtain a consistently formatted prefix based on this attribute.
+	 * @since 5.1
+	 * @see #getLogPrefix()
+	 */
+	String LOG_ID_ATTRIBUTE = ServerWebExchange.class.getName() + ".LOG_ID";
+
+
+	/**
 	 * Return the current HTTP request.
 	 */
 	ServerHttpRequest getRequest();
@@ -80,7 +90,7 @@ public interface ServerWebExchange {
 	@SuppressWarnings("unchecked")
 	default <T> T getRequiredAttribute(String name) {
 		T value = getAttribute(name);
-		Assert.notNull(value, "Required attribute '" + name + "' is missing.");
+		Assert.notNull(value, () -> "Required attribute '" + name + "' is missing");
 		return value;
 	}
 
@@ -114,7 +124,6 @@ public interface ServerWebExchange {
 	/**
 	 * Return the form data from the body of the request if the Content-Type is
 	 * {@code "application/x-www-form-urlencoded"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
@@ -124,10 +133,11 @@ public interface ServerWebExchange {
 	/**
 	 * Return the parts of a multipart request if the Content-Type is
 	 * {@code "multipart/form-data"} or an empty map otherwise.
-	 *
 	 * <p><strong>Note:</strong> calling this method causes the request body to
 	 * be read and parsed in full and the resulting {@code MultiValueMap} is
 	 * cached so that this method is safe to call more than once.
+	 * <p><strong>Note:</strong>the {@linkplain Part#content() contents} of each
+	 * part is not cached, and can only be read once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 
@@ -140,8 +150,7 @@ public interface ServerWebExchange {
 	/**
 	 * Return the {@link ApplicationContext} associated with the web application,
 	 * if it was initialized with one via
-	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext
-	 * WebHttpHandlerBuilder#applicationContext}.
+	 * {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)}.
 	 * @since 5.0.3
 	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#applicationContext(ApplicationContext)
 	 */
@@ -207,6 +216,17 @@ public interface ServerWebExchange {
 	 * @param transformer a URL transformation function to add
 	 */
 	void addUrlTransformer(Function<String, String> transformer);
+
+	/**
+	 * Return a log message prefix to use to correlate messages for this exchange.
+	 * The prefix is based on the value of the attribute {@link #LOG_ID_ATTRIBUTE}
+	 * along with some extra formatting so that the prefix can be conveniently
+	 * prepended with no further formatting no separators required.
+	 * @return the log message prefix or an empty String if the
+	 * {@link #LOG_ID_ATTRIBUTE} is not set.
+	 * @since 5.1
+	 */
+	String getLogPrefix();
 
 	/**
 	 * Return a builder to mutate properties of this exchange by wrapping it

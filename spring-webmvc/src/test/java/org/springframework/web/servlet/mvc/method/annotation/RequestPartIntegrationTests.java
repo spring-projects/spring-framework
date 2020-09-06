@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.Connector;
@@ -30,11 +31,10 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +67,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
@@ -86,7 +86,7 @@ public class RequestPartIntegrationTests {
 	private static String baseUrl;
 
 
-	@BeforeClass
+	@BeforeAll
 	public static void startServer() throws Exception {
 		// Let server pick its own random, available port.
 		server = new Server(0);
@@ -115,14 +115,14 @@ public class RequestPartIntegrationTests {
 		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void stopServer() throws Exception {
 		if (server != null) {
 			server.stop();
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
 		emptyBodyConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -178,7 +178,7 @@ public class RequestPartIntegrationTests {
 		this.restTemplate.setMessageConverters(Collections.singletonList(converter));
 
 		ResponseEntity<Void> responseEntity = restTemplate.exchange(requestEntity, Void.class);
-		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	private void testCreate(String url, String basename) {
@@ -192,7 +192,7 @@ public class RequestPartIntegrationTests {
 		parts.add("iso-8859-1-data", new HttpEntity<>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
 
 		URI location = restTemplate.postForLocation(url, parts);
-		assertEquals("http://localhost:8080/test/" + basename + "/logo.jpg", location.toString());
+		assertThat(location.toString()).isEqualTo(("http://localhost:8080/test/" + basename + "/logo.jpg"));
 	}
 
 
@@ -239,7 +239,7 @@ public class RequestPartIntegrationTests {
 				@RequestPart(name = "empty-data", required = false) TestData emptyData,
 				@RequestPart(name = "iso-8859-1-data") byte[] iso88591Data) {
 
-			Assert.assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
+			assertThat(iso88591Data).isEqualTo(new byte[]{(byte) 0xC4});
 
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.get().getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
@@ -249,7 +249,7 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/spr13319", method = POST, consumes = "multipart/form-data")
 		public ResponseEntity<Void> create(@RequestPart("file") MultipartFile multipartFile) {
-			assertEquals("élève.txt", multipartFile.getOriginalFilename());
+			assertThat(multipartFile.getOriginalFilename()).isEqualTo("élève.txt");
 			return ResponseEntity.ok().build();
 		}
 	}

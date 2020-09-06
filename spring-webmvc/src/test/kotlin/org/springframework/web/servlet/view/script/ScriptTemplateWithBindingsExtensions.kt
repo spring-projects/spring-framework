@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package org.springframework.web.reactive.result.view.script
+package org.springframework.web.servlet.view.script
 
 import kotlin.script.templates.standard.ScriptTemplateWithBindings
 
@@ -13,4 +13,4 @@ fun ScriptTemplateWithBindings.i18n(code: String) =
 
 var ScriptTemplateWithBindings.foo: String
 	get() = bindings["foo"] as String
-	set(value) { throw UnsupportedOperationException()}
+	set(@Suppress("UNUSED_PARAMETER") value) { throw UnsupportedOperationException()}

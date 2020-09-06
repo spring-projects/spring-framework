@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,6 @@
 package org.springframework.web.reactive.function.server;
 
 import java.util.Optional;
-
-import org.springframework.util.Assert;
 
 /**
  * Represents a function that evaluates on a given {@link ServerRequest}.
@@ -49,7 +47,6 @@ public interface RequestPredicate {
 	 * @return a predicate composed of this predicate AND the {@code other} predicate
 	 */
 	default RequestPredicate and(RequestPredicate other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new RequestPredicates.AndRequestPredicate(this, other);
 	}
 
@@ -58,7 +55,7 @@ public interface RequestPredicate {
 	 * @return a predicate that represents the logical negation of this predicate
 	 */
 	default RequestPredicate negate() {
-		return (t) -> !test(t);
+		return new RequestPredicates.NegateRequestPredicate(this);
 	}
 
 	/**
@@ -69,7 +66,6 @@ public interface RequestPredicate {
 	 * @return a predicate composed of this predicate OR the {@code other} predicate
 	 */
 	default RequestPredicate or(RequestPredicate other) {
-		Assert.notNull(other, "'other' must not be null");
 		return new RequestPredicates.OrRequestPredicate(this, other);
 	}
 
@@ -77,7 +73,7 @@ public interface RequestPredicate {
 	 * Transform the given request into a request used for a nested route. For instance,
 	 * a path-based predicate can return a {@code ServerRequest} with a the path remaining
 	 * after a match.
-	 * <p>The default implementation returns an {@code Optional} wrapping the given path if
+	 * <p>The default implementation returns an {@code Optional} wrapping the given request if
 	 * {@link #test(ServerRequest)} evaluates to {@code true}; or {@link Optional#empty()}
 	 * if it evaluates to {@code false}.
 	 * @param request the request to be nested
@@ -86,6 +82,17 @@ public interface RequestPredicate {
 	 */
 	default Optional<ServerRequest> nest(ServerRequest request) {
 		return (test(request) ? Optional.of(request) : Optional.empty());
+	}
+
+	/**
+	 * Accept the given visitor. Default implementation calls
+	 * {@link RequestPredicates.Visitor#unknown(RequestPredicate)}; composed {@code RequestPredicate}
+	 * implementations are expected to call {@code accept} for all components that make up this
+	 * request predicate.
+	 * @param visitor the visitor to accept
+	 */
+	default void accept(RequestPredicates.Visitor visitor) {
+		visitor.unknown(this);
 	}
 
 }

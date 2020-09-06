@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -199,10 +200,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
 			outputMessage.getServletResponse().setStatus(returnStatus);
 			if (returnStatus == 200) {
-				if (isResourceNotModified(inputMessage, outputMessage)) {
-					// Ensure headers are flushed, no body should be written.
+				HttpMethod method = inputMessage.getMethod();
+				if ((HttpMethod.GET.equals(method) || HttpMethod.HEAD.equals(method))
+						&& isResourceNotModified(inputMessage, outputMessage)) {
 					outputMessage.flush();
-					// Skip call to converters, as they may update the body.
 					return;
 				}
 			}
@@ -283,7 +284,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else {
 			Type type = getHttpEntityType(returnType);
 			type = (type != null ? type : Object.class);
-			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
+			return ResolvableType.forMethodParameter(returnType, type).toClass();
 		}
 	}
 

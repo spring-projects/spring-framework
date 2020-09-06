@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,24 @@ package org.springframework.web.context.request;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpSession;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpSession;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Rick Evans
@@ -42,9 +50,10 @@ public class ServletRequestAttributesTests {
 	};
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void ctorRejectsNullArg() throws Exception {
-		new ServletRequestAttributes(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new ServletRequestAttributes(null));
 	}
 
 	@Test
@@ -53,7 +62,7 @@ public class ServletRequestAttributesTests {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
 		Object value = request.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertThat(value).isSameAs(VALUE);
 	}
 
 	@Test
@@ -61,13 +70,8 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		request.close();
-		try {
-			attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		assertThatIllegalStateException().isThrownBy(() ->
+				attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_REQUEST));
 	}
 
 	@Test
@@ -78,7 +82,7 @@ public class ServletRequestAttributesTests {
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
+		assertThat(session.getAttribute(KEY)).isSameAs(VALUE);
 	}
 
 	@Test
@@ -88,11 +92,11 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
+		assertThat(attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION)).isSameAs(VALUE);
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		assertSame(VALUE, session.getAttribute(KEY));
+		assertThat(session.getAttribute(KEY)).isSameAs(VALUE);
 	}
 
 	@Test
@@ -101,7 +105,7 @@ public class ServletRequestAttributesTests {
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
-		assertNull(value);
+		assertThat(value).isNull();
 		verify(request).getSession(false);
 	}
 
@@ -114,7 +118,7 @@ public class ServletRequestAttributesTests {
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
 		Object value = session.getAttribute(KEY);
-		assertNull(value);
+		assertThat(value).isNull();
 	}
 
 	@Test
@@ -134,7 +138,7 @@ public class ServletRequestAttributesTests {
 		given(session.getAttribute(KEY)).willReturn(VALUE);
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
-		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
+		assertThat(attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION)).isSameAs(VALUE);
 		attrs.requestCompleted();
 
 		verify(session, times(2)).getAttribute(KEY);
@@ -159,12 +163,12 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void skipImmutableInteger() {
-		doSkipImmutableValue(new Integer(1));
+		doSkipImmutableValue(1);
 	}
 
 	@Test
 	public void skipImmutableFloat() {
-		doSkipImmutableValue(new Float(1.1));
+		doSkipImmutableValue(1.1F);
 	}
 
 	@Test

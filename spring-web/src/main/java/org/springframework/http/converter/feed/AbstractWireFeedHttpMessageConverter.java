@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,17 +41,21 @@ import org.springframework.util.StringUtils;
  * Abstract base class for Atom and RSS Feed message converters, using the
  * <a href="https://github.com/rometools/rome">ROME tools</a> project.
  *
- * <p>><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
+ * <p><b>NOTE: As of Spring 4.1, this is based on the {@code com.rometools}
  * variant of ROME, version 1.5. Please upgrade your build dependency.</b>
  *
  * @author Arjen Poutsma
  * @since 3.0.2
+ * @param <T> the converted object type
  * @see AtomFeedHttpMessageConverter
  * @see RssChannelHttpMessageConverter
  */
 public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 		extends AbstractHttpMessageConverter<T> {
 
+	/**
+	 * The default charset used by the converter.
+	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
@@ -74,7 +78,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 			return (T) feedInput.build(reader);
 		}
 		catch (FeedException ex) {
-			throw new HttpMessageNotReadableException("Could not read WireFeed: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read WireFeed: " + ex.getMessage(), ex, inputMessage);
 		}
 	}
 
@@ -86,7 +90,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed>
 				Charset.forName(wireFeed.getEncoding()) : DEFAULT_CHARSET);
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		if (contentType != null) {
-			contentType = new MediaType(contentType.getType(), contentType.getSubtype(), charset);
+			contentType = new MediaType(contentType, charset);
 			outputMessage.getHeaders().setContentType(contentType);
 		}
 

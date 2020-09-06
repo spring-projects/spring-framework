@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,12 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * Describes transaction attributes on a method or class.
+ * Describes a transaction attribute on an individual method or on a class.
+ *
+ * <p>At the class level, this annotation applies as a default to all methods of
+ * the declaring class and its subclasses. Note that it does not apply to ancestor
+ * classes up the class hierarchy; methods need to be locally redeclared in order
+ * to participate in a subclass-level annotation.
  *
  * <p>This annotation type is generally directly comparable to Spring's
  * {@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}
@@ -46,12 +51,13 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Paluch
  * @since 1.2
  * @see org.springframework.transaction.interceptor.TransactionAttribute
  * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute
  * @see org.springframework.transaction.interceptor.RuleBasedTransactionAttribute
  */
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
@@ -66,15 +72,29 @@ public @interface Transactional {
 
 	/**
 	 * A <em>qualifier</em> value for the specified transaction.
-	 * <p>May be used to determine the target transaction manager,
-	 * matching the qualifier value (or the bean name) of a specific
-	 * {@link org.springframework.transaction.PlatformTransactionManager}
+	 * <p>May be used to determine the target transaction manager, matching the
+	 * qualifier value (or the bean name) of a specific
+	 * {@link org.springframework.transaction.TransactionManager TransactionManager}
 	 * bean definition.
 	 * @since 4.2
 	 * @see #value
+	 * @see org.springframework.transaction.PlatformTransactionManager
+	 * @see org.springframework.transaction.ReactiveTransactionManager
 	 */
 	@AliasFor("value")
 	String transactionManager() default "";
+
+	/**
+	 * Defines zero (0) or more transaction labels. Labels may be used to
+	 * describe a transaction and they can be evaluated by individual transaction
+	 * manager. Labels may serve a solely descriptive purpose or map to
+	 * pre-defined transaction manager-specific options.
+	 * <p>See the description of the actual transaction manager implementation
+	 * how it evaluates transaction labels.
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.DefaultTransactionAttribute#getLabels()
+	 */
+	String[] label() default {};
 
 	/**
 	 * The transaction propagation type.
@@ -86,19 +106,43 @@ public @interface Transactional {
 	/**
 	 * The transaction isolation level.
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions. Consider switching the "validateExistingTransactions" flag to
+	 * "true" on your transaction manager if you'd like isolation level declarations
+	 * to get rejected when participating in an existing transaction with a different
+	 * isolation level.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getIsolationLevel()
+	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setValidateExistingTransaction
 	 */
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
-	 * The timeout for this transaction.
+	 * The timeout for this transaction (in seconds).
 	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
+	 * @return the timeout in seconds
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
 	 */
 	int timeout() default TransactionDefinition.TIMEOUT_DEFAULT;
 
 	/**
-	 * {@code true} if the transaction is read-only.
+	 * The timeout for this transaction (in seconds).
+	 * <p>Defaults to the default timeout of the underlying transaction system.
+	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
+	 * {@link Propagation#REQUIRES_NEW} since it only applies to newly started
+	 * transactions.
+	 * @return the timeout in seconds as a String value, e.g. a placeholder
+	 * @since 5.3
+	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getTimeout()
+	 */
+	String timeoutString() default "";
+
+	/**
+	 * A boolean flag that can be set to {@code true} if the transaction is
+	 * effectively read-only, allowing for corresponding optimizations at runtime.
 	 * <p>Defaults to {@code false}.
 	 * <p>This just serves as a hint for the actual transaction subsystem;
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
@@ -106,6 +150,7 @@ public @interface Transactional {
 	 * <i>not</i> throw an exception when asked for a read-only transaction
 	 * but rather silently ignore the hint.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#isReadOnly()
+	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */
 	boolean readOnly() default false;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,12 +29,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
-import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to
@@ -51,7 +48,7 @@ import org.springframework.web.server.WebHandler;
  * <li>{@link HandlerResultHandler} -- process handler return values
  * </ul>
  *
- * <p>{@code DispatcherHandler} s also designed to be a Spring bean itself and
+ * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and
  * implements {@link ApplicationContextAware} for access to the context it runs
  * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
  * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
@@ -69,13 +66,6 @@ import org.springframework.web.server.WebHandler;
  * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)
  */
 public class DispatcherHandler implements WebHandler, ApplicationContextAware {
-
-	@SuppressWarnings("ThrowableInstanceNeverThrown")
-	private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
-			new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
-
-
-	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
@@ -146,19 +136,22 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-		if (logger.isDebugEnabled()) {
-			ServerHttpRequest request = exchange.getRequest();
-			logger.debug("Processing " + request.getMethodValue() + " request for [" + request.getURI() + "]");
-		}
 		if (this.handlerMappings == null) {
-			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
+			return createNotFoundError();
 		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
-				.switchIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
+				.switchIfEmpty(createNotFoundError())
 				.flatMap(handler -> invokeHandler(exchange, handler))
 				.flatMap(result -> handleResult(exchange, result));
+	}
+
+	private <R> Mono<R> createNotFoundError() {
+		return Mono.defer(() -> {
+			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+			return Mono.error(ex);
+		});
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
@@ -174,8 +167,13 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
-				.onErrorResume(ex -> result.applyExceptionHandler(ex).flatMap(exceptionResult ->
-						getResultHandler(exceptionResult).handleResult(exchange, exceptionResult)));
+				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
+				.onErrorResume(ex ->
+						result.applyExceptionHandler(ex).flatMap(exResult -> {
+							String text = "Exception handler " + exResult.getHandler() +
+									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
+							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
+						}));
 	}
 
 	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {

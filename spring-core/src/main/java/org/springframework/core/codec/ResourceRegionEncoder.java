@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.OptionalLong;
@@ -40,15 +39,21 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Encoder for {@link ResourceRegion}s.
+ * Encoder for {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 
+	/**
+	 * The default buffer size used by the encoder.
+	 */
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
+	/**
+	 * The hint key that contains the boundary string.
+	 */
 	public static final String BOUNDARY_STRING_HINT = ResourceRegionEncoder.class.getName() + ".boundaryString";
 
 	private final int bufferSize;
@@ -67,65 +72,73 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return super.canEncode(elementType, mimeType)
-				&& ResourceRegion.class.isAssignableFrom(elementType.resolve(Object.class));
+				&& ResourceRegion.class.isAssignableFrom(elementType.toClass());
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> inputStream,
+	public Flux<DataBuffer> encode(Publisher<? extends ResourceRegion> input,
 			DataBufferFactory bufferFactory, ResolvableType elementType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
-		Assert.notNull(inputStream, "'inputStream' must not be null");
+		Assert.notNull(input, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
-		if (inputStream instanceof Mono) {
-			return ((Mono<? extends ResourceRegion>) inputStream)
-					.flatMapMany(region -> writeResourceRegion(region, bufferFactory));
+		if (input instanceof Mono) {
+			return Mono.from(input)
+					.flatMapMany(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException(
+									"Resource " + region.getResource() + " is not readable"));
+						}
+						return writeResourceRegion(region, bufferFactory, hints);
+					});
 		}
 		else {
-			Assert.notNull(hints, "'hints' must not be null");
-			Assert.isTrue(hints.containsKey(BOUNDARY_STRING_HINT), "'hints' must contain boundaryString hint");
-			final String boundaryString = (String) hints.get(BOUNDARY_STRING_HINT);
+			final String boundaryString = Hints.getRequiredHint(hints, BOUNDARY_STRING_HINT);
+			byte[] startBoundary = toAsciiBytes("\r\n--" + boundaryString + "\r\n");
+			byte[] contentType = mimeType != null ? toAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0];
 
-			byte[] startBoundary = getAsciiBytes("\r\n--" + boundaryString + "\r\n");
-			byte[] contentType =
-					(mimeType != null ? getAsciiBytes("Content-Type: " + mimeType + "\r\n") : new byte[0]);
+			return Flux.from(input)
+					.concatMap(region -> {
+						if (!region.getResource().isReadable()) {
+							return Flux.error(new EncodingException(
+									"Resource " + region.getResource() + " is not readable"));
+						}
+						Flux<DataBuffer> prefix = Flux.just(
+								bufferFactory.wrap(startBoundary),
+								bufferFactory.wrap(contentType),
+								bufferFactory.wrap(getContentRangeHeader(region))); // only wrapping, no allocation
 
-			Flux<DataBuffer> regions = Flux.from(inputStream).
-					concatMap(region ->
-							Flux.concat(
-									getRegionPrefix(bufferFactory, startBoundary, contentType, region),
-									writeResourceRegion(region, bufferFactory)
-							));
-			return Flux.concat(regions, getRegionSuffix(bufferFactory, boundaryString));
+						return prefix.concatWith(writeResourceRegion(region, bufferFactory, hints));
+					})
+					.concatWithValues(getRegionSuffix(bufferFactory, boundaryString));
 		}
+		// No doOnDiscard (no caching after DataBufferUtils#read)
 	}
 
-	private Flux<DataBuffer> getRegionPrefix(DataBufferFactory bufferFactory, byte[] startBoundary,
-			byte[] contentType, ResourceRegion region) {
+	private Flux<DataBuffer> writeResourceRegion(
+			ResourceRegion region, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints) {
 
-		return Flux.just(
-				bufferFactory.allocateBuffer(startBoundary.length).write(startBoundary),
-				bufferFactory.allocateBuffer(contentType.length).write(contentType),
-				bufferFactory.wrap(ByteBuffer.wrap(getContentRangeHeader(region)))
-		);
-	}
-
-	private Flux<DataBuffer> writeResourceRegion(ResourceRegion region, DataBufferFactory bufferFactory) {
 		Resource resource = region.getResource();
 		long position = region.getPosition();
+		long count = region.getCount();
+
+		if (logger.isDebugEnabled() && !Hints.isLoggingSuppressed(hints)) {
+			logger.debug(Hints.getLogPrefix(hints) +
+					"Writing region " + position + "-" + (position + count) + " of [" + resource + "]");
+		}
+
 		Flux<DataBuffer> in = DataBufferUtils.read(resource, position, bufferFactory, this.bufferSize);
-		return DataBufferUtils.takeUntilByteCount(in, region.getCount());
+		return DataBufferUtils.takeUntilByteCount(in, count);
 	}
 
-	private Flux<DataBuffer> getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
-		byte[] endBoundary = getAsciiBytes("\r\n--" + boundaryString + "--");
-		return Flux.just(bufferFactory.allocateBuffer(endBoundary.length).write(endBoundary));
+	private DataBuffer getRegionSuffix(DataBufferFactory bufferFactory, String boundaryString) {
+		byte[] endBoundary = toAsciiBytes("\r\n--" + boundaryString + "--");
+		return bufferFactory.wrap(endBoundary);
 	}
 
-	private byte[] getAsciiBytes(String in) {
+	private byte[] toAsciiBytes(String in) {
 		return in.getBytes(StandardCharsets.US_ASCII);
 	}
 
@@ -134,10 +147,11 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 		long end = start + region.getCount() - 1;
 		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + contentLength.getAsLong() + "\r\n\r\n");
+			long length = contentLength.getAsLong();
+			return toAsciiBytes("Content-Range: bytes " + start + '-' + end + '/' + length + "\r\n\r\n");
 		}
 		else {
-			return getAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");
+			return toAsciiBytes("Content-Range: bytes " + start + '-' + end + "\r\n\r\n");
 		}
 	}
 

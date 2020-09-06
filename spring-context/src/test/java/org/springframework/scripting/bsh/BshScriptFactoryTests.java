@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,10 +36,12 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.TestBeanAwareMessenger;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rob Harrop
@@ -51,81 +54,85 @@ public class BshScriptFactoryTests {
 	public void staticScript() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator"));
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messenger"));
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator")).isTrue();
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messenger")).isTrue();
 
 		Calculator calc = (Calculator) ctx.getBean("calculator");
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
-		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
-		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+		boolean condition3 = calc instanceof Refreshable;
+		assertThat(condition3).as("Scripted object should not be instance of Refreshable").isFalse();
+		boolean condition2 = messenger instanceof Refreshable;
+		assertThat(condition2).as("Scripted object should not be instance of Refreshable").isFalse();
 
-		assertEquals(calc, calc);
-		assertEquals(messenger, messenger);
-		assertTrue(!messenger.equals(calc));
-		assertTrue(messenger.hashCode() != calc.hashCode());
-		assertTrue(!messenger.toString().equals(calc.toString()));
+		assertThat(calc).isEqualTo(calc);
+		assertThat(messenger).isEqualTo(messenger);
+		boolean condition1 = !messenger.equals(calc);
+		assertThat(condition1).isTrue();
+		assertThat(messenger.hashCode() != calc.hashCode()).isTrue();
+		boolean condition = !messenger.toString().equals(calc.toString());
+		assertThat(condition).isTrue();
 
-		assertEquals(5, calc.add(2, 3));
+		assertThat(calc.add(2, 3)).isEqualTo(5);
 
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
 
-		assertTrue(ctx.getBeansOfType(Calculator.class).values().contains(calc));
-		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+		assertThat(ctx.getBeansOfType(Calculator.class).values().contains(calc)).isTrue();
+		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
 	}
 
 	@Test
 	public void staticScriptWithNullReturnValue() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfig"));
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfig")).isTrue();
 
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerWithConfig");
 		messenger.setMessage(null);
-		assertNull(messenger.getMessage());
-		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+		assertThat(messenger.getMessage()).isNull();
+		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
 	}
 
 	@Test
 	public void staticScriptWithTwoInterfacesSpecified() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfigExtra"));
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfigExtra")).isTrue();
 
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerWithConfigExtra");
 		messenger.setMessage(null);
-		assertNull(messenger.getMessage());
-		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+		assertThat(messenger.getMessage()).isNull();
+		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
 
 		ctx.close();
-		assertNull(messenger.getMessage());
+		assertThat(messenger.getMessage()).isNull();
 	}
 
 	@Test
 	public void staticWithScriptReturningInstance() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance")).isTrue();
 
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
-		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
+		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
 
 		ctx.close();
-		assertNull(messenger.getMessage());
+		assertThat(messenger.getMessage()).isNull();
 	}
 
 	@Test
 	public void staticScriptImplementingInterface() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
-		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerImpl"));
+		assertThat(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerImpl")).isTrue();
 
 		Messenger messenger = (Messenger) ctx.getBean("messengerImpl");
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
-		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
+		assertThat(ctx.getBeansOfType(Messenger.class).values().contains(messenger)).isTrue();
 
 		ctx.close();
-		assertNull(messenger.getMessage());
+		assertThat(messenger.getMessage()).isNull();
 	}
 
 	@Test
@@ -134,17 +141,18 @@ public class BshScriptFactoryTests {
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
-		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
-		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+		assertThat(AopUtils.isAopProxy(messenger)).as("Shouldn't get proxy when refresh is disabled").isFalse();
+		boolean condition = messenger instanceof Refreshable;
+		assertThat(condition).as("Scripted object should not be instance of Refreshable").isFalse();
 
-		assertNotSame(messenger, messenger2);
-		assertSame(messenger.getClass(), messenger2.getClass());
-		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals("Hello World!", messenger2.getMessage());
+		assertThat(messenger2).isNotSameAs(messenger);
+		assertThat(messenger2.getClass()).isSameAs(messenger.getClass());
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Hello World!");
 		messenger.setMessage("Bye World!");
 		messenger2.setMessage("Byebye World!");
-		assertEquals("Bye World!", messenger.getMessage());
-		assertEquals("Byebye World!", messenger2.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo("Bye World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Byebye World!");
 	}
 
 	@Test
@@ -152,17 +160,18 @@ public class BshScriptFactoryTests {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
-		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
-		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
+		assertThat(AopUtils.isAopProxy(messenger)).as("Should be a proxy for refreshable scripts").isTrue();
+		boolean condition = messenger instanceof Refreshable;
+		assertThat(condition).as("Should be an instance of Refreshable").isTrue();
 
 		String desiredMessage = "Hello World!";
-		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertThat(messenger.getMessage()).as("Message is incorrect").isEqualTo(desiredMessage);
 
 		Refreshable refreshable = (Refreshable) messenger;
 		refreshable.refresh();
 
-		assertEquals("Message is incorrect after refresh", desiredMessage, messenger.getMessage());
-		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+		assertThat(messenger.getMessage()).as("Message is incorrect after refresh").isEqualTo(desiredMessage);
+		assertThat(refreshable.getRefreshCount()).as("Incorrect refresh count").isEqualTo(2);
 	}
 
 	@Test
@@ -171,33 +180,30 @@ public class BshScriptFactoryTests {
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
-		assertTrue("Should be a proxy for refreshable scripts", AopUtils.isAopProxy(messenger));
-		assertTrue("Should be an instance of Refreshable", messenger instanceof Refreshable);
+		assertThat(AopUtils.isAopProxy(messenger)).as("Should be a proxy for refreshable scripts").isTrue();
+		boolean condition = messenger instanceof Refreshable;
+		assertThat(condition).as("Should be an instance of Refreshable").isTrue();
 
-		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals("Hello World!", messenger2.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Hello World!");
 		messenger.setMessage("Bye World!");
 		messenger2.setMessage("Byebye World!");
-		assertEquals("Bye World!", messenger.getMessage());
-		assertEquals("Byebye World!", messenger2.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo("Bye World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Byebye World!");
 
 		Refreshable refreshable = (Refreshable) messenger;
 		refreshable.refresh();
 
-		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals("Byebye World!", messenger2.getMessage());
-		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Byebye World!");
+		assertThat(refreshable.getRefreshCount()).as("Incorrect refresh count").isEqualTo(2);
 	}
 
 	@Test
 	public void scriptCompilationException() {
-		try {
-			new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml");
-			fail("Must throw exception for broken script file");
-		}
-		catch (NestedRuntimeException ex) {
-			assertTrue(ex.contains(ScriptCompilationException.class));
-		}
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() ->
+				new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml"))
+			.matches(ex -> ex.contains(ScriptCompilationException.class));
 	}
 
 	@Test
@@ -208,43 +214,28 @@ public class BshScriptFactoryTests {
 		given(script.isModified()).willReturn(true);
 		BshScriptFactory factory = new BshScriptFactory(
 				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript, Messenger.class);
-		try {
+		assertThatExceptionOfType(BshScriptUtils.BshExecutionException.class).isThrownBy(() -> {
 			Messenger messenger = (Messenger) factory.getScriptedObject(script, Messenger.class);
 			messenger.getMessage();
-			fail("Must have thrown a BshScriptUtils.BshExecutionException.");
-		}
-		catch (BshScriptUtils.BshExecutionException expected) {
-		}
+		});
 	}
 
 	@Test
 	public void ctorWithNullScriptSourceLocator() {
-		try {
-			new BshScriptFactory(null, Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory(null, Messenger.class));
 	}
 
 	@Test
 	public void ctorWithEmptyScriptSourceLocator() {
-		try {
-			new BshScriptFactory("", Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory("", Messenger.class));
 	}
 
 	@Test
 	public void ctorWithWhitespacedScriptSourceLocator() {
-		try {
-			new BshScriptFactory("\n   ", Messenger.class);
-			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new BshScriptFactory("\n   ", Messenger.class));
 	}
 
 	@Test
@@ -253,37 +244,38 @@ public class BshScriptFactoryTests {
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
 		Collection<String> beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
-		assertTrue(beanNames.contains("messenger"));
-		assertTrue(beanNames.contains("messengerImpl"));
-		assertTrue(beanNames.contains("messengerInstance"));
+		assertThat(beanNames.contains("messenger")).isTrue();
+		assertThat(beanNames.contains("messengerImpl")).isTrue();
+		assertThat(beanNames.contains("messengerInstance")).isTrue();
 
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
-		assertEquals("Hello World!", messenger.getMessage());
-		assertFalse(messenger instanceof Refreshable);
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		boolean condition = messenger instanceof Refreshable;
+		assertThat(condition).isFalse();
 
 		Messenger messengerImpl = (Messenger) ctx.getBean("messengerImpl");
-		assertEquals("Hello World!", messengerImpl.getMessage());
+		assertThat(messengerImpl.getMessage()).isEqualTo("Hello World!");
 
 		Messenger messengerInstance = (Messenger) ctx.getBean("messengerInstance");
-		assertEquals("Hello World!", messengerInstance.getMessage());
+		assertThat(messengerInstance.getMessage()).isEqualTo("Hello World!");
 
 		TestBeanAwareMessenger messengerByType = (TestBeanAwareMessenger) ctx.getBean("messengerByType");
-		assertEquals(testBean, messengerByType.getTestBean());
+		assertThat(messengerByType.getTestBean()).isEqualTo(testBean);
 
 		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
-		assertEquals(testBean, messengerByName.getTestBean());
+		assertThat(messengerByName.getTestBean()).isEqualTo(testBean);
 
 		Collection<Messenger> beans = ctx.getBeansOfType(Messenger.class).values();
-		assertTrue(beans.contains(messenger));
-		assertTrue(beans.contains(messengerImpl));
-		assertTrue(beans.contains(messengerInstance));
-		assertTrue(beans.contains(messengerByType));
-		assertTrue(beans.contains(messengerByName));
+		assertThat(beans.contains(messenger)).isTrue();
+		assertThat(beans.contains(messengerImpl)).isTrue();
+		assertThat(beans.contains(messengerInstance)).isTrue();
+		assertThat(beans.contains(messengerByType)).isTrue();
+		assertThat(beans.contains(messengerByName)).isTrue();
 
 		ctx.close();
-		assertNull(messenger.getMessage());
-		assertNull(messengerImpl.getMessage());
-		assertNull(messengerInstance.getMessage());
+		assertThat(messenger.getMessage()).isNull();
+		assertThat(messengerImpl.getMessage()).isNull();
+		assertThat(messengerInstance.getMessage()).isNull();
 	}
 
 	@Test
@@ -292,30 +284,32 @@ public class BshScriptFactoryTests {
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
-		assertNotSame(messenger, messenger2);
-		assertSame(messenger.getClass(), messenger2.getClass());
-		assertEquals("Hello World!", messenger.getMessage());
-		assertEquals("Hello World!", messenger2.getMessage());
+		assertThat(messenger2).isNotSameAs(messenger);
+		assertThat(messenger2.getClass()).isSameAs(messenger.getClass());
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Hello World!");
 		messenger.setMessage("Bye World!");
 		messenger2.setMessage("Byebye World!");
-		assertEquals("Bye World!", messenger.getMessage());
-		assertEquals("Byebye World!", messenger2.getMessage());
+		assertThat(messenger.getMessage()).isEqualTo("Bye World!");
+		assertThat(messenger2.getMessage()).isEqualTo("Byebye World!");
 	}
 
 	@Test
 	public void inlineScriptFromTag() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
-		assertNotNull(calculator);
-		assertFalse(calculator instanceof Refreshable);
+		assertThat(calculator).isNotNull();
+		boolean condition = calculator instanceof Refreshable;
+		assertThat(condition).isFalse();
 	}
 
 	@Test
 	public void refreshableFromTag() {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
-		assertEquals("Hello World!", messenger.getMessage());
-		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
+		assertThat(messenger.getMessage()).isEqualTo("Hello World!");
+		boolean condition = messenger instanceof Refreshable;
+		assertThat(condition).as("Messenger should be Refreshable").isTrue();
 	}
 
 	@Test
@@ -323,7 +317,7 @@ public class BshScriptFactoryTests {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger eventListener = (Messenger) ctx.getBean("eventListener");
 		ctx.publishEvent(new MyEvent(ctx));
-		assertEquals("count=2", eventListener.getMessage());
+		assertThat(eventListener.getMessage()).isEqualTo("count=2");
 	}
 
 

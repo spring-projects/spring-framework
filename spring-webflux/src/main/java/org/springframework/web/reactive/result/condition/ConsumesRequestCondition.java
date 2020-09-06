@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,13 +19,18 @@ package org.springframework.web.reactive.result.condition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -44,10 +49,12 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private static final ConsumesRequestCondition EMPTY_CONDITION = new ConsumesRequestCondition();
 
 
 	private final List<ConsumeMediaTypeExpression> expressions;
+
+	private boolean bodyRequired = true;
 
 
 	/**
@@ -69,36 +76,39 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
 	public ConsumesRequestCondition(String[] consumes, String[] headers) {
-		this(parseExpressions(consumes, headers));
+		this.expressions = parseExpressions(consumes, headers);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 	}
 
-	/**
-	 * Private constructor accepting parsed media type expressions.
-	 */
-	private ConsumesRequestCondition(Collection<ConsumeMediaTypeExpression> expressions) {
-		this.expressions = new ArrayList<>(expressions);
-		Collections.sort(this.expressions);
-	}
-
-
-	private static Set<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>();
-		if (headers != null) {
+	private static List<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
+		Set<ConsumeMediaTypeExpression> result = null;
+		if (!ObjectUtils.isEmpty(headers)) {
 			for (String header : headers) {
 				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
 				if ("Content-Type".equalsIgnoreCase(expr.name)) {
+					result = (result != null ? result : new LinkedHashSet<>());
 					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ConsumeMediaTypeExpression(mediaType, expr.isNegated));
 					}
 				}
 			}
 		}
-		if (consumes != null) {
+		if (!ObjectUtils.isEmpty(consumes)) {
+			result = (result != null ? result : new LinkedHashSet<>());
 			for (String consume : consumes) {
 				result.add(new ConsumeMediaTypeExpression(consume));
 			}
 		}
-		return result;
+		return (result != null ? new ArrayList<>(result) : Collections.emptyList());
+	}
+
+	/**
+	 * Private constructor for internal when creating matching conditions.
+	 */
+	private ConsumesRequestCondition(List<ConsumeMediaTypeExpression> expressions) {
+		this.expressions = expressions;
 	}
 
 
@@ -125,6 +135,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	/**
 	 * Whether the condition has any media type expressions.
 	 */
+	@Override
 	public boolean isEmpty() {
 		return this.expressions.isEmpty();
 	}
@@ -140,13 +151,36 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	}
 
 	/**
+	 * Whether this condition should expect requests to have a body.
+	 * <p>By default this is set to {@code true} in which case it is assumed a
+	 * request body is required and this condition matches to the "Content-Type"
+	 * header or falls back on "Content-Type: application/octet-stream".
+	 * <p>If set to {@code false}, and the request does not have a body, then this
+	 * condition matches automatically, i.e. without checking expressions.
+	 * @param bodyRequired whether requests are expected to have a body
+	 * @since 5.2
+	 */
+	public void setBodyRequired(boolean bodyRequired) {
+		this.bodyRequired = bodyRequired;
+	}
+
+	/**
+	 * Return the setting for {@link #setBodyRequired(boolean)}.
+	 * @since 5.2
+	 */
+	public boolean isBodyRequired() {
+		return this.bodyRequired;
+	}
+
+
+	/**
 	 * Returns the "other" instance if it has any expressions; returns "this"
 	 * instance otherwise. Practically that means a method-level "consumes"
 	 * overrides a type-level "consumes" condition.
 	 */
 	@Override
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
-		return !other.expressions.isEmpty() ? other : this;
+		return (!other.expressions.isEmpty() ? other : this);
 	}
 
 	/**
@@ -161,20 +195,37 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-			return PRE_FLIGHT_MATCH;
+		ServerHttpRequest request = exchange.getRequest();
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return EMPTY_CONDITION;
 		}
 		if (isEmpty()) {
 			return this;
 		}
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(expressions);
-		for (Iterator<ConsumeMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
-			ConsumeMediaTypeExpression expression = iterator.next();
-			if (!expression.match(exchange)) {
-				iterator.remove();
+		if (!hasBody(request) && !this.bodyRequired) {
+			return EMPTY_CONDITION;
+		}
+		List<ConsumeMediaTypeExpression> result = getMatchingExpressions(exchange);
+		return !CollectionUtils.isEmpty(result) ? new ConsumesRequestCondition(result) : null;
+	}
+
+	private boolean hasBody(ServerHttpRequest request) {
+		String contentLength = request.getHeaders().getFirst(HttpHeaders.CONTENT_LENGTH);
+		String transferEncoding = request.getHeaders().getFirst(HttpHeaders.TRANSFER_ENCODING);
+		return StringUtils.hasText(transferEncoding) ||
+				(StringUtils.hasText(contentLength) && !contentLength.trim().equals("0"));
+	}
+
+	@Nullable
+	private List<ConsumeMediaTypeExpression> getMatchingExpressions(ServerWebExchange exchange) {
+		List<ConsumeMediaTypeExpression> result = null;
+		for (ConsumeMediaTypeExpression expression : this.expressions) {
+			if (expression.match(exchange)) {
+				result = result != null ? result : new ArrayList<>();
+				result.add(expression);
 			}
 		}
-		return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
+		return result;
 	}
 
 	/**

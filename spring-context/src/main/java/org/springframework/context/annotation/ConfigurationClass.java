@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,6 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -104,7 +103,7 @@ final class ConfigurationClass {
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.notNull(beanName, "Bean name must not be null");
-		this.metadata = new StandardAnnotationMetadata(clazz, true);
+		this.metadata = AnnotationMetadata.introspect(clazz);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.beanName = beanName;
 	}
@@ -118,7 +117,7 @@ final class ConfigurationClass {
 	 * @since 3.1.1
 	 */
 	public ConfigurationClass(Class<?> clazz, @Nullable ConfigurationClass importedBy) {
-		this.metadata = new StandardAnnotationMetadata(clazz, true);
+		this.metadata = AnnotationMetadata.introspect(clazz);
 		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
 	}
@@ -211,20 +210,20 @@ final class ConfigurationClass {
 	}
 
 	public void validate(ProblemReporter problemReporter) {
-		// A configuration class may not be final (CGLIB limitation)
-		if (getMetadata().isAnnotated(Configuration.class.getName())) {
-			if (getMetadata().isFinal()) {
+		// A configuration class may not be final (CGLIB limitation) unless it declares proxyBeanMethods=false
+		Map<String, Object> attributes = this.metadata.getAnnotationAttributes(Configuration.class.getName());
+		if (attributes != null && (Boolean) attributes.get("proxyBeanMethods")) {
+			if (this.metadata.isFinal()) {
 				problemReporter.error(new FinalConfigurationProblem());
 			}
-		}
-
-		for (BeanMethod beanMethod : this.beanMethods) {
-			beanMethod.validate(problemReporter);
+			for (BeanMethod beanMethod : this.beanMethods) {
+				beanMethod.validate(problemReporter);
+			}
 		}
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof ConfigurationClass &&
 				getMetadata().getClassName().equals(((ConfigurationClass) other).getMetadata().getClassName())));
 	}

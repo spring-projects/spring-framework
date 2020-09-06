@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -385,8 +385,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
-				StringUtils.toStringArray(locations),
-				ClassUtils.toClassArray(classes),
+				StringUtils.toStringArray(locations), ClassUtils.toClassArray(classes),
 				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
 				ActiveProfilesUtils.resolveActiveProfiles(testClass),
 				mergedTestPropertySources.getLocations(),

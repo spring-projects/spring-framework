@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.transaction.jta;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
@@ -117,7 +118,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		Object helper = loadWebLogicTransactionHelper();
 		try {
-			logger.debug("Retrieving JTA UserTransaction from WebLogic TransactionHelper");
+			logger.trace("Retrieving JTA UserTransaction from WebLogic TransactionHelper");
 			Method getUserTransactionMethod = helper.getClass().getMethod("getUserTransaction");
 			return (UserTransaction) getUserTransactionMethod.invoke(this.transactionHelper);
 		}
@@ -136,7 +137,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 	protected TransactionManager retrieveTransactionManager() throws TransactionSystemException {
 		Object helper = loadWebLogicTransactionHelper();
 		try {
-			logger.debug("Retrieving JTA TransactionManager from WebLogic TransactionHelper");
+			logger.trace("Retrieving JTA TransactionManager from WebLogic TransactionHelper");
 			Method getTransactionManagerMethod = helper.getClass().getMethod("getTransactionManager");
 			return (TransactionManager) getTransactionManagerMethod.invoke(this.transactionHelper);
 		}
@@ -158,7 +159,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 				Method getTransactionHelperMethod = transactionHelperClass.getMethod("getTransactionHelper");
 				helper = getTransactionHelperMethod.invoke(null);
 				this.transactionHelper = helper;
-				logger.debug("WebLogic TransactionHelper found");
+				logger.trace("WebLogic TransactionHelper found");
 			}
 			catch (InvocationTargetException ex) {
 				throw new TransactionSystemException(
@@ -180,16 +181,16 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 			if (this.weblogicUserTransactionAvailable) {
 				this.beginWithNameMethod = userTransactionClass.getMethod("begin", String.class);
 				this.beginWithNameAndTimeoutMethod = userTransactionClass.getMethod("begin", String.class, int.class);
-				logger.info("Support for WebLogic transaction names available");
+				logger.debug("Support for WebLogic transaction names available");
 			}
 			else {
-				logger.info("Support for WebLogic transaction names not available");
+				logger.debug("Support for WebLogic transaction names not available");
 			}
 
 			// Obtain WebLogic ClientTransactionManager interface.
 			Class<?> transactionManagerClass =
 					getClass().getClassLoader().loadClass(CLIENT_TRANSACTION_MANAGER_CLASS_NAME);
-			logger.debug("WebLogic ClientTransactionManager found");
+			logger.trace("WebLogic ClientTransactionManager found");
 
 			this.weblogicTransactionManagerAvailable = transactionManagerClass.isInstance(getTransactionManager());
 			if (this.weblogicTransactionManagerAvailable) {
@@ -199,7 +200,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 				logger.debug("Support for WebLogic forceResume available");
 			}
 			else {
-				logger.warn("Support for WebLogic forceResume not available");
+				logger.debug("Support for WebLogic forceResume not available");
 			}
 		}
 		catch (Exception ex) {

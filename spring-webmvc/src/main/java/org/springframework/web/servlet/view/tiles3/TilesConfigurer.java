@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,10 @@
 
 package org.springframework.web.servlet.view.tiles3;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
+
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
 import javax.el.CompositeELResolver;
@@ -70,7 +71,7 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * Helper class to configure Tiles 3.x for the Spring Framework. See
- * <a href="http://tiles.apache.org">http://tiles.apache.org</a>
+ * <a href="https://tiles.apache.org">https://tiles.apache.org</a>
  * for more information about Tiles, which basically is a templating mechanism
  * for web applications using JSPs and other template engines.
  *
@@ -310,7 +311,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		@Override
 		protected List<ApplicationResource> getSources(ApplicationContext applicationContext) {
 			if (definitions != null) {
-				List<ApplicationResource> result = new LinkedList<>();
+				List<ApplicationResource> result = new ArrayList<>();
 				for (String definition : definitions) {
 					Collection<ApplicationResource> resources = applicationContext.getResources(definition);
 					if (resources != null) {

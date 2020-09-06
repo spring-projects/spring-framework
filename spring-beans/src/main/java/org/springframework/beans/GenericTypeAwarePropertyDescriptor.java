@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,12 +60,13 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	@Nullable
 	private Class<?> propertyType;
 
+	@Nullable
 	private final Class<?> propertyEditorClass;
 
 
 	public GenericTypeAwarePropertyDescriptor(Class<?> beanClass, String propertyName,
-			@Nullable Method readMethod, @Nullable Method writeMethod, Class<?> propertyEditorClass)
-			throws IntrospectionException {
+			@Nullable Method readMethod, @Nullable Method writeMethod,
+			@Nullable Class<?> propertyEditorClass) throws IntrospectionException {
 
 		super(propertyName, null, null);
 		this.beanClass = beanClass;
@@ -102,8 +103,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 					this.ambiguousWriteMethods = ambiguousCandidates;
 				}
 			}
-			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0);
-			GenericTypeResolver.resolveParameterType(this.writeMethodParameter, this.beanClass);
+			this.writeMethodParameter = new MethodParameter(this.writeMethod, 0).withContainingClass(this.beanClass);
 		}
 
 		if (this.readMethod != null) {
@@ -157,13 +157,14 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getPropertyEditorClass() {
 		return this.propertyEditorClass;
 	}
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

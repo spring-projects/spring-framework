@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.cache.jcache;
 
 import java.net.URI;
 import java.util.Properties;
+
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 
@@ -28,9 +29,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link FactoryBean} for a JCache {@link javax.cache.CacheManager},
- * obtaining a pre-defined CacheManager by name through the standard
- * JCache {@link javax.cache.Caching} class.
+ * {@link FactoryBean} for a JCache {@link CacheManager javax.cache.CacheManager},
+ * obtaining a pre-defined {@code CacheManager} by name through the standard
+ * JCache {@link Caching javax.cache.Caching} class.
  *
  * <p>Note: This class has been updated for JCache 1.0, as of Spring 4.0.
  *
@@ -56,16 +57,16 @@ public class JCacheManagerFactoryBean
 
 
 	/**
-	 * Specify the URI for the desired CacheManager.
-	 * Default is {@code null} (i.e. JCache's default).
+	 * Specify the URI for the desired {@code CacheManager}.
+	 * <p>Default is {@code null} (i.e. JCache's default).
 	 */
 	public void setCacheManagerUri(@Nullable URI cacheManagerUri) {
 		this.cacheManagerUri = cacheManagerUri;
 	}
 
 	/**
-	 * Specify properties for the to-be-created CacheManager.
-	 * Default is {@code null} (i.e. no special properties to apply).
+	 * Specify properties for the to-be-created {@code CacheManager}.
+	 * <p>Default is {@code null} (i.e. no special properties to apply).
 	 * @see javax.cache.spi.CachingProvider#getCacheManager(URI, ClassLoader, Properties)
 	 */
 	public void setCacheManagerProperties(@Nullable Properties cacheManagerProperties) {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,8 +39,6 @@ public abstract class Base64Utils {
 	 * Base64-encode the given byte array.
 	 * @param src the original byte array
 	 * @return the encoded byte array
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] encode(byte[] src) {
 		if (src.length == 0) {
@@ -53,8 +51,6 @@ public abstract class Base64Utils {
 	 * Base64-decode the given byte array.
 	 * @param src the encoded byte array
 	 * @return the original byte array
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] decode(byte[] src) {
 		if (src.length == 0) {
@@ -68,8 +64,6 @@ public abstract class Base64Utils {
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the original byte array
 	 * @return the encoded byte array
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
 	public static byte[] encodeUrlSafe(byte[] src) {
@@ -84,8 +78,6 @@ public abstract class Base64Utils {
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the encoded byte array
 	 * @return the original byte array
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 * @since 4.2.4
 	 */
 	public static byte[] decodeUrlSafe(byte[] src) {
@@ -97,7 +89,7 @@ public abstract class Base64Utils {
 
 	/**
 	 * Base64-encode the given byte array to a String.
-	 * @param src the original byte array (may be {@code null})
+	 * @param src the original byte array
 	 * @return the encoded byte array as a UTF-8 String
 	 */
 	public static String encodeToString(byte[] src) {
@@ -124,8 +116,6 @@ public abstract class Base64Utils {
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the original byte array
 	 * @return the encoded byte array as a UTF-8 String
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static String encodeToUrlSafeString(byte[] src) {
 		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
@@ -136,8 +126,6 @@ public abstract class Base64Utils {
 	 * "URL and Filename Safe Alphabet".
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array
-	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
-	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] decodeFromUrlSafeString(String src) {
 		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));

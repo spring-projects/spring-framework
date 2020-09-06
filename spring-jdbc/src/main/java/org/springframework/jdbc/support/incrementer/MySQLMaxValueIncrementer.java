@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -58,16 +59,16 @@ import org.springframework.jdbc.support.JdbcUtils;
  */
 public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer {
 
-	/** The SQL string for retrieving the new sequence value */
+	/** The SQL string for retrieving the new sequence value. */
 	private static final String VALUE_SQL = "select last_insert_id()";
 
-	/** The next id to serve */
+	/** The next id to serve. */
 	private long nextId = 0;
 
-	/** The max id to serve */
+	/** The max id to serve. */
 	private long maxId = 0;
 
-	/** Whether or not to use a new connection for the incrementer */
+	/** Whether or not to use a new connection for the incrementer. */
 	private boolean useNewConnection = true;
 
 

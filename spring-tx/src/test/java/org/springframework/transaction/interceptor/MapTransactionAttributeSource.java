@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,23 +31,23 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	private final Map<Object, TransactionAttribute> attributeMap = new HashMap<>();
 
 
-	public void register(Method method, TransactionAttribute txAttr) {
-		this.attributeMap.put(method, txAttr);
-	}
-
 	public void register(Class<?> clazz, TransactionAttribute txAttr) {
 		this.attributeMap.put(clazz, txAttr);
 	}
 
-
-	@Override
-	protected TransactionAttribute findTransactionAttribute(Method method) {
-		return this.attributeMap.get(method);
+	public void register(Method method, TransactionAttribute txAttr) {
+		this.attributeMap.put(method, txAttr);
 	}
+
 
 	@Override
 	protected TransactionAttribute findTransactionAttribute(Class<?> clazz) {
 		return this.attributeMap.get(clazz);
+	}
+
+	@Override
+	protected TransactionAttribute findTransactionAttribute(Method method) {
+		return this.attributeMap.get(method);
 	}
 
 }

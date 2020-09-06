@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.vendor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -97,9 +98,10 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		switch (database) {
 			case DB2: return TargetDatabase.DB2;
 			case DERBY: return TargetDatabase.Derby;
+			case HANA: return TargetDatabase.HANA;
 			case HSQL: return TargetDatabase.HSQL;
 			case INFORMIX: return TargetDatabase.Informix;
-			case MYSQL: return TargetDatabase.MySQL4;
+			case MYSQL: return TargetDatabase.MySQL;
 			case ORACLE: return TargetDatabase.Oracle;
 			case POSTGRESQL: return TargetDatabase.PostgreSQL;
 			case SQL_SERVER: return TargetDatabase.SQLServer;

@@ -1,5 +1,5 @@
 /**
- * Useful generic {@code java.util.concurrent.Future} extension.
+ * Useful generic {@code java.util.concurrent.Future} extensions.
  */
 @NonNullApi
 @NonNullFields

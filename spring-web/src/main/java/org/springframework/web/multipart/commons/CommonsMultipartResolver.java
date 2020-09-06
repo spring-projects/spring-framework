@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.multipart.commons;
 
 import java.util.List;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -33,12 +34,13 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Servlet-based {@link MultipartResolver} implementation for
- * <a href="http://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
+ * <a href="https://commons.apache.org/proper/commons-fileupload">Apache Commons FileUpload</a>
  * 1.2 or above.
  *
  * <p>Provides "maxUploadSize", "maxInMemorySize" and "defaultEncoding" settings as
@@ -188,11 +190,14 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		try {
-			cleanupFileItems(request.getMultiFileMap());
-		}
-		catch (Throwable ex) {
-			logger.warn("Failed to perform multipart cleanup for servlet request", ex);
+		if (!(request instanceof AbstractMultipartHttpServletRequest) ||
+				((AbstractMultipartHttpServletRequest) request).isResolved()) {
+			try {
+				cleanupFileItems(request.getMultiFileMap());
+			}
+			catch (Throwable ex) {
+				logger.warn("Failed to perform multipart cleanup for servlet request", ex);
+			}
 		}
 	}
 

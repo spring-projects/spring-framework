@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -71,7 +72,8 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	/**
-	 * @return the result value printer
+	 * Return the result value printer.
+	 * @return the printer
 	 */
 	protected ResultValuePrinter getPrinter() {
 		return this.printer;
@@ -135,13 +137,13 @@ public class PrintingResultHandler implements ResultHandler {
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
 		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-		for (String name : params.keySet()) {
+		params.forEach((name, values) -> {
 			if (params.get(name) != null) {
-				for (String value : params.get(name)) {
+				for (String value : values) {
 					multiValueMap.add(name, value);
 				}
 			}
-		}
+		});
 		return multiValueMap;
 	}
 
@@ -235,10 +237,10 @@ public class PrintingResultHandler implements ResultHandler {
 			this.printer.printValue("Attributes", null);
 		}
 		else {
-			for (String name : flashMap.keySet()) {
+			flashMap.forEach((name, value) -> {
 				this.printer.printValue("Attribute", name);
-				this.printer.printValue("value", flashMap.get(name));
-			}
+				this.printer.printValue("value", value);
+			});
 		}
 	}
 

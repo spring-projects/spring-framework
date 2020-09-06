@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,15 +15,27 @@
  */
 package org.springframework.test.web.reactive.server.samples;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@XmlRootElement
 class Person {
 
-	private final String name;
+	private String name;
+
+
+	// No-arg constructor for XML
+	public Person() {
+	}
 
 	@JsonCreator
 	public Person(@JsonProperty("name") String name) {
+		this.name = name;
+	}
+
+	public void setName(String name) {
 		this.name = name;
 	}
 

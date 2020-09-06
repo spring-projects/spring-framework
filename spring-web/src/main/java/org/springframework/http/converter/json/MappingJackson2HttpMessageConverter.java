@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and
- * write JSON using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2.x's</a> {@link ObjectMapper}.
+ * write JSON using <a href="https://github.com/FasterXML/jackson">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@code HashMap} instances.
  *
@@ -94,21 +94,6 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
 		if (this.jsonPrefix != null) {
 			generator.writeRaw(this.jsonPrefix);
-		}
-		String jsonpFunction =
-				(object instanceof MappingJacksonValue ? ((MappingJacksonValue) object).getJsonpFunction() : null);
-		if (jsonpFunction != null) {
-			generator.writeRaw("/**/");
-			generator.writeRaw(jsonpFunction + "(");
-		}
-	}
-
-	@Override
-	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-		String jsonpFunction =
-				(object instanceof MappingJacksonValue ? ((MappingJacksonValue) object).getJsonpFunction() : null);
-		if (jsonpFunction != null) {
-			generator.writeRaw(");");
 		}
 	}
 

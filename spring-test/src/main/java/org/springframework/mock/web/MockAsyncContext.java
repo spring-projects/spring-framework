@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
@@ -52,7 +53,7 @@ public class MockAsyncContext implements AsyncContext {
 	@Nullable
 	private String dispatchedPath;
 
-	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
+	private long timeout = 10 * 1000L;
 
 	private final List<Runnable> dispatchHandlers = new ArrayList<>();
 
@@ -65,7 +66,14 @@ public class MockAsyncContext implements AsyncContext {
 
 	public void addDispatchHandler(Runnable handler) {
 		Assert.notNull(handler, "Dispatch handler must not be null");
-		this.dispatchHandlers.add(handler);
+		synchronized (this) {
+			if (this.dispatchedPath == null) {
+				this.dispatchHandlers.add(handler);
+			}
+			else {
+				handler.run();
+			}
+		}
 	}
 
 	@Override
@@ -87,7 +95,7 @@ public class MockAsyncContext implements AsyncContext {
 	@Override
 	public void dispatch() {
 		dispatch(this.request.getRequestURI());
- 	}
+	}
 
 	@Override
 	public void dispatch(String path) {
@@ -96,9 +104,9 @@ public class MockAsyncContext implements AsyncContext {
 
 	@Override
 	public void dispatch(@Nullable ServletContext context, String path) {
-		this.dispatchedPath = path;
-		for (Runnable r : this.dispatchHandlers) {
-			r.run();
+		synchronized (this) {
+			this.dispatchedPath = path;
+			this.dispatchHandlers.forEach(Runnable::run);
 		}
 	}
 
@@ -109,7 +117,7 @@ public class MockAsyncContext implements AsyncContext {
 
 	@Override
 	public void complete() {
-		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(this.request, MockHttpServletRequest.class);
 		if (mockRequest != null) {
 			mockRequest.setAsyncStarted(false);
 		}
@@ -147,6 +155,17 @@ public class MockAsyncContext implements AsyncContext {
 		return BeanUtils.instantiateClass(clazz);
 	}
 
+	/**
+	 * By default this is set to 10000 (10 seconds) even though the Servlet API
+	 * specifies a default async request timeout of 30 seconds. Keep in mind the
+	 * timeout could further be impacted by global configuration through the MVC
+	 * Java config or the XML namespace, as well as be overridden per request on
+	 * {@link org.springframework.web.context.request.async.DeferredResult DeferredResult}
+	 * or on
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter SseEmitter}.
+	 * @param timeout the timeout value to use.
+	 * @see AsyncContext#setTimeout(long)
+	 */
 	@Override
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;

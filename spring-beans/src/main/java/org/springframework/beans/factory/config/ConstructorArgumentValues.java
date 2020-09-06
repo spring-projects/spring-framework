@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +43,9 @@ import org.springframework.util.ObjectUtils;
  */
 public class ConstructorArgumentValues {
 
-	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>(0);
+	private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<>();
 
-	private final List<ValueHolder> genericArgumentValues = new LinkedList<>();
+	private final List<ValueHolder> genericArgumentValues = new ArrayList<>();
 
 
 	/**
@@ -164,10 +164,10 @@ public class ConstructorArgumentValues {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = this.indexedArgumentValues.get(index);
 		if (valueHolder != null &&
-				(valueHolder.getType() == null ||
-						(requiredType != null && ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
-				(valueHolder.getName() == null || "".equals(requiredName) ||
-						(requiredName != null && requiredName.equals(valueHolder.getName())))) {
+				(valueHolder.getType() == null || (requiredType != null &&
+						ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
+				(valueHolder.getName() == null || (requiredName != null &&
+						(requiredName.isEmpty() || requiredName.equals(valueHolder.getName()))))) {
 			return valueHolder;
 		}
 		return null;
@@ -277,17 +277,19 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or {@code null} if none found
 	 */
 	@Nullable
-	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName, @Nullable Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName,
+			@Nullable Set<ValueHolder> usedValueHolders) {
+
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
 			}
-			if (valueHolder.getName() != null && !"".equals(requiredName) &&
-					(requiredName == null || !valueHolder.getName().equals(requiredName))) {
+			if (valueHolder.getName() != null && (requiredName == null ||
+					(!requiredName.isEmpty() && !requiredName.equals(valueHolder.getName())))) {
 				continue;
 			}
-			if (valueHolder.getType() != null &&
-					(requiredType == null || !ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) {
+			if (valueHolder.getType() != null && (requiredType == null ||
+					!ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) {
 				continue;
 			}
 			if (requiredType != null && valueHolder.getType() == null && valueHolder.getName() == null &&
@@ -384,7 +386,7 @@ public class ConstructorArgumentValues {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -408,7 +410,7 @@ public class ConstructorArgumentValues {
 		for (Map.Entry<Integer, ValueHolder> entry : this.indexedArgumentValues.entrySet()) {
 			ValueHolder vh1 = entry.getValue();
 			ValueHolder vh2 = that.indexedArgumentValues.get(entry.getKey());
-			if (!vh1.contentEquals(vh2)) {
+			if (vh2 == null || !vh1.contentEquals(vh2)) {
 				return false;
 			}
 		}
@@ -484,7 +486,6 @@ public class ConstructorArgumentValues {
 
 		/**
 		 * Set the value for the constructor argument.
-		 * @see PropertyPlaceholderConfigurer
 		 */
 		public void setValue(@Nullable Object value) {
 			this.value = value;

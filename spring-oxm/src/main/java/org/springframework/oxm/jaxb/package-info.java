@@ -1,5 +1,5 @@
 /**
- * Package providing integration of <a href="http://java.sun.com/webservices/jaxb/">JAXB</a>
+ * Package providing integration of <a href="https://java.sun.com/webservices/jaxb/">JAXB</a>
  * with Spring's O/X Mapping support.
  */
 @NonNullApi

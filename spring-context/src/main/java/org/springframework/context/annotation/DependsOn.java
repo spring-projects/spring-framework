@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,12 @@ import java.lang.annotation.Target;
  * created by the container before this bean. Used infrequently in cases where a bean
  * does not explicitly depend on another through properties or constructor arguments,
  * but rather depends on the side effects of another bean's initialization.
+ *
+ * <p>A depends-on declaration can specify both an initialization-time dependency and,
+ * in the case of singleton beans only, a corresponding destruction-time dependency.
+ * Dependent beans that define a depends-on relationship with a given bean are destroyed
+ * first, prior to the given bean itself being destroyed. Thus, a depends-on declaration
+ * can also control shutdown order.
  *
  * <p>May be used on any class directly or indirectly annotated with
  * {@link org.springframework.stereotype.Component} or on methods annotated

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,9 @@ package org.springframework.orm.jpa.persistenceunit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.PersistenceUnitTransactionType;
@@ -122,20 +123,16 @@ final class PersistenceUnitReader {
 	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
+		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String resourceLocation = null;
 		try {
 			for (String location : persistenceXmlLocations) {
 				Resource[] resources = this.resourcePatternResolver.getResources(location);
 				for (Resource resource : resources) {
 					resourceLocation = resource.toString();
-					InputStream stream = resource.getInputStream();
-					try {
+					try (InputStream stream = resource.getInputStream()) {
 						Document document = buildDocument(handler, stream);
 						parseDocument(resource, document, infos);
-					}
-					finally {
-						stream.close();
 					}
 				}
 			}
@@ -150,7 +147,7 @@ final class PersistenceUnitReader {
 			throw new IllegalArgumentException("Internal error parsing persistence unit from " + resourceLocation);
 		}
 
-		return infos.toArray(new SpringPersistenceUnitInfo[infos.size()]);
+		return infos.toArray(new SpringPersistenceUnitInfo[0]);
 	}
 
 
@@ -230,7 +227,7 @@ final class PersistenceUnitReader {
 		Element excludeUnlistedClasses = DomUtils.getChildElementByTagName(persistenceUnit, EXCLUDE_UNLISTED_CLASSES);
 		if (excludeUnlistedClasses != null) {
 			String excludeText = DomUtils.getTextValue(excludeUnlistedClasses);
-			unitInfo.setExcludeUnlistedClasses(!StringUtils.hasText(excludeText) || Boolean.valueOf(excludeText));
+			unitInfo.setExcludeUnlistedClasses(!StringUtils.hasText(excludeText) || Boolean.parseBoolean(excludeText));
 		}
 
 		// set JPA 2.0 shared cache mode
@@ -276,8 +273,9 @@ final class PersistenceUnitReader {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
 			String value = DomUtils.getTextValue(element).trim();
-			if (StringUtils.hasText(value))
+			if (StringUtils.hasText(value)) {
 				unitInfo.addManagedClassName(value);
+			}
 		}
 	}
 

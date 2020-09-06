@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -41,15 +42,16 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	@Override
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType) throws TypeMismatchException {
-		return doConvert(value, requiredType, null, null);
+		return convertIfNecessary(value, requiredType, TypeDescriptor.valueOf(requiredType));
 	}
 
 	@Override
 	@Nullable
-	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable MethodParameter methodParam)
-			throws TypeMismatchException {
+	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+			@Nullable MethodParameter methodParam) throws TypeMismatchException {
 
-		return doConvert(value, requiredType, methodParam, null);
+		return convertIfNecessary(value, requiredType,
+				(methodParam != null ? new TypeDescriptor(methodParam) : TypeDescriptor.valueOf(requiredType)));
 	}
 
 	@Override
@@ -57,21 +59,18 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType, @Nullable Field field)
 			throws TypeMismatchException {
 
-		return doConvert(value, requiredType, null, field);
+		return convertIfNecessary(value, requiredType,
+				(field != null ? new TypeDescriptor(field) : TypeDescriptor.valueOf(requiredType)));
 	}
 
 	@Nullable
-	private <T> T doConvert(@Nullable Object value,@Nullable Class<T> requiredType,
-			@Nullable MethodParameter methodParam, @Nullable Field field) throws TypeMismatchException {
+	@Override
+	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
+			@Nullable TypeDescriptor typeDescriptor) throws TypeMismatchException {
 
 		Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");
 		try {
-			if (field != null) {
-				return this.typeConverterDelegate.convertIfNecessary(value, requiredType, field);
-			}
-			else {
-				return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
-			}
+			return this.typeConverterDelegate.convertIfNecessary(null, null, value, requiredType, typeDescriptor);
 		}
 		catch (ConverterNotFoundException | IllegalStateException ex) {
 			throw new ConversionNotSupportedException(value, requiredType, ex);

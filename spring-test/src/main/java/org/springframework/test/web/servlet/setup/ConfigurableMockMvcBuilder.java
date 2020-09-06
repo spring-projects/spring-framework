@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.setup;
 
 import javax.servlet.Filter;
 
+import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultHandler;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @param <B> a self reference to the builder type
  */
 public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder<B>> extends MockMvcBuilder {
 
@@ -36,7 +38,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * <pre class="code">
 	 * mockMvcBuilder.addFilters(springSecurityFilterChain);
 	 * </pre>
-	 * <p>is the equivalent of the following web.xml configuration:
+	 * <p>It is the equivalent of the following web.xml configuration:
 	 * <pre class="code">
 	 * &lt;filter-mapping&gt;
 	 *     &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
@@ -51,9 +53,9 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add a filter mapped to a specific set of patterns. For example:
 	 * <pre class="code">
-	 * mockMvcBuilder.addFilters(myResourceFilter, "/resources/*");
+	 * mockMvcBuilder.addFilter(myResourceFilter, "/resources/*");
 	 * </pre>
-	 * <p>is the equivalent of:
+	 * <p>It is the equivalent of:
 	 * <pre class="code">
 	 * &lt;filter-mapping&gt;
 	 *     &lt;filter-name&gt;myResourceFilter&lt;/filter-name&gt;
@@ -62,7 +64,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * </pre>
 	 * <p>Filters will be invoked in the order in which they are provided.
 	 * @param filter the filter to add
-	 * @param urlPatterns URL patterns to map to; if empty, "/*" is used by default
+	 * @param urlPatterns the URL patterns to map to; if empty, "/*" is used by default
 	 */
 	<T extends B> T addFilter(Filter filter, String... urlPatterns);
 
@@ -103,6 +105,13 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * dispatchOptionsRequest} which allows processing of HTTP OPTIONS requests.
 	 */
 	<T extends B> T dispatchOptions(boolean dispatchOptions);
+
+	/**
+	 * A more advanced variant of {@link #dispatchOptions(boolean)} that allows
+	 * customizing any {@link org.springframework.web.servlet.DispatcherServlet}
+	 * property.
+	 */
+	<T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer);
 
 	/**
 	 * Add a {@code MockMvcConfigurer} that automates MockMvc setup and

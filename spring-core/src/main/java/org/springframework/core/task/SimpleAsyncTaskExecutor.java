@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +64,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	public static final int NO_CONCURRENCY = ConcurrencyThrottleSupport.NO_CONCURRENCY;
 
 
-	/** Internal concurrency throttle used by this executor */
+	/** Internal concurrency throttle used by this executor. */
 	private final ConcurrencyThrottleAdapter concurrencyThrottle = new ConcurrencyThrottleAdapter();
 
 	@Nullable
@@ -126,6 +126,11 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * execution callback (which may be a wrapper around the user-supplied task).
 	 * <p>The primary use case is to set some execution context around the task's
 	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * <p><b>NOTE:</b> Exception handling in {@code TaskDecorator} implementations
+	 * is limited to plain {@code Runnable} execution via {@code execute} calls.
+	 * In case of {@code #submit} calls, the exposed {@code Runnable} will be a
+	 * {@code FutureTask} which does not propagate any exceptions; you might
+	 * have to cast it and call {@code Future#get} to evaluate exceptions.
 	 * @since 4.3
 	 */
 	public final void setTaskDecorator(TaskDecorator taskDecorator) {
