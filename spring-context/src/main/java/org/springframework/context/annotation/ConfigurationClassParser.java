@@ -667,7 +667,7 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Factory method to obtain {@link SourceClass SourceClasss} from class names.
+	 * Factory method to obtain a {@link SourceClass} collection from class names.
 	 */
 	private Collection<SourceClass> asSourceClasses(String[] classNames, Predicate<String> filter) throws IOException {
 		List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);
