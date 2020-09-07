@@ -294,10 +294,39 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForAnnotationIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), annotationType);
-				result = mergeNamesWithParent(result, parentResult, hbf);
+				result = mergeNamesIncludeAnnotationWithParent(result, parentResult, hbf, annotationType);
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Merge the given bean names has the supplied {@link Annotation}
+	 * type result with the given parent result.
+	 * @param result the local bean name result
+	 * @param parentResult the parent bean name result (possibly empty)
+	 * @param hbf the local bean factory
+	 * @param annotationType the type of annotation to look for
+	 * @return the merged result (possibly the local result as-is)
+	 * @since
+	 * @see ListableBeanFactory#findAnnotationOnBean(java.lang.String, java.lang.Class)
+	 */
+	private static String[] mergeNamesIncludeAnnotationWithParent(
+			String[] result, String[] parentResult, HierarchicalBeanFactory hbf,
+			Class<? extends Annotation> annotationType) {
+		if (parentResult.length == 0) {
+			return result;
+		}
+		List<String> merged = new ArrayList<>(result.length + parentResult.length);
+		merged.addAll(Arrays.asList(result));
+		for (String beanName : parentResult) {
+			if (!merged.contains(beanName) && (!hbf.containsLocalBean(beanName)
+					|| hbf instanceof ListableBeanFactory
+					&& ((ListableBeanFactory) hbf).findAnnotationOnBean(beanName, annotationType) == null)) {
+				merged.add(beanName);
+			}
+		}
+		return StringUtils.toStringArray(merged);
 	}
 
 
