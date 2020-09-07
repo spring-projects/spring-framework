@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import io.rsocket.Payload;
+import io.rsocket.core.RSocketClient;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.WellKnownMimeType;
@@ -170,11 +171,10 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Mono<Payload> setupPayload = getSetupPayload(dataMimeType, metaMimeType, strategies);
 
 		RSocketConnector connector = initConnector(
-				this.rsocketConnectorConfigurers,
-				metaMimeType, dataMimeType, setupPayload, strategies);
+				this.rsocketConnectorConfigurers, metaMimeType, dataMimeType, setupPayload, strategies);
 
 		return new DefaultRSocketRequester(
-				connector.toRSocketClient(transport), null, dataMimeType, metaMimeType, strategies);
+				RSocketClient.from(connector.connect(transport)), null, dataMimeType, metaMimeType, strategies);
 	}
 
 	@Override

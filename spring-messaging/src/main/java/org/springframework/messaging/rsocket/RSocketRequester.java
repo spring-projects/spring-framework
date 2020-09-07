@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketClient;
+import io.rsocket.core.RSocketClient;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
@@ -225,7 +225,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Build an {@link RSocketRequester} instance for use with a TCP
-		 * transport. Requests are made via {@link io.rsocket.RSocketClient}
+		 * transport. Requests are made via {@link io.rsocket.core.RSocketClient}
 		 * which establishes a shared TCP connection to given host and port.
 		 * @param host the host of the server to connect to
 		 * @param port the port of the server to connect to
@@ -236,7 +236,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Build an {@link RSocketRequester} instance for use with a WebSocket
-		 * transport. Requests are made via {@link io.rsocket.RSocketClient}
+		 * transport. Requests are made via {@link io.rsocket.core.RSocketClient}
 		 * which establishes a shared WebSocket connection to given URL.
 		 * @param uri the URL of the server to connect to
 		 * @return the created {@code RSocketRequester}
@@ -246,7 +246,7 @@ public interface RSocketRequester {
 
 		/**
 		 * Build an {@link RSocketRequester} instance for use with the given
-		 * transport. Requests are made via {@link io.rsocket.RSocketClient}
+		 * transport. Requests are made via {@link io.rsocket.core.RSocketClient}
 		 * which establishes a shared connection through the given transport.
 		 * @param transport the transport to use for connecting to the server
 		 * @return the created {@code RSocketRequester}
