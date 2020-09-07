@@ -26,7 +26,7 @@ configure(allprojects) { project ->
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.11.2"
 			mavenBom "io.netty:netty-bom:4.1.51.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.0-SNAPSHOT"
-			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR5"
+			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR6"
 			mavenBom "io.rsocket:rsocket-bom:1.1.0-SNAPSHOT"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.31.v20200723"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.0"
@@ -191,7 +191,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.5.7') {
+			dependencySet(group: 'org.mockito', version: '3.5.10') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
