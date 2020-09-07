@@ -115,7 +115,7 @@ import org.springframework.util.StringUtils;
  * assert ps.containsProperty("o2") == true;
  * assert ps.containsProperty("o3") == false;
  * assert ps.getProperty("o1").equals("v1");
- * assert ps.getProperty("o2").equals("");
+ * assert ps.getProperty("o2").isEmpty();
  * assert ps.getProperty("o3") == null;
  * </pre>
  *

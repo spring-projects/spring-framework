@@ -79,7 +79,7 @@ public class PropertiesEditorTests {
 		assertThat(p.entrySet().size() == 3).as("contains two entries").isTrue();
 		assertThat(p.get("foo").equals("bar")).as("foo=bar").isTrue();
 		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
-		assertThat(p.get("x").equals("")).as("x='y=z'").isTrue();
+		assertThat(p.get("x").isEmpty()).as("x='y=z'").isTrue();
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class PropertiesEditorTests {
 		pe.setAsText(s);
 		Properties p = (Properties) pe.getValue();
 		assertThat(p.entrySet().size() == 3).as("contains three entries").isTrue();
-		assertThat(p.get("foo").equals("")).as("foo is empty").isTrue();
+		assertThat(p.get("foo").isEmpty()).as("foo is empty").isTrue();
 		assertThat(p.get("me").equals("mi")).as("me=mi").isTrue();
 	}
 
