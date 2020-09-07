@@ -85,6 +85,8 @@ public class UrlPathHelper {
 
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
+	private boolean readOnly = false;
+
 
 	/**
 	 * Whether URL lookups should always use the full path within the current
@@ -96,6 +98,7 @@ public class UrlPathHelper {
 	 * <p>By default this is set to "false".
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		checkReadOnly();
 		this.alwaysUseFullPath = alwaysUseFullPath;
 	}
 
@@ -118,6 +121,7 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
+		checkReadOnly();
 		this.urlDecode = urlDecode;
 	}
 
@@ -134,6 +138,7 @@ public class UrlPathHelper {
 	 * <p>Default is "true".
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		checkReadOnly();
 		this.removeSemicolonContent = removeSemicolonContent;
 	}
 
@@ -141,6 +146,7 @@ public class UrlPathHelper {
 	 * Whether configured to remove ";" (semicolon) content from the request URI.
 	 */
 	public boolean shouldRemoveSemicolonContent() {
+		checkReadOnly();
 		return this.removeSemicolonContent;
 	}
 
@@ -158,6 +164,7 @@ public class UrlPathHelper {
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
+		checkReadOnly();
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -166,6 +173,17 @@ public class UrlPathHelper {
 	 */
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
+	}
+
+	/**
+	 * Switch to read-only mode where further configuration changes are not allowed.
+	 */
+	private void setReadOnly() {
+		this.readOnly = true;
+	}
+
+	private void checkReadOnly() {
+		Assert.isTrue(!this.readOnly, "This instance cannot be modified");
 	}
 
 
@@ -590,8 +608,7 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		return (this.removeSemicolonContent ?
-				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
+		return (this.removeSemicolonContent ? removeSemicolonContentInternal(requestUri) : requestUri);
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {
@@ -601,16 +618,6 @@ public class UrlPathHelper {
 			String start = requestUri.substring(0, semicolonIndex);
 			requestUri = (slashIndex != -1) ? start + requestUri.substring(slashIndex) : start;
 			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
-		}
-		return requestUri;
-	}
-
-	private String removeJsessionid(String requestUri) {
-		int startIndex = requestUri.toLowerCase().indexOf(";jsessionid=");
-		if (startIndex != -1) {
-			int endIndex = requestUri.indexOf(';', startIndex + 12);
-			String start = requestUri.substring(0, startIndex);
-			requestUri = (endIndex != -1) ? start + requestUri.substring(endIndex) : start;
 		}
 		return requestUri;
 	}
@@ -695,7 +702,7 @@ public class UrlPathHelper {
 
 
 	/**
-	 * Shared, read-only instance of {@code UrlPathHelper}. Uses default settings:
+	 * Shared, read-only instance with defaults. The following apply:
 	 * <ul>
 	 * <li>{@code alwaysUseFullPath=false}
 	 * <li>{@code urlDecode=true}
@@ -703,27 +710,29 @@ public class UrlPathHelper {
 	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
 	 * </ul>
 	 */
-	public static final UrlPathHelper defaultInstance = new UrlPathHelper() {
+	public static final UrlPathHelper defaultInstance = new UrlPathHelper();
 
-		@Override
-		public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-			throw new UnsupportedOperationException();
-		}
+	static {
+		defaultInstance.setReadOnly();
+	}
 
-		@Override
-		public void setUrlDecode(boolean urlDecode) {
-			throw new UnsupportedOperationException();
-		}
 
-		@Override
-		public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-			throw new UnsupportedOperationException();
-		}
+	/**
+	 * Shared, read-only instance for the full, encoded path. The following apply:
+	 * <ul>
+	 * <li>{@code alwaysUseFullPath=true}
+	 * <li>{@code urlDecode=false}
+	 * <li>{@code removeSemicolon=false}
+	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
+	 * </ul>
+	 */
+	public static final UrlPathHelper rawPathInstance = new UrlPathHelper();
 
-		@Override
-		public void setDefaultEncoding(String defaultEncoding) {
-			throw new UnsupportedOperationException();
-		}
-	};
+	static {
+		rawPathInstance.setAlwaysUseFullPath(true);
+		rawPathInstance.setUrlDecode(false);
+		rawPathInstance.setRemoveSemicolonContent(false);
+		rawPathInstance.setReadOnly();
+	}
 
 }
