@@ -321,8 +321,8 @@ public abstract class BeanFactoryUtils {
 		merged.addAll(Arrays.asList(result));
 		for (String beanName : parentResult) {
 			if (!merged.contains(beanName) && (!hbf.containsLocalBean(beanName)
-					|| hbf instanceof ListableBeanFactory
-					&& ((ListableBeanFactory) hbf).findAnnotationOnBean(beanName, annotationType) == null)) {
+					|| (hbf instanceof ListableBeanFactory
+					&& ((ListableBeanFactory) hbf).findAnnotationOnBean(beanName, annotationType) == null))) {
 				merged.add(beanName);
 			}
 		}
