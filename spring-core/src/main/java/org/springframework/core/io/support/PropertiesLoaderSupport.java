@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
@@ -180,7 +181,8 @@ public abstract class PropertiesLoaderSupport {
 				catch (IOException ex) {
 					// Resource not found when trying to open it
 					if (this.ignoreResourceNotFound &&
-							(ex instanceof FileNotFoundException || ex instanceof UnknownHostException)) {
+							(ex instanceof FileNotFoundException || ex instanceof UnknownHostException ||
+									ex instanceof SocketException)) {
 						if (logger.isInfoEnabled()) {
 							logger.info("Properties resource not found: " + ex.getMessage());
 						}
