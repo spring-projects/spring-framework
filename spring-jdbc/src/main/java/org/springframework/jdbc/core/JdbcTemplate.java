@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,7 +183,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * Set whether or not we want to ignore SQLWarnings.
 	 * <p>Default is "true", swallowing and logging all warnings. Switch this flag
-	 * to "false" to make the JdbcTemplate throw a SQLWarningException instead.
+	 * to "false" to make the JdbcTemplate throw an SQLWarningException instead.
 	 * @see java.sql.SQLWarning
 	 * @see org.springframework.jdbc.SQLWarningException
 	 * @see #handleWarnings
@@ -1396,7 +1396,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw a SQLWarningException if we're not ignoring warnings,
+	 * Throw an SQLWarningException if we're not ignoring warnings,
 	 * otherwise log the warnings at debug level.
 	 * @param stmt the current JDBC statement
 	 * @throws SQLWarningException if not ignoring warnings
@@ -1419,7 +1419,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Throw a SQLWarningException if encountering an actual warning.
+	 * Throw an SQLWarningException if encountering an actual warning.
 	 * @param warning the warnings object from the current statement.
 	 * May be {@code null}, in which case this method does nothing.
 	 * @throws SQLWarningException in case of an actual warning to be raised
@@ -1447,7 +1447,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object which is potentially a SqlProvider
+	 * @param sqlProvider object which is potentially an SqlProvider
 	 * @return the SQL string, or {@code null} if not known
 	 * @see SqlProvider
 	 */
