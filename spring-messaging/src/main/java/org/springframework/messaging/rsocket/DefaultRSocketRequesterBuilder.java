@@ -28,11 +28,15 @@ import io.rsocket.Payload;
 import io.rsocket.core.RSocketClient;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.loadbalance.LoadbalanceRSocketClient;
+import io.rsocket.loadbalance.LoadbalanceStrategy;
+import io.rsocket.loadbalance.LoadbalanceTarget;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
 import io.rsocket.util.DefaultPayload;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ReactiveAdapter;
@@ -168,6 +172,25 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 				this.rsocketConnectorConfigurers, metaMimeType, dataMimeType, strategies);
 
 		RSocketClient client = RSocketClient.from(connector.connect(transport));
+		return new DefaultRSocketRequester(client, null, dataMimeType, metaMimeType, strategies);
+	}
+
+	@Override
+	public RSocketRequester transports(
+			Publisher<List<LoadbalanceTarget>> targetPublisher, LoadbalanceStrategy loadbalanceStrategy) {
+
+		RSocketStrategies strategies = getRSocketStrategies();
+		MimeType metaMimeType = getMetadataMimeType();
+		MimeType dataMimeType = getDataMimeType(strategies);
+
+		RSocketConnector connector = initConnector(
+				this.rsocketConnectorConfigurers, metaMimeType, dataMimeType, strategies);
+
+		LoadbalanceRSocketClient client = LoadbalanceRSocketClient.builder(targetPublisher)
+				.connector(connector)
+				.loadbalanceStrategy(loadbalanceStrategy)
+				.build();
+
 		return new DefaultRSocketRequester(client, null, dataMimeType, metaMimeType, strategies);
 	}
 
