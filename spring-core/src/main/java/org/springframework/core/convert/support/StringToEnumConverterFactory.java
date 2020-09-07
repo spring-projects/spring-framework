@@ -32,16 +32,12 @@ import org.springframework.core.convert.converter.ConverterFactory;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
-	private static final Map<Class<?>, StringToEnum<?>> cache = new ConcurrentHashMap<>();
+	private static final Map<String, StringToEnum<?>> CACHE = new ConcurrentHashMap<>();
 
 	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
-		StringToEnum converter = cache.get(targetType);
-		if (converter == null) {
-			converter = new StringToEnum(ConversionUtils.getEnumType(targetType));
-			cache.put(targetType, converter);
-		}
-		return converter;
+		return (StringToEnum) CACHE.computeIfAbsent(targetType.getName(),
+				t-> new StringToEnum(ConversionUtils.getEnumType(targetType)));
 	}
 
 	private static class StringToEnum<T extends Enum> implements Converter<String, T> {

@@ -45,16 +45,11 @@ import org.springframework.util.NumberUtils;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>, ConditionalConverter {
-	private final static Map<Class<?>, NumberToNumber<?>> cache = new ConcurrentHashMap<>();
+	private final static Map<String, NumberToNumber<?>> CACHE = new ConcurrentHashMap<>();
 
 	@Override
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
-		NumberToNumber converter = cache.get(targetType);
-		if (converter == null) {
-			converter = new NumberToNumber<>(targetType);
-			cache.put(targetType, converter);
-		}
-		return converter;
+		return (NumberToNumber) CACHE.computeIfAbsent(targetType.getName(), t-> new NumberToNumber(targetType));
 	}
 
 	@Override
