@@ -2965,7 +2965,7 @@ public class ClassReader {
       // Parse the array_value array.
       while (numElementValuePairs-- > 0) {
         currentOffset =
-            readElementValue(annotationVisitor, currentOffset, /* named = */ null, charBuffer);
+            readElementValue(annotationVisitor, currentOffset, /* elementName = */ null, charBuffer);
       }
     }
     if (annotationVisitor != null) {
