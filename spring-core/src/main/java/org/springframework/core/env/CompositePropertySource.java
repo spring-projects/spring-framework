@@ -16,11 +16,11 @@
 
 package org.springframework.core.env;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.lang.Nullable;
@@ -42,8 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public class CompositePropertySource extends EnumerablePropertySource<Object> {
 
-	private final Set<PropertySource<?>> propertySources = new LinkedHashSet<>();
-
+	private final Deque<PropertySource<?>> propertySources = new ArrayDeque<>();
 
 	/**
 	 * Create a new {@code CompositePropertySource}.
@@ -104,10 +103,7 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	 * @since 4.1
 	 */
 	public void addFirstPropertySource(PropertySource<?> propertySource) {
-		List<PropertySource<?>> existing = new ArrayList<>(this.propertySources);
-		this.propertySources.clear();
-		this.propertySources.add(propertySource);
-		this.propertySources.addAll(existing);
+		this.propertySources.offerFirst(propertySource);
 	}
 
 	/**
