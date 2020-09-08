@@ -67,7 +67,7 @@ configure(allprojects) { project ->
 
 			dependency "com.caucho:hessian:4.0.63"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
-			dependency("com.fasterxml.woodstox:woodstox-core:6.1.1") {
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.1") {
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
