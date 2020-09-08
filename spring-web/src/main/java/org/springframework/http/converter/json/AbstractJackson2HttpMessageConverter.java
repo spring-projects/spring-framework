@@ -286,14 +286,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	/**
-	 * Return the charset to use for JSON input.
+	 * Determine the charset to use for JSON input.
 	 * <p>By default this is either the charset from the input {@code MediaType}
-	 * or otherwise falling back on {@code UTF-8}.
+	 * or otherwise falling back on {@code UTF-8}. Can be overridden in subclasses.
 	 * @param contentType the content type of the HTTP input message
 	 * @return the charset to use
 	 * @since 5.1.18
 	 */
-	protected static Charset getCharset(@Nullable MediaType contentType) {
+	protected Charset getCharset(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
 		}
