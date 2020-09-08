@@ -16,10 +16,13 @@
 
 package org.springframework.scheduling.support;
 
+import java.util.Arrays;
+
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.scheduling.support.BitSetAssert.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -28,12 +31,12 @@ public class BitsCronFieldTests {
 
 	@Test
 	void parse() {
-		assertThat(BitsCronField.parseSeconds("42").bits()).hasUnsetRange(0, 41).hasSet(42).hasUnsetRange(43, 59);
-		assertThat(BitsCronField.parseMinutes("1,2,5,9").bits()).hasUnset(0).hasSet(1, 2).hasUnset(3,4).hasSet(5).hasUnsetRange(6,8).hasSet(9).hasUnsetRange(10,59);
-		assertThat(BitsCronField.parseSeconds("0-4,8-12").bits()).hasSetRange(0, 4).hasUnsetRange(5,7).hasSetRange(8, 12).hasUnsetRange(13,59);
-		assertThat(BitsCronField.parseHours("0-23/2").bits()).hasSet(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22).hasUnset(1,3,5,7,9,11,13,15,17,19,21,23);
-		assertThat(BitsCronField.parseDaysOfWeek("0").bits()).hasUnsetRange(0, 6).hasSet(7, 7);
-		assertThat(BitsCronField.parseSeconds("57/2").bits()).hasUnsetRange(0, 56).hasSet(57).hasUnset(58).hasSet(59);
+		assertThat(BitsCronField.parseSeconds("42")).has(clearRange(0, 41)).has(set(42)).has(clearRange(43, 59));
+		assertThat(BitsCronField.parseMinutes("1,2,5,9")).has(clear(0)).has(set(1, 2)).has(clearRange(3,4)).has(set(5)).has(clearRange(6,8)).has(set(9)).has(clearRange(10,59));
+		assertThat(BitsCronField.parseSeconds("0-4,8-12")).has(setRange(0, 4)).has(clearRange(5,7)).has(setRange(8, 12)).has(clearRange(13,59));
+		assertThat(BitsCronField.parseHours("0-23/2")).has(set(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22)).has(clear(1,3,5,7,9,11,13,15,17,19,21,23));
+		assertThat(BitsCronField.parseDaysOfWeek("0")).has(clearRange(0, 6)).has(set(7, 7));
+		assertThat(BitsCronField.parseSeconds("57/2")).has(clearRange(0, 56)).has(set(57)).has(clear(58)).has(set(59));
 	}
 
 	@Test
@@ -55,22 +58,78 @@ public class BitsCronFieldTests {
 
 	@Test
 	void parseWildcards() {
-		assertThat(BitsCronField.parseSeconds("*").bits()).hasSetRange(0, 60);
-		assertThat(BitsCronField.parseMinutes("*").bits()).hasSetRange(0, 60);
-		assertThat(BitsCronField.parseHours("*").bits()).hasSetRange(0, 23);
-		assertThat(BitsCronField.parseDaysOfMonth("*").bits()).hasUnset(0).hasSetRange(1, 31);
-		assertThat(BitsCronField.parseDaysOfMonth("?").bits()).hasUnset(0).hasSetRange(1, 31);
-		assertThat(BitsCronField.parseMonth("*").bits()).hasUnset(0).hasSetRange(1, 12);
-		assertThat(BitsCronField.parseDaysOfWeek("*").bits()).hasUnset(0).hasSetRange(1, 7);
-		assertThat(BitsCronField.parseDaysOfWeek("?").bits()).hasUnset(0).hasSetRange(1, 7);
+		assertThat(BitsCronField.parseSeconds("*")).has(setRange(0, 60));
+		assertThat(BitsCronField.parseMinutes("*")).has(setRange(0, 60));
+		assertThat(BitsCronField.parseHours("*")).has(setRange(0, 23));
+		assertThat(BitsCronField.parseDaysOfMonth("*")).has(clear(0)).has(setRange(1, 31));
+		assertThat(BitsCronField.parseDaysOfMonth("?")).has(clear(0)).has(setRange(1, 31));
+		assertThat(BitsCronField.parseMonth("*")).has(clear(0)).has(setRange(1, 12));
+		assertThat(BitsCronField.parseDaysOfWeek("*")).has(clear(0)).has(setRange(1, 7));
+		assertThat(BitsCronField.parseDaysOfWeek("?")).has(clear(0)).has(setRange(1, 7));
 	}
 
 	@Test
 	void names() {
-		assertThat(((BitsCronField)CronField.parseMonth("JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC")).bits())
-				.hasUnset(0).hasSetRange(1, 12);
-		assertThat(((BitsCronField)CronField.parseDaysOfWeek("SUN,MON,TUE,WED,THU,FRI,SAT")).bits())
-				.hasUnset(0).hasSetRange(1, 7);
+		assertThat(((BitsCronField)CronField.parseMonth("JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC")))
+				.has(clear(0)).has(setRange(1, 12));
+		assertThat(((BitsCronField)CronField.parseDaysOfWeek("SUN,MON,TUE,WED,THU,FRI,SAT")))
+				.has(clear(0)).has(setRange(1, 7));
+	}
+
+	private static Condition<BitsCronField> set(int... indices) {
+		return new Condition<BitsCronField>(String.format("set bits %s", Arrays.toString(indices))) {
+			@Override
+			public boolean matches(BitsCronField value) {
+				for (int index : indices) {
+					if (!value.getBit(index)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+	}
+
+	private static Condition<BitsCronField> setRange(int min, int max) {
+		return new Condition<BitsCronField>(String.format("set range %d-%d", min, max)) {
+			@Override
+			public boolean matches(BitsCronField value) {
+				for (int i = min; i < max; i++) {
+					if (!value.getBit(i)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+	}
+
+	private static Condition<BitsCronField> clear(int... indices) {
+		return new Condition<BitsCronField>(String.format("clear bits %s", Arrays.toString(indices))) {
+			@Override
+			public boolean matches(BitsCronField value) {
+				for (int index : indices) {
+					if (value.getBit(index)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+	}
+
+	private static Condition<BitsCronField> clearRange(int min, int max) {
+		return new Condition<BitsCronField>(String.format("clear range %d-%d", min, max)) {
+			@Override
+			public boolean matches(BitsCronField value) {
+				for (int i = min; i < max; i++) {
+					if (value.getBit(i)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
 	}
 
 }
