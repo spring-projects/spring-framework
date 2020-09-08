@@ -65,7 +65,7 @@ configure(allprojects) { project ->
 
 			dependency "com.caucho:hessian:4.0.63"
 			dependency "com.fasterxml:aalto-xml:1.2.2"
-			dependency("com.fasterxml.woodstox:woodstox-core:6.1.1") {
+			dependency("com.fasterxml.woodstox:woodstox-core:6.2.1") {
 				exclude group: "stax", name: "stax-api"
 			}
 			dependency "com.google.code.gson:gson:2.8.6"
@@ -109,7 +109,7 @@ configure(allprojects) { project ->
 			dependency "org.apache.poi:poi-ooxml:4.1.2"
 			dependency "org.apache-extras.beanshell:bsh:2.0b6"
 			dependency "org.freemarker:freemarker:2.3.30"
-			dependency "org.hsqldb:hsqldb:2.5.0"
+			dependency "org.hsqldb:hsqldb:2.5.1"
 			dependency "org.quartz-scheduler:quartz:2.3.2"
 			dependency "org.codehaus.fabric3.api:commonj:1.1.0"
 			dependency "net.sf.ehcache:ehcache:2.10.6"
