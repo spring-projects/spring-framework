@@ -73,7 +73,7 @@ configure(allprojects) { project ->
 			dependency "com.google.code.gson:gson:2.8.6"
 			dependency "com.google.protobuf:protobuf-java-util:3.13.0"
 			dependency "com.googlecode.protobuf-java-format:protobuf-java-format:1.4"
-			dependency("com.thoughtworks.xstream:xstream:1.4.12") {
+			dependency("com.thoughtworks.xstream:xstream:1.4.13") {
 				exclude group: "xpp3", name: "xpp3_min"
 				exclude group: "xmlpull", name: "xmlpull"
 			}
