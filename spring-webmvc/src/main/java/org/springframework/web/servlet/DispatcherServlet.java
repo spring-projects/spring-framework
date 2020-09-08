@@ -1153,8 +1153,8 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		if (mappedHandler != null) {
-			// Exception (if any) is already handled..
-			mappedHandler.triggerAfterCompletion(request, response, null);
+			// Exception (if any) is already handled, but passed in case of any business logic needs..
+			mappedHandler.triggerAfterCompletion(request, response, exception);
 		}
 	}
 
