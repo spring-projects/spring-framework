@@ -30,7 +30,9 @@ import org.springframework.format.Parser;
  *
  * @author Juergen Hoeller
  * @since 4.0
+ * @deprecated as of 5.3.0, scheduled for removal in 6.0.
  */
+@Deprecated
 public final class LocalTimeParser implements Parser<LocalTime> {
 
 	private final DateTimeFormatter formatter;
