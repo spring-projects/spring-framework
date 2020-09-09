@@ -754,8 +754,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		try {
 			String forwardedHeader = headers.getFirst("Forwarded");
 			if (StringUtils.hasText(forwardedHeader)) {
-				String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
-				Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
+				Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedHeader);
 				if (matcher.find()) {
 					scheme(matcher.group(1).trim());
 					port(null);
@@ -764,7 +763,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 					scheme("https");
 					port(null);
 				}
-				matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
+				matcher = FORWARDED_HOST_PATTERN.matcher(forwardedHeader);
 				if (matcher.find()) {
 					adaptForwardedHost(matcher.group(1).trim());
 				}
