@@ -255,6 +255,9 @@ public class ModelAndViewContainer {
 	 * necessary. This flag can also be set when controller methods declare an
 	 * argument of type {@code ServletResponse} or {@code OutputStream}).
 	 * <p>The default value is {@code false}.
+	 * {
+	 *     标记请求是否已被完全处理
+	 * }
 	 */
 	public void setRequestHandled(boolean requestHandled) {
 		this.requestHandled = requestHandled;

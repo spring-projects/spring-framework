@@ -111,6 +111,7 @@ public abstract class AbstractApplicationEventMulticaster
 			if (singletonTarget instanceof ApplicationListener) {
 				this.defaultRetriever.applicationListeners.remove(singletonTarget);
 			}
+			// 注册监听器
 			this.defaultRetriever.applicationListeners.add(listener);
 			this.retrieverCache.clear();
 		}

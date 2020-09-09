@@ -52,6 +52,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+	/** 本异常处理器能够处理的 request handler */
 	@Nullable
 	private Set<?> mappedHandlers;
 
@@ -137,7 +138,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			prepareResponse(ex, response);
+			prepareResponse(ex, response); // HTTP {@code Cache-Control: no-store} header.
+			// 解析异常
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
 				// Print debug message when warn logger is not enabled.
@@ -236,6 +238,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Prevents the response from being cached, through setting corresponding
 	 * HTTP {@code Cache-Control: no-store} header.
+	 * 防止响应被缓存
 	 * @param response current HTTP response
 	 */
 	protected void preventCaching(HttpServletResponse response) {

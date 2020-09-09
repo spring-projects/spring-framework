@@ -32,7 +32,10 @@ import org.springframework.lang.Nullable;
  * {@code RequestMappingHandlerAdapter} and {@code ExceptionHandlerExceptionResolver}
  * or more likely annotated with {@code @ControllerAdvice} in which case they
  * will be auto-detected by both.
- *
+ * {
+ *     在 controller 方法的 @ResponseBody 和 ResponseEntity 执行后，在数据被写入 HttpMessageConverter 前执行。
+ *     可以通过 RequestMappingHandlerAdapter 和 ExceptionHandlerExceptionResolver 进行注册，此外 @ControllerAdvice 注释的类会被自动注册
+ * }
  * @author Rossen Stoyanchev
  * @since 4.1
  * @param <T> the body type

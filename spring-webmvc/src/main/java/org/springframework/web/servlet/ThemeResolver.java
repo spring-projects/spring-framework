@@ -45,6 +45,11 @@ import org.springframework.lang.Nullable;
  * @since 17.06.2003
  * @see org.springframework.ui.context.Theme
  * @see org.springframework.ui.context.ThemeSource
+ * {
+ *     通过cookie,header等方式来切换theme变量值，在JSP 等模板引擎中可以跟进 themeName 动态切换样式等
+ *     可以通过 RequestContext.getTheme()读取值
+ * }
+ *
  */
 public interface ThemeResolver {
 

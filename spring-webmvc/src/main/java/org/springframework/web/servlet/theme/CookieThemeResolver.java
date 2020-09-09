@@ -109,6 +109,7 @@ public class CookieThemeResolver extends CookieGenerator implements ThemeResolve
 		if (themeName == null) {
 			themeName = getDefaultThemeName();
 		}
+		// Theme 被放到 request 属性里面
 		request.setAttribute(THEME_REQUEST_ATTRIBUTE_NAME, themeName);
 		return themeName;
 	}

@@ -36,7 +36,9 @@ import org.springframework.web.method.HandlerMethod;
  * Extension of {@link HandlerMethod} that invokes the underlying method with
  * argument values resolved from the current HTTP request through a list of
  * {@link HandlerMethodArgumentResolver}.
- *
+ * {
+ *     支持传递给定参数来调用方法
+ * }
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1
@@ -130,11 +132,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	@Nullable
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+		// 解析参数
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
+		// 调用异常处理方法
 		return doInvoke(args);
 	}
 

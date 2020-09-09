@@ -39,7 +39,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  * <p>The {@link #findAnnotatedBeans(ApplicationContext)} method can be used to
  * discover such beans. However, a {@code ControllerAdviceBean} may be created
  * from any object, including ones without an {@code @ControllerAdvice} annotation.
- *
+ * {
+ *    封装了有关 Spring 管理的 @ControllerAdvice Bean 相关的信息 。
+ *	  可以通过 {@link #findAnnotatedBeans(ApplicationContext)} 查找 这类 Bean。
+ *	  但是 {@code ControllerAdviceBean} 可以被任何对象创建，不仅仅是通过 {@code @ControllerAdvice} 注解
+ * }
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -51,6 +55,8 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Reference to the actual bean instance or a {@code String} representing
 	 * the bean name.
+	 *
+	 * @ControllerAdvice 注解的类的实例
 	 */
 	private final Object beanOrName;
 
@@ -59,13 +65,21 @@ public class ControllerAdviceBean implements Ordered {
 	/**
 	 * Reference to the resolved bean instance, potentially lazily retrieved
 	 * via the {@code BeanFactory}.
+	 *
+	 *  @ControllerAdvice 注解的类的实例
 	 */
 	@Nullable
 	private Object resolvedBean;
 
+	/**
+	 * @ControllerAdvice 注解的类
+	 */
 	@Nullable
 	private final Class<?> beanType;
 
+	/**
+	 * 断言 可以 处理 哪些 Clazz
+	 */
 	private final HandlerTypePredicate beanTypePredicate;
 
 	@Nullable
@@ -258,6 +272,9 @@ public class ControllerAdviceBean implements Ordered {
 	 * @see #getOrder()
 	 * @see OrderComparator
 	 * @see Ordered
+	 * {
+	 *     读取 Spring 管理的 @ControllerAdvice 注释的Bean，来创建 ControllerAdviceBean
+	 * }
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
@@ -287,6 +304,11 @@ public class ControllerAdviceBean implements Ordered {
 		return createBeanTypePredicate(controllerAdvice);
 	}
 
+	/**
+	 * 读取 @ControllerAdvice 注解上的变量值，作为 构造 HandlerTypePredicate 的参数
+	 * @param controllerAdvice
+	 * @return
+	 */
 	private static HandlerTypePredicate createBeanTypePredicate(@Nullable ControllerAdvice controllerAdvice) {
 		if (controllerAdvice != null) {
 			return HandlerTypePredicate.builder()

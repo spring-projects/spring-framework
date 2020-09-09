@@ -41,7 +41,9 @@ import org.springframework.util.Assert;
  * <p>Used internally by Spring's {@link org.springframework.jdbc.core.JdbcTemplate},
  * Spring's JDBC operation objects and the JDBC {@link DataSourceTransactionManager}.
  * Can also be used directly in application code.
- *
+ * {
+ *     可以在应用程序中直接使用，用来获取数据库连接
+ * }
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #getConnection

@@ -17,7 +17,6 @@ ext {
 		exclude group: "org.slf4j", name: "jcl-over-slf4j"
 	}
 }
-
 configure(allprojects) { project ->
 	apply plugin: "io.spring.dependency-management"
 
@@ -284,6 +283,9 @@ configure(allprojects) { project ->
 		}
 		repositories {
 			mavenCentral()
+			maven {
+				url 'https://maven.aliyun.com/repository/public/'
+			}
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 			maven { url "https://repo.spring.io/snapshot" } // Reactor and RSocket
 		}

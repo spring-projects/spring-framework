@@ -892,6 +892,9 @@ public abstract class ClassUtils {
 	 * class, but the original class in case of a CGLIB-generated subclass.
 	 * @param clazz the class to check
 	 * @return the user-defined class
+	 * {
+	 * 	返回用户定义的 Class,使用场景是: 如果 是CGLIB 自动生成的类，则返回 superClass，否则直接返回即可
+	 * }
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {

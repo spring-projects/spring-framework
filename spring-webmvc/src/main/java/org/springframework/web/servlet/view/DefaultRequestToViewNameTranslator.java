@@ -66,10 +66,11 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private String separator = SLASH;
 
+	/** 删除最前面的斜线 */
 	private boolean stripLeadingSlash = true;
-
+	/** 删除最后面的斜线 */
 	private boolean stripTrailingSlash = true;
-
+	/** 删除文件名扩展。例如： "mypath/myfile.txt" -> "mypath/myfile". /
 	private boolean stripExtension = true;
 
 

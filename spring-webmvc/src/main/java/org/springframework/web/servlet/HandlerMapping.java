@@ -53,6 +53,9 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.handler.AbstractHandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+ * {
+ * 	返回uri匹配的处理器
+ * }
  */
 public interface HandlerMapping {
 

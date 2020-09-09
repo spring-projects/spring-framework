@@ -74,6 +74,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.1
+ * {
+ *     通过 @ExceptionHandle 注解的方法来 解析异常
+ * }
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
 		implements ApplicationContextAware, InitializingBean {
@@ -89,27 +92,34 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	@Nullable
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
+	/** 参数解析器 */
 	@Nullable
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	@Nullable
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
+	/** 返回值解析器 */
 	@Nullable
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
-
+	/** 消息转换器：从 http request 读取数据，将数据写入 到 response */
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	/**  在 controller 方法的 @ResponseBody 和 ResponseEntity 执行后，在数据被写入 HttpMessageConverter 前执行。 */
 	private final List<Object> responseBodyAdvice = new ArrayList<>();
 
 	@Nullable
 	private ApplicationContext applicationContext;
 
+	/**
+	 * 初始化容量，避免扩容带来的性能消耗
+	 * 缓存每个class 对应的 异常处理解析器。先找 exceptionHandlerCache 中有没有能够解析异常的方法，如果没有，再找 exceptionHandlerAdviceCache
+	 * */
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
-
+	/** 保存了 @ControllerAdvice的封装信息 和 @ExceptionHandler的封装信息 的映射关系*/
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<>();
 
@@ -282,18 +292,22 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		if (getApplicationContext() == null) {
 			return;
 		}
-
+		// 读取 @ControllerAdvice 注释的Bean，来构建ControllerAdviceBean
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
 			Class<?> beanType = adviceBean.getBeanType();
 			if (beanType == null) {
 				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
 			}
+			// 查找 clazz及其父类中注释了  @ExceptionHandler 的方法，来构建 异常解析器
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(beanType);
+
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
+				// ResponseBodyAdvice 在 controller 方法的 @ResponseBody 和 ResponseEntity 执行后，数据被写入 HttpMessageConverter 前执行。
 				this.responseBodyAdvice.add(adviceBean);
 			}
 		}
@@ -338,7 +352,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		resolvers.add(new RedirectAttributesMethodArgumentResolver());
 		resolvers.add(new ModelMethodProcessor());
 
-		// Custom arguments
+		// Custom arguments 自定义参数解析器
 		if (getCustomArgumentResolvers() != null) {
 			resolvers.addAll(getCustomArgumentResolvers());
 		}
@@ -349,6 +363,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	/**
 	 * Return the list of return value handlers to use including built-in and
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
+	 * 返回值解析器
 	 */
 	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
@@ -387,12 +402,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.
+	 * {
+	 *     查找 {@code @ExceptionHandler} 方法，并调用它处理系统抛出的异常，并返回 ModelAndView
+	 * }
 	 */
 	@Override
 	@Nullable
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 			HttpServletResponse response, @Nullable HandlerMethod handlerMethod, Exception exception) {
-
+		// 获取能够处理异常的方法
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
@@ -415,6 +433,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			Throwable cause = exception.getCause();
 			if (cause != null) {
 				// Expose cause as provided argument as well
+				// 处理异常
 				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
 			}
 			else {
@@ -457,9 +476,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * and if not found, it continues searching for additional {@code @ExceptionHandler}
 	 * methods assuming some {@linkplain ControllerAdvice @ControllerAdvice}
 	 * Spring-managed beans were detected.
-	 * @param handlerMethod the method where the exception was raised (may be {@code null})
-	 * @param exception the raised exception
-	 * @return a method to handle the exception, or {@code null} if none
+	 * {
+	 *     先查找 Controller类，再 查找  @ControllerAdvice
+	 * }
+	 * @param handlerMethod the method where the exception was raised (may be {@code null}) 抛出异常的方法
+	 * @param exception the raised exception  抛出的异常
+	 * @return a method to handle the exception, or {@code null} if none 处理异常的方法
 	 */
 	@Nullable
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(
@@ -468,14 +490,17 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		Class<?> handlerType = null;
 
 		if (handlerMethod != null) {
+			// 先判断 自己类中有没有注释了 @ExceptionHandler的方法
 			// Local exception handler methods on the controller class itself.
 			// To be invoked through the proxy, even in case of an interface-based proxy.
 			handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
 			if (resolver == null) {
+				// 自己类中没有注释了 @ExceptionHandler的方法，就会创建一个空的 ExceptionHandlerMethodResolver
 				resolver = new ExceptionHandlerMethodResolver(handlerType);
 				this.exceptionHandlerCache.put(handlerType, resolver);
 			}
+			// 找出能够处理异常的method，如果 handlerType 中 没有@ExceptionHandler 注释的方法，则method 返回 null
 			Method method = resolver.resolveMethod(exception);
 			if (method != null) {
 				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
@@ -483,12 +508,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			// For advice applicability check below (involving base packages, assignable types
 			// and annotation presence), use target class instead of interface-based proxy.
 			if (Proxy.isProxyClass(handlerType)) {
+				// 如果是代理，则分析目标类
 				handlerType = AopUtils.getTargetClass(handlerMethod.getBean());
 			}
 		}
-
+		// 查看抛出异常的类是否包含了@ExceptionHandler注释的方法
 		for (Map.Entry<ControllerAdviceBean, ExceptionHandlerMethodResolver> entry : this.exceptionHandlerAdviceCache.entrySet()) {
 			ControllerAdviceBean advice = entry.getKey();
+			// 当handlerType 为null时，只要 advice 没有指定作用范围，advice.isApplicableToBeanType(null) 就会返回 true
 			if (advice.isApplicableToBeanType(handlerType)) {
 				ExceptionHandlerMethodResolver resolver = entry.getValue();
 				Method method = resolver.resolveMethod(exception);

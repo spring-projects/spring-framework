@@ -81,6 +81,9 @@ import javax.servlet.http.HttpServletRequest;
  * @see org.springframework.web.multipart.support.ByteArrayMultipartFileEditor
  * @see org.springframework.web.multipart.support.StringMultipartFileEditor
  * @see org.springframework.web.servlet.DispatcherServlet
+ * {
+ *     文件上传解析器
+ * }
  */
 public interface MultipartResolver {
 
@@ -90,6 +93,9 @@ public interface MultipartResolver {
 	 * accepted requests might depend on the capabilities of the resolver implementation.
 	 * @param request the servlet request to be evaluated
 	 * @return whether the request contains multipart content
+	 * {
+	 *     content-type 为 “multipart/ 前缀的才会返回true”
+	 * }
 	 */
 	boolean isMultipart(HttpServletRequest request);
 

@@ -55,7 +55,12 @@ import org.springframework.web.util.NestedServletException;
  * annotation, a not-modified check condition
  * (see {@link ServletWebRequest#checkNotModified(long)}), or
  * a method argument that provides access to the response stream.
- *
+ * {
+ *     在 Servlet 环境下 跟进参数调用 Method
+ *     特性：
+ *     1. 支持通过 注册的 HandlerMethodReturnValueHandler 来改变返回值
+ *     2. 支持在method 上注释 @ResponseStatus 来设置响应状态码，此时如果方法返回null，或者返回类型为 void，说明request已经处理完成
+ * }
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 3.1
@@ -101,8 +106,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public void invokeAndHandle(ServletWebRequest webRequest, ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+		// 调用异常处理方法
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
+		// 设置响应码
 		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
@@ -133,6 +139,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	/**
 	 * Set the response status according to the {@link ResponseStatus} annotation.
+	 * 根据 ResponseStatus 的值设置响应码
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
 		HttpStatus status = getResponseStatus();

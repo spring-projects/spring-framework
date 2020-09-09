@@ -39,7 +39,7 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 
 	private static final int MAX_PATTERNS = 1024;
 
-
+	/** 代理 */
 	private final MatchableHandlerMapping delegate;
 
 	private final PathPatternParser parser;

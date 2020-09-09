@@ -44,15 +44,19 @@ import org.springframework.util.StringUtils;
  * 				.and(HandlerTypePredicate.forBasePackage("org.example"));
  * </pre>
  *
+ * {
+ * 		判断一个 request handling component 是否匹配
+ * }
  * @author Rossen Stoyanchev
  * @since 5.1
  */
 public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
+	/**通过包*/
 	private final Set<String> basePackages;
-
+	/**通过基类*/
 	private final List<Class<?>> assignableTypes;
-
+	/**通过注解*/
 	private final List<Class<? extends Annotation>> annotations;
 
 
@@ -68,6 +72,9 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 	}
 
 
+	/**
+	 * 是否匹配
+	 */
 	@Override
 	public boolean test(Class<?> controllerType) {
 		if (!hasSelectors()) {
@@ -80,6 +87,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 				}
 			}
 			for (Class<?> clazz : this.assignableTypes) {
+				// 如果 实现了 assignableTypes
 				if (ClassUtils.isAssignable(clazz, controllerType)) {
 					return true;
 				}
@@ -98,10 +106,11 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 	}
 
 
-	// Static factory methods
+	// Static factory methods 静态工厂方法
 
 	/**
 	 * {@code Predicate} that applies to any handlers.
+	 *
 	 */
 	public static HandlerTypePredicate forAnyHandlerType() {
 		return new HandlerTypePredicate(
@@ -152,6 +161,7 @@ public final class HandlerTypePredicate implements Predicate<Class<?>> {
 
 	/**
 	 * A {@link HandlerTypePredicate} builder.
+	 * 构建者
 	 */
 	public static class Builder {
 

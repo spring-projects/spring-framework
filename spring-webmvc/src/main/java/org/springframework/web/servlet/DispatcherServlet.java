@@ -166,18 +166,24 @@ import org.springframework.web.util.WebUtils;
 public class DispatcherServlet extends FrameworkServlet {
 
 	/** Well-known name for the MultipartResolver object in the bean factory for this namespace. */
+	/** {文件上传解析器 BeanName} */
 	public static final String MULTIPART_RESOLVER_BEAN_NAME = "multipartResolver";
 
 	/** Well-known name for the LocaleResolver object in the bean factory for this namespace. */
+	/** {本地化解析器 BeanName} */
 	public static final String LOCALE_RESOLVER_BEAN_NAME = "localeResolver";
 
 	/** Well-known name for the ThemeResolver object in the bean factory for this namespace. */
+	/** {跟进具体的策略如cookie，header等方式和动态切换主题（跟进主题值动态切换css文件等）} */
 	public static final String THEME_RESOLVER_BEAN_NAME = "themeResolver";
 
 	/**
 	 * Well-known name for the HandlerMapping object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerMappings" is turned off.
 	 * @see #setDetectAllHandlerMappings
+	 * {
+	 *  返回 uri 匹配的处理器
+	 * }
 	 */
 	public static final String HANDLER_MAPPING_BEAN_NAME = "handlerMapping";
 
@@ -185,6 +191,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the HandlerAdapter object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerAdapters" is turned off.
 	 * @see #setDetectAllHandlerAdapters
+	 * {
+	 *     通过 handlerAdapter 调用真实的 逻辑实现 如：Controller
+	 * }
 	 */
 	public static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
 
@@ -192,11 +201,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Well-known name for the HandlerExceptionResolver object in the bean factory for this namespace.
 	 * Only used when "detectAllHandlerExceptionResolvers" is turned off.
 	 * @see #setDetectAllHandlerExceptionResolvers
+	 *
+	 * 异常解析器
 	 */
 	public static final String HANDLER_EXCEPTION_RESOLVER_BEAN_NAME = "handlerExceptionResolver";
 
 	/**
 	 * Well-known name for the RequestToViewNameTranslator object in the bean factory for this namespace.
+	 * 视图转换器
 	 */
 	public static final String REQUEST_TO_VIEW_NAME_TRANSLATOR_BEAN_NAME = "viewNameTranslator";
 
@@ -270,6 +282,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Name of the class path resource (relative to the DispatcherServlet class)
 	 * that defines DispatcherServlet's default strategy names.
+	 * 默认策略配置的文件名称
 	 */
 	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
@@ -281,7 +294,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 
-	/** Store default strategy implementations. */
+	/** Store default strategy implementations.
+	 *  存储默认实现的属性文件，数据来源于 DispatcherServlet.properties
+	 */
 	@Nullable
 	private static Properties defaultStrategies;
 
@@ -492,6 +507,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Initialize the strategy objects that this servlet uses.
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
+	 * 初始化
 	 */
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
@@ -499,6 +515,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initThemeResolver(context);
 		initHandlerMappings(context);
 		initHandlerAdapters(context);
+		// 异常解析器
 		initHandlerExceptionResolvers(context);
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
@@ -671,19 +688,22 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initHandlerExceptionResolvers(ApplicationContext context) {
 		this.handlerExceptionResolvers = null;
-
+		// 需要检测所有的异常处理器
 		if (this.detectAllHandlerExceptionResolvers) {
 			// Find all HandlerExceptionResolvers in the ApplicationContext, including ancestor contexts.
+			// 查找所有的 HandlerExceptionResolver Bean
 			Map<String, HandlerExceptionResolver> matchingBeans = BeanFactoryUtils
 					.beansOfTypeIncludingAncestors(context, HandlerExceptionResolver.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerExceptionResolvers = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
+				// 排序，基于 Ordered 子类，或者是 Order 注解
 				AnnotationAwareOrderComparator.sort(this.handlerExceptionResolvers);
 			}
 		}
 		else {
 			try {
+				// 只检测 BeanName 为 handlerExceptionResolver 的异常处理器
 				HandlerExceptionResolver her =
 						context.getBean(HANDLER_EXCEPTION_RESOLVER_BEAN_NAME, HandlerExceptionResolver.class);
 				this.handlerExceptionResolvers = Collections.singletonList(her);
@@ -695,6 +715,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least some HandlerExceptionResolvers, by registering
 		// default HandlerExceptionResolvers if no other resolvers are found.
+		// 确保至少有一个异常处理解析器
 		if (this.handlerExceptionResolvers == null) {
 			this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
 			if (logger.isTraceEnabled()) {
@@ -871,15 +892,17 @@ public class DispatcherServlet extends FrameworkServlet {
 				throw new IllegalStateException("Could not load '" + DEFAULT_STRATEGIES_PATH + "': " + ex.getMessage());
 			}
 		}
-
+		// key 为全限定类名
 		String key = strategyInterface.getName();
 		String value = defaultStrategies.getProperty(key);
 		if (value != null) {
+			// 可能会存在配置多个默认策略
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
 			List<T> strategies = new ArrayList<>(classNames.length);
 			for (String className : classNames) {
 				try {
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					// 在容器中创建默认实现
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
@@ -1027,7 +1050,9 @@ public class DispatcherServlet extends FrameworkServlet {
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
+			// 执行请求，保存请求执行结果
 			ModelAndView mv = null;
+			// 执行请求，保存异常
 			Exception dispatchException = null;
 
 			try {
@@ -1076,6 +1101,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			// 处理请求结果，将结果写入 response
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1116,6 +1142,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Handle the result of handler selection and handler invocation, which is
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
+	 * @param mappedHandler 当前request 匹配的请求链
 	 */
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
 			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
@@ -1129,7 +1156,9 @@ public class DispatcherServlet extends FrameworkServlet {
 				mv = ((ModelAndViewDefiningException) exception).getModelAndView();
 			}
 			else {
+
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+				// 解析异常
 				mv = processHandlerException(request, response, handler, exception);
 				errorView = (mv != null);
 			}
@@ -1302,7 +1331,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Determine an error ModelAndView via the registered HandlerExceptionResolvers.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or {@code null} if none chosen at the time of the exception
+	 * @param handler the executed handler, or {@code null} if none chosen at the time of the exception {当前request 匹配的请求链。如果在抛出异常时还没有选中 handler 则为 null}
 	 * (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to
@@ -1319,6 +1348,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		ModelAndView exMv = null;
 		if (this.handlerExceptionResolvers != null) {
 			for (HandlerExceptionResolver resolver : this.handlerExceptionResolvers) {
+				// 解析异常的入口
 				exMv = resolver.resolveException(request, response, handler, ex);
 				if (exMv != null) {
 					break;

@@ -52,7 +52,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * (e.g. lazy-init bean, prototype bean). Use {@link #createWithResolvedBean()}
  * to obtain a {@code HandlerMethod} instance with a bean instance resolved
  * through the associated {@link BeanFactory}.
- *
+ * {
+ *     将 bean信息 和 method 信息封装起来
+ * }
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

@@ -412,6 +412,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			applicationEvent = (ApplicationEvent) event;
 		}
 		else {
+			// 封装了
 			applicationEvent = new PayloadApplicationEvent<>(this, event);
 			if (eventType == null) {
 				eventType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
