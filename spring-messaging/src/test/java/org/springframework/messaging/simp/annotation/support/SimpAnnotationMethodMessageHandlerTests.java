@@ -371,7 +371,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		assertThat(controller.fluxSink).isNotNull();
-		controller.fluxSink.emitNext("foo");
+		controller.fluxSink.tryEmitNext("foo");
 
 		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
