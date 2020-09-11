@@ -95,6 +95,12 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private boolean includeClientInfo = false;
 
+	private boolean includeClientInfoRemoteAddr = true;
+
+	private boolean includeClientInfoSessionId = false;
+
+	private boolean includeClientInfoUser = true;
+
 	private boolean includeHeaders = false;
 
 	private boolean includePayload = false;
@@ -145,6 +151,69 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 */
 	protected boolean isIncludeClientInfo() {
 		return this.includeClientInfo;
+	}
+
+	/**
+	 * Set whether the client address should be included in the log message.
+	 * Only applies if {@code includeClientInfo} is {@code true}.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "includeClientInfoRemoteAddr" in the filter definition in {@code web.xml}.
+	 * @see #setIncludeClientInfo
+	 * @since 5.3.0
+	 */
+	public void setIncludeClientInfoRemoteAddr(boolean includeClientInfoRemoteAddr) {
+		this.includeClientInfoRemoteAddr = includeClientInfoRemoteAddr;
+	}
+
+	/**
+	 * Return whether the client address should be included in the
+	 * log message.
+	 * @since 5.3.0
+	 */
+	protected boolean isIncludeClientInfoRemoteAddr() {
+		return this.includeClientInfoRemoteAddr;
+	}
+
+	/**
+	 * Set whether the client session id should be included in the log message.
+	 * Only applies if {@code includeClientInfo} is {@code true}.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "includeClientInfoSessionId" in the filter definition in {@code web.xml}.
+	 * @see #setIncludeClientInfo
+	 * @since 5.3.0
+	 */
+	public void setIncludeClientInfoSessionId(boolean includeClientInfoSessionId) {
+		this.includeClientInfoSessionId = includeClientInfoSessionId;
+	}
+
+	/**
+	 * Return whether the client session id should be included in the
+	 * log message.
+	 * @since 5.3.0
+	 */
+	protected boolean isIncludeClientInfoSessionId() {
+		return this.includeClientInfoSessionId;
+	}
+
+	/**
+	 * Set whether the client remote user should be included in the log message.
+	 * Only applies if {@code includeClientInfo} is {@code true}.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "includeClientInfoUser" in the filter definition in {@code web.xml}.
+	 * @see #setIncludeClientInfo
+	 * @since 5.3.0
+	 */
+	public void setIncludeClientInfoUser(boolean includeClientInfoUser) {
+		this.includeClientInfoUser = includeClientInfoUser;
+	}
+
+	/**
+	 * Return whether the client remote user should be included in the
+	 * log message.
+	 * @since 5.3.0
+	 */
+	protected boolean isIncludeClientInfoUser() {
+		return this.includeClientInfoUser;
 	}
 
 	/**
@@ -282,14 +351,14 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 
 		boolean shouldLog = shouldLog(requestToUse);
-		if (shouldLog && isFirstRequest) {
+		if (shouldLog && shouldLogBefore(requestToUse) && isFirstRequest) {
 			beforeRequest(requestToUse, getBeforeMessage(requestToUse));
 		}
 		try {
 			filterChain.doFilter(requestToUse, response);
 		}
 		finally {
-			if (shouldLog && !isAsyncStarted(requestToUse)) {
+			if (shouldLog && shouldLogAfter(requestToUse) && !isAsyncStarted(requestToUse)) {
 				afterRequest(requestToUse, getAfterMessage(requestToUse));
 			}
 		}
@@ -333,17 +402,23 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		}
 
 		if (isIncludeClientInfo()) {
-			String client = request.getRemoteAddr();
-			if (StringUtils.hasLength(client)) {
-				msg.append(", client=").append(client);
+			if (isIncludeClientInfoRemoteAddr()) {
+				String client = request.getRemoteAddr();
+				if (StringUtils.hasLength(client)) {
+					msg.append(", client=").append(client);
+				}
 			}
-			HttpSession session = request.getSession(false);
-			if (session != null) {
-				msg.append(", session=").append(session.getId());
+			if (isIncludeClientInfoSessionId()) {
+				HttpSession session = request.getSession(false);
+				if (session != null) {
+					msg.append(", session=").append(session.getId());
+				}
 			}
-			String user = request.getRemoteUser();
-			if (user != null) {
-				msg.append(", user=").append(user);
+			if (isIncludeClientInfoUser()) {
+				String user = request.getRemoteUser();
+				if (user != null) {
+					msg.append(", user=").append(user);
+				}
 			}
 		}
 
@@ -410,6 +485,36 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @since 4.1.5
 	 */
 	protected boolean shouldLog(HttpServletRequest request) {
+		return true;
+	}
+
+	/**
+	 * Determine whether to call the {@link #beforeRequest}
+	 * methods for the current request, i.e. whether logging is currently active
+	 * (and the log message is worth building) before the request.
+	 * <p>The default implementation always returns {@code true}. Subclasses may
+	 * override this with a log level check.
+	 * @param request current HTTP request
+	 * @return {@code true} if the before method should get called;
+	 * {@code false} otherwise
+	 * @since 5.3.0
+	 */
+	protected boolean shouldLogBefore(HttpServletRequest request) {
+		return true;
+	}
+
+	/**
+	 * Determine whether to call the {@link #afterRequest}
+	 * methods for the current request, i.e. whether logging is currently active
+	 * (and the log message is worth building) after the request.
+	 * <p>The default implementation always returns {@code true}. Subclasses may
+	 * override this with a log level check.
+	 * @param request current HTTP request
+	 * @return {@code true} if the after method should get called;
+	 * {@code false} otherwise
+	 * @since 5.3.0
+	 */
+	protected boolean shouldLogAfter(HttpServletRequest request) {
 		return true;
 	}
 
