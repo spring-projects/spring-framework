@@ -30,7 +30,7 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
- * visitPermittedclass} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
+ * visitPermittedSubclass} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
  * visitTypeAnnotation} | {@code visitAttribute} )* ( {@code visitNestMember} | {@code
  * visitInnerClass} | {@code visitRecordComponent} | {@code visitField} | {@code visitMethod} )*
  * {@code visitEnd}.

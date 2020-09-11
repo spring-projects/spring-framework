@@ -28,7 +28,9 @@ import org.springframework.format.Printer;
  *
  * @author Keith Donald
  * @since 3.0
+ * @deprecated as of 5.3.0, scheduled for removal in 6.0.
  */
+@Deprecated
 public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 
 	private final DateTimeFormatter formatter;

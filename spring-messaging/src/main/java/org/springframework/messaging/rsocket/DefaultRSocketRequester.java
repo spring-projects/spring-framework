@@ -22,8 +22,7 @@ import java.util.function.Consumer;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
-import io.rsocket.RSocketClient;
-import io.rsocket.core.RSocketClientAdapter;
+import io.rsocket.core.RSocketClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -73,7 +72,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		Assert.notNull(metadataMimeType, "'metadataMimeType' is required");
 		Assert.notNull(strategies, "RSocketStrategies is required");
 
-		this.rsocketClient = (rsocketClient != null ? rsocketClient : new RSocketClientAdapter(rsocket));
+		this.rsocketClient = (rsocketClient != null ? rsocketClient : RSocketClient.from(rsocket));
 		this.rsocket = rsocket;
 		this.dataMimeType = dataMimeType;
 		this.metadataMimeType = metadataMimeType;
