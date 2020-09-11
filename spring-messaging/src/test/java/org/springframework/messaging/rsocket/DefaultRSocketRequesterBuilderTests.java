@@ -17,6 +17,8 @@
 package org.springframework.messaging.rsocket;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -273,6 +275,12 @@ public class DefaultRSocketRequesterBuilderTests {
 		public boolean isDisposed() {
 			return false;
 		}
+
+		@Override
+		public SocketAddress remoteAddress() {
+			return InetSocketAddress.createUnresolved("localhost", 9090);
+		}
+
 	}
 
 
