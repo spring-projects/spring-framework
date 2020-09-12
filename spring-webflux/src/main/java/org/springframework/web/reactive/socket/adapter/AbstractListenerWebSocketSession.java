@@ -26,6 +26,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.util.concurrent.Queues;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -73,7 +74,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
 
-	private final MonoProcessor<CloseStatus> closeStatusProcessor = MonoProcessor.create();
+	private final MonoProcessor<CloseStatus> closeStatusProcessor = MonoProcessor.fromSink(Sinks.one());
 
 
 	/**

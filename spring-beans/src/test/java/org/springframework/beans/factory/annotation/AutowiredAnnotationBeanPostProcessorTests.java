@@ -24,13 +24,13 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -2709,7 +2709,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 
 	@SuppressWarnings("serial")
-	public static class SelfInjectionCollectionBean extends LinkedList<SelfInjectionCollectionBean> {
+	public static class SelfInjectionCollectionBean extends ArrayList<SelfInjectionCollectionBean> {
 
 		@Autowired
 		public SelfInjectionCollectionBean reference;
@@ -2833,7 +2833,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public List<TestBean> iterateTestBeans() {
-			List<TestBean> resolved = new LinkedList<>();
+			List<TestBean> resolved = new ArrayList<>();
 			for (TestBean tb : this.testBeanProvider) {
 				resolved.add(tb);
 			}
@@ -2841,7 +2841,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public List<TestBean> forEachTestBeans() {
-			List<TestBean> resolved = new LinkedList<>();
+			List<TestBean> resolved = new ArrayList<>();
 			this.testBeanProvider.forEach(resolved::add);
 			return resolved;
 		}

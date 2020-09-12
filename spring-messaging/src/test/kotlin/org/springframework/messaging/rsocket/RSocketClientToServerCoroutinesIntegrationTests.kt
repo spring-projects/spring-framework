@@ -145,17 +145,17 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Controller
 	class ServerController {
 
-		val fireForgetPayloads = Sinks.replayAll<String>()
+		val fireForgetPayloads = Sinks.many().replay().all<String>()
 
 		@MessageMapping("receive")
 		fun receive(payload: String) {
-			fireForgetPayloads.next(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("receive-async")
 		suspend fun receiveAsync(payload: String) {
 			delay(10)
-			fireForgetPayloads.next(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("echo-async")

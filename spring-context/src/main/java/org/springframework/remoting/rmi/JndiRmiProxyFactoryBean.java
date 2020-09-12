@@ -61,7 +61,7 @@ import org.springframework.util.ClassUtils;
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
  * @see javax.rmi.PortableRemoteObject#narrow
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor

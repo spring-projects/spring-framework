@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -42,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class ErrorsMethodArgumentResolverTests {
+class ErrorsMethodArgumentResolverTests {
 
 	private final ErrorsMethodArgumentResolver resolver =
 			new ErrorsMethodArgumentResolver(ReactiveAdapterRegistry.getSharedInstance());
@@ -56,7 +57,7 @@ public class ErrorsMethodArgumentResolverTests {
 
 
 	@Test
-	public void supports() {
+	void supports() {
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		assertThat(this.resolver.supportsParameter(parameter)).isTrue();
 
@@ -71,7 +72,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolve() {
+	void resolve() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", bindingResult);
 
@@ -88,9 +89,9 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMono() {
+	void resolveWithMono() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
-		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.create();
+		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.fromSink(Sinks.one());
 		monoProcessor.onNext(bindingResult);
 		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", monoProcessor);
 
@@ -102,7 +103,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMonoOnBindingResultAndModelAttribute() {
+	void resolveWithMonoOnBindingResultAndModelAttribute() {
 		MethodParameter parameter = this.testMethod.arg(BindingResult.class);
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)
@@ -112,7 +113,7 @@ public class ErrorsMethodArgumentResolverTests {
 	}
 
 	@Test  // SPR-16187
-	public void resolveWithBindingResultNotFound() {
+	void resolveWithBindingResultNotFound() {
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)

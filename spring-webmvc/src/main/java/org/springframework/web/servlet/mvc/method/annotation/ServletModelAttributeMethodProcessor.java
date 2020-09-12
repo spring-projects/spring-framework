@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,8 +108,8 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
+		@SuppressWarnings("unchecked")
 		Map<String, String> variables = (Map<String, String>) request.getAttribute(
 				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (variables != null ? variables : Collections.emptyMap());
@@ -156,6 +156,25 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
 		servletBinder.bind(servletRequest);
+	}
+
+	@Override
+	@Nullable
+	public Object resolveConstructorArgument(String paramName, Class<?> paramType, NativeWebRequest request)
+			throws Exception {
+
+		Object value = super.resolveConstructorArgument(paramName, paramType, request);
+		if (value != null) {
+			return value;
+		}
+		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		if (servletRequest != null) {
+			String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+			@SuppressWarnings("unchecked")
+			Map<String, String> uriVars = (Map<String, String>) servletRequest.getAttribute(attr);
+			return uriVars.get(paramName);
+		}
+		return null;
 	}
 
 }

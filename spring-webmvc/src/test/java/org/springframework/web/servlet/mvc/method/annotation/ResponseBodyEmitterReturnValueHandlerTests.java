@@ -227,16 +227,16 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		sink.next("foo");
-		sink.next("bar");
-		sink.next("baz");
-		sink.complete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
@@ -248,14 +248,14 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 
 		IllegalStateException ex = new IllegalStateException("wah wah");
-		sink.error(ex);
-		sink.complete();
+		sink.tryEmitError(ex);
+		sink.tryEmitComplete();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
@@ -290,7 +290,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test
 	public void responseEntityFlux() throws Exception {
 
-		Sinks.StandaloneFluxSink<String> sink = Sinks.unicast();
+		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
 		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, String.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
@@ -299,10 +299,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		sink.next("foo");
-		sink.next("bar");
-		sink.next("baz");
-		sink.complete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/plain");
 		assertThat(this.response.getContentAsString()).isEqualTo("foobarbaz");
@@ -311,7 +311,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test // SPR-17076
 	public void responseEntityFluxWithCustomHeader() throws Exception {
 
-		Sinks.StandaloneFluxSink<SimpleBean> sink = Sinks.unicast();
+		Sinks.Many<SimpleBean> sink = Sinks.many().unicast().onBackpressureBuffer();
 		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, SimpleBean.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);

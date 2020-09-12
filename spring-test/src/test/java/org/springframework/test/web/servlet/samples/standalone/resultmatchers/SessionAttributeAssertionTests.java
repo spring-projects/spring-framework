@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-class SessionAttributeAssertionTests {
+public class SessionAttributeAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SimpleController())
 										.defaultRequest(get("/"))

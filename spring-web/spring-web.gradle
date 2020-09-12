@@ -23,7 +23,7 @@ dependencies {
 	optional("io.netty:netty-handler")
 	optional("io.netty:netty-codec-http") // Until Netty4ClientHttpRequest is removed
 	optional("io.netty:netty-transport")  // Until Netty4ClientHttpRequest is removed
-	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("io.undertow:undertow-core")
 	optional("org.apache.tomcat.embed:tomcat-embed-core")
 	optional("org.eclipse.jetty:jetty-server") {

@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -102,7 +103,7 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 					throw new LookupPathIndexException(lookupPath, requestUri);
 				}
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
-				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
+				if (StringUtils.matchesCharacter(lookupPath, '/') && !StringUtils.matchesCharacter(requestUri, '/')) {
 					String contextPath = pathHelper.getContextPath(this);
 					if (requestUri.equals(contextPath)) {
 						this.indexLookupPath = requestUri.length();

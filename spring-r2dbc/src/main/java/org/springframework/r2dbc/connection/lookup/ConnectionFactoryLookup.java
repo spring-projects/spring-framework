@@ -33,6 +33,7 @@ public interface ConnectionFactoryLookup {
 	 * @return the {@link ConnectionFactory} (never {@code null})
 	 * @throws ConnectionFactoryLookupFailureException if the lookup failed
 	 */
-	ConnectionFactory getConnectionFactory(String connectionFactoryName) throws ConnectionFactoryLookupFailureException;
+	ConnectionFactory getConnectionFactory(String connectionFactoryName)
+			throws ConnectionFactoryLookupFailureException;
 
 }

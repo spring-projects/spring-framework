@@ -6488,139 +6488,112 @@ of `AbstractTestNGSpringContextTests` for an example of how to instrument your t
 
 
 
+include::testing-webtestclient.adoc[leveloffset=+2]
+
+
+
 [[spring-mvc-test-framework]]
-=== Spring MVC Test Framework
+=== MockMvc
 
-The Spring MVC Test framework provides first class support for testing Spring MVC code
-with a fluent API that you can use with JUnit, TestNG, or any other testing framework. It
-is built on the {api-spring-framework}/mock/web/package-summary.html[Servlet API mock objects]
-from the `spring-test` module and, hence, does not use a running Servlet container. It
-uses the `DispatcherServlet` to provide full Spring MVC runtime behavior and provides
-support for loading actual Spring configuration with the TestContext framework in
-addition to a standalone mode, in which you can manually instantiate controllers and test
-them one at a time.
+The Spring MVC Test framework, also known as MockMvc, provides support for testing Spring
+MVC applications. It performs full Spring MVC request handling but via mock request and
+response objects instead of a running server.
 
-Spring MVC Test also provides client-side support for testing code that uses the
-`RestTemplate`. Client-side tests mock the server responses and also do not use a running
-server.
-
-TIP: Spring Boot provides an option to write full, end-to-end integration tests that
-include a running server. If this is your goal, see the
-{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
-For more information on the differences between out-of-container and end-to-end
-integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
+MockMvc can be used on its own to perform requests and verify responses. It can also be
+used through the <<webtestclient>> where MockMvc is plugged in as the server to handle
+requests with. The advantage of `WebTestClient` is the option to work with higher level
+objects instead of raw data as well as the ability to switch to full, end-to-end HTTP
+tests against a live server and use the same test API.
 
 
 [[spring-mvc-test-server]]
-==== Server-Side Tests
+==== Overview
 
-You can write a plain unit test for a Spring MVC controller by using JUnit or TestNG. To
-do so, instantiate the controller, inject it with mocked or stubbed dependencies, and
-call its methods (passing `MockHttpServletRequest`, `MockHttpServletResponse`, and
-others, as necessary). However, when writing such a unit test, much remains untested: for
-example, request mappings, data binding, type conversion, validation, and much more.
-Furthermore, other controller methods such as `@InitBinder`, `@ModelAttribute`, and
-`@ExceptionHandler` may also be invoked as part of the request processing lifecycle.
+You can write plain unit tests for Spring MVC by instantiating a controller, injecting it
+with dependencies, and calling its methods. However such tests do not verify request
+mappings, data binding, message conversion, type conversion, validation, and nor
+do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
+`@ExceptionHandler` methods.
 
-The goal of Spring MVC Test is to provide an effective way to test controllers by
-performing requests and generating responses through the actual `DispatcherServlet`.
+The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
+testing for Spring MVC controllers without a running server. It does that by invoking
+the `DispacherServlet` and passing
+<<mock-objects-servlet, "`mock`" implementations of the Servlet API>> from the
+`spring-test` module which replicates the full Spring MVC request handling without
+a running server.
 
-Spring MVC Test builds on the familiar <<mock-objects-servlet, "`mock`" implementations of
-the Servlet API>> available in the `spring-test` module. This allows performing requests
-and generating responses without the need for running in a Servlet container. For the
-most part, everything should work as it does at runtime with a few notable exceptions, as
-explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. The following JUnit
-Jupiter-based example uses Spring MVC Test:
+MockMvc is a server side test framework that lets you verify most of the functionality
+of a Spring MVC application using lightweight and targeted tests. You can use it on
+its own to perform requests and to verify responses, or you can also use it through
+the <<webtestclient>> API with MockMvc plugged in as the server to handle requests
+with.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-	import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
-	class ExampleTests {
-
-		MockMvc mockMvc;
-
-		@BeforeEach
-		void setup(WebApplicationContext wac) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-		}
-
-		@Test
-		void getAccount() throws Exception {
-			this.mockMvc.perform(get("/accounts/1")
-					.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType("application/json"))
-				.andExpect(jsonPath("$.name").value("Lee"));
-		}
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	import org.springframework.test.web.servlet.get
-
-	@SpringJUnitWebConfig(locations = ["test-servlet-context.xml"])
-	class ExampleTests {
-
-		lateinit var mockMvc: MockMvc
-
-		@BeforeEach
-		fun setup(wac: WebApplicationContext) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
-		}
-
-		@Test
-		fun getAccount() {
-			mockMvc.get("/accounts/1") {
-				accept = MediaType.APPLICATION_JSON
-			}.andExpect {
-				status { isOk }
-				content { contentType(MediaType.APPLICATION_JSON) }
-				jsonPath("$.name") { value("Lee") }
-			}
-		}
-	}
-----
-
-NOTE: A dedicated <<languages.adoc#mockmvc-dsl, MockMvc DSL>> is available in Kotlin
-
-The preceding test relies on the `WebApplicationContext` support of the TestContext
-framework to load Spring configuration from an XML configuration file located in the same
-package as the test class, but Java-based and Groovy-based configuration are also
-supported. See these
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/context[sample tests].
-
-The `MockMvc` instance is used to perform a `GET` request to `/accounts/1` and verify
-that the resulting response has status 200, the content type is `application/json`, and
-the response body has a JSON property called `name` with the value `Lee`. The `jsonPath`
-syntax is supported through the Jayway https://github.com/jayway/JsonPath[JsonPath
-project]. Many other options for verifying the result of the performed request are
-discussed later in this document.
 
 [[spring-mvc-test-server-static-imports]]
 ===== Static Imports
 
-The fluent API in the example from the <<spring-mvc-test-server, preceding section>>
-requires a few static imports, such as `MockMvcRequestBuilders.{asterisk}`,
-`MockMvcResultMatchers.{asterisk}`, and `MockMvcBuilders.{asterisk}`. An easy way to find
-these classes is to search for types that match `MockMvc*`. If you use Eclipse or the
-https://spring.io/tools[Spring Tools for Eclipse], be sure to add them as "`favorite static members`" in
-the Eclipse preferences under Java -> Editor -> Content Assist -> Favorites. Doing so
-lets you use content assist after typing the first character of the static method name.
-Other IDEs (such as IntelliJ) may not require any additional configuration. Check the
-support for code completion on static members.
+When using MockMvc directly to perform requests, you'll need static imports for:
+
+- `MockMvcBuilders.{asterisk}`
+- `MockMvcRequestBuilders.{asterisk}`
+- `MockMvcResultMatchers.{asterisk}`
+- `MockMvcResultHandlers.{asterisk}`
+
+An easy way to remember that is search for `MockMvc*`. If using Eclipse be sure to also
+add the above as "`favorite static members`" in the Eclipse preferences.
+
+When using MockMvc through the <<webtestclient>> you do not need static imports.
+The `WebTestClient` provides a fluent API without static imports.
+
 
 [[spring-mvc-test-server-setup-options]]
 ===== Setup Choices
 
-You have two main options for creating an instance of `MockMvc`. The first is to load
-Spring MVC configuration through the TestContext framework, which loads the Spring
-configuration and injects a `WebApplicationContext` into the test to use to build a
-`MockMvc` instance. The following example shows how to do so:
+MockMvc can be setup in one of two ways. One is to point directly to the controllers you
+want to test and programmatically configure Spring MVC infrastructure. The second is to
+point to Spring configuration with Spring MVC and controller infrastructure in it.
+
+To set up MockMvc for testing a specific controller, use the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	class MyWebTests {
+
+		MockMvc mockMvc;
+
+		@BeforeEach
+		void setup() {
+			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
+		}
+
+		// ...
+
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyWebTests {
+
+		lateinit var mockMvc : MockMvc
+
+		@BeforeEach
+		fun setup() {
+			mockMvc = MockMvcBuilders.standaloneSetup(AccountController()).build()
+		}
+
+		// ...
+
+	}
+----
+
+Or you can also use this setup when testing through the
+<<webtestclient-controller-config, WebTestClient>> which delegates to the same builder
+as shown above.
+
+To set up MockMvc through Spring configuration, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6658,44 +6631,11 @@ configuration and injects a `WebApplicationContext` into the test to use to buil
 	}
 ----
 
-Your second option is to manually create a controller instance without loading Spring
-configuration. Instead, basic default configuration, roughly comparable to that of the
-MVC JavaConfig or the MVC namespace, is automatically created. You can customize it to a
-degree. The following example shows how to do so:
+Or you can also use this setup when testing through the
+<<webtestclient-context-config, WebTestClient>> which delegates to the same builder
+as shown above.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	class MyWebTests {
 
-		MockMvc mockMvc;
-
-		@BeforeEach
-		void setup() {
-			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
-		}
-
-		// ...
-
-	}
-----
-
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	class MyWebTests {
-
-		lateinit var mockMvc : MockMvc
-
-		@BeforeEach
-		fun setup() {
-			mockMvc = MockMvcBuilders.standaloneSetup(AccountController()).build()
-		}
-
-		// ...
-
-	}
-----
 
 Which setup option should you use?
 
@@ -6826,7 +6766,11 @@ for a list of all MockMvc builder features or use the IDE to explore the availab
 [[spring-mvc-test-server-performing-requests]]
 ===== Performing Requests
 
-You can perform requests that use any HTTP method, as the following example shows:
+This section shows how to use MockMvc on its own to perform requests and verify responses.
+If using MockMvc through the `WebTestClient` please see the corresponding section on
+<<webtestclient-tests>> instead.
+
+To perform requests that use any HTTP method, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7137,6 +7081,11 @@ resulting links by using XPath expressions:
 [[spring-mvc-test-async-requests]]
 ===== Async Requests
 
+This section shows how to use MockMvc on its own to test asynchronous request handling.
+If using MockMvc through the <<webtestclient>>, there is nothing special to do to make
+asynchronous requests work as the `WebTestClient` automatically does what is described
+in this section.
+
 Servlet 3.0 asynchronous requests,
 <<web.adoc#mvc-ann-async,supported in Spring MVC>>, work by exiting the Servlet container
 thread and allowing the application to compute the response asynchronously, after which
@@ -7200,10 +7149,8 @@ or reactive type such as Reactor `Mono`:
 ===== Streaming Responses
 
 There are no options built into Spring MVC Test for container-less testing of streaming
-responses. Applications that make use of
-<<web.adoc#mvc-ann-async-http-streaming,Spring MVC streaming>> options can use the
-<<testing.adoc#webtestclient-stream,WebTestClient>> to perform end-to-end, integration
-tests against a running server. This is also supported in Spring Boot where you can
+responses. However you can test streaming requests through the <<WebTestClient>>.
+This is also supported in Spring Boot where you can
 {doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
 with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
 project Reactor that allows declaring expectations on a stream of data.
@@ -7231,9 +7178,9 @@ last filter delegates to the `DispatcherServlet`.
 
 
 [[spring-mvc-test-vs-end-to-end-integration-tests]]
-===== Spring MVC Test vs End-to-End Tests
+===== MockMvc vs End-to-End Tests
 
-Spring MVC Test is built on Servlet API mock implementations from the
+MockMVc is built on Servlet API mock implementations from the
 `spring-test` module and does not rely on a running container. Therefore, there are
 some differences when compared to full end-to-end integration tests with an actual
 client and a live server running.
@@ -7280,11 +7227,10 @@ of testing even within the same project.
 ===== Further Examples
 
 The framework's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
-sample tests] intended to show how to use Spring MVC Test. You can browse these examples
-for further ideas. Also, the
-https://github.com/spring-projects/spring-mvc-showcase[`spring-mvc-showcase`] project has
-full test coverage based on Spring MVC Test.
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
+many sample tests] intended to show how to use MockMvc on its own or through the
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
+WebTestClient]. Browse these examples for further ideas.
 
 
 [[spring-mvc-test-server-htmlunit]]
@@ -8359,7 +8305,7 @@ http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 
 [[spring-mvc-test-client]]
-==== Client-Side REST Tests
+=== Testing Client Applications
 
 You can use client-side tests to test code that internally uses the `RestTemplate`. The
 idea is to declare expected requests and to provide "`stub`" responses so that you can
@@ -8478,7 +8424,7 @@ logic but without running a server. The following example shows how to do so:
 ----
 
 [[spring-mvc-test-client-static-imports]]
-===== Static Imports
+==== Static Imports
 
 As with server-side tests, the fluent API for client-side tests requires a few static
 imports. Those are easy to find by searching for `MockRest*`. Eclipse users should add
@@ -8489,13 +8435,11 @@ the static method name. Other IDEs (such IntelliJ) may not require any additiona
 configuration. Check for the support for code completion on static members.
 
 [[spring-mvc-test-client-resources]]
-===== Further Examples of Client-side REST Tests
+==== Further Examples of Client-side REST Tests
 
 Spring MVC Test's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
-
-include::testing-webtestclient.adoc[leveloffset=+2]
 
 
 

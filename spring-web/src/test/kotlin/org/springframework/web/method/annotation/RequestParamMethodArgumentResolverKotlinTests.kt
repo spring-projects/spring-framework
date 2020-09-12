@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.annotation
 
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.BeforeEach
@@ -139,7 +138,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 
 	@Test
 	fun resolveNonNullableNotRequiredWithoutParameter() {
-		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
+		assertThatExceptionOfType(NullPointerException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableParamNotRequired, null, webRequest, binderFactory) as String
 		}
 	}
@@ -221,7 +220,7 @@ class RequestParamMethodArgumentResolverKotlinTests {
 		request.method = HttpMethod.POST.name
 		request.contentType = MediaType.MULTIPART_FORM_DATA_VALUE
 
-		assertThatExceptionOfType(TypeCastException::class.java).isThrownBy {
+		assertThatExceptionOfType(NullPointerException::class.java).isThrownBy {
 			resolver.resolveArgument(nonNullableMultipartParamNotRequired, null, webRequest, binderFactory) as MultipartFile
 		}
 	}

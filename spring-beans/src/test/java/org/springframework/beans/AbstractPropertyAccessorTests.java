@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1072,7 +1071,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setGenericArrayProperty() {
 		SkipReaderStub target = new SkipReaderStub();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> values = new LinkedList<>();
+		List<String> values = new ArrayList<>();
 		values.add("1");
 		values.add("2");
 		values.add("3");
@@ -1113,7 +1112,7 @@ public abstract class AbstractPropertyAccessorTests {
 		SortedSet<String> sortedSet = new TreeSet<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", sortedSet);
-		List<String> list = new LinkedList<>();
+		List<String> list = new ArrayList<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", list);
 		assertThat(target.getCollection()).isSameAs(coll);
@@ -1130,7 +1129,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<String> coll = new ArrayList<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll);
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set);
 		List<String> sortedSet = new ArrayList<>();
@@ -1157,7 +1156,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<String> coll = new HashSet<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll.toArray());
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set.toArray());
 		List<String> sortedSet = new ArrayList<>();
@@ -1184,7 +1183,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", new int[] {0});
-		List<Integer> set = new LinkedList<>();
+		List<Integer> set = new ArrayList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", new int[] {1});
 		List<Integer> sortedSet = new ArrayList<>();
@@ -1211,7 +1210,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", 0);
-		List<Integer> set = new LinkedList<>();
+		List<Integer> set = new ArrayList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", 1);
 		List<Integer> sortedSet = new ArrayList<>();
@@ -1235,7 +1234,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithStringValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", "set1");
 		List<String> sortedSet = new ArrayList<>();

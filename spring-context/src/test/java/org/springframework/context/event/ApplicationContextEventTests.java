@@ -16,8 +16,8 @@
 
 package org.springframework.context.event;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -537,7 +537,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final List<ApplicationEvent> seenEvents = new LinkedList<>();
+		public final List<ApplicationEvent> seenEvents = new ArrayList<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {

@@ -505,10 +505,13 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#equals(Object)
 	 */
 	public static boolean isEqualsMethod(@Nullable Method method) {
-		if (method == null || !method.getName().equals("equals")) {
+		if (method == null) {
 			return false;
 		}
 		if (method.getParameterCount() != 1) {
+			return false;
+		}
+		if (!method.getName().equals("equals")) {
 			return false;
 		}
 		return method.getParameterTypes()[0] == Object.class;
@@ -519,7 +522,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
+		return method != null && method.getParameterCount() == 0 && method.getName().equals("hashCode");
 	}
 
 	/**
@@ -527,7 +530,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
+		return (method != null && method.getParameterCount() == 0 && method.getName().equals("toString"));
 	}
 
 	/**

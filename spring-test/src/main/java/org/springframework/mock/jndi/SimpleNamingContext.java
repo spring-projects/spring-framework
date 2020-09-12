@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public class SimpleNamingContext implements Context {
 
 	private abstract static class AbstractNamingEnumeration<T> implements NamingEnumeration<T> {
 
-		private Iterator<T> iterator;
+		private final Iterator<T> iterator;
 
 		private AbstractNamingEnumeration(SimpleNamingContext context, String proot) throws NamingException {
 			if (!proot.isEmpty() && !proot.endsWith("/")) {

@@ -18,11 +18,11 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,9 +48,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
 
-	private final List<RequestExpectation> expectations = new LinkedList<>();
+	private final List<RequestExpectation> expectations = new ArrayList<>();
 
-	private final List<ClientHttpRequest> requests = new LinkedList<>();
+	private final List<ClientHttpRequest> requests = new ArrayList<>();
 
 	private final Map<ClientHttpRequest, Throwable> requestFailures = new LinkedHashMap<>();
 
@@ -81,7 +81,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	@SuppressWarnings("deprecation")
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
-		RequestExpectation expectation = null;
+		RequestExpectation expectation;
 		synchronized (this.requests) {
 			if (this.requests.isEmpty()) {
 				afterExpectationsDeclared();

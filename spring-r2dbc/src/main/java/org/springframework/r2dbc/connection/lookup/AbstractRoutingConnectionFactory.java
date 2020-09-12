@@ -16,7 +16,6 @@
 
 package org.springframework.r2dbc.connection.lookup;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import io.r2dbc.spi.Connection;
@@ -27,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract {@link ConnectionFactory} implementation that routes
@@ -76,7 +76,6 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * with the lookup key as key. The mapped value can either be a corresponding
 	 * {@link ConnectionFactory} instance or a connection factory name String (to be
 	 * resolved via a {@link #setConnectionFactoryLookup ConnectionFactoryLookup}).
-	 *
 	 * <p>The key can be of arbitrary type; this class implements the generic lookup
 	 * process only. The concrete key representation will be handled by
 	 * {@link #resolveSpecifiedLookupKey(Object)} and {@link #determineCurrentLookupKey()}.
@@ -87,11 +86,9 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 
 	/**
 	 * Specify the default target {@link ConnectionFactory}, if any.
-	 *
 	 * <p>The mapped value can either be a corresponding {@link ConnectionFactory}
 	 * instance or a connection factory name {@link String} (to be resolved via a
 	 * {@link #setConnectionFactoryLookup ConnectionFactoryLookup}).
-	 *
 	 * <p>This {@link ConnectionFactory} will be used as target if none of the keyed
 	 * {@link #setTargetConnectionFactories targetConnectionFactories} match the
 	 * {@link #determineCurrentLookupKey() current lookup key}.
@@ -103,11 +100,9 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	/**
 	 * Specify whether to apply a lenient fallback to the default {@link ConnectionFactory}
 	 * if no specific {@link ConnectionFactory} could be found for the current lookup key.
-	 *
 	 * <p>Default is {@code true}, accepting lookup keys without a corresponding entry
 	 * in the target {@link ConnectionFactory} map - simply falling back to the default
 	 * {@link ConnectionFactory} in that case.
-	 *
 	 * <p>Switch this flag to {@code false} if you would prefer the fallback to only
 	 * apply when no lookup key was emitted. Lookup keys without a {@link ConnectionFactory}
 	 * entry will then lead to an {@link IllegalStateException}.
@@ -129,12 +124,12 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 		this.connectionFactoryLookup = connectionFactoryLookup;
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
-
 		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
 
-		this.resolvedConnectionFactories = new HashMap<>(this.targetConnectionFactories.size());
+		this.resolvedConnectionFactories = CollectionUtils.newHashMap(this.targetConnectionFactories.size());
 		this.targetConnectionFactories.forEach((key, value) -> {
 			Object lookupKey = resolveSpecifiedLookupKey(key);
 			ConnectionFactory connectionFactory = resolveSpecifiedConnectionFactory(value);
@@ -234,7 +229,6 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * Determine the current lookup key. This will typically be implemented to check a
 	 * subscriber context. Allows for arbitrary keys. The returned key needs to match the
 	 * stored lookup key type, as resolved by the {@link #resolveSpecifiedLookupKey} method.
-	 *
 	 * @return {@link Mono} emitting the lookup key. May complete without emitting a value
 	 * if no lookup key available
 	 */

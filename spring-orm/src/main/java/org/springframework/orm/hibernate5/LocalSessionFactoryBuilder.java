@@ -47,6 +47,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
@@ -76,8 +77,8 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3/5.4, as of Spring 5.2.
- * Set up with Hibernate 5.2+, this builder is also a convenient way to set up
+ * <p>Compatible with Hibernate 5.2/5.3/5.4, as of Spring 5.3.
+ * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
@@ -162,23 +163,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		if (dataSource != null) {
 			getProperties().put(AvailableSettings.DATASOURCE, dataSource);
 		}
-
-		// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "ON_CLOSE");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 
 		getProperties().put(AvailableSettings.CLASSLOADERS, Collections.singleton(resourceLoader.getClassLoader()));
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
@@ -225,22 +211,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
-		// Hibernate 5.1/5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "AFTER_STATEMENT");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT);
 
 		return this;
 	}

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link org.springframework.web.servlet.HandlerMapping}.
+ *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
  */
@@ -65,16 +66,12 @@ class HandlerMappingTests {
 		mapping.setApplicationContext(new StaticWebApplicationContext());
 
 		HandlerExecutionChain chain = mapping.getHandler(requestFactory.apply("/"));
-
 		assertThat(chain).isNotNull();
-		assertThat(chain.getInterceptors()).contains(i1.getInterceptor(), i2, i3.getInterceptor(), i4);
+		assertThat(chain.getInterceptorList()).contains(i1.getInterceptor(), i2, i3.getInterceptor(), i4);
 	}
 
 
 	private static class TestHandlerMapping extends AbstractHandlerMapping {
-
-		TestHandlerMapping() {
-		}
 
 		@Override
 		protected Object getHandlerInternal(HttpServletRequest request) {

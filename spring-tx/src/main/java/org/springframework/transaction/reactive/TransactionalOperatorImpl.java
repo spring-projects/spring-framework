@@ -82,8 +82,8 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::rollback)
 					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
-		.subscriberContext(TransactionContextManager.getOrCreateContext())
-		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+		.contextWrite(TransactionContextManager.getOrCreateContext())
+		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
 
 	@Override
@@ -104,8 +104,8 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 					.onErrorResume(ex ->
 							rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
-		.subscriberContext(TransactionContextManager.getOrCreateContext())
-		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+		.contextWrite(TransactionContextManager.getOrCreateContext())
+		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
 
 	/**

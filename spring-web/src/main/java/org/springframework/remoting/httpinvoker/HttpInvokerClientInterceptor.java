@@ -69,7 +69,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @see HttpInvokerServiceExporter
  * @see HttpInvokerProxyFactoryBean
  * @see java.rmi.server.RMIClassLoader
- * @deprecated as of 5.3.0 with no replacement.
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
 @Deprecated
 public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor

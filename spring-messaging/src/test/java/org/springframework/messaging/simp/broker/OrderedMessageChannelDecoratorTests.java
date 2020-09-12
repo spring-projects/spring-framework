@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link OrderedMessageSender}.
+ * Unit tests for {@link OrderedMessageChannelDecorator}.
  * @author Rossen Stoyanchev
+ * @see org.springframework.web.socket.messaging.OrderedMessageSendingIntegrationTests
  */
-public class OrderedMessageSenderTests {
+public class OrderedMessageChannelDecoratorTests {
 
-	private static final Log logger = LogFactory.getLog(OrderedMessageSenderTests.class);
+	private static final Log logger = LogFactory.getLog(OrderedMessageChannelDecoratorTests.class);
 
 
-	private OrderedMessageSender sender;
+	private OrderedMessageChannelDecorator sender;
 
 	ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
 
@@ -59,9 +60,9 @@ public class OrderedMessageSenderTests {
 		this.executor.afterPropertiesSet();
 
 		this.channel = new ExecutorSubscribableChannel(this.executor);
-		OrderedMessageSender.configureOutboundChannel(this.channel, true);
+		OrderedMessageChannelDecorator.configureInterceptor(this.channel, true);
 
-		this.sender = new OrderedMessageSender(this.channel, logger);
+		this.sender = new OrderedMessageChannelDecorator(this.channel, logger);
 
 	}
 
@@ -89,9 +90,10 @@ public class OrderedMessageSenderTests {
 				latch.countDown();
 				return;
 			}
-			if (actual == 100 || actual == 200) {
+			// Force messages to queue up periodically
+			if (actual % 101 == 0) {
 				try {
-					Thread.sleep(200);
+					Thread.sleep(50);
 				}
 				catch (InterruptedException ex) {
 					result.set(ex.toString());

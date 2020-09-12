@@ -33,7 +33,9 @@ import org.springframework.lang.Nullable;
  * @see #setIso
  * @see #setStyle
  * @see DateTimeFormatterFactory
+ * @deprecated as of 5.3.0, scheduled for removal in 6.0.
  */
+@Deprecated
 public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 		implements FactoryBean<DateTimeFormatter>, InitializingBean {
 

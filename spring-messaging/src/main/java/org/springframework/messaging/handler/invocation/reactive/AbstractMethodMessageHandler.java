@@ -22,10 +22,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,7 +51,6 @@ import org.springframework.messaging.handler.invocation.AbstractExceptionHandler
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.RouteMatcher;
@@ -104,9 +104,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	@Nullable
 	private String beanName;
 
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
+	private final Map<T, HandlerMethod> handlerMethods = new ConcurrentHashMap<>(64);
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
+	private final Map<String, List<T>> destinationLookup = new ConcurrentHashMap<>(48);
 
 
 	/**
@@ -229,7 +229,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. for non-pattern destinations).
 	 */
 	public MultiValueMap<String, T> getDestinationLookup() {
-		return CollectionUtils.unmodifiableMultiValueMap(this.destinationLookup);
+		return CollectionUtils.unmodifiableMultiValueMap(CollectionUtils.toMultiValueMap(this.destinationLookup));
 	}
 
 	/**
@@ -366,16 +366,15 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	/**
 	 * Register a handler method and its unique mapping.
-	 * <p><strong>Note:</strong> This method is protected and can be invoked by
-	 * subclasses. Keep in mind however that the registration is not protected
-	 * for concurrent use, and is expected to be done on startup.
+	 * <p><strong>Note:</strong> As of 5.3 this method is public (rather than
+	 * protected) and can be used both at startup and at runtime.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
-	protected final void registerHandlerMethod(Object handler, Method method, T mapping) {
+	public final void registerHandlerMethod(Object handler, Method method, T mapping) {
 		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
@@ -390,7 +389,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.handlerMethods.put(mapping, newHandlerMethod);
 
 		for (String pattern : getDirectLookupMappings(mapping)) {
-			this.destinationLookup.add(pattern, mapping);
+			List<T> values = this.destinationLookup.computeIfAbsent(pattern, p -> new CopyOnWriteArrayList<>());
+			values.add(mapping);
 		}
 	}
 

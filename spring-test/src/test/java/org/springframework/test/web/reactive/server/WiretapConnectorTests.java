@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,7 @@ public class WiretapConnectorTests {
 		ExchangeFunction function = ExchangeFunctions.create(wiretapConnector);
 		function.exchange(clientRequest).block(ofMillis(0));
 
-		WiretapConnector.Info actual = wiretapConnector.claimRequest("1");
-		ExchangeResult result = actual.createExchangeResult(Duration.ZERO, null);
+		ExchangeResult result = wiretapConnector.getExchangeResult("1", null, Duration.ZERO);
 		assertThat(result.getMethod()).isEqualTo(HttpMethod.GET);
 		assertThat(result.getUrl().toString()).isEqualTo("/test");
 	}

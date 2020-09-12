@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
-		if (!"".equals(containerClass)) {
-			return null; // Not supported
+		if (StringUtils.hasLength(containerClass)) {
+			return null;  // not supported
 		}
-		else if ("".equals(containerType) || containerType.startsWith("default")) {
+		else if (!StringUtils.hasLength(containerType) || containerType.startsWith("default")) {
 			factoryDef.setBeanClassName("org.springframework.jms.config.DefaultJmsListenerContainerFactory");
 		}
 		else if (containerType.startsWith("simple")) {
@@ -91,10 +91,10 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 
 		String containerType = containerEle.getAttribute(CONTAINER_TYPE_ATTRIBUTE);
 		String containerClass = containerEle.getAttribute(CONTAINER_CLASS_ATTRIBUTE);
-		if (!"".equals(containerClass)) {
+		if (StringUtils.hasLength(containerClass)) {
 			containerDef.setBeanClassName(containerClass);
 		}
-		else if ("".equals(containerType) || containerType.startsWith("default")) {
+		else if (!StringUtils.hasLength(containerType) || containerType.startsWith("default")) {
 			containerDef.setBeanClassName("org.springframework.jms.listener.DefaultMessageListenerContainer");
 		}
 		else if (containerType.startsWith("simple")) {

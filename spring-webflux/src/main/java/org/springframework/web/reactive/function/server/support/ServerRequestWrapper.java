@@ -38,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -104,8 +105,14 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
+	@Deprecated
 	public PathContainer pathContainer() {
 		return this.delegate.pathContainer();
+	}
+
+	@Override
+	public RequestPath requestPath() {
+		return this.delegate.requestPath();
 	}
 
 	@Override

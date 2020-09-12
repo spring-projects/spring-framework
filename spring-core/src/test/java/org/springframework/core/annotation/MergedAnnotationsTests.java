@@ -53,6 +53,7 @@ import org.springframework.util.ReflectionUtils;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.entry;
 
@@ -72,6 +73,26 @@ import static org.assertj.core.api.Assertions.entry;
  * @see MergedAnnotationClassLoaderTests
  */
 class MergedAnnotationsTests {
+
+	@Test
+	void fromPreconditions() {
+		SearchStrategy strategy = SearchStrategy.DIRECT;
+		RepeatableContainers containers = RepeatableContainers.standardRepeatables();
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MergedAnnotations.from(getClass(), strategy, null, AnnotationFilter.PLAIN))
+			.withMessage("RepeatableContainers must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MergedAnnotations.from(getClass(), strategy, containers, null))
+			.withMessage("AnnotationFilter must not be null");
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MergedAnnotations.from(getClass(), new Annotation[0], null, AnnotationFilter.PLAIN))
+			.withMessage("RepeatableContainers must not be null");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> MergedAnnotations.from(getClass(), new Annotation[0], containers, null))
+			.withMessage("AnnotationFilter must not be null");
+	}
 
 	@Test
 	void streamWhenFromNonAnnotatedClass() {

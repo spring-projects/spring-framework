@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.support;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
@@ -92,7 +92,7 @@ public class SimpleTransactionScope implements Scope {
 	 */
 	static class ScopedObjectsHolder {
 
-		final Map<String, Object> scopedInstances = new HashMap<>();
+		final Map<String, Object> scopedInstances = new ConcurrentHashMap<>();
 
 		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 	}

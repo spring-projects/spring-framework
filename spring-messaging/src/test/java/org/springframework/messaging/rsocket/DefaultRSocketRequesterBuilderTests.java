@@ -17,6 +17,8 @@
 package org.springframework.messaging.rsocket;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -79,20 +81,17 @@ public class DefaultRSocketRequesterBuilderTests {
 
 
 	@Test
-	@SuppressWarnings({"unchecked", "deprecation"})
+	@SuppressWarnings("unchecked")
 	public void rsocketConnectorConfigurer() {
-		ClientRSocketFactoryConfigurer factoryConfigurer = mock(ClientRSocketFactoryConfigurer.class);
 		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
 		RSocketRequester.builder()
 				.rsocketConnector(this.connectorConfigurer)
-				.rsocketFactory(factoryConfigurer)
 				.rsocketStrategies(strategiesConfigurer)
 				.transport(this.transport);
 
 		// RSocketStrategies and RSocketConnector configurers should have been called
 
 		verify(strategiesConfigurer).accept(any(RSocketStrategies.Builder.class));
-		verify(factoryConfigurer).configure(any(io.rsocket.RSocketFactory.ClientRSocketFactory.class));
 		assertThat(this.connectorConfigurer.connector()).isNotNull();
 	}
 
@@ -276,6 +275,12 @@ public class DefaultRSocketRequesterBuilderTests {
 		public boolean isDisposed() {
 			return false;
 		}
+
+		@Override
+		public SocketAddress remoteAddress() {
+			return InetSocketAddress.createUnresolved("localhost", 9090);
+		}
+
 	}
 
 

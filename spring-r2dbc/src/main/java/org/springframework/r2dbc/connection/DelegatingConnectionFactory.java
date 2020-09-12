@@ -34,43 +34,43 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  * @since 5.3
- * @see #create
+ * @see #create()
  */
 public class DelegatingConnectionFactory implements ConnectionFactory, Wrapped<ConnectionFactory> {
 
 	private final ConnectionFactory targetConnectionFactory;
 
 
+	/**
+	 * Create a new DelegatingConnectionFactory.
+	 * @param targetConnectionFactory the target ConnectionFactory
+	 */
 	public DelegatingConnectionFactory(ConnectionFactory targetConnectionFactory) {
 		Assert.notNull(targetConnectionFactory, "ConnectionFactory must not be null");
 		this.targetConnectionFactory = targetConnectionFactory;
 	}
 
 
-	@Override
-	public Mono<? extends Connection> create() {
-		return Mono.from(this.targetConnectionFactory.create());
-	}
-
+	/**
+	 * Return the target ConnectionFactory that this ConnectionFactory delegates to.
+	 */
 	public ConnectionFactory getTargetConnectionFactory() {
 		return this.targetConnectionFactory;
 	}
 
 	@Override
+	public Mono<? extends Connection> create() {
+		return Mono.from(this.targetConnectionFactory.create());
+	}
+
+	@Override
 	public ConnectionFactoryMetadata getMetadata() {
-		return obtainTargetConnectionFactory().getMetadata();
+		return this.targetConnectionFactory.getMetadata();
 	}
 
 	@Override
 	public ConnectionFactory unwrap() {
-		return obtainTargetConnectionFactory();
-	}
-
-	/**
-	 * Obtain the target {@link ConnectionFactory} for actual use (never {@code null}).
-	 */
-	protected ConnectionFactory obtainTargetConnectionFactory() {
-		return getTargetConnectionFactory();
+		return this.targetConnectionFactory;
 	}
 
 }

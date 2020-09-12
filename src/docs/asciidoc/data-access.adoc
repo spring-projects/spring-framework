@@ -4452,7 +4452,7 @@ While this usually works well, there is a potential for issues (for example, wit
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
 (as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue -- for example, as reported on Oracle 12c (SPR-16139).
+if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,
 either through a 'BatchPreparedStatementSetter' (as shown earlier), through an explicit type

@@ -129,51 +129,6 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	void inheritedAnnotationsStrategyOnClassWithAllClassesFilteredOut() {
-		List<String> annotationsFound = new ArrayList<>();
-		String scanResult = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
-				SearchStrategy.INHERITED_ANNOTATIONS,
-				(context, aggregateIndex, source, annotations) -> {
-					trackIndexedAnnotations(aggregateIndex, annotations, annotationsFound);
-					return null; // continue searching
-				},
-				(context, clazz) -> true // filter out all classes
-			);
-		assertThat(annotationsFound).isEmpty();
-		assertThat(scanResult).isNull();
-	}
-
-	@Test
-	void inheritedAnnotationsStrategyOnClassWithSourceClassFilteredOut() {
-		List<String> annotationsFound = new ArrayList<>();
-		String scanResult = AnnotationsScanner.scan(this, WithSingleSuperclass.class,
-				SearchStrategy.INHERITED_ANNOTATIONS,
-				(context, aggregateIndex, source, annotations) -> {
-					trackIndexedAnnotations(aggregateIndex, annotations, annotationsFound);
-					return null; // continue searching
-				},
-				(context, clazz) -> clazz == WithSingleSuperclass.class
-			);
-		assertThat(annotationsFound).containsExactly(/* "0:TestAnnotation1", */ "1:TestInheritedAnnotation2");
-		assertThat(scanResult).isNull();
-	}
-
-	@Test
-	void inheritedAnnotationsStrategyInClassHierarchyWithSuperSuperclassFilteredOut() {
-		List<String> annotationsFound = new ArrayList<>();
-		String scanResult = AnnotationsScanner.scan(this, WithHierarchy.class,
-				SearchStrategy.INHERITED_ANNOTATIONS,
-				(context, aggregateIndex, source, annotations) -> {
-					trackIndexedAnnotations(aggregateIndex, annotations, annotationsFound);
-					return null; // continue searching
-				},
-				(context, clazz) -> clazz == HierarchySuperSuperclass.class
-			);
-		assertThat(annotationsFound).containsExactly("0:TestAnnotation1", "1:TestInheritedAnnotation2");
-		assertThat(scanResult).isNull();
-	}
-
-	@Test
 	void superclassStrategyOnClassWhenNotAnnotatedScansNone() {
 		Class<?> source = WithNoAnnotations.class;
 		assertThat(scan(source, SearchStrategy.SUPERCLASS)).isEmpty();

@@ -2103,7 +2103,7 @@ While a `ChannelInterceptor` is invoked once for each message sent to a channel,
 `ExecutorChannelInterceptor` provides hooks in the thread of each `MessageHandler`
 subscribed to messages from the channel.
 
-Note that, as with the `SesionDisconnectEvent` described earlier, a DISCONNECT message
+Note that, as with the `SessionDisconnectEvent` described earlier, a DISCONNECT message
 can be from the client or it can also be automatically generated when
 the WebSocket session is closed. In some cases, an interceptor may intercept this
 message more than once for each session. Components should be idempotent with regard to

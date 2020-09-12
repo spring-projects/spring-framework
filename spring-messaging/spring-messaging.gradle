@@ -8,7 +8,7 @@ dependencies {
 	compileOnly(project(":kotlin-coroutines"))
 	optional(project(":spring-context"))
 	optional(project(":spring-oxm"))
-	optional("io.projectreactor.netty:reactor-netty")
+	optional("io.projectreactor.netty:reactor-netty-http")
 	optional("io.rsocket:rsocket-core")
 	optional("io.rsocket:rsocket-transport-netty")
 	optional("com.fasterxml.jackson.core:jackson-databind")

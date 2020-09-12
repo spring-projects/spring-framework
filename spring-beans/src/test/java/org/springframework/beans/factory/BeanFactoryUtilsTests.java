@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,7 @@ import org.springframework.beans.testfixture.beans.TestAnnotation;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.DummyFactory;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
@@ -43,6 +46,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 04.07.2003
  */
 public class BeanFactoryUtilsTests {
@@ -321,6 +325,164 @@ public class BeanFactoryUtilsTests {
 	public void testIntDependencies() {
 		String[] deps = this.dependentBeansFactory.getDependentBeans("int");
 		assertThat(Arrays.equals(new String[] { "buffer" }, deps)).isTrue();
+	}
+
+	@Test
+	public void findAnnotationOnBean() {
+		this.listableBeanFactory.registerSingleton("controllerAdvice", new ControllerAdviceClass());
+		this.listableBeanFactory.registerSingleton("restControllerAdvice", new RestControllerAdviceClass());
+		testFindAnnotationOnBean(this.listableBeanFactory);
+	}
+
+	@Test  // gh-25520
+	public void findAnnotationOnBeanWithStaticFactory() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		lbf.addBean("controllerAdvice", new ControllerAdviceClass());
+		lbf.addBean("restControllerAdvice", new RestControllerAdviceClass());
+		testFindAnnotationOnBean(lbf);
+	}
+
+	private void testFindAnnotationOnBean(ListableBeanFactory lbf) {
+		assertControllerAdvice(lbf, "controllerAdvice");
+		assertControllerAdvice(lbf, "restControllerAdvice");
+	}
+
+	private void assertControllerAdvice(ListableBeanFactory lbf, String beanName) {
+		ControllerAdvice controllerAdvice = lbf.findAnnotationOnBean(beanName, ControllerAdvice.class);
+		assertThat(controllerAdvice).isNotNull();
+		assertThat(controllerAdvice.value()).isEqualTo("com.example");
+		assertThat(controllerAdvice.basePackage()).isEqualTo("com.example");
+	}
+
+	@Test
+	public void isSingletonAndIsPrototypeWithStaticFactory() {
+		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
+		TestBean bean = new TestBean();
+		DummyFactory fb1 = new DummyFactory();
+		DummyFactory fb2 = new DummyFactory();
+		fb2.setSingleton(false);
+		TestBeanSmartFactoryBean sfb1 = new TestBeanSmartFactoryBean(true, true);
+		TestBeanSmartFactoryBean sfb2 = new TestBeanSmartFactoryBean(true, false);
+		TestBeanSmartFactoryBean sfb3 = new TestBeanSmartFactoryBean(false, true);
+		TestBeanSmartFactoryBean sfb4 = new TestBeanSmartFactoryBean(false, false);
+		lbf.addBean("bean", bean);
+		lbf.addBean("fb1", fb1);
+		lbf.addBean("fb2", fb2);
+		lbf.addBean("sfb1", sfb1);
+		lbf.addBean("sfb2", sfb2);
+		lbf.addBean("sfb3", sfb3);
+		lbf.addBean("sfb4", sfb4);
+
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
+		assertThat(beans.get("bean")).isSameAs(bean);
+		assertThat(beans.get("fb1")).isSameAs(fb1.getObject());
+		assertThat(beans.get("fb2")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb1")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb2")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb3")).isInstanceOf(TestBean.class);
+		assertThat(beans.get("sfb4")).isInstanceOf(TestBean.class);
+
+		assertThat(lbf.getBeanDefinitionCount()).isEqualTo(7);
+		assertThat(lbf.getBean("bean")).isInstanceOf(TestBean.class);
+		assertThat(lbf.getBean("&fb1")).isInstanceOf(FactoryBean.class);
+		assertThat(lbf.getBean("&fb2")).isInstanceOf(FactoryBean.class);
+		assertThat(lbf.getBean("&sfb1")).isInstanceOf(SmartFactoryBean.class);
+		assertThat(lbf.getBean("&sfb2")).isInstanceOf(SmartFactoryBean.class);
+		assertThat(lbf.getBean("&sfb3")).isInstanceOf(SmartFactoryBean.class);
+		assertThat(lbf.getBean("&sfb4")).isInstanceOf(SmartFactoryBean.class);
+
+		assertThat(lbf.isSingleton("bean")).isTrue();
+		assertThat(lbf.isSingleton("fb1")).isTrue();
+		assertThat(lbf.isSingleton("fb2")).isTrue();
+		assertThat(lbf.isSingleton("sfb1")).isTrue();
+		assertThat(lbf.isSingleton("sfb2")).isTrue();
+		assertThat(lbf.isSingleton("sfb3")).isTrue();
+		assertThat(lbf.isSingleton("sfb4")).isTrue();
+
+		assertThat(lbf.isSingleton("&fb1")).isTrue();
+		assertThat(lbf.isSingleton("&fb2")).isFalse();
+		assertThat(lbf.isSingleton("&sfb1")).isTrue();
+		assertThat(lbf.isSingleton("&sfb2")).isTrue();
+		assertThat(lbf.isSingleton("&sfb3")).isFalse();
+		assertThat(lbf.isSingleton("&sfb4")).isFalse();
+
+		assertThat(lbf.isPrototype("bean")).isFalse();
+		assertThat(lbf.isPrototype("fb1")).isFalse();
+		assertThat(lbf.isPrototype("fb2")).isFalse();
+		assertThat(lbf.isPrototype("sfb1")).isFalse();
+		assertThat(lbf.isPrototype("sfb2")).isFalse();
+		assertThat(lbf.isPrototype("sfb3")).isFalse();
+		assertThat(lbf.isPrototype("sfb4")).isFalse();
+
+		assertThat(lbf.isPrototype("&fb1")).isFalse();
+		assertThat(lbf.isPrototype("&fb2")).isTrue();
+		assertThat(lbf.isPrototype("&sfb1")).isTrue();
+		assertThat(lbf.isPrototype("&sfb2")).isFalse();
+		assertThat(lbf.isPrototype("&sfb3")).isTrue();
+		assertThat(lbf.isPrototype("&sfb4")).isTrue();
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ControllerAdvice {
+
+		@AliasFor("basePackage")
+		String value() default "";
+
+		@AliasFor("value")
+		String basePackage() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@ControllerAdvice
+	@interface RestControllerAdvice {
+
+		@AliasFor(annotation = ControllerAdvice.class)
+		String value() default "";
+
+		@AliasFor(annotation = ControllerAdvice.class)
+		String basePackage() default "";
+	}
+
+	@ControllerAdvice("com.example")
+	static class ControllerAdviceClass {
+	}
+
+	@RestControllerAdvice("com.example")
+	static class RestControllerAdviceClass {
+	}
+
+	static class TestBeanSmartFactoryBean implements SmartFactoryBean<TestBean> {
+
+		private final TestBean testBean = new TestBean("enigma", 42);
+		private final boolean singleton;
+		private final boolean prototype;
+
+		TestBeanSmartFactoryBean(boolean singleton, boolean prototype) {
+			this.singleton = singleton;
+			this.prototype = prototype;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return this.singleton;
+		}
+
+		@Override
+		public boolean isPrototype() {
+			return this.prototype;
+		}
+
+		@Override
+		public Class<TestBean> getObjectType() {
+			return TestBean.class;
+		}
+
+		public TestBean getObject() throws Exception {
+			// We don't really care if the actual instance is a singleton or prototype
+			// for the tests that use this factory.
+			return this.testBean;
+		}
 	}
 
 }

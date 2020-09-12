@@ -207,9 +207,9 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 
 	@Test  // SPR-16402
 	public void singleSubscriberWithResource() throws IOException {
-		Sinks.StandaloneFluxSink<Resource> sink = Sinks.unicast();
+		Sinks.Many<Resource> sink = Sinks.many().unicast().onBackpressureBuffer();
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		sink.next(logo);
+		sink.tryEmitNext(logo);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.asyncPart("logo", sink.asFlux(), Resource.class);

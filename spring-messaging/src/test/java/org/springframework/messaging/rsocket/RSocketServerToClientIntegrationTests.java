@@ -44,10 +44,10 @@ import org.springframework.stereotype.Controller;
 /**
  * Client-side handling of requests initiated from the server side.
  *
- *  @author Rossen Stoyanchev
+ * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
-public class RSocketServerToClientIntegrationTests {
+class RSocketServerToClientIntegrationTests {
 
 	private static AnnotationConfigApplicationContext context;
 
@@ -56,8 +56,7 @@ public class RSocketServerToClientIntegrationTests {
 
 	@BeforeAll
 	@SuppressWarnings("ConstantConditions")
-	public static void setupOnce() {
-
+	static void setupOnce() {
 		context = new AnnotationConfigApplicationContext(RSocketConfig.class);
 		RSocketMessageHandler messageHandler = context.getBean(RSocketMessageHandler.class);
 		SocketAcceptor responder = messageHandler.responder();
@@ -69,34 +68,33 @@ public class RSocketServerToClientIntegrationTests {
 	}
 
 	@AfterAll
-	public static void tearDownOnce() {
+	static void tearDownOnce() {
 		server.dispose();
 	}
 
 
 	@Test
-	public void echo() {
+	void echo() {
 		connectAndRunTest("echo");
 	}
 
 	@Test
-	public void echoAsync() {
+	void echoAsync() {
 		connectAndRunTest("echo-async");
 	}
 
 	@Test
-	public void echoStream() {
+	void echoStream() {
 		connectAndRunTest("echo-stream");
 	}
 
 	@Test
-	public void echoChannel() {
+	void echoChannel() {
 		connectAndRunTest("echo-channel");
 	}
 
 
 	private static void connectAndRunTest(String connectionRoute) {
-
 		context.getBean(ServerController.class).reset();
 
 		RSocketStrategies strategies = context.getBean(RSocketStrategies.class);
@@ -131,11 +129,11 @@ public class RSocketServerToClientIntegrationTests {
 		volatile MonoProcessor<Void> result;
 
 
-		public void reset() {
-			this.result = MonoProcessor.create();
+		void reset() {
+			this.result = MonoProcessor.fromSink(Sinks.one());
 		}
 
-		public void await(Duration duration) {
+		void await(Duration duration) {
 			this.result.block(duration);
 		}
 
@@ -217,11 +215,11 @@ public class RSocketServerToClientIntegrationTests {
 
 	private static class ClientHandler {
 
-		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
+		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.next(payload);
+			this.fireForgetPayloads.tryEmitNext(payload);
 		}
 
 		@MessageMapping("echo")
@@ -250,19 +248,19 @@ public class RSocketServerToClientIntegrationTests {
 	static class RSocketConfig {
 
 		@Bean
-		public ServerController serverController() {
+		ServerController serverController() {
 			return new ServerController();
 		}
 
 		@Bean
-		public RSocketMessageHandler serverMessageHandler() {
+		RSocketMessageHandler serverMessageHandler() {
 			RSocketMessageHandler handler = new RSocketMessageHandler();
 			handler.setRSocketStrategies(rsocketStrategies());
 			return handler;
 		}
 
 		@Bean
-		public RSocketStrategies rsocketStrategies() {
+		RSocketStrategies rsocketStrategies() {
 			return RSocketStrategies.create();
 		}
 	}

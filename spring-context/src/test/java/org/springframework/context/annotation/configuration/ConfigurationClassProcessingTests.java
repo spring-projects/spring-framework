@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,12 +280,32 @@ public class ConfigurationClassProcessingTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithApplicationListener.class);
 		ctx.refresh();
+
 		ConfigWithApplicationListener config = ctx.getBean(ConfigWithApplicationListener.class);
 		assertThat(config.closed).isFalse();
 		ctx.close();
 		assertThat(config.closed).isTrue();
 	}
 
+	@Test
+	public void configurationWithOverloadedBeanMismatch() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
+
+	@Test
+	public void configurationWithOverloadedBeanMismatchWithAsm() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(OverloadedBeanMismatch.class.getName()));
+		ctx.refresh();
+
+		TestBean tb = ctx.getBean(TestBean.class);
+		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
+	}
 
 
 	/**
@@ -592,6 +612,23 @@ public class ConfigurationClassProcessingTests {
 		@Bean
 		public ApplicationListener<ContextClosedEvent> listener() {
 			return (event -> this.closed = true);
+		}
+	}
+
+
+	@Configuration
+	public static class OverloadedBeanMismatch {
+
+		@Bean(name = "other")
+		public NestedTestBean foo() {
+			return new NestedTestBean();
+		}
+
+		@Bean(name = "foo")
+		public TestBean foo(@Qualifier("other") NestedTestBean other) {
+			TestBean tb = new TestBean();
+			tb.setLawyer(other);
+			return tb;
 		}
 	}
 

@@ -239,8 +239,7 @@ class RequestMappingInfoHandlerMappingTests {
 
 		HandlerExecutionChain chain = mapping.getHandler(new MockHttpServletRequest("GET", path));
 		assertThat(chain).isNotNull();
-		assertThat(chain.getInterceptors()).isNotNull();
-		assertThat(chain.getInterceptors()[0]).isSameAs(interceptor);
+		assertThat(chain.getInterceptorList().get(0)).isSameAs(interceptor);
 
 		chain = mapping.getHandler(new MockHttpServletRequest("GET", "/invalid"));
 		assertThat(chain).isNull();

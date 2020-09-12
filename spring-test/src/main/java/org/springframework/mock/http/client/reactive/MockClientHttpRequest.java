@@ -105,6 +105,12 @@ public class MockClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this;
+	}
+
+	@Override
 	protected void applyHeaders() {
 	}
 

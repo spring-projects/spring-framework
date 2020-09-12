@@ -17,10 +17,15 @@
 package org.springframework.jdbc.support;
 
 import java.sql.BatchUpdateException;
+import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.CannotSerializeTransactionException;
@@ -35,6 +40,9 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Rod Johnson
@@ -79,7 +87,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 
 		SQLException dupKeyEx = new SQLException("", "", 10);
 		DataAccessException dksex = sext.translate("task", "SQL", dupKeyEx);
-		assertThat(DataIntegrityViolationException.class.isAssignableFrom(dksex.getClass())).as("Not instance of DataIntegrityViolationException").isTrue();
+		assertThat(DataIntegrityViolationException.class.isInstance(dksex)).as("Not instance of DataIntegrityViolationException").isTrue();
 
 		// Test fallback. We assume that no database will ever return this error code,
 		// but 07xxx will be bad grammar picked up by the fallback SQLState translator
@@ -152,14 +160,13 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 		final SQLErrorCodes customErrorCodes = new SQLErrorCodes();
 		final CustomSQLErrorCodesTranslation customTranslation = new CustomSQLErrorCodesTranslation();
 
-		customErrorCodes.setBadSqlGrammarCodes(new String[] {"1", "2"});
-		customErrorCodes.setDataIntegrityViolationCodes(new String[] {"3", "4"});
-		customTranslation.setErrorCodes(new String[] {"1"});
+		customErrorCodes.setBadSqlGrammarCodes("1", "2");
+		customErrorCodes.setDataIntegrityViolationCodes("3", "4");
+		customTranslation.setErrorCodes("1");
 		customTranslation.setExceptionClass(CustomErrorCodeException.class);
-		customErrorCodes.setCustomTranslations(new CustomSQLErrorCodesTranslation[] {customTranslation});
+		customErrorCodes.setCustomTranslations(customTranslation);
 
-		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator();
-		sext.setSqlErrorCodes(customErrorCodes);
+		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(customErrorCodes);
 
 		// Should custom translate this
 		SQLException badSqlEx = new SQLException("", "", 1);
@@ -174,6 +181,30 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 		// Shouldn't custom translate this - invalid class
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				customTranslation.setExceptionClass(String.class));
+	}
+
+	@Test
+	public void dataSourceInitialization() throws Exception {
+		SQLException connectionException = new SQLException();
+		SQLException duplicateKeyException = new SQLException("test", "", 1);
+
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willThrow(connectionException);
+
+		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+		assertThat(sext.translate("test", null, duplicateKeyException)).isNull();
+
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
+
+		Connection connection = mock(Connection.class);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+
+		Mockito.reset(dataSource);
+		given(dataSource.getConnection()).willReturn(connection);
+		assertThat(sext.translate("test", null, duplicateKeyException)).isInstanceOf(DuplicateKeyException.class);
+
+		verify(connection).close();
 	}
 
 }

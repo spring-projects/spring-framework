@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-public class SimpleThreadScopeTests {
+class SimpleThreadScopeTests {
 
 	private final ApplicationContext applicationContext =
 			new ClassPathXmlApplicationContext("simpleThreadScopeTests.xml", getClass());
 
 
 	@Test
-	public void getFromScope() throws Exception {
+	void getFromScope() throws Exception {
 		String name = "threadScopedObject";
 		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
 		assertThat(bean).isNotNull();
@@ -47,7 +47,7 @@ public class SimpleThreadScopeTests {
 	}
 
 	@Test
-	public void getMultipleInstances() throws Exception {
+	void getMultipleInstances() throws Exception {
 		// Arrange
 		TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class));

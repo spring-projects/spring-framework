@@ -25,6 +25,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Provides access to a collection of merged annotations, usually obtained
@@ -326,7 +327,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers) {
 
-		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
+		return from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -340,11 +341,13 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @param annotationFilter an annotation filter used to restrict the
 	 * annotations considered
 	 * @return a {@link MergedAnnotations} instance containing the merged
-	 * element annotations
+	 * annotations for the supplied element
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
 	}
 
@@ -386,7 +389,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * @return a {@link MergedAnnotations} instance containing the annotations
 	 */
 	static MergedAnnotations from(Object source, Annotation[] annotations, RepeatableContainers repeatableContainers) {
-		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, AnnotationFilter.PLAIN);
+		return from(source, annotations, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**
@@ -405,6 +408,8 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(Object source, Annotation[] annotations,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
+		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
 	}
 
@@ -414,10 +419,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 * {@link MergedAnnotations} instance to be created from annotations that
 	 * are not necessarily loaded using reflection. The provided annotations
 	 * must all be {@link MergedAnnotation#isDirectlyPresent() directly present}
-	 * and must have a {@link MergedAnnotation#getAggregateIndex() aggregate
+	 * and must have an {@link MergedAnnotation#getAggregateIndex() aggregate
 	 * index} of {@code 0}.
-	 * <p>
-	 * The resulting {@link MergedAnnotations} instance will contain both the
+	 * <p>The resulting {@link MergedAnnotations} instance will contain both the
 	 * specified annotations, and any meta-annotations that can be read using
 	 * reflection.
 	 * @param annotations the annotations to include

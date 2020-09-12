@@ -276,7 +276,8 @@ public abstract class UriComponents implements Serializable {
 	 */
 	private static String sanitizeSource(String source) {
 		int level = 0;
-		StringBuilder sb = new StringBuilder();
+		int lastCharIndex = 0;
+		char[] chars = new char[source.length()];
 		for (char c : source.toCharArray()) {
 			if (c == '{') {
 				level++;
@@ -287,9 +288,9 @@ public abstract class UriComponents implements Serializable {
 			if (level > 1 || (level == 1 && c == '}')) {
 				continue;
 			}
-			sb.append(c);
+			chars[lastCharIndex++] = c;
 		}
-		return sb.toString();
+		return new String(chars, 0, lastCharIndex);
 	}
 
 	private static String getVariableName(String match) {

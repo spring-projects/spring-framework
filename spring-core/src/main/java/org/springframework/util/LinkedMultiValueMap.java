@@ -17,14 +17,14 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Simple implementation of {@link MultiValueMap} that wraps a {@link LinkedHashMap},
- * storing multiple values in a {@link LinkedList}.
+ * storing multiple values in an {@link ArrayList}.
  *
  * <p>This Map implementation is generally not thread-safe. It is primarily designed
  * for data structures exposed from request objects, for use in a single thread only.
@@ -49,11 +49,14 @@ public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implem
 
 	/**
 	 * Create a new LinkedMultiValueMap that wraps a {@link LinkedHashMap}
-	 * with the given initial capacity.
-	 * @param initialCapacity the initial capacity
+	 * with an initial capacity that can accommodate the specified number of
+	 * elements without any immediate resize/rehash operations to be expected.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @see CollectionUtils#newLinkedHashMap(int)
 	 */
-	public LinkedMultiValueMap(int initialCapacity) {
-		super(new LinkedHashMap<>(initialCapacity));
+	public LinkedMultiValueMap(int expectedSize) {
+		super(CollectionUtils.newLinkedHashMap(expectedSize));
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implem
 	/**
 	 * Create a deep copy of this Map.
 	 * @return a copy of this Map, including a copy of each value-holding List entry
-	 * (consistently using an independent modifiable {@link LinkedList} for each entry)
+	 * (consistently using an independent modifiable {@link ArrayList} for each entry)
 	 * along the lines of {@code MultiValueMap.addAll} semantics
 	 * @since 4.2
 	 * @see #addAll(MultiValueMap)
@@ -80,7 +83,7 @@ public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implem
 	 */
 	public LinkedMultiValueMap<K, V> deepCopy() {
 		LinkedMultiValueMap<K, V> copy = new LinkedMultiValueMap<>(size());
-		forEach((key, values) -> copy.put(key, new LinkedList<>(values)));
+		forEach((key, values) -> copy.put(key, new ArrayList<>(values)));
 		return copy;
 	}
 

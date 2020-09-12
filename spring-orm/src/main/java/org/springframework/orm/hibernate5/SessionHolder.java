@@ -16,8 +16,6 @@
 
 package org.springframework.orm.hibernate5;
 
-import javax.persistence.EntityManager;
-
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -40,8 +38,6 @@ import org.springframework.orm.jpa.EntityManagerHolder;
  */
 public class SessionHolder extends EntityManagerHolder {
 
-	private final Session session;
-
 	@Nullable
 	private Transaction transaction;
 
@@ -49,16 +45,13 @@ public class SessionHolder extends EntityManagerHolder {
 	private FlushMode previousFlushMode;
 
 
-	@SuppressWarnings("cast")
 	public SessionHolder(Session session) {
-		// Check below is always true against Hibernate >= 5.2 but not against 5.0/5.1 at runtime
-		super(session instanceof EntityManager ? session : null);
-		this.session = session;
+		super(session);
 	}
 
 
 	public Session getSession() {
-		return this.session;
+		return (Session) getEntityManager();
 	}
 
 	public void setTransaction(@Nullable Transaction transaction) {
