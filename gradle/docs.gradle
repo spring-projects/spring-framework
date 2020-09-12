@@ -188,10 +188,10 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 		into "javadoc-api"
 	}
 	from ("$asciidoctor.outputDir/html5") {
-		into "spring-framework-reference"
+		into "reference/html"
 	}
 	from ("$asciidoctor.outputDir/pdf") {
-		into "spring-framework-reference/pdf"
+		into "reference/pdf"
 	}
 	from (dokka) {
 		into "kdoc-api"
