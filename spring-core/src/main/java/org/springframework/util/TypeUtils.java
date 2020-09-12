@@ -168,33 +168,12 @@ public abstract class TypeUtils {
 				rLowerBounds = new Type[] { null };
 			}
 
-			for (Type lBound : lUpperBounds) {
-				for (Type rBound : rUpperBounds) {
-					if (!isAssignableBound(lBound, rBound)) {
-						return false;
-					}
-				}
 
-				for (Type rBound : rLowerBounds) {
-					if (!isAssignableBound(lBound, rBound)) {
-						return false;
-					}
-				}
+			if (!isAssignableBound(rUpperBounds, lUpperBounds, lLowerBounds)) {
+				return false;
 			}
 
-			for (Type lBound : lLowerBounds) {
-				for (Type rBound : rUpperBounds) {
-					if (!isAssignableBound(rBound, lBound)) {
-						return false;
-					}
-				}
-
-				for (Type rBound : rLowerBounds) {
-					if (!isAssignableBound(rBound, lBound)) {
-						return false;
-					}
-				}
-			}
+			return isAssignableBound(rLowerBounds, lUpperBounds, lLowerBounds);
 		}
 		else {
 			for (Type lBound : lUpperBounds) {
@@ -210,6 +189,23 @@ public abstract class TypeUtils {
 			}
 		}
 
+		return true;
+	}
+
+	private static boolean isAssignableBound(Type[] bounds, Type[] upperBounds, Type[] lowerBounds) {
+		for (Type bound : bounds) {
+			for (Type uBound : upperBounds) {
+				if (!isAssignableBound(bound, uBound)) {
+					return false;
+				}
+			}
+
+			for (Type lBound : lowerBounds) {
+				if (!isAssignableBound(lBound, bound)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
