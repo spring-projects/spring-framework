@@ -715,8 +715,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			return;
 		}
 		Assert.notNull(name, "'name' must not be null");
-		String encodedFileName = encodeHeaderFieldParam(filename, charset);
-		set(CONTENT_DISPOSITION, "form-data; name=\"" + name + '\"' + "; filename*=" + encodedFileName);
+		String encodedFilename = encodeHeaderFieldParam(filename, charset);
+		set(CONTENT_DISPOSITION, "form-data; name=\"" + name + '\"' + "; filename*=" + encodedFilename);
 	}
 
 	/**

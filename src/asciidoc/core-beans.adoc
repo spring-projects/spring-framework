@@ -38,7 +38,7 @@ information on using the `BeanFactory` instead of the `ApplicationContext,` refe
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC __container__ are called __beans__. A bean is an object that is
-instantiated, assembled, and otherwise managed by a Spring IoC container. Otherwise, a
+instantiated, assembled, and managed by a Spring IoC container. Otherwise, a
 bean is simply one of many objects in your application. Beans, and the __dependencies__
 among them, are reflected in the __configuration metadata__ used by a container.
 

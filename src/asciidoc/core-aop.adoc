@@ -1357,7 +1357,7 @@ join point, unless you specify otherwise the order of execution is undefined. Yo
 control the order of execution by specifying precedence. This is done in the normal
 Spring way by either implementing the `org.springframework.core.Ordered` interface in
 the aspect class or annotating it with the `Order` annotation. Given two aspects, the
-aspect returning the lower value from `Ordered.getValue()` (or the annotation value) has
+aspect returning the lower value from `Ordered.getOrder()` (or the annotation value) has
 the higher precedence.
 
 When two pieces of advice defined in __the same__ aspect both need to run at the same
