@@ -140,9 +140,9 @@ public class ReactiveTypeHandlerTests {
 
 		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
 		testDeferredResultSubscriber(sink.asFlux(), Flux.class, forClass(Bar.class), () -> {
-			sink.emitNext(bar1);
-			sink.emitNext(bar2);
-			sink.emitComplete();
+			sink.tryEmitNext(bar1);
+			sink.tryEmitNext(bar2);
+			sink.tryEmitComplete();
 		}, Arrays.asList(bar1, bar2));
 	}
 
@@ -195,10 +195,10 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		sink.emitNext("foo");
-		sink.emitNext("bar");
-		sink.emitNext("baz");
-		sink.emitComplete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
@@ -214,10 +214,10 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		sseEmitter.initialize(emitterHandler);
 
-		sink.emitNext(ServerSentEvent.builder("foo").id("1").build());
-		sink.emitNext(ServerSentEvent.builder("bar").id("2").build());
-		sink.emitNext(ServerSentEvent.builder("baz").id("3").build());
-		sink.emitComplete();
+		sink.tryEmitNext(ServerSentEvent.builder("foo").id("1").build());
+		sink.tryEmitNext(ServerSentEvent.builder("bar").id("2").build());
+		sink.tryEmitNext(ServerSentEvent.builder("baz").id("3").build());
+		sink.tryEmitComplete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("id:1\ndata:foo\n\nid:2\ndata:bar\n\nid:3\ndata:baz\n\n");
 	}
@@ -239,9 +239,9 @@ public class ReactiveTypeHandlerTests {
 		Bar bar1 = new Bar("foo");
 		Bar bar2 = new Bar("bar");
 
-		sink.emitNext(bar1);
-		sink.emitNext(bar2);
-		sink.emitComplete();
+		sink.tryEmitNext(bar1);
+		sink.tryEmitNext(bar2);
+		sink.tryEmitComplete();
 
 		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/x-ndjson");
 		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
@@ -256,10 +256,10 @@ public class ReactiveTypeHandlerTests {
 		EmitterHandler emitterHandler = new EmitterHandler();
 		emitter.initialize(emitterHandler);
 
-		sink.emitNext("The quick");
-		sink.emitNext(" brown fox jumps over ");
-		sink.emitNext("the lazy dog");
-		sink.emitComplete();
+		sink.tryEmitNext("The quick");
+		sink.tryEmitNext(" brown fox jumps over ");
+		sink.tryEmitNext("the lazy dog");
+		sink.tryEmitComplete();
 
 		assertThat(emitterHandler.getValuesAsText()).isEqualTo("The quick brown fox jumps over the lazy dog");
 	}

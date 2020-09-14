@@ -55,6 +55,9 @@ import org.springframework.web.reactive.function.BodyExtractors;
  */
 class DefaultClientResponse implements ClientResponse {
 
+	private static final byte[] EMPTY = new byte[0];
+
+
 	private final ClientHttpResponse response;
 
 	private final Headers headers;
@@ -200,7 +203,8 @@ class DefaultClientResponse implements ClientResponse {
 					DataBufferUtils.release(dataBuffer);
 					return bytes;
 				})
-				.defaultIfEmpty(new byte[0])
+				.defaultIfEmpty(EMPTY)
+				.onErrorReturn(IllegalStateException.class::isInstance, EMPTY)
 				.map(bodyBytes -> {
 					HttpRequest request = this.requestSupplier.get();
 					Charset charset = headers().contentType()

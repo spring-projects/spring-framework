@@ -1013,7 +1013,12 @@ class WebClientIntegrationTests {
 		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
 
 		StepVerifier.create(responseMono)
-				.expectErrorMessage("URI is not absolute: " + uri)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
+					WebClientRequestException ex = (WebClientRequestException) throwable;
+					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
+					assertThat(ex.getUri()).isEqualTo(URI.create(uri));
+				})
 				.verify(Duration.ofSeconds(5));
 	}
 
@@ -1124,6 +1129,25 @@ class WebClientIntegrationTests {
 				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
+	}
+
+	@ParameterizedWebClientTest
+	void invalidDomain(ClientHttpConnector connector) {
+		startServer(connector);
+
+		String url = "http://example.invalid";
+		Mono<ClientResponse> result = this.webClient.get().
+				uri(url)
+				.exchange();
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
+					WebClientRequestException ex = (WebClientRequestException) throwable;
+					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
+					assertThat(ex.getUri()).isEqualTo(URI.create(url));
+				})
+				.verify();
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
  * @since 4.1
  */
 @SpringJUnitConfig(EmptyDatabaseConfig.class)
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @DirtiesContext
 class TransactionalAfterTestMethodSqlScriptsTests extends AbstractTransactionalTests {
 

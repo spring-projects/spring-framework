@@ -1649,7 +1649,7 @@ join point, unless you specify otherwise, the order of execution is undefined. Y
 control the order of execution by specifying precedence. This is done in the normal
 Spring way by either implementing the `org.springframework.core.Ordered` interface in
 the aspect class or annotating it with the `@Order` annotation. Given two aspects, the
-aspect returning the lower value from `Ordered.getValue()` (or the annotation value) has
+aspect returning the lower value from `Ordered.getOrder()` (or the annotation value) has
 the higher precedence.
 
 [NOTE]
@@ -2918,7 +2918,7 @@ an aspect weaving phase to your build script.
 If you have chosen to use Spring AOP, you have a choice of @AspectJ or XML style.
 There are various tradeoffs to consider.
 
-The XML style may most familiar to existing Spring users, and it is backed by genuine
+The XML style may be most familiar to existing Spring users, and it is backed by genuine
 POJOs. When using AOP as a tool to configure enterprise services, XML can be a good
 choice (a good test is whether you consider the pointcut expression to be a part of your
 configuration that you might want to change independently). With the XML style, it is
