@@ -411,7 +411,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		try {
 			int status = response.getServletResponse().getStatus();
-			if (status < 200 || status > 299) {
+			if (status < 200 || (status > 299 && status < 400)) {
 				return;
 			}
 		}
