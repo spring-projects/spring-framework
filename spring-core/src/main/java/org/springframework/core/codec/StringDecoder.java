@@ -103,6 +103,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		return this.defaultCharset;
 	}
 
+
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
 		return (elementType.resolve() == String.class && super.canDecode(elementType, mimeType));
@@ -167,7 +168,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Finds the first match and longest delimiter, {@link EndFrameBuffer} just after it.
-	 *
 	 * @param dataBuffer the buffer to find delimiters in
 	 * @param matcher used to find the first delimiters
 	 * @return a flux of buffers, containing {@link EndFrameBuffer} after each delimiter that was
@@ -221,14 +221,11 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		}
 
 		DataBuffer result = dataBuffers.get(0).factory().join(dataBuffers);
-
 		if (stripDelimiter && matchingDelimiter != null) {
 			result.writePosition(result.writePosition() - matchingDelimiter.length);
 		}
 		return result;
 	}
-
-
 
 
 	/**
@@ -293,8 +290,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 		private static final DataBuffer BUFFER = new DefaultDataBufferFactory().wrap(new byte[0]);
 
-		private byte[] delimiter;
-
+		private final byte[] delimiter;
 
 		public EndFrameBuffer(byte[] delimiter) {
 			super(BUFFER);
@@ -304,7 +300,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		public byte[] delimiter() {
 			return this.delimiter;
 		}
-
 	}
 
 
@@ -312,7 +307,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 		@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 		private final LimitedDataBufferList list;
-
 
 		LimitChecker(int maxInMemorySize) {
 			this.list = new LimitedDataBufferList(maxInMemorySize);

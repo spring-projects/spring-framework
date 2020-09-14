@@ -556,7 +556,7 @@ public final class ContentDisposition {
 
 	private static class BuilderImpl implements Builder {
 
-		private String type;
+		private final String type;
 
 		@Nullable
 		private String name;
