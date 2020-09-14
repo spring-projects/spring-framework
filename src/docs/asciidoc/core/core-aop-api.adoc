@@ -149,11 +149,11 @@ Let's consider some static pointcut implementations included with Spring.
 One obvious way to specify static pointcuts is regular expressions. Several AOP
 frameworks besides Spring make this possible.
 `org.springframework.aop.support.JdkRegexpMethodPointcut` is a generic regular
-expression pointcut, using the regular expression support in the JDK.
+expression pointcut that uses the regular expression support in the JDK.
 
-Using the `JdkRegexpMethodPointcut` class, you can provide a list of pattern Strings. If
-any of these is a match, the pointcut will evaluate to true. (So the result is
-effectively the union of these pointcuts.)
+With the `JdkRegexpMethodPointcut` class, you can provide a list of pattern strings.
+If any of these is a match, the pointcut evaluates to `true`. (As a consequence,
+the resulting pointcut is effectively the union of the specified patterns.)
 
 The usage is shown below:
 

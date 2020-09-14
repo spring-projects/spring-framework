@@ -369,10 +369,10 @@ public final class ContentDisposition {
 	}
 
 	/**
-	 * Decode the given header field param as describe in RFC 5987.
+	 * Decode the given header field param as described in RFC 5987.
 	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
-	 * @param filename the header field param
-	 * @param charset the charset to use
+	 * @param filename the filename
+	 * @param charset the charset for the filename
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
@@ -380,18 +380,18 @@ public final class ContentDisposition {
 		Assert.notNull(filename, "'input' String` should not be null");
 		Assert.notNull(charset, "'charset' should not be null");
 		byte[] value = filename.getBytes(charset);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
 		while (index < value.length) {
 			byte b = value[index];
 			if (isRFC5987AttrChar(b)) {
-				bos.write((char) b);
+				baos.write((char) b);
 				index++;
 			}
 			else if (b == '%' && index < value.length - 2) {
 				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
 				try {
-					bos.write(Integer.parseInt(String.valueOf(array), 16));
+					baos.write(Integer.parseInt(String.valueOf(array), 16));
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
@@ -402,7 +402,7 @@ public final class ContentDisposition {
 				throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT);
 			}
 		}
-		return new String(bos.toByteArray(), charset);
+		return new String(baos.toByteArray(), charset);
 	}
 
 	private static boolean isRFC5987AttrChar(byte c) {
@@ -522,7 +522,7 @@ public final class ContentDisposition {
 
 	private static class BuilderImpl implements Builder {
 
-		private String type;
+		private final String type;
 
 		@Nullable
 		private String name;
