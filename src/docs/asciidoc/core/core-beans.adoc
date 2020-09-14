@@ -42,7 +42,7 @@ information on using the `BeanFactory` instead of the `ApplicationContext,` see
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC container are called beans. A bean is an object that is
-instantiated, assembled, and otherwise managed by a Spring IoC container. Otherwise, a
+instantiated, assembled, and managed by a Spring IoC container. Otherwise, a
 bean is simply one of many objects in your application. Beans, and the dependencies
 among them, are reflected in the configuration metadata used by a container.
 
@@ -2089,7 +2089,7 @@ startup, because it must satisfy the singleton's dependencies. The lazy-initiali
 is injected into a singleton bean elsewhere that is not lazy-initialized.
 
 You can also control lazy-initialization at the container level by using the
-`default-lazy-init` attribute on the `<beans/>` element, a the following example shows:
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
 
 ====
 [source,xml,indent=0]
@@ -4190,7 +4190,8 @@ which these `BeanFactoryPostProcessor` instances run by setting the `order` prop
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface, too. See the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`] and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
 ====

@@ -143,9 +143,9 @@ frameworks besides Spring make this possible.
 `org.springframework.aop.support.JdkRegexpMethodPointcut` is a generic regular
 expression pointcut that uses the regular expression support in the JDK.
 
-With the `JdkRegexpMethodPointcut` class, you can provide a list of pattern strings. If
-any of these is a match, the pointcut evaluates to `true`. (So, the result is
-effectively the union of these pointcuts.)
+With the `JdkRegexpMethodPointcut` class, you can provide a list of pattern strings.
+If any of these is a match, the pointcut evaluates to `true`. (As a consequence,
+the resulting pointcut is effectively the union of the specified patterns.)
 
 The following example shows how to use `JdkRegexpMethodPointcut`:
 
