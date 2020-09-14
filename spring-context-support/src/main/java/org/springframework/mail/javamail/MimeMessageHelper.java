@@ -173,7 +173,7 @@ public class MimeMessageHelper {
 
 	private FileTypeMap fileTypeMap;
 
-	private boolean encodeFilenames = true;
+	private boolean encodeFilenames = false;
 
 	private boolean validateAddresses = false;
 
@@ -490,9 +490,11 @@ public class MimeMessageHelper {
 	/**
 	 * Set whether to encode attachment filenames passed to this helper's
 	 * {@code #addAttachment} methods.
-	 * <p>The default is {@code true} for compatibility with older email clients;
-	 * turn this to {@code false} for standard MIME behavior. On a related note,
+	 * <p>The default is {@code false} for standard MIME behavior; turn this to
+	 * {@code true} for compatibility with older email clients. On a related note,
 	 * check out JavaMail's {@code mail.mime.encodefilename} system property.
+	 * <p><b>NOTE:</b> The default changed to {@code false} in 5.3, in favor of
+	 * JavaMail's standard {@code mail.mime.encodefilename} system property.
 	 * @since 5.2.9
 	 * @see #addAttachment(String, DataSource)
 	 * @see MimeBodyPart#setFileName(String)
