@@ -36,7 +36,9 @@ import org.springframework.lang.Nullable;
  * @author Keith Donald
  * @since 3.0
  * @see JodaTimeContextHolder
+ * @deprecated as of 5.3.0, scheduled for removal in 6.0.
  */
+@Deprecated
 public class JodaTimeContext {
 
 	@Nullable

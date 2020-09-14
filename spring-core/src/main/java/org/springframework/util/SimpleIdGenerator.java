@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,20 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A simple {@link IdGenerator} that starts at 1 and increments by 1 with each call.
+ * A simple {@link IdGenerator} that starts at 1, increments up to
+ * {@link Long#MAX_VALUE}, and then rolls over.
  *
  * @author Rossen Stoyanchev
  * @since 4.1.5
  */
 public class SimpleIdGenerator implements IdGenerator {
 
-	private final AtomicLong mostSigBits = new AtomicLong(0);
-
 	private final AtomicLong leastSigBits = new AtomicLong(0);
 
 
 	@Override
 	public UUID generateId() {
-		long leastSigBits = this.leastSigBits.incrementAndGet();
-		if (leastSigBits == 0) {
-			this.mostSigBits.incrementAndGet();
-		}
-		return new UUID(this.mostSigBits.get(), leastSigBits);
+		return new UUID(0, this.leastSigBits.incrementAndGet());
 	}
 
 }

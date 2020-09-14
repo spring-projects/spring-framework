@@ -233,10 +233,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		sink.emitNext("foo");
-		sink.emitNext("bar");
-		sink.emitNext("baz");
-		sink.emitComplete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
@@ -254,8 +254,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 
 		IllegalStateException ex = new IllegalStateException("wah wah");
-		sink.emitError(ex);
-		sink.emitComplete();
+		sink.tryEmitError(ex);
+		sink.tryEmitComplete();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
@@ -299,10 +299,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		sink.emitNext("foo");
-		sink.emitNext("bar");
-		sink.emitNext("baz");
-		sink.emitComplete();
+		sink.tryEmitNext("foo");
+		sink.tryEmitNext("bar");
+		sink.tryEmitNext("baz");
+		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/plain");
 		assertThat(this.response.getContentAsString()).isEqualTo("foobarbaz");

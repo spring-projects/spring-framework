@@ -57,7 +57,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * response during which time pre-commit actions can still make changes to
 	 * the response status and headers.
 	 */
-	private enum State {NEW, COMMITTING, COMMITTED}
+	private enum State {NEW, COMMITTING, COMMIT_ACTION_FAILED, COMMITTED}
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
@@ -204,7 +204,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public boolean isCommitted() {
-		return this.state.get() != State.NEW;
+		State state = this.state.get();
+		return (state != State.NEW && state != State.COMMIT_ACTION_FAILED);
 	}
 
 	@Override
@@ -251,19 +252,22 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit(@Nullable Supplier<? extends Mono<Void>> writeAction) {
-		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
-			return Mono.empty();
-		}
-
 		Flux<Void> allActions = Flux.empty();
-
-		if (!this.commitActions.isEmpty()) {
-			allActions = Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
-					.doOnError(ex -> {
-						if (this.state.compareAndSet(State.COMMITTING, State.NEW)) {
-							getHeaders().clearContentHeaders();
-						}
-					});
+		if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
+			if (!this.commitActions.isEmpty()) {
+				allActions = Flux.concat(Flux.fromIterable(this.commitActions).map(Supplier::get))
+						.doOnError(ex -> {
+							if (this.state.compareAndSet(State.COMMITTING, State.COMMIT_ACTION_FAILED)) {
+								getHeaders().clearContentHeaders();
+							}
+						});
+			}
+		}
+		else if (this.state.compareAndSet(State.COMMIT_ACTION_FAILED, State.COMMITTING)) {
+			// Skip commit actions
+		}
+		else {
+			return Mono.empty();
 		}
 
 		allActions = allActions.concatWith(Mono.fromRunnable(() -> {

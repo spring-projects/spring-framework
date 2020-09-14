@@ -246,7 +246,7 @@ class RSocketBufferLeakTests {
 		void checkForLeaks() {
 			this.rsockets.stream().map(PayloadSavingDecorator::getPayloads)
 					.forEach(payloadInfoProcessor -> {
-						payloadInfoProcessor.emitComplete();
+						payloadInfoProcessor.tryEmitComplete();
 						payloadInfoProcessor.asFlux()
 								.doOnNext(this::checkForLeak)
 								.blockLast();
@@ -328,7 +328,7 @@ class RSocketBufferLeakTests {
 			}
 
 			private io.rsocket.Payload addPayload(io.rsocket.Payload payload) {
-				this.payloads.emitNext(new PayloadLeakInfo(payload));
+				this.payloads.tryEmitNext(new PayloadLeakInfo(payload));
 				return payload;
 			}
 

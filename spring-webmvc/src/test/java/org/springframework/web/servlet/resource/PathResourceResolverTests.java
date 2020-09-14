@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,13 @@ public class PathResourceResolverTests {
 
 	@Test // SPR-12624
 	public void checkRelativeLocation() throws Exception {
-		String locationUrl= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
-		Resource location = new UrlResource(locationUrl.replace("/springframework","/../org/springframework"));
+		String location= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
+		location = location.replace("/test/org/springframework","/test/org/../org/springframework");
 
-		assertThat(this.resolver.resolveResource(null, "main.css", Collections.singletonList(location), null)).isNotNull();
+		Resource actual = this.resolver.resolveResource(
+				null, "main.css", Collections.singletonList(new UrlResource(location)), null);
+
+		assertThat(actual).isNotNull();
 	}
 
 	@Test // SPR-12747

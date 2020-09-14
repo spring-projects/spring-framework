@@ -399,7 +399,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 					}
 					else {
 						int nullable = (function ? DatabaseMetaData.functionNullable : DatabaseMetaData.procedureNullable);
-						CallParameterMetaData meta = new CallParameterMetaData(columnName, columnType,
+						CallParameterMetaData meta = new CallParameterMetaData(function, columnName, columnType,
 								columns.getInt("DATA_TYPE"), columns.getString("TYPE_NAME"),
 								columns.getInt("NULLABLE") == nullable);
 						this.callParameterMetaData.add(meta);

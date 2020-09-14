@@ -149,13 +149,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		@MessageMapping("receive")
 		fun receive(payload: String) {
-			fireForgetPayloads.emitNext(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("receive-async")
 		suspend fun receiveAsync(payload: String) {
 			delay(10)
-			fireForgetPayloads.emitNext(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("echo-async")

@@ -34,28 +34,31 @@ import org.springframework.util.StringUtils;
  */
 final class BitsCronField extends CronField {
 
-	private static final BitsCronField ZERO_NANOS;
+	private static final long MASK = 0xFFFFFFFFFFFFFFFFL;
 
 
-	static {
-		ZERO_NANOS = new BitsCronField(Type.NANO);
-		ZERO_NANOS.bits.set(0);
-	}
+	@Nullable
+	private static BitsCronField zeroNanos = null;
 
-	private final BitSet bits;
 
+	// we store at most 60 bits, for seconds and minutes, so a 64-bit long suffices
+	private long bits;
 
 
 	private BitsCronField(Type type) {
 		super(type);
-		this.bits = new BitSet((int) type.range().getMaximum());
 	}
 
 	/**
 	 * Return a {@code BitsCronField} enabled for 0 nano seconds.
 	 */
 	public static BitsCronField zeroNanos() {
-		return BitsCronField.ZERO_NANOS;
+		if (zeroNanos == null) {
+			BitsCronField field = new BitsCronField(Type.NANO);
+			field.setBit(0);
+			zeroNanos = field;
+		}
+		return zeroNanos;
 	}
 
 	/**
@@ -98,11 +101,10 @@ final class BitsCronField extends CronField {
 	 */
 	public static BitsCronField parseDaysOfWeek(String value) {
 		BitsCronField result = parseDate(value, Type.DAY_OF_WEEK);
-		BitSet bits = result.bits;
-		if (bits.get(0)) {
+		if (result.getBit(0)) {
 			// cron supports 0 for Sunday; we use 7 like java.time
-			bits.set(7);
-			bits.clear(0);
+			result.setBit(7);
+			result.clearBit(0);
 		}
 		return result;
 	}
@@ -173,10 +175,10 @@ final class BitsCronField extends CronField {
 	@Override
 	public <T extends Temporal & Comparable<? super T>> T nextOrSame(T temporal) {
 		int current = type().get(temporal);
-		int next = this.bits.nextSetBit(current);
+		int next = nextSetBit(current);
 		if (next == -1) {
 			temporal = type().rollForward(temporal);
-			next = this.bits.nextSetBit(0);
+			next = nextSetBit(0);
 		}
 		if (next == current) {
 			return temporal;
@@ -195,23 +197,54 @@ final class BitsCronField extends CronField {
 		}
 	}
 
-	BitSet bits() {
-		return this.bits;
+	boolean getBit(int index) {
+		return (this.bits & (1L << index)) != 0;
+	}
+
+	private int nextSetBit(int fromIndex) {
+		long result = this.bits & (MASK << fromIndex);
+		if (result != 0) {
+			return Long.numberOfTrailingZeros(result);
+		}
+		else {
+			return -1;
+		}
+
 	}
 
 	private void setBits(ValueRange range) {
-		this.bits.set((int) range.getMinimum(), (int) range.getMaximum() + 1);
+		if (range.getMinimum() == range.getMaximum()) {
+			setBit((int) range.getMinimum());
+		}
+		else {
+			long minMask = MASK << range.getMinimum();
+			long maxMask = MASK >>> - (range.getMaximum() + 1);
+			this.bits |= (minMask & maxMask);
+		}
 	}
 
 	private void setBits(ValueRange range, int delta) {
-		for (int i = (int) range.getMinimum(); i <= range.getMaximum(); i += delta) {
-			this.bits.set(i);
+		if (delta == 1) {
+			setBits(range);
 		}
+		else {
+			for (int i = (int) range.getMinimum(); i <= range.getMaximum(); i += delta) {
+				setBit(i);
+			}
+		}
+	}
+
+	private void setBit(int index) {
+		this.bits |= (1L << index);
+	}
+
+	private void clearBit(int index) {
+		this.bits &=  ~(1L << index);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.bits.hashCode();
+		return Long.hashCode(this.bits);
 	}
 
 	@Override
@@ -223,13 +256,25 @@ final class BitsCronField extends CronField {
 			return false;
 		}
 		BitsCronField other = (BitsCronField) o;
-		return type() == other.type() &&
-				this.bits.equals(other.bits);
+		return type() == other.type() && this.bits == other.bits;
 	}
 
 	@Override
 	public String toString() {
-		return type() + " " + this.bits;
+		StringBuilder builder = new StringBuilder(type().toString());
+		builder.append(" {");
+		int i = nextSetBit(0);
+		if (i != -1) {
+			builder.append(i);
+			i = nextSetBit(i+1);
+			while (i != -1) {
+				builder.append(", ");
+				builder.append(i);
+				i = nextSetBit(i+1);
+			}
+		}
+		builder.append('}');
+		return builder.toString();
 	}
 
 }

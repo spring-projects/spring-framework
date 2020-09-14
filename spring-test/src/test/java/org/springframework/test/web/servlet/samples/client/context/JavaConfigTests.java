@@ -57,7 +57,7 @@ import static org.mockito.BDDMockito.given;
 	@ContextConfiguration(classes = JavaConfigTests.RootConfig.class),
 	@ContextConfiguration(classes = JavaConfigTests.WebConfig.class)
 })
-public class JavaConfigTests {
+class JavaConfigTests {
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -65,21 +65,18 @@ public class JavaConfigTests {
 	@Autowired
 	private PersonDao personDao;
 
-	@Autowired
-	private PersonController personController;
-
 	private WebTestClient testClient;
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.testClient = MockMvcWebTestClient.bindToApplicationContext(this.wac).build();
 		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
 	}
 
 
 	@Test
-	public void person() {
+	void person() {
 		testClient.get().uri("/person/5")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
@@ -88,7 +85,7 @@ public class JavaConfigTests {
 	}
 
 	@Test
-	public void tilesDefinitions() {
+	void tilesDefinitions() {
 		testClient.get().uri("/")
 				.exchange()
 				.expectStatus().isOk()
@@ -100,7 +97,7 @@ public class JavaConfigTests {
 	static class RootConfig {
 
 		@Bean
-		public PersonDao personDao() {
+		PersonDao personDao() {
 			return Mockito.mock(PersonDao.class);
 		}
 	}
@@ -113,7 +110,7 @@ public class JavaConfigTests {
 		private RootConfig rootConfig;
 
 		@Bean
-		public PersonController personController() {
+		PersonController personController() {
 			return new PersonController(this.rootConfig.personDao());
 		}
 
@@ -138,7 +135,7 @@ public class JavaConfigTests {
 		}
 
 		@Bean
-		public TilesConfigurer tilesConfigurer() {
+		TilesConfigurer tilesConfigurer() {
 			TilesConfigurer configurer = new TilesConfigurer();
 			configurer.setDefinitions("/WEB-INF/**/tiles.xml");
 			return configurer;
