@@ -77,9 +77,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return this.exchange.getRequestMethod().toString();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+		// getRequestCookies() is deprecated in Undertow 2.2
 		for (String name : this.exchange.getRequestCookies().keySet()) {
 			Cookie cookie = this.exchange.getRequestCookies().get(name);
 			HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
