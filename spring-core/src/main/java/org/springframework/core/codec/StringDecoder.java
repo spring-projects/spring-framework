@@ -72,6 +72,8 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private final boolean stripDelimiter;
 
+	private Charset defaultCharset = DEFAULT_CHARSET;
+
 	private final ConcurrentMap<Charset, byte[][]> delimitersCache = new ConcurrentHashMap<>();
 
 
@@ -82,6 +84,24 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		this.stripDelimiter = stripDelimiter;
 	}
 
+
+	/**
+	 * Set the default character set to fall back on if the MimeType does not specify any.
+	 * <p>By default this is {@code UTF-8}.
+	 * @param defaultCharset the charset to fall back on
+	 * @since 5.2.9
+	 */
+	public void setDefaultCharset(Charset defaultCharset) {
+		this.defaultCharset = defaultCharset;
+	}
+
+	/**
+	 * Return the configured {@link #setDefaultCharset(Charset) defaultCharset}.
+	 * @since 5.2.9
+	 */
+	public Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -136,12 +156,12 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 		return value;
 	}
 
-	private static Charset getCharset(@Nullable MimeType mimeType) {
+	private Charset getCharset(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			return mimeType.getCharset();
 		}
 		else {
-			return DEFAULT_CHARSET;
+			return getDefaultCharset();
 		}
 	}
 
