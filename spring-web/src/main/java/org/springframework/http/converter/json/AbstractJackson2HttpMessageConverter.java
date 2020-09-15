@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,18 +210,18 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		JavaType javaType = getJavaType(clazz, null);
-		return readJavaType(javaType, inputMessage);
-	}
-
-	@Override
 	public Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		JavaType javaType = getJavaType(type, contextClass);
+		return readJavaType(javaType, inputMessage);
+	}
+
+	@Override
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
 	}
 
