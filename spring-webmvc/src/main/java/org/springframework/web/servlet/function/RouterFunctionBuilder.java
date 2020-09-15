@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
@@ -40,6 +41,8 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	private final List<RouterFunction<ServerResponse>> routerFunctions = new ArrayList<>();
 
 	private final List<HandlerFilterFunction<ServerResponse, ServerResponse>> filterFunctions = new ArrayList<>();
+
+	private final List<HandlerFilterFunction<ServerResponse, ServerResponse>> errorHandlers = new ArrayList<>();
 
 
 	@Override
@@ -307,7 +310,8 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 		Assert.notNull(predicate, "Predicate must not be null");
 		Assert.notNull(responseProvider, "ResponseProvider must not be null");
 
-		return filter(HandlerFilterFunction.ofErrorHandler(predicate, responseProvider));
+		this.errorHandlers.add(0, HandlerFilterFunction.ofErrorHandler(predicate, responseProvider));
+		return this;
 	}
 
 	@Override
@@ -316,8 +320,7 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 		Assert.notNull(exceptionType, "ExceptionType must not be null");
 		Assert.notNull(responseProvider, "ResponseProvider must not be null");
 
-		return filter(HandlerFilterFunction.ofErrorHandler(exceptionType::isInstance,
-				responseProvider));
+		return onError(exceptionType::isInstance, responseProvider);
 	}
 
 	@Override
@@ -327,12 +330,12 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 		}
 		RouterFunction<ServerResponse> result = new BuiltRouterFunction(this.routerFunctions);
 
-		if (this.filterFunctions.isEmpty()) {
+		if (this.filterFunctions.isEmpty() && this.errorHandlers.isEmpty()) {
 			return result;
 		}
 		else {
 			HandlerFilterFunction<ServerResponse, ServerResponse> filter =
-					this.filterFunctions.stream()
+					Stream.concat(this.filterFunctions.stream(), this.errorHandlers.stream())
 							.reduce(HandlerFilterFunction::andThen)
 							.orElseThrow(IllegalStateException::new);
 
