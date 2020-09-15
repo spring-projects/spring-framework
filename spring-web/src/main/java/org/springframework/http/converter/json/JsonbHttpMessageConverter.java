@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,12 +101,12 @@ public class JsonbHttpMessageConverter extends AbstractJsonHttpMessageConverter 
 	}
 
 	@Override
-	protected void writeInternal(Object o, @Nullable Type type, Writer writer) throws Exception {
+	protected void writeInternal(Object object, @Nullable Type type, Writer writer) throws Exception {
 		if (type instanceof ParameterizedType) {
-			getJsonb().toJson(o, type, writer);
+			getJsonb().toJson(object, type, writer);
 		}
 		else {
-			getJsonb().toJson(o, writer);
+			getJsonb().toJson(object, writer);
 		}
 	}
 
