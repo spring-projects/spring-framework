@@ -153,6 +153,7 @@ public abstract class AbstractDataBufferAllocatingTests {
 	public @interface ParameterizedDataBufferAllocatingTest {
 	}
 
+	@SuppressWarnings("deprecation") // PooledByteBufAllocator no longer supports tinyCacheSize.
 	public static Stream<Arguments> dataBufferFactories() {
 		return Stream.of(
 			arguments("NettyDataBufferFactory - UnpooledByteBufAllocator - preferDirect = true",
