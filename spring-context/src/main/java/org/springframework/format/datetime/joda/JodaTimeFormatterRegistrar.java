@@ -55,7 +55,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * @see FormatterRegistrar#registerFormatters
  * @see org.springframework.format.datetime.DateFormatterRegistrar
  * @see DateTimeFormatterFactoryBean
- * @deprecated as of 5.3.0, scheduled for removal in 6.0.
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
 @Deprecated
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
