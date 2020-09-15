@@ -430,10 +430,10 @@ public abstract class ResponseEntityExceptionHandler {
 	 */
 	@Nullable
 	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
-			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
+			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		if (webRequest instanceof ServletWebRequest) {
-			ServletWebRequest servletWebRequest = (ServletWebRequest) webRequest;
+		if (request instanceof ServletWebRequest) {
+			ServletWebRequest servletWebRequest = (ServletWebRequest) request;
 			HttpServletResponse response = servletWebRequest.getResponse();
 			if (response != null && response.isCommitted()) {
 				if (logger.isWarnEnabled()) {
@@ -443,7 +443,7 @@ public abstract class ResponseEntityExceptionHandler {
 			}
 		}
 
-		return handleExceptionInternal(ex, null, headers, status, webRequest);
+		return handleExceptionInternal(ex, null, headers, status, request);
 	}
 
 	/**
