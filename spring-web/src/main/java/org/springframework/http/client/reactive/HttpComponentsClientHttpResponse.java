@@ -56,8 +56,7 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 
 	public HttpComponentsClientHttpResponse(DataBufferFactory dataBufferFactory,
-			Message<HttpResponse, Publisher<ByteBuffer>> message,
-			HttpClientContext context) {
+			Message<HttpResponse, Publisher<ByteBuffer>> message, HttpClientContext context) {
 
 		this.dataBufferFactory = dataBufferFactory;
 		this.message = message;
@@ -112,4 +111,5 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
+
 }
