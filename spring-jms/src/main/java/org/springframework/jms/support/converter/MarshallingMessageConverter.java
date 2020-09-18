@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,6 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.jms.core.JmsTemplate#convertAndSend
- * @see org.springframework.jms.core.JmsTemplate#receiveAndConvert
  */
 public class MarshallingMessageConverter implements MessageConverter, InitializingBean {
 
@@ -215,7 +213,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	protected TextMessage marshalToTextMessage(Object object, Session session, Marshaller marshaller)
 			throws JMSException, IOException, XmlMappingException {
 
-		StringWriter writer = new StringWriter();
+		StringWriter writer = new StringWriter(1024);
 		Result result = new StreamResult(writer);
 		marshaller.marshal(object, result);
 		return session.createTextMessage(writer.toString());
