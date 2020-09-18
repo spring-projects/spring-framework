@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,14 +54,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Default {@link ServerRequest.Builder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
-	private final List<HttpMessageConverter<?>> messageConverters;
+	private final HttpServletRequest servletRequest;
 
-	private HttpServletRequest servletRequest;
+	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private String methodName;
 
@@ -78,8 +79,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	public DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
-		this.messageConverters = other.messageConverters();
 		this.servletRequest = other.servletRequest();
+		this.messageConverters = other.messageConverters();
 		this.methodName = other.methodName();
 		this.uri = other.uri();
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
@@ -155,10 +156,8 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest build() {
-
-		return new BuiltServerRequest(this.servletRequest,
-				this.methodName, this.uri, this.headers, this.cookies, this.attributes, this.body,
-				this.messageConverters);
+		return new BuiltServerRequest(this.servletRequest, this.methodName, this.uri,
+				this.headers, this.cookies, this.attributes, this.body, this.messageConverters);
 	}
 
 
@@ -172,7 +171,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final HttpServletRequest servletRequest;
 
-		private MultiValueMap<String, Cookie> cookies;
+		private final MultiValueMap<String, Cookie> cookies;
 
 		private final Map<String, Object> attributes;
 
@@ -184,6 +183,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 				HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				Map<String, Object> attributes, byte[] body,
 				List<HttpMessageConverter<?>> messageConverters) {
+
 			this.servletRequest = servletRequest;
 			this.methodName = methodName;
 			this.uri = uri;
@@ -241,9 +241,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
-				throws ServletException, IOException {
-
+		private <T> T bodyInternal(Type bodyType, Class<?> bodyClass) throws ServletException, IOException {
 			HttpInputMessage inputMessage = new BuiltInputMessage();
 			MediaType contentType = headers().contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -302,6 +300,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public HttpServletRequest servletRequest() {
 			return this.servletRequest;
 		}
+
 
 		private class BuiltInputMessage implements HttpInputMessage {
 
