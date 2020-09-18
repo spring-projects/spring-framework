@@ -29,10 +29,10 @@ of several mock server setup choices or a connection to a live server.
 This setup allows you to test specific controller(s) via mock request and response objects,
 without a running server.
 
-For WebFlux applications, use the below which loads infrastructure equivalent to the
+For WebFlux applications, use the following which loads infrastructure equivalent to the
 <<web-reactive.adoc#webflux-config, WebFlux Java config>>, registers the given
 controller(s), and creates a <<web-reactive.adoc#webflux-web-handler-api, WebHandler chain>>
-to handle requests with:
+to handle requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -46,11 +46,11 @@ to handle requests with:
 	val client = WebTestClient.bindToController(TestController()).build()
 ----
 
-For Spring MVC, use the below which delegates to the
+For Spring MVC, use the following which delegates to the
 {api-spring-framework}/https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
 to load infrastructure equivalent to the <<web.adoc#mvc-config, WebMvc Java config>>,
 registers the given controller(s), and creates an instance of
-<<testing.adoc#spring-mvc-test-framework, MockMvc>> to handle requests with:
+<<testing.adoc#spring-mvc-test-framework, MockMvc>> to handle requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -73,10 +73,10 @@ This setup allows you to load Spring configuration with Spring MVC or Spring Web
 infrastructure and controller declarations and use it to handle requests via mock request
 and response objects, without a running server.
 
-For WebFlux, use the below where the Spring `ApplicationContext` is passed to
+For WebFlux, use the following where the Spring `ApplicationContext` is passed to
 {api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext-org.springframework.context.ApplicationContext-[WebHttpHandlerBuilder]
 to create the <<web-reactive.adoc#webflux-web-handler-api, WebHandler chain>> to handle
-requests with:
+requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -114,10 +114,10 @@ requests with:
 <2> Inject the configuration
 <3> Create the `WebTestClient`
 
-For Spring MVC, use the below where the Spring `ApplicationContext` is passed to
-{api-spring-framework}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.html#webAppContextSetup]
+For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
+{api-spring-framework}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
 to create a <<testing.adoc#spring-mvc-test-framework, MockMvc>> instance to handle
-requests with:
+requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -131,7 +131,7 @@ requests with:
 	class MyTests {
 
 		@Autowired
-		private WebApplicationContext wac; // <2>
+		WebApplicationContext wac; // <2>
 
 		WebTestClient client;
 
@@ -163,7 +163,7 @@ requests with:
 
 		@BeforeEach
 		fun setUp() { // <2>
-			client = WebTestClient.bindToApplicationContext(context).build() // <3>
+			client = MockMvcWebTestClient.bindToApplicationContext(wac).build() // <3>
 		}
 	}
 ----
@@ -176,11 +176,11 @@ requests with:
 [[webtestclient-fn-config]]
 === Bind to Router Function
 
-This setup allows you to test <<web-reactive.adoc#webflux-fn, functional endpoints>>
-via mock request and response objects, without a running server.
+This setup allows you to test <<web-reactive.adoc#webflux-fn, functional endpoints>> via
+mock request and response objects, without a running server.
 
-For WebFlux, use the below which delegates to `RouterFunctions.toWebHandler` to create a
-server setup to handle requests with:
+For WebFlux, use the following which delegates to `RouterFunctions.toWebHandler` to
+create a server setup to handle requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -195,7 +195,7 @@ server setup to handle requests with:
 	val client = WebTestClient.bindToRouterFunction(route).build()
 ----
 
-For Spring MVC there is currently no options to test
+For Spring MVC there are currently no options to test
 <<web.adoc#webmvc-fn, WebMvc functional endpoints>>.
 
 
@@ -223,8 +223,9 @@ This setup connects to a running server to perform full, end-to-end HTTP tests:
 
 In addition to the server setup options described earlier, you can also configure client
 options, including base URL, default headers, client filters, and others. These options
-are readily available following `bindToServer`. For all others, you need to use
-`configureClient()` to transition from server to client configuration, as follows:
+are readily available following `bindToServer()`. For all other configuration options,
+you need to use `configureClient()` to transition from server to client configuration, as
+follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -257,7 +258,7 @@ prepare a request with any content including form data, multipart data, and more
 After the call to `exchange()`, `WebTestClient` diverges from the `WebClient` and
 instead continues with a workflow to verify responses.
 
-To assert the response status and headers, use the below:
+To assert the response status and headers, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
