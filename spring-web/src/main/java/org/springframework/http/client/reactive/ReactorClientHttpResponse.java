@@ -126,15 +126,13 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.response.cookies().values().stream().flatMap(Collection::stream)
-				.forEach(c ->
-
-					result.add(c.name(), ResponseCookie.fromClientResponse(c.name(), c.value())
-							.domain(c.domain())
-							.path(c.path())
-							.maxAge(c.maxAge())
-							.secure(c.isSecure())
-							.httpOnly(c.isHttpOnly())
-							.build()));
+				.forEach(c -> result.add(c.name(), ResponseCookie.fromClientResponse(c.name(), c.value())
+						.domain(c.domain())
+						.path(c.path())
+						.maxAge(c.maxAge())
+						.secure(c.isSecure())
+						.httpOnly(c.isHttpOnly())
+						.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 
