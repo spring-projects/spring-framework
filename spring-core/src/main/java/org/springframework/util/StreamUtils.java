@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.lang.Nullable;
 public abstract class StreamUtils {
 
 	/**
-	 * The default buffer size used why copying bytes.
+	 * The default buffer size used when copying bytes.
 	 */
 	public static final int BUFFER_SIZE = 4096;
 
@@ -55,7 +55,7 @@ public abstract class StreamUtils {
 
 	/**
 	 * Copy the contents of the given InputStream into a new byte array.
-	 * Leaves the stream open when done.
+	 * <p>Leaves the stream open when done.
 	 * @param in the stream to copy from (may be {@code null} or empty)
 	 * @return the new byte array that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
@@ -72,8 +72,9 @@ public abstract class StreamUtils {
 
 	/**
 	 * Copy the contents of the given InputStream into a String.
-	 * Leaves the stream open when done.
+	 * <p>Leaves the stream open when done.
 	 * @param in the InputStream to copy from (may be {@code null} or empty)
+	 * @param charset the {@link Charset} to use to decode the bytes
 	 * @return the String that has been copied to (possibly empty)
 	 * @throws IOException in case of I/O errors
 	 */
@@ -85,16 +86,16 @@ public abstract class StreamUtils {
 		StringBuilder out = new StringBuilder();
 		InputStreamReader reader = new InputStreamReader(in, charset);
 		char[] buffer = new char[BUFFER_SIZE];
-		int bytesRead = -1;
-		while ((bytesRead = reader.read(buffer)) != -1) {
-			out.append(buffer, 0, bytesRead);
+		int charsRead;
+		while ((charsRead = reader.read(buffer)) != -1) {
+			out.append(buffer, 0, charsRead);
 		}
 		return out.toString();
 	}
 
 	/**
 	 * Copy the contents of the given byte array to the given OutputStream.
-	 * Leaves the stream open when done.
+	 * <p>Leaves the stream open when done.
 	 * @param in the byte array to copy from
 	 * @param out the OutputStream to copy to
 	 * @throws IOException in case of I/O errors
@@ -107,8 +108,8 @@ public abstract class StreamUtils {
 	}
 
 	/**
-	 * Copy the contents of the given String to the given output OutputStream.
-	 * Leaves the stream open when done.
+	 * Copy the contents of the given String to the given OutputStream.
+	 * <p>Leaves the stream open when done.
 	 * @param in the String to copy from
 	 * @param charset the Charset
 	 * @param out the OutputStream to copy to
@@ -116,7 +117,7 @@ public abstract class StreamUtils {
 	 */
 	public static void copy(String in, Charset charset, OutputStream out) throws IOException {
 		Assert.notNull(in, "No input String specified");
-		Assert.notNull(charset, "No charset specified");
+		Assert.notNull(charset, "No Charset specified");
 		Assert.notNull(out, "No OutputStream specified");
 
 		Writer writer = new OutputStreamWriter(out, charset);
@@ -126,7 +127,7 @@ public abstract class StreamUtils {
 
 	/**
 	 * Copy the contents of the given InputStream to the given OutputStream.
-	 * Leaves both streams open when done.
+	 * <p>Leaves both streams open when done.
 	 * @param in the InputStream to copy from
 	 * @param out the OutputStream to copy to
 	 * @return the number of bytes copied
@@ -138,7 +139,7 @@ public abstract class StreamUtils {
 
 		int byteCount = 0;
 		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead = -1;
+		int bytesRead;
 		while ((bytesRead = in.read(buffer)) != -1) {
 			out.write(buffer, 0, bytesRead);
 			byteCount += bytesRead;
@@ -170,7 +171,7 @@ public abstract class StreamUtils {
 		}
 
 		long bytesToCopy = end - start + 1;
-		byte[] buffer = new byte[StreamUtils.BUFFER_SIZE];
+		byte[] buffer = new byte[(int) Math.min(StreamUtils.BUFFER_SIZE, bytesToCopy)];
 		while (bytesToCopy > 0) {
 			int bytesRead = in.read(buffer);
 			if (bytesRead == -1) {
@@ -190,7 +191,7 @@ public abstract class StreamUtils {
 
 	/**
 	 * Drain the remaining content of the given InputStream.
-	 * Leaves the InputStream open when done.
+	 * <p>Leaves the InputStream open when done.
 	 * @param in the InputStream to drain
 	 * @return the number of bytes read
 	 * @throws IOException in case of I/O errors
