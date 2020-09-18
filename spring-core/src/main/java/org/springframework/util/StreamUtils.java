@@ -105,6 +105,7 @@ public abstract class StreamUtils {
 		Assert.notNull(out, "No OutputStream specified");
 
 		out.write(in);
+		out.flush();
 	}
 
 	/**
