@@ -134,7 +134,7 @@ public class PeriodicTrigger implements Trigger {
 		Date lastExecution = triggerContext.lastScheduledExecutionTime();
 		Date lastCompletion = triggerContext.lastCompletionTime();
 		if (lastExecution == null || lastCompletion == null) {
-			return new Date(System.currentTimeMillis() + this.initialDelay);
+			return new Date(triggerContext.getClock().millis() + this.initialDelay);
 		}
 		if (this.fixedRate) {
 			return new Date(lastExecution.getTime() + this.period);

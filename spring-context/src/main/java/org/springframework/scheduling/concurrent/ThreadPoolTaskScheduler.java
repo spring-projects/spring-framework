@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -66,6 +67,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@Nullable
 	private volatile ErrorHandler errorHandler;
 
+	private Clock clock = Clock.systemDefaultZone();
+
 	@Nullable
 	private ScheduledExecutorService scheduledExecutor;
 
@@ -108,6 +111,21 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 */
 	public void setErrorHandler(ErrorHandler errorHandler) {
 		this.errorHandler = errorHandler;
+	}
+
+	/**
+	 * Set the clock to use for scheduling purposes.
+	 * <p>The default clock is the system clock for the default time zone.
+	 * @since 5.3
+	 * @see Clock#systemDefaultZone()
+	 */
+	public void setClock(Clock clock) {
+		this.clock = clock;
+	}
+
+	@Override
+	public Clock getClock() {
+		return this.clock;
 	}
 
 
@@ -310,7 +328,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			if (errorHandler == null) {
 				errorHandler = TaskUtils.getDefaultErrorHandler(true);
 			}
-			return new ReschedulingRunnable(task, trigger, executor, errorHandler).schedule();
+			return new ReschedulingRunnable(task, trigger, this.clock, executor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
@@ -320,7 +338,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		ScheduledExecutorService executor = getScheduledExecutor();
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return executor.schedule(errorHandlingTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
 		}
@@ -332,7 +350,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return executor.scheduleAtFixedRate(errorHandlingTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
 		}
@@ -355,7 +373,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
-		long initialDelay = startTime.getTime() - System.currentTimeMillis();
+		long initialDelay = startTime.getTime() - this.clock.millis();
 		try {
 			return executor.scheduleWithFixedDelay(errorHandlingTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
 		}
