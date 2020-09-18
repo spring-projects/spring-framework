@@ -70,7 +70,6 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize(Class<T> mappedClass) {
 		super.initialize(mappedClass);
