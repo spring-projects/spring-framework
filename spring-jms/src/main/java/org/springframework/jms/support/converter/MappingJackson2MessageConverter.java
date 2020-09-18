@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,7 +275,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	protected TextMessage mapToTextMessage(Object object, Session session, ObjectWriter objectWriter)
 			throws JMSException, IOException {
 
-		StringWriter writer = new StringWriter();
+		StringWriter writer = new StringWriter(1024);
 		objectWriter.writeValue(writer, object);
 		return session.createTextMessage(writer.toString());
 	}
