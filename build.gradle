@@ -5,6 +5,7 @@ plugins {
 	id 'org.jetbrains.kotlin.jvm' version '1.3.72' apply false
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
 	id 'org.asciidoctor.jvm.convert' version '2.4.0'
+	id 'org.asciidoctor.jvm.pdf' version '2.4.0'
 	id 'de.undercouch.download' version '4.1.1'
 	id "io.freefair.aspectj" version '4.1.6' apply false
 	id 'com.gradle.build-scan' version '3.2'
