@@ -6186,7 +6186,7 @@ Spring MVC Test's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
 
-include::testing-webtestclient.adoc[leveloffset=+2]
+include::testing/testing-webtestclient.adoc[leveloffset=+2]
 
 
 

@@ -8289,4 +8289,4 @@ directly through the backing cache (when configuring it) or through its native A
 
 
 
-include::integration-appendix.adoc[leveloffset=+1]
+include::integration/integration-appendix.adoc[leveloffset=+1]
