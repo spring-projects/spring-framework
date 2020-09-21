@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+	
+import org.asciidoctor.gradle.AsciidoctorTask
+
+buildscript {
+	repositories {
+		maven { url "https://repo.spring.io/plugins-release" }
+	}
+	dependencies {
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.8")
+		classpath("org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16")
+	}
+}
 
 task api(type: Javadoc) {
 	group = "Documentation"
@@ -80,7 +92,15 @@ dokka {
 	}
 }
 
+asciidoctorj {
+	version = '1.5.8'
+}
+
 asciidoctor {
+	// only output PDF documentation for non-SNAPSHOT builds
+	if (!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
+		dependsOn 'asciidoctorPdf'
+	}
 	sources {
 		include '*.adoc'
 	}
@@ -91,10 +111,6 @@ asciidoctor {
 	}
 	logDocuments = true
 	backends = ["html5"]
-	// only ouput PDF documentation for non-SNAPSHOT builds
-	if(!project.getVersion().toString().contains("BUILD-SNAPSHOT")) {
-		backends += "pdf"
-	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes  'icons': 'font',
 			'idprefix': '',
@@ -107,7 +123,29 @@ asciidoctor {
 			stylesdir: 'stylesheets/',
 			stylesheet: 'main.css',
 			'spring-version': project.version
+}
 
+task asciidoctorPdf(type: AsciidoctorTask) {
+	sources {
+		include '*.adoc'
+	}
+	logDocuments = true
+	backends = ["pdf"]
+	options doctype: 'book', eruby: 'erubis'
+	attributes  'icons': 'font',
+			'idprefix': '',
+			'idseparator': '-',
+			docinfo: '',
+			revnumber: project.version,
+			sectanchors: '',
+			sectnums: '',
+			'source-highlighter': 'coderay@', // TODO switch to 'rouge' once supported by the html5 backend
+			stylesdir: 'stylesheets/',
+			stylesheet: 'main.css',
+			'spring-version': project.version
+	doLast {
+		project.delete("$asciidoctorPdf.outputDir/pdf/images")
+	}
 }
 
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
