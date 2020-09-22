@@ -120,10 +120,8 @@ class WebClientIntegrationTests {
 	void retrieve(ClientHttpConnector connector) {
 		startServer(connector);
 
-		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
-						.addHeader("Set-Cookie", "testkey1=testvalue1;")
-						.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
-						.setBody("Hello Spring!"));
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
@@ -1102,7 +1100,7 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "text/plain")
 				.addHeader("Set-Cookie", "testkey1=testvalue1;")
-				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
+				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; SameSite=Lax; Secure")
 				.setBody("test"));
 
 		Mono<ClientResponse> result = this.webClient.get()
@@ -1123,6 +1121,7 @@ class WebClientIntegrationTests {
 					assertThat(cookie2.getValue()).isEqualTo("testvalue2");
 					assertThat(cookie2.isSecure()).isTrue();
 					assertThat(cookie2.isHttpOnly()).isTrue();
+					assertThat(cookie2.getSameSite()).isEqualTo("Lax");
 					assertThat(cookie2.getMaxAge().getSeconds()).isEqualTo(42);
 				})
 				.expectComplete()
