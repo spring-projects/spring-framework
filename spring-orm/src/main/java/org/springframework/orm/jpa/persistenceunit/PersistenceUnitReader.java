@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.persistenceunit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.SharedCacheMode;
@@ -123,7 +123,7 @@ final class PersistenceUnitReader {
 	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
+		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String resourceLocation = null;
 		try {
 			for (String location : persistenceXmlLocations) {

@@ -56,8 +56,7 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 
 	public HttpComponentsClientHttpResponse(DataBufferFactory dataBufferFactory,
-			Message<HttpResponse, Publisher<ByteBuffer>> message,
-			HttpClientContext context) {
+			Message<HttpResponse, Publisher<ByteBuffer>> message, HttpClientContext context) {
 
 		this.dataBufferFactory = dataBufferFactory;
 		this.message = message;
@@ -82,13 +81,15 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		LinkedMultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.context.getCookieStore().getCookies().forEach(cookie ->
-				result.add(cookie.getName(), ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
-						.domain(cookie.getDomain())
-						.path(cookie.getPath())
-						.maxAge(getMaxAgeSeconds(cookie))
-						.secure(cookie.isSecure())
-						.httpOnly(cookie.containsAttribute("httponly"))
-						.build()));
+				result.add(cookie.getName(),
+						ResponseCookie.fromClientResponse(cookie.getName(), cookie.getValue())
+								.domain(cookie.getDomain())
+								.path(cookie.getPath())
+								.maxAge(getMaxAgeSeconds(cookie))
+								.secure(cookie.isSecure())
+								.httpOnly(cookie.containsAttribute("httponly"))
+								.sameSite(cookie.getAttribute("samesite"))
+								.build()));
 		return result;
 	}
 
@@ -112,4 +113,5 @@ class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
+
 }

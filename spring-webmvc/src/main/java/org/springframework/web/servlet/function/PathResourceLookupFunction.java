@@ -55,7 +55,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 
 	@Override
 	public Optional<Resource> apply(ServerRequest request) {
-		PathContainer pathContainer = request.pathContainer();
+		PathContainer pathContainer = request.requestPath().pathWithinApplication();
 		if (!this.pattern.matches(pathContainer)) {
 			return Optional.empty();
 		}

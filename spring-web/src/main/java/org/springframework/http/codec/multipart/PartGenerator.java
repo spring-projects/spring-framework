@@ -23,8 +23,8 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -479,7 +479,7 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		}
 
 		private void switchToFile(DataBuffer current, long byteCount) {
-			List<DataBuffer> content = new LinkedList<>(this.content);
+			List<DataBuffer> content = new ArrayList<>(this.content);
 			content.add(current);
 			this.releaseOnDispose = false;
 

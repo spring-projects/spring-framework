@@ -36,6 +36,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -158,6 +159,12 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		this.beanFactory.setParentBeanFactory(getInternalParentBeanFactory());
 	}
 
+	@Override
+	public void setApplicationStartup(ApplicationStartup applicationStartup) {
+		super.setApplicationStartup(applicationStartup);
+		this.beanFactory.setApplicationStartup(applicationStartup);
+	}
+
 	/**
 	 * Set whether it should be allowed to override bean definitions by registering
 	 * a different definition with the same name, automatically replacing the former.
@@ -266,7 +273,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
-		this.beanFactory.setApplicationStartup(this.getApplicationStartup());
 		this.beanFactory.setSerializationId(getId());
 	}
 

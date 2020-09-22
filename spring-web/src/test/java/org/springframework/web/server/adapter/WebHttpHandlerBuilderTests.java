@@ -18,6 +18,8 @@ package org.springframework.web.server.adapter;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -29,7 +31,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -47,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class WebHttpHandlerBuilderTests {
 
 	@Test  // SPR-15074
-	public void orderedWebFilterBeans() {
+	void orderedWebFilterBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedWebFilterBeanConfig.class);
 		context.refresh();
@@ -65,7 +69,7 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
-	public void forwardedHeaderFilter() {
+	void forwardedHeaderTransformer() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(ForwardedHeaderFilterConfig.class);
 		context.refresh();
@@ -76,7 +80,7 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test  // SPR-15074
-	public void orderedWebExceptionHandlerBeans() {
+	void orderedWebExceptionHandlerBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(OrderedExceptionHandlerBeanConfig.class);
 		context.refresh();
@@ -90,7 +94,7 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test
-	public void configWithoutFilters() {
+	void configWithoutFilters() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(NoFilterConfig.class);
 		context.refresh();
@@ -104,7 +108,7 @@ public class WebHttpHandlerBuilderTests {
 	}
 
 	@Test  // SPR-16972
-	public void cloneWithApplicationContext() {
+	void cloneWithApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(NoFilterConfig.class);
 		context.refresh();
@@ -114,6 +118,26 @@ public class WebHttpHandlerBuilderTests {
 		assertThat(((HttpWebHandlerAdapter) builder.clone().build()).getApplicationContext()).isSameAs(context);
 	}
 
+	@Test
+	void httpHandlerDecorator() {
+		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
+				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();
+
+		AtomicBoolean success = new AtomicBoolean(false);
+		HttpHandler httpHandler = WebHttpHandlerBuilder
+				.webHandler(exchange -> {
+					HttpHeaders headers = exchange.getRequest().getHeaders();
+					assertThat(headers.get("My-Header")).containsExactlyInAnyOrder("1", "2", "3");
+					success.set(true);
+					return Mono.empty();
+				})
+				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "1"), res))
+				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "2"), res))
+				.httpHandlerDecorator(handler -> (req, res) -> handler.handle(mutator.apply(req, "3"), res)).build();
+
+		httpHandler.handle(MockServerHttpRequest.get("/").build(), new MockServerHttpResponse()).block();
+		assertThat(success.get()).isTrue();
+	}
 
 	private static Mono<Void> writeToResponse(ServerWebExchange exchange, String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);

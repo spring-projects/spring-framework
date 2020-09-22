@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +29,7 @@ import io.undertow.util.HeaderValues;
 import io.undertow.util.HttpString;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -81,7 +81,7 @@ class UndertowHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		Map<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
+		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
 		this.headers.forEach(values ->
 				singleValueMap.put(values.getHeaderName().toString(), values.getFirst()));
 		return singleValueMap;

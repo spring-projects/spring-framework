@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,6 +44,14 @@ import org.springframework.lang.Nullable;
 public abstract class CollectionUtils {
 
 	/**
+	 * Default load factor for {@link HashMap}/{@link LinkedHashMap} variants.
+	 * @see #newHashMap(int)
+	 * @see #newLinkedHashMap(int)
+	 */
+	static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+
+	/**
 	 * Return {@code true} if the supplied Collection is {@code null} or empty.
 	 * Otherwise, return {@code false}.
 	 * @param collection the Collection to check
@@ -63,6 +72,40 @@ public abstract class CollectionUtils {
 	}
 
 	/**
+	 * Instantiate a new {@link HashMap} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * <p>This differs from the regular {@link HashMap} constructor
+	 * which takes an initial capacity relative to a load factor
+	 * but is effectively aligned with the JDK's
+	 * {@link java.util.concurrent.ConcurrentHashMap#ConcurrentHashMap(int)}.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 5.3
+	 * @see #newLinkedHashMap(int)
+	 */
+	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
+		return new HashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
+	 * Instantiate a new {@link LinkedHashMap} with an initial capacity
+	 * that can accommodate the specified number of elements without
+	 * any immediate resize/rehash operations to be expected.
+	 * <p>This differs from the regular {@link LinkedHashMap} constructor
+	 * which takes an initial capacity relative to a load factor but is
+	 * aligned with Spring's own {@link LinkedCaseInsensitiveMap} and
+	 * {@link LinkedMultiValueMap} constructor semantics as of 5.3.
+	 * @param expectedSize the expected number of elements (with a corresponding
+	 * capacity to be derived so that no resize/rehash operations are needed)
+	 * @since 5.3
+	 * @see #newHashMap(int)
+	 */
+	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
+		return new LinkedHashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+	}
+
+	/**
 	 * Convert the supplied array into a List. A primitive array gets converted
 	 * into a List of the appropriate wrapper type.
 	 * <p><b>NOTE:</b> Generally prefer the standard {@link Arrays#asList} method.
@@ -74,8 +117,7 @@ public abstract class CollectionUtils {
 	 * @see ObjectUtils#toObjectArray(Object)
 	 * @see Arrays#asList(Object[])
 	 */
-	@SuppressWarnings("rawtypes")
-	public static List arrayToList(@Nullable Object source) {
+	public static List<?> arrayToList(@Nullable Object source) {
 		return Arrays.asList(ObjectUtils.toObjectArray(source));
 	}
 
@@ -430,7 +472,7 @@ public abstract class CollectionUtils {
 			MultiValueMap<? extends K, ? extends V> targetMap) {
 
 		Assert.notNull(targetMap, "'targetMap' must not be null");
-		Map<K, List<V>> result = new LinkedHashMap<>(targetMap.size());
+		Map<K, List<V>> result = newLinkedHashMap(targetMap.size());
 		targetMap.forEach((key, value) -> {
 			List<? extends V> values = Collections.unmodifiableList(value);
 			result.put(key, (List<V>) values);

@@ -16,8 +16,8 @@
 
 package org.springframework.jdbc.support;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	 * Create a new GeneratedKeyHolder with a default list.
 	 */
 	public GeneratedKeyHolder() {
-		this.keyList = new LinkedList<>();
+		this.keyList = new ArrayList<>(1);
 	}
 
 	/**

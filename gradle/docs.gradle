@@ -130,29 +130,6 @@ asciidoctorj {
 		}
 	}
 	fatalWarnings ".*"
-}
-
-/**
- * Produce the Spring Framework Reference documentation
- * from "src/docs/asciidoc" into  "build/asciidoc/html5"
- */
-asciidoctor {
-	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
-	sources {
-		include '*.adoc'
-	}
-	outputDir "$buildDir/docs/ref-docs/"
-	resources {
-		from(sourceDir) {
-			include 'images/*.png', 'css/**', 'js/**'
-		}
-		from extractDocResources
-	}
-	logDocuments = true
-	outputOptions {
-		backends = ["html5", "pdf"]
-	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
 			icons: 'font',
@@ -172,6 +149,41 @@ asciidoctor {
 }
 
 /**
+ * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
+ * in "build/docs/ref-docs/html5".
+ */
+asciidoctor {
+	dependsOn asciidoctorPdf
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
+	sources {
+		include '*.adoc'
+	}
+	outputDir "$buildDir/docs/ref-docs/html5"
+	logDocuments = true
+	resources {
+		from(sourceDir) {
+			include 'images/*.png', 'css/**', 'js/**'
+		}
+		from extractDocResources
+	}
+}
+
+/**
+ * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
+ * in "build/docs/ref-docs/pdf".
+ */
+asciidoctorPdf {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
+	sources {
+		include '*.adoc'
+	}
+	outputDir "$buildDir/docs/ref-docs/pdf"
+	logDocuments = true
+}
+
+/**
  * Zip all docs (API and reference) into a single archive
  */
 task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
@@ -188,10 +200,10 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 		into "javadoc-api"
 	}
 	from ("$asciidoctor.outputDir/html5") {
-		into "spring-framework-reference"
+		into "reference/html"
 	}
 	from ("$asciidoctor.outputDir/pdf") {
-		into "spring-framework-reference/pdf"
+		into "reference/pdf"
 	}
 	from (dokka) {
 		into "kdoc-api"

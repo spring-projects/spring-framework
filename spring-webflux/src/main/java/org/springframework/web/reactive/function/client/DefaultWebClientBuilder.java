@@ -180,7 +180,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private MultiValueMap<String, String> initCookies() {
 		if (this.defaultCookies == null) {
-			this.defaultCookies = new LinkedMultiValueMap<>(4);
+			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
 	}

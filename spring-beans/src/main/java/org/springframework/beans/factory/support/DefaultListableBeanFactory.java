@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +80,7 @@ import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.CompositeIterator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -476,7 +476,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				if (beanNames.length == 0) {
 					return Stream.empty();
 				}
-				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
+				Map<String, T> matchingBeans = CollectionUtils.newLinkedHashMap(beanNames.length);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
 					if (!(beanInstance instanceof NullBean)) {
@@ -665,7 +665,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) throws BeansException {
 
 		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
-		Map<String, T> result = new LinkedHashMap<>(beanNames.length);
+		Map<String, T> result = CollectionUtils.newLinkedHashMap(beanNames.length);
 		for (String beanName : beanNames) {
 			try {
 				Object beanInstance = getBean(beanName);
@@ -715,7 +715,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		String[] beanNames = getBeanNamesForAnnotation(annotationType);
-		Map<String, Object> result = new LinkedHashMap<>(beanNames.length);
+		Map<String, Object> result = CollectionUtils.newLinkedHashMap(beanNames.length);
 		for (String beanName : beanNames) {
 			Object beanInstance = getBean(beanName);
 			if (!(beanInstance instanceof NullBean)) {
@@ -1235,7 +1235,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, requiredType.toClass(), args));
 		}
 		else if (candidateNames.length > 1) {
-			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
+			Map<String, Object> candidates = CollectionUtils.newLinkedHashMap(candidateNames.length);
 			for (String beanName : candidateNames) {
 				if (containsSingleton(beanName) && args == null) {
 					Object beanInstance = getBean(beanName);
@@ -1532,7 +1532,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
-		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length);
+		Map<String, Object> result = CollectionUtils.newLinkedHashMap(candidateNames.length);
 		for (Map.Entry<Class<?>, Object> classObjectEntry : this.resolvableDependencies.entrySet()) {
 			Class<?> autowiringType = classObjectEntry.getKey();
 			if (autowiringType.isAssignableFrom(requiredType)) {

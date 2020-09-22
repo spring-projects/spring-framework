@@ -24,7 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +46,6 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.ClassLoaderReference;
 import com.thoughtworks.xstream.core.DefaultConverterLookup;
-import com.thoughtworks.xstream.core.util.CompositeClassLoader;
 import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -82,6 +80,7 @@ import org.springframework.oxm.UnmarshallingFailureException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.support.AbstractMarshaller;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.function.SingletonSupplier;
@@ -186,7 +185,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	@Nullable
 	private Class<?>[] supportedClasses;
 
-	private ClassLoader beanClassLoader = new CompositeClassLoader();
+	@Nullable
+	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 	private final SingletonSupplier<XStream> xstream = SingletonSupplier.of(this::buildXStream);
 
@@ -584,7 +584,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements BeanClassLo
 	}
 
 	private Map<String, Class<?>> toClassMap(Map<String, ?> map) throws ClassNotFoundException {
-		Map<String, Class<?>> result = new LinkedHashMap<>(map.size());
+		Map<String, Class<?>> result = CollectionUtils.newLinkedHashMap(map.size());
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();

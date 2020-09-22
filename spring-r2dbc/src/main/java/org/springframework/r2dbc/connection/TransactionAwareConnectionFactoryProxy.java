@@ -58,9 +58,8 @@ import org.springframework.util.ReflectionUtils;
  * {@link ConnectionFactory}, avoiding the need to define such a proxy in the first place.
  *
  * <p><b>NOTE:</b> This {@link ConnectionFactory} proxy needs to return wrapped
- * {@link Connection}s (which implement the {@link ConnectionProxy} interface) in order
- * to handle close calls properly. Use {@link Wrapped#unwrap()} to retrieve
- * the native R2DBC Connection.
+ * {@link Connection}s in order to handle close calls properly.
+ * Use {@link Wrapped#unwrap()} to retrieve the native R2DBC Connection.
  *
  * @author Mark Paluch
  * @author Christoph Strobl
@@ -74,9 +73,7 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 
 	/**
 	 * Create a new {@link TransactionAwareConnectionFactoryProxy}.
-	 *
-	 * @param targetConnectionFactory the target {@link ConnectionFactory}.
-	 * @throws IllegalArgumentException if given {@link ConnectionFactory} is {@code null}.
+	 * @param targetConnectionFactory the target {@link ConnectionFactory}
 	 */
 	public TransactionAwareConnectionFactoryProxy(ConnectionFactory targetConnectionFactory) {
 		super(targetConnectionFactory);
@@ -84,25 +81,20 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 
 
 	/**
-	 * Delegates to {@link ConnectionFactoryUtils} for automatically participating in Spring-managed transactions.
-	 * <p>
-	 * The returned {@link ConnectionFactory} handle implements the {@link ConnectionProxy} interface, allowing to
-	 * retrieve the underlying target {@link Connection}.
-	 *
+	 * Delegates to {@link ConnectionFactoryUtils} for automatically participating
+	 * in Spring-managed transactions.
 	 * @return a transactional {@link Connection} if any, a new one else.
 	 * @see ConnectionFactoryUtils#doGetConnection
-	 * @see ConnectionProxy#getTargetConnection
 	 */
 	@Override
 	public Mono<Connection> create() {
-		return getTransactionAwareConnectionProxy(obtainTargetConnectionFactory());
+		return getTransactionAwareConnectionProxy(getTargetConnectionFactory());
 	}
 
 	/**
-	 * Wraps the given {@link Connection} with a proxy that delegates every method call to it but delegates
-	 * {@code close()} calls to {@link ConnectionFactoryUtils}.
-	 *
-	 * @param targetConnectionFactory the {@link ConnectionFactory} that the {@link Connection} came from.
+	 * Wraps the given {@link Connection} with a proxy that delegates every method call
+	 * to it but delegates {@code close()} calls to {@link ConnectionFactoryUtils}.
+	 * @param targetConnectionFactory the {@link ConnectionFactory} that the {@link Connection} came from
 	 * @return the wrapped {@link Connection}.
 	 * @see Connection#close()
 	 * @see ConnectionFactoryUtils#doReleaseConnection
@@ -113,16 +105,15 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 	}
 
 	private static Connection proxyConnection(Connection connection, ConnectionFactory targetConnectionFactory) {
-
 		return (Connection) Proxy.newProxyInstance(TransactionAwareConnectionFactoryProxy.class.getClassLoader(),
-				new Class<?>[] { Connection.class, Wrapped.class },
+				new Class<?>[] {Connection.class, Wrapped.class},
 				new TransactionAwareInvocationHandler(connection, targetConnectionFactory));
 	}
 
 
 	/**
-	 * Invocation handler that delegates close calls on R2DBC Connections to {@link ConnectionFactoryUtils} for being
-	 * aware of context-bound transactions.
+	 * Invocation handler that delegates close calls on R2DBC Connections to
+	 * {@link ConnectionFactoryUtils} for being aware of context-bound transactions.
 	 */
 	private static class TransactionAwareInvocationHandler implements InvocationHandler {
 

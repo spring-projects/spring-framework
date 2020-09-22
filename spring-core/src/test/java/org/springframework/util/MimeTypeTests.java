@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,6 +318,25 @@ class MimeTypeTests {
 		testWithQuotedParameters("foo/bar;param=\"a\\\"b,c\"");
 		testWithQuotedParameters("foo/bar;param=\"\\\\\"");
 		testWithQuotedParameters("foo/bar;param=\"\\,\\\"");
+	}
+
+	@Test
+	void parseSubtypeSuffix() {
+		MimeType type = new MimeType("application", "vdn.something+json");
+		assertThat(type.getSubtypeSuffix()).isEqualTo("json");
+		type = new MimeType("application", "vdn.something");
+		assertThat(type.getSubtypeSuffix()).isNull();
+		type = new MimeType("application", "vdn.something+");
+		assertThat(type.getSubtypeSuffix()).isEqualTo("");
+		type = new MimeType("application", "vdn.some+thing+json");
+		assertThat(type.getSubtypeSuffix()).isEqualTo("json");
+	}
+
+	@Test // gh-25350
+	void wildcardSubtypeCompatibleWithSuffix() {
+		MimeType applicationStar = new MimeType("application", "*");
+		MimeType applicationVndJson = new MimeType("application", "vnd.something+json");
+		assertThat(applicationStar.isCompatibleWith(applicationVndJson)).isTrue();
 	}
 
 	private void testWithQuotedParameters(String... mimeTypes) {

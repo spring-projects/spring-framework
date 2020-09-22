@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-class ExceptionHandlerTests {
+public class ExceptionHandlerTests {
 
 	@Nested
 	class MvcTests {
@@ -58,14 +58,6 @@ class ExceptionHandlerTests {
 		@Test
 		void globalExceptionHandlerMethod() throws Exception {
 			standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
-				.perform(get("/person/Bonnie"))
-				.andExpect(status().isOk())
-				.andExpect(forwardedUrl("globalErrorView"));
-		}
-
-		@Test
-		void globalExceptionHandlerMethodUsingClassArgument() throws Exception {
-			standaloneSetup(PersonController.class).setControllerAdvice(GlobalExceptionHandler.class).build()
 				.perform(get("/person/Bonnie"))
 				.andExpect(status().isOk())
 				.andExpect(forwardedUrl("globalErrorView"));
@@ -146,7 +138,7 @@ class ExceptionHandlerTests {
 		void noHandlerFound() throws Exception {
 			standaloneSetup(RestPersonController.class)
 				.setControllerAdvice(RestGlobalExceptionHandler.class, RestPersonControllerExceptionHandler.class)
-				.addDispatcherServletCustomizer(dispatcherServlet -> dispatcherServlet.setThrowExceptionIfNoHandlerFound(true))
+				.addDispatcherServletCustomizer(servlet -> servlet.setThrowExceptionIfNoHandlerFound(true))
 				.build()
 				.perform(get("/bogus").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())

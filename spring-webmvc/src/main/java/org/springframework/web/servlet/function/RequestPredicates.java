@@ -21,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.security.Principal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -51,6 +50,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -490,7 +490,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			PathContainer pathContainer = request.pathContainer();
+			PathContainer pathContainer = request.requestPath().pathWithinApplication();
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
 			if (info != null) {
@@ -516,7 +516,7 @@ public abstract class RequestPredicates {
 
 		@Override
 		public Optional<ServerRequest> nest(ServerRequest request) {
-			return Optional.ofNullable(this.pattern.matchStartOfPath(request.pathContainer()))
+			return Optional.ofNullable(this.pattern.matchStartOfPath(request.requestPath().pathWithinApplication()))
 					.map(info -> new SubPathServerRequestWrapper(request, info, this.pattern));
 		}
 
@@ -924,15 +924,25 @@ public abstract class RequestPredicates {
 
 		private final ServerRequest request;
 
-		private final PathContainer pathContainer;
+		private RequestPath requestPath;
 
 		private final Map<String, Object> attributes;
 
 		public SubPathServerRequestWrapper(ServerRequest request,
 				PathPattern.PathRemainingMatchInfo info, PathPattern pattern) {
 			this.request = request;
-			this.pathContainer = new SubPathContainer(info.getPathRemaining());
+			this.requestPath = requestPath(request.requestPath(), info);
 			this.attributes = mergeAttributes(request, info.getUriVariables(), pattern);
+		}
+
+		private static RequestPath requestPath(RequestPath original, PathPattern.PathRemainingMatchInfo info) {
+			StringBuilder contextPath = new StringBuilder(original.contextPath().value());
+			contextPath.append(info.getPathMatched().value());
+			int length = contextPath.length();
+			if (length > 0 && contextPath.charAt(length - 1) == '/') {
+				contextPath.setLength(length - 1);
+			}
+			return original.modifyContextPath(contextPath.toString());
 		}
 
 		private static Map<String, Object> mergeAttributes(ServerRequest request,
@@ -970,13 +980,8 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public String path() {
-			return this.pathContainer.value();
-		}
-
-		@Override
-		public PathContainer pathContainer() {
-			return this.pathContainer;
+		public RequestPath requestPath() {
+			return this.requestPath;
 		}
 
 		@Override
@@ -1084,46 +1089,6 @@ public abstract class RequestPredicates {
 			return method() + " " +  path();
 		}
 
-		private static class SubPathContainer implements PathContainer {
-
-			private static final PathContainer.Separator SEPARATOR = () -> "/";
-
-
-			private final String value;
-
-			private final List<Element> elements;
-
-			public SubPathContainer(PathContainer original) {
-				this.value = prefixWithSlash(original.value());
-				this.elements = prependWithSeparator(original.elements());
-			}
-
-			private static String prefixWithSlash(String path) {
-				if (!path.startsWith("/")) {
-					path = "/" + path;
-				}
-				return path;
-			}
-
-			private static List<Element> prependWithSeparator(List<Element> elements) {
-				List<Element> result = new ArrayList<>(elements);
-				if (result.isEmpty() || !(result.get(0) instanceof Separator)) {
-					result.add(0, SEPARATOR);
-				}
-				return Collections.unmodifiableList(result);
-			}
-
-
-			@Override
-			public String value() {
-				return this.value;
-			}
-
-			@Override
-			public List<Element> elements() {
-				return this.elements;
-			}
-		}
 	}
 
 }

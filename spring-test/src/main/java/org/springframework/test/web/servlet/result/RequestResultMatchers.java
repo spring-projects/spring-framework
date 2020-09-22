@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class RequestResultMatchers {
 	 * or {@link WebAsyncTask}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ResultMatcher asyncResult(Matcher<T> matcher) {
+	public <T> ResultMatcher asyncResult(Matcher<? super T> matcher) {
 		return result -> {
 			HttpServletRequest request = result.getRequest();
 			assertAsyncStarted(request);
@@ -110,7 +110,7 @@ public class RequestResultMatchers {
 	 * Assert a request attribute value with the given Hamcrest {@link Matcher}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ResultMatcher attribute(String name, Matcher<T> matcher) {
+	public <T> ResultMatcher attribute(String name, Matcher<? super T> matcher) {
 		return result -> {
 			T value = (T) result.getRequest().getAttribute(name);
 			assertThat("Request attribute '" + name + "'", value, matcher);
@@ -129,7 +129,7 @@ public class RequestResultMatchers {
 	 * Assert a session attribute value with the given Hamcrest {@link Matcher}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ResultMatcher sessionAttribute(String name, Matcher<T> matcher) {
+	public <T> ResultMatcher sessionAttribute(String name, Matcher<? super T> matcher) {
 		return result -> {
 			HttpSession session = result.getRequest().getSession();
 			Assert.state(session != null, "No HttpSession");

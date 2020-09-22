@@ -41,7 +41,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -2062,6 +2061,31 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@PathPatternsParameterizedTest
+	void dataClassBindingWithNullable(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(NullableDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "true");
+		request.addParameter("param3", "3");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-true-3");
+	}
+
+	@PathPatternsParameterizedTest
+	void dataClassBindingWithNullableAndConversionError(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(NullableDataClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("param1", "value1");
+		request.addParameter("param2", "x");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("value1-x-null");
+	}
+
+	@PathPatternsParameterizedTest
 	void dataClassBindingWithOptional(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(OptionalDataClassController.class, usePathPatterns);
 
@@ -2409,7 +2433,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@Override
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<>();
+			List<TestBean> list = new ArrayList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2436,7 +2460,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@Override
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<>();
+			List<TestBean> list = new ArrayList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2463,7 +2487,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<>();
+			List<TestBean> list = new ArrayList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2500,7 +2524,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<>();
+			List<TestBean> list = new ArrayList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2521,7 +2545,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans(@ModelAttribute(name="myCommand", binding=false) TestBean tb) {
-			List<TestBean> list = new LinkedList<>();
+			List<TestBean> list = new ArrayList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -3834,11 +3858,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class DataClass {
 
 		@NotNull
-		public final String param1;
+		private final String param1;
 
-		public final boolean param2;
+		private final boolean param2;
 
-		public int param3;
+		private int param3;
 
 		@ConstructorProperties({"param1", "param2", "optionalParam"})
 		public DataClass(String param1, boolean p2, Optional<Integer> optionalParam) {
@@ -3848,8 +3872,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			optionalParam.ifPresent(integer -> this.param3 = integer);
 		}
 
+		public String param1() {
+			return param1;
+		}
+
+		public boolean param2() {
+			return param2;
+		}
+
 		public void setParam3(int param3) {
 			this.param3 = param3;
+		}
+
+		public int getParam3() {
+			return param3;
 		}
 	}
 
@@ -3876,7 +3912,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
-			binder.initDirectFieldAccess();
 			binder.setConversionService(new DefaultFormattingConversionService());
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
@@ -3885,6 +3920,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping("/bind")
 		public BindStatusView handle(@Valid DataClass data, BindingResult result) {
+			assertThat(data).isNotNull();
 			if (result.hasErrors()) {
 				return new BindStatusView(result.getErrorCount() + ":" + result.getFieldValue("param1") + "-" +
 						result.getFieldValue("param2") + "-" + result.getFieldValue("param3"));
@@ -3974,6 +4010,21 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public String handle(ServletPartDataClass data) throws IOException {
 			return StreamUtils.copyToString(data.param1.getInputStream(), StandardCharsets.UTF_8) +
 					"-" + data.param2 + "-" + data.param3;
+		}
+	}
+
+	@RestController
+	public static class NullableDataClassController {
+
+		@RequestMapping("/bind")
+		public String handle(@Nullable DataClass data, BindingResult result) {
+			if (result.hasErrors()) {
+				assertThat(data).isNull();
+				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
+						result.getFieldValue("param3");
+			}
+			assertThat(data).isNotNull();
+			return data.param1 + "-" + data.param2 + "-" + data.param3;
 		}
 	}
 

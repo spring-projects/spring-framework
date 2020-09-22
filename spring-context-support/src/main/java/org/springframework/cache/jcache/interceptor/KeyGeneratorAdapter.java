@@ -101,7 +101,6 @@ class KeyGeneratorAdapter implements KeyGenerator {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Object doGenerate(KeyGenerator keyGenerator, CacheKeyInvocationContext<?> context) {
 		List<Object> parameters = new ArrayList<>();
 		for (CacheInvocationParameter param : context.getKeyParameters()) {

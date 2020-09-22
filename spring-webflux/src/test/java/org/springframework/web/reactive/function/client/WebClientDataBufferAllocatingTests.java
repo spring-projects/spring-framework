@@ -40,7 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
-import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -127,7 +126,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
-		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
+		StepVerifier.create(mono).expectError(WebClientResponseException.class).verify(Duration.ofSeconds(3));
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 

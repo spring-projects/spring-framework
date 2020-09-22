@@ -104,6 +104,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	protected void applyHeaders() {
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
@@ -121,6 +122,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				cookie.setSameSiteMode(httpCookie.getSameSite());
+				// getResponseCookies() is deprecated in Undertow 2.2
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
 			}
 		}

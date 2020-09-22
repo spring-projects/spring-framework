@@ -91,12 +91,14 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		}
 	}
 
+
 	/**
-	 * Set the buffer factory to be used.
+	 * Set the buffer factory to use.
 	 */
 	public void setBufferFactory(DataBufferFactory bufferFactory) {
 		this.bufferFactory = bufferFactory;
 	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,

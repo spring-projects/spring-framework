@@ -252,6 +252,11 @@ abstract class CronField {
 			}
 			return temporal;
 		}
+
+		@Override
+		public String toString() {
+			return this.field.toString();
+		}
 	}
 
 }

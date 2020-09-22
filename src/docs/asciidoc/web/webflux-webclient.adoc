@@ -251,8 +251,11 @@ To configure a connection timeout:
 	import io.netty.channel.ChannelOption;
 
 	HttpClient httpClient = HttpClient.create()
-			.tcpConfiguration(client ->
-					client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000));
+			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+
+	WebClient webClient = WebClient.builder()
+			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -260,10 +263,14 @@ To configure a connection timeout:
 	import io.netty.channel.ChannelOption
 
 	val httpClient = HttpClient.create()
-			.tcpConfiguration { it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)}
+			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+
+	val webClient = WebClient.builder()
+			.clientConnector(new ReactorClientHttpConnector(httpClient))
+			.build();
 ----
 
-To configure a read and/or write timeout values:
+To configure a read or write timeout:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -272,10 +279,12 @@ To configure a read and/or write timeout values:
 	import io.netty.handler.timeout.WriteTimeoutHandler;
 
 	HttpClient httpClient = HttpClient.create()
-			.tcpConfiguration(client ->
-					client.doOnConnected(conn -> conn
-							.addHandlerLast(new ReadTimeoutHandler(10))
-							.addHandlerLast(new WriteTimeoutHandler(10))));
+			.doOnConnected(conn -> conn
+					.addHandlerLast(new ReadTimeoutHandler(10))
+					.addHandlerLast(new WriteTimeoutHandler(10)));
+
+	// Create WebClient...
+
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -283,12 +292,59 @@ To configure a read and/or write timeout values:
 	import io.netty.handler.timeout.ReadTimeoutHandler
 	import io.netty.handler.timeout.WriteTimeoutHandler
 
-	val httpClient = HttpClient.create().tcpConfiguration {
-		it.doOnConnected { conn -> conn
-				.addHandlerLast(ReadTimeoutHandler(10))
-				.addHandlerLast(WriteTimeoutHandler(10))
-		}
-	}
+	val httpClient = HttpClient.create()
+			.doOnConnected { conn -> conn
+					.addHandlerLast(new ReadTimeoutHandler(10))
+					.addHandlerLast(new WriteTimeoutHandler(10))
+			}
+
+	// Create WebClient...
+----
+
+To configure a response timeout for all requests:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	HttpClient httpClient = HttpClient.create()
+			.responseTimeout(Duration.ofSeconds(2));
+
+	// Create WebClient...
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val httpClient = HttpClient.create()
+			.responseTimeout(Duration.ofSeconds(2));
+
+	// Create WebClient...
+----
+
+To configure a response timeout for a specific request:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient.create().get()
+			.uri("https://example.org/path")
+			.httpRequest(httpRequest -> {
+				HttpClientRequest reactorRequest = httpRequest.getNativeRequest();
+				reactorRequest.responseTimeout(Duration.ofSeconds(2));
+			})
+			.retrieve()
+			.bodyToMono(String.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	WebClient.create().get()
+			.uri("https://example.org/path")
+			.httpRequest { httpRequest: ClientHttpRequest ->
+				val reactorRequest = httpRequest.getNativeRequest<HttpClientRequest>()
+				reactorRequest.responseTimeout(Duration.ofSeconds(2))
+			}
+			.retrieve()
+			.bodyToMono(String::class.java)
 ----
 
 
@@ -303,18 +359,20 @@ The following example shows how to customize Jetty `HttpClient` settings:
 ----
 	HttpClient httpClient = new HttpClient();
 	httpClient.setCookieStore(...);
-	ClientHttpConnector connector = new JettyClientHttpConnector(httpClient);
 
-	WebClient webClient = WebClient.builder().clientConnector(connector).build();
+	WebClient webClient = WebClient.builder()
+			.clientConnector(new JettyClientHttpConnector(httpClient))
+			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val httpClient = HttpClient()
 	httpClient.cookieStore = ...
-	val connector = JettyClientHttpConnector(httpClient)
 
-	val webClient = WebClient.builder().clientConnector(connector).build();
+	val webClient = WebClient.builder()
+			.clientConnector(new JettyClientHttpConnector(httpClient))
+			.build();
 ----
 
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),

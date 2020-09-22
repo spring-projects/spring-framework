@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -197,8 +196,8 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testGenericListOfLists() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
-		List<List<Integer>> list = new LinkedList<>();
-		list.add(new LinkedList<>());
+		List<List<Integer>> list = new ArrayList<>();
+		list.add(new ArrayList<>());
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", 5);
@@ -209,8 +208,8 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testGenericListOfListsWithElementConversion() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
-		List<List<Integer>> list = new LinkedList<>();
-		list.add(new LinkedList<>());
+		List<List<Integer>> list = new ArrayList<>();
+		list.add(new ArrayList<>());
 		gb.setListOfLists(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("listOfLists[0][0]", "5");
@@ -246,7 +245,7 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testGenericListOfMaps() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
-		List<Map<Integer, Long>> list = new LinkedList<>();
+		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -258,7 +257,7 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testGenericListOfMapsWithElementConversion() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
-		List<Map<Integer, Long>> list = new LinkedList<>();
+		List<Map<Integer, Long>> list = new ArrayList<>();
 		list.add(new HashMap<>());
 		gb.setListOfMaps(list);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
@@ -295,7 +294,7 @@ public class BeanWrapperGenericsTests {
 	public void testGenericMapOfLists() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
-		map.put(1, new LinkedList<>());
+		map.put(1, new ArrayList<>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", 5);
@@ -307,7 +306,7 @@ public class BeanWrapperGenericsTests {
 	public void testGenericMapOfListsWithElementConversion() throws MalformedURLException {
 		GenericBean<String> gb = new GenericBean<>();
 		Map<Integer, List<Integer>> map = new HashMap<>();
-		map.put(1, new LinkedList<>());
+		map.put(1, new ArrayList<>());
 		gb.setMapOfLists(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfLists[1][0]", "5");
@@ -347,7 +346,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testGenericTypeNestingListOfMapOfInteger() throws Exception {
-		List<Map<String, String>> list = new LinkedList<>();
+		List<Map<String, String>> list = new ArrayList<>();
 		Map<String, String> map = new HashMap<>();
 		map.put("testKey", "5");
 		list.add(map);
@@ -381,9 +380,9 @@ public class BeanWrapperGenericsTests {
 	@Test
 	public void testComplexGenericMap() {
 		Map<List<String>, List<String>> inputMap = new HashMap<>();
-		List<String> inputKey = new LinkedList<>();
+		List<String> inputKey = new ArrayList<>();
 		inputKey.add("1");
-		List<String> inputValue = new LinkedList<>();
+		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 		inputMap.put(inputKey, inputValue);
 
@@ -414,7 +413,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexGenericIndexedMapEntry() {
-		List<String> inputValue = new LinkedList<>();
+		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();
@@ -440,7 +439,7 @@ public class BeanWrapperGenericsTests {
 
 	@Test
 	public void testComplexDerivedIndexedMapEntry() {
-		List<String> inputValue = new LinkedList<>();
+		List<String> inputValue = new ArrayList<>();
 		inputValue.add("10");
 
 		ComplexMapHolder holder = new ComplexMapHolder();

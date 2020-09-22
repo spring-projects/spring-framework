@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.metrics.jfr.FlightRecorderApplicationStartup;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 public class GenericApplicationContextTests {
 
 	@Test
-	public void getBeanForClass() {
+	void getBeanForClass() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class));
 		ac.refresh();
@@ -50,7 +51,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void withSingletonSupplier() {
+	void withSingletonSupplier() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class, ac::toString));
 		ac.refresh();
@@ -62,7 +63,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void withScopedSupplier() {
+	void withScopedSupplier() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("testBean",
 				new RootBeanDefinition(String.class, BeanDefinition.SCOPE_PROTOTYPE, ac::toString));
@@ -75,7 +76,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void accessAfterClosing() {
+	void accessAfterClosing() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class));
 		ac.refresh();
@@ -95,7 +96,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualBeans() {
+	void individualBeans() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean(BeanA.class);
 		context.registerBean(BeanB.class);
@@ -108,7 +109,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualNamedBeans() {
+	void individualNamedBeans() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("a", BeanA.class);
 		context.registerBean("b", BeanB.class);
@@ -121,7 +122,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualBeanWithSupplier() {
+	void individualBeanWithSupplier() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean(BeanA.class,
 				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)));
@@ -139,7 +140,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualBeanWithSupplierAndCustomizer() {
+	void individualBeanWithSupplierAndCustomizer() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean(BeanA.class,
 				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)),
@@ -155,7 +156,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualNamedBeanWithSupplier() {
+	void individualNamedBeanWithSupplier() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("a", BeanA.class,
 				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)));
@@ -170,7 +171,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualNamedBeanWithSupplierAndCustomizer() {
+	void individualNamedBeanWithSupplierAndCustomizer() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("a", BeanA.class,
 				() -> new BeanA(context.getBean(BeanB.class), context.getBean(BeanC.class)),
@@ -186,7 +187,7 @@ public class GenericApplicationContextTests {
 	}
 
 	@Test
-	public void individualBeanWithNullReturningSupplier() {
+	void individualBeanWithNullReturningSupplier() {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBean("a", BeanA.class, () -> null);
 		context.registerBean("b", BeanB.class, BeanB::new);
@@ -199,6 +200,14 @@ public class GenericApplicationContextTests {
 		assertThat(context.getBeansOfType(BeanA.class).isEmpty()).isTrue();
 		assertThat(context.getBeansOfType(BeanB.class).values().iterator().next()).isSameAs(context.getBean(BeanB.class));
 		assertThat(context.getBeansOfType(BeanC.class).values().iterator().next()).isSameAs(context.getBean(BeanC.class));
+	}
+
+	@Test
+	void configureApplicationStartupOnBeanFactory() {
+		FlightRecorderApplicationStartup applicationStartup = new FlightRecorderApplicationStartup();
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.setApplicationStartup(applicationStartup);
+		assertThat(context.getBeanFactory().getApplicationStartup()).isEqualTo(applicationStartup);
 	}
 
 

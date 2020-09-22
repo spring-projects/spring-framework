@@ -5159,7 +5159,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThatExceptionOfType(Exception.class).isThrownBy(expression::getValue);
 	}
 
-	private void assertIsCompiled(Expression expression) {
+	public static void assertIsCompiled(Expression expression) {
 		try {
 			Field field = SpelExpression.class.getDeclaredField("compiledAst");
 			field.setAccessible(true);

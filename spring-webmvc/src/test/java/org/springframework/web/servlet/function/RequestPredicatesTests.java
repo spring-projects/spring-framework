@@ -148,6 +148,13 @@ class RequestPredicatesTests {
 		assertThat(predicate.test(initRequest("GET", "/path"))).isTrue();
 	}
 
+	@Test
+	public void pathWithContext() {
+		RequestPredicate predicate = RequestPredicates.path("/p*");
+		ServerRequest request = initRequest("GET", "/context/path",
+				servletRequest -> servletRequest.setContextPath("/context"));
+		assertThat(predicate.test(request)).isTrue();
+	}
 
 	@Test
 	void headers() {

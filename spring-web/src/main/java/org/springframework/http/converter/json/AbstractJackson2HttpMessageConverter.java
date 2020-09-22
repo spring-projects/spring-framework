@@ -24,7 +24,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -56,6 +55,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.TypeUtils;
 
 /**
@@ -77,7 +77,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = CollectionUtils.newHashMap(JsonEncoding.values().length);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}
@@ -235,18 +235,18 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-
-		JavaType javaType = getJavaType(clazz, null);
-		return readJavaType(javaType, inputMessage);
-	}
-
-	@Override
 	public Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		JavaType javaType = getJavaType(type, contextClass);
+		return readJavaType(javaType, inputMessage);
+	}
+
+	@Override
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
 	}
 
@@ -285,7 +285,15 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 	}
 
-	private static Charset getCharset(@Nullable MediaType contentType) {
+	/**
+	 * Determine the charset to use for JSON input.
+	 * <p>By default this is either the charset from the input {@code MediaType}
+	 * or otherwise falling back on {@code UTF-8}. Can be overridden in subclasses.
+	 * @param contentType the content type of the HTTP input message
+	 * @return the charset to use
+	 * @since 5.1.18
+	 */
+	protected Charset getCharset(@Nullable MediaType contentType) {
 		if (contentType != null && contentType.getCharset() != null) {
 			return contentType.getCharset();
 		}

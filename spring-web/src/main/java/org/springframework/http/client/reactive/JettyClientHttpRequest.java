@@ -85,6 +85,12 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this.jettyRequest;
+	}
+
+	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return Mono.<Void>create(sink -> {
 			Flux<ContentChunk> chunks = Flux.from(body).map(buffer -> toContentChunk(buffer, sink));

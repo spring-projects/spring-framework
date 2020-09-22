@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,13 +172,13 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			if (byte[].class == getSerializedPayloadClass()) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				Result result = new StreamResult(out);
 				this.marshaller.marshal(payload, result);
 				payload = out.toByteArray();
 			}
 			else {
-				Writer writer = new StringWriter();
+				Writer writer = new StringWriter(1024);
 				Result result = new StreamResult(writer);
 				this.marshaller.marshal(payload, result);
 				payload = writer.toString();

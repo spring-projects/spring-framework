@@ -43,7 +43,7 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -123,7 +123,7 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public PathContainer pathContainer() {
+	public RequestPath requestPath() {
 		return request().getPath();
 	}
 

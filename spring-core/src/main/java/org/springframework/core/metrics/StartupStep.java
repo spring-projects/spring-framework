@@ -76,7 +76,7 @@ public interface StartupStep {
 	/**
 	 * Return the {@link Tag} collection for this step.
 	 */
-	Tags tags();
+	Tags getTags();
 
 	/**
 	 * Record the state of the step and possibly other metrics like execution time.
@@ -86,7 +86,7 @@ public interface StartupStep {
 
 
 	/**
-	 * Mutable collection of {@link Tag}.
+	 * Immutable collection of {@link Tag}.
 	 */
 	interface Tags extends Iterable<Tag> {
 	}

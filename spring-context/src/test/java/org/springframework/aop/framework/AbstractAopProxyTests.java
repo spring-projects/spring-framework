@@ -22,9 +22,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.MarshalException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -1128,7 +1128,7 @@ public abstract class AbstractAopProxyTests {
 		};
 
 		class NameSaver implements MethodInterceptor {
-			private List<Object> names = new LinkedList<>();
+			private List<Object> names = new ArrayList<>();
 
 			@Override
 			public Object invoke(MethodInvocation mi) throws Throwable {

@@ -38,7 +38,6 @@ public interface DatabasePopulator {
 	/**
 	 * Populate, initialize, or clean up the database using the
 	 * provided R2DBC {@link Connection}.
-	 *
 	 * @param connection the R2DBC connection to use to populate the db;
 	 * already configured and ready to use, must not be {@code null}
 	 * @return {@link Mono} that initiates script execution and is
@@ -53,8 +52,7 @@ public interface DatabasePopulator {
 	 * @return {@link Mono} that initiates {@link DatabasePopulator#populate(Connection)}
 	 * and is notified upon completion
 	 */
-	default Mono<Void> populate(ConnectionFactory connectionFactory)
-			throws DataAccessException {
+	default Mono<Void> populate(ConnectionFactory connectionFactory) throws DataAccessException {
 		Assert.notNull(connectionFactory, "ConnectionFactory must not be null");
 		return Mono.usingWhen(ConnectionFactoryUtils.getConnection(connectionFactory), //
 				this::populate, //

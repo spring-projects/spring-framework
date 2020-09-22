@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+import org.springframework.web.reactive.socket.server.WebSocketService;
 
 /**
  * Defines callback methods to customize the configuration for WebFlux
@@ -121,6 +122,18 @@ public interface WebFluxConfigurer {
 	 */
 	@Nullable
 	default MessageCodesResolver getMessageCodesResolver() {
+		return null;
+	}
+
+	/**
+	 * Provide the {@link WebSocketService} to create
+	 * {@link org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter}
+	 * with. This can be used to configure server-specific properties through the
+	 * {@link org.springframework.web.reactive.socket.server.RequestUpgradeStrategy}.
+	 * @since 5.3
+	 */
+	@Nullable
+	default WebSocketService getWebSocketService() {
 		return null;
 	}
 

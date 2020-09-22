@@ -18,9 +18,9 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -229,7 +229,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	@Override
 	public int doStartTagInternal() throws JspException {
-		this.params = new LinkedList<>();
+		this.params = new ArrayList<>();
 		this.templateParams = new HashSet<>();
 		return EVAL_BODY_INCLUDE;
 	}

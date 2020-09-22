@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final Trigger trigger;
 
-	private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+	private final SimpleTriggerContext triggerContext;
 
 	private final ScheduledExecutorService executor;
 
@@ -60,11 +61,12 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	private final Object triggerContextMonitor = new Object();
 
 
-	public ReschedulingRunnable(
-			Runnable delegate, Trigger trigger, ScheduledExecutorService executor, ErrorHandler errorHandler) {
+	public ReschedulingRunnable(Runnable delegate, Trigger trigger, Clock clock,
+			ScheduledExecutorService executor, ErrorHandler errorHandler) {
 
 		super(delegate, errorHandler);
 		this.trigger = trigger;
+		this.triggerContext = new SimpleTriggerContext(clock);
 		this.executor = executor;
 	}
 
@@ -76,7 +78,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 			if (this.scheduledExecutionTime == null) {
 				return null;
 			}
-			long initialDelay = this.scheduledExecutionTime.getTime() - System.currentTimeMillis();
+			long initialDelay = this.scheduledExecutionTime.getTime() - this.triggerContext.getClock().millis();
 			this.currentFuture = this.executor.schedule(this, initialDelay, TimeUnit.MILLISECONDS);
 			return this;
 		}
@@ -89,9 +91,9 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	@Override
 	public void run() {
-		Date actualExecutionTime = new Date();
+		Date actualExecutionTime = new Date(this.triggerContext.getClock().millis());
 		super.run();
-		Date completionTime = new Date();
+		Date completionTime = new Date(this.triggerContext.getClock().millis());
 		synchronized (this.triggerContextMonitor) {
 			Assert.state(this.scheduledExecutionTime != null, "No scheduled execution");
 			this.triggerContext.update(this.scheduledExecutionTime, actualExecutionTime, completionTime);

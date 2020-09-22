@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
@@ -180,7 +181,7 @@ public abstract class PropertiesLoaderSupport {
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
 				}
-				catch (FileNotFoundException | UnknownHostException ex) {
+				catch (FileNotFoundException | UnknownHostException | SocketException ex) {
 					if (this.ignoreResourceNotFound) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Properties resource not found: " + ex.getMessage());

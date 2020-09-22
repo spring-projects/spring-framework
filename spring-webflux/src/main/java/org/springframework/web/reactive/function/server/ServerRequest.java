@@ -42,6 +42,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -100,14 +101,24 @@ public interface ServerRequest {
 	 * Get the request path.
 	 */
 	default String path() {
-		return uri().getRawPath();
+		return requestPath().pathWithinApplication().value();
 	}
 
 	/**
 	 * Get the request path as a {@code PathContainer}.
+	 * @deprecated as of 5.3, in favor on {@link #requestPath()}
 	 */
+	@Deprecated
 	default PathContainer pathContainer() {
-		return PathContainer.parsePath(path());
+		return requestPath();
+	}
+
+	/**
+	 * Get the request path as a {@code PathContainer}.
+	 * @since 5.3
+	 */
+	default RequestPath requestPath() {
+		return exchange().getRequest().getPath();
 	}
 
 	/**

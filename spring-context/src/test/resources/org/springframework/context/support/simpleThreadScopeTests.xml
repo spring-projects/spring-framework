@@ -1,51 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-                https://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
 		<property name="scopes">
 			<map>
 				<entry key="thread">
-					<bean class="org.springframework.context.support.SimpleThreadScope"/>
+					<bean class="org.springframework.context.support.SimpleThreadScope" />
 				</entry>
 			</map>
 		</property>
 	</bean>
 
-	<bean id="threadScopedObject" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread"/>
-
-	<!--
-	<bean id="requestScopedDisposableObject" class="org.springframework.beans.testfixture.beans.DerivedTestBean" scope="request"/>
-
-	<bean id="requestScopedFactoryBean" class="org.springframework.beans.testfixture.beans.factory.DummyFactory" scope="request"/>
-
-	<bean id="requestScopedObjectCircle1" class="org.springframework.beans.testfixture.beans.TestBean" scope="request">
-		<property name="spouse" ref="requestScopedObjectCircle2"/>
+	<bean id="threadScopedObject" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread">
+		<property name="spouse" ref="threadScopedObject2" />
 	</bean>
 
-	<bean id="requestScopedObjectCircle2" class="org.springframework.beans.testfixture.beans.TestBean" scope="request">
-		<property name="spouse" ref="requestScopedObjectCircle1"/>
-	</bean>
+	<bean id="threadScopedObject2" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread" />
 
-  <bean id="requestScopedOuterBean" class="org.springframework.beans.testfixture.beans.DerivedTestBean" scope="request">
-    <property name="name" value="outer"/>
-    <property name="spouse">
-      <bean class="org.springframework.beans.testfixture.beans.DerivedTestBean">
-        <property name="name" value="inner"/>
-      </bean>
-    </property>
-  </bean>
-
-  <bean id="singletonOuterBean" class="org.springframework.beans.testfixture.beans.DerivedTestBean" lazy-init="true">
-    <property name="name" value="outer"/>
-    <property name="spouse">
-      <bean class="org.springframework.beans.testfixture.beans.DerivedTestBean" scope="request">
-        <property name="name" value="inner"/>
-      </bean>
-    </property>
-  </bean>
-
--->
 </beans>

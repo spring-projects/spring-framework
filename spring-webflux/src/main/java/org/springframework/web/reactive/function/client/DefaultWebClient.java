@@ -166,6 +166,10 @@ class DefaultWebClient implements WebClient {
 
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
+		@Nullable
+		private Consumer<ClientHttpRequest> httpRequestConsumer;
+
+
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
@@ -208,7 +212,7 @@ class DefaultWebClient implements WebClient {
 
 		private MultiValueMap<String, String> getCookies() {
 			if (this.cookies == null) {
-				this.cookies = new LinkedMultiValueMap<>(4);
+				this.cookies = new LinkedMultiValueMap<>(3);
 			}
 			return this.cookies;
 		}
@@ -236,6 +240,13 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
 			attributesConsumer.accept(this.attributes);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec httpRequest(Consumer<ClientHttpRequest> requestConsumer) {
+			this.httpRequestConsumer = (this.httpRequestConsumer != null ?
+					this.httpRequestConsumer.andThen(requestConsumer) : requestConsumer);
 			return this;
 		}
 
@@ -344,10 +355,14 @@ class DefaultWebClient implements WebClient {
 			if (defaultRequest != null) {
 				defaultRequest.accept(this);
 			}
-			return ClientRequest.create(this.httpMethod, initUri())
+			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
 					.headers(headers -> headers.addAll(initHeaders()))
 					.cookies(cookies -> cookies.addAll(initCookies()))
 					.attributes(attributes -> attributes.putAll(this.attributes));
+			if (this.httpRequestConsumer != null) {
+				builder.httpRequest(this.httpRequestConsumer);
+			}
+			return builder;
 		}
 
 		private URI initUri() {
@@ -473,11 +488,13 @@ class DefaultWebClient implements WebClient {
 
 		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> bodyPublisher) {
 			Mono<T> result = statusHandlers(response);
+			Mono<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
+							t -> wrapException(t, response));
 			if (result != null) {
-				return result.switchIfEmpty(bodyPublisher);
+				return result.switchIfEmpty(wrappedExceptions);
 			}
 			else {
-				return bodyPublisher;
+				return wrappedExceptions;
 			}
 		}
 
@@ -495,11 +512,13 @@ class DefaultWebClient implements WebClient {
 
 		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> bodyPublisher) {
 			Mono<T> result = statusHandlers(response);
+			Flux<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
+					t -> wrapException(t, response));
 			if (result != null) {
-				return result.flux().switchIfEmpty(bodyPublisher);
+				return result.flux().switchIfEmpty(wrappedExceptions);
 			}
 			else {
-				return bodyPublisher;
+				return wrappedExceptions;
 			}
 		}
 
@@ -538,6 +557,12 @@ class DefaultWebClient implements WebClient {
 			URI uri = request.getURI();
 			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
 			return result.checkpoint(description);
+		}
+
+		private <T> Mono<T> wrapException(Throwable throwable, ClientResponse response) {
+			return response.createException()
+					.map(responseException -> responseException.initCause(throwable))
+					.flatMap(Mono::error);
 		}
 
 		@Override
