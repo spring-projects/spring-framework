@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.annotation.Annotation;
 import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
@@ -84,12 +85,13 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
+		final Annotation[] parameterAnnotations = parameter.getParameterAnnotations();
 		return (WebRequest.class.isAssignableFrom(paramType) ||
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
 				(pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) ||
-				Principal.class.isAssignableFrom(paramType) ||
+				(Principal.class.isAssignableFrom(paramType) && parameterAnnotations.length == 0) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
 				HttpMethod.class == paramType ||

@@ -18,6 +18,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.time.ZoneId;
@@ -120,6 +124,19 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(principalParameter, null, webRequest, null);
 		assertThat(result).as("Invalid result").isNull();
+	}
+
+	// spring-security already provides the @AuthenticationPrincipal annotation to inject the Principal taken from SecurityContext.getAuthentication.getPrincipal()
+	//  but ServletRequestMethodArgumentResolver used to take precedence over @AuthenticationPrincipal resolver org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver
+	//  and we used to get the wrong Principal in methods. See https://github.com/spring-projects/spring-framework/pull/25780
+	@Test
+	public void annotatedPrincipal() throws Exception {
+		Principal principal = () -> "Foo";
+		servletRequest.setUserPrincipal(principal);
+		Method principalMethod = getClass().getMethod("supportedParamsWithAnnotatedPrincipal", Principal.class);
+
+		MethodParameter principalParameter = new MethodParameter(principalMethod, 0);
+		assertThat(resolver.supportsParameter(principalParameter)).as("Principal not supported").isFalse();
 	}
 
 	@Test
@@ -245,6 +262,14 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertThat(result).as("Invalid result").isSameAs(pushBuilder);
 	}
 
+	@Target({ ElementType.PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface PlaceHolder {}
+
+	@SuppressWarnings("unused")
+	public void supportedParamsWithAnnotatedPrincipal(@PlaceHolder Principal p) {
+
+	}
 
 	@SuppressWarnings("unused")
 	public void supportedParams(ServletRequest p0,
