@@ -16,24 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.multipart.MultipartRequest;
-import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.i18n.FixedLocaleResolver;
-import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
-import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
-import org.springframework.web.testfixture.servlet.MockHttpSession;
-
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.PushBuilder;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.annotation.ElementType;
@@ -45,6 +27,26 @@ import java.security.Principal;
 import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.PushBuilder;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.i18n.FixedLocaleResolver;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import org.springframework.web.testfixture.servlet.MockHttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
