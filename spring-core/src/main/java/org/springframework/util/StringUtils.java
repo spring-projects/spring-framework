@@ -271,11 +271,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
-			sb.deleteCharAt(0);
+		int beginIdx = 0;
+		while (beginIdx < str.length() && Character.isWhitespace(str.charAt(beginIdx))) {
+			beginIdx++;
 		}
-		return sb.toString();
+		return str.substring(beginIdx);
 	}
 
 	/**
@@ -289,11 +289,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
-			sb.deleteCharAt(sb.length() - 1);
+		int endIdx = str.length() - 1;
+		while (endIdx >= 0 && Character.isWhitespace(str.charAt(endIdx))) {
+			endIdx--;
 		}
-		return sb.toString();
+		return str.substring(0, endIdx + 1);
 	}
 
 	/**
@@ -307,11 +307,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && sb.charAt(0) == leadingCharacter) {
-			sb.deleteCharAt(0);
+		int beginIdx = 0;
+		while (beginIdx < str.length() && leadingCharacter == str.charAt(beginIdx)) {
+			beginIdx++;
 		}
-		return sb.toString();
+		return str.substring(beginIdx);
 	}
 
 	/**
@@ -325,11 +325,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == trailingCharacter) {
-			sb.deleteCharAt(sb.length() - 1);
+		int endIdx = str.length() - 1;
+		while (endIdx >= 0 && trailingCharacter == str.charAt(endIdx)) {
+			endIdx--;
 		}
-		return sb.toString();
+		return str.substring(0, endIdx + 1);
 	}
 
 	/**
