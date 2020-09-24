@@ -137,11 +137,7 @@ asciidoctorj {
 			sectnums: '',
 			'source-highlighter': 'highlight.js',
 			highlightjsdir: 'js/highlight',
-<<<<<<< HEAD
-			'highlightjs-theme': 'googlecode',
-=======
 			'highlightjs-theme': 'github', // 'googlecode',
->>>>>>> 5.2.x
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
