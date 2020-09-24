@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.StopWatch.TaskInfo;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -109,6 +110,28 @@ class StopWatchTests {
 			.as("total time in seconds for task #2")
 			.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
 			.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
+		assertThat(stopWatch.getLastTime())
+				.as("last task time in default time unit for task #2")
+				.isGreaterThanOrEqualTo(millisToNanos(duration2))
+				.isLessThanOrEqualTo(millisToNanos(duration2 + fudgeFactor));
+		assertThat(stopWatch.getLastTime(MILLISECONDS))
+				.as("last task time in default time unit for task #2")
+				.isGreaterThanOrEqualTo(duration2)
+				.isLessThanOrEqualTo(duration2 + fudgeFactor);
+		assertThat(stopWatch.getTotalTime(SECONDS))
+				.as("total time with timeunit in seconds for task #2")
+				.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
+				.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
+		assertThat(stopWatch.getTotalTime())
+				.as("total time in seconds for task #2")
+				.isGreaterThanOrEqualTo(millisToNanos(duration1 + duration2  - fudgeFactor))
+				.isLessThanOrEqualTo(millisToNanos(duration1 + duration2 + fudgeFactor));
+
+		stopWatch.setTimeUnit(SECONDS);
+		assertThat(stopWatch.getTotalTime())
+				.as("total time with default seconds timeunit in seconds for task #2")
+				.isGreaterThanOrEqualTo((duration1 + duration2  - fudgeFactor) / 1000.0)
+				.isLessThanOrEqualTo((duration1 + duration2 + fudgeFactor) / 1000.0);
 
 		assertThat(stopWatch.getTaskCount()).isEqualTo(2);
 		assertThat(stopWatch.prettyPrint()).contains(name1, name2);

@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
  * work and in development, rather than as part of production applications.
  *
  * <p>As of Spring Framework 5.2, running time is tracked and reported in
- * nanoseconds.
+ * nanoseconds or you can set your type of {@link TimeUnit} in {@link StopWatch#setTimeUnit(TimeUnit)}
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -72,6 +72,9 @@ public class StopWatch {
 	/** Total running time. */
 	private long totalTimeNanos;
 
+	private static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.NANOSECONDS;
+
+	private TimeUnit timeUnit = DEFAULT_TIME_UNIT;
 
 	/**
 	 * Construct a new {@code StopWatch}.
@@ -114,6 +117,12 @@ public class StopWatch {
 		this.keepTaskList = keepTaskList;
 	}
 
+	/**
+	 * Set TimeUnit as time provider
+	 */
+	public void setTimeUnit(TimeUnit timeUnit) {
+		this.timeUnit = timeUnit;
+	}
 
 	/**
 	 * Start an unnamed task.
@@ -270,6 +279,35 @@ public class StopWatch {
 		return this.taskList.toArray(new TaskInfo[0]);
 	}
 
+	public double getLastTime() {
+		if (this.lastTaskInfo == null) {
+			throw new IllegalStateException("No tasks run: can't get last task info");
+		}
+		long lastTimeNanos = this.lastTaskInfo.getTimeNanos();
+		return convertTimeUnit(lastTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+	}
+
+	public double getLastTime(TimeUnit timeUnit) {
+		if (this.lastTaskInfo == null) {
+			throw new IllegalStateException("No tasks run: can't get last task info");
+		}
+		long lastTimeNanos = this.lastTaskInfo.getTimeNanos();
+		return convertTimeUnit(lastTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+	}
+
+	/**
+	 * Get total running time in type of TimeUnit argument
+	 */
+	public double getTotalTime(TimeUnit timeUnit) {
+		return convertTimeUnit(this.totalTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+	}
+
+	/**
+	 * Get total running time in type of current TimeUnit field
+	 */
+	public double getTotalTime() {
+		return convertTimeUnit(this.totalTimeNanos, DEFAULT_TIME_UNIT, timeUnit);
+	}
 
 	/**
 	 * Get a short description of the total running time.
@@ -291,7 +329,7 @@ public class StopWatch {
 		}
 		else {
 			sb.append("---------------------------------------------\n");
-			sb.append("ns         %     Task name\n");
+			sb.append(getTimeUnitAbbreviation(timeUnit)).append("         %     Task name\n");
 			sb.append("---------------------------------------------\n");
 			NumberFormat nf = NumberFormat.getNumberInstance();
 			nf.setMinimumIntegerDigits(9);
@@ -300,7 +338,7 @@ public class StopWatch {
 			pf.setMinimumIntegerDigits(3);
 			pf.setGroupingUsed(false);
 			for (TaskInfo task : getTaskInfo()) {
-				sb.append(nf.format(task.getTimeNanos())).append("  ");
+				sb.append(nf.format(convertTimeUnit(task.getTimeNanos(), DEFAULT_TIME_UNIT, timeUnit))).append("  ");
 				sb.append(pf.format((double) task.getTimeNanos() / getTotalTimeNanos())).append("  ");
 				sb.append(task.getTaskName()).append("\n");
 			}
@@ -338,6 +376,34 @@ public class StopWatch {
 		return duration / 1_000_000_000.0;
 	}
 
+	private static double convertTimeUnit(double amount, TimeUnit from, TimeUnit to) {
+		if (from.ordinal() < to.ordinal()) {
+			return amount / from.convert(1, to);
+		} else {
+			return amount * to.convert(1, from);
+		}
+	}
+
+	private static String getTimeUnitAbbreviation(TimeUnit timeUnit) {
+		switch (timeUnit.name()) {
+			case "NANOSECONDS":
+				return "ns";
+			case "MICROSECONDS":
+				return "μs";
+			case "MILLISECONDS":
+				return "ms";
+			case "SECONDS":
+				return "sec";
+			case "MINUTES":
+				return "min";
+			case "HOURS":
+				return "hrs";
+			case "DAYS":
+				return "days";
+			default:
+				throw new IllegalArgumentException("No TimeUnit equivalent for " + timeUnit);
+		}
+	}
 
 	/**
 	 * Nested class to hold data about one task executed within the {@code StopWatch}.
