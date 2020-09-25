@@ -2622,8 +2622,8 @@ number of transactional operations. For example, if you have a web application t
 requires transactions only for certain update operations, you may not want to set up
 transactional proxies by using Spring or any other technology. In this case, using the
 `TransactionTemplate` may be a good approach. Being able to set the transaction name
-explicitly is also something that can be done only by using the programmatic approach to
-transaction management.
+explicitly is also something that can be done only by using the programmatic approach
+to transaction management.
 
 On the other hand, if your application has numerous transactional operations,
 declarative transaction management is usually worthwhile. It keeps transaction
@@ -2636,14 +2636,14 @@ management is greatly reduced.
 [[transaction-event]]
 === Transaction-bound Events
 
-As of Spring 4.2, the listener of an event can be bound to a phase of the transaction. The
-typical example is to handle the event when the transaction has completed successfully. Doing so
-lets events be used with more flexibility when the outcome of the current transaction
-actually matters to the listener.
+As of Spring 4.2, the listener of an event can be bound to a phase of the transaction.
+The typical example is to handle the event when the transaction has completed successfully.
+Doing so lets events be used with more flexibility when the outcome of the current
+transaction actually matters to the listener.
 
-You can register a regular event listener by using the `@EventListener` annotation. If you need
-to bind it to the transaction, use `@TransactionalEventListener`. When you do so, the listener
-is bound to the commit phase of the transaction by default.
+You can register a regular event listener by using the `@EventListener` annotation.
+If you need to bind it to the transaction, use `@TransactionalEventListener`.
+When you do so, the listener is bound to the commit phase of the transaction by default.
 
 The next example shows this concept. Assume that a component publishes an order-created
 event and that we want to define a listener that should only handle that event once the
@@ -2675,14 +2675,22 @@ example sets up such an event listener:
 	}
 ----
 
-The `@TransactionalEventListener` annotation exposes a `phase` attribute  that lets you customize
-the phase of the transaction to which the listener should be bound. The valid phases are `BEFORE_COMMIT`,
-`AFTER_COMMIT` (default), `AFTER_ROLLBACK`, and `AFTER_COMPLETION` that aggregates the transaction
-completion (be it a commit or a rollback).
+The `@TransactionalEventListener` annotation exposes a `phase` attribute that lets you
+customize the phase of the transaction to which the listener should be bound.
+The valid phases are `BEFORE_COMMIT`, `AFTER_COMMIT` (default), `AFTER_ROLLBACK`, as well as
+`AFTER_COMPLETION` which aggregates the transaction completion (be it a commit or a rollback).
 
-If no transaction is running, the listener is not invoked at all, since we cannot honor the required
-semantics. You can, however, override that behavior by setting the `fallbackExecution` attribute
-of the annotation to `true`.
+If no transaction is running, the listener is not invoked at all, since we cannot honor the
+required semantics. You can, however, override that behavior by setting the `fallbackExecution`
+attribute of the annotation to `true`.
+
+[NOTE]
+====
+`@TransactionalEventListener` only works with thread-bound transactions managed by
+`PlatformTransactionManager`. A reactive transaction managed by `ReactiveTransactionManager`
+uses the Reactor context instead of thread-local attributes, so from the perspective of
+an event listener, there is no compatible active transaction that it can participate in.
+====
 
 
 
