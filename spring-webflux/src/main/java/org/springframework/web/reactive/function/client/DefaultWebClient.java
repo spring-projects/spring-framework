@@ -49,7 +49,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -85,12 +84,12 @@ class DefaultWebClient implements WebClient {
 	private final DefaultWebClientBuilder builder;
 
 
-	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable UriBuilderFactory factory,
+	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest, DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
-		this.uriBuilderFactory = (factory != null ? factory : new DefaultUriBuilderFactory());
+		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
 		this.defaultRequest = defaultRequest;
@@ -252,13 +251,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestBodySpec httpRequest(Consumer<ClientHttpRequest> requestConsumer) {
-			this.httpRequestConsumer = (this.httpRequestConsumer != null ?
-					this.httpRequestConsumer.andThen(requestConsumer) : requestConsumer);
-			return this;
-		}
-
-		@Override
 		public DefaultRequestBodyUriSpec accept(MediaType... acceptableMediaTypes) {
 			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
@@ -303,6 +295,13 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec httpRequest(Consumer<ClientHttpRequest> requestConsumer) {
+			this.httpRequestConsumer = (this.httpRequestConsumer != null ?
+					this.httpRequestConsumer.andThen(requestConsumer) : requestConsumer);
 			return this;
 		}
 
