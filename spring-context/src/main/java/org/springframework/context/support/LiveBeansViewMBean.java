@@ -21,7 +21,7 @@ package org.springframework.context.support;
  *
  * @author Juergen Hoeller
  * @since 3.2
- * @deprecated as of 5.3, in favor of using Spring Boot actuators for such need.
+ * @deprecated as of 5.3, in favor of using Spring Boot actuators for such needs
  */
 @Deprecated
 public interface LiveBeansViewMBean {

@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @since 3.2
  * @see #getSnapshotAsJson()
  * @see org.springframework.web.context.support.LiveBeansViewServlet
- * @deprecated as of 5.3, in favor of using Spring Boot actuators for such need.
+ * @deprecated as of 5.3, in favor of using Spring Boot actuators for such needs
  */
 @Deprecated
 public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAware {

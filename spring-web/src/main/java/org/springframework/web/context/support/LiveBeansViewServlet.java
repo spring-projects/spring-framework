@@ -27,7 +27,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Servlet variant of {@link org.springframework.context.support.LiveBeansView}'s MBean exposure.
+ * Servlet variant of {@link org.springframework.context.support.LiveBeansView}'s
+ * MBean exposure.
  *
  * <p>Generates a JSON snapshot for current beans and their dependencies in
  * all ApplicationContexts that live within the current web application.
@@ -35,7 +36,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.2
  * @see org.springframework.context.support.LiveBeansView#getSnapshotAsJson()
- * @deprecated as of 5.3, in favor of using Spring Boot actuators for such need.
+ * @deprecated as of 5.3, in favor of using Spring Boot actuators for such needs
  */
 @Deprecated
 @SuppressWarnings("serial")

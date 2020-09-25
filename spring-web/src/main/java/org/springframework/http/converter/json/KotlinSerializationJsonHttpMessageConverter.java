@@ -39,11 +39,13 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and write JSON using
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
+ * that can read and write JSON using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
- * <p>This converter can be used to bind {@code @Serializable} Kotlin classes. It supports {@code application/json} and
- * {@code application/*+json} with various character sets, {@code UTF-8} being the default.
+ * <p>This converter can be used to bind {@code @Serializable} Kotlin classes.
+ * It supports {@code application/json} and {@code application/*+json} with
+ * various character sets, {@code UTF-8} being the default.
  *
  * @author Andreas Ahlenstorf
  * @author Sebastien Deleuze
