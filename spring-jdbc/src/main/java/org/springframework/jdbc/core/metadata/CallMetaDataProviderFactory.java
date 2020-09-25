@@ -43,6 +43,7 @@ public final class CallMetaDataProviderFactory {
 			"Apache Derby",
 			"DB2",
 			"Informix Dynamic Server",
+			"MariaDB",
 			"Microsoft SQL Server",
 			"MySQL",
 			"Oracle",

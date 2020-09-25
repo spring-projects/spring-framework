@@ -457,11 +457,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		}
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
-			return this.objectMapper.getTypeFactory().constructType(mappedClass);
+			return this.objectMapper.constructType(mappedClass);
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
-			return this.objectMapper.getTypeFactory().constructType(typeClass);
+			return this.objectMapper.constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);
