@@ -965,6 +965,17 @@ The following example shows how to do so for client-side requests:
 			.build()
 ----
 
+
+[[webflux-logging-appenders]]
+==== Appenders
+
+Logging libraries such as SLF4J and Log4J 2 provide asynchronous loggers that avoid
+blocking. While those have their own drawbacks such as potentially dropping messages
+that could not be queued for logging, they are the best available option currently
+or use in a reactive, non-blocking application.
+
+
+
 [[webflux-codecs-custom]]
 ==== Custom codecs
 
