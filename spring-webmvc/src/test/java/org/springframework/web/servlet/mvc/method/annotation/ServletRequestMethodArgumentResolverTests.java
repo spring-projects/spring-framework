@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,10 +126,7 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertThat(result).as("Invalid result").isNull();
 	}
 
-	// spring-security already provides the @AuthenticationPrincipal annotation to inject the Principal taken from SecurityContext.getAuthentication.getPrincipal()
-	//  but ServletRequestMethodArgumentResolver used to take precedence over @AuthenticationPrincipal resolver org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver
-	//  and we used to get the wrong Principal in methods. See https://github.com/spring-projects/spring-framework/pull/25780
-	@Test
+	@Test // gh-25780
 	public void annotatedPrincipal() throws Exception {
 		Principal principal = () -> "Foo";
 		servletRequest.setUserPrincipal(principal);
@@ -262,14 +259,6 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertThat(result).as("Invalid result").isSameAs(pushBuilder);
 	}
 
-	@Target({ ElementType.PARAMETER })
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface PlaceHolder {}
-
-	@SuppressWarnings("unused")
-	public void supportedParamsWithAnnotatedPrincipal(@PlaceHolder Principal p) {
-
-	}
 
 	@SuppressWarnings("unused")
 	public void supportedParams(ServletRequest p0,
@@ -283,7 +272,13 @@ public class ServletRequestMethodArgumentResolverTests {
 								TimeZone p8,
 								ZoneId p9,
 								HttpMethod p10,
-								PushBuilder p11) {
-	}
+								PushBuilder p11) {}
+
+	@Target({ ElementType.PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface AuthenticationPrincipal {}
+
+	@SuppressWarnings("unused")
+	public void supportedParamsWithAnnotatedPrincipal(@AuthenticationPrincipal Principal p) {}
 
 }
