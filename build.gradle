@@ -95,7 +95,7 @@ configure(allprojects) { project ->
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.5"
-			dependency "com.github.librepdf:openpdf:1.3.20"
+			dependency "com.github.librepdf:openpdf:1.3.22"
 			dependency "com.rometools:rome:1.15.0"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.3"
@@ -196,7 +196,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.5.11') {
+			dependencySet(group: 'org.mockito', version: '3.5.13') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
