@@ -80,6 +80,7 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun awaitExchange() {
 		val response = mockk<ClientResponse>()
 		every { requestBodySpec.exchange() } returns Mono.just(response)

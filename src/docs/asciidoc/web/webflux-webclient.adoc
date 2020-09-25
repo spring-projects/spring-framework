@@ -1,16 +1,20 @@
 [[webflux-client]]
 = WebClient
 
-Spring WebFlux includes a reactive, non-blocking `WebClient` for HTTP requests. The client
-has a functional, fluent API with reactive types for declarative composition, see
-<<web-reactive.adoc#webflux-reactive-libraries>>. WebFlux client and server rely on the
-same non-blocking <<web-reactive.adoc#webflux-codecs, codecs>> to encode and decode request
-and response content.
+Spring WebFlux includes a client to perform HTTP requests with. `WebClient` has a
+functional, fluent API based on Reactor, see <<web-reactive.adoc#webflux-reactive-libraries>>,
+which enables declarative composition of asynchronous logic without the need to deal with
+threads or concurrency. It is fully non-blocking, it supports streaming, and relies on
+the same <<web-reactive.adoc#webflux-codecs, codecs>> that are also used to encode and
+decode request and response content on the server side.
 
-Internally `WebClient` delegates to an HTTP client library. By default, it uses
-https://github.com/reactor/reactor-netty[Reactor Netty], there is built-in support for
-the Jetty https://github.com/jetty-project/jetty-reactive-httpclient[reactive HttpClient],
-and others can be plugged in through a `ClientHttpConnector`.
+`WebClient` needs an HTTP client library to perform requests with. There is built-in
+support for the following:
+
+* https://github.com/reactor/reactor-netty[Reactor Netty]
+* https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
+* https://hc.apache.org/index.html[Apache HttpComponents]
+* Others can be plugged via `ClientHttpConnector`.
 
 
 
@@ -23,12 +27,10 @@ The simplest way to create a `WebClient` is through one of the static factory me
 * `WebClient.create()`
 * `WebClient.create(String baseUrl)`
 
-The above methods use the Reactor Netty `HttpClient` with default settings and expect
-`io.projectreactor.netty:reactor-netty` to be on the classpath.
-
 You can also use `WebClient.builder()` with further options:
 
 * `uriBuilderFactory`: Customized `UriBuilderFactory` to use as a base URL.
+* `defaultUriVariables`: default values to use when expanding URI templates.
 * `defaultHeader`: Headers for every request.
 * `defaultCookie`: Cookies for every request.
 * `defaultRequest`: `Consumer` to customize every request.
@@ -36,33 +38,25 @@ You can also use `WebClient.builder()` with further options:
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
 
-The following example configures <<web-reactive.adoc#webflux-codecs, HTTP codecs>>:
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	WebClient client = WebClient.builder()
-			.exchangeStrategies(builder -> {
-					return builder.codecs(codecConfigurer -> {
-						//...
-					});
-			})
+			.codecs(configurer -> ... )
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val webClient = WebClient.builder()
-			.exchangeStrategies { strategies ->
-				strategies.codecs {
-					//...
-				}
-			}
+			.codecs { configurer -> ... }
 			.build()
 ----
 
-Once built, a `WebClient` instance is immutable. However, you can clone it and build a
-modified copy without affecting the original instance, as the following example shows:
+Once built, a `WebClient` is immutable. However, you can clone it and build a
+modified copy as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -94,37 +88,29 @@ modified copy without affecting the original instance, as the following example 
 [[webflux-client-builder-maxinmemorysize]]
 === MaxInMemorySize
 
-Spring WebFlux configures <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering
-data in-memory in codec to avoid application memory issues. By the default this is
-configured to 256KB and if that's not enough for your use case, you'll see the following:
+Codecs have <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering data in
+memory to avoid application memory issues. By the default those are set to 256KB.
+If that's not enough you'll get the following error:
 
 ----
 org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on max bytes to buffer
 ----
 
-You can configure this limit on all default codecs with the following code sample:
+To change the limit for default codecs, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	WebClient webClient = WebClient.builder()
-			.exchangeStrategies(builder ->
-				builder.codecs(codecs ->
-					codecs.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
-				)
-			)
+			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024));
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val webClient = WebClient.builder()
-		.exchangeStrategies { builder ->
-				builder.codecs {
-					it.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)
-				}
-		}
-		.build()
+			.codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
+			.build()
 ----
 
 
@@ -132,7 +118,7 @@ You can configure this limit on all default codecs with the following code sampl
 [[webflux-client-builder-reactor]]
 === Reactor Netty
 
-To customize Reactor Netty settings, simple provide a pre-configured `HttpClient`:
+To customize Reactor Netty settings, provide a pre-configured `HttpClient`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -457,8 +443,30 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 [[webflux-client-retrieve]]
 == `retrieve()`
 
-The `retrieve()` method is the easiest way to get a response body and decode it.
-The following example shows how to do so:
+The `retrieve()` method can be used to declare how to extract the response. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient client = WebClient.create("https://example.org");
+
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity(Person.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = WebClient.create("https://example.org")
+
+	val result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity<Person>().awaitSingle()
+----
+
+Or to get only the body:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -481,7 +489,7 @@ The following example shows how to do so:
 			.awaitBody<Person>()
 ----
 
-You can also get a stream of objects decoded from the response, as the following example shows:
+To get a stream of decoded objects:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -500,11 +508,9 @@ You can also get a stream of objects decoded from the response, as the following
 			.bodyToFlow<Quote>()
 ----
 
-By default, responses with 4xx or 5xx status codes result in an
-`WebClientResponseException` or one of its HTTP status specific sub-classes, such as
-`WebClientResponseException.BadRequest`, `WebClientResponseException.NotFound`, and others.
-You can also use the `onStatus` method to customize the resulting exception,
-as the following example shows:
+By default, 4xx or 5xx responses result in an `WebClientResponseException`, including
+sub-classes for specific HTTP status codes. To customize the handling of error
+responses, use `onStatus` handlers as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -527,67 +533,44 @@ as the following example shows:
 			.awaitBody<Person>()
 ----
 
-When `onStatus` is used, if the response is expected to have content, then the `onStatus`
-callback should consume it. If not, the content will be automatically drained to ensure
-resources are released.
-
 
 
 
 [[webflux-client-exchange]]
-== `exchange()`
+== `exchangeToMono()`
 
-The `exchange()` method provides more control than the `retrieve` method. The following example is equivalent
-to `retrieve()` but also provides access to the `ClientResponse`:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	Mono<Person> result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.flatMap(response -> response.bodyToMono(Person.class));
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	val result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.awaitExchange()
-			.awaitBody<Person>()
-----
-
-At this level, you can also create a full `ResponseEntity`:
+The `exchangeToMono()` and `exchangeToFlux()` methods are useful for more advanced
+cases that require more control, such as to decode the response differently
+depending on the response status:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	Mono<ResponseEntity<Person>> result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.exchange()
-			.flatMap(response -> response.toEntity(Person.class));
+	Mono<Object> entityMono = client.get()
+		   .uri("/persons/1")
+		   .accept(MediaType.APPLICATION_JSON)
+		   .exchangeToMono(response -> {
+			   if (response.statusCode().equals(HttpStatus.OK)) {
+				   return response.bodyToMono(Person.class);
+			   }
+			   else if (response.statusCode().is4xxClientError()) {
+				   return response.bodyToMono(ErrorContainer.class);
+			   }
+			   else {
+				   return Mono.error(response.createException());
+			   }
+		   });
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val result = client.get()
-			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
-			.awaitExchange()
-			.toEntity<Person>()
 ----
 
-Note that (unlike `retrieve()`), with `exchange()`, there are no automatic error signals for
-4xx and 5xx responses. You have to check the status code and decide how to proceed.
+When using the above, after the returned `Mono` or `Flux` completes, the response body
+is checked and if not consumed it is released to prevent memory and connection leaks.
+Therefore the response cannot be decoded further downstream. It is up to the provided
+function to declare how to decode the response if needed.
 
-[CAUTION]
-====
-Unlike `retrieve()`, when using `exchange()`, it is the responsibility of the application
-to consume any response content regardless of the scenario (success, error, unexpected
-data, etc). Not doing so can cause a memory leak. The Javadoc for `ClientResponse` lists
-all the available options for consuming the body. Generally prefer using `retrieve()`
-unless you have a good reason for using `exchange()` which does allow to check the
-response status and headers before deciding how to or if to consume the response.
-====
 
 
 
