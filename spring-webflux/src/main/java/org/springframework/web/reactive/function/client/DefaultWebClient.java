@@ -147,6 +147,14 @@ class DefaultWebClient implements WebClient {
 		return new DefaultWebClientBuilder(this.builder);
 	}
 
+	private static Mono<Void> releaseIfNotConsumed(ClientResponse response) {
+		return response.releaseBody().onErrorResume(ex2 -> Mono.empty());
+	}
+
+	private static <T> Mono<T> releaseIfNotConsumed(ClientResponse response, Throwable ex) {
+		return response.releaseBody().onErrorResume(ex2 -> Mono.empty()).then(Mono.error(ex));
+	}
+
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
@@ -342,6 +350,65 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public ResponseSpec retrieve() {
+			return new DefaultResponseSpec(exchange(), this::createRequest);
+		}
+
+		private HttpRequest createRequest() {
+			return new HttpRequest() {
+				private final URI uri = initUri();
+				private final HttpHeaders headers = initHeaders();
+
+				@Override
+				public HttpMethod getMethod() {
+					return httpMethod;
+				}
+				@Override
+				public String getMethodValue() {
+					return httpMethod.name();
+				}
+				@Override
+				public URI getURI() {
+					return this.uri;
+				}
+				@Override
+				public HttpHeaders getHeaders() {
+					return this.headers;
+				}
+			};
+		}
+
+		@Override
+		public <V> Mono<V> exchangeToMono(Function<ClientResponse, ? extends Mono<V>> responseHandler) {
+			return exchange().flatMap(response -> {
+				try {
+					return responseHandler.apply(response)
+							.flatMap(value -> releaseIfNotConsumed(response).thenReturn(value))
+							.switchIfEmpty(Mono.defer(() -> releaseIfNotConsumed(response).then(Mono.empty())))
+							.onErrorResume(ex -> releaseIfNotConsumed(response, ex));
+				}
+				catch (Throwable ex) {
+					return releaseIfNotConsumed(response, ex);
+				}
+			});
+		}
+
+		@Override
+		public <V> Flux<V> exchangeToFlux(Function<ClientResponse, ? extends Flux<V>> responseHandler) {
+			return exchange().flatMapMany(response -> {
+				try {
+					return responseHandler.apply(response)
+							.concatWith(Flux.defer(() -> releaseIfNotConsumed(response).then(Mono.empty())))
+							.onErrorResume(ex -> releaseIfNotConsumed(response, ex));
+				}
+				catch (Throwable ex) {
+					return releaseIfNotConsumed(response, ex);
+				}
+			});
+		}
+
+		@Override
+		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
@@ -397,35 +464,6 @@ class DefaultWebClient implements WebClient {
 				result.putAll(this.cookies);
 				return result;
 			}
-		}
-
-		@Override
-		public ResponseSpec retrieve() {
-			return new DefaultResponseSpec(exchange(), this::createRequest);
-		}
-
-		private HttpRequest createRequest() {
-			return new HttpRequest() {
-				private final URI uri = initUri();
-				private final HttpHeaders headers = initHeaders();
-
-				@Override
-				public HttpMethod getMethod() {
-					return httpMethod;
-				}
-				@Override
-				public String getMethodValue() {
-					return httpMethod.name();
-				}
-				@Override
-				public URI getURI() {
-					return this.uri;
-				}
-				@Override
-				public HttpHeaders getHeaders() {
-					return this.headers;
-				}
-			};
 		}
 	}
 
@@ -530,11 +568,11 @@ class DefaultWebClient implements WebClient {
 					Mono<? extends Throwable> exMono;
 					try {
 						exMono = handler.apply(response);
-						exMono = exMono.flatMap(ex -> drainBody(response, ex));
-						exMono = exMono.onErrorResume(ex -> drainBody(response, ex));
+						exMono = exMono.flatMap(ex -> releaseIfNotConsumed(response, ex));
+						exMono = exMono.onErrorResume(ex -> releaseIfNotConsumed(response, ex));
 					}
 					catch (Throwable ex2) {
-						exMono = drainBody(response, ex2);
+						exMono = releaseIfNotConsumed(response, ex2);
 					}
 					Mono<T> result = exMono.flatMap(Mono::error);
 					HttpRequest request = this.requestSupplier.get();
@@ -542,14 +580,6 @@ class DefaultWebClient implements WebClient {
 				}
 			}
 			return null;
-		}
-
-		@SuppressWarnings("unchecked")
-		private <T> Mono<T> drainBody(ClientResponse response, Throwable ex) {
-			// Ensure the body is drained, even if the StatusHandler didn't consume it,
-			// but ignore exception, in case the handler did consume.
-			return (Mono<T>) response.releaseBody()
-					.onErrorResume(ex2 -> Mono.empty()).thenReturn(ex);
 		}
 
 		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {

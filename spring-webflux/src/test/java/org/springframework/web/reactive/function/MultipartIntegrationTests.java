@@ -29,13 +29,13 @@ import reactor.test.StepVerifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.FormFieldPart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.AbstractRouterFunctionIntegrationTests;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -62,15 +62,16 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 	void multipartData(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Mono<ClientResponse> result = webClient
+		Mono<ResponseEntity<Void>> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/multipartData")
 				.bodyValue(generateBody())
-				.exchange();
+				.retrieve()
+				.toEntity(Void.class);
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 
@@ -78,15 +79,16 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 	void parts(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		Mono<ClientResponse> result = webClient
+		Mono<ResponseEntity<Void>> result = webClient
 				.post()
 				.uri("http://localhost:" + this.port + "/parts")
 				.bodyValue(generateBody())
-				.exchange();
+				.retrieve()
+				.toEntity(Void.class);
 
 		StepVerifier
 				.create(result)
-				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.OK))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK))
 				.verifyComplete();
 	}
 

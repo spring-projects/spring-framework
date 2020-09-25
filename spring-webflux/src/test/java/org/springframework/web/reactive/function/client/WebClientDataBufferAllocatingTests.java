@@ -182,9 +182,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<Void> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::releaseBody);
-
+				.exchangeToMono(ClientResponse::releaseBody);
 
 		StepVerifier.create(result)
 				.expectComplete()
@@ -201,8 +199,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<ResponseEntity<Void>> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::toBodilessEntity);
+				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
 				.assertNext(entity -> {
