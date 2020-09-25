@@ -16,8 +16,8 @@
 
 package org.springframework.context.support;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,7 +59,7 @@ public class SimpleThreadScope implements Scope {
 			new NamedThreadLocal<Map<String, Object>>("SimpleThreadScope") {
 				@Override
 				protected Map<String, Object> initialValue() {
-					return new ConcurrentHashMap<>();
+					return new HashMap<>();
 				}
 			};
 
@@ -67,7 +67,14 @@ public class SimpleThreadScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Map<String, Object> scope = this.threadScope.get();
-		return scope.computeIfAbsent(name, k -> objectFactory.getObject());
+		// NOTE: Do NOT modify the following to use Map::computeIfAbsent. For details,
+		// see https://github.com/spring-projects/spring-framework/issues/25801.
+		Object scopedObject = scope.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			scope.put(name, scopedObject);
+		}
+		return scopedObject;
 	}
 
 	@Override
