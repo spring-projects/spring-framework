@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,12 @@ import org.springframework.core.annotation.AliasFor;
  * <p>Adding {@link org.springframework.core.annotation.Order @Order} to your annotated
  * method allows you to prioritize that listener amongst other listeners running before
  * or after transaction completion.
+ *
+ * <p><b>NOTE: Transactional event listeners only work with thread-bound transactions
+ * managed by {@link org.springframework.transaction.PlatformTransactionManager}.</b>
+ * A reactive transaction managed by {@link org.springframework.transaction.ReactiveTransactionManager}
+ * uses the Reactor context instead of thread-local attributes, so from the perspective of
+ * an event listener, there is no compatible active transaction that it can participate in.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
