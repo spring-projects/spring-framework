@@ -40,7 +40,7 @@ import org.springframework.transaction.testfixture.CallCountingTransactionManage
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -52,7 +52,7 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
  * @since 3.1
  */
 @SuppressWarnings("resource")
-@EnabledForTestGroups(PERFORMANCE)
+@EnabledForTestGroups(LONG_RUNNING)
 class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 	@Test

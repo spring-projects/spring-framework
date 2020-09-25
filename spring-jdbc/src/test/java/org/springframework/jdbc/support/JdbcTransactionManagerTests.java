@@ -63,7 +63,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
@@ -979,7 +979,7 @@ public class JdbcTransactionManagerTests {
 		doTestTransactionWithTimeout(1);
 	}
 
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	private void doTestTransactionWithTimeout(int timeout) throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		given(con.getAutoCommit()).willReturn(true);

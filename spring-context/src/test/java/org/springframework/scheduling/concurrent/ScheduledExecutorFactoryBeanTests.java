@@ -32,7 +32,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Rick Evans
@@ -84,7 +84,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void oneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 
@@ -98,7 +98,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void fixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 
@@ -116,7 +116,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void fixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();
@@ -136,7 +136,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 
@@ -156,7 +156,7 @@ class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();
