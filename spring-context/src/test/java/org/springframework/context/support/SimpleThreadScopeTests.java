@@ -38,7 +38,7 @@ class SimpleThreadScopeTests {
 
 	@Test
 	void getFromScope() throws Exception {
-		String name = "threadScopedObject";
+		String name = "removeNodeStatusScreen";
 		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
 		assertThat(bean).isNotNull();
 		assertThat(this.applicationContext.getBean(name)).isSameAs(bean);
@@ -50,8 +50,8 @@ class SimpleThreadScopeTests {
 	void getMultipleInstances() throws Exception {
 		// Arrange
 		TestBean[] beans = new TestBean[2];
-		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class));
-		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class));
+		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("removeNodeStatusScreen", TestBean.class));
+		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("removeNodeStatusScreen", TestBean.class));
 		// Act
 		thread1.start();
 		thread2.start();
