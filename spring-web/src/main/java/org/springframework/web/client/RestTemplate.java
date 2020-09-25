@@ -21,7 +21,6 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -110,9 +109,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		ClassLoader classLoader = RestTemplate.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
 		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
-		jackson2Present =
-				ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
-						ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		jackson2XmlPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.xml.XmlMapper", classLoader);
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
@@ -918,7 +916,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				HttpHeaders httpHeaders = httpRequest.getHeaders();
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				if (!requestHeaders.isEmpty()) {
-					requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
+					requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));
 				}
 				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
@@ -937,7 +935,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 								(GenericHttpMessageConverter<Object>) messageConverter;
 						if (genericConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
 							if (!requestHeaders.isEmpty()) {
-								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
+								requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));
 							}
 							logBody(requestBody, requestContentType, genericConverter);
 							genericConverter.write(requestBody, requestBodyType, requestContentType, httpRequest);
@@ -946,7 +944,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
-							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new LinkedList<>(values)));
+							requestHeaders.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));
 						}
 						logBody(requestBody, requestContentType, messageConverter);
 						((HttpMessageConverter<Object>) messageConverter).write(

@@ -41,6 +41,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -139,6 +140,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		}
 	}
 
+
 	@Override
 	protected boolean canConvertFrom(Message<?> message, @Nullable Class<?> targetClass) {
 		if (targetClass == null || !supportsMimeType(message.getHeaders())) {
@@ -210,7 +212,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		Object payload = message.getPayload();
 		Class<?> view = getSerializationView(conversionHint);
 		try {
-			if (targetClass.isInstance(payload)) {
+			if (ClassUtils.isAssignableValue(targetClass, payload)) {
 				return payload;
 			}
 			else if (payload instanceof byte[]) {
@@ -246,7 +248,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			Type genericParameterType = param.getNestedGenericParameterType();
 			Class<?> contextClass = param.getContainingClass();
 			Type type = GenericTypeResolver.resolveType(genericParameterType, contextClass);
-			return this.objectMapper.getTypeFactory().constructType(type);
+			return this.objectMapper.constructType(type);
 		}
 		return this.objectMapper.constructType(targetClass);
 	}
@@ -331,7 +333,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @return the JSON encoding to use (never {@code null})
 	 */
 	protected JsonEncoding getJsonEncoding(@Nullable MimeType contentType) {
-		if (contentType != null && (contentType.getCharset() != null)) {
+		if (contentType != null && contentType.getCharset() != null) {
 			Charset charset = contentType.getCharset();
 			for (JsonEncoding encoding : JsonEncoding.values()) {
 				if (charset.name().equals(encoding.getJavaName())) {

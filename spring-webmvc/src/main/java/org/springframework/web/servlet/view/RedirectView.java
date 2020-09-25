@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,6 +34,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -456,12 +456,12 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		boolean first = (targetUrl.toString().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
-			Collection<Object> values;
+			Collection<?> values;
 			if (rawValue != null && rawValue.getClass().isArray()) {
-				values = Arrays.asList(ObjectUtils.toObjectArray(rawValue));
+				values = CollectionUtils.arrayToList(rawValue);
 			}
 			else if (rawValue instanceof Collection) {
-				values = ((Collection<Object>) rawValue);
+				values = ((Collection<?>) rawValue);
 			}
 			else {
 				values = Collections.singleton(rawValue);

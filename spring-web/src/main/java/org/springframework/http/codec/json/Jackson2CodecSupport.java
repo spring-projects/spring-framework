@@ -27,7 +27,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.logging.Log;
 
 import org.springframework.core.GenericTypeResolver;
@@ -111,8 +110,7 @@ public abstract class Jackson2CodecSupport {
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.objectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	protected Map<String, Object> getHints(ResolvableType resolvableType) {
