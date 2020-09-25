@@ -34,11 +34,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
@@ -51,17 +49,13 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.
@@ -957,60 +951,6 @@ public abstract class AbstractPropertyAccessorTests {
 		assertThat(target.getArray().length).isEqualTo(2);
 		assertThat(target.getArray()[0]).isEqualTo(1);
 		assertThat(target.getArray()[1]).isEqualTo(2);
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void setPrimitiveArrayPropertyLargeMatching() {
-		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
-
-		PrimitiveArrayBean target = new PrimitiveArrayBean();
-		AbstractPropertyAccessor accessor = createAccessor(target);
-		int[] input = new int[1024];
-		StopWatch sw = new StopWatch();
-		sw.start("array1");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(target.getArray().length).isEqualTo(1024);
-		assertThat(target.getArray()[0]).isEqualTo(0);
-		long time1 = sw.getLastTaskTimeMillis();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(String.class, new StringTrimmerEditor(false));
-		sw.start("array2");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 125).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
-		sw.start("array3");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
-		sw.start("array3");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
-		sw.start("array4");
-		for (int i = 0; i < 100; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(target.getArray().length).isEqualTo(1024);
-		assertThat(target.getArray()[0]).isEqualTo(0);
-		assertThat(sw.getLastTaskTimeMillis() > time1).as("Took too long").isTrue();
 	}
 
 	@Test
