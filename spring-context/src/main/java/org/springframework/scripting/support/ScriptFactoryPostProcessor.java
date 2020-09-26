@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +40,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -134,10 +134,11 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
+public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
+		BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -188,7 +189,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
 	/** Map from bean name String to ScriptSource object. */
-	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
+	private final Map<String, ScriptSource> scriptSourceCache = new ConcurrentHashMap<>();
 
 
 	/**
@@ -426,7 +427,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			proxyTargetClass = (Boolean) attributeValue;
 		}
 		else if (attributeValue instanceof String) {
-			proxyTargetClass = Boolean.valueOf((String) attributeValue);
+			proxyTargetClass = Boolean.parseBoolean((String) attributeValue);
 		}
 		else if (attributeValue != null) {
 			throw new BeanDefinitionStoreException("Invalid proxy target class attribute [" +
@@ -460,14 +461,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @see #convertToScriptSource
 	 */
 	protected ScriptSource getScriptSource(String beanName, String scriptSourceLocator) {
-		synchronized (this.scriptSourceCache) {
-			ScriptSource scriptSource = this.scriptSourceCache.get(beanName);
-			if (scriptSource == null) {
-				scriptSource = convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader);
-				this.scriptSourceCache.put(beanName, scriptSource);
-			}
-			return scriptSource;
-		}
+		return this.scriptSourceCache.computeIfAbsent(beanName, key ->
+				convertToScriptSource(beanName, scriptSourceLocator, this.resourceLoader));
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -289,7 +289,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessBeforeInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
-	 * @param existingBean the new bean instance
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
 	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
 	 * enforce the given instance to be returned, i.e. no proxies etc)
@@ -305,7 +306,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
 	 * instance, invoking their {@code postProcessAfterInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
-	 * @param existingBean the new bean instance
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
 	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
 	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
 	 * enforce the given instance to be returned, i.e. no proxies etc)
@@ -337,8 +339,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * including its bean name.
 	 * <p>This is effectively a variant of {@link #getBean(Class)} which preserves the
 	 * bean name of the matching instance.
-	 * @param requiredType type the bean must match; can be an interface or superclass.
-	 * {@code null} is disallowed.
+	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return the bean name plus bean instance
 	 * @throws NoSuchBeanDefinitionException if no matching bean was found
 	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
@@ -347,6 +348,22 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #getBean(Class)
 	 */
 	<T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException;
+
+	/**
+	 * Resolve a bean instance for the given bean name, providing a dependency descriptor
+	 * for exposure to target factory methods.
+	 * <p>This is effectively a variant of {@link #getBean(String, Class)} which supports
+	 * factory methods with an {@link org.springframework.beans.factory.InjectionPoint}
+	 * argument.
+	 * @param name the name of the bean to look up
+	 * @param descriptor the dependency descriptor for the requesting injection point
+	 * @return the corresponding bean instance
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
+	 * @throws BeansException if the bean could not be created
+	 * @since 5.1.5
+	 * @see #getBean(String, Class)
+	 */
+	Object resolveBeanByName(String name, DependencyDescriptor descriptor) throws BeansException;
 
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.

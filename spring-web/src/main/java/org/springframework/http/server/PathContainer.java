@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,14 +21,13 @@ import java.util.List;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Structured representation of a URI path whose elements have been pre-parsed
- * into a sequence of {@link Separator Separator} and {@link PathSegment
- * PathSegment} elements.
+ * Structured representation of a URI path parsed via {@link #parsePath(String)}
+ * into a sequence of {@link Separator} and {@link PathSegment} elements.
  *
- * <p>An instance of this class can be created via {@link #parsePath(String)}.
- * Each {@link PathSegment PathSegment} exposes its structure decoded
- * safely without the risk of encoded reserved characters altering the path or
- * segment structure and without path parameters for path matching purposes.
+ * <p>Each {@link PathSegment} exposes its content in decoded form and with path
+ * parameters removed. This makes it safe to match one path segment at a time
+ * without the risk of decoded reserved characters altering the structure of
+ * the path.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -36,12 +35,12 @@ import org.springframework.util.MultiValueMap;
 public interface PathContainer {
 
 	/**
-	 * The original path that was parsed.
+	 * The original path from which this instance was parsed.
 	 */
 	String value();
 
 	/**
-	 * The list of path elements, either {@link Separator} or {@link PathSegment}.
+	 * The contained path elements, either {@link Separator} or {@link PathSegment}.
 	 */
 	List<Element> elements();
 
@@ -55,8 +54,8 @@ public interface PathContainer {
 	}
 
 	/**
-	 * Extract a sub-path from the given start offset (inclusive) into the
-	 * element list and to the end offset (exclusive).
+	 * Extract a sub-path from the given start offset into the element list
+	 * (inclusive) and to the end offset (exclusive).
 	 * @param startIndex the start element index (inclusive)
 	 * @param endIndex the end element index (exclusive)
 	 * @return the sub-path
@@ -67,23 +66,35 @@ public interface PathContainer {
 
 
 	/**
-	 * Parse the path value into a sequence of {@link Separator Separator} and
-	 * {@link PathSegment PathSegment} elements.
-	 * @param path the encoded, raw URL path value to parse
+	 * Parse the path value into a sequence of {@code "/"} {@link Separator Separator}
+	 * and {@link PathSegment PathSegment} elements.
+	 * @param path the encoded, raw path value to parse
 	 * @return the parsed path
 	 */
 	static PathContainer parsePath(String path) {
-		return DefaultPathContainer.createFromUrlPath(path);
+		return DefaultPathContainer.createFromUrlPath(path, Options.HTTP_PATH);
+	}
+
+	/**
+	 * Parse the path value into a sequence of {@link Separator Separator} and
+	 * {@link PathSegment PathSegment} elements.
+	 * @param path the encoded, raw path value to parse
+	 * @param options to customize parsing
+	 * @return the parsed path
+	 * @since 5.2
+	 */
+	static PathContainer parsePath(String path, Options options) {
+		return DefaultPathContainer.createFromUrlPath(path, options);
 	}
 
 
 	/**
-	 * Common representation of a path element, e.g. separator or segment.
+	 * A path element, either separator or path segment.
 	 */
 	interface Element {
 
 		/**
-		 * Return the original, raw (encoded) value for the path component.
+		 * The unmodified, original value of this element.
 		 */
 		String value();
 	}
@@ -102,21 +113,69 @@ public interface PathContainer {
 	interface PathSegment extends Element {
 
 		/**
-		 * Return the path segment value to use for pattern matching purposes.
-		 * By default this is the same as {@link #value()} but may also differ
-		 * in sub-interfaces (e.g. decoded, sanitized, etc.).
+		 * Return the path segment value, decoded and sanitized, for path matching.
 		 */
 		String valueToMatch();
 
 		/**
-		 * The same as {@link #valueToMatch()} but as a {@code char[]}.
+		 * Expose {@link #valueToMatch()} as a character array.
 		 */
 		char[] valueToMatchAsChars();
 
 		/**
-		 * Path parameters parsed from the path segment.
+		 * Path parameters associated with this path segment.
 		 */
 		MultiValueMap<String, String> parameters();
+	}
+
+
+	/**
+	 * Options to customize parsing based on the type of input path.
+	 * @since 5.2
+	 */
+	class Options {
+
+		/**
+		 * Options for HTTP URL paths:
+		 * <p>Separator '/' with URL decoding and parsing of path params.
+		 */
+		public final static Options HTTP_PATH = Options.create('/', true);
+
+		/**
+		 * Options for a message route:
+		 * <p>Separator '.' without URL decoding nor parsing of params. Escape
+		 * sequences for the separator char in segment values are still decoded.
+		 */
+		public final static Options MESSAGE_ROUTE = Options.create('.', false);
+
+		private final char separator;
+
+		private final boolean decodeAndParseSegments;
+
+		private Options(char separator, boolean decodeAndParseSegments) {
+			this.separator = separator;
+			this.decodeAndParseSegments = decodeAndParseSegments;
+		}
+
+		public char separator() {
+			return this.separator;
+		}
+
+		public boolean shouldDecodeAndParseSegments() {
+			return this.decodeAndParseSegments;
+		}
+
+		/**
+		 * Create an {@link Options} instance with the given settings.
+		 * @param separator the separator for parsing the path into segments;
+		 * currently this must be slash or dot.
+		 * @param decodeAndParseSegments whether to URL decode path segment
+		 * values and parse path parameters. If set to false, only escape
+		 * sequences for the separator char are decoded.
+		 */
+		public static Options create(char separator, boolean decodeAndParseSegments) {
+			return new Options(separator, decodeAndParseSegments);
+		}
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,17 +18,15 @@ package org.springframework.test.context.jdbc;
 
 import java.lang.annotation.Retention;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static java.lang.annotation.RetentionPolicy.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 /**
  * Integration tests that verify support for using {@link Sql @Sql} as a
@@ -37,9 +35,9 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.*;
  * @author Sam Brannen
  * @since 4.3
  */
-@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@SpringJUnitConfig(EmptyDatabaseConfig.class)
 @DirtiesContext
-public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalTests {
 
 	@Test
 	@ComposedSql(
@@ -47,8 +45,8 @@ public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUni
 		statements = "INSERT INTO user VALUES('Dilbert')",
 		executionPhase = BEFORE_TEST_METHOD
 	)
-	public void composedSqlAnnotation() {
-		assertEquals("Number of rows in the 'user' table.", 1, countRowsInTable("user"));
+	void composedSqlAnnotation() {
+		assertNumUsers(1);
 	}
 
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
@@ -117,7 +118,7 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 					getRestTemplate().execute(receiveUrl, HttpMethod.POST, requestCallback, responseExtractor);
 					requestCallback = requestCallbackAfterHandshake;
 				}
-				catch (Throwable ex) {
+				catch (Exception ex) {
 					if (!connectFuture.isDone()) {
 						connectFuture.setException(ex);
 					}
@@ -182,7 +183,13 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			request.getHeaders().putAll(this.headers);
 			if (this.body != null) {
-				StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
+				if (request instanceof StreamingHttpOutputMessage) {
+					((StreamingHttpOutputMessage) request).setBody(outputStream ->
+							StreamUtils.copy(this.body, SockJsFrame.CHARSET, outputStream));
+				}
+				else {
+					StreamUtils.copy(this.body, SockJsFrame.CHARSET, request.getBody());
+				}
 			}
 		}
 	}
@@ -245,15 +252,14 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 			return null;
 		}
 
-		private void handleFrame(ByteArrayOutputStream os) {
-			byte[] bytes = os.toByteArray();
+		private void handleFrame(ByteArrayOutputStream os) throws IOException {
+			String content = os.toString(SockJsFrame.CHARSET.name());
 			os.reset();
-			String content = new String(bytes, SockJsFrame.CHARSET);
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR receive content: " + content);
 			}
 			if (!PRELUDE.equals(content)) {
-				this.sockJsSession.handleFrame(new String(bytes, SockJsFrame.CHARSET));
+				this.sockJsSession.handleFrame(content);
 			}
 		}
 	}

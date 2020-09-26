@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.web.socket;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,7 +38,7 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>WebSocket Extension HTTP headers may include parameters and follow
- * <a href="http://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230 section 3.2</a></p>
+ * <a href="https://tools.ietf.org/html/rfc7230#section-3.2">RFC 7230 section 3.2</a></p>
  *
  * <p>Note that the order of extensions in HTTP headers defines their order of execution,
  * e.g. extensions "foo, bar" will be executed as "bar(foo(message))".</p>
@@ -154,13 +153,13 @@ public class WebSocketExtension {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<>(parts.length - 1);
+			parameters = CollectionUtils.newLinkedHashMap(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');
 				if (eqIndex != -1) {
 					String attribute = parameter.substring(0, eqIndex);
-					String value = parameter.substring(eqIndex + 1, parameter.length());
+					String value = parameter.substring(eqIndex + 1);
 					parameters.put(attribute, value);
 				}
 			}

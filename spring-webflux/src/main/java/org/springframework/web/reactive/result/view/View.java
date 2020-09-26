@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,6 +43,18 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public interface View {
+
+	/**
+	 * The name of the exchange attribute that contains the
+	 * {@link org.springframework.web.reactive.BindingContext BindingContext}
+	 * for the request which can be used to create
+	 * {@link org.springframework.validation.BindingResult BindingResult}
+	 * instances for objects in to the model.
+	 * <p>Note: This attribute is not required and may not be present.
+	 * @since 5.1.8
+	 */
+	String BINDING_CONTEXT_ATTRIBUTE = View.class.getName() + ".bindingContext";
+
 
 	/**
 	 * Return the list of media types this View supports, or an empty list.

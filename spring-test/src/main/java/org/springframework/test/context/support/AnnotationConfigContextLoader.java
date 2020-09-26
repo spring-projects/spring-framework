@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,13 +28,13 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that loads
- * bean definitions from annotated classes.
+ * bean definitions from component classes.
  *
  * <p>See the Javadoc for
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
- * for a definition of <em>annotated class</em>.
+ * for a definition of <em>component class</em>.
  *
- * <p>Note: {@code AnnotationConfigContextLoader} supports <em>annotated classes</em>
+ * <p>Note: {@code AnnotationConfigContextLoader} supports <em>component classes</em>
  * rather than the String-based resource locations defined by the legacy
  * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
  * although {@code AnnotationConfigContextLoader} extends
@@ -61,8 +61,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	// SmartContextLoader
 
 	/**
-	 * Process <em>annotated classes</em> in the supplied {@link ContextConfigurationAttributes}.
-	 * <p>If the <em>annotated classes</em> are {@code null} or empty and
+	 * Process <em>component classes</em> in the supplied {@link ContextConfigurationAttributes}.
+	 * <p>If the <em>component classes</em> are {@code null} or empty and
 	 * {@link #isGenerateDefaultLocations()} returns {@code true}, this
 	 * {@code SmartContextLoader} will attempt to {@link
 	 * #detectDefaultConfigurationClasses detect default configuration classes}.
@@ -167,23 +167,23 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * Register classes in the supplied {@link GenericApplicationContext context}
 	 * from the classes in the supplied {@link MergedContextConfiguration}.
-	 * <p>Each class must represent an <em>annotated class</em>. An
+	 * <p>Each class must represent a <em>component class</em>. An
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
 	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
 	 * since {@code AnnotatedBeanDefinitionReader} is not an instance of
 	 * {@link BeanDefinitionReader}.
-	 * @param context the context in which the annotated classes should be registered
+	 * @param context the context in which the component classes should be registered
 	 * @param mergedConfig the merged configuration from which the classes should be retrieved
 	 * @see AbstractGenericContextLoader#loadBeanDefinitions
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
-		Class<?>[] annotatedClasses = mergedConfig.getClasses();
+		Class<?>[] componentClasses = mergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering annotated classes: " + ObjectUtils.nullSafeToString(annotatedClasses));
+			logger.debug("Registering component classes: " + ObjectUtils.nullSafeToString(componentClasses));
 		}
-		new AnnotatedBeanDefinitionReader(context).register(annotatedClasses);
+		new AnnotatedBeanDefinitionReader(context).register(componentClasses);
 	}
 
 	/**

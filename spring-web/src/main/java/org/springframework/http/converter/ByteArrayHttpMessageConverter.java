@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,7 +28,7 @@ import org.springframework.util.StreamUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write byte arrays.
  *
- * <p>By default, this converter supports all media types ({@code &#42;&#47;&#42;}), and
+ * <p>By default, this converter supports all media types (<code>&#42;/&#42;</code>), and
  * writes with a {@code Content-Type} of {@code application/octet-stream}. This can be
  * overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *

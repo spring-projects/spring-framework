@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel.ast;
+
+import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -104,14 +106,11 @@ public class CompoundExpression extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringBuilder sb = new StringBuilder();
+		StringJoiner sj = new StringJoiner(".");
 		for (int i = 0; i < getChildCount(); i++) {
-			if (i > 0) {
-				sb.append(".");
-			}
-			sb.append(getChild(i).toStringAST());
+			sj.add(getChild(i).toStringAST());
 		}
-		return sb.toString();
+		return sj.toString();
 	}
 
 	@Override
@@ -126,8 +125,8 @@ public class CompoundExpression extends SpelNodeImpl {
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
-		for (int i = 0; i < this.children.length;i++) {
-			this.children[i].generateCode(mv, cf);
+		for (SpelNodeImpl child : this.children) {
+			child.generateCode(mv, cf);
 		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

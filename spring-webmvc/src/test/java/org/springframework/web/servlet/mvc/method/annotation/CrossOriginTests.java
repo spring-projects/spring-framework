@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,13 +21,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import javax.servlet.http.HttpServletRequest;
+
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -35,7 +35,8 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -47,16 +48,15 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
+import org.springframework.web.servlet.handler.PathPatternsParameterizedTest;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
+import org.springframework.web.util.ServletRequestPathUtils;
+import org.springframework.web.util.pattern.PathPatternParser;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test fixture for {@link CrossOrigin @CrossOrigin} annotated methods.
@@ -64,250 +64,319 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  * @author Nicolas Labrot
+ * @author Rossen Stoyanchev
  */
-public class CrossOriginTests {
+class CrossOriginTests {
 
-	private final TestRequestMappingInfoHandlerMapping handlerMapping = new TestRequestMappingInfoHandlerMapping();
-
-	private final MockHttpServletRequest request = new MockHttpServletRequest();
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
-
-
-	@Before
-	@SuppressWarnings("resource")
-	public void setup() {
+	@SuppressWarnings("unused")
+	static Stream<TestRequestMappingInfoHandlerMapping> pathPatternsArguments() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		Properties props = new Properties();
-		props.setProperty("myOrigin", "http://example.com");
+		props.setProperty("myOrigin", "https://example.com");
+		props.setProperty("myDomainPattern", "http://*.example.com");
 		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		wac.registerSingleton("ppc", PropertySourcesPlaceholderConfigurer.class);
 		wac.refresh();
 
-		this.handlerMapping.setRemoveSemicolonContent(false);
-		wac.getAutowireCapableBeanFactory().initializeBean(this.handlerMapping, "hm");
+		TestRequestMappingInfoHandlerMapping mapping1 = new TestRequestMappingInfoHandlerMapping();
+		mapping1.setPatternParser(new PathPatternParser());
+		wac.getAutowireCapableBeanFactory().initializeBean(mapping1, "mapping1");
 
+		TestRequestMappingInfoHandlerMapping mapping2 = new TestRequestMappingInfoHandlerMapping();
+		wac.getAutowireCapableBeanFactory().initializeBean(mapping2, "mapping2");
+		wac.close();
+
+		return Stream.of(mapping1, mapping2);
+	}
+
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+
+	@BeforeEach
+	void setup() {
 		this.request.setMethod("GET");
-		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
+		this.request.addHeader(HttpHeaders.ORIGIN, "https://domain.com/");
 	}
 
 
-	@Test
-	public void noAnnotationWithoutOrigin() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void noAnnotationWithoutOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/no");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		assertNull(getCorsConfiguration(chain, false));
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertThat(getCorsConfiguration(chain, false)).isNull();
 	}
 
-	@Test  // SPR-12931
-	public void noAnnotationWithOrigin() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void noAnnotationWithAccessControlRequestMethod(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/no");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler().toString())
+				.endsWith("RequestMappingInfoHandlerMapping$HttpOptionsHandler#handle()");
+	}
+
+	@PathPatternsParameterizedTest
+	void noAnnotationWithPreflightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/no");
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain.com/");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertThat(chain).isNotNull();
+		assertThat(chain.getHandler().getClass().getName()).endsWith("AbstractHandlerMapping$PreFlightHandler");
+	}
+
+	@PathPatternsParameterizedTest  // SPR-12931
+	void noAnnotationWithOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/no");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		assertNull(getCorsConfiguration(chain, false));
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertThat(getCorsConfiguration(chain, false)).isNull();
 	}
 
-	@Test  // SPR-12931
-	public void noAnnotationPostWithOrigin() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest  // SPR-12931
+	void noAnnotationPostWithOrigin(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("POST");
 		this.request.setRequestURI("/no");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		assertNull(getCorsConfiguration(chain, false));
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		assertThat(getCorsConfiguration(chain, false)).isNull();
 	}
 
-	@Test
-	public void defaultAnnotation() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void defaultAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/default");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertNull(config.getAllowCredentials());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
-		assertEquals(new Long(1800), config.getMaxAge());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isNull();
+		assertThat(config.getAllowedHeaders()).containsExactly("*");
+		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
+		assertThat(config.getMaxAge()).isEqualTo(new Long(1800));
 	}
 
-	@Test
-	public void customized() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void customized(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/customized");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"DELETE"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://site1.com", "http://site2.com"}, config.getAllowedOrigins().toArray());
-		assertArrayEquals(new String[] {"header1", "header2"}, config.getAllowedHeaders().toArray());
-		assertArrayEquals(new String[] {"header3", "header4"}, config.getExposedHeaders().toArray());
-		assertEquals(new Long(123), config.getMaxAge());
-		assertFalse(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("DELETE");
+		assertThat(config.getAllowedOrigins()).containsExactly("https://site1.com", "https://site2.com");
+		assertThat(config.getAllowedHeaders()).containsExactly("header1", "header2");
+		assertThat(config.getExposedHeaders()).containsExactly("header3", "header4");
+		assertThat(config.getMaxAge()).isEqualTo(new Long(123));
+		assertThat(config.getAllowCredentials()).isFalse();
 	}
 
-	@Test
-	public void customOriginDefinedViaValueAttribute() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void customOriginDefinedViaValueAttribute(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/customOrigin");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertNull(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
 	}
 
-	@Test
-	public void customOriginDefinedViaPlaceholder() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void customOriginDefinedViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/someOrigin");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
-		assertNull(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("https://example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
 	}
 
-	@Test
-	public void bogusAllowCredentialsValue() throws Exception {
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(containsString("@CrossOrigin's allowCredentials"));
-		exception.expectMessage(containsString("current value is [bogus]"));
-		this.handlerMapping.registerHandler(new MethodLevelControllerWithBogusAllowCredentialsValue());
+	@PathPatternsParameterizedTest
+	public void customOriginPatternViaValueAttribute(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPattern");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).isEqualTo(Collections.singletonList("http://*.example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
 	}
 
-	@Test
-	public void classLevel() throws Exception {
-		this.handlerMapping.registerHandler(new ClassLevelController());
+	@PathPatternsParameterizedTest
+	public void customOriginPatternViaPlaceholder(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOriginPatternPlaceholder");
+		HandlerExecutionChain chain = mapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).isEqualTo(Collections.singletonList("http://*.example.com"));
+		assertThat(config.getAllowCredentials()).isNull();
+	}
+
+	@PathPatternsParameterizedTest
+	void bogusAllowCredentialsValue(TestRequestMappingInfoHandlerMapping mapping) {
+		assertThatIllegalStateException()
+				.isThrownBy(() -> mapping.registerHandler(new MethodLevelControllerWithBogusAllowCredentialsValue()))
+				.withMessageContaining("@CrossOrigin's allowCredentials")
+				.withMessageContaining("current value is [bogus]");
+	}
+
+	@PathPatternsParameterizedTest
+	void allowCredentialsWithDefaultOrigin(TestRequestMappingInfoHandlerMapping mapping) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> mapping.registerHandler(new CredentialsWithDefaultOriginController()))
+				.withMessageContaining("When allowCredentials is true, allowedOrigins cannot contain");
+	}
+
+	@PathPatternsParameterizedTest
+	void allowCredentialsWithWildcardOrigin(TestRequestMappingInfoHandlerMapping mapping) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> mapping.registerHandler(new CredentialsWithWildcardOriginController()))
+				.withMessageContaining("When allowCredentials is true, allowedOrigins cannot contain");
+	}
+
+	@PathPatternsParameterizedTest
+	void classLevel(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new ClassLevelController());
 
 		this.request.setRequestURI("/foo");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertFalse(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isFalse();
 
 		this.request.setRequestURI("/bar");
-		chain = this.handlerMapping.getHandler(request);
+		chain = mapping.getHandler(request);
 		config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertFalse(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isFalse();
 
 		this.request.setRequestURI("/baz");
-		chain = this.handlerMapping.getHandler(request);
+		chain = mapping.getHandler(request);
 		config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
-	@Test // SPR-13468
-	public void classLevelComposedAnnotation() throws Exception {
-		this.handlerMapping.registerHandler(new ClassLevelMappingWithComposedAnnotation());
+	@PathPatternsParameterizedTest // SPR-13468
+	void classLevelComposedAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new ClassLevelMappingWithComposedAnnotation());
 
 		this.request.setRequestURI("/foo");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://foo.com"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example/");
+		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
-	@Test // SPR-13468
-	public void methodLevelComposedAnnotation() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelMappingWithComposedAnnotation());
+	@PathPatternsParameterizedTest // SPR-13468
+	void methodLevelComposedAnnotation(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelMappingWithComposedAnnotation());
 
 		this.request.setRequestURI("/foo");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"http://foo.com"}, config.getAllowedOrigins().toArray());
-		assertTrue(config.getAllowCredentials());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("http://www.foo.example/");
+		assertThat(config.getAllowCredentials()).isTrue();
 	}
 
-	@Test
-	public void preFlightRequest() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void preFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/default");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"GET"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertNull(config.getAllowCredentials());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
-		assertEquals(new Long(1800), config.getMaxAge());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("GET");
+		assertThat(config.getAllowedOrigins()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isNull();
+		assertThat(config.getAllowedHeaders()).containsExactly("*");
+		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
+		assertThat(config.getMaxAge()).isEqualTo(new Long(1800));
 	}
 
-	@Test
-	public void ambiguousHeaderPreFlightRequest() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void ambiguousHeaderPreFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
 		this.request.setRequestURI("/ambiguous-header");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"*"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.getAllowCredentials());
-		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
-		assertNull(config.getMaxAge());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("*");
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).containsExactly("*");
+		assertThat(config.getAllowedHeaders()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isTrue();
+		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
+		assertThat(config.getMaxAge()).isNull();
 	}
 
-	@Test
-	public void ambiguousProducesPreFlightRequest() throws Exception {
-		this.handlerMapping.registerHandler(new MethodLevelController());
+	@PathPatternsParameterizedTest
+	void ambiguousProducesPreFlightRequest(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		mapping.registerHandler(new MethodLevelController());
 		this.request.setMethod("OPTIONS");
 		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.request.setRequestURI("/ambiguous-produces");
-		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		HandlerExecutionChain chain = mapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, true);
-		assertNotNull(config);
-		assertArrayEquals(new String[] {"*"}, config.getAllowedMethods().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedOrigins().toArray());
-		assertArrayEquals(new String[] {"*"}, config.getAllowedHeaders().toArray());
-		assertTrue(config.getAllowCredentials());
-		assertTrue(CollectionUtils.isEmpty(config.getExposedHeaders()));
-		assertNull(config.getMaxAge());
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedMethods()).containsExactly("*");
+		assertThat(config.getAllowedOrigins()).isNull();
+		assertThat(config.getAllowedOriginPatterns()).containsExactly("*");
+		assertThat(config.getAllowedHeaders()).containsExactly("*");
+		assertThat(config.getAllowCredentials()).isTrue();
+		assertThat(CollectionUtils.isEmpty(config.getExposedHeaders())).isTrue();
+		assertThat(config.getMaxAge()).isNull();
 	}
 
-	@Test
-	public void preFlightRequestWithoutRequestMethodHeader() throws Exception {
+	@PathPatternsParameterizedTest
+	void preFlightRequestWithoutRequestMethodHeader(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/default");
-		request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		assertNull(this.handlerMapping.getHandler(request));
+		request.addHeader(HttpHeaders.ORIGIN, "https://domain2.com");
+		assertThat(mapping.getHandler(request)).isNull();
 	}
 
 
-	private CorsConfiguration getCorsConfiguration(HandlerExecutionChain chain, boolean isPreFlightRequest) {
+	@Nullable
+	private CorsConfiguration getCorsConfiguration(@Nullable HandlerExecutionChain chain, boolean isPreFlightRequest) {
+		assertThat(chain).isNotNull();
 		if (isPreFlightRequest) {
 			Object handler = chain.getHandler();
-			assertTrue(handler.getClass().getSimpleName().equals("PreFlightHandler"));
+			assertThat(handler.getClass().getSimpleName().equals("PreFlightHandler")).isTrue();
 			DirectFieldAccessor accessor = new DirectFieldAccessor(handler);
 			return (CorsConfiguration)accessor.getPropertyValue("config");
 		}
 		else {
-			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			if (interceptors != null) {
-				for (HandlerInterceptor interceptor : interceptors) {
-					if (interceptor.getClass().getSimpleName().equals("CorsInterceptor")) {
-						DirectFieldAccessor accessor = new DirectFieldAccessor(interceptor);
-						return (CorsConfiguration) accessor.getPropertyValue("config");
-					}
+			for (HandlerInterceptor interceptor : chain.getInterceptorList()) {
+				if (interceptor.getClass().getSimpleName().equals("CorsInterceptor")) {
+					DirectFieldAccessor accessor = new DirectFieldAccessor(interceptor);
+					return (CorsConfiguration) accessor.getPropertyValue("config");
 				}
 			}
 		}
@@ -316,6 +385,7 @@ public class CrossOriginTests {
 
 
 	@Controller
+	@SuppressWarnings("unused")
 	private static class MethodLevelController {
 
 		@GetMapping("/no")
@@ -358,7 +428,7 @@ public class CrossOriginTests {
 			return "{}";
 		}
 
-		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" },
+		@CrossOrigin(origins = { "https://site1.com", "https://site2.com" },
 				allowedHeaders = { "header1", "header2" },
 				exposedHeaders = { "header3", "header4" },
 				methods = RequestMethod.DELETE,
@@ -368,7 +438,7 @@ public class CrossOriginTests {
 		public void customized() {
 		}
 
-		@CrossOrigin("http://example.com")
+		@CrossOrigin("https://example.com")
 		@RequestMapping("/customOrigin")
 		public void customOriginDefinedViaValueAttribute() {
 		}
@@ -377,10 +447,21 @@ public class CrossOriginTests {
 		@RequestMapping("/someOrigin")
 		public void customOriginDefinedViaPlaceholder() {
 		}
+
+		@CrossOrigin(originPatterns = "http://*.example.com")
+		@RequestMapping("/customOriginPattern")
+		public void customOriginPatternDefinedViaValueAttribute() {
+		}
+
+		@CrossOrigin(originPatterns = "${myDomainPattern}")
+		@RequestMapping("/customOriginPatternPlaceholder")
+		public void customOriginPatternDefinedViaPlaceholder() {
+		}
 	}
 
 
 	@Controller
+	@SuppressWarnings("unused")
 	private static class MethodLevelControllerWithBogusAllowCredentialsValue {
 
 		@CrossOrigin(allowCredentials = "bogus")
@@ -403,11 +484,31 @@ public class CrossOriginTests {
 		public void bar() {
 		}
 
-		@CrossOrigin(allowCredentials = "true")
+		@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 		@RequestMapping(path = "/baz", method = RequestMethod.GET)
 		public void baz() {
 		}
+	}
 
+
+	@Controller
+	@CrossOrigin(allowCredentials = "true")
+	private static class CredentialsWithDefaultOriginController {
+
+		@GetMapping(path = "/no-origin")
+		public void noOrigin() {
+		}
+	}
+
+
+	@Controller
+	@CrossOrigin(allowCredentials = "true")
+	private static class CredentialsWithWildcardOriginController {
+
+		@GetMapping(path = "/no-origin")
+		@CrossOrigin(origins = "*")
+		public void wildcardOrigin() {
+		}
 	}
 
 
@@ -423,12 +524,14 @@ public class CrossOriginTests {
 
 
 	@Controller
-	@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
+	@ComposedCrossOrigin(origins = "http://www.foo.example/", allowCredentials = "true")
 	private static class ClassLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
+
+
 	}
 
 
@@ -436,7 +539,7 @@ public class CrossOriginTests {
 	private static class MethodLevelMappingWithComposedAnnotation {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
-		@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
+		@ComposedCrossOrigin(origins = "http://www.foo.example/", allowCredentials = "true")
 		public void foo() {
 		}
 	}
@@ -444,7 +547,7 @@ public class CrossOriginTests {
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingHandlerMapping {
 
-		public void registerHandler(Object handler) {
+		void registerHandler(Object handler) {
 			super.detectHandlerMethods(handler);
 		}
 
@@ -457,17 +560,32 @@ public class CrossOriginTests {
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annotation = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annotation != null) {
-				return new RequestMappingInfo(
-						new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(), true, true),
-						new RequestMethodsRequestCondition(annotation.method()),
-						new ParamsRequestCondition(annotation.params()),
-						new HeadersRequestCondition(annotation.headers()),
-						new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
-						new ProducesRequestCondition(annotation.produces(), annotation.headers()), null);
+				RequestMappingInfo.BuilderConfiguration options = new RequestMappingInfo.BuilderConfiguration();
+				if (getPatternParser() != null) {
+					options.setPatternParser(getPatternParser());
+				}
+				return RequestMappingInfo.paths(annotation.value())
+						.methods(annotation.method())
+						.params(annotation.params())
+						.headers(annotation.headers())
+						.consumes(annotation.consumes())
+						.produces(annotation.produces())
+						.options(options)
+						.build();
 			}
 			else {
 				return null;
 			}
+		}
+
+		@Override
+		protected String initLookupPath(HttpServletRequest request) {
+			// At runtime this is done by the DispatcherServlet
+			if (getPatternParser() != null) {
+				RequestPath requestPath = ServletRequestPathUtils.parseAndCache(request);
+				return requestPath.pathWithinApplication().value();
+			}
+			return super.initLookupPath(request);
 		}
 	}
 

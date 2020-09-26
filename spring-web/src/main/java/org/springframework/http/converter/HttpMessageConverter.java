@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * Strategy interface that specifies a converter that can convert from and to HTTP requests and responses.
+ * Strategy interface for converting from and to HTTP requests and responses.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public interface HttpMessageConverter<T> {
 
 	/**
 	 * Return the list of {@link MediaType} objects supported by this converter.
-	 * @return the list of supported media types
+	 * @return the list of supported media types, potentially an immutable copy
 	 */
 	List<MediaType> getSupportedMediaTypes();
 

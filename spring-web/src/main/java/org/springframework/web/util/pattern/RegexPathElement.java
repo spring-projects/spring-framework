@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,7 @@
 
 package org.springframework.web.util.pattern;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,12 +35,12 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
  */
 class RegexPathElement extends PathElement {
 
-	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 
-	private char[] regex;
+	private final char[] regex;
 
 	private final boolean caseSensitive;
 
@@ -48,7 +48,7 @@ class RegexPathElement extends PathElement {
 
 	private int wildcardCount;
 
-	private final List<String> variableNames = new LinkedList<>();
+	private final List<String> variableNames = new ArrayList<>();
 
 
 	RegexPathElement(int pos, char[] regex, boolean caseSensitive, char[] completePattern, char separator) {
@@ -136,7 +136,7 @@ class RegexPathElement extends PathElement {
 		if (matches) {
 			if (isNoMorePattern()) {
 				if (matchingContext.determineRemainingPath &&
-					(this.variableNames.isEmpty() ? true : textToMatch.length() > 0)) {
+					(this.variableNames.isEmpty() || textToMatch.length() > 0)) {
 					matchingContext.remainingPathIndex = pathIndex + 1;
 					matches = true;
 				}
@@ -203,6 +203,7 @@ class RegexPathElement extends PathElement {
 	}
 
 
+	@Override
 	public String toString() {
 		return "Regex(" + String.valueOf(this.regex) + ")";
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,42 +19,44 @@ package org.springframework.web.reactive;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.AbstractHttpHandlerIntegrationTests;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for server response flushing behavior.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  */
-public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private WebClient webClient;
 
 
-	@Before
-	public void setup() throws Exception {
-		super.setup();
+	@Override
+	protected void startServer(HttpServer httpServer) throws Exception {
+		super.startServer(httpServer);
 		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 
-	@Test
-	public void writeAndFlushWith() {
+	@ParameterizedHttpServerTest
+	void writeAndFlushWith(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-flush")
 				.retrieve()
@@ -68,8 +70,10 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				.verify(Duration.ofSeconds(10L));
 	}
 
-	@Test  // SPR-14991
-	public void writeAndAutoFlushOnComplete() {
+	@ParameterizedHttpServerTest  // SPR-14991
+	void writeAndAutoFlushOnComplete(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-complete")
 				.retrieve()
@@ -77,7 +81,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		try {
 			StepVerifier.create(result)
-					.consumeNextWith(value -> assertEquals(64 * 1024, value.length()))
+					.consumeNextWith(value -> assertThat(value.length()).isEqualTo((64 * 1024)))
 					.expectComplete()
 					.verify(Duration.ofSeconds(10L));
 		}
@@ -93,8 +97,10 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		}
 	}
 
-	@Test  // SPR-14992
-	public void writeAndAutoFlushBeforeComplete() {
+	@ParameterizedHttpServerTest  // SPR-14992
+	void writeAndAutoFlushBeforeComplete(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		Mono<String> result = this.webClient.get()
 				.uri("/write-and-never-complete")
 				.retrieve()

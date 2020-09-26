@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,12 +35,13 @@ import org.springframework.web.context.ContextLoader;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext WebApplicationContext}
- * implementation which accepts annotated classes as input - in particular
+ * implementation which accepts <em>component classes</em> as input &mdash; in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
  * classes, but also plain {@link org.springframework.stereotype.Component @Component}
- * classes and JSR-330 compliant classes using {@code javax.inject} annotations. Allows
- * for registering classes one by one (specifying class names as config location) as well
- * as for classpath scanning (specifying base packages as config location).
+ * classes and JSR-330 compliant classes using {@code javax.inject} annotations.
+ *
+ * <p>Allows for registering classes one by one (specifying class names as config
+ * location) as well as for classpath scanning (specifying base packages as config location).
  *
  * <p>This is essentially the equivalent of
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -53,7 +54,7 @@ import org.springframework.web.context.ContextLoader;
  *
  * <p>As of Spring 3.1, this class may also be directly instantiated and injected into
  * Spring's {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
- * new {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
+ * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
  * code-based alternative to {@code web.xml}. See its Javadoc for details and usage examples.
  *
  * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
@@ -74,7 +75,8 @@ import org.springframework.web.context.ContextLoader;
  *
  * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
- * to deliberately override certain bean definitions via an extra Configuration class.
+ * to deliberately override certain bean definitions via an extra {@code @Configuration}
+ * class.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -90,7 +92,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	@Nullable
 	private ScopeMetadataResolver scopeMetadataResolver;
 
-	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
+	private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
 
 	private final Set<String> basePackages = new LinkedHashSet<>();
 
@@ -137,31 +139,33 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 
 	/**
-	 * Register one or more annotated classes to be processed.
+	 * Register one or more component classes to be processed.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
-	 * @param annotatedClasses one or more annotated classes,
+	 * @param componentClasses one or more component classes,
 	 * e.g. {@link org.springframework.context.annotation.Configuration @Configuration} classes
 	 * @see #scan(String...)
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
 	 * @see #setConfigLocation(String)
 	 * @see #refresh()
 	 */
-	public void register(Class<?>... annotatedClasses) {
-		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-		Collections.addAll(this.annotatedClasses, annotatedClasses);
+	@Override
+	public void register(Class<?>... componentClasses) {
+		Assert.notEmpty(componentClasses, "At least one component class must be specified");
+		Collections.addAll(this.componentClasses, componentClasses);
 	}
 
 	/**
 	 * Perform a scan within the specified base packages.
 	 * <p>Note that {@link #refresh()} must be called in order for the context
 	 * to fully process the new classes.
-	 * @param basePackages the packages to check for annotated classes
+	 * @param basePackages the packages to check for component classes
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
 	 * @see #register(Class...)
 	 * @see #setConfigLocation(String)
 	 * @see #refresh()
 	 */
+	@Override
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Collections.addAll(this.basePackages, basePackages);
@@ -176,7 +180,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * {@link #setConfigLocations(String[])}, attempt first to load each location as a
 	 * class, registering a {@code BeanDefinition} if class loading is successful,
 	 * and if class loading fails (i.e. a {@code ClassNotFoundException} is raised),
-	 * assume the value is a package and attempt to scan it for annotated classes.
+	 * assume the value is a package and attempt to scan it for component classes.
 	 * <p>Enables the default set of annotation configuration post processors, such that
 	 * {@code @Autowired}, {@code @Required}, and associated annotations can be used.
 	 * <p>Configuration class bean definitions are registered with generated bean
@@ -208,12 +212,12 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
 		}
 
-		if (!this.annotatedClasses.isEmpty()) {
+		if (!this.componentClasses.isEmpty()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Registering annotated classes: [" +
-						StringUtils.collectionToCommaDelimitedString(this.annotatedClasses) + "]");
+				logger.debug("Registering component classes: [" +
+						StringUtils.collectionToCommaDelimitedString(this.componentClasses) + "]");
 			}
-			reader.register(ClassUtils.toClassArray(this.annotatedClasses));
+			reader.register(ClassUtils.toClassArray(this.componentClasses));
 		}
 
 		if (!this.basePackages.isEmpty()) {
@@ -241,7 +245,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 					}
 					int count = scanner.scan(configLocation);
 					if (count == 0 && logger.isDebugEnabled()) {
-						logger.debug("No annotated classes found for specified class/package [" + configLocation + "]");
+						logger.debug("No component classes found for specified class/package [" + configLocation + "]");
 					}
 				}
 			}

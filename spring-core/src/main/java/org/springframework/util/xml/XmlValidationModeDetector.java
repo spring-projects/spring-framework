@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  */
 public class XmlValidationModeDetector {
@@ -89,8 +90,7 @@ public class XmlValidationModeDetector {
 	 */
 	public int detectValidationMode(InputStream inputStream) throws IOException {
 		// Peek into the file to look for DOCTYPE.
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-		try {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 			boolean isDtdValidated = false;
 			String content;
 			while ((content = reader.readLine()) != null) {
@@ -113,9 +113,6 @@ public class XmlValidationModeDetector {
 			// Choked on some character encoding...
 			// Leave the decision up to the caller.
 			return VALIDATION_AUTO;
-		}
-		finally {
-			reader.close();
 		}
 	}
 
@@ -142,20 +139,27 @@ public class XmlValidationModeDetector {
 	}
 
 	/**
-	 * Consumes all the leading comment data in the given String and returns the remaining content, which
-	 * may be empty since the supplied content might be all comment data. For our purposes it is only important
-	 * to strip leading comment content on a line since the first piece of non comment content will be either
-	 * the DOCTYPE declaration or the root element of the document.
+	 * Consume all leading and trailing comments in the given String and return
+	 * the remaining content, which may be empty since the supplied content might
+	 * be all comment data.
 	 */
 	@Nullable
 	private String consumeCommentTokens(String line) {
-		if (!line.contains(START_COMMENT) && !line.contains(END_COMMENT)) {
+		int indexOfStartComment = line.indexOf(START_COMMENT);
+		if (indexOfStartComment == -1 && !line.contains(END_COMMENT)) {
 			return line;
 		}
+
+		String result = "";
 		String currLine = line;
+		if (indexOfStartComment >= 0) {
+			result = line.substring(0, indexOfStartComment);
+			currLine = line.substring(indexOfStartComment);
+		}
+
 		while ((currLine = consume(currLine)) != null) {
 			if (!this.inComment && !currLine.trim().startsWith(START_COMMENT)) {
-				return currLine;
+				return result + currLine;
 			}
 		}
 		return null;

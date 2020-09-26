@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.document;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * will extend this class to merge the PDF form with model data.
  *
  * <p>This view implementation uses Bruno Lowagie's
- * <a href="http://www.lowagie.com/iText">iText</a> API.
+ * <a href="https://www.lowagie.com/iText">iText</a> API.
  * Known to work with the original iText 2.1.7 as well as its fork
  * <a href="https://github.com/LibrePDF/OpenPDF">OpenPDF</a>.
  * <b>We strongly recommend OpenPDF since it is actively maintained

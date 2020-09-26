@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.view.groovy;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Locale;
 
 import groovy.text.TemplateEngine;
 import groovy.text.markup.MarkupTemplateEngine;
 import groovy.text.markup.TemplateConfiguration;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticApplicationContext;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 
 /**
  * Unit tests for
@@ -51,7 +49,7 @@ public class GroovyMarkupConfigurerTests {
 	private GroovyMarkupConfigurer configurer;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.applicationContext = new StaticApplicationContext();
 		this.configurer = new GroovyMarkupConfigurer();
@@ -64,13 +62,13 @@ public class GroovyMarkupConfigurerTests {
 		this.configurer.afterPropertiesSet();
 
 		TemplateEngine engine = this.configurer.getTemplateEngine();
-		assertNotNull(engine);
-		assertEquals(MarkupTemplateEngine.class, engine.getClass());
+		assertThat(engine).isNotNull();
+		assertThat(engine.getClass()).isEqualTo(MarkupTemplateEngine.class);
 
 		MarkupTemplateEngine markupEngine = (MarkupTemplateEngine) engine;
 		TemplateConfiguration configuration = markupEngine.getTemplateConfiguration();
-		assertNotNull(configuration);
-		assertEquals(GroovyMarkupConfigurer.class, configuration.getClass());
+		assertThat(configuration).isNotNull();
+		assertThat(configuration.getClass()).isEqualTo(GroovyMarkupConfigurer.class);
 	}
 
 	@Test
@@ -80,8 +78,8 @@ public class GroovyMarkupConfigurerTests {
 		this.configurer.afterPropertiesSet();
 
 		TemplateEngine engine = this.configurer.getTemplateEngine();
-		assertNotNull(engine);
-		assertEquals(TestTemplateEngine.class, engine.getClass());
+		assertThat(engine).isNotNull();
+		assertThat(engine.getClass()).isEqualTo(TestTemplateEngine.class);
 	}
 
 	@Test
@@ -91,13 +89,13 @@ public class GroovyMarkupConfigurerTests {
 		this.configurer.afterPropertiesSet();
 
 		TemplateEngine engine = this.configurer.getTemplateEngine();
-		assertNotNull(engine);
-		assertEquals(MarkupTemplateEngine.class, engine.getClass());
+		assertThat(engine).isNotNull();
+		assertThat(engine.getClass()).isEqualTo(MarkupTemplateEngine.class);
 
 		MarkupTemplateEngine markupEngine = (MarkupTemplateEngine) engine;
 		TemplateConfiguration configuration = markupEngine.getTemplateConfiguration();
-		assertNotNull(configuration);
-		assertFalse(configuration.isCacheTemplates());
+		assertThat(configuration).isNotNull();
+		assertThat(configuration.isCacheTemplates()).isFalse();
 	}
 
 	@Test
@@ -107,21 +105,21 @@ public class GroovyMarkupConfigurerTests {
 		this.configurer.setApplicationContext(this.applicationContext);
 
 		ClassLoader classLoader = this.configurer.createTemplateClassLoader();
-		assertNotNull(classLoader);
+		assertThat(classLoader).isNotNull();
 		URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(1));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/groovy/"));
+		assertThat(urlClassLoader.getURLs()).hasSize(1);
+		assertThat(urlClassLoader.getURLs()[0].toString())
+				.endsWith("org/springframework/web/servlet/view/groovy/");
 
 		this.configurer.setResourceLoaderPath(RESOURCE_LOADER_PATH + ",classpath:org/springframework/web/servlet/view/");
 		classLoader = this.configurer.createTemplateClassLoader();
-		assertNotNull(classLoader);
+		assertThat(classLoader).isNotNull();
 		urlClassLoader = (URLClassLoader) classLoader;
-		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(2));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/groovy/"));
-		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(1).toString(),
-				Matchers.endsWith("org/springframework/web/servlet/view/"));
+		assertThat(urlClassLoader.getURLs()).hasSize(2);
+		assertThat(urlClassLoader.getURLs()[0].toString())
+				.endsWith("org/springframework/web/servlet/view/groovy/");
+		assertThat(urlClassLoader.getURLs()[1].toString())
+				.endsWith("org/springframework/web/servlet/view/");
 	}
 
 	private class TestTemplateEngine extends MarkupTemplateEngine {
@@ -134,37 +132,38 @@ public class GroovyMarkupConfigurerTests {
 	@Test
 	public void resolveSampleTemplate() throws Exception {
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "test.tpl");
-		Assert.assertNotNull(url);
+		assertThat(url).isNotNull();
 	}
 
 	@Test
 	public void resolveI18nFullLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.GERMANY);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_de_DE.tpl"));
+		assertThat(url).isNotNull();
+		assertThat(url.getPath()).contains("i18n_de_DE.tpl");
 	}
 
 	@Test
 	public void resolveI18nPartialLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.FRANCE);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n_fr.tpl"));
+		assertThat(url).isNotNull();
+		assertThat(url.getPath()).contains("i18n_fr.tpl");
 	}
 
 	@Test
 	public void resolveI18nDefaultLocale() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
 		URL url = this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "i18n.tpl");
-		Assert.assertNotNull(url);
-		Assert.assertThat(url.getPath(), Matchers.containsString("i18n.tpl"));
+		assertThat(url).isNotNull();
+		assertThat(url.getPath()).contains("i18n.tpl");
 	}
 
-	@Test(expected = IOException.class)
+	@Test
 	public void failMissingTemplate() throws Exception {
 		LocaleContextHolder.setLocale(Locale.US);
-		this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl");
-		Assert.fail();
+		assertThatIOException().isThrownBy(() ->
+			this.configurer.resolveTemplate(getClass().getClassLoader(), TEMPLATE_PREFIX + "missing.tpl"));
 	}
+
 }

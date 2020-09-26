@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,16 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -93,7 +95,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private volatile boolean active = true;
 
-	private final ConcurrentMap<Integer, LinkedList<Session>> cachedSessions = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Integer, Deque<Session>> cachedSessions = new ConcurrentHashMap<>();
 
 
 	/**
@@ -185,7 +187,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		this.active = false;
 
 		synchronized (this.cachedSessions) {
-			for (LinkedList<Session> sessionList : this.cachedSessions.values()) {
+			for (Deque<Session> sessionList : this.cachedSessions.values()) {
 				synchronized (sessionList) {
 					for (Session session : sessionList) {
 						try {
@@ -215,7 +217,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return null;
 		}
 
-		LinkedList<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new LinkedList<>());
+		Deque<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new ArrayDeque<>());
 		Session session = null;
 		synchronized (sessionList) {
 			if (!sessionList.isEmpty()) {
@@ -246,7 +248,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @param sessionList the List of cached Sessions that the given Session belongs to
 	 * @return the wrapped Session
 	 */
-	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
+	protected Session getCachedSessionProxy(Session target, Deque<Session> sessionList) {
 		List<Class<?>> classes = new ArrayList<>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
@@ -267,7 +269,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Session target;
 
-		private final LinkedList<Session> sessionList;
+		private final Deque<Session> sessionList;
 
 		private final Map<DestinationCacheKey, MessageProducer> cachedProducers = new HashMap<>();
 
@@ -275,7 +277,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private boolean transactionOpen = false;
 
-		public CachedSessionInvocationHandler(Session target, LinkedList<Session> sessionList) {
+		public CachedSessionInvocationHandler(Session target, Deque<Session> sessionList) {
 			this.target = target;
 			this.sessionList = sessionList;
 		}
@@ -519,10 +521,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == other || destinationEquals((DestinationCacheKey) other));
+			return (this == other || (other instanceof DestinationCacheKey &&
+					destinationEquals((DestinationCacheKey) other)));
 		}
 
 		@Override
@@ -573,9 +576,12 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
+			}
+			if (!(other instanceof ConsumerCacheKey)) {
+				return false;
 			}
 			ConsumerCacheKey otherKey = (ConsumerCacheKey) other;
 			return (destinationEquals(otherKey) &&
@@ -587,7 +593,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		@Override
 		public int hashCode() {
-			return 31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector);
+			return (31 * super.hashCode() + ObjectUtils.nullSafeHashCode(this.selector));
 		}
 
 		@Override

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,12 +23,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link HttpStatusCodeException} and subclasses.
@@ -51,14 +50,14 @@ public class HttpStatusCodeExceptionTests {
 		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 		HttpStatusCodeException ex2 =
 				(HttpStatusCodeException) new ObjectInputStream(in).readObject();
-		assertThat(ex2.getResponseBodyAsString(), equalTo(ex1.getResponseBodyAsString()));
+		assertThat(ex2.getResponseBodyAsString()).isEqualTo(ex1.getResponseBodyAsString());
 	}
 
 	@Test
 	public void emptyStatusText() {
 		HttpStatusCodeException ex = new HttpClientErrorException(HttpStatus.NOT_FOUND, "");
 
-		assertEquals("404 Not Found", ex.getMessage());
+		assertThat(ex.getMessage()).isEqualTo("404 Not Found");
 	}
 
 }

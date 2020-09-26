@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ package org.springframework.test.web.servlet.samples.standalone;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -38,20 +38,26 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.servlet.view.xml.MarshallingView;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * Tests with view resolution.
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolutionTests {
+class ViewResolutionTests {
 
 	@Test
-	public void testJspOnly() throws Exception {
+	void jspOnly() throws Exception {
 		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/WEB-INF/", ".jsp");
 
 		standaloneSetup(new PersonController()).setViewResolvers(viewResolver).build()
@@ -63,16 +69,16 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void testJsonOnly() throws Exception {
+	void jsonOnly() throws Exception {
 		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.person.name").value("Corea"));
 	}
 
 	@Test
-	public void testXmlOnly() throws Exception {
+	void xmlOnly() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -84,7 +90,7 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void testContentNegotiation() throws Exception {
+	void contentNegotiation() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -113,7 +119,7 @@ public class ViewResolutionTests {
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.person.name").value("Corea"));
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_XML))
@@ -123,7 +129,7 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void defaultViewResolver() throws Exception {
+	void defaultViewResolver() throws Exception {
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(model().attribute("person", hasProperty("name", equalTo("Corea"))))
@@ -136,7 +142,7 @@ public class ViewResolutionTests {
 	private static class PersonController {
 
 		@GetMapping("/person/{name}")
-		public String show(@PathVariable String name, Model model) {
+		String show(@PathVariable String name, Model model) {
 			Person person = new Person(name);
 			model.addAttribute(person);
 			return "person/show";
@@ -144,4 +150,3 @@ public class ViewResolutionTests {
 	}
 
 }
-

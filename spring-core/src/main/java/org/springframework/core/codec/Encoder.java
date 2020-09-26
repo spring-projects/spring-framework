@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,12 +60,34 @@ public interface Encoder<T> {
 	 * @param elementType the expected type of elements in the input stream;
 	 * this type must have been previously passed to the {@link #canEncode}
 	 * method and it must have returned {@code true}.
-	 * @param mimeType the MIME type for the output stream (optional)
-	 * @param hints additional information about how to do encode
+	 * @param mimeType the MIME type for the output content (optional)
+	 * @param hints additional information about how to encode
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
 			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints);
+
+	/**
+	 * Encode an Object of type T to a data buffer. This is useful for scenarios,
+	 * that distinct messages (or events) are encoded and handled individually,
+	 * in fully aggregated form.
+	 * <p>By default this method raises {@link UnsupportedOperationException}
+	 * and it is expected that some encoders cannot produce a single buffer or
+	 * cannot do so synchronously (e.g. encoding a {@code Resource}).
+	 * @param value the value to be encoded
+	 * @param bufferFactory for creating the output {@code DataBuffer}
+	 * @param valueType the type for the value being encoded
+	 * @param mimeType the MIME type for the output content (optional)
+	 * @param hints additional information about how to encode
+	 * @return the encoded content
+	 * @since 5.2
+	 */
+	default DataBuffer encodeValue(T value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
+		// It may not be possible to produce a single DataBuffer synchronously
+		throw new UnsupportedOperationException();
+	}
 
 	/**
 	 * Return the list of mime types this encoder supports.

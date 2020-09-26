@@ -3,9 +3,9 @@
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:task="http://www.springframework.org/schema/task"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
-	   			http://www.springframework.org/schema/beans/spring-beans.xsd
+	   			https://www.springframework.org/schema/beans/spring-beans.xsd
 				http://www.springframework.org/schema/task
-				http://www.springframework.org/schema/task/spring-task.xsd">
+				https://www.springframework.org/schema/task/spring-task.xsd">
 
 	<task:scheduler id="defaultScheduler"/>
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,9 @@
 package org.springframework.scheduling.quartz;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.quartz.SchedulerConfigException;
@@ -109,7 +111,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
-					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -137,7 +139,7 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
-					/* Quartz 2.2 initialize method */
+					@Override
 					public void initialize() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -146,7 +148,8 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 
 		// No, if HSQL is the platform, we really don't want to use locks...
 		try {
-			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource, "getDatabaseProductName");
+			String productName = JdbcUtils.extractDatabaseMetaData(this.dataSource,
+					DatabaseMetaData::getDatabaseProductName);
 			productName = JdbcUtils.commonDatabaseName(productName);
 			if (productName != null && productName.toLowerCase().contains("hsql")) {
 				setUseDBLocks(false);

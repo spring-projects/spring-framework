@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.util.concurrent.Queues;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -35,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.CloseStatus;
 import org.springframework.web.reactive.socket.HandshakeInfo;
+import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketMessage.Type;
 import org.springframework.web.reactive.socket.WebSocketSession;
@@ -44,8 +46,8 @@ import org.springframework.web.reactive.socket.WebSocketSession;
  * event-listener WebSocket APIs (e.g. Java WebSocket API JSR-356, Jetty,
  * Undertow) and Reactive Streams.
  *
- * <p>Also an implementation of {@code Subscriber&lt;Void&gt;} so it can be used as
- * the completion subscriber for session handling
+ * <p>Also implements {@code Subscriber<Void>} so it can be used to subscribe to
+ * the completion of {@link WebSocketHandler#handle(WebSocketSession)}.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev
@@ -63,7 +65,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 
 	@Nullable
-	private final MonoProcessor<Void> completionMono;
+	private final MonoProcessor<Void> handlerCompletion;
 
 	private final WebSocketReceivePublisher receivePublisher;
 
@@ -71,6 +73,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	private volatile WebSocketSendProcessor sendProcessor;
 
 	private final AtomicBoolean sendCalled = new AtomicBoolean();
+
+	private final MonoProcessor<CloseStatus> closeStatusProcessor = MonoProcessor.fromSink(Sinks.one());
 
 
 	/**
@@ -87,15 +91,16 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 	/**
-	 * Alternative constructor with completion {@code Mono&lt;Void&gt;} to propagate
-	 * the session completion (success or error) (for client-side use).
+	 * Alternative constructor with completion {@code Mono<Void>} to propagate
+	 * session completion (success or error). This is primarily for use with the
+	 * {@code WebSocketClient} to be able to report the end of execution.
 	 */
 	public AbstractListenerWebSocketSession(T delegate, String id, HandshakeInfo info,
-			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> completionMono) {
+			DataBufferFactory bufferFactory, @Nullable MonoProcessor<Void> handlerCompletion) {
 
 		super(delegate, id, info, bufferFactory);
 		this.receivePublisher = new WebSocketReceivePublisher();
-		this.completionMono = completionMono;
+		this.handlerCompletion = handlerCompletion;
 	}
 
 
@@ -124,6 +129,11 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		else {
 			return Mono.error(new IllegalStateException("send() has already been called"));
 		}
+	}
+
+	@Override
+	public Mono<CloseStatus> closeStatus() {
+		return this.closeStatusProcessor;
 	}
 
 	/**
@@ -170,6 +180,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	/** Handle an error callback from the WebSocketHandler adapter. */
 	void handleError(Throwable ex) {
+		this.closeStatusProcessor.onComplete();
 		this.receivePublisher.onError(ex);
 		WebSocketSendProcessor sendProcessor = this.sendProcessor;
 		if (sendProcessor != null) {
@@ -179,7 +190,8 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 	/** Handle a close callback from the WebSocketHandler adapter. */
-	void handleClose(CloseStatus reason) {
+	void handleClose(CloseStatus closeStatus) {
+		this.closeStatusProcessor.onNext(closeStatus);
 		this.receivePublisher.onAllDataRead();
 		WebSocketSendProcessor sendProcessor = this.sendProcessor;
 		if (sendProcessor != null) {
@@ -189,7 +201,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 	}
 
 
-	// Subscriber<Void> implementation
+	// Subscriber<Void> implementation tracking WebSocketHandler#handle completion
 
 	@Override
 	public void onSubscribe(Subscription subscription) {
@@ -203,17 +215,16 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 
 	@Override
 	public void onError(Throwable ex) {
-		if (this.completionMono != null) {
-			this.completionMono.onError(ex);
+		if (this.handlerCompletion != null) {
+			this.handlerCompletion.onError(ex);
 		}
-		int code = CloseStatus.SERVER_ERROR.getCode();
-		close(new CloseStatus(code, ex.getMessage()));
+		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
 	}
 
 	@Override
 	public void onComplete() {
-		if (this.completionMono != null) {
-			this.completionMono.onComplete();
+		if (this.handlerCompletion != null) {
+			this.handlerCompletion.onComplete();
 		}
 		close();
 	}

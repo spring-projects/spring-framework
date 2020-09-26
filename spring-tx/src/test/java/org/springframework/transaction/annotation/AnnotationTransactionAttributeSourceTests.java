@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,29 +21,32 @@ import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+
 import javax.ejb.TransactionAttributeType;
 
 import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.util.SerializationTestUtils;
+import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Mark Paluch
  */
 public class AnnotationTransactionAttributeSourceTests {
 
@@ -52,7 +55,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		TestBean1 tb = new TestBean1();
 		CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 		AnnotationTransactionAttributeSource tas = new AnnotationTransactionAttributeSource();
-		TransactionInterceptor ti = new TransactionInterceptor(ptm, tas);
+		TransactionInterceptor ti = new TransactionInterceptor((TransactionManager) ptm, tas);
 
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setInterfaces(ITestBean1.class);
@@ -60,15 +63,15 @@ public class AnnotationTransactionAttributeSourceTests {
 		proxyFactory.setTarget(tb);
 		ITestBean1 proxy = (ITestBean1) proxyFactory.getProxy();
 		proxy.getAge();
-		assertEquals(1, ptm.commits);
+		assertThat(ptm.commits).isEqualTo(1);
 
-		ITestBean1 serializedProxy = (ITestBean1) SerializationTestUtils.serializeAndDeserialize(proxy);
+		ITestBean1 serializedProxy = SerializationTestUtils.serializeAndDeserialize(proxy);
 		serializedProxy.getAge();
 		Advised advised = (Advised) serializedProxy;
 		TransactionInterceptor serializedTi = (TransactionInterceptor) advised.getAdvisors()[0].getAdvice();
 		CallCountingTransactionManager serializedPtm =
 				(CallCountingTransactionManager) serializedTi.getTransactionManager();
-		assertEquals(2, serializedPtm.commits);
+		assertThat(serializedPtm.commits).isEqualTo(2);
 	}
 
 	@Test
@@ -76,10 +79,10 @@ public class AnnotationTransactionAttributeSourceTests {
 		Method method = Empty.class.getMethod("getAge");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
-		assertNull(atas.getTransactionAttribute(method, null));
+		assertThat(atas.getTransactionAttribute(method, null)).isNull();
 
 		// Try again in case of caching
-		assertNull(atas.getTransactionAttribute(method, null));
+		assertThat(atas.getTransactionAttribute(method, null)).isNull();
 	}
 
 	/**
@@ -95,7 +98,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	/**
@@ -115,7 +118,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	/**
@@ -129,7 +132,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean2.class);
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	/**
@@ -138,22 +141,31 @@ public class AnnotationTransactionAttributeSourceTests {
 	@Test
 	public void transactionAttributeOnTargetClassMethodOverridesAttributeOnInterfaceMethod() throws Exception {
 		Method interfaceMethod = ITestBean3.class.getMethod("getAge");
-		Method interfaceMethod2 = ITestBean3.class.getMethod("getName");
+		Method interfaceMethod2 = ITestBean3.class.getMethod("setAge", int.class);
+		Method interfaceMethod3 = ITestBean3.class.getMethod("getName");
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		atas.setEmbeddedValueResolver(strVal -> ("${myTimeout}".equals(strVal) ? "5" : strVal));
+
 		TransactionAttribute actual = atas.getTransactionAttribute(interfaceMethod, TestBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRES_NEW, actual.getPropagationBehavior());
-		assertEquals(TransactionAttribute.ISOLATION_REPEATABLE_READ, actual.getIsolationLevel());
-		assertEquals(5, actual.getTimeout());
-		assertTrue(actual.isReadOnly());
+		assertThat(actual.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRES_NEW);
+		assertThat(actual.getIsolationLevel()).isEqualTo(TransactionAttribute.ISOLATION_REPEATABLE_READ);
+		assertThat(actual.getTimeout()).isEqualTo(5);
+		assertThat(actual.isReadOnly()).isTrue();
+
+		TransactionAttribute actual2 = atas.getTransactionAttribute(interfaceMethod2, TestBean3.class);
+		assertThat(actual2.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRES_NEW);
+		assertThat(actual2.getIsolationLevel()).isEqualTo(TransactionAttribute.ISOLATION_REPEATABLE_READ);
+		assertThat(actual2.getTimeout()).isEqualTo(5);
+		assertThat(actual2.isReadOnly()).isTrue();
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		TransactionAttribute actual2 = atas.getTransactionAttribute(interfaceMethod2, TestBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, actual2.getPropagationBehavior());
+		TransactionAttribute actual3 = atas.getTransactionAttribute(interfaceMethod3, TestBean3.class);
+		assertThat(actual3.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 	}
 
 	@Test
@@ -167,9 +179,9 @@ public class AnnotationTransactionAttributeSourceTests {
 		rbta.getRollbackRules().add(new RollbackRuleAttribute("java.lang.Exception"));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
 
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
-		assertTrue(actual.rollbackOn(new Exception()));
-		assertFalse(actual.rollbackOn(new IOException()));
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
+		assertThat(actual.rollbackOn(new Exception())).isTrue();
+		assertThat(actual.rollbackOn(new IOException())).isFalse();
 
 		actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
 
@@ -177,9 +189,24 @@ public class AnnotationTransactionAttributeSourceTests {
 		rbta.getRollbackRules().add(new RollbackRuleAttribute("java.lang.Exception"));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
 
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
-		assertTrue(actual.rollbackOn(new Exception()));
-		assertFalse(actual.rollbackOn(new IOException()));
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
+		assertThat(actual.rollbackOn(new Exception())).isTrue();
+		assertThat(actual.rollbackOn(new IOException())).isFalse();
+	}
+
+	@Test
+	public void labelsAreApplied() throws Exception {
+		Method method = TestBean11.class.getMethod("getAge");
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean11.class);
+
+		assertThat(actual.getLabels()).containsOnly("retryable", "long-running");
+
+		method = TestBean11.class.getMethod("setAge", Integer.TYPE);
+		actual = atas.getTransactionAttribute(method, method.getDeclaringClass());
+
+		assertThat(actual.getLabels()).containsOnly("short-running");
 	}
 
 	/**
@@ -196,7 +223,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	@Test
@@ -209,7 +236,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	@Test
@@ -222,7 +249,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 	}
 
 	@Test
@@ -235,9 +262,9 @@ public class AnnotationTransactionAttributeSourceTests {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		assertTrue(actual.isReadOnly());
+		assertThat(actual.isReadOnly()).isTrue();
 	}
 
 	@Test
@@ -250,9 +277,9 @@ public class AnnotationTransactionAttributeSourceTests {
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		assertTrue(actual.isReadOnly());
+		assertThat(actual.isReadOnly()).isTrue();
 	}
 
 	@Test
@@ -260,20 +287,20 @@ public class AnnotationTransactionAttributeSourceTests {
 		Method method = TestInterface9.class.getMethod("getAge");
 
 		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
-		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean9.getAge()", annotation);
+		assertThat(annotation).as("AnnotationUtils.findAnnotation should not find @Transactional for TestBean9.getAge()").isNull();
 		annotation = AnnotationUtils.findAnnotation(TestBean9.class, Transactional.class);
-		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean9", annotation);
+		assertThat(annotation).as("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean9").isNotNull();
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean9.class);
-		assertNotNull("Failed to retrieve TransactionAttribute for TestBean9.getAge()", actual);
+		assertThat(actual).as("Failed to retrieve TransactionAttribute for TestBean9.getAge()").isNotNull();
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		assertTrue(actual.isReadOnly());
+		assertThat(actual.isReadOnly()).isTrue();
 	}
 
 	@Test
@@ -281,21 +308,20 @@ public class AnnotationTransactionAttributeSourceTests {
 		Method method = TestInterface10.class.getMethod("getAge");
 
 		Transactional annotation = AnnotationUtils.findAnnotation(method, Transactional.class);
-		assertNotNull("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean10.getAge()",
-				annotation);
+		assertThat(annotation).as("AnnotationUtils.findAnnotation failed to find @Transactional for TestBean10.getAge()").isNotNull();
 		annotation = AnnotationUtils.findAnnotation(TestBean10.class, Transactional.class);
-		assertNull("AnnotationUtils.findAnnotation should not find @Transactional for TestBean10", annotation);
+		assertThat(annotation).as("AnnotationUtils.findAnnotation should not find @Transactional for TestBean10").isNull();
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute actual = atas.getTransactionAttribute(method, TestBean10.class);
-		assertNotNull("Failed to retrieve TransactionAttribute for TestBean10.getAge()", actual);
+		assertThat(actual).as("Failed to retrieve TransactionAttribute for TestBean10.getAge()").isNotNull();
 
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.getRollbackRules().add(new RollbackRuleAttribute(Exception.class));
 		rbta.getRollbackRules().add(new NoRollbackRuleAttribute(IOException.class));
-		assertEquals(rbta.getRollbackRules(), ((RuleBasedTransactionAttribute) actual).getRollbackRules());
+		assertThat(((RuleBasedTransactionAttribute) actual).getRollbackRules()).isEqualTo(rbta.getRollbackRules());
 
-		assertTrue(actual.isReadOnly());
+		assertThat(actual.isReadOnly()).isTrue();
 	}
 
 	@Test
@@ -305,9 +331,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, Ejb3AnnotatedBean1.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, Ejb3AnnotatedBean1.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -317,9 +343,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, Ejb3AnnotatedBean2.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, Ejb3AnnotatedBean2.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -329,9 +355,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, Ejb3AnnotatedBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, Ejb3AnnotatedBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -341,9 +367,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean1.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean1.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -353,9 +379,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean2.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean2.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -365,9 +391,9 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, JtaAnnotatedBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, JtaAnnotatedBean3.class);
-		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_SUPPORTS);
 	}
 
 	@Test
@@ -378,10 +404,10 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
 		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, GroovyTestBean.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		assertThat(getAgeAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
 		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, GroovyTestBean.class);
-		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getNameAttr.getPropagationBehavior());
-		assertNull(atas.getTransactionAttribute(getMetaClassMethod, GroovyTestBean.class));
+		assertThat(getNameAttr.getPropagationBehavior()).isEqualTo(TransactionAttribute.PROPAGATION_REQUIRED);
+		assertThat(atas.getTransactionAttribute(getMetaClassMethod, GroovyTestBean.class)).isNull();
 	}
 
 
@@ -569,6 +595,9 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
+		@Transactional(propagation = Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ,
+				timeoutString = "${myTimeout}", readOnly = true, rollbackFor = Exception.class,
+				noRollbackFor = IOException.class)
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -690,6 +719,21 @@ public class AnnotationTransactionAttributeSourceTests {
 		@Override
 		public int getAge() {
 			return 10;
+		}
+	}
+
+	@Transactional(label = {"retryable", "long-running"})
+	static class TestBean11 {
+
+		private int age = 10;
+
+		@Transactional(label = "short-running")
+		public void setAge(int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
 		}
 	}
 

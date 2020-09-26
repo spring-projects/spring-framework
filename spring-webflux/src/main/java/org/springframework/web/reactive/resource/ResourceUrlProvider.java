@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -54,8 +54,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	private static final Log logger = LogFactory.getLog(ResourceUrlProvider.class);
 
 
-	private final PathPatternParser patternParser = new PathPatternParser();
-
 	private final Map<PathPattern, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
 
@@ -78,7 +76,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		this.handlerMap.clear();
 		handlerMap.forEach((rawPattern, resourceWebHandler) -> {
 			rawPattern = prependLeadingSlash(rawPattern);
-			PathPattern pattern = this.patternParser.parse(rawPattern);
+			PathPattern pattern = PathPatternParser.defaultInstance.parse(rawPattern);
 			this.handlerMap.put(pattern, resourceWebHandler);
 		});
 	}

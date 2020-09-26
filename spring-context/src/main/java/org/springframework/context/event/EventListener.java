@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,18 +48,39 @@ import org.springframework.core.annotation.AliasFor;
  * return type is either an array or a collection, each element is sent
  * as a new individual event.
  *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em>.
+ *
+ * <h3>Exception Handling</h3>
+ * <p>While it is possible for an event listener to declare that it
+ * throws arbitrary exception types, any checked exceptions thrown
+ * from an event listener will be wrapped in an
+ * {@link java.lang.reflect.UndeclaredThrowableException UndeclaredThrowableException}
+ * since the event publisher can only handle runtime exceptions.
+ *
+ * <h3>Asynchronous Listeners</h3>
+ * <p>If you want a particular listener to process events asynchronously, you
+ * can use Spring's {@link org.springframework.scheduling.annotation.Async @Async}
+ * support, but be aware of the following limitations when using asynchronous events.
+ *
+ * <ul>
+ * <li>If an asynchronous event listener throws an exception, it is not propagated
+ * to the caller. See {@link org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
+ * AsyncUncaughtExceptionHandler} for more details.</li>
+ * <li>Asynchronous event listener methods cannot publish a subsequent event by returning a
+ * value. If you need to publish another event as the result of the processing, inject an
+ * {@link org.springframework.context.ApplicationEventPublisher ApplicationEventPublisher}
+ * to publish the event manually.</li>
+ * </ul>
+ *
+ * <h3>Ordering Listeners</h3>
  * <p>It is also possible to define the order in which listeners for a
  * certain event are to be invoked. To do so, add Spring's common
  * {@link org.springframework.core.annotation.Order @Order} annotation
  * alongside this event listener annotation.
  *
- * <p>While it is possible for an event listener to declare that it
- * throws arbitrary exception types, any checked exceptions thrown
- * from an event listener will be wrapped in an
- * {@link java.lang.reflect.UndeclaredThrowableException}
- * since the event publisher can only handle runtime exceptions.
- *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.2
  * @see EventListenerMethodProcessor
  */
@@ -85,19 +106,24 @@ public @interface EventListener {
 	Class<?>[] classes() default {};
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for making the
-	 * event handling conditional.
-	 * <p>Default is {@code ""}, meaning the event is always handled.
-	 * <p>The SpEL expression evaluates against a dedicated context that
-	 * provides the following meta-data:
+	 * Spring Expression Language (SpEL) expression used for making the event
+	 * handling conditional.
+	 * <p>The event will be handled if the expression evaluates to boolean
+	 * {@code true} or one of the following strings: {@code "true"}, {@code "on"},
+	 * {@code "yes"}, or {@code "1"}.
+	 * <p>The default expression is {@code ""}, meaning the event is always handled.
+	 * <p>The SpEL expression will be evaluated against a dedicated context that
+	 * provides the following metadata:
 	 * <ul>
-	 * <li>{@code #root.event}, {@code #root.args} for
-	 * references to the {@link ApplicationEvent} and method arguments
-	 * respectively.</li>
-	 * <li>Method arguments can be accessed by index. For instance the
-	 * first argument can be accessed via {@code #root.args[0]}, {@code #p0}
-	 * or {@code #a0}. Arguments can also be accessed by name if that
-	 * information is available.</li>
+	 * <li>{@code #root.event} or {@code event} for references to the
+	 * {@link ApplicationEvent}</li>
+	 * <li>{@code #root.args} or {@code args} for references to the method
+	 * arguments array</li>
+	 * <li>Method arguments can be accessed by index. For example, the first
+	 * argument can be accessed via {@code #root.args[0]}, {@code args[0]},
+	 * {@code #a0}, or {@code #p0}.</li>
+	 * <li>Method arguments can be accessed by name (with a preceding hash tag)
+	 * if parameter names are available in the compiled byte code.</li>
 	 * </ul>
 	 */
 	String condition() default "";

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.beans.factory.support;
 
 import java.util.function.Supplier;
 
+import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.lang.Nullable;
@@ -180,6 +181,8 @@ public final class BeanDefinitionBuilder {
 	/**
 	 * Set the name of a non-static factory method to use for this definition,
 	 * including the bean name of the factory instance to call the method on.
+	 * @param factoryMethod the name of the factory method
+	 * @param factoryBean the name of the bean to call the specified factory method on
 	 * @since 4.3.6
 	 */
 	public BeanDefinitionBuilder setFactoryMethodOnBean(String factoryMethod, String factoryBean) {
@@ -209,7 +212,7 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Add the supplied property value under the given name.
+	 * Add the supplied property value under the given property name.
 	 */
 	public BeanDefinitionBuilder addPropertyValue(String name, @Nullable Object value) {
 		this.beanDefinition.getPropertyValues().add(name, value);
@@ -223,6 +226,17 @@ public final class BeanDefinitionBuilder {
 	 */
 	public BeanDefinitionBuilder addPropertyReference(String name, String beanName) {
 		this.beanDefinition.getPropertyValues().add(name, new RuntimeBeanReference(beanName));
+		return this;
+	}
+
+	/**
+	 * Add an autowired marker for the specified property on the specified bean.
+	 * @param name the name of the property to mark as autowired
+	 * @since 5.2
+	 * @see AutowiredPropertyMarker
+	 */
+	public BeanDefinitionBuilder addAutowiredProperty(String name) {
+		this.beanDefinition.getPropertyValues().add(name, AutowiredPropertyMarker.INSTANCE);
 		return this;
 	}
 
@@ -297,6 +311,15 @@ public final class BeanDefinitionBuilder {
 			String[] added = ObjectUtils.addObjectToArray(this.beanDefinition.getDependsOn(), beanName);
 			this.beanDefinition.setDependsOn(added);
 		}
+		return this;
+	}
+
+	/**
+	 * Set whether this bean is a primary autowire candidate.
+	 * @since 5.1.11
+	 */
+	public BeanDefinitionBuilder setPrimary(boolean primary) {
+		this.beanDefinition.setPrimary(primary);
 		return this;
 	}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @since 5.0
+ * @see HttpHeaders#getAcceptLanguageAsLocales()
  */
 public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver {
 
@@ -76,6 +77,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 
 	/**
 	 * The configured default locale, if any.
+	 * <p>This method may be overridden in subclasses.
 	 */
 	@Nullable
 	public Locale getDefaultLocale() {
@@ -98,7 +100,7 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 	@Nullable
 	private Locale resolveSupportedLocale(@Nullable List<Locale> requestLocales) {
 		if (CollectionUtils.isEmpty(requestLocales)) {
-			return this.defaultLocale;  // may be null
+			return getDefaultLocale();  // may be null
 		}
 		List<Locale> supportedLocales = getSupportedLocales();
 		if (supportedLocales.isEmpty()) {
@@ -128,7 +130,8 @@ public class AcceptHeaderLocaleContextResolver implements LocaleContextResolver 
 			return languageMatch;
 		}
 
-		return (this.defaultLocale != null ? this.defaultLocale : requestLocales.get(0));
+		Locale defaultLocale = getDefaultLocale();
+		return (defaultLocale != null ? defaultLocale : requestLocales.get(0));
 	}
 
 	@Override

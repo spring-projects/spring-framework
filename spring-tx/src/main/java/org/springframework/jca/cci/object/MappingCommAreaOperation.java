@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.jca.cci.object;
 
 import java.io.IOException;
+
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
@@ -24,7 +25,6 @@ import javax.resource.cci.RecordFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jca.cci.core.support.CommAreaRecord;
 
 /**
  * EIS operation object for access to COMMAREA records.
@@ -32,7 +32,10 @@ import org.springframework.jca.cci.core.support.CommAreaRecord;
  *
  * @author Thierry Templier
  * @since 1.2
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 
 	/**
@@ -56,7 +59,7 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 	@Override
 	protected final Record createInputRecord(RecordFactory recordFactory, Object inObject) {
 		try {
-			return new CommAreaRecord(objectToBytes(inObject));
+			return new org.springframework.jca.cci.core.support.CommAreaRecord(objectToBytes(inObject));
 		}
 		catch (IOException ex) {
 			throw new DataRetrievalFailureException("I/O exception during bytes conversion", ex);
@@ -65,7 +68,8 @@ public abstract class MappingCommAreaOperation extends MappingRecordOperation {
 
 	@Override
 	protected final Object extractOutputData(Record record) throws DataAccessException {
-		CommAreaRecord commAreaRecord = (CommAreaRecord) record;
+		org.springframework.jca.cci.core.support.CommAreaRecord commAreaRecord =
+				(org.springframework.jca.cci.core.support.CommAreaRecord) record;
 		try {
 			return bytesToObject(commAreaRecord.toByteArray());
 		}

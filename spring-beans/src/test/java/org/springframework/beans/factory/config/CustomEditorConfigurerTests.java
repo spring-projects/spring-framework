@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyEditorRegistrar;
@@ -33,9 +33,9 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.beans.testfixture.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
@@ -70,9 +70,9 @@ public class CustomEditorConfigurerTests {
 		bf.registerBeanDefinition("tb2", bd2);
 
 		TestBean tb1 = (TestBean) bf.getBean("tb1");
-		assertEquals(df.parse("2.12.1975"), tb1.getDate());
+		assertThat(tb1.getDate()).isEqualTo(df.parse("2.12.1975"));
 		TestBean tb2 = (TestBean) bf.getBean("tb2");
-		assertEquals(df.parse("2.12.1975"), tb2.getSomeMap().get("myKey"));
+		assertThat(tb2.getSomeMap().get("myKey")).isEqualTo(df.parse("2.12.1975"));
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class CustomEditorConfigurerTests {
 
 		TestBean tb = (TestBean) bf.getBean("tb");
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
-		assertEquals(df.parse("2.12.1975"), tb.getDate());
+		assertThat(tb.getDate()).isEqualTo(df.parse("2.12.1975"));
 	}
 
 	@Test
@@ -111,8 +111,8 @@ public class CustomEditorConfigurerTests {
 		bf.registerBeanDefinition("tb", bd);
 
 		TestBean tb = (TestBean) bf.getBean("tb");
-		assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);
-		assertEquals("test", tb.getStringArray()[0]);
+		assertThat(tb.getStringArray() != null && tb.getStringArray().length == 1).isTrue();
+		assertThat(tb.getStringArray()[0]).isEqualTo("test");
 	}
 
 

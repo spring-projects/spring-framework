@@ -47,9 +47,222 @@ public interface Opcodes {
   int ASM5 = 5 << 16 | 0 << 8;
   int ASM6 = 6 << 16 | 0 << 8;
   int ASM7 = 7 << 16 | 0 << 8;
+  int ASM8 = 8 << 16 | 0 << 8;
+  int ASM9 = 9 << 16 | 0 << 8;
 
-  // Java ClassFile versions (the minor version is stored in the 16 most
-  // significant bits, and the
+  /**
+   * <i>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
+   * will break existing code using it. Only code compiled with --enable-preview can use this.</i>
+   * <p>SPRING PATCH: no preview mode check for ASM 9 experimental, enabling it by default.
+   */
+  int ASM10_EXPERIMENTAL = 1 << 24 | 10 << 16 | 0 << 8;
+
+  /*
+   * Internal flags used to redirect calls to deprecated methods. For instance, if a visitOldStuff
+   * method in API_OLD is deprecated and replaced with visitNewStuff in API_NEW, then the
+   * redirection should be done as follows:
+   *
+   * <pre>
+   * public class StuffVisitor {
+   *   ...
+   *
+   *   &#64;Deprecated public void visitOldStuff(int arg, ...) {
+   *     // SOURCE_DEPRECATED means "a call from a deprecated method using the old 'api' value".
+   *     visitNewStuf(arg | (api &#60; API_NEW ? SOURCE_DEPRECATED : 0), ...);
+   *   }
+   *
+   *   public void visitNewStuff(int argAndSource, ...) {
+   *     if (api &#60; API_NEW &#38;&#38; (argAndSource &#38; SOURCE_DEPRECATED) == 0) {
+   *       visitOldStuff(argAndSource, ...);
+   *     } else {
+   *       int arg = argAndSource &#38; ~SOURCE_MASK;
+   *       [ do stuff ]
+   *     }
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>If 'api' is equal to API_NEW, there are two cases:
+   *
+   * <ul>
+   *   <li>call visitNewStuff: the redirection test is skipped and 'do stuff' is executed directly.
+   *   <li>call visitOldSuff: the source is not set to SOURCE_DEPRECATED before calling
+   *       visitNewStuff, but the redirection test is skipped anyway in visitNewStuff, which
+   *       directly executes 'do stuff'.
+   * </ul>
+   *
+   * <p>If 'api' is equal to API_OLD, there are two cases:
+   *
+   * <ul>
+   *   <li>call visitOldSuff: the source is set to SOURCE_DEPRECATED before calling visitNewStuff.
+   *       Because of this visitNewStuff does not redirect back to visitOldStuff, and instead
+   *       executes 'do stuff'.
+   *   <li>call visitNewStuff: the call is redirected to visitOldStuff because the source is 0.
+   *       visitOldStuff now sets the source to SOURCE_DEPRECATED and calls visitNewStuff back. This
+   *       time visitNewStuff does not redirect the call, and instead executes 'do stuff'.
+   * </ul>
+   *
+   * <h1>User subclasses</h1>
+   *
+   * <p>If a user subclass overrides one of these methods, there are only two cases: either 'api' is
+   * API_OLD and visitOldStuff is overridden (and visitNewStuff is not), or 'api' is API_NEW or
+   * more, and visitNewStuff is overridden (and visitOldStuff is not). Any other case is a user
+   * programming error.
+   *
+   * <p>If 'api' is equal to API_NEW, the class hierarchy is equivalent to
+   *
+   * <pre>
+   * public class StuffVisitor {
+   *   &#64;Deprecated public void visitOldStuff(int arg, ...) { visitNewStuf(arg, ...); }
+   *   public void visitNewStuff(int arg, ...) { [ do stuff ] }
+   * }
+   * class UserStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitNewStuff(int arg, ...) {
+   *     super.visitNewStuff(int arg, ...); // optional
+   *     [ do user stuff ]
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>It is then obvious that whether visitNewStuff or visitOldStuff is called, 'do stuff' and 'do
+   * user stuff' will be executed, in this order.
+   *
+   * <p>If 'api' is equal to API_OLD, the class hierarchy is equivalent to
+   *
+   * <pre>
+   * public class StuffVisitor {
+   *   &#64;Deprecated public void visitOldStuff(int arg, ...) {
+   *     visitNewStuf(arg | SOURCE_DEPRECATED, ...);
+   *   }
+   *   public void visitNewStuff(int argAndSource...) {
+   *     if ((argAndSource & SOURCE_DEPRECATED) == 0) {
+   *       visitOldStuff(argAndSource, ...);
+   *     } else {
+   *       int arg = argAndSource &#38; ~SOURCE_MASK;
+   *       [ do stuff ]
+   *     }
+   *   }
+   * }
+   * class UserStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitOldStuff(int arg, ...) {
+   *     super.visitOldStuff(int arg, ...); // optional
+   *     [ do user stuff ]
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>and there are two cases:
+   *
+   * <ul>
+   *   <li>call visitOldSuff: in the call to super.visitOldStuff, the source is set to
+   *       SOURCE_DEPRECATED and visitNewStuff is called. Here 'do stuff' is run because the source
+   *       was previously set to SOURCE_DEPRECATED, and execution eventually returns to
+   *       UserStuffVisitor.visitOldStuff, where 'do user stuff' is run.
+   *   <li>call visitNewStuff: the call is redirected to UserStuffVisitor.visitOldStuff because the
+   *       source is 0. Execution continues as in the previous case, resulting in 'do stuff' and 'do
+   *       user stuff' being executed, in this order.
+   * </ul>
+   *
+   * <h1>ASM subclasses</h1>
+   *
+   * <p>In ASM packages, subclasses of StuffVisitor can typically be sub classed again by the user,
+   * and can be used with API_OLD or API_NEW. Because of this, if such a subclass must override
+   * visitNewStuff, it must do so in the following way (and must not override visitOldStuff):
+   *
+   * <pre>
+   * public class AsmStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitNewStuff(int argAndSource, ...) {
+   *     if (api &#60; API_NEW &#38;&#38; (argAndSource &#38; SOURCE_DEPRECATED) == 0) {
+   *       super.visitNewStuff(argAndSource, ...);
+   *       return;
+   *     }
+   *     super.visitNewStuff(argAndSource, ...); // optional
+   *     int arg = argAndSource &#38; ~SOURCE_MASK;
+   *     [ do other stuff ]
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>If a user class extends this with 'api' equal to API_NEW, the class hierarchy is equivalent
+   * to
+   *
+   * <pre>
+   * public class StuffVisitor {
+   *   &#64;Deprecated public void visitOldStuff(int arg, ...) { visitNewStuf(arg, ...); }
+   *   public void visitNewStuff(int arg, ...) { [ do stuff ] }
+   * }
+   * public class AsmStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitNewStuff(int arg, ...) {
+   *     super.visitNewStuff(arg, ...);
+   *     [ do other stuff ]
+   *   }
+   * }
+   * class UserStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitNewStuff(int arg, ...) {
+   *     super.visitNewStuff(int arg, ...);
+   *     [ do user stuff ]
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>It is then obvious that whether visitNewStuff or visitOldStuff is called, 'do stuff', 'do
+   * other stuff' and 'do user stuff' will be executed, in this order. If, on the other hand, a user
+   * class extends AsmStuffVisitor with 'api' equal to API_OLD, the class hierarchy is equivalent to
+   *
+   * <pre>
+   * public class StuffVisitor {
+   *   &#64;Deprecated public void visitOldStuff(int arg, ...) {
+   *     visitNewStuf(arg | SOURCE_DEPRECATED, ...);
+   *   }
+   *   public void visitNewStuff(int argAndSource, ...) {
+   *     if ((argAndSource & SOURCE_DEPRECATED) == 0) {
+   *       visitOldStuff(argAndSource, ...);
+   *     } else {
+   *       int arg = argAndSource &#38; ~SOURCE_MASK;
+   *       [ do stuff ]
+   *     }
+   *   }
+   * }
+   * public class AsmStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitNewStuff(int argAndSource, ...) {
+   *     if ((argAndSource &#38; SOURCE_DEPRECATED) == 0) {
+   *       super.visitNewStuff(argAndSource, ...);
+   *       return;
+   *     }
+   *     super.visitNewStuff(argAndSource, ...); // optional
+   *     int arg = argAndSource &#38; ~SOURCE_MASK;
+   *     [ do other stuff ]
+   *   }
+   * }
+   * class UserStuffVisitor extends StuffVisitor {
+   *   &#64;Override public void visitOldStuff(int arg, ...) {
+   *     super.visitOldStuff(arg, ...);
+   *     [ do user stuff ]
+   *   }
+   * }
+   * </pre>
+   *
+   * <p>and, here again, whether visitNewStuff or visitOldStuff is called, 'do stuff', 'do other
+   * stuff' and 'do user stuff' will be executed, in this order (exercise left to the reader).
+   *
+   * <h1>Notes</h1>
+   *
+   * <ul>
+   *   <li>the SOURCE_DEPRECATED flag is set only if 'api' is API_OLD, just before calling
+   *       visitNewStuff. By hypothesis, this method is not overridden by the user. Therefore, user
+   *       classes can never see this flag. Only ASM subclasses must take care of extracting the
+   *       actual argument value by clearing the source flags.
+   *   <li>because the SOURCE_DEPRECATED flag is immediately cleared in the caller, the caller can
+   *       call visitOldStuff or visitNewStuff (in 'do stuff' and 'do user stuff') on a delegate
+   *       visitor without any risks (breaking the redirection logic, "leaking" the flag, etc).
+   *   <li>all the scenarios discussed above are unit tested in MethodVisitorTest.
+   * </ul>
+   */
+
+  int SOURCE_DEPRECATED = 0x100;
+  int SOURCE_MASK = SOURCE_DEPRECATED;
+
+  // Java ClassFile versions (the minor version is stored in the 16 most significant bits, and the
   // major version in the 16 least significant bits).
 
   int V1_1 = 3 << 16 | 45;
@@ -64,6 +277,10 @@ public interface Opcodes {
   int V10 = 0 << 16 | 54;
   int V11 = 0 << 16 | 55;
   int V12 = 0 << 16 | 56;
+  int V13 = 0 << 16 | 57;
+  int V14 = 0 << 16 | 58;
+  int V15 = 0 << 16 | 59;
+  int V16 = 0 << 16 | 60;
 
   /**
    * Version flag indicating that the class is using 'preview' features.
@@ -100,7 +317,7 @@ public interface Opcodes {
   int ACC_SYNTHETIC = 0x1000; // class, field, method, parameter, module *
   int ACC_ANNOTATION = 0x2000; // class
   int ACC_ENUM = 0x4000; // class(?) field inner
-  int ACC_MANDATED = 0x8000; // parameter, module, module *
+  int ACC_MANDATED = 0x8000; // field, method, parameter, module, module *
   int ACC_MODULE = 0x8000; // class
 
   // ASM specific access flags.
@@ -108,6 +325,7 @@ public interface Opcodes {
   // access flags, and also to make sure that these flags are automatically filtered out when
   // written in class files (because access flags are stored using 16 bits only).
 
+  int ACC_RECORD = 0x10000; // class
   int ACC_DEPRECATED = 0x20000; // class, field, method
 
   // Possible values for the type operand of the NEWARRAY instruction.

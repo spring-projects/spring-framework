@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +36,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
@@ -78,9 +80,9 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 		}
 
-		private static HttpHeaders createHeaders(HttpServletRequest request) {
+		private static MultiValueMap<String, String> createHeaders(HttpServletRequest request) {
 			HttpFields fields = ((Request) request).getMetaData().getFields();
-			return new HttpHeaders(new JettyHeadersAdapter(fields));
+			return new JettyHeadersAdapter(fields);
 		}
 	}
 
@@ -101,8 +103,15 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected void applyHeaders() {
-			MediaType contentType = getHeaders().getContentType();
 			HttpServletResponse response = getNativeResponse();
+			MediaType contentType = null;
+			try {
+				contentType = getHeaders().getContentType();
+			}
+			catch (Exception ex) {
+				String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+				response.setContentType(rawContentType);
+			}
 			if (response.getContentType() == null && contentType != null) {
 				response.setContentType(contentType.toString());
 			}

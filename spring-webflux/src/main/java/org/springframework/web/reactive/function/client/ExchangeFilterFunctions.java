@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,15 +22,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.function.BodyExtractors;
 
 /**
  * Static factory methods providing access to built-in implementations of
@@ -38,6 +36,7 @@ import org.springframework.web.reactive.function.BodyExtractors;
  *
  * @author Rob Winch
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.0
  */
 public abstract class ExchangeFilterFunctions {
@@ -62,11 +61,10 @@ public abstract class ExchangeFilterFunctions {
 	 */
 	public static ExchangeFilterFunction limitResponseSize(long maxByteCount) {
 		return (request, next) ->
-				next.exchange(request).map(response -> {
-					Flux<DataBuffer> body = response.body(BodyExtractors.toDataBuffers());
-					body = DataBufferUtils.takeUntilByteCount(body, maxByteCount);
-					return ClientResponse.from(response).body(body).build();
-				});
+				next.exchange(request).map(response ->
+						response.mutate()
+								.body(body -> DataBufferUtils.takeUntilByteCount(body, maxByteCount))
+								.build());
 	}
 
 	/**
@@ -89,20 +87,21 @@ public abstract class ExchangeFilterFunctions {
 
 	/**
 	 * Return a filter that applies HTTP Basic Authentication to the request
-	 * headers via {@link HttpHeaders#setBasicAuth(String, String)}.
-	 * @param user the user
+	 * headers via {@link HttpHeaders#setBasicAuth(String)} and
+	 * {@link HttpHeaders#encodeBasicAuth(String, String, Charset)}.
+	 * @param username the username
 	 * @param password the password
 	 * @return the filter to add authentication headers with
-	 * @see HttpHeaders#setBasicAuth(String, String)
-	 * @see HttpHeaders#setBasicAuth(String, String, Charset)
+	 * @see HttpHeaders#encodeBasicAuth(String, String, Charset)
+	 * @see HttpHeaders#setBasicAuth(String)
 	 */
-	public static ExchangeFilterFunction basicAuthentication(String user, String password) {
+	public static ExchangeFilterFunction basicAuthentication(String username, String password) {
+		String encodedCredentials = HttpHeaders.encodeBasicAuth(username, password, null);
 		return (request, next) ->
 				next.exchange(ClientRequest.from(request)
-						.headers(headers -> headers.setBasicAuth(user, password))
+						.headers(headers -> headers.setBasicAuth(encodedCredentials))
 						.build());
 	}
-
 
 	/**
 	 * Variant of {@link #basicAuthentication(String, String)} that looks up
@@ -131,7 +130,7 @@ public abstract class ExchangeFilterFunctions {
 
 
 	/**
-	 * Stores user and password for HTTP basic authentication.
+	 * Stores username and password for HTTP basic authentication.
 	 * @deprecated as of Spring 5.1 in favor of using
 	 * {@link HttpHeaders#setBasicAuth(String, String)} while building the request.
 	 */
@@ -155,23 +154,23 @@ public abstract class ExchangeFilterFunctions {
 		}
 
 		/**
-		 * Return a {@literal Consumer} that stores the given user and password
+		 * Return a {@literal Consumer} that stores the given username and password
 		 * as a request attribute of type {@code Credentials} that is in turn
 		 * used by {@link ExchangeFilterFunctions#basicAuthentication()}.
-		 * @param user the user
+		 * @param username the username
 		 * @param password the password
 		 * @return a consumer that can be passed into
 		 * {@linkplain ClientRequest.Builder#attributes(java.util.function.Consumer)}
 		 * @see ClientRequest.Builder#attributes(java.util.function.Consumer)
 		 * @see #BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE
 		 */
-		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String user, String password) {
-			Credentials credentials = new Credentials(user, password);
+		public static Consumer<Map<String, Object>> basicAuthenticationCredentials(String username, String password) {
+			Credentials credentials = new Credentials(username, password);
 			return (map -> map.put(BASIC_AUTHENTICATION_CREDENTIALS_ATTRIBUTE, credentials));
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			if (this == other) {
 				return true;
 			}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * introspect to create AJType metadata using the type returned for the
 	 * given bean name from the BeanFactory.
 	 * @param beanFactory the BeanFactory to obtain instance(s) from
-	 * @param name name of the bean
+	 * @param name the name of the bean
 	 */
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this(beanFactory, name, null);

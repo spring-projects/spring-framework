@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,15 +30,13 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -54,10 +52,17 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.tests.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Mock object based tests for JdbcTemplate.
@@ -83,11 +88,8 @@ public class JdbcTemplateTests {
 
 	private CallableStatement callableStatement;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		this.connection = mock(Connection.class);
 		this.dataSource = mock(DataSource.class);
@@ -110,10 +112,11 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testBeanProperties() throws Exception {
-		assertTrue("datasource ok", this.template.getDataSource() == this.dataSource);
-		assertTrue("ignores warnings by default", this.template.isIgnoreWarnings());
+		assertThat(this.template.getDataSource() == this.dataSource).as("datasource ok").isTrue();
+		assertThat(this.template.isIgnoreWarnings()).as("ignores warnings by default").isTrue();
 		this.template.setIgnoreWarnings(false);
-		assertTrue("can set NOT to ignore warnings", !this.template.isIgnoreWarnings());
+		boolean condition = !this.template.isIgnoreWarnings();
+		assertThat(condition).as("can set NOT to ignore warnings").isTrue();
 	}
 
 	@Test
@@ -123,7 +126,7 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willReturn(1);
 		Dispatcher d = new Dispatcher(idParam, sql);
 		int rowsAffected = this.template.update(d);
-		assertTrue("1 update affected 1 row", rowsAffected == 1);
+		assertThat(rowsAffected == 1).as("1 update affected 1 row").isTrue();
 		verify(this.preparedStatement).setInt(1, idParam);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -139,16 +142,12 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		Dispatcher d = new Dispatcher(idParam, sql);
-		this.thrown.expect(UncategorizedSQLException.class);
-		this.thrown.expect(exceptionCause(equalTo(sqlException)));
-		try {
-			this.template.update(d);
-		}
-		finally {
-			verify(this.preparedStatement).setInt(1, idParam);
-			verify(this.preparedStatement).close();
-			verify(this.connection, atLeastOnce()).close();
-		}
+		assertThatExceptionOfType(UncategorizedSQLException.class).isThrownBy(() ->
+				this.template.update(d))
+			.withCause(sqlException);
+		verify(this.preparedStatement).setInt(1, idParam);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -170,18 +169,19 @@ public class JdbcTemplateTests {
 	@Test
 	public void testStringsWithPreparedStatementSetter() throws Exception {
 		final Integer argument = 99;
-		doTestStrings(null, null, null, argument, (template, sql, rch) -> template.query(sql, ps -> {
-			ps.setObject(1, argument);
-		}, rch));
+		doTestStrings(null, null, null, argument, (template, sql, rch) ->
+			template.query(sql, ps -> ps.setObject(1, argument), rch));
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
 		doTestStrings(null, null, null, null,
 				(template, sql, rch) -> template.query(sql, (Object[]) null, rch));
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = 99;
 		doTestStrings(null, null, null, argument,
@@ -195,7 +195,7 @@ public class JdbcTemplateTests {
 		String[] results = {"rod", "gary", " portia"};
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new LinkedList<>();
+			private List<String> list = new ArrayList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));
@@ -225,9 +225,9 @@ public class JdbcTemplateTests {
 
 		// Match
 		String[] forenames = sh.getStrings();
-		assertTrue("same length", forenames.length == results.length);
+		assertThat(forenames.length == results.length).as("same length").isTrue();
 		for (int i = 0; i < forenames.length; i++) {
-			assertTrue("Row " + i + " matches", forenames[i].equals(results[i]));
+			assertThat(forenames[i].equals(results[i])).as("Row " + i + " matches").isTrue();
 		}
 
 		if (fetchSize != null) {
@@ -271,12 +271,12 @@ public class JdbcTemplateTests {
 		String result = this.template.execute(new ConnectionCallback<String>() {
 			@Override
 			public String doInConnection(Connection con) {
-				assertTrue(con instanceof ConnectionProxy);
-				assertSame(JdbcTemplateTests.this.connection, ((ConnectionProxy) con).getTargetConnection());
+				assertThat(con instanceof ConnectionProxy).isTrue();
+				assertThat(((ConnectionProxy) con).getTargetConnection()).isSameAs(JdbcTemplateTests.this.connection);
 				return "test";
 			}
 		});
-		assertEquals("test", result);
+		assertThat(result).isEqualTo("test");
 	}
 
 	@Test
@@ -292,7 +292,7 @@ public class JdbcTemplateTests {
 			}
 		});
 
-		assertEquals("test", result);
+		assertThat(result).isEqualTo("test");
 		verify(this.preparedStatement).setFetchSize(10);
 		verify(this.preparedStatement).setMaxRows(20);
 		verify(this.preparedStatement).close();
@@ -325,11 +325,12 @@ public class JdbcTemplateTests {
 		given(this.resultSet.next()).willReturn(true);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		this.thrown.expect(sameInstance(runtimeException));
 		try {
-			this.template.query(sql, (RowCallbackHandler) rs -> {
-				throw runtimeException;
-			});
+			assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
+					this.template.query(sql, (RowCallbackHandler) rs -> {
+						throw runtimeException;
+					}))
+				.withMessage(runtimeException.getMessage());
 		}
 		finally {
 			verify(this.resultSet).close();
@@ -350,7 +351,7 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		int actualRowsAffected = this.template.update(sql);
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 		verify(this.statement).close();
 		verify(this.connection).close();
 	}
@@ -366,7 +367,7 @@ public class JdbcTemplateTests {
 
 		int actualRowsAffected = this.template.update(sql,
 				4, new SqlParameterValue(Types.NUMERIC, 2, Float.valueOf(1.4142f)));
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 		verify(this.preparedStatement).setObject(1, 4);
 		verify(this.preparedStatement).setObject(2, Float.valueOf(1.4142f), Types.NUMERIC, 2);
 		verify(this.preparedStatement).close();
@@ -381,14 +382,11 @@ public class JdbcTemplateTests {
 		given(this.statement.executeUpdate(sql)).willThrow(sqlException);
 		given(this.connection.createStatement()).willReturn(this.statement);
 
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		try {
-			this.template.update(sql);
-		}
-		finally {
-			verify(this.statement).close();
-			verify(this.connection, atLeastOnce()).close();
-		}
+		assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
+				this.template.update(sql))
+			.withCause(sqlException);
+		verify(this.statement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -400,7 +398,7 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		int actualRowsAffected = this.template.update(sql);
-		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
+		assertThat(actualRowsAffected == rowsAffected).as("Actual rows affected is correct").isTrue();
 
 		verify(this.statement).close();
 		verify(this.connection).close();
@@ -418,7 +416,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
 
 		verify(this.statement).addBatch(sql[0]);
 		verify(this.statement).addBatch(sql[1]);
@@ -439,7 +437,7 @@ public class JdbcTemplateTests {
 			template.batchUpdate(sql);
 		}
 		catch (UncategorizedSQLException ex) {
-			assertThat(ex.getSql(), equalTo("B; D"));
+			assertThat(ex.getSql()).isEqualTo("B; D");
 		}
 	}
 
@@ -458,7 +456,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
 
 		verify(this.statement, never()).addBatch(anyString());
 		verify(this.statement).close();
@@ -477,15 +475,11 @@ public class JdbcTemplateTests {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
-		this.thrown.expect(InvalidDataAccessApiUsageException.class);
-		try {
-			template.batchUpdate(sql);
-		}
-		finally {
-			verify(this.statement, never()).addBatch(anyString());
-			verify(this.statement).close();
-			verify(this.connection, atLeastOnce()).close();
-		}
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				template.batchUpdate(sql));
+		verify(this.statement, never()).addBatch(anyString());
+		verify(this.statement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -511,9 +505,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -552,9 +546,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -589,9 +583,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -626,9 +620,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -657,9 +651,9 @@ public class JdbcTemplateTests {
 		};
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, setter);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, never()).addBatch();
 		verify(this.preparedStatement).setInt(1, ids[0]);
@@ -688,10 +682,10 @@ public class JdbcTemplateTests {
 			}
 		};
 
-		this.thrown.expect(DataAccessException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
-			this.template.batchUpdate(sql, setter);
+			assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
+					this.template.batchUpdate(sql, setter))
+				.withCause(sqlException);
 		}
 		finally {
 			verify(this.preparedStatement, times(2)).addBatch();
@@ -708,7 +702,7 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, Collections.emptyList());
-		assertTrue("executed 0 updates", actualRowsAffected.length == 0);
+		assertThat(actualRowsAffected.length == 0).as("executed 0 updates").isTrue();
 	}
 
 	@Test
@@ -724,9 +718,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, ids);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100);
@@ -749,9 +743,9 @@ public class JdbcTemplateTests {
 		this.template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = this.template.batchUpdate(sql, ids, sqlTypes);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
+		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 		verify(this.preparedStatement, times(2)).addBatch();
 		verify(this.preparedStatement).setObject(1, 100, sqlTypes[0]);
 		verify(this.preparedStatement).setObject(1, 200, sqlTypes[0]);
@@ -773,10 +767,10 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
-		assertEquals("executed 2 updates", 2, actualRowsAffected[0].length);
-		assertEquals(rowsAffected1[0], actualRowsAffected[0][0]);
-		assertEquals(rowsAffected1[1], actualRowsAffected[0][1]);
-		assertEquals(rowsAffected2[0], actualRowsAffected[1][0]);
+		assertThat(actualRowsAffected[0].length).as("executed 2 updates").isEqualTo(2);
+		assertThat(actualRowsAffected[0][0]).isEqualTo(rowsAffected1[0]);
+		assertThat(actualRowsAffected[0][1]).isEqualTo(rowsAffected1[1]);
+		assertThat(actualRowsAffected[1][0]).isEqualTo(rowsAffected2[0]);
 
 		verify(this.preparedStatement, times(3)).addBatch();
 		verify(this.preparedStatement).setInt(1, ids.get(0));
@@ -794,9 +788,9 @@ public class JdbcTemplateTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 
-		this.thrown.expect(CannotGetJdbcConnectionException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
+				template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+			.withCause(sqlException);
 	}
 
 	@Test
@@ -809,9 +803,9 @@ public class JdbcTemplateTests {
 		this.template.afterPropertiesSet();
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 
-		this.thrown.expect(CannotGetJdbcConnectionException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
+				this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+			.withCause(sqlException);
 	}
 
 	@Test
@@ -850,9 +844,9 @@ public class JdbcTemplateTests {
 			this.template.afterPropertiesSet();
 		}
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		this.thrown.expect(CannotGetJdbcConnectionException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+		assertThatExceptionOfType(CannotGetJdbcConnectionException.class).isThrownBy(() ->
+				this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch))
+			.withCause(sqlException);
 	}
 
 	@Test
@@ -865,7 +859,7 @@ public class JdbcTemplateTests {
 
 		PreparedStatementSetter pss = ps -> ps.setString(1, name);
 		int actualRowsUpdated = new JdbcTemplate(this.dataSource).update(sql, pss);
-		assertEquals("updated correct # of rows", actualRowsUpdated, expectedRowsUpdated);
+		assertThat(expectedRowsUpdated).as("updated correct # of rows").isEqualTo(actualRowsUpdated);
 		verify(this.preparedStatement).setString(1, name);
 		verify(this.preparedStatement).close();
 		verify(this.connection).close();
@@ -879,16 +873,12 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		PreparedStatementSetter pss = ps -> ps.setString(1, name);
-		this.thrown.expect(DataAccessException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		try {
-			new JdbcTemplate(this.dataSource).update(sql, pss);
-		}
-		finally {
-			verify(this.preparedStatement).setString(1, name);
-			verify(this.preparedStatement).close();
-			verify(this.connection, atLeastOnce()).close();
-		}
+		assertThatExceptionOfType(DataAccessException.class).isThrownBy(() ->
+				new JdbcTemplate(this.dataSource).update(sql, pss))
+			.withCause(sqlException);
+		verify(this.preparedStatement).setString(1, name);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -919,18 +909,14 @@ public class JdbcTemplateTests {
 
 		JdbcTemplate t = new JdbcTemplate(this.dataSource);
 		t.setIgnoreWarnings(false);
-		this.thrown.expect(SQLWarningException.class);
-		this.thrown.expect(exceptionCause(sameInstance(warnings)));
-		try {
-			t.query(sql, rs -> {
-				rs.getByte(1);
-			});
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.preparedStatement).close();
-			verify(this.connection).close();
-		}
+
+		ResultSetExtractor<Byte> extractor = rs -> rs.getByte(1);
+		assertThatExceptionOfType(SQLWarningException.class).isThrownBy(() ->
+				t.query(sql, extractor))
+			.withCause(warnings);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -945,9 +931,8 @@ public class JdbcTemplateTests {
 		// Too long: truncation
 
 		this.template.setIgnoreWarnings(true);
-		this.template.query(sql, rs -> {
-			rs.getByte(1);
-		});
+		RowCallbackHandler rch = rs -> rs.getByte(1);
+		this.template.query(sql, rch);
 
 		verify(this.resultSet).close();
 		verify(this.preparedStatement).close();
@@ -963,19 +948,14 @@ public class JdbcTemplateTests {
 		mockDatabaseMetaData(false);
 		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		this.thrown.expect(BadSqlGrammarException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		try {
-			this.template.query(sql, (RowCallbackHandler) rs -> {
-				throw sqlException;
-			});
-			fail("Should have thrown BadSqlGrammarException");
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.preparedStatement).close();
-			verify(this.connection, atLeastOnce()).close();
-		}
+		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+				this.template.query(sql, (RowCallbackHandler) rs -> {
+					throw sqlException;
+				}))
+			.withCause(sqlException);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
 	@Test
@@ -991,18 +971,14 @@ public class JdbcTemplateTests {
 		template.setDatabaseProductName("MySQL");
 		template.afterPropertiesSet();
 
-		this.thrown.expect(BadSqlGrammarException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		try {
-			template.query(sql, (RowCallbackHandler) rs -> {
-				throw sqlException;
-			});
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.preparedStatement).close();
-			verify(this.connection).close();
-		}
+		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+				template.query(sql, (RowCallbackHandler) rs -> {
+					throw sqlException;
+				}))
+			.withCause(sqlException);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
 	/**
@@ -1025,18 +1001,14 @@ public class JdbcTemplateTests {
 		template.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		template.afterPropertiesSet();
 
-		this.thrown.expect(BadSqlGrammarException.class);
-		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
-		try {
-			template.query(sql, (RowCallbackHandler) rs -> {
-				throw sqlException;
-			});
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.preparedStatement).close();
-			verify(this.connection).close();
-		}
+		assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
+				template.query(sql, (RowCallbackHandler) rs -> {
+					throw sqlException;
+				}))
+			.withCause(sqlException);
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -1046,25 +1018,14 @@ public class JdbcTemplateTests {
 		given(this.preparedStatement.executeQuery()).willReturn(resultSet2);
 		given(this.connection.createStatement()).willReturn(this.statement);
 
-		try {
-			this.template.query("my query", (ResultSetExtractor<Object>) rs -> {
-				throw new InvalidDataAccessApiUsageException("");
-			});
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// ok
-		}
-
-		try {
-			this.template.query(con -> con.prepareStatement("my query"), (ResultSetExtractor<Object>) rs2 -> {
-				throw new InvalidDataAccessApiUsageException("");
-			});
-			fail("Should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// ok
-		}
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				this.template.query("my query", (ResultSetExtractor<Object>) rs -> {
+					throw new InvalidDataAccessApiUsageException("");
+				}));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				this.template.query(con -> con.prepareStatement("my query"), (ResultSetExtractor<Object>) rs2 -> {
+					throw new InvalidDataAccessApiUsageException("");
+				}));
 
 		verify(this.resultSet).close();
 		verify(resultSet2).close();
@@ -1082,15 +1043,11 @@ public class JdbcTemplateTests {
 			throw new InvalidDataAccessApiUsageException("");
 		});
 
-		this.thrown.expect(InvalidDataAccessApiUsageException.class);
-		try {
-			this.template.call(conn -> conn.prepareCall("my query"), Collections.singletonList(param));
-		}
-		finally {
-			verify(this.resultSet).close();
-			verify(this.callableStatement).close();
-			verify(this.connection).close();
-		}
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
+				this.template.call(conn -> conn.prepareCall("my query"), Collections.singletonList(param)));
+		verify(this.resultSet).close();
+		verify(this.callableStatement).close();
+		verify(this.connection).close();
 	}
 
 	@Test
@@ -1099,19 +1056,18 @@ public class JdbcTemplateTests {
 		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 		given(this.callableStatement.getObject(1)).willReturn("X");
 
-		assertTrue("default should have been NOT case insensitive",
-				!this.template.isResultsMapCaseInsensitive());
+		boolean condition = !this.template.isResultsMapCaseInsensitive();
+		assertThat(condition).as("default should have been NOT case insensitive").isTrue();
 
 		this.template.setResultsMapCaseInsensitive(true);
-		assertTrue("now it should have been set to case insensitive",
-				this.template.isResultsMapCaseInsensitive());
+		assertThat(this.template.isResultsMapCaseInsensitive()).as("now it should have been set to case insensitive").isTrue();
 
 		Map<String, Object> out = this.template.call(
 				conn -> conn.prepareCall("my query"), Collections.singletonList(new SqlOutParameter("a", 12)));
 
-		assertThat(out, instanceOf(LinkedCaseInsensitiveMap.class));
-		assertNotNull("we should have gotten the result with upper case", out.get("A"));
-		assertNotNull("we should have gotten the result with lower case", out.get("a"));
+		assertThat(out).isInstanceOf(LinkedCaseInsensitiveMap.class);
+		assertThat(out.get("A")).as("we should have gotten the result with upper case").isNotNull();
+		assertThat(out.get("a")).as("we should have gotten the result with lower case").isNotNull();
 		verify(this.callableStatement).close();
 		verify(this.connection).close();
 	}
@@ -1131,8 +1087,8 @@ public class JdbcTemplateTests {
 		given(this.resultSet.getObject(2)).willReturn("second value");
 
 		Map<String, Object> map = this.template.queryForMap("my query");
-		assertEquals(1, map.size());
-		assertEquals("first value", map.get("x"));
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(map.get("x")).isEqualTo("first value");
 	}
 
 

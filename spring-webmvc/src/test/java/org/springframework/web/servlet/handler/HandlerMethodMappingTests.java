@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -24,11 +25,10 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -37,12 +37,11 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Test for {@link AbstractHandlerMethodMapping}.
@@ -53,7 +52,7 @@ import static org.junit.Assert.assertNull;
 @SuppressWarnings("unused")
 public class HandlerMethodMappingTests {
 
-	private AbstractHandlerMethodMapping<String> mapping;
+	private MyHandlerMethodMapping mapping;
 
 	private MyHandler handler;
 
@@ -62,7 +61,7 @@ public class HandlerMethodMappingTests {
 	private Method method2;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.mapping = new MyHandlerMethodMapping();
 		this.handler = new MyHandler();
@@ -71,21 +70,24 @@ public class HandlerMethodMappingTests {
 	}
 
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void registerDuplicates() {
 		this.mapping.registerMapping("foo", this.handler, this.method1);
-		this.mapping.registerMapping("foo", this.handler, this.method2);
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.registerMapping("foo", this.handler, this.method2));
 	}
 
 	@Test
 	public void directMatch() throws Exception {
-		String key = "foo";
-		this.mapping.registerMapping(key, this.handler, this.method1);
+		this.mapping.registerMapping("/foo", this.handler, this.method1);
+		this.mapping.registerMapping("/fo*", this.handler, this.method2);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", key);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod result = this.mapping.getHandlerInternal(request);
-		assertEquals(method1, result.getMethod());
-		assertEquals(result, request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+
+		assertThat(result.getMethod()).isEqualTo(method1);
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(result);
+		assertThat(this.mapping.getMatches()).containsExactly("/foo");
 	}
 
 	@Test
@@ -95,16 +97,17 @@ public class HandlerMethodMappingTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod result = this.mapping.getHandlerInternal(request);
-		assertEquals(method1, result.getMethod());
-		assertEquals(result, request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE));
+		assertThat(result.getMethod()).isEqualTo(method1);
+		assertThat(request.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE)).isEqualTo(result);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void ambiguousMatch() throws Exception {
+	@Test
+	public void ambiguousMatch() {
 		this.mapping.registerMapping("/f?o", this.handler, this.method1);
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 
-		this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo")));
 	}
 
 	@Test
@@ -116,18 +119,18 @@ public class HandlerMethodMappingTests {
 		mapping1.setApplicationContext(new StaticApplicationContext(cxt));
 		mapping1.afterPropertiesSet();
 
-		assertEquals(0, mapping1.getHandlerMethods().size());
+		assertThat(mapping1.getHandlerMethods().size()).isEqualTo(0);
 
 		AbstractHandlerMethodMapping<String> mapping2 = new MyHandlerMethodMapping();
 		mapping2.setDetectHandlerMethodsInAncestorContexts(true);
 		mapping2.setApplicationContext(new StaticApplicationContext(cxt));
 		mapping2.afterPropertiesSet();
 
-		assertEquals(2, mapping2.getHandlerMethods().size());
+		assertThat(mapping2.getHandlerMethods().size()).isEqualTo(2);
 	}
 
 	@Test
-	public void registerMapping() throws Exception {
+	public void registerMapping() {
 
 		String key1 = "/foo";
 		String key2 = "/foo*";
@@ -136,10 +139,10 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
+		assertThat(directUrlMatches).isNotNull();
+		assertThat(directUrlMatches.size()).isEqualTo(1);
+		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
 
 		// Mapping name lookup
 
@@ -148,29 +151,29 @@ public class HandlerMethodMappingTests {
 
 		String name1 = this.method1.getName();
 		List<HandlerMethod> handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name1);
-		assertNotNull(handlerMethods);
-		assertEquals(1, handlerMethods.size());
-		assertEquals(handlerMethod1, handlerMethods.get(0));
+		assertThat(handlerMethods).isNotNull();
+		assertThat(handlerMethods.size()).isEqualTo(1);
+		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod1);
 
 		String name2 = this.method2.getName();
 		handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name2);
-		assertNotNull(handlerMethods);
-		assertEquals(1, handlerMethods.size());
-		assertEquals(handlerMethod2, handlerMethods.get(0));
+		assertThat(handlerMethods).isNotNull();
+		assertThat(handlerMethods.size()).isEqualTo(1);
+		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod2);
 
 		// CORS lookup
 
 		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod1);
-		assertNotNull(config);
-		assertEquals("http://" + handler.hashCode() + name1, config.getAllowedOrigins().get(0));
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins().get(0)).isEqualTo(("http://" + handler.hashCode() + name1));
 
 		config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod2);
-		assertNotNull(config);
-		assertEquals("http://" + handler.hashCode() + name2, config.getAllowedOrigins().get(0));
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins().get(0)).isEqualTo(("http://" + handler.hashCode() + name2));
 	}
 
 	@Test
-	public void registerMappingWithSameMethodAndTwoHandlerInstances() throws Exception {
+	public void registerMappingWithSameMethodAndTwoHandlerInstances() {
 
 		String key1 = "foo";
 		String key2 = "bar";
@@ -186,29 +189,29 @@ public class HandlerMethodMappingTests {
 
 		// Direct URL lookup
 
-		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
-		assertNotNull(directUrlMatches);
-		assertEquals(1, directUrlMatches.size());
-		assertEquals(key1, directUrlMatches.get(0));
+		List<String> directUrlMatches = this.mapping.getMappingRegistry().getMappingsByDirectPath(key1);
+		assertThat(directUrlMatches).isNotNull();
+		assertThat(directUrlMatches.size()).isEqualTo(1);
+		assertThat(directUrlMatches.get(0)).isEqualTo(key1);
 
 		// Mapping name lookup
 
 		String name = this.method1.getName();
 		List<HandlerMethod> handlerMethods = this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(name);
-		assertNotNull(handlerMethods);
-		assertEquals(2, handlerMethods.size());
-		assertEquals(handlerMethod1, handlerMethods.get(0));
-		assertEquals(handlerMethod2, handlerMethods.get(1));
+		assertThat(handlerMethods).isNotNull();
+		assertThat(handlerMethods.size()).isEqualTo(2);
+		assertThat(handlerMethods.get(0)).isEqualTo(handlerMethod1);
+		assertThat(handlerMethods.get(1)).isEqualTo(handlerMethod2);
 
 		// CORS lookup
 
 		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod1);
-		assertNotNull(config);
-		assertEquals("http://" + handler1.hashCode() + name, config.getAllowedOrigins().get(0));
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins().get(0)).isEqualTo(("http://" + handler1.hashCode() + name));
 
 		config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod2);
-		assertNotNull(config);
-		assertEquals("http://" + handler2.hashCode() + name, config.getAllowedOrigins().get(0));
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins().get(0)).isEqualTo(("http://" + handler2.hashCode() + name));
 	}
 
 	@Test
@@ -218,13 +221,13 @@ public class HandlerMethodMappingTests {
 		HandlerMethod handlerMethod = new HandlerMethod(this.handler, this.method1);
 
 		this.mapping.registerMapping(key, this.handler, this.method1);
-		assertNotNull(this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key)));
+		assertThat(this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key))).isNotNull();
 
 		this.mapping.unregisterMapping(key);
-		assertNull(mapping.getHandlerInternal(new MockHttpServletRequest("GET", key)));
-		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
-		assertNull(this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(this.method1.getName()));
-		assertNull(this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod));
+		assertThat(mapping.getHandlerInternal(new MockHttpServletRequest("GET", key))).isNull();
+		assertThat(this.mapping.getMappingRegistry().getMappingsByDirectPath(key)).isNull();
+		assertThat(this.mapping.getMappingRegistry().getHandlerMethodsByMappingName(this.method1.getName())).isNull();
+		assertThat(this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod)).isNull();
 	}
 
 	@Test
@@ -241,8 +244,8 @@ public class HandlerMethodMappingTests {
 		HandlerMethod handlerMethod = this.mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 
 		CorsConfiguration config = this.mapping.getMappingRegistry().getCorsConfiguration(handlerMethod);
-		assertNotNull(config);
-		assertEquals("http://" + beanName.hashCode() + this.method1.getName(), config.getAllowedOrigins().get(0));
+		assertThat(config).isNotNull();
+		assertThat(config.getAllowedOrigins().get(0)).isEqualTo(("http://" + beanName.hashCode() + this.method1.getName()));
 	}
 
 
@@ -253,9 +256,14 @@ public class HandlerMethodMappingTests {
 
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
+		private final List<String> matches = new ArrayList<>();
 
 		public MyHandlerMethodMapping() {
 			setHandlerMethodMappingNamingStrategy(new SimpleMappingNamingStrategy());
+		}
+
+		public List<String> getMatches() {
+			return this.matches;
 		}
 
 		@Override
@@ -264,14 +272,14 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected String getMappingForMethod(Method method, Class<?> handlerType) {
-			String methodName = method.getName();
-			return methodName.startsWith("handler") ? methodName : null;
+		protected Set<String> getDirectPaths(String mapping) {
+			return (pathMatcher.isPattern(mapping) ? Collections.emptySet() : Collections.singleton(mapping));
 		}
 
 		@Override
-		protected Set<String> getMappingPathPatterns(String key) {
-			return (this.pathMatcher.isPattern(key) ? Collections.<String>emptySet() : Collections.singleton(key));
+		protected String getMappingForMethod(Method method, Class<?> handlerType) {
+			String methodName = method.getName();
+			return methodName.startsWith("handler") ? methodName : null;
 		}
 
 		@Override
@@ -284,7 +292,11 @@ public class HandlerMethodMappingTests {
 		@Override
 		protected String getMatchingMapping(String pattern, HttpServletRequest request) {
 			String lookupPath = this.pathHelper.getLookupPathForRequest(request);
-			return this.pathMatcher.match(pattern, lookupPath) ? pattern : null;
+			String match = (this.pathMatcher.match(pattern, lookupPath) ? pattern : null);
+			if (match != null) {
+				this.matches.add(match);
+			}
+			return match;
 		}
 
 		@Override

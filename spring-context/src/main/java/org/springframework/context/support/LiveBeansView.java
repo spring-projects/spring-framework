@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -41,15 +42,14 @@ import org.springframework.util.StringUtils;
  * local {@code LiveBeansView} bean definition) or all registered ApplicationContexts
  * (driven by the {@value #MBEAN_DOMAIN_PROPERTY_NAME} environment property).
  *
- * <p>Note: This feature is still in beta and primarily designed for use with
- * Spring Tool Suite 3.1 and higher.
- *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.2
  * @see #getSnapshotAsJson()
  * @see org.springframework.web.context.support.LiveBeansViewServlet
+ * @deprecated as of 5.3, in favor of using Spring Boot actuators for such needs
  */
+@Deprecated
 public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAware {
 
 	/**

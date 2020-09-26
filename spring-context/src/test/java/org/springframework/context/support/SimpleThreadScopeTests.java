@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,39 +19,39 @@ package org.springframework.context.support;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.tests.sample.beans.TestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
-public class SimpleThreadScopeTests {
+class SimpleThreadScopeTests {
 
 	private final ApplicationContext applicationContext =
 			new ClassPathXmlApplicationContext("simpleThreadScopeTests.xml", getClass());
 
 
 	@Test
-	public void getFromScope() throws Exception {
-		String name = "threadScopedObject";
+	void getFromScope() throws Exception {
+		String name = "removeNodeStatusScreen";
 		TestBean bean = this.applicationContext.getBean(name, TestBean.class);
-		assertNotNull(bean);
-		assertSame(bean, this.applicationContext.getBean(name));
+		assertThat(bean).isNotNull();
+		assertThat(this.applicationContext.getBean(name)).isSameAs(bean);
 		TestBean bean2 = this.applicationContext.getBean(name, TestBean.class);
-		assertSame(bean, bean2);
+		assertThat(bean2).isSameAs(bean);
 	}
 
 	@Test
-	public void getMultipleInstances() throws Exception {
+	void getMultipleInstances() throws Exception {
 		// Arrange
 		TestBean[] beans = new TestBean[2];
-		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class));
-		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class));
+		Thread thread1 = new Thread(() -> beans[0] = applicationContext.getBean("removeNodeStatusScreen", TestBean.class));
+		Thread thread2 = new Thread(() -> beans[1] = applicationContext.getBean("removeNodeStatusScreen", TestBean.class));
 		// Act
 		thread1.start();
 		thread2.start();
@@ -60,7 +60,7 @@ public class SimpleThreadScopeTests {
 					.atMost(500, TimeUnit.MILLISECONDS)
 					.pollInterval(10, TimeUnit.MILLISECONDS)
 					.until(() -> (beans[0] != null) && (beans[1] != null));
-		assertNotSame(beans[0], beans[1]);
+		assertThat(beans[1]).isNotSameAs(beans[0]);
 	}
 
 }

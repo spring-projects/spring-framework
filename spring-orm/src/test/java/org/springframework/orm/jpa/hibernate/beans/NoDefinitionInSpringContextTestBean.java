@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,10 @@ package org.springframework.orm.jpa.hibernate.beans;
 
 public class NoDefinitionInSpringContextTestBean extends TestBean {
 
+	@SuppressWarnings("unused")
 	private NoDefinitionInSpringContextTestBean() {
-		throw new AssertionError(
-				"Unexpected call to the default constructor."
-				+ " Is Spring trying to instantiate this class by itself, even though it should delegate to the fallback producer?"
+		throw new AssertionError("Unexpected call to the default constructor. " +
+				"Is Spring trying to instantiate this class by itself, even though it should delegate to the fallback producer?"
 		);
 	}
 

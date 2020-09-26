@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
@@ -405,8 +406,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				throw new SockJsException("Session closed.", this.session.getId(), null);
 			}
 
-			PooledByteBuffer pooled = bufferPool.allocate();
-			try {
+			try (PooledByteBuffer pooled = bufferPool.allocate()) {
 				int r;
 				do {
 					ByteBuffer buffer = pooled.getBuffer();
@@ -436,20 +436,16 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 			catch (IOException exc) {
 				onFailure(exc);
 			}
-			finally {
-				pooled.close();
-			}
 		}
 
 		private void handleFrame() {
-			byte[] bytes = this.outputStream.toByteArray();
+			String content = StreamUtils.copyToString(this.outputStream, SockJsFrame.CHARSET);
 			this.outputStream.reset();
-			String content = new String(bytes, SockJsFrame.CHARSET);
 			if (logger.isTraceEnabled()) {
 				logger.trace("XHR content received: " + content);
 			}
 			if (!PRELUDE.equals(content)) {
-				this.session.handleFrame(new String(bytes, SockJsFrame.CHARSET));
+				this.session.handleFrame(content);
 			}
 		}
 

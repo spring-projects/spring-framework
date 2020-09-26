@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,10 @@
 
 package org.springframework.jms.listener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+
 import javax.jms.Connection;
 import javax.jms.JMSException;
 
@@ -80,9 +81,9 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean active = false;
 
-	private volatile boolean running = false;
+	private volatile boolean running;
 
-	private final List<Object> pausedTasks = new LinkedList<>();
+	private final List<Object> pausedTasks = new ArrayList<>();
 
 	protected final Object lifecycleMonitor = new Object();
 

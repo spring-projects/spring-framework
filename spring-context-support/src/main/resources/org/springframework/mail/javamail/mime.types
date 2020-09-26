@@ -1,11 +1,11 @@
 ################################################################################
-# Copyright 2002-2018 the original author or authors.
+# Copyright 2002-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,11 @@
 ################################################################################
 #
 # Defaults for the Java Activation Framework (revised).
+#
 # Modified extensions registered in this file:
 # text/plain			java c c++ cpp pl cc h
 # image/png				png
+# image/svg+xml			svg
 #
 ################################################################################
 
@@ -48,7 +50,7 @@ video/x-msvideo				avi
 ################################################################################
 #
 # Additional file types adapted from
-# http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html
+# http://sites.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html
 # kindly re-licensed to Apache Software License 2.0 by Ian Graham.
 #
 ################################################################################
@@ -67,6 +69,8 @@ image/x-xbitmap				xbm
 image/x-xpixmap				xpm
 # Portable Network Graphics
 image/png				png
+# Scalable Vector Graphics
+image/svg+xml			svg
 # Image Exchange Format (RFC 1314)
 image/ief				ief
 # RGB

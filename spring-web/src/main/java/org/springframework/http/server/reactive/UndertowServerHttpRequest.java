@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +17,11 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.function.IntPredicate;
+
 import javax.net.ssl.SSLSession;
 
 import io.undertow.connector.ByteBufferPool;
@@ -36,10 +33,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -64,24 +58,18 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
-		super(initUri(exchange), "", initHeaders(exchange));
+		super(initUri(exchange), "", new UndertowHeadersAdapter(exchange.getRequestHeaders()));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);
 	}
 
 	private static URI initUri(HttpServerExchange exchange) throws URISyntaxException {
-		Assert.notNull(exchange, "HttpServerExchange is required.");
+		Assert.notNull(exchange, "HttpServerExchange is required");
 		String requestURL = exchange.getRequestURL();
 		String query = exchange.getQueryString();
-		String requestUriAndQuery = StringUtils.isEmpty(query) ? requestURL : requestURL + "?" + query;
+		String requestUriAndQuery = (StringUtils.hasLength(query) ? requestURL + "?" + query : requestURL);
 		return new URI(requestUriAndQuery);
-	}
-
-	private static HttpHeaders initHeaders(HttpServerExchange exchange) {
-		UndertowHeadersAdapter headersMap =
-				new UndertowHeadersAdapter(exchange.getRequestHeaders());
-		return new HttpHeaders(headersMap);
 	}
 
 	@Override
@@ -89,9 +77,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		return this.exchange.getRequestMethod().toString();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+		// getRequestCookies() is deprecated in Undertow 2.2
 		for (String name : this.exchange.getRequestCookies().keySet()) {
 			Cookie cookie = this.exchange.getRequestCookies().get(name);
 			HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
@@ -101,6 +91,13 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	@Nullable
+	public InetSocketAddress getLocalAddress() {
+		return this.exchange.getDestinationAddress();
+	}
+
+	@Override
+	@Nullable
 	public InetSocketAddress getRemoteAddress() {
 		return this.exchange.getSourceAddress();
 	}
@@ -173,7 +170,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		@Nullable
 		protected DataBuffer read() throws IOException {
 			PooledByteBuffer pooledByteBuffer = this.byteBufferPool.allocate();
-			boolean release = true;
 			try {
 				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
 				int read = this.channel.read(byteBuffer);
@@ -184,9 +180,9 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 				if (read > 0) {
 					byteBuffer.flip();
-					DataBuffer dataBuffer = this.bufferFactory.wrap(byteBuffer);
-					release = false;
-					return new UndertowDataBuffer(dataBuffer, pooledByteBuffer);
+					DataBuffer dataBuffer = this.bufferFactory.allocateBuffer(read);
+					dataBuffer.write(byteBuffer);
+					return dataBuffer;
 				}
 				else if (read == -1) {
 					onAllDataRead();
@@ -194,190 +190,13 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				return null;
 			}
 			finally {
-				if (release && pooledByteBuffer.isOpen()) {
-					pooledByteBuffer.close();
-				}
+				pooledByteBuffer.close();
 			}
 		}
 
 		@Override
 		protected void discardData() {
 			// Nothing to discard since we pass data buffers on immediately..
-		}
-	}
-
-
-	private static class UndertowDataBuffer implements PooledDataBuffer {
-
-		private final DataBuffer dataBuffer;
-
-		private final PooledByteBuffer pooledByteBuffer;
-
-		public UndertowDataBuffer(DataBuffer dataBuffer, PooledByteBuffer pooledByteBuffer) {
-			this.dataBuffer = dataBuffer;
-			this.pooledByteBuffer = pooledByteBuffer;
-		}
-
-		@Override
-		public boolean isAllocated() {
-			return this.pooledByteBuffer.isOpen();
-		}
-
-		@Override
-		public PooledDataBuffer retain() {
-			return this;
-		}
-
-		@Override
-		public boolean release() {
-			boolean result;
-			try {
-				result = DataBufferUtils.release(this.dataBuffer);
-			}
-			finally {
-				this.pooledByteBuffer.close();
-			}
-			return result && this.pooledByteBuffer.isOpen();
-		}
-
-		@Override
-		public DataBufferFactory factory() {
-			return this.dataBuffer.factory();
-		}
-
-		@Override
-		public int indexOf(IntPredicate predicate, int fromIndex) {
-			return this.dataBuffer.indexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int lastIndexOf(IntPredicate predicate, int fromIndex) {
-			return this.dataBuffer.lastIndexOf(predicate, fromIndex);
-		}
-
-		@Override
-		public int readableByteCount() {
-			return this.dataBuffer.readableByteCount();
-		}
-
-		@Override
-		public int writableByteCount() {
-			return this.dataBuffer.writableByteCount();
-		}
-
-		@Override
-		public int readPosition() {
-			return this.dataBuffer.readPosition();
-		}
-
-		@Override
-		public DataBuffer readPosition(int readPosition) {
-			return this.dataBuffer.readPosition(readPosition);
-		}
-
-		@Override
-		public int writePosition() {
-			return this.dataBuffer.writePosition();
-		}
-
-		@Override
-		public DataBuffer writePosition(int writePosition) {
-			return this.dataBuffer.writePosition(writePosition);
-		}
-
-		@Override
-		public int capacity() {
-			return this.dataBuffer.capacity();
-		}
-
-		@Override
-		public DataBuffer capacity(int newCapacity) {
-			return this.dataBuffer.capacity(newCapacity);
-		}
-
-		@Override
-		public DataBuffer ensureCapacity(int capacity) {
-			return this.dataBuffer.ensureCapacity(capacity);
-		}
-
-		@Override
-		public byte getByte(int index) {
-			return this.dataBuffer.getByte(index);
-		}
-
-		@Override
-		public byte read() {
-			return this.dataBuffer.read();
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination) {
-			return this.dataBuffer.read(destination);
-		}
-
-		@Override
-		public DataBuffer read(byte[] destination, int offset, int length) {
-			return this.dataBuffer.read(destination, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(byte b) {
-			return this.dataBuffer.write(b);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source) {
-			return this.dataBuffer.write(source);
-		}
-
-		@Override
-		public DataBuffer write(byte[] source, int offset, int length) {
-			return this.dataBuffer.write(source, offset, length);
-		}
-
-		@Override
-		public DataBuffer write(DataBuffer... buffers) {
-			return this.dataBuffer.write(buffers);
-		}
-
-		@Override
-		public DataBuffer write(ByteBuffer... byteBuffers) {
-			return this.dataBuffer.write(byteBuffers);
-		}
-
-		@Override
-		public DataBuffer write(CharSequence charSequence, Charset charset) {
-			return this.dataBuffer.write(charSequence, charset);
-		}
-
-		@Override
-		public DataBuffer slice(int index, int length) {
-			return this.dataBuffer.slice(index, length);
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer() {
-			return this.dataBuffer.asByteBuffer();
-		}
-
-		@Override
-		public ByteBuffer asByteBuffer(int index, int length) {
-			return this.dataBuffer.asByteBuffer(index, length);
-		}
-
-		@Override
-		public InputStream asInputStream() {
-			return this.dataBuffer.asInputStream();
-		}
-
-		@Override
-		public InputStream asInputStream(boolean releaseOnClose) {
-			return this.dataBuffer.asInputStream(releaseOnClose);
-		}
-
-		@Override
-		public OutputStream asOutputStream() {
-			return this.dataBuffer.asOutputStream();
 		}
 	}
 

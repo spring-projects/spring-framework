@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,14 +28,15 @@ import java.util.Set;
  * Marshaller to write {@link CandidateComponentsMetadata} as properties.
  *
  * @author Stephane Nicoll
+ * @author Vedran Pavic
  * @since 5.0
  */
 abstract class PropertiesMarshaller {
 
 	public static void write(CandidateComponentsMetadata metadata, OutputStream out) throws IOException {
-		Properties props = new Properties();
+		Properties props = new SortedProperties(true);
 		metadata.getItems().forEach(m -> props.put(m.getType(), String.join(",", m.getStereotypes())));
-		props.store(out, "");
+		props.store(out, null);
 	}
 
 	public static CandidateComponentsMetadata read(InputStream in) throws IOException {

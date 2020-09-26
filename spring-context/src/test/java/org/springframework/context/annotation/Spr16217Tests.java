@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
@@ -28,7 +28,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public class Spr16217Tests {
 
 	@Test
-	@Ignore("TODO")
+	@Disabled("TODO")
 	public void baseConfigurationIsIncludedWhenFirstSuperclassReferenceIsSkippedInRegisterBeanPhase() {
 		try (AnnotationConfigApplicationContext context =
 					new AnnotationConfigApplicationContext(RegisterBeanPhaseImportingConfiguration.class)) {

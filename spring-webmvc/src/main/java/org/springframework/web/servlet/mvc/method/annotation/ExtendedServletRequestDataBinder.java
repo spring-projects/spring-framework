@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -30,6 +31,8 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @see ServletRequestDataBinder
+ * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
  */
 public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 
@@ -59,9 +62,9 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	 * Merge URI variables into the property values to use for data binding.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		@SuppressWarnings("unchecked")
 		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(attr);
 		if (uriVars != null) {
 			uriVars.forEach((name, value) -> {

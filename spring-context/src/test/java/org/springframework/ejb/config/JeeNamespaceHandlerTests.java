@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,21 +16,21 @@
 
 package org.springframework.ejb.config;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBean;
 import org.springframework.jndi.JndiObjectFactoryBean;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
@@ -42,8 +42,9 @@ public class JeeNamespaceHandlerTests {
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	@Before
-	public void setUp() throws Exception {
+
+	@BeforeEach
+	public void setup() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ctx).loadBeanDefinitions(
 				new ClassPathResource("jeeNamespaceHandlerTests.xml", getClass()));
@@ -52,18 +53,19 @@ public class JeeNamespaceHandlerTests {
 		this.beanFactory.getBeanNamesForType(ITestBean.class);
 	}
 
+
 	@Test
-	public void testSimpleDefinition() throws Exception {
+	public void testSimpleDefinition() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simple");
-		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 	}
 
 	@Test
-	public void testComplexDefinition() throws Exception {
+	public void testComplexDefinition() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complex");
-		assertEquals(JndiObjectFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(JndiObjectFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "jdbc/MyDataSource");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "cache", "true");
@@ -75,39 +77,39 @@ public class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testWithEnvironment() throws Exception {
+	public void testWithEnvironment() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
 		assertPropertyValue(beanDefinition, "defaultObject", new RuntimeBeanReference("myBean"));
 	}
 
 	@Test
-	public void testWithReferencedEnvironment() throws Exception {
+	public void testWithReferencedEnvironment() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("withReferencedEnvironment");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", new RuntimeBeanReference("myEnvironment"));
-		assertFalse(beanDefinition.getPropertyValues().contains("environmentRef"));
+		assertThat(beanDefinition.getPropertyValues().contains("environmentRef")).isFalse();
 	}
 
 	@Test
-	public void testSimpleLocalSlsb() throws Exception {
+	public void testSimpleLocalSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleLocalEjb");
-		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(LocalStatelessSessionProxyFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 	}
 
 	@Test
-	public void testSimpleRemoteSlsb() throws Exception {
+	public void testSimpleRemoteSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("simpleRemoteEjb");
-		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
 	}
 
 	@Test
-	public void testComplexLocalSlsb() throws Exception {
+	public void testComplexLocalSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexLocalEjb");
-		assertEquals(LocalStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(LocalStatelessSessionProxyFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyLocalBean");
 		assertPropertyValue(beanDefinition, "cacheHome", "true");
@@ -117,33 +119,32 @@ public class JeeNamespaceHandlerTests {
 	}
 
 	@Test
-	public void testComplexRemoteSlsb() throws Exception {
+	public void testComplexRemoteSlsb() {
 		BeanDefinition beanDefinition = this.beanFactory.getMergedBeanDefinition("complexRemoteEjb");
-		assertEquals(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName(), beanDefinition.getBeanClassName());
+		assertThat(beanDefinition.getBeanClassName()).isEqualTo(SimpleRemoteStatelessSessionProxyFactoryBean.class.getName());
 		assertPropertyValue(beanDefinition, "businessInterface", ITestBean.class.getName());
 		assertPropertyValue(beanDefinition, "jndiName", "ejb/MyRemoteBean");
 		assertPropertyValue(beanDefinition, "cacheHome", "true");
 		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
-		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.tests.sample.beans.ITestBean");
+		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.testfixture.beans.ITestBean");
 		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
 		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
 	}
 
 	@Test
-	public void testLazyInitJndiLookup() throws Exception {
+	public void testLazyInitJndiLookup() {
 		BeanDefinition definition = this.beanFactory.getMergedBeanDefinition("lazyDataSource");
-		assertTrue(definition.isLazyInit());
+		assertThat(definition.isLazyInit()).isTrue();
 		definition = this.beanFactory.getMergedBeanDefinition("lazyLocalBean");
-		assertTrue(definition.isLazyInit());
+		assertThat(definition.isLazyInit()).isTrue();
 		definition = this.beanFactory.getMergedBeanDefinition("lazyRemoteBean");
-		assertTrue(definition.isLazyInit());
+		assertThat(definition.isLazyInit()).isTrue();
 	}
 
 	private void assertPropertyValue(BeanDefinition beanDefinition, String propertyName, Object expectedValue) {
-		assertEquals("Property '" + propertyName + "' incorrect",
-				expectedValue, beanDefinition.getPropertyValues().getPropertyValue(propertyName).getValue());
+		assertThat(beanDefinition.getPropertyValues().getPropertyValue(propertyName).getValue()).as("Property '" + propertyName + "' incorrect").isEqualTo(expectedValue);
 	}
 
 }

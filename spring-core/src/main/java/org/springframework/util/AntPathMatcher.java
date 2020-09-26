@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +30,7 @@ import org.springframework.lang.Nullable;
 /**
  * {@link PathMatcher} implementation for Ant-style path patterns.
  *
- * <p>Part of this mapping code has been kindly borrowed from <a href="http://ant.apache.org">Apache Ant</a>.
+ * <p>Part of this mapping code has been kindly borrowed from <a href="https://ant.apache.org">Apache Ant</a>.
  *
  * <p>The mapping matches URLs using the following rules:<br>
  * <ul>
@@ -68,6 +68,7 @@ import org.springframework.lang.Nullable;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Vladislav Kisel
  * @since 16.07.2003
  */
 public class AntPathMatcher implements PathMatcher {
@@ -77,9 +78,9 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?}");
 
-	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
+	private static final char[] WILDCARD_CHARS = {'*', '?', '{'};
 
 
 	private String pathSeparator;
@@ -168,8 +169,25 @@ public class AntPathMatcher implements PathMatcher {
 
 
 	@Override
-	public boolean isPattern(String path) {
-		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
+	public boolean isPattern(@Nullable String path) {
+		if (path == null) {
+			return false;
+		}
+		boolean uriVar = false;
+		for (int i = 0; i < path.length(); i++) {
+			char c = path.charAt(i);
+			if (c == '*' || c == '?') {
+				return true;
+			}
+			if (c == '{') {
+				uriVar = true;
+				continue;
+			}
+			if (c == '}' && uriVar) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -185,15 +203,15 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Actually match the given {@code path} against the given {@code pattern}.
 	 * @param pattern the pattern to match against
-	 * @param path the path String to test
+	 * @param path the path to test
 	 * @param fullMatch whether a full pattern match is required (else a pattern match
 	 * as far as the given base path goes is sufficient)
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch,
+	protected boolean doMatch(String pattern, @Nullable String path, boolean fullMatch,
 			@Nullable Map<String, String> uriTemplateVariables) {
 
-		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+		if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 
@@ -203,7 +221,6 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		String[] pathDirs = tokenizePath(path);
-
 		int pattIdxStart = 0;
 		int pattIdxEnd = pattDirs.length - 1;
 		int pathIdxStart = 0;
@@ -401,7 +418,7 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Tokenize the given path String into parts, based on this matcher's settings.
+	 * Tokenize the given path into parts, based on this matcher's settings.
 	 * @param path the path to tokenize
 	 * @return the tokenized path parts
 	 */
@@ -598,14 +615,15 @@ public class AntPathMatcher implements PathMatcher {
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of
 	 * explicitness.
-	 * <p>This{@code Comparator} will {@linkplain java.util.List#sort(Comparator) sort}
-	 * a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns:
+	 * <p>This {@code Comparator} will {@linkplain java.util.List#sort(Comparator) sort}
+	 * a list so that more specific patterns (without URI templates or wild cards) come before
+	 * generic patterns. So given a list with the following patterns, the returned comparator
+	 * will sort this list so that the order will be as indicated.
 	 * <ol>
 	 * <li>{@code /hotels/new}</li>
-	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li>
+	 * <li>{@code /hotels/{hotel}}</li>
+	 * <li>{@code /hotels/*}</li>
 	 * </ol>
-	 * the returned comparator will sort this list so that the order will be as indicated.
 	 * <p>The full path given as parameter is used to test for exact matches. So when the given path
 	 * is {@code /hotels/2}, the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
 	 * @param path the full path to use for comparison
@@ -624,19 +642,28 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected static class AntPathStringMatcher {
 
-		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
+		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
 		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
+		private final String rawPattern;
+
+		private final boolean caseSensitive;
+
+		private final boolean exactMatch;
+
+		@Nullable
 		private final Pattern pattern;
 
-		private final List<String> variableNames = new LinkedList<>();
+		private final List<String> variableNames = new ArrayList<>();
 
 		public AntPathStringMatcher(String pattern) {
 			this(pattern, true);
 		}
 
 		public AntPathStringMatcher(String pattern, boolean caseSensitive) {
+			this.rawPattern = pattern;
+			this.caseSensitive = caseSensitive;
 			StringBuilder patternBuilder = new StringBuilder();
 			Matcher matcher = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
@@ -666,9 +693,17 @@ public class AntPathMatcher implements PathMatcher {
 				}
 				end = matcher.end();
 			}
-			patternBuilder.append(quote(pattern, end, pattern.length()));
-			this.pattern = (caseSensitive ? Pattern.compile(patternBuilder.toString()) :
-					Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+			// No glob pattern was found, this is an exact String match
+			if (end == 0) {
+				this.exactMatch = true;
+				this.pattern = null;
+			}
+			else {
+				this.exactMatch = false;
+				patternBuilder.append(quote(pattern, end, pattern.length()));
+				this.pattern = (this.caseSensitive ? Pattern.compile(patternBuilder.toString()) :
+						Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
+			}
 		}
 
 		private String quote(String s, int start, int end) {
@@ -683,28 +718,31 @@ public class AntPathMatcher implements PathMatcher {
 		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
 		public boolean matchStrings(String str, @Nullable Map<String, String> uriTemplateVariables) {
-			Matcher matcher = this.pattern.matcher(str);
-			if (matcher.matches()) {
-				if (uriTemplateVariables != null) {
-					// SPR-8455
-					if (this.variableNames.size() != matcher.groupCount()) {
-						throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
-								this.pattern + " does not match the number of URI template variables it defines, " +
-								"which can occur if capturing groups are used in a URI template regex. " +
-								"Use non-capturing groups instead.");
+			if (this.exactMatch) {
+				return this.caseSensitive ? this.rawPattern.equals(str) : this.rawPattern.equalsIgnoreCase(str);
+			}
+			else if (this.pattern != null) {
+				Matcher matcher = this.pattern.matcher(str);
+				if (matcher.matches()) {
+					if (uriTemplateVariables != null) {
+						if (this.variableNames.size() != matcher.groupCount()) {
+							throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+									this.pattern + " does not match the number of URI template variables it defines, " +
+									"which can occur if capturing groups are used in a URI template regex. " +
+									"Use non-capturing groups instead.");
+						}
+						for (int i = 1; i <= matcher.groupCount(); i++) {
+							String name = this.variableNames.get(i - 1);
+							String value = matcher.group(i);
+							uriTemplateVariables.put(name, value);
+						}
 					}
-					for (int i = 1; i <= matcher.groupCount(); i++) {
-						String name = this.variableNames.get(i - 1);
-						String value = matcher.group(i);
-						uriTemplateVariables.put(name, value);
-					}
+					return true;
 				}
-				return true;
 			}
-			else {
-				return false;
-			}
+			return false;
 		}
+
 	}
 
 
@@ -762,7 +800,10 @@ public class AntPathMatcher implements PathMatcher {
 				return 1;
 			}
 
-			if (info1.isPrefixPattern() && info2.getDoubleWildcards() == 0) {
+			if (info1.isPrefixPattern() && info2.isPrefixPattern()) {
+				return info2.getLength() - info1.getLength();
+			}
+			else if (info1.isPrefixPattern() && info2.getDoubleWildcards() == 0) {
 				return 1;
 			}
 			else if (info2.isPrefixPattern() && info1.getDoubleWildcards() == 0) {

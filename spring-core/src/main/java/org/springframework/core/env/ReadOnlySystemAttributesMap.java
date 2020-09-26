@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
  * Read-only {@code Map<String, String>} implementation that is backed by system
  * properties or environment variables.
  *
- * <p>Used by {@link AbstractApplicationContext} when a {@link SecurityManager} prohibits
+ * <p>Used by {@link AbstractEnvironment} when a {@link SecurityManager} prohibits
  * access to {@link System#getProperties()} or {@link System#getenv()}. It is for this
  * reason that the implementations of {@link #keySet()}, {@link #entrySet()}, and
  * {@link #values()} always return empty even though {@link #get(Object)} may in fact

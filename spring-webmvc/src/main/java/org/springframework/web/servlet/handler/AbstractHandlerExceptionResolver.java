@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -100,8 +101,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	/**
 	 * Set the log category for warn logging. The name will be passed to the underlying logger
 	 * implementation through Commons Logging, getting interpreted as a log category according
-	 * to the logger's configuration. If {@code null} is passed, warn logging is turned off.
-	 * <p>By default there is no warn logging although sub-classes like
+	 * to the logger's configuration. If {@code null} or empty String is passed, warn logging
+	 * is turned off.
+	 * <p>By default there is no warn logging although subclasses like
 	 * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}
 	 * can change that default. Specify this setting to activate warn logging into a specific
 	 * category. Alternatively, override the {@link #logException} method for custom logging.
@@ -109,7 +111,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
-		this.warnLogger = !StringUtils.isEmpty(loggerName) ? LogFactory.getLog(loggerName) : null;
+		this.warnLogger = (StringUtils.hasLength(loggerName) ? LogFactory.getLog(loggerName) : null);
 	}
 
 	/**
@@ -138,11 +140,11 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);
 			if (result != null) {
-				// Print warn message when warn logger is not enabled...
+				// Print debug message when warn logger is not enabled.
 				if (logger.isDebugEnabled() && (this.warnLogger == null || !this.warnLogger.isWarnEnabled())) {
 					logger.debug("Resolved [" + ex + "]" + (result.isEmpty() ? "" : " to " + result));
 				}
-				// warnLogger with full stack trace (requires explicit config)
+				// Explicitly configured warn logger in logException method.
 				logException(ex, request);
 			}
 			return result;
@@ -178,8 +180,16 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				}
 			}
 		}
-		// Else only apply if there are no explicit handler mappings.
-		return (this.mappedHandlers == null && this.mappedHandlerClasses == null);
+		return !hasHandlerMappings();
+	}
+
+	/**
+	 * Whether there are any handler mappings registered via
+	 * {@link #setMappedHandlers(Set)} or {@link #setMappedHandlerClasses(Class[])}.
+	 * @since 5.3
+	 */
+	protected boolean hasHandlerMappings() {
+		return (this.mappedHandlers != null || this.mappedHandlerClasses != null);
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,8 +42,10 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
@@ -98,14 +101,24 @@ public interface ServerRequest {
 	 * Get the request path.
 	 */
 	default String path() {
-		return uri().getRawPath();
+		return requestPath().pathWithinApplication().value();
 	}
 
 	/**
 	 * Get the request path as a {@code PathContainer}.
+	 * @deprecated as of 5.3, in favor on {@link #requestPath()}
 	 */
+	@Deprecated
 	default PathContainer pathContainer() {
-		return PathContainer.parsePath(path());
+		return requestPath();
+	}
+
+	/**
+	 * Get the request path as a {@code PathContainer}.
+	 * @since 5.3
+	 */
+	default RequestPath requestPath() {
+		return exchange().getRequest().getPath();
 	}
 
 	/**
@@ -123,6 +136,12 @@ public interface ServerRequest {
 	 * @since 5.1
 	 */
 	Optional<InetSocketAddress> remoteAddress();
+
+	/**
+	 * Get the local address to which this request is connected, if available.
+	 * @since 5.2.3
+	 */
+	Optional<InetSocketAddress> localAddress();
 
 	/**
 	 * Get the readers used to convert the body of this request.
@@ -281,6 +300,108 @@ public interface ServerRequest {
 	 */
 	ServerWebExchange exchange();
 
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied last-modified timestamp (as determined by the application).
+	 * <p>If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 *	 return request.checkNotModified(lastModified)
+	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@code #checkNotModified(Instant)} method; or
+	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param lastModified the last-modified timestamp that the
+	 * application determined for the underlying resource
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(Instant lastModified) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), lastModified, null);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag), as determined by the application.
+	 * <p>If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   String eTag = // application-specific calculation
+	 *	 return request.checkNotModified(eTag)
+	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@link #checkNotModified(Instant)} method; or
+	 * {@code #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param etag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(String etag) {
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), null, etag);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
+	 * as determined by the application.
+	 * <p>If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 *   String eTag = // application-specific calculation
+	 *	 return request.checkNotModified(lastModified, eTag)
+	 *	   .switchIfEmpty(Mono.defer(() -> {
+	 *	     // further request processing, actually building content
+	 *		 return ServerResponse.ok().body(...);
+	 *	   }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * @param lastModified the last-modified timestamp that the
+	 * application determined for the underlying resource
+	 * @param etag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), lastModified, etag);
+	}
 
 	// Static builder methods
 
@@ -296,8 +417,10 @@ public interface ServerRequest {
 	}
 
 	/**
-	 * Create a builder with the status, headers, and cookies of the given request.
-	 * @param other the response to copy the status, headers, and cookies from
+	 * Create a builder with the {@linkplain HttpMessageReader message readers},
+	 * method name, URI, headers, cookies, and attributes of the given request.
+	 * @param other the request to copy the message readers, method name, URI,
+	 * headers, and attributes from
 	 * @return the created builder
 	 * @since 5.1
 	 */
@@ -359,11 +482,23 @@ public interface ServerRequest {
 		List<HttpRange> range();
 
 		/**
-		 * Get the header value(s), if any, for the header of the given name.
+		 * Get the header value(s), if any, for the header with the given name.
 		 * <p>Returns an empty list if no header values are found.
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);
+
+		/**
+		 * Get the first header value, if any, for the header with the given name.
+		 * <p>Returns {@code null} if no header values are found.
+		 * @param headerName the header name
+		 * @since 5.2.5
+		 */
+		@Nullable
+		default String firstHeader(String headerName) {
+			List<String> list = header(headerName);
+			return list.isEmpty() ? null : list.get(0);
+		}
 
 		/**
 		 * Get the headers as an instance of {@link HttpHeaders}.

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,7 +50,7 @@ public interface HttpMessageWriter<T> {
 	/**
 	 * Whether the given object type is supported by this writer.
 	 * @param elementType the type of object to check
-	 * @param mediaType the media type for the write, possibly {@code null}
+	 * @param mediaType the media type for the write (possibly {@code null})
 	 * @return {@code true} if writable, {@code false} otherwise
 	 */
 	boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType);
@@ -60,8 +60,8 @@ public interface HttpMessageWriter<T> {
 	 * @param inputStream the objects to write
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canWrite(ResolvableType, MediaType)}
-	 * @param mediaType the content type for the write, possibly {@code null} to
-	 * indicate that the default content type of the writer must be used.
+	 * @param mediaType the content type for the write (possibly {@code null} to
+	 * indicate that the default content type of the writer must be used)
 	 * @param message the message to write to
 	 * @param hints additional information about how to encode and write
 	 * @return indicates completion or error
@@ -77,8 +77,8 @@ public interface HttpMessageWriter<T> {
 	 * value; for annotated controllers, the {@link MethodParameter} can be
 	 * accessed via {@link ResolvableType#getSource()}.
 	 * @param elementType the type of Objects in the input stream
-	 * @param mediaType the content type to use, possibly {@code null} indicating
-	 * the default content type of the writer should be used.
+	 * @param mediaType the content type to use (possibly {@code null} indicating
+	 * the default content type of the writer should be used)
 	 * @param request the current request
 	 * @param response the current response
 	 * @return a {@link Mono} that indicates completion of writing or error

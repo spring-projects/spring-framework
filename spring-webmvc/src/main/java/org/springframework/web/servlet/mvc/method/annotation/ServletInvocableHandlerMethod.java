@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -104,6 +107,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		if (returnValue == null) {
 			if (isRequestNotModified(webRequest) || getResponseStatus() != null || mavContainer.isRequestHandled()) {
+				disableContentCachingIfNecessary(webRequest);
 				mavContainer.setRequestHandled(true);
 				return;
 			}
@@ -158,6 +162,17 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	private boolean isRequestNotModified(ServletWebRequest webRequest) {
 		return webRequest.isNotModified();
+	}
+
+	private void disableContentCachingIfNecessary(ServletWebRequest webRequest) {
+		if (isRequestNotModified(webRequest)) {
+			HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+			Assert.notNull(response, "Expected HttpServletResponse");
+			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {
+				HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+				Assert.notNull(request, "Expected HttpServletRequest");
+			}
+		}
 	}
 
 	private String formatErrorForReturnValue(@Nullable Object returnValue) {

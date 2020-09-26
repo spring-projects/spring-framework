@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,6 +42,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.GsonMessageConverter;
+import org.springframework.messaging.converter.JsonbMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -113,11 +115,18 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jackson2Present;
 
+	private static final boolean gsonPresent;
+
+	private static final boolean jsonbPresent;
+
 	private static final boolean javaxValidationPresent;
 
 	static {
 		ClassLoader classLoader = MessageBrokerBeanDefinitionParser.class.getClassLoader();
-		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader);
+		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
+				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
+		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
 		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
 	}
 
@@ -200,7 +209,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(WebSocketHandlerMapping.class);
 
 		String orderAttribute = element.getAttribute("order");
-		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);
+		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.parseInt(orderAttribute);
 		handlerMappingDef.getPropertyValues().add("order", order);
 
 		String pathHelper = element.getAttribute("path-helper");
@@ -485,7 +494,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				converters.add(object);
 			}
 		}
-		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+		if (convertersElement == null || Boolean.parseBoolean(convertersElement.getAttribute("register-defaults"))) {
 			converters.setSource(source);
 			converters.add(new RootBeanDefinition(StringMessageConverter.class));
 			converters.add(new RootBeanDefinition(ByteArrayMessageConverter.class));
@@ -501,6 +510,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 				jacksonFactoryDef.setSource(source);
 				jacksonConverterDef.getPropertyValues().add("objectMapper", jacksonFactoryDef);
 				converters.add(jacksonConverterDef);
+			}
+			else if (gsonPresent) {
+				converters.add(new RootBeanDefinition(GsonMessageConverter.class));
+			}
+			else if (jsonbPresent) {
+				converters.add(new RootBeanDefinition(JsonbMessageConverter.class));
 			}
 		}
 		ConstructorArgumentValues cargs = new ConstructorArgumentValues();

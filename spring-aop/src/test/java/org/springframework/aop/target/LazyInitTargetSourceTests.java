@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,15 +18,15 @@ package org.springframework.aop.target;
 
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.core.io.Resource;
-import org.springframework.tests.sample.beans.ITestBean;
 
-import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifiedResource;
 
 /**
  * @author Juergen Hoeller
@@ -49,9 +49,9 @@ public class LazyInitTargetSourceTests {
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
-		assertFalse(bf.containsSingleton("target"));
-		assertEquals(10, tb.getAge());
-		assertTrue(bf.containsSingleton("target"));
+		assertThat(bf.containsSingleton("target")).isFalse();
+		assertThat(tb.getAge()).isEqualTo(10);
+		assertThat(bf.containsSingleton("target")).isTrue();
 	}
 
 	@Test
@@ -61,9 +61,9 @@ public class LazyInitTargetSourceTests {
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
-		assertFalse(bf.containsSingleton("target"));
-		assertEquals("Rob Harrop", tb.getName());
-		assertTrue(bf.containsSingleton("target"));
+		assertThat(bf.containsSingleton("target")).isFalse();
+		assertThat(tb.getName()).isEqualTo("Rob Harrop");
+		assertThat(bf.containsSingleton("target")).isTrue();
 	}
 
 	@Test
@@ -73,14 +73,14 @@ public class LazyInitTargetSourceTests {
 		bf.preInstantiateSingletons();
 
 		Set<?> set1 = (Set<?>) bf.getBean("proxy1");
-		assertFalse(bf.containsSingleton("target1"));
-		assertTrue(set1.contains("10"));
-		assertTrue(bf.containsSingleton("target1"));
+		assertThat(bf.containsSingleton("target1")).isFalse();
+		assertThat(set1.contains("10")).isTrue();
+		assertThat(bf.containsSingleton("target1")).isTrue();
 
 		Set<?> set2 = (Set<?>) bf.getBean("proxy2");
-		assertFalse(bf.containsSingleton("target2"));
-		assertTrue(set2.contains("20"));
-		assertTrue(bf.containsSingleton("target2"));
+		assertThat(bf.containsSingleton("target2")).isFalse();
+		assertThat(set2.contains("20")).isTrue();
+		assertThat(bf.containsSingleton("target2")).isTrue();
 	}
 
 

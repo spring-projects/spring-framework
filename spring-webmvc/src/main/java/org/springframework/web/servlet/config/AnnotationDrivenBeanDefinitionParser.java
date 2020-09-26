@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -208,12 +208,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 
 		if (element.hasAttribute("enable-matrix-variables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
+			boolean enableMatrixVariables = Boolean.parseBoolean(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
 		configurePathMatchingProperties(handlerMappingDef, element, context);
-		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME , handlerMappingDef);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME, handlerMappingDef);
 
 		RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
 		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsRef);
@@ -234,8 +234,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, context);
 		String asyncTimeout = getAsyncTimeout(element);
 		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element);
-		ManagedList<?> callableInterceptors = getCallableInterceptors(element, source, context);
-		ManagedList<?> deferredResultInterceptors = getDeferredResultInterceptors(element, source, context);
+		ManagedList<?> callableInterceptors = getInterceptors(element, source, context, "callable-interceptors");
+		ManagedList<?> deferredResultInterceptors = getInterceptors(element, source, context, "deferred-result-interceptors");
 
 		RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		handlerAdapterDef.setSource(source);
@@ -265,7 +265,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		handlerAdapterDef.getPropertyValues().add("callableInterceptors", callableInterceptors);
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
-		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME , handlerAdapterDef);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME, handlerAdapterDef);
 
 		RootBeanDefinition uriContributorDef =
 				new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
@@ -391,7 +391,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 			String name = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-			context.getReaderContext().getRegistry().registerBeanDefinition(name , factoryBeanDef);
+			context.getReaderContext().getRegistry().registerBeanDefinition(name, factoryBeanDef);
 			context.registerComponent(new BeanComponentDefinition(factoryBeanDef, name));
 			beanRef = new RuntimeBeanReference(name);
 		}
@@ -450,7 +450,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			defaultMediaTypes.put("smile", "application/x-jackson-smile");
 		}
 		if (jackson2CborPresent) {
-			defaultMediaTypes.put("cbor", "application/cbor");
+			defaultMediaTypes.put("cbor", MediaType.APPLICATION_CBOR_VALUE);
 		}
 		return defaultMediaTypes;
 	}
@@ -480,34 +480,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return null;
 	}
 
-	private ManagedList<?> getCallableInterceptors(
-			Element element, @Nullable Object source, ParserContext context) {
+	private ManagedList<?> getInterceptors(
+			Element element, @Nullable Object source, ParserContext context, String interceptorElementName) {
 
 		ManagedList<Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
-			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "callable-interceptors");
-			if (interceptorsElement != null) {
-				interceptors.setSource(source);
-				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
-					BeanDefinitionHolder beanDef = context.getDelegate().parseBeanDefinitionElement(converter);
-					if (beanDef != null) {
-						beanDef = context.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
-						interceptors.add(beanDef);
-					}
-				}
-			}
-		}
-		return interceptors;
-	}
-
-	private ManagedList<?> getDeferredResultInterceptors(
-			Element element, @Nullable Object source, ParserContext context) {
-
-		ManagedList<Object> interceptors = new ManagedList<>();
-		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
-		if (asyncElement != null) {
-			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "deferred-result-interceptors");
+			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, interceptorElementName);
 			if (interceptorsElement != null) {
 				interceptors.setSource(source);
 				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
@@ -569,7 +548,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		if (convertersElement == null || Boolean.valueOf(convertersElement.getAttribute("register-defaults"))) {
+		if (convertersElement == null || Boolean.parseBoolean(convertersElement.getAttribute("register-defaults"))) {
 			messageConverters.setSource(source);
 			messageConverters.add(createConverterDefinition(ByteArrayHttpMessageConverter.class, source));
 

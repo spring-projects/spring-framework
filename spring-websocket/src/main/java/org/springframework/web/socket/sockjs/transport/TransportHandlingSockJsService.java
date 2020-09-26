@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -135,6 +136,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		this.messageCodec = messageCodec;
 	}
 
+	@Override
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
 				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
@@ -214,10 +216,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		catch (HandshakeFailureException ex) {
 			failure = ex;
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			failure = new HandshakeFailureException("Uncaught failure for request " + request.getURI(), ex);
 		}
-			finally {
+		finally {
 			if (failure != null) {
 				chain.applyAfterHandshake(request, response, failure);
 				throw failure;
@@ -269,6 +271,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			SockJsSession session = this.sessions.get(sessionId);
+			boolean isNewSession = false;
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
@@ -277,6 +280,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 					}
 					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
+					isNewSession = true;
 				}
 				else {
 					response.setStatusCode(HttpStatus.NOT_FOUND);
@@ -310,12 +314,20 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			transportHandler.handleRequest(request, response, handler, session);
+
+			if (isNewSession && (response instanceof ServletServerHttpResponse)) {
+				int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
+				if (HttpStatus.valueOf(status).is4xxClientError()) {
+					this.sessions.remove(sessionId);
+				}
+			}
+
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (SockJsException ex) {
 			failure = ex;
 		}
-		catch (Throwable ex) {
+		catch (Exception ex) {
 			failure = new SockJsException("Uncaught failure for request " + request.getURI(), sessionId, ex);
 		}
 		finally {

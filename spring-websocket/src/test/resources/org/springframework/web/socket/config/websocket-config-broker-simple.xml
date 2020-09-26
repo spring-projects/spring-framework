@@ -1,8 +1,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:websocket="http://www.springframework.org/schema/websocket"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket https://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
 	<websocket:message-broker application-destination-prefix="/app"
 							  user-destination-prefix="/personal"
@@ -17,7 +17,7 @@
 			</websocket:decorator-factories>
 		</websocket:transport>
 
-		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="http://mydomain1.com,http://mydomain2.com">
+		<websocket:stomp-endpoint path=" /foo,/bar" allowed-origins="https://mydomain1.example,https://mydomain2.example">
 			<websocket:handshake-handler ref="myHandler"/>
 			<websocket:handshake-interceptors>
 				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>
@@ -25,7 +25,7 @@
 			</websocket:handshake-interceptors>
 		</websocket:stomp-endpoint>
 
-		<websocket:stomp-endpoint path="/test,/sockjs" allowed-origins="http://mydomain3.com,http://mydomain4.com">
+		<websocket:stomp-endpoint path="/test,/sockjs" allowed-origins="https://mydomain3.com,https://mydomain4.com">
 			<websocket:handshake-handler ref="myHandler"/>
 			<websocket:handshake-interceptors>
 				<bean class="org.springframework.web.socket.config.FooTestInterceptor"/>

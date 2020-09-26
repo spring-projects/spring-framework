@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,10 @@ package org.springframework.web.reactive.function.server;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -32,21 +30,23 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.function.server.HandlerFilterFunction.*;
-import static org.springframework.web.reactive.function.server.RequestPredicates.*;
-import static org.springframework.web.reactive.function.server.RouterFunctions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.web.reactive.function.server.HandlerFilterFunction.ofResponseProcessor;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class RenderingResponseIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
@@ -72,34 +72,38 @@ public class RenderingResponseIntegrationTests extends AbstractRouterFunctionInt
 	}
 
 
-	@Test
-	public void normal() {
+	@ParameterizedHttpServerTest
+	void normal(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/normal", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertEquals(2, body.size());
-		assertEquals("foo", body.get("name"));
-		assertEquals("baz", body.get("bar"));
+		assertThat(body.size()).isEqualTo(2);
+		assertThat(body.get("name")).isEqualTo("foo");
+		assertThat(body.get("bar")).isEqualTo("baz");
 	}
 
-	@Test
-	public void filter() {
+	@ParameterizedHttpServerTest
+	void filter(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
 		ResponseEntity<String> result =
 				restTemplate.getForEntity("http://localhost:" + port + "/filter", String.class);
 
-		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Map<String, String> body = parseBody(result.getBody());
-		assertEquals(3, body.size());
-		assertEquals("foo", body.get("name"));
-		assertEquals("baz", body.get("bar"));
-		assertEquals("quux", body.get("qux"));
+		assertThat(body.size()).isEqualTo(3);
+		assertThat(body.get("name")).isEqualTo("foo");
+		assertThat(body.get("bar")).isEqualTo("baz");
+		assertThat(body.get("qux")).isEqualTo("quux");
 	}
 
 	private Map<String, String> parseBody(String body) {
 		String[] lines = body.split("\\n");
-		Map<String, String> result = new LinkedHashMap<>(lines.length);
+		Map<String, String> result = CollectionUtils.newLinkedHashMap(lines.length);
 		for (String line : lines) {
 			int idx = line.indexOf('=');
 			String key = line.substring(0, idx);

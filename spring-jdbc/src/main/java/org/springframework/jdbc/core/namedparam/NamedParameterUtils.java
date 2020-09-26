@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.core.namedparam;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,7 @@ public abstract class NamedParameterUtils {
 
 	/**
 	 * Set of characters that qualify as parameter separators,
-	 * indicating that a parameter name in a SQL String has ended.
+	 * indicating that a parameter name in an SQL String has ended.
 	 */
 	private static final String PARAMETER_SEPARATORS = "\"':&,;()|=+-*%/\\<>^";
 
@@ -284,8 +283,8 @@ public abstract class NamedParameterUtils {
 				if (value instanceof SqlParameterValue) {
 					value = ((SqlParameterValue) value).getValue();
 				}
-				if (value instanceof Collection) {
-					Iterator<?> entryIter = ((Collection<?>) value).iterator();
+				if (value instanceof Iterable) {
+					Iterator<?> entryIter = ((Iterable<?>) value).iterator();
 					int k = 0;
 					while (entryIter.hasNext()) {
 						if (k > 0) {

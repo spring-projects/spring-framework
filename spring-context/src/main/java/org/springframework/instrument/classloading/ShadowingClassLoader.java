@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,14 +48,14 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default. */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
-			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.",
+			new String[] {"java.", "javax.", "jdk.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.",
 					"org.w3c.", "org.xml.", "org.dom4j.", "org.eclipse", "org.aspectj.", "net.sf.cglib",
 					"org.springframework.cglib", "org.apache.xerces.", "org.apache.commons.logging."};
 
 
 	private final ClassLoader enclosingClassLoader;
 
-	private final List<ClassFileTransformer> classFileTransformers = new LinkedList<>();
+	private final List<ClassFileTransformer> classFileTransformers = new ArrayList<>(1);
 
 	private final Map<String, Class<?>> classCache = new HashMap<>();
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package org.aopalliance.intercept;
 
 import java.lang.reflect.Constructor;
+
+import javax.annotation.Nonnull;
 
 /**
  * Description of an invocation to a constructor, given to an
@@ -36,6 +38,7 @@ public interface ConstructorInvocation extends Invocation {
 	 * {@link Joinpoint#getStaticPart()} method (same result).
 	 * @return the constructor being called
 	 */
+	@Nonnull
 	Constructor<?> getConstructor();
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,10 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
 import javax.persistence.spi.ClassTransformer;
@@ -60,16 +61,16 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	@Nullable
 	private DataSource jtaDataSource;
 
-	private final List<String> mappingFileNames = new LinkedList<>();
+	private final List<String> mappingFileNames = new ArrayList<>();
 
-	private List<URL> jarFileUrls = new LinkedList<>();
+	private final List<URL> jarFileUrls = new ArrayList<>();
 
 	@Nullable
 	private URL persistenceUnitRootUrl;
 
-	private final List<String> managedClassNames = new LinkedList<>();
+	private final List<String> managedClassNames = new ArrayList<>();
 
-	private final List<String> managedPackages = new LinkedList<>();
+	private final List<String> managedPackages = new ArrayList<>();
 
 	private boolean excludeUnlistedClasses = false;
 

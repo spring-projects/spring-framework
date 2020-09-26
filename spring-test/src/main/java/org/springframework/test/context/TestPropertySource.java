@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.springframework.test.context;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -43,7 +44,9 @@ import org.springframework.core.annotation.AliasFor;
  * or some other means). Thus, test property sources can be used to selectively
  * override properties defined in system and application property sources.
  * Furthermore, inlined {@link #properties} have higher precedence than
- * properties loaded from resource {@link #locations}.
+ * properties loaded from resource {@link #locations}. Note, however, that
+ * properties registered via {@link DynamicPropertySource @DynamicPropertySource}
+ * have higher precedence than those loaded via {@code @TestPropertySource}.
  *
  * <h3>Default Properties File Detection</h3>
  * <p>If {@code @TestPropertySource} is declared as an <em>empty</em> annotation
@@ -67,6 +70,8 @@ import org.springframework.core.annotation.AliasFor;
  * <ul>
  * <li>Typically, {@code @TestPropertySource} will be used in conjunction with
  * {@link ContextConfiguration @ContextConfiguration}.</li>
+ * <li>As of Spring Framework 5.2, {@code @TestPropertySource} can be used as a
+ * <em>{@linkplain Repeatable repeatable}</em> annotation.</li>
  * <li>This annotation may be used as a <em>meta-annotation</em> to create
  * custom <em>composed annotations</em>; however, caution should be taken if
  * this annotation and {@code @ContextConfiguration} are combined on a composed
@@ -78,6 +83,7 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 4.1
  * @see ContextConfiguration
+ * @see DynamicPropertySource
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see org.springframework.context.annotation.PropertySource
@@ -86,6 +92,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+@Repeatable(TestPropertySources.class)
 public @interface TestPropertySource {
 
 	/**
@@ -168,9 +175,24 @@ public @interface TestPropertySource {
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
-	 * }
-	 * </pre>
-	 *
+	 * }</pre>
+	 * <p>If {@code @TestPropertySource} is used as a <em>{@linkplain Repeatable
+	 * repeatable}</em> annotation, the following special rules apply.
+	 * <ol>
+	 * <li>All {@code @TestPropertySource} annotations at a given level in the
+	 * test class hierarchy (i.e., directly present or meta-present on a test
+	 * class) are considered to be <em>local</em> annotations, in contrast to
+	 * {@code @TestPropertySource} annotations that are inherited from a
+	 * superclass.</li>
+	 * <li>All local {@code @TestPropertySource} annotations must declare the
+	 * same value for the {@code inheritLocations} flag.</li>
+	 * <li>The {@code inheritLocations} flag is not taken into account between
+	 * local {@code @TestPropertySource} annotations. Specifically, the property
+	 * source locations for one local annotation will be appended to the list of
+	 * property source locations defined by previous local annotations. This
+	 * allows a local annotation to extend the list of test property source
+	 * locations, potentially overriding individual properties.</li>
+	 * </ol>
 	 * @see #locations
 	 */
 	boolean inheritLocations() default true;
@@ -228,8 +250,24 @@ public @interface TestPropertySource {
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
 	 *   // ...
-	 * }
-	 * </pre>
+	 * }</pre>
+	 * <p>If {@code @TestPropertySource} is used as a <em>{@linkplain Repeatable
+	 * repeatable}</em> annotation, the following special rules apply.
+	 * <ol>
+	 * <li>All {@code @TestPropertySource} annotations at a given level in the
+	 * test class hierarchy (i.e., directly present or meta-present on a test
+	 * class) are considered to be <em>local</em> annotations, in contrast to
+	 * {@code @TestPropertySource} annotations that are inherited from a
+	 * superclass.</li>
+	 * <li>All local {@code @TestPropertySource} annotations must declare the
+	 * same value for the {@code inheritProperties} flag.</li>
+	 * <li>The {@code inheritProperties} flag is not taken into account between
+	 * local {@code @TestPropertySource} annotations. Specifically, inlined
+	 * properties for one local annotation will be appended to the list of
+	 * inlined properties defined by previous local annotations. This allows a
+	 * local annotation to extend the list of inlined properties, potentially
+	 * overriding individual properties.</li>
+	 * </ol>
 	 * @see #properties
 	 */
 	boolean inheritProperties() default true;

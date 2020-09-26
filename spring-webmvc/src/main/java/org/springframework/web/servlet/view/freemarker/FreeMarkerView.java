@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -70,8 +71,9 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  *
  * <p>Depends on a single {@link FreeMarkerConfig} object such as {@link FreeMarkerConfigurer}
  * being accessible in the current web application context, with any bean name.
- * Alternatively, you can set the FreeMarker {@link Configuration} object as bean property.
- * See {@link #setConfiguration} for more details on the impacts of this approach.
+ * Alternatively, you can set the FreeMarker {@link Configuration} object as a
+ * bean property. See {@link #setConfiguration} for more details on the impacts
+ * of this approach.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *

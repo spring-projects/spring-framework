@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -62,8 +63,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-		HttpStatus status = resolveStatus(ex);
-		if (status == null || !exchange.getResponse().setStatusCode(status)) {
+		if (!updateResponse(exchange.getResponse(), ex)) {
 			return Mono.error(ex);
 		}
 
@@ -86,30 +86,54 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		return "Resolved [" + reason + "] for HTTP " + request.getMethod() + " " + path;
 	}
 
-	@Nullable
-	private HttpStatus resolveStatus(Throwable ex) {
-		HttpStatus status = determineStatus(ex);
-		if (status == null) {
-			Throwable cause = ex.getCause();
-			if (cause != null) {
-				status = resolveStatus(cause);
+	private boolean updateResponse(ServerHttpResponse response, Throwable ex) {
+		boolean result = false;
+		HttpStatus httpStatus = determineStatus(ex);
+		int code = (httpStatus != null ? httpStatus.value() : determineRawStatusCode(ex));
+		if (code != -1) {
+			if (response.setRawStatusCode(code)) {
+				if (ex instanceof ResponseStatusException) {
+					((ResponseStatusException) ex).getResponseHeaders()
+							.forEach((name, values) ->
+									values.forEach(value -> response.getHeaders().add(name, value)));
+				}
+				result = true;
 			}
 		}
-		return status;
+		else {
+			Throwable cause = ex.getCause();
+			if (cause != null) {
+				result = updateResponse(response, cause);
+			}
+		}
+		return result;
 	}
 
 	/**
-	 * Determine the HTTP status implied by the given exception.
-	 * @param ex the exception to introspect
+	 * Determine the HTTP status for the given exception.
+	 * <p>As of 5.3 this method always returns {@code null} in which case
+	 * {@link #determineRawStatusCode(Throwable)} is used instead.
+	 * @param ex the exception to check
 	 * @return the associated HTTP status, if any
-	 * @since 5.0.5
+	 * @deprecated as of 5.3 in favor of {@link #determineRawStatusCode(Throwable)}.
 	 */
 	@Nullable
+	@Deprecated
 	protected HttpStatus determineStatus(Throwable ex) {
-		if (ex instanceof ResponseStatusException) {
-			return ((ResponseStatusException) ex).getStatus();
-		}
 		return null;
+	}
+
+	/**
+	 * Determine the raw status code for the given exception.
+	 * @param ex the exception to check
+	 * @return the associated HTTP status code, or -1 if it can't be derived.
+	 * @since 5.3
+	 */
+	protected int determineRawStatusCode(Throwable ex) {
+		if (ex instanceof ResponseStatusException) {
+			return ((ResponseStatusException) ex).getRawStatusCode();
+		}
+		return -1;
 	}
 
 }

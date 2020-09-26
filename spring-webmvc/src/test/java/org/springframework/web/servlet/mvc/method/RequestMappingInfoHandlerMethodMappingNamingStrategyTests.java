@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,18 +18,17 @@ package org.springframework.web.servlet.mvc.method;
 
 import java.lang.reflect.Method;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMethodMappingNamingStrategy}.
+ * Unit tests for {@link RequestMappingInfoHandlerMethodMappingNamingStrategy}.
  *
  * @author Rossen Stoyanchev
  */
@@ -37,28 +36,28 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategyTests {
 
 	@Test
 	public void getNameExplicit() {
-
 		Method method = ClassUtils.getMethod(TestController.class, "handle");
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 
+		@SuppressWarnings("deprecation")
 		RequestMappingInfo rmi = new RequestMappingInfo("foo", null, null, null, null, null, null, null);
 
 		HandlerMethodMappingNamingStrategy<RequestMappingInfo> strategy = new RequestMappingInfoHandlerMethodMappingNamingStrategy();
 
-		assertEquals("foo", strategy.getName(handlerMethod, rmi));
+		assertThat(strategy.getName(handlerMethod, rmi)).isEqualTo("foo");
 	}
 
 	@Test
 	public void getNameConvention() {
-
 		Method method = ClassUtils.getMethod(TestController.class, "handle");
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 
+		@SuppressWarnings("deprecation")
 		RequestMappingInfo rmi = new RequestMappingInfo(null, null, null, null, null, null, null, null);
 
 		HandlerMethodMappingNamingStrategy<RequestMappingInfo> strategy = new RequestMappingInfoHandlerMethodMappingNamingStrategy();
 
-		assertEquals("TC#handle", strategy.getName(handlerMethod, rmi));
+		assertThat(strategy.getName(handlerMethod, rmi)).isEqualTo("TC#handle");
 	}
 
 

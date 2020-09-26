@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,11 +18,12 @@ package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -228,7 +229,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	@Override
 	public int doStartTagInternal() throws JspException {
-		this.params = new LinkedList<>();
+		this.params = new ArrayList<>();
 		this.templateParams = new HashSet<>();
 		return EVAL_BODY_INCLUDE;
 	}
@@ -277,7 +278,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			}
 			else {
 				if (this.context.endsWith("/")) {
-					url.append(this.context.substring(0, this.context.length() - 1));
+					url.append(this.context, 0, this.context.length() - 1);
 				}
 				else {
 					url.append(this.context);

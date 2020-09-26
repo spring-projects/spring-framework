@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,12 +44,16 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.StandardAnnotationMetadata;
+import org.springframework.core.type.StandardMethodMetadata;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -65,6 +69,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 3.0
  * @see ConfigurationClassParser
  */
@@ -73,6 +78,13 @@ class ConfigurationClassBeanDefinitionReader {
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
 
 	private static final ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
+
+	/**
+	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
+	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
+	 * <p>The default is "false".
+	 */
+	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
 
 	private final BeanDefinitionRegistry registry;
 
@@ -208,20 +220,29 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata);
-		beanDef.setResource(configClass.getResource());
+		ConfigurationClassBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass, metadata, beanName);
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
 
 		if (metadata.isStatic()) {
 			// static @Bean method
-			beanDef.setBeanClassName(configClass.getMetadata().getClassName());
-			beanDef.setFactoryMethodName(methodName);
+			if (configClass.getMetadata() instanceof StandardAnnotationMetadata) {
+				beanDef.setBeanClass(((StandardAnnotationMetadata) configClass.getMetadata()).getIntrospectedClass());
+			}
+			else {
+				beanDef.setBeanClassName(configClass.getMetadata().getClassName());
+			}
+			beanDef.setUniqueFactoryMethodName(methodName);
 		}
 		else {
 			// instance @Bean method
 			beanDef.setFactoryBeanName(configClass.getBeanName());
 			beanDef.setUniqueFactoryMethodName(methodName);
 		}
+
+		if (metadata instanceof StandardMethodMetadata) {
+			beanDef.setResolvedFactoryMethod(((StandardMethodMetadata) metadata).getIntrospectedMethod());
+		}
+
 		beanDef.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor.
 				SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
@@ -264,7 +285,7 @@ class ConfigurationClassBeanDefinitionReader {
 					new BeanDefinitionHolder(beanDef, beanName), this.registry,
 					proxyMode == ScopedProxyMode.TARGET_CLASS);
 			beanDefToRegister = new ConfigurationClassBeanDefinition(
-					(RootBeanDefinition) proxyDef.getBeanDefinition(), configClass, metadata);
+					(RootBeanDefinition) proxyDef.getBeanDefinition(), configClass, metadata, beanName);
 		}
 
 		if (logger.isTraceEnabled()) {
@@ -286,8 +307,16 @@ class ConfigurationClassBeanDefinitionReader {
 		// preserve the existing bean definition.
 		if (existingBeanDef instanceof ConfigurationClassBeanDefinition) {
 			ConfigurationClassBeanDefinition ccbd = (ConfigurationClassBeanDefinition) existingBeanDef;
-			return ccbd.getMetadata().getClassName().equals(
-					beanMethod.getConfigurationClass().getMetadata().getClassName());
+			if (ccbd.getMetadata().getClassName().equals(
+					beanMethod.getConfigurationClass().getMetadata().getClassName())) {
+				if (ccbd.getFactoryMethodMetadata().getMethodName().equals(ccbd.getFactoryMethodName())) {
+					ccbd.setNonUniqueFactoryMethodName(ccbd.getFactoryMethodMetadata().getMethodName());
+				}
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 
 		// A bean definition resulting from a component scan can be silently overridden
@@ -329,6 +358,9 @@ class ConfigurationClassBeanDefinitionReader {
 					// When clearly asking for Groovy, that's what they'll get...
 					readerClass = GroovyBeanDefinitionReader.class;
 				}
+				else if (shouldIgnoreXml) {
+					throw new UnsupportedOperationException("XML support disabled");
+				}
 				else {
 					// Primarily ".xml" files but for any other extension as well
 					readerClass = XmlBeanDefinitionReader.class;
@@ -361,7 +393,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
 		registrars.forEach((registrar, metadata) ->
-				registrar.registerBeanDefinitions(metadata, this.registry));
+				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));
 	}
 
 
@@ -378,23 +410,31 @@ class ConfigurationClassBeanDefinitionReader {
 
 		private final MethodMetadata factoryMethodMetadata;
 
-		public ConfigurationClassBeanDefinition(ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
+		private final String derivedBeanName;
+
+		public ConfigurationClassBeanDefinition(
+				ConfigurationClass configClass, MethodMetadata beanMethodMetadata, String derivedBeanName) {
+
 			this.annotationMetadata = configClass.getMetadata();
 			this.factoryMethodMetadata = beanMethodMetadata;
+			this.derivedBeanName = derivedBeanName;
+			setResource(configClass.getResource());
 			setLenientConstructorResolution(false);
 		}
 
-		public ConfigurationClassBeanDefinition(
-				RootBeanDefinition original, ConfigurationClass configClass, MethodMetadata beanMethodMetadata) {
+		public ConfigurationClassBeanDefinition(RootBeanDefinition original,
+				ConfigurationClass configClass, MethodMetadata beanMethodMetadata, String derivedBeanName) {
 			super(original);
 			this.annotationMetadata = configClass.getMetadata();
 			this.factoryMethodMetadata = beanMethodMetadata;
+			this.derivedBeanName = derivedBeanName;
 		}
 
 		private ConfigurationClassBeanDefinition(ConfigurationClassBeanDefinition original) {
 			super(original);
 			this.annotationMetadata = original.annotationMetadata;
 			this.factoryMethodMetadata = original.factoryMethodMetadata;
+			this.derivedBeanName = original.derivedBeanName;
 		}
 
 		@Override
@@ -403,13 +443,15 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 
 		@Override
+		@NonNull
 		public MethodMetadata getFactoryMethodMetadata() {
 			return this.factoryMethodMetadata;
 		}
 
 		@Override
 		public boolean isFactoryMethod(Method candidate) {
-			return (super.isFactoryMethod(candidate) && BeanAnnotationHelper.isBeanAnnotated(candidate));
+			return (super.isFactoryMethod(candidate) && BeanAnnotationHelper.isBeanAnnotated(candidate) &&
+					BeanAnnotationHelper.determineBeanNameFor(candidate).equals(this.derivedBeanName));
 		}
 
 		@Override

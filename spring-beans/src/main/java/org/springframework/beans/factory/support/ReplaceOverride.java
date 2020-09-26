@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,10 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -38,7 +39,7 @@ public class ReplaceOverride extends MethodOverride {
 
 	private final String methodReplacerBeanName;
 
-	private List<String> typeIdentifiers = new LinkedList<>();
+	private final List<String> typeIdentifiers = new ArrayList<>();
 
 
 	/**
@@ -48,7 +49,7 @@ public class ReplaceOverride extends MethodOverride {
 	 */
 	public ReplaceOverride(String methodName, String methodReplacerBeanName) {
 		super(methodName);
-		Assert.notNull(methodName, "Method replacer bean name must not be null");
+		Assert.notNull(methodReplacerBeanName, "Method replacer bean name must not be null");
 		this.methodReplacerBeanName = methodReplacerBeanName;
 	}
 
@@ -68,6 +69,7 @@ public class ReplaceOverride extends MethodOverride {
 	public void addTypeIdentifier(String identifier) {
 		this.typeIdentifiers.add(identifier);
 	}
+
 
 	@Override
 	public boolean matches(Method method) {
@@ -94,7 +96,7 @@ public class ReplaceOverride extends MethodOverride {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (!(other instanceof ReplaceOverride) || !super.equals(other)) {
 			return false;
 		}

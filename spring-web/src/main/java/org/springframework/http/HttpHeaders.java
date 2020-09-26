@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -34,11 +35,11 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,11 +64,14 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
+ * <p>Note that {@code HttpHeaders} generally treats header names in a case-insensitive manner.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @author Josh Long
+ * @author Sam Brannen
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -77,302 +81,302 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * The HTTP {@code Accept} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.2">Section 5.3.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.2">Section 5.3.2 of RFC 7231</a>
 	 */
 	public static final String ACCEPT = "Accept";
 	/**
 	 * The HTTP {@code Accept-Charset} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.3">Section 5.3.3 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.3">Section 5.3.3 of RFC 7231</a>
 	 */
 	public static final String ACCEPT_CHARSET = "Accept-Charset";
 	/**
 	 * The HTTP {@code Accept-Encoding} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.4">Section 5.3.4 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.4">Section 5.3.4 of RFC 7231</a>
 	 */
 	public static final String ACCEPT_ENCODING = "Accept-Encoding";
 	/**
 	 * The HTTP {@code Accept-Language} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.3.5">Section 5.3.5 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.5">Section 5.3.5 of RFC 7231</a>
 	 */
 	public static final String ACCEPT_LANGUAGE = "Accept-Language";
 	/**
 	 * The HTTP {@code Accept-Ranges} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-2.3">Section 5.3.5 of RFC 7233</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.3">Section 5.3.5 of RFC 7233</a>
 	 */
 	public static final String ACCEPT_RANGES = "Accept-Ranges";
 	/**
 	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 	/**
 	 * The CORS {@code Access-Control-Allow-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 	/**
 	 * The CORS {@code Access-Control-Allow-Methods} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	/**
 	 * The CORS {@code Access-Control-Allow-Origin} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	/**
 	 * The CORS {@code Access-Control-Expose-Headers} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	/**
 	 * The CORS {@code Access-Control-Max-Age} response header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 	/**
 	 * The CORS {@code Access-Control-Request-Headers} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
 	/**
 	 * The CORS {@code Access-Control-Request-Method} request header field name.
-	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
+	 * @see <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>
 	 */
 	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
 	/**
 	 * The HTTP {@code Age} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.1">Section 5.1 of RFC 7234</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.1">Section 5.1 of RFC 7234</a>
 	 */
 	public static final String AGE = "Age";
 	/**
 	 * The HTTP {@code Allow} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.4.1">Section 7.4.1 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.4.1">Section 7.4.1 of RFC 7231</a>
 	 */
 	public static final String ALLOW = "Allow";
 	/**
 	 * The HTTP {@code Authorization} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7235#section-4.2">Section 4.2 of RFC 7235</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7235#section-4.2">Section 4.2 of RFC 7235</a>
 	 */
 	public static final String AUTHORIZATION = "Authorization";
 	/**
 	 * The HTTP {@code Cache-Control} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.2">Section 5.2 of RFC 7234</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">Section 5.2 of RFC 7234</a>
 	 */
 	public static final String CACHE_CONTROL = "Cache-Control";
 	/**
 	 * The HTTP {@code Connection} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-6.1">Section 6.1 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-6.1">Section 6.1 of RFC 7230</a>
 	 */
 	public static final String CONNECTION = "Connection";
 	/**
 	 * The HTTP {@code Content-Encoding} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.2.2">Section 3.1.2.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.2.2">Section 3.1.2.2 of RFC 7231</a>
 	 */
 	public static final String CONTENT_ENCODING = "Content-Encoding";
 	/**
 	 * The HTTP {@code Content-Disposition} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc6266">RFC 6266</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
 	 */
 	public static final String CONTENT_DISPOSITION = "Content-Disposition";
 	/**
 	 * The HTTP {@code Content-Language} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.3.2">Section 3.1.3.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.3.2">Section 3.1.3.2 of RFC 7231</a>
 	 */
 	public static final String CONTENT_LANGUAGE = "Content-Language";
 	/**
 	 * The HTTP {@code Content-Length} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-3.3.2">Section 3.3.2 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.2">Section 3.3.2 of RFC 7230</a>
 	 */
 	public static final String CONTENT_LENGTH = "Content-Length";
 	/**
 	 * The HTTP {@code Content-Location} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.4.2">Section 3.1.4.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.4.2">Section 3.1.4.2 of RFC 7231</a>
 	 */
 	public static final String CONTENT_LOCATION = "Content-Location";
 	/**
 	 * The HTTP {@code Content-Range} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-4.2">Section 4.2 of RFC 7233</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-4.2">Section 4.2 of RFC 7233</a>
 	 */
 	public static final String CONTENT_RANGE = "Content-Range";
 	/**
 	 * The HTTP {@code Content-Type} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.5">Section 3.1.1.5 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.5">Section 3.1.1.5 of RFC 7231</a>
 	 */
 	public static final String CONTENT_TYPE = "Content-Type";
 	/**
 	 * The HTTP {@code Cookie} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc2109#section-4.3.4">Section 4.3.4 of RFC 2109</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc2109#section-4.3.4">Section 4.3.4 of RFC 2109</a>
 	 */
 	public static final String COOKIE = "Cookie";
 	/**
 	 * The HTTP {@code Date} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.1.1.2">Section 7.1.1.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.2">Section 7.1.1.2 of RFC 7231</a>
 	 */
 	public static final String DATE = "Date";
 	/**
 	 * The HTTP {@code ETag} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
 	 */
 	public static final String ETAG = "ETag";
 	/**
 	 * The HTTP {@code Expect} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.1.1">Section 5.1.1 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.1.1">Section 5.1.1 of RFC 7231</a>
 	 */
 	public static final String EXPECT = "Expect";
 	/**
 	 * The HTTP {@code Expires} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.3">Section 5.3 of RFC 7234</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.3">Section 5.3 of RFC 7234</a>
 	 */
 	public static final String EXPIRES = "Expires";
 	/**
 	 * The HTTP {@code From} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.5.1">Section 5.5.1 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.5.1">Section 5.5.1 of RFC 7231</a>
 	 */
 	public static final String FROM = "From";
 	/**
 	 * The HTTP {@code Host} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-5.4">Section 5.4 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-5.4">Section 5.4 of RFC 7230</a>
 	 */
 	public static final String HOST = "Host";
 	/**
 	 * The HTTP {@code If-Match} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-3.1">Section 3.1 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-3.1">Section 3.1 of RFC 7232</a>
 	 */
 	public static final String IF_MATCH = "If-Match";
 	/**
 	 * The HTTP {@code If-Modified-Since} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-3.3">Section 3.3 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-3.3">Section 3.3 of RFC 7232</a>
 	 */
 	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 	/**
 	 * The HTTP {@code If-None-Match} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-3.2">Section 3.2 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-3.2">Section 3.2 of RFC 7232</a>
 	 */
 	public static final String IF_NONE_MATCH = "If-None-Match";
 	/**
 	 * The HTTP {@code If-Range} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-3.2">Section 3.2 of RFC 7233</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-3.2">Section 3.2 of RFC 7233</a>
 	 */
 	public static final String IF_RANGE = "If-Range";
 	/**
 	 * The HTTP {@code If-Unmodified-Since} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-3.4">Section 3.4 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-3.4">Section 3.4 of RFC 7232</a>
 	 */
 	public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 	/**
 	 * The HTTP {@code Last-Modified} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7232#section-2.2">Section 2.2 of RFC 7232</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.2">Section 2.2 of RFC 7232</a>
 	 */
 	public static final String LAST_MODIFIED = "Last-Modified";
 	/**
 	 * The HTTP {@code Link} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc5988">RFC 5988</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc5988">RFC 5988</a>
 	 */
 	public static final String LINK = "Link";
 	/**
 	 * The HTTP {@code Location} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.1.2">Section 7.1.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.2">Section 7.1.2 of RFC 7231</a>
 	 */
 	public static final String LOCATION = "Location";
 	/**
 	 * The HTTP {@code Max-Forwards} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.1.2">Section 5.1.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.1.2">Section 5.1.2 of RFC 7231</a>
 	 */
 	public static final String MAX_FORWARDS = "Max-Forwards";
 	/**
 	 * The HTTP {@code Origin} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc6454">RFC 6454</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
 	 */
 	public static final String ORIGIN = "Origin";
 	/**
 	 * The HTTP {@code Pragma} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.4">Section 5.4 of RFC 7234</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.4">Section 5.4 of RFC 7234</a>
 	 */
 	public static final String PRAGMA = "Pragma";
 	/**
 	 * The HTTP {@code Proxy-Authenticate} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7235#section-4.3">Section 4.3 of RFC 7235</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7235#section-4.3">Section 4.3 of RFC 7235</a>
 	 */
 	public static final String PROXY_AUTHENTICATE = "Proxy-Authenticate";
 	/**
 	 * The HTTP {@code Proxy-Authorization} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7235#section-4.4">Section 4.4 of RFC 7235</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7235#section-4.4">Section 4.4 of RFC 7235</a>
 	 */
 	public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
 	/**
 	 * The HTTP {@code Range} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7233#section-3.1">Section 3.1 of RFC 7233</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-3.1">Section 3.1 of RFC 7233</a>
 	 */
 	public static final String RANGE = "Range";
 	/**
 	 * The HTTP {@code Referer} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.5.2">Section 5.5.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.5.2">Section 5.5.2 of RFC 7231</a>
 	 */
 	public static final String REFERER = "Referer";
 	/**
 	 * The HTTP {@code Retry-After} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.1.3">Section 7.1.3 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.3">Section 7.1.3 of RFC 7231</a>
 	 */
 	public static final String RETRY_AFTER = "Retry-After";
 	/**
 	 * The HTTP {@code Server} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.4.2">Section 7.4.2 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.4.2">Section 7.4.2 of RFC 7231</a>
 	 */
 	public static final String SERVER = "Server";
 	/**
 	 * The HTTP {@code Set-Cookie} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc2109#section-4.2.2">Section 4.2.2 of RFC 2109</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc2109#section-4.2.2">Section 4.2.2 of RFC 2109</a>
 	 */
 	public static final String SET_COOKIE = "Set-Cookie";
 	/**
 	 * The HTTP {@code Set-Cookie2} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc2965">RFC 2965</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc2965">RFC 2965</a>
 	 */
 	public static final String SET_COOKIE2 = "Set-Cookie2";
 	/**
 	 * The HTTP {@code TE} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-4.3">Section 4.3 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-4.3">Section 4.3 of RFC 7230</a>
 	 */
 	public static final String TE = "TE";
 	/**
 	 * The HTTP {@code Trailer} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-4.4">Section 4.4 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-4.4">Section 4.4 of RFC 7230</a>
 	 */
 	public static final String TRAILER = "Trailer";
 	/**
 	 * The HTTP {@code Transfer-Encoding} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-3.3.1">Section 3.3.1 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.3.1">Section 3.3.1 of RFC 7230</a>
 	 */
 	public static final String TRANSFER_ENCODING = "Transfer-Encoding";
 	/**
 	 * The HTTP {@code Upgrade} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-6.7">Section 6.7 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-6.7">Section 6.7 of RFC 7230</a>
 	 */
 	public static final String UPGRADE = "Upgrade";
 	/**
 	 * The HTTP {@code User-Agent} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-5.5.3">Section 5.5.3 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.5.3">Section 5.5.3 of RFC 7231</a>
 	 */
 	public static final String USER_AGENT = "User-Agent";
 	/**
 	 * The HTTP {@code Vary} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-7.1.4">Section 7.1.4 of RFC 7231</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.4">Section 7.1.4 of RFC 7231</a>
 	 */
 	public static final String VARY = "Vary";
 	/**
 	 * The HTTP {@code Via} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7230#section-5.7.1">Section 5.7.1 of RFC 7230</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-5.7.1">Section 5.7.1 of RFC 7230</a>
 	 */
 	public static final String VIA = "Via";
 	/**
 	 * The HTTP {@code Warning} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.5">Section 5.5 of RFC 7234</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.5">Section 5.5 of RFC 7234</a>
 	 */
 	public static final String WARNING = "Warning";
 	/**
 	 * The HTTP {@code WWW-Authenticate} header field name.
-	 * @see <a href="http://tools.ietf.org/html/rfc7235#section-4.1">Section 4.1 of RFC 7235</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7235#section-4.1">Section 4.1 of RFC 7235</a>
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
@@ -381,7 +385,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * An empty {@code HttpHeaders} instance (immutable).
 	 * @since 5.0
 	 */
-	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
+	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
@@ -394,12 +398,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	private static final ZoneId GMT = ZoneId.of("GMT");
 
 	/**
-	 * Date formats with time zone as specified in the HTTP RFC.
+	 * Date formats with time zone as specified in the HTTP RFC to use for formatting.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
-	private static final DateTimeFormatter[] DATE_FORMATTERS = new DateTimeFormatter[] {
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US).withZone(GMT);
+
+	/**
+	 * Date formats with time zone as specified in the HTTP RFC to use for parsing.
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final DateTimeFormatter[] DATE_PARSERS = new DateTimeFormatter[] {
 			DateTimeFormatter.RFC_1123_DATE_TIME,
-			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zz", Locale.US),
+			DateTimeFormatter.ofPattern("EEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
 			DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.US).withZone(GMT)
 	};
 
@@ -409,6 +419,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Construct a new, empty instance of the {@code HttpHeaders} object.
+	 * <p>This is the common constructor, using a case-insensitive map structure.
 	 */
 	public HttpHeaders() {
 		this(CollectionUtils.toMultiValueMap(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH)));
@@ -416,6 +427,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
+	 * <p>This constructor is available as an optimization for adapting to existing
+	 * headers map structures, primarily for internal use within the framework.
+	 * @param headers the headers map (expected to operate with case-insensitive keys)
 	 * @since 5.1
 	 */
 	public HttpHeaders(MultiValueMap<String, String> headers) {
@@ -423,6 +437,17 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		this.headers = headers;
 	}
 
+
+	/**
+	 * Get the list of header values for the given header name, if any.
+	 * @param headerName the header name
+	 * @return the list of header values, or an empty list
+	 * @since 5.2
+	 */
+	public List<String> getOrEmpty(Object headerName) {
+		List<String> values = get(headerName);
+		return (values != null ? values : Collections.emptyList());
+	}
 
 	/**
 	 * Set the list of acceptable {@linkplain MediaType media types},
@@ -584,6 +609,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
+	 * @since 5.2
+	 */
+	public void setAccessControlMaxAge(Duration maxAge) {
+		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge.getSeconds()));
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
 	 */
 	public void setAccessControlMaxAge(long maxAge) {
 		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge));
@@ -632,15 +665,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public void setAcceptCharset(List<Charset> acceptableCharsets) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<Charset> iterator = acceptableCharsets.iterator(); iterator.hasNext();) {
-			Charset charset = iterator.next();
-			builder.append(charset.name().toLowerCase(Locale.ENGLISH));
-			if (iterator.hasNext()) {
-				builder.append(", ");
-			}
+		StringJoiner joiner = new StringJoiner(", ");
+		for (Charset charset : acceptableCharsets) {
+			joiner.add(charset.name().toLowerCase(Locale.ENGLISH));
 		}
-		set(ACCEPT_CHARSET, builder.toString());
+		set(ACCEPT_CHARSET, joiner.toString());
 	}
 
 	/**
@@ -687,7 +716,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
-		if (!StringUtils.isEmpty(value)) {
+		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
 			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
@@ -713,7 +742,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @throws IllegalArgumentException if either {@code user} or
 	 * {@code password} contain characters that cannot be encoded to ISO-8859-1
 	 * @since 5.1
+	 * @see #setBasicAuth(String)
 	 * @see #setBasicAuth(String, String, Charset)
+	 * @see #encodeBasicAuth(String, String, Charset)
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
 	public void setBasicAuth(String username, String password) {
@@ -730,24 +761,33 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @throws IllegalArgumentException if {@code username} or {@code password}
 	 * contains characters that cannot be encoded to the given charset
 	 * @since 5.1
+	 * @see #setBasicAuth(String)
+	 * @see #setBasicAuth(String, String)
+	 * @see #encodeBasicAuth(String, String, Charset)
 	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
 	 */
 	public void setBasicAuth(String username, String password, @Nullable Charset charset) {
-		Assert.notNull(username, "Username must not be null");
-		Assert.notNull(password, "Password must not be null");
-		if (charset == null) {
-			charset = StandardCharsets.ISO_8859_1;
-		}
+		setBasicAuth(encodeBasicAuth(username, password, charset));
+	}
 
-		CharsetEncoder encoder = charset.newEncoder();
-		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
-			throw new IllegalArgumentException(
-					"Username or password contains characters that cannot be encoded to " + charset.displayName());
-		}
-
-		String credentialsString = username + ":" + password;
-		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
-		String encodedCredentials = new String(encodedBytes, charset);
+	/**
+	 * Set the value of the {@linkplain #AUTHORIZATION Authorization} header to
+	 * Basic Authentication based on the given {@linkplain #encodeBasicAuth
+	 * encoded credentials}.
+	 * <p>Favor this method over {@link #setBasicAuth(String, String)} and
+	 * {@link #setBasicAuth(String, String, Charset)} if you wish to cache the
+	 * encoded credentials.
+	 * @param encodedCredentials the encoded credentials
+	 * @throws IllegalArgumentException if supplied credentials string is
+	 * {@code null} or blank
+	 * @since 5.2
+	 * @see #setBasicAuth(String, String)
+	 * @see #setBasicAuth(String, String, Charset)
+	 * @see #encodeBasicAuth(String, String, Charset)
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public void setBasicAuth(String encodedCredentials) {
+		Assert.hasText(encodedCredentials, "'encodedCredentials' must not be null or blank");
 		set(AUTHORIZATION, "Basic " + encodedCredentials);
 	}
 
@@ -821,7 +861,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
 		Assert.notNull(name, "Name must not be null");
 		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
-		if (filename != null) {
+		if (StringUtils.hasText(filename)) {
 			disposition.filename(filename);
 		}
 		setContentDisposition(disposition.build());
@@ -848,7 +888,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public ContentDisposition getContentDisposition() {
 		String contentDisposition = getFirst(CONTENT_DISPOSITION);
-		if (contentDisposition != null) {
+		if (StringUtils.hasText(contentDisposition)) {
 			return ContentDisposition.parse(contentDisposition);
 		}
 		return ContentDisposition.empty();
@@ -857,7 +897,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the {@link Locale} of the content language,
 	 * as specified by the {@literal Content-Language} header.
-	 * <p>Use {@code set(CONTENT_LANGUAGE, ...)} if you need
+	 * <p>Use {@code put(CONTENT_LANGUAGE, list)} if you need
 	 * to set multiple content languages.</p>
 	 * @since 5.0
 	 */
@@ -866,11 +906,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the first {@link Locale} of the content languages,
-	 * as specified by the {@literal Content-Language} header.
-	 * <p>Returns {@code null} when the content language is unknown.
-	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
-	 * to get multiple content languages.</p>
+	 * Get the first {@link Locale} of the content languages, as specified by the
+	 * {@code Content-Language} header.
+	 * <p>Use {@link #getValuesAsList(String)} if you need to get multiple content
+	 * languages.
+	 * @return the first {@code Locale} of the content languages, or {@code null}
+	 * if unknown
 	 * @since 5.0
 	 */
 	@Nullable
@@ -929,6 +970,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the date and time at which the message was created, as specified
 	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(ZonedDateTime date) {
+		setZonedDateTime(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
+	 * @since 5.2
+	 */
+	public void setDate(Instant date) {
+		setInstant(DATE, date);
+	}
+
+	/**
+	 * Set the date and time at which the message was created, as specified
+	 * by the {@code Date} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
 	 */
@@ -977,6 +1036,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setExpires(ZonedDateTime expires) {
 		setZonedDateTime(EXPIRES, expires);
+	}
+
+	/**
+	 * Set the date and time at which the message is no longer valid,
+	 * as specified by the {@code Expires} header.
+	 * @since 5.2
+	 */
+	public void setExpires(Instant expires) {
+		setInstant(EXPIRES, expires);
 	}
 
 	/**
@@ -1073,6 +1141,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	public List<String> getIfMatch() {
@@ -1132,6 +1201,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-None-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 */
 	public List<String> getIfNoneMatch() {
 		return getETagValuesAsList(IF_NONE_MATCH);
@@ -1322,7 +1392,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.0
 	 */
 	public void setZonedDateTime(String headerName, ZonedDateTime date) {
-		set(headerName, DATE_FORMATTERS[0].format(date));
+		set(headerName, DATE_FORMATTER.format(date));
 	}
 
 	/**
@@ -1417,7 +1487,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 				headerValue = headerValue.substring(0, parametersIndex);
 			}
 
-			for (DateTimeFormatter dateFormatter : DATE_FORMATTERS) {
+			for (DateTimeFormatter dateFormatter : DATE_PARSERS) {
 				try {
 					return ZonedDateTime.parse(headerValue, dateFormatter);
 				}
@@ -1456,9 +1526,26 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Remove the well-known {@code "Content-*"} HTTP headers.
+	 * <p>Such headers should be cleared from the response if the intended
+	 * body can't be written due to errors.
+	 * @since 5.2.3
+	 */
+	public void clearContentHeaders() {
+		this.headers.remove(HttpHeaders.CONTENT_DISPOSITION);
+		this.headers.remove(HttpHeaders.CONTENT_ENCODING);
+		this.headers.remove(HttpHeaders.CONTENT_LANGUAGE);
+		this.headers.remove(HttpHeaders.CONTENT_LENGTH);
+		this.headers.remove(HttpHeaders.CONTENT_LOCATION);
+		this.headers.remove(HttpHeaders.CONTENT_RANGE);
+		this.headers.remove(HttpHeaders.CONTENT_TYPE);
+	}
+
+	/**
 	 * Retrieve a combined result from the field values of the ETag header.
 	 * @param headerName the header name
 	 * @return the combined result
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	protected List<String> getETagValuesAsList(String headerName) {
@@ -1505,17 +1592,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @return a combined result with comma delimitation
 	 */
 	protected String toCommaDelimitedString(List<String> headerValues) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> it = headerValues.iterator(); it.hasNext();) {
-			String val = it.next();
+		StringJoiner joiner = new StringJoiner(", ");
+		for (String val : headerValues) {
 			if (val != null) {
-				builder.append(val);
-				if (it.hasNext()) {
-					builder.append(", ");
-				}
+				joiner.add(val);
 			}
 		}
-		return builder.toString();
+		return joiner.toString();
 	}
 
 	/**
@@ -1658,15 +1741,21 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
 		if (!(other instanceof HttpHeaders)) {
 			return false;
 		}
-		HttpHeaders otherHeaders = (HttpHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return unwrap(this).equals(unwrap((HttpHeaders) other));
+	}
+
+	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
+		while (headers.headers instanceof HttpHeaders) {
+			headers = (HttpHeaders) headers.headers;
+		}
+		return headers.headers;
 	}
 
 	@Override
@@ -1681,20 +1770,34 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Return a {@code HttpHeaders} object that can only be read, not written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 * (in case it happens to be a read-only {@code HttpHeaders} instance already)
+	 * @since 5.3
 	 */
-	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
-		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers instanceof ReadOnlyHttpHeaders) {
-			return headers;
-		}
-		else {
-			return new ReadOnlyHttpHeaders(headers);
-		}
+	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
+		return (headers instanceof HttpHeaders ?
+				readOnlyHttpHeaders((HttpHeaders) headers) : new ReadOnlyHttpHeaders(headers));
 	}
 
 	/**
-	 * Return a {@code HttpHeaders} object that can be read and written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		Assert.notNull(headers, "HttpHeaders must not be null");
+		return (headers instanceof ReadOnlyHttpHeaders ? headers : new ReadOnlyHttpHeaders(headers.headers));
+	}
+
+	/**
+	 * Remove any read-only wrapper that may have been previously applied around
+	 * the given headers via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * @param headers the headers to expose
+	 * @return a writable variant of the headers, or the original headers as-is
 	 * @since 5.1.1
 	 */
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
@@ -1702,12 +1805,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (headers == EMPTY) {
 			return new HttpHeaders();
 		}
-		else if (headers instanceof ReadOnlyHttpHeaders) {
-			return new HttpHeaders(headers.headers);
-		}
-		else {
-			return headers;
-		}
+		return (headers instanceof ReadOnlyHttpHeaders ? new HttpHeaders(headers.headers) : headers);
 	}
 
 	/**
@@ -1729,11 +1827,46 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 				.collect(Collectors.joining(", ", "[", "]"));
 	}
 
+	/**
+	 * Encode the given username and password into Basic Authentication credentials.
+	 * <p>The encoded credentials returned by this method can be supplied to
+	 * {@link #setBasicAuth(String)} to set the Basic Authentication header.
+	 * @param username the username
+	 * @param password the password
+	 * @param charset the charset to use to convert the credentials into an octet
+	 * sequence. Defaults to {@linkplain StandardCharsets#ISO_8859_1 ISO-8859-1}.
+	 * @throws IllegalArgumentException if {@code username} or {@code password}
+	 * contains characters that cannot be encoded to the given charset
+	 * @since 5.2
+	 * @see #setBasicAuth(String)
+	 * @see #setBasicAuth(String, String)
+	 * @see #setBasicAuth(String, String, Charset)
+	 * @see <a href="https://tools.ietf.org/html/rfc7617">RFC 7617</a>
+	 */
+	public static String encodeBasicAuth(String username, String password, @Nullable Charset charset) {
+		Assert.notNull(username, "Username must not be null");
+		Assert.doesNotContain(username, ":", "Username must not contain a colon");
+		Assert.notNull(password, "Password must not be null");
+		if (charset == null) {
+			charset = StandardCharsets.ISO_8859_1;
+		}
+
+		CharsetEncoder encoder = charset.newEncoder();
+		if (!encoder.canEncode(username) || !encoder.canEncode(password)) {
+			throw new IllegalArgumentException(
+					"Username or password contains characters that cannot be encoded to " + charset.displayName());
+		}
+
+		String credentialsString = username + ":" + password;
+		byte[] encodedBytes = Base64.getEncoder().encode(credentialsString.getBytes(charset));
+		return new String(encodedBytes, charset);
+	}
+
 	// Package-private: used in ResponseCookie
 	static String formatDate(long date) {
 		Instant instant = Instant.ofEpochMilli(date);
 		ZonedDateTime time = ZonedDateTime.ofInstant(instant, GMT);
-		return DATE_FORMATTERS[0].format(time);
+		return DATE_FORMATTER.format(time);
 	}
 
 }

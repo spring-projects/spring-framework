@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
-import org.junit.Test;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -27,8 +25,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests various combinations of profile declarations against various profile
@@ -62,58 +60,59 @@ public class ProfileXmlBeanDefinitionTests {
 
 	private static final String TARGET_BEAN = "foo";
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testProfileValidation() {
-		beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE));
 	}
 
 	@Test
 	public void testProfilePermutations() {
-		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, NONE_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, DEV_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(PROD_ELIGIBLE_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, PROD_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, NONE_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, DEV_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, PROD_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(DEV_ELIGIBLE_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE)).isNot(containingTarget());
 
-		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, DEV_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(ALL_ELIGIBLE_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, UNKNOWN_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, NONE_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, UNKNOWN_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, DEV_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(MULTI_NEGATED_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NEGATED_XML, UNKNOWN_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NEGATED_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NEGATED_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NEGATED_XML, MULTI_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, NONE_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, UNKNOWN_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, DEV_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NEGATED_XML, MULTI_ACTIVE)).isNot(containingTarget());
 
-		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, UNKNOWN_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, UNKNOWN_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, DEV_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_NOT_DEV_ELIGIBLE_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, NONE_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, UNKNOWN_ACTIVE), not(containsTargetBean()));
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, DEV_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, PROD_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, MULTI_ACTIVE), containsTargetBean());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, NONE_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, UNKNOWN_ACTIVE)).isNot(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, DEV_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, PROD_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(MULTI_ELIGIBLE_SPACE_DELIMITED_XML, MULTI_ACTIVE)).is(containingTarget());
 
-		assertThat(beanFactoryFor(UNKNOWN_ELIGIBLE_XML, MULTI_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(UNKNOWN_ELIGIBLE_XML, MULTI_ACTIVE)).isNot(containingTarget());
 	}
 
 	@Test
@@ -126,7 +125,7 @@ public class ProfileXmlBeanDefinitionTests {
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_ELIGIBLE_XML, getClass()));
 
-			assertThat(beanFactory, not(containsTargetBean()));
+			assertThat(beanFactory).isNot(containingTarget());
 		}
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -136,14 +135,14 @@ public class ProfileXmlBeanDefinitionTests {
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(CUSTOM_DEFAULT_ELIGIBLE_XML, getClass()));
 
-			assertThat(beanFactory, containsTargetBean());
+			assertThat(beanFactory).is(containingTarget());
 		}
 	}
 
 	@Test
 	public void testDefaultAndNonDefaultProfile() {
-		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
-		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other"), not(containsTargetBean()));
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE)).is(containingTarget());
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other")).isNot(containingTarget());
 
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -153,7 +152,7 @@ public class ProfileXmlBeanDefinitionTests {
 			env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
-			assertThat(beanFactory, containsTargetBean());
+			assertThat(beanFactory).is(containingTarget());
 		}
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -163,7 +162,7 @@ public class ProfileXmlBeanDefinitionTests {
 			env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
-			assertThat(beanFactory, containsTargetBean());
+			assertThat(beanFactory).is(containingTarget());
 		}
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -173,7 +172,7 @@ public class ProfileXmlBeanDefinitionTests {
 			//env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
-			assertThat(beanFactory, containsTargetBean());
+			assertThat(beanFactory).is(containingTarget());
 		}
 	}
 
@@ -188,25 +187,8 @@ public class ProfileXmlBeanDefinitionTests {
 		return beanFactory;
 	}
 
-
-	private static Matcher<BeanDefinitionRegistry> containsBeanDefinition(final String beanName) {
-		return new TypeSafeMatcher<BeanDefinitionRegistry>() {
-
-			@Override
-			public void describeTo(Description desc) {
-				desc.appendText("a BeanDefinitionRegistry containing bean named ")
-					.appendValue(beanName);
-			}
-
-			@Override
-			public boolean matchesSafely(BeanDefinitionRegistry beanFactory) {
-				return beanFactory.containsBeanDefinition(beanName);
-			}
-
-		};
+	private Condition<BeanDefinitionRegistry> containingTarget() {
+		return new Condition<>(registry -> registry.containsBeanDefinition(TARGET_BEAN), "contains target");
 	}
 
-	private static Matcher<BeanDefinitionRegistry> containsTargetBean() {
-		return containsBeanDefinition(TARGET_BEAN);
-	}
 }

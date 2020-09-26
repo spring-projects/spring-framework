@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,14 @@ package org.springframework.context.annotation;
 
 import java.io.Closeable;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Chris Beams
@@ -48,27 +48,27 @@ public class DestroyMethodInferenceTests {
 		WithInheritedCloseMethod c8 = ctx.getBean("c8", WithInheritedCloseMethod.class);
 		WithDisposableBean c9 = ctx.getBean("c9", WithDisposableBean.class);
 
-		assertThat(c0.closed, is(false));
-		assertThat(c1.closed, is(false));
-		assertThat(c2.closed, is(false));
-		assertThat(c3.closed, is(false));
-		assertThat(c4.closed, is(false));
-		assertThat(c5.closed, is(false));
-		assertThat(c6.closed, is(false));
-		assertThat(c7.closed, is(false));
-		assertThat(c8.closed, is(false));
-		assertThat(c9.closed, is(false));
+		assertThat(c0.closed).as("c0").isFalse();
+		assertThat(c1.closed).as("c1").isFalse();
+		assertThat(c2.closed).as("c2").isFalse();
+		assertThat(c3.closed).as("c3").isFalse();
+		assertThat(c4.closed).as("c4").isFalse();
+		assertThat(c5.closed).as("c5").isFalse();
+		assertThat(c6.closed).as("c6").isFalse();
+		assertThat(c7.closed).as("c7").isFalse();
+		assertThat(c8.closed).as("c8").isFalse();
+		assertThat(c9.closed).as("c9").isFalse();
 		ctx.close();
-		assertThat("c0", c0.closed, is(true));
-		assertThat("c1", c1.closed, is(true));
-		assertThat("c2", c2.closed, is(true));
-		assertThat("c3", c3.closed, is(true));
-		assertThat("c4", c4.closed, is(true));
-		assertThat("c5", c5.closed, is(true));
-		assertThat("c6", c6.closed, is(false));
-		assertThat("c7", c7.closed, is(true));
-		assertThat("c8", c8.closed, is(false));
-		assertThat("c9", c9.closed, is(true));
+		assertThat(c0.closed).as("c0").isTrue();
+		assertThat(c1.closed).as("c1").isTrue();
+		assertThat(c2.closed).as("c2").isTrue();
+		assertThat(c3.closed).as("c3").isTrue();
+		assertThat(c4.closed).as("c4").isTrue();
+		assertThat(c5.closed).as("c5").isTrue();
+		assertThat(c6.closed).as("c6").isFalse();
+		assertThat(c7.closed).as("c7").isTrue();
+		assertThat(c8.closed).as("c8").isFalse();
+		assertThat(c9.closed).as("c9").isTrue();
 	}
 
 	@Test
@@ -81,16 +81,16 @@ public class DestroyMethodInferenceTests {
 		WithNoCloseMethod x4 = ctx.getBean("x4", WithNoCloseMethod.class);
 		WithInheritedCloseMethod x8 = ctx.getBean("x8", WithInheritedCloseMethod.class);
 
-		assertThat(x1.closed, is(false));
-		assertThat(x2.closed, is(false));
-		assertThat(x3.closed, is(false));
-		assertThat(x4.closed, is(false));
+		assertThat(x1.closed).isFalse();
+		assertThat(x2.closed).isFalse();
+		assertThat(x3.closed).isFalse();
+		assertThat(x4.closed).isFalse();
 		ctx.close();
-		assertThat(x1.closed, is(false));
-		assertThat(x2.closed, is(true));
-		assertThat(x3.closed, is(true));
-		assertThat(x4.closed, is(false));
-		assertThat(x8.closed, is(false));
+		assertThat(x1.closed).isFalse();
+		assertThat(x2.closed).isTrue();
+		assertThat(x3.closed).isTrue();
+		assertThat(x4.closed).isFalse();
+		assertThat(x8.closed).isFalse();
 	}
 
 

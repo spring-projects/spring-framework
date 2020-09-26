@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.sql.Blob;
@@ -28,6 +29,9 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -55,6 +59,19 @@ public abstract class JdbcUtils {
 	public static final int TYPE_UNKNOWN = Integer.MIN_VALUE;
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
+
+	private static final Map<Integer, String> typeNames = new HashMap<>();
+
+	static {
+		try {
+			for (Field field : Types.class.getFields()) {
+				typeNames.put((Integer) field.get(null), field.getName());
+			}
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to resolve JDBC Types constants", ex);
+		}
+	}
 
 
 	/**
@@ -298,26 +315,44 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Extract database meta-data via the given DatabaseMetaDataCallback.
-	 * <p>This method will open a connection to the database and retrieve the database meta-data.
-	 * Since this method is called before the exception translation feature is configured for
-	 * a datasource, this method can not rely on the SQLException translation functionality.
-	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked exception
-	 * and any calling code should catch and handle this exception. You can just log the
-	 * error and hope for the best, but there is probably a more serious error that will
-	 * reappear when you try to access the database again.
+	 * <p>This method will open a connection to the database and retrieve its meta-data.
+	 * Since this method is called before the exception translation feature is configured
+	 * for a DataSource, this method can not rely on SQLException translation itself.
+	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked
+	 * exception and any calling code should catch and handle this exception. You can just
+	 * log the error and hope for the best, but there is probably a more serious error that
+	 * will reappear when you try to access the database again.
 	 * @param dataSource the DataSource to extract meta-data for
 	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information, as returned by
 	 * the DatabaseMetaDataCallback's {@code processMetaData} method
 	 * @throws MetaDataAccessException if meta-data access failed
+	 * @see java.sql.DatabaseMetaData
 	 */
-	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
+	public static <T> T extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback<T> action)
 			throws MetaDataAccessException {
 
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(dataSource);
-			DatabaseMetaData metaData = con.getMetaData();
+			DatabaseMetaData metaData;
+			try {
+				metaData = con.getMetaData();
+			}
+			catch (SQLException ex) {
+				if (DataSourceUtils.isConnectionTransactional(con, dataSource)) {
+					// Probably a closed thread-bound Connection - retry against fresh Connection
+					DataSourceUtils.releaseConnection(con, dataSource);
+					con = null;
+					logger.debug("Failed to obtain DatabaseMetaData from transactional Connection - " +
+							"retrying against fresh Connection", ex);
+					con = dataSource.getConnection();
+					metaData = con.getMetaData();
+				}
+				else {
+					throw ex;
+				}
+			}
 			if (metaData == null) {
 				// should only happen in test environments
 				throw new MetaDataAccessException("DatabaseMetaData returned by Connection [" + con + "] was null");
@@ -348,7 +383,11 @@ public abstract class JdbcUtils {
 	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
 	 * or failed to invoke the specified method
 	 * @see java.sql.DatabaseMetaData
+	 * @deprecated as of 5.2.9, in favor of
+	 * {@link #extractDatabaseMetaData(DataSource, DatabaseMetaDataCallback)}
+	 * with a lambda expression or method reference and a generically typed result
 	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <T> T extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {
@@ -440,6 +479,18 @@ public abstract class JdbcUtils {
 				Types.DOUBLE == sqlType || Types.FLOAT == sqlType || Types.INTEGER == sqlType ||
 				Types.NUMERIC == sqlType || Types.REAL == sqlType || Types.SMALLINT == sqlType ||
 				Types.TINYINT == sqlType);
+	}
+
+	/**
+	 * Resolve the standard type name for the given SQL type, if possible.
+	 * @param sqlType the SQL type to resolve
+	 * @return the corresponding constant name in {@link java.sql.Types}
+	 * (e.g. "VARCHAR"/"NUMERIC"), or {@code null} if not resolvable
+	 * @since 5.2
+	 */
+	@Nullable
+	public static String resolveTypeName(int sqlType) {
+		return typeNames.get(sqlType);
 	}
 
 	/**

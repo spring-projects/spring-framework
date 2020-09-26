@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -186,11 +186,10 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see FlushMode#MANUAL
 	 */
-	@SuppressWarnings("deprecation")
 	protected Session openSession() throws DataAccessResourceFailureException {
 		try {
 			Session session = obtainSessionFactory().openSession();
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 			return session;
 		}
 		catch (HibernateException ex) {

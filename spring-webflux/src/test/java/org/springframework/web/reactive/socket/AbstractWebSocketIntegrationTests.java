@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,33 +18,31 @@ package org.springframework.web.reactive.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.tomcat.websocket.server.WsContextListener;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple3;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.HttpServer;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -60,6 +58,11 @@ import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyReques
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 /**
  * Base class for WebSocket integration tests. Sub-classes must implement
@@ -67,28 +70,21 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * handler mappings to {@code WebSocketHandler}'s.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-@RunWith(Parameterized.class)
 @SuppressWarnings({"unused", "WeakerAccess"})
-public abstract class AbstractWebSocketIntegrationTests {
+abstract class AbstractWebSocketIntegrationTests {
 
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest(name = "[{index}] client[{0}], server[{1}]")
+	@MethodSource("arguments")
+	@interface ParameterizedWebSocketTest {
+	}
 
-	protected int port;
-
-	@Parameter(0)
-	public WebSocketClient client;
-
-	@Parameter(1)
-	public HttpServer server;
-
-	@Parameter(2)
-	public Class<?> serverConfigClass;
-
-
-	@Parameters(name = "client[{0}] - server [{1}]")
-	public static Object[][] arguments() throws IOException {
+	static Stream<Object[]> arguments() throws IOException {
 
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
@@ -103,17 +99,35 @@ public abstract class AbstractWebSocketIntegrationTests {
 		servers.put(new ReactorHttpServer(), ReactorNettyConfig.class);
 		servers.put(new UndertowHttpServer(), UndertowConfig.class);
 
-		Flux<WebSocketClient> f1 = Flux.fromArray(clients).concatMap(c -> Flux.just(c).repeat(servers.size()));
-		Flux<HttpServer> f2 = Flux.fromIterable(servers.keySet()).repeat(clients.length);
-		Flux<Class<?>> f3 = Flux.fromIterable(servers.values()).repeat(clients.length);
+		// Try each client once against each server..
 
-		return Flux.zip(f1, f2, f3).map(Tuple3::toArray).collectList().block()
-				.toArray(new Object[clients.length * servers.size()][2]);
+		Flux<WebSocketClient> f1 = Flux.fromArray(clients)
+				.concatMap(c -> Mono.just(c).repeat(servers.size() - 1));
+
+		Flux<Map.Entry<HttpServer, Class<?>>> f2 = Flux.fromIterable(servers.entrySet())
+				.repeat(clients.length - 1)
+				.share();
+
+		return Flux.zip(f1, f2.map(Map.Entry::getKey), f2.map(Map.Entry::getValue))
+				.map(Tuple3::toArray)
+				.toStream();
 	}
 
 
-	@Before
-	public void setup() throws Exception {
+	protected WebSocketClient client;
+
+	protected HttpServer server;
+
+	protected Class<?> serverConfigClass;
+
+	protected int port;
+
+
+	protected void startServer(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
+		this.client = client;
+		this.server = server;
+		this.serverConfigClass = serverConfigClass;
+
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -126,8 +140,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
-	@After
-	public void stop() {
+	@AfterEach
+	void stopServer() {
 		if (this.client instanceof Lifecycle) {
 			((Lifecycle) this.client).stop();
 		}
@@ -136,15 +150,13 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 
 	private HttpHandler createHttpHandler() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.register(DispatcherConfig.class, this.serverConfigClass);
-		context.register(getWebConfigClass());
-		context.refresh();
+		ApplicationContext context = new AnnotationConfigApplicationContext(
+				DispatcherConfig.class, this.serverConfigClass, getWebConfigClass());
 		return WebHttpHandlerBuilder.applicationContext(context).build();
 	}
 
-	protected URI getUrl(String path) throws URISyntaxException {
-		return new URI("ws://localhost:" + this.port + path);
+	protected URI getUrl(String path) {
+		return URI.create("ws://localhost:" + this.port + path);
 	}
 
 	protected abstract Class<?> getWebConfigClass();
