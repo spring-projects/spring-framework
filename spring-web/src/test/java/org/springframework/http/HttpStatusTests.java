@@ -128,4 +128,12 @@ public class HttpStatusTests {
 		}
 	}
 
+	@Test
+	public void allStatusSeriesShouldMatchExpectations() {
+		// a series of a status is manually set, make sure it is the correct one
+		for (HttpStatus status : HttpStatus.values()) {
+			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
+			assertThat(expectedSeries).isEqualTo(status.series());
+		}
+	}
 }
