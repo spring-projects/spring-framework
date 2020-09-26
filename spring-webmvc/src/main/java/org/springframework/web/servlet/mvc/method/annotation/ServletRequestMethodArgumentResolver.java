@@ -89,7 +89,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				MultipartRequest.class.isAssignableFrom(paramType) ||
 				HttpSession.class.isAssignableFrom(paramType) ||
 				(pushBuilder != null && pushBuilder.isAssignableFrom(paramType)) ||
-				(Principal.class.isAssignableFrom(paramType) && parameter.getParameterAnnotations().length == 0) ||
+				(Principal.class.isAssignableFrom(paramType) && !parameter.hasParameterAnnotations()) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType) ||
 				HttpMethod.class == paramType ||
