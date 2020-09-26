@@ -418,14 +418,14 @@ public enum HttpStatus {
 
 	private final int value;
 
-	private final String reasonPhrase;
-
 	private final Series series;
+
+	private final String reasonPhrase;
 
 	HttpStatus(int value, Series series, String reasonPhrase) {
 		this.value = value;
-		this.reasonPhrase = reasonPhrase;
 		this.series = series;
+		this.reasonPhrase = reasonPhrase;
 	}
 
 
@@ -437,13 +437,6 @@ public enum HttpStatus {
 	}
 
 	/**
-	 * Return the reason phrase of this status code.
-	 */
-	public String getReasonPhrase() {
-		return this.reasonPhrase;
-	}
-
-	/**
 	 * Return the HTTP status series of this status code.
 	 * @see HttpStatus.Series
 	 */
@@ -452,9 +445,16 @@ public enum HttpStatus {
 	}
 
 	/**
+	 * Return the reason phrase of this status code.
+	 */
+	public String getReasonPhrase() {
+		return this.reasonPhrase;
+	}
+
+	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 4.0
 	 * @see #series()
 	 */
@@ -465,7 +465,7 @@ public enum HttpStatus {
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 4.0
 	 * @see #series()
 	 */
@@ -476,7 +476,7 @@ public enum HttpStatus {
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 4.0
 	 * @see #series()
 	 */
@@ -487,7 +487,7 @@ public enum HttpStatus {
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 4.0
 	 * @see #series()
 	 */
@@ -498,7 +498,7 @@ public enum HttpStatus {
 	/**
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 4.0
 	 * @see #series()
 	 */
@@ -510,7 +510,7 @@ public enum HttpStatus {
 	 * Whether this status code is in the HTTP series
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
 	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
-	 * This is a shortcut for checking the value of {@link #series()}.
+	 * <p>This is a shortcut for checking the value of {@link #series()}.
 	 * @since 5.0
 	 * @see #is4xxClientError()
 	 * @see #is5xxServerError()
@@ -529,7 +529,7 @@ public enum HttpStatus {
 
 
 	/**
-	 * Return the enum constant of this type with the specified numeric value.
+	 * Return the {@code HttpStatus} enum constant with the specified numeric value.
 	 * @param statusCode the numeric value of the enum to be returned
 	 * @return the enum constant with the specified numeric value
 	 * @throws IllegalArgumentException if this enum has no constant for the specified numeric value
@@ -585,18 +585,20 @@ public enum HttpStatus {
 		}
 
 		/**
-		 * Return the enum constant of this type with the corresponding series.
-		 * @param status a standard HTTP status enum value
-		 * @return the enum constant of this type with the corresponding series
+		 * Return the {@code Series} enum constant for the supplied {@code HttpStatus}.
+		 * @param status a standard HTTP status enum constant
+		 * @return the {@code Series} enum constant for the supplied {@code HttpStatus}
+		 * @deprecated as of 5.3, in favor of invoking {@link HttpStatus#series()} directly
 		 */
+		@Deprecated
 		public static Series valueOf(HttpStatus status) {
 			return status.series;
 		}
 
 		/**
-		 * Return the enum constant of this type with the corresponding series.
+		 * Return the {@code Series} enum constant for the supplied status code.
 		 * @param statusCode the HTTP status code (potentially non-standard)
-		 * @return the enum constant of this type with the corresponding series
+		 * @return the {@code Series} enum constant for the supplied status code
 		 * @throws IllegalArgumentException if this enum has no corresponding constant
 		 */
 		public static Series valueOf(int statusCode) {
