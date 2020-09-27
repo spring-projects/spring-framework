@@ -56,8 +56,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC URL to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setUrl(@Nullable String url) {
+	public AbstractDriverBasedDataSource setUrl(@Nullable String url) {
 		this.url = (url != null ? url.trim() : null);
+		return this;
 	}
 
 	/**
@@ -72,8 +73,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC username to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setUsername(@Nullable String username) {
+	public AbstractDriverBasedDataSource setUsername(@Nullable String username) {
 		this.username = username;
+		return this;
 	}
 
 	/**
@@ -88,8 +90,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Set the JDBC password to use for connecting through the Driver.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setPassword(@Nullable String password) {
+	public AbstractDriverBasedDataSource setPassword(@Nullable String password) {
 		this.password = password;
+		return this;
 	}
 
 	/**
@@ -105,8 +108,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @since 4.3.2
 	 * @see Connection#setCatalog
 	 */
-	public void setCatalog(@Nullable String catalog) {
+	public AbstractDriverBasedDataSource setCatalog(@Nullable String catalog) {
 		this.catalog = catalog;
+		return this;
 	}
 
 	/**
@@ -123,8 +127,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @since 4.3.2
 	 * @see Connection#setSchema
 	 */
-	public void setSchema(@Nullable String schema) {
+	public AbstractDriverBasedDataSource setSchema(@Nullable String schema) {
 		this.schema = schema;
+		return this;
 	}
 
 	/**
@@ -144,8 +149,9 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * DataSource will override the corresponding connection properties.
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
-	public void setConnectionProperties(@Nullable Properties connectionProperties) {
+	public AbstractDriverBasedDataSource setConnectionProperties(@Nullable Properties connectionProperties) {
 		this.connectionProperties = connectionProperties;
+		return this;
 	}
 
 	/**
@@ -216,7 +222,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * Obtain a Connection using the given properties.
 	 * <p>Template method to be implemented by subclasses.
 	 * @param props the merged connection properties
-	 * @return the obtained Connection
+	 * @return the obtained Connectiona
 	 * @throws SQLException in case of failure
 	 */
 	protected abstract Connection getConnectionFromDriver(Properties props) throws SQLException;
