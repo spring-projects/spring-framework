@@ -20,8 +20,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-
+import java.util.Collection;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -81,7 +83,13 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 	@Override
 	public InputStream getBody() throws IOException {
-		if (this.multipartRequest instanceof StandardMultipartHttpServletRequest) {
+		Collection<Part> parts = null;
+		try {
+			parts = this.multipartRequest.getParts();
+		} catch (ServletException e) {
+			//ignoring this as it might be a non multipart/form-data Content-Type
+		}
+		if (parts != null && !parts.isEmpty()) {
 			try {
 				return this.multipartRequest.getPart(this.partName).getInputStream();
 			}

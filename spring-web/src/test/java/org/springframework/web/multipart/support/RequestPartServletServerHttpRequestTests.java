@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.apache.catalina.Server;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -132,6 +134,25 @@ public class RequestPartServletServerHttpRequestTests {
 		byte[] bytes = {(byte) 0xC4};
 		mockRequest.setParameter("part", new String(bytes, StandardCharsets.ISO_8859_1));
 		mockRequest.setCharacterEncoding("iso-8859-1");
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertThat(result).isEqualTo(bytes);
+	}
+
+	@Test //#25829
+	public void getBodyViaRequestPart() throws Exception {
+		MockMultipartHttpServletRequest mockRequest = new MockMultipartHttpServletRequest() {
+			@Override
+			public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+				return headers;
+			}
+		};
+		byte[] bytes = "Hello".getBytes();
+		MockPart mockPart = new MockPart("part", bytes);
+		mockPart.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+		mockRequest.addPart(mockPart);
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertThat(result).isEqualTo(bytes);
