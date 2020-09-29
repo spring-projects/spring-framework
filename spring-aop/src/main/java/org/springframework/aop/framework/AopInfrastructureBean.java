@@ -21,6 +21,7 @@ package org.springframework.aop.framework;
  * AOP infrastructure. In particular, this implies that any such bean
  * is not subject to auto-proxying, even if a pointcut would match.
  *
+ * 实现了此接口则表明该类不需要被切面，不要被AOP代理
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator

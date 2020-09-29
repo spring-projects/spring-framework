@@ -131,6 +131,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * to a property, {@code null} will be returned and an INFO-level log message will be
 	 * issued noting the exception.
 	 */
+	/**
+	 * 获取environment传入的参数
+	 * @return
+	 */
 	Map<String, Object> getSystemProperties();
 
 	/**

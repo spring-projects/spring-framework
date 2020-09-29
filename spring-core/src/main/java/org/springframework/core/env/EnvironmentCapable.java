@@ -43,6 +43,11 @@ public interface EnvironmentCapable {
 	/**
 	 * Return the {@link Environment} associated with this component.
 	 */
+	/**
+	 * 获取容器的一些启动参数
+	 * 例如-Dparams=value
+	 * @return
+	 */
 	Environment getEnvironment();
 
 }

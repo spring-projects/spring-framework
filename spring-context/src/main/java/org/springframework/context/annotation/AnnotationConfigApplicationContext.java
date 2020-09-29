@@ -84,7 +84,14 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		//调用默认无参构造器，主要初始化AnnotatedBeanDefinitionReader
+		//以及路径扫描器ClassPathBeanDefinitionScanner
 		this();
+		/**
+		 * 把传入的classes进行注册，classes既可以有@Configuration注解，也可以没有@Configuration注解
+		 * 如何注册委托给了org.springframework.context.annotation.AnnotatedBeanDefinitionReader#register方法
+		 * 包装传入的classes生成BeanDefinition，注册到BeanDefinitionRegistry
+		 */
 		register(componentClasses);
 		refresh();
 	}

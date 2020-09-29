@@ -69,6 +69,13 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 		return ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME;
 	}
 
+	/**
+	 * doParse()的核心作用其实就是注册一个对于 AspectJ处理的类
+	 * org. Springframework.context.weaving.AspectJWeavingEnabler
+	 * @param element the XML element being parsed
+	 * @param parserContext the object encapsulating the current state of the parsing process
+	 * @param builder used to define the {@code BeanDefinition}
+	 */
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -95,6 +102,7 @@ class LoadTimeWeaverBeanDefinitionParser extends AbstractSingleBeanDefinitionPar
 		}
 		else {
 			// Determine default...
+			// 自动检测是否有 META_INF/aop.xml文件存在
 			ClassLoader cl = parserContext.getReaderContext().getBeanClassLoader();
 			return (cl != null && cl.getResource(AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE) != null);
 		}

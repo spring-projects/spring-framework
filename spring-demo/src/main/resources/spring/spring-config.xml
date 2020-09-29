@@ -3,5 +3,16 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 	<bean id="helloService" class="io.codegitz.service.impl.HelloServiceImpl"/>
+<!--	1.使用类的无参构造器函数创建 	-->
+	<bean id="user1" class="io.codegitz.entity.User" scope="prototype" lazy-init="true" primary="true"></bean>
+<!--	2.使用静态工厂进行创建-->
+<!--	class值不是写User对象的全路径，而是写静态工厂的全路径-->
+<!--	factory-method的值要写调用的方法-->
+	<bean id="user2" class="io.codegitz.entity.factory.StaticFactory" factory-method="getUser" scope="singleton"></bean>
+<!--	3.使用实例工厂进行创建-->
+<!--	需要先创建factorybean对象，然后通过factorybean对象进行调用-->
+	<bean id="userFactory" class="io.codegitz.entity.factory.UserFactory"></bean>
+	<bean id="user3" factory-bean="userFactory" factory-method="getUser" scope="singleton"></bean>
 
+	<bean id="userFactoryBean" class="io.codegitz.entity.factory.UserFactoryBean"></bean>
 </beans>

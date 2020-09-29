@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!--		<bean id="messageSource"-->
+<!--			  class="org.springframework.context.support.ResourceBundleMessageSource">-->
+<!--			<property name="basenames">-->
+<!--				<list>-->
+<!--					<value>format</value>-->
+<!--					<value>exceptions</value>-->
+<!--					<value>windows</value>-->
+<!--				</list>-->
+<!--			</property>-->
+<!--		</bean>-->
+	<!-- this MessageSource is being used in a web application -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="exceptions"/>
+	</bean>
+
+	<!-- lets inject the above MessageSource into this POJO -->
+	<bean id="example" class="io.codegitz.entity.Example">
+		<property name="messages" ref="messageSource"/>
+	</bean>
+</beans>

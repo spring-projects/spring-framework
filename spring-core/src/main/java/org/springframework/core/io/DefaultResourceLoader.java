@@ -140,10 +140,17 @@ public class DefaultResourceLoader implements ResourceLoader {
 	}
 
 
+	/**
+	 * 根据location获取Resources具体实现类实例
+	 * 使用策略模式进行匹配
+	 * @param location the resource location
+	 * @return
+	 */
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
 
+		//ProtocolResolver用户自定义协议资源解决策略
 		for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
@@ -151,13 +158,22 @@ public class DefaultResourceLoader implements ResourceLoader {
 			}
 		}
 
+		//如果是以"/"开头，则构造ClassPathContextResources返回
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
 		}
+		//若以classpath开头，则构造ClassPathResources类型资源并返回
+		//在构造该资源时，通过getClassLoader获取当前的ClassLoader
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
+			/**
+			 * 构造URL，尝试对它进行资源定位，若没有则抛出MalformedURLException异常
+			 * 判断是否为FileURL，若果是则返回FileURLResources类型资源，否则构造URLResources
+			 * 若在加载过程中抛出MalformedURLException异常
+			 * 则委派getResourceByPath()实现资源定位
+			 */
 			try {
 				// Try to parse the location as a URL...
 				URL url = new URL(location);

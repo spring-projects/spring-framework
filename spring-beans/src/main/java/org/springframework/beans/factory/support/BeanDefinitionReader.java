@@ -119,6 +119,7 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
+	//加载多个配置文件
 	int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException;
 
 }

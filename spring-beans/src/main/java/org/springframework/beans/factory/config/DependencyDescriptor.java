@@ -65,8 +65,10 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	@Nullable
 	private String fieldName;
 
+	// 对应@Autowired 的required
 	private final boolean required;
 
+	// 懒加载
 	private final boolean eager;
 
 	private int nestingLevel = 1;

@@ -32,6 +32,7 @@ package org.springframework.beans.factory;
  * @author Juergen Hoeller
  * @since 3.1
  */
+//感知容器的标识接口
 public interface Aware {
 
 }

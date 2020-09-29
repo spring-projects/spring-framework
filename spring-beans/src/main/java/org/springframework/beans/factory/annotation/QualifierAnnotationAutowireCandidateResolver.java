@@ -341,6 +341,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
+	 * take your time.
 	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */

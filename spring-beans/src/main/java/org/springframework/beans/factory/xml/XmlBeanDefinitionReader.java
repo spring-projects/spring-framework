@@ -390,6 +390,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throws BeanDefinitionStoreException {
 
 		try {
+			/**
+			 * 创建Document对象，XML文档对象，即dom树
+			 * 使用这个Document对象可以获取XML文件中的节点并且创建节点
+			 * SAX XML
+			 * 解析dom树，即解析出一个个属性，将其属性保存到BeanDefinition当中
+			 * 并向容器注册BeanDefinition
+			 */
 			Document doc = doLoadDocument(inputSource, resource);
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
@@ -509,9 +516,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		//创建BeanDefinitionDocumentReader，这个是实际从XML的dom树中服务BeanDefinition
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+		//获取注册表BeanDefinitionMap在本次加载前的BeanDefinition数量
 		int countBefore = getRegistry().getBeanDefinitionCount();
+		//加载并注册
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+		//用本次加载后的数据减去以前有的数量，即为本次加载的BeanDefinition数量
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
 
