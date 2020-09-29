@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,19 +45,20 @@ public interface Converter<S, T> {
 	T convert(S source);
 
 	/**
-	 * Construct a composed {@link Converter} that first applies this {@link Converter} to
-	 * its input, and then applies the {@code after} {@link Converter} to the result.
-	 *
-	 * @since 5.2
-	 * @param <U> the type of output of both the {@code after} {@link Converter} and the
-	 * composed {@link Converter}
+	 * Construct a composed {@link Converter} that first applies this {@link Converter}
+	 * to its input, and then applies the {@code after} {@link Converter} to the
+	 * result.
 	 * @param after the {@link Converter} to apply after this {@link Converter}
 	 * is applied
-	 * @return a composed {@link Converter} that first applies this {@link Converter} and then
-	 * applies the {@code after} {@link Converter}
+	 * @param <U> the type of output of both the {@code after} {@link Converter}
+	 * and the composed {@link Converter}
+	 * @return a composed {@link Converter} that first applies this {@link Converter}
+	 * and then applies the {@code after} {@link Converter}
+	 * @since 5.3
 	 */
 	default <U> Converter<S, U> andThen(Converter<? super T, ? extends U> after) {
-		Assert.notNull(after, "after cannot be null");
+		Assert.notNull(after, "after must not be null");
 		return (S s) -> after.convert(convert(s));
 	}
+
 }
