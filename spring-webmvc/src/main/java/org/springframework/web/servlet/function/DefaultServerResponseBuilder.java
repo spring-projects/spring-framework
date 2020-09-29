@@ -17,21 +17,17 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -231,9 +227,10 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	/**
 	 * Abstract base class for {@link ServerResponse} implementations.
 	 */
-	abstract static class AbstractServerResponse implements ServerResponse {
+	abstract static class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 		private static final Set<HttpMethod> SAFE_METHODS =	EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+
 
 		final int statusCode;
 
@@ -241,7 +238,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final MultiValueMap<String, Cookie> cookies;
 
-		private final List<ErrorHandler<?>> errorHandlers = new ArrayList<>();
 
 		protected AbstractServerResponse(
 				int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
@@ -250,14 +246,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies =
 					CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
-		}
-
-		protected <T extends ServerResponse> void addErrorHandler(Predicate<Throwable> predicate,
-				BiFunction<Throwable, ServerRequest, T> errorHandler) {
-
-			Assert.notNull(predicate, "Predicate must not be null");
-			Assert.notNull(errorHandler, "ErrorHandler must not be null");
-			this.errorHandlers.add(new ErrorHandler<>(predicate, errorHandler));
 		}
 
 
@@ -338,55 +326,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				HttpServletRequest request, HttpServletResponse response, Context context)
 				throws ServletException, IOException;
 
-		@Nullable
-		protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
-
-			return this.errorHandlers.stream()
-					.filter(errorHandler -> errorHandler.test(t))
-					.findFirst()
-					.map(errorHandler -> {
-						ServerRequest serverRequest = (ServerRequest)
-								servletRequest.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
-						ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
-						try {
-							return serverResponse.writeTo(servletRequest, servletResponse, context);
-						}
-						catch (ServletException ex) {
-							throw new IllegalStateException(ex);
-						}
-						catch (IOException ex) {
-							throw new UncheckedIOException(ex);
-						}
-					})
-					.orElseThrow(() -> new IllegalStateException(t));
-		}
-
-
-		private static class ErrorHandler<T extends ServerResponse> {
-
-			private final Predicate<Throwable> predicate;
-
-			private final BiFunction<Throwable, ServerRequest, T>
-					responseProvider;
-
-			public ErrorHandler(Predicate<Throwable> predicate,
-					BiFunction<Throwable, ServerRequest, T> responseProvider) {
-
-				Assert.notNull(predicate, "Predicate must not be null");
-				Assert.notNull(responseProvider, "ResponseProvider must not be null");
-				this.predicate = predicate;
-				this.responseProvider = responseProvider;
-			}
-
-			public boolean test(Throwable t) {
-				return this.predicate.test(t);
-			}
-
-			public T handle(Throwable t, ServerRequest serverRequest) {
-				return this.responseProvider.apply(t, serverRequest);
-			}
-		}
 	}
 
 
@@ -394,8 +333,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction;
 
-		public WriterFunctionResponse(
-				int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
+		public WriterFunctionResponse(int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
 
 			super(statusCode, headers, cookies);

@@ -41,6 +41,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
@@ -56,7 +58,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -70,9 +71,6 @@ import org.springframework.web.servlet.ModelAndView;
  * @param <T> the entity type
  */
 final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
-
-	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
-			"org.reactivestreams.Publisher", DefaultEntityResponseBuilder.class.getClassLoader());
 
 	private static final Type RESOURCE_REGION_LIST_TYPE =
 				new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
@@ -209,13 +207,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
-		else if (reactiveStreamsPresent && PublisherEntityResponse.isPublisher(this.entity)) {
-			Publisher publisher = (Publisher) this.entity;
-			return new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher, this.entityType);
+		else if (AsyncServerResponse.reactiveStreamsPresent) {
+			ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(this.entity.getClass());
+			if (adapter != null) {
+				Publisher<T> publisher = adapter.toPublisher(this.entity);
+				return new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher, this.entityType);
+			}
 		}
-		else {
-			return new DefaultEntityResponse<>(this.status, this.headers, this.cookies, this.entity, this.entityType);
-		}
+		return new DefaultEntityResponse<>(this.status, this.headers, this.cookies, this.entity, this.entityType);
 	}
 
 
@@ -325,7 +324,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		protected void tryWriteEntityWithMessageConverters(Object entity, HttpServletRequest request,
-				HttpServletResponse response, ServerResponse.Context context) {
+				HttpServletResponse response, ServerResponse.Context context) throws ServletException, IOException {
 			try {
 				writeEntityWithMessageConverters(entity, request, response, context);
 			}
@@ -376,6 +375,9 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 						handleError(throwable, servletRequest, servletResponse, context);
 					}
 				}
+				catch (ServletException | IOException ex) {
+					logger.warn("Asynchronous execution resulted in exception", ex);
+				}
 				finally {
 					asyncContext.complete();
 				}
@@ -385,6 +387,9 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	}
 
 
+	/**
+	 * {@link EntityResponse} implementation for asynchronous {@link Publisher} bodies.
+	 */
 	private static class PublisherEntityResponse<T> extends DefaultEntityResponse<Publisher<T>> {
 
 		public PublisherEntityResponse(int statusCode, HttpHeaders headers,
@@ -402,11 +407,6 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			entity().subscribe(new ProducingSubscriber(asyncContext, context));
 			return null;
 		}
-
-		public static boolean isPublisher(Object entity) {
-			return (entity instanceof Publisher);
-		}
-
 
 		@SuppressWarnings("SubscriberImplementation")
 		private class ProducingSubscriber implements Subscriber<T> {
@@ -438,13 +438,23 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			public void onNext(T element) {
 				HttpServletRequest servletRequest = (HttpServletRequest) this.asyncContext.getRequest();
 				HttpServletResponse servletResponse = (HttpServletResponse) this.asyncContext.getResponse();
-				tryWriteEntityWithMessageConverters(element, servletRequest, servletResponse, this.context);
+				try {
+					tryWriteEntityWithMessageConverters(element, servletRequest, servletResponse, this.context);
+				}
+				catch (ServletException | IOException ex) {
+					onError(ex);
+				}
 			}
 
 			@Override
 			public void onError(Throwable t) {
-				handleError(t, (HttpServletRequest) this.asyncContext.getRequest(),
-						(HttpServletResponse) this.asyncContext.getResponse(), this.context);
+				try {
+					handleError(t, (HttpServletRequest) this.asyncContext.getRequest(),
+							(HttpServletResponse) this.asyncContext.getResponse(), this.context);
+				}
+				catch (ServletException | IOException ex) {
+					logger.warn("Asynchronous execution resulted in exception", ex);
+				}
 				this.asyncContext.complete();
 			}
 
