@@ -431,7 +431,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 	private Mono<Void> processCommit(TransactionSynchronizationManager synchronizationManager,
 			GenericReactiveTransaction status) throws TransactionException {
 
-		AtomicBoolean beforeCompletionInvoked = new AtomicBoolean(false);
+		AtomicBoolean beforeCompletionInvoked = new AtomicBoolean();
 
 		Mono<Object> commit = prepareForCommit(synchronizationManager, status)
 				.then(triggerBeforeCommit(synchronizationManager, status))

@@ -63,7 +63,7 @@ public abstract class AbstractBrokerMessageHandler
 	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
-	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+	private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
 	private final BrokerAvailabilityEvent availableEvent = new BrokerAvailabilityEvent(true, this);
 

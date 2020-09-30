@@ -52,7 +52,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 
 	private final Queue<Message<?>> messages = new ConcurrentLinkedQueue<>();
 
-	private final AtomicBoolean sendInProgress = new AtomicBoolean(false);
+	private final AtomicBoolean sendInProgress = new AtomicBoolean();
 
 
 	public OrderedMessageChannelDecorator(MessageChannel channel, Log logger) {
