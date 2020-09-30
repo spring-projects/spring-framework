@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.setNativeHeader("foo", "baz");
 
-		assertEquals(Arrays.asList("baz"), headerAccessor.getNativeHeader("foo"));
+		assertEquals(Collections.singletonList("baz"), headerAccessor.getNativeHeader("foo"));
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headers = new NativeMessageHeaderAccessor(nativeHeaders);
 		headers.addNativeHeader("foo", null);
 
-		assertEquals(Arrays.asList("bar"), headers.getNativeHeader("foo"));
+		assertEquals(Collections.singletonList("bar"), headers.getNativeHeader("foo"));
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class NativeMessageHeaderAccessorTests {
 		NativeMessageHeaderAccessor headerAccessor = new NativeMessageHeaderAccessor();
 		headerAccessor.addNativeHeader("foo", "bar");
 
-		assertEquals(Arrays.asList("bar"), headerAccessor.getNativeHeader("foo"));
+		assertEquals(Collections.singletonList("bar"), headerAccessor.getNativeHeader("foo"));
 	}
 
 	@Test
