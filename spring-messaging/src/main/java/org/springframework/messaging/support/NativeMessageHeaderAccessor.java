@@ -113,7 +113,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	public void setHeader(String name, @Nullable Object value) {
 		if (name.equalsIgnoreCase(NATIVE_HEADERS)) {
 			// Force removal since setHeader checks for equality
-			removeHeader(NATIVE_HEADERS);
+			super.setHeader(NATIVE_HEADERS, null);
 		}
 		super.setHeader(name, value);
 	}
