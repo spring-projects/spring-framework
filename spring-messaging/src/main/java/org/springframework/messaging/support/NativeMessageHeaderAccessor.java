@@ -75,8 +75,6 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			@SuppressWarnings("unchecked")
 			Map<String, List<String>> map = (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 			if (map != null) {
-				// Force removal since setHeader checks for equality
-				removeHeader(NATIVE_HEADERS);
 				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(map));
 			}
 		}
@@ -105,11 +103,37 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (isMutable()) {
 			Map<String, List<String>> map = getNativeHeaders();
 			if (map != null) {
-				// Force removal since setHeader checks for equality
-				removeHeader(NATIVE_HEADERS);
 				setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
 			}
 			super.setImmutable();
+		}
+	}
+
+	@Override
+	public void setHeader(String name, @Nullable Object value) {
+		if (name.equalsIgnoreCase(NATIVE_HEADERS)) {
+			// Force removal since setHeader checks for equality
+			removeHeader(NATIVE_HEADERS);
+		}
+		super.setHeader(name, value);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
+		if (headersToCopy != null) {
+			Map<String, List<String>> nativeHeaders = getNativeHeaders();
+			Map<String, List<String>> map = (Map<String, List<String>>) headersToCopy.get(NATIVE_HEADERS);
+			if (map != null) {
+				if (nativeHeaders != null) {
+					nativeHeaders.putAll(map);
+				}
+				else {
+					nativeHeaders = new LinkedMultiValueMap<>(map);
+				}
+			}
+			super.copyHeaders(headersToCopy);
+			setHeader(NATIVE_HEADERS, nativeHeaders);
 		}
 	}
 
