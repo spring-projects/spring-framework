@@ -229,4 +229,21 @@ public class NativeMessageHeaderAccessorTests {
 		headerAccessor.setImmutable();
 	}
 
+	@Test // gh-25821
+	void copyImmutableToMutable() {
+		NativeMessageHeaderAccessor source = new NativeMessageHeaderAccessor();
+		source.addNativeHeader("foo", "bar");
+		Message<String> message = MessageBuilder.createMessage("payload", source.getMessageHeaders());
+
+		NativeMessageHeaderAccessor target = new NativeMessageHeaderAccessor();
+		target.copyHeaders(message.getHeaders());
+		target.setLeaveMutable(true);
+		message = MessageBuilder.createMessage(message.getPayload(), target.getMessageHeaders());
+
+		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(message);
+		assertThat(accessor.isMutable());
+		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
+		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
+	}
+
 }
