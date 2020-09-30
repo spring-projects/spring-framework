@@ -73,7 +73,7 @@ class CodecConfigurerTests {
 
 	private final CodecConfigurer configurer = new TestCodecConfigurer();
 
-	private final AtomicInteger index = new AtomicInteger(0);
+	private final AtomicInteger index = new AtomicInteger();
 
 
 	@Test
@@ -374,7 +374,7 @@ class CodecConfigurerTests {
 	@SuppressWarnings("deprecation")
 	@Test
 	void withDefaultCodecConfig() {
-		AtomicBoolean callbackCalled = new AtomicBoolean(false);
+		AtomicBoolean callbackCalled = new AtomicBoolean();
 		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
 		this.configurer.customCodecs().withDefaultCodecConfig(config -> {
 			assertThat(config.isEnableLoggingRequestDetails()).isTrue();
