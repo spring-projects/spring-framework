@@ -78,7 +78,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		return expectation;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException {
 		RequestExpectation expectation;

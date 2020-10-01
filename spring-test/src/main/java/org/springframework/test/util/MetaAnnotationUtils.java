@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -374,7 +374,7 @@ public abstract class MetaAnnotationUtils {
 
 
 	/**
-	 * <em>Untyped</em> extension of {@code AnnotationDescriptor} that is used
+	 * <em>Untyped</em> extension of {@link AnnotationDescriptor} that is used
 	 * to describe the declaration of one of several candidate annotation types
 	 * where the actual annotation type cannot be predetermined.
 	 */
@@ -399,7 +399,7 @@ public abstract class MetaAnnotationUtils {
 		@Override
 		public Annotation synthesizeAnnotation() {
 			throw new UnsupportedOperationException(
-					"getMergedAnnotation() is unsupported in UntypedAnnotationDescriptor");
+					"synthesizeAnnotation() is unsupported in UntypedAnnotationDescriptor");
 		}
 	}
 
