@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Default {@link ServerResponse.BodyBuilder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
@@ -184,6 +185,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse build(
 			BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+
 		return new WriterFunctionResponse(this.statusCode, this.headers, this.cookies, writeFunction);
 	}
 
@@ -240,7 +242,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		private final MultiValueMap<String, Cookie> cookies;
 
 		private final List<ErrorHandler<?>> errorHandlers = new ArrayList<>();
-
 
 		protected AbstractServerResponse(
 				int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
@@ -322,8 +323,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			if (servletResponse.getCharacterEncoding() == null &&
 					this.headers.getContentType() != null &&
 					this.headers.getContentType().getCharset() != null) {
-				servletResponse
-						.setCharacterEncoding(this.headers.getContentType().getCharset().name());
+				servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
 			}
 		}
 
@@ -334,9 +334,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Nullable
-		protected abstract ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context)
-		throws ServletException, IOException;
+		protected abstract ModelAndView writeToInternal(
+				HttpServletRequest request, HttpServletResponse response, Context context)
+				throws ServletException, IOException;
 
 		@Nullable
 		protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
@@ -346,21 +346,20 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 					.filter(errorHandler -> errorHandler.test(t))
 					.findFirst()
 					.map(errorHandler -> {
-						ServerRequest serverRequest =
-								(ServerRequest) servletRequest
-										.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
+						ServerRequest serverRequest = (ServerRequest)
+								servletRequest.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
 						ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
 						try {
 							return serverResponse.writeTo(servletRequest, servletResponse, context);
 						}
 						catch (ServletException ex) {
-							throw new RuntimeException(ex);
+							throw new IllegalStateException(ex);
 						}
 						catch (IOException ex) {
 							throw new UncheckedIOException(ex);
 						}
 					})
-					.orElseThrow(() -> new RuntimeException(t));
+					.orElseThrow(() -> new IllegalStateException(t));
 		}
 
 
@@ -373,6 +372,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 			public ErrorHandler(Predicate<Throwable> predicate,
 					BiFunction<Throwable, ServerRequest, T> responseProvider) {
+
 				Assert.notNull(predicate, "Predicate must not be null");
 				Assert.notNull(responseProvider, "ResponseProvider must not be null");
 				this.predicate = predicate;
@@ -387,8 +387,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 				return this.responseProvider.apply(t, serverRequest);
 			}
 		}
-
-
 	}
 
 
@@ -396,24 +394,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction;
 
-
-		public WriterFunctionResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies,
+		public WriterFunctionResponse(
+				int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+
 			super(statusCode, headers, cookies);
 			Assert.notNull(writeFunction, "WriteFunction must not be null");
 			this.writeFunction = writeFunction;
 		}
 
 		@Override
-		protected ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context) {
+		protected ModelAndView writeToInternal(
+				HttpServletRequest request, HttpServletResponse response, Context context) {
+
 			return this.writeFunction.apply(request, response);
 		}
 	}
-
-
-
-
 
 }

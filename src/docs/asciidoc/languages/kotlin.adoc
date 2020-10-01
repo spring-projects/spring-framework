@@ -383,9 +383,23 @@ class KotlinScriptConfiguration {
 }
 ----
 
-
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
+
+=== Kotlin multiplatform serialization
+
+As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
+supported in Spring MVC. The builtin support currently only targets JSON format.
+
+To enable it, follow https://github.com/Kotlin/kotlinx.serialization#setup[those instructions] and make sure neither
+Jackson, GSON or JSONB are in the classpath.
+
+NOTE: For a typical Spring Boot web application, that can be achieved by excluding `spring-boot-starter-json` dependency.
+
+If you need Jackson, GSON or JSONB for other purposes, you can keep them on the classpath and
+<<web#mvc-config-message-converters, configure message converters>> to remove `MappingJackson2HttpMessageConverter` and add
+`KotlinSerializationJsonHttpMessageConverter`.
+
 
 == Coroutines
 

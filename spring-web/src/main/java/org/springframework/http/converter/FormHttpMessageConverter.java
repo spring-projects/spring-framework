@@ -232,6 +232,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
+	 * Return the {@linkplain #setPartConverters configured converters} for MIME
+	 * parts.
+	 * @since 5.3
+	 */
+	public List<HttpMessageConverter<?>> getPartConverters() {
+		return Collections.unmodifiableList(this.partConverters);
+	}
+
+	/**
 	 * Add a message body converter. Such a converter is used to convert objects
 	 * to MIME parts.
 	 */

@@ -358,10 +358,51 @@ jobs:
         ARTIFACTORY_SERVER: ((artifactory-server))
         ARTIFACTORY_USERNAME: ((artifactory-username))
         ARTIFACTORY_PASSWORD: ((artifactory-password))
+- name: stage-rc
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - task: stage
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/stage-version.yml
+      params:
+        RELEASE_TYPE: RC
+        GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
+        GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
+        GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+    - put: artifactory-repo
+      params:
+        <<: *artifactory-params
+        repo: libs-staging-local
+    - put: git-repo
+      params:
+        repository: stage-git-repo
+- name: promote-rc
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - get: artifactory-repo
+      trigger: false
+      passed: [stage-rc]
+      params:
+        download_artifacts: false
+        save_build_info: true
+    - task: promote
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/promote-version.yml
+      params:
+        RELEASE_TYPE: RC
+        ARTIFACTORY_SERVER: ((artifactory-server))
+        ARTIFACTORY_USERNAME: ((artifactory-username))
+        ARTIFACTORY_PASSWORD: ((artifactory-password))
 groups:
 - name: "Build"
   jobs: ["build", "jdk11-build", "jdk14-build", "jdk15-build"]
 - name: "Release"
-  jobs: ["stage-milestone", "promote-milestone"]
+  jobs: ["stage-milestone","stage-rc", "promote-milestone","promote-rc"]
 - name: "CI Images"
   jobs: ["build-spring-framework-ci-images"]

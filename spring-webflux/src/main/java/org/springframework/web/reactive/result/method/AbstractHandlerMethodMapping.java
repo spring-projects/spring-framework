@@ -366,6 +366,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 */
 	protected void handleMatch(T mapping, HandlerMethod handlerMethod, ServerWebExchange exchange) {
+		String lookupPath = exchange.getRequest().getPath().pathWithinApplication().value();
+		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, lookupPath);
 	}
 
 	/**

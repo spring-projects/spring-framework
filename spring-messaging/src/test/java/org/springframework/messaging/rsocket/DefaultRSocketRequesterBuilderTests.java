@@ -29,6 +29,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.DuplexConnection;
+import io.rsocket.RSocketErrorException;
 import io.rsocket.core.DefaultConnectionSetupPayload;
 import io.rsocket.core.RSocketConnector;
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -242,14 +243,12 @@ public class DefaultRSocketRequesterBuilderTests {
 		}
 
 		@Override
-		public Mono<Void> send(Publisher<ByteBuf> frames) {
-			return Mono.empty();
+		public void sendFrame(int i, ByteBuf byteBuf) {
+			this.setupFrame = this.setupFrame == null ? byteBuf : this.setupFrame;
 		}
 
 		@Override
-		public Mono<Void> sendOne(ByteBuf frame) {
-			this.setupFrame = frame;
-			return Mono.empty();
+		public void sendErrorAndClose(RSocketErrorException e) {
 		}
 
 		@Override

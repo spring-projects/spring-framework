@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,14 +132,13 @@ public abstract class ObjectUtils {
 	 * @see CollectionUtils#isEmpty(java.util.Collection)
 	 * @see CollectionUtils#isEmpty(java.util.Map)
 	 */
-	@SuppressWarnings("rawtypes")
 	public static boolean isEmpty(@Nullable Object obj) {
 		if (obj == null) {
 			return true;
 		}
 
 		if (obj instanceof Optional) {
-			return !((Optional) obj).isPresent();
+			return !((Optional<?>) obj).isPresent();
 		}
 		if (obj instanceof CharSequence) {
 			return ((CharSequence) obj).length() == 0;
@@ -148,10 +147,10 @@ public abstract class ObjectUtils {
 			return Array.getLength(obj) == 0;
 		}
 		if (obj instanceof Collection) {
-			return ((Collection) obj).isEmpty();
+			return ((Collection<?>) obj).isEmpty();
 		}
 		if (obj instanceof Map) {
-			return ((Map) obj).isEmpty();
+			return ((Map<?, ?>) obj).isEmpty();
 		}
 
 		// else
@@ -611,9 +610,7 @@ public abstract class ObjectUtils {
 		if (obj == null) {
 			return EMPTY_STRING;
 		}
-		String className = obj.getClass().getName();
-		String identityHexString = getIdentityHexString(obj);
-		return className + '@' + identityHexString;
+		return obj.getClass().getName() + "@" + getIdentityHexString(obj);
 	}
 
 	/**

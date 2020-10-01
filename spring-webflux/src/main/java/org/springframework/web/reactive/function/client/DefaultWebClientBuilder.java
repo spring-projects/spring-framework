@@ -262,24 +262,26 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	@Override
 	public WebClient build() {
+		ClientHttpConnector connectorToUse =
+				(this.connector != null ? this.connector : initConnector());
+
 		ExchangeFunction exchange = (this.exchangeFunction == null ?
-				ExchangeFunctions.create(getOrInitConnector(), initExchangeStrategies()) :
+				ExchangeFunctions.create(connectorToUse, initExchangeStrategies()) :
 				this.exchangeFunction);
+
 		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
 				.reduce(ExchangeFilterFunction::andThen)
 				.map(filter -> filter.apply(exchange))
 				.orElse(exchange) : exchange);
+
 		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
 				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
 				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
 				this.defaultRequest, new DefaultWebClientBuilder(this));
 	}
 
-	private ClientHttpConnector getOrInitConnector() {
-		if (this.connector != null) {
-			return this.connector;
-		}
-		else if (reactorClientPresent) {
+	private ClientHttpConnector initConnector() {
+		if (reactorClientPresent) {
 			return new ReactorClientHttpConnector();
 		}
 		else if (jettyClientPresent) {

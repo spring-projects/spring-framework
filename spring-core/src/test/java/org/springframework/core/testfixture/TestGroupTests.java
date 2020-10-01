@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Tests for {@link TestGroup}.
@@ -69,12 +68,6 @@ class TestGroupTests {
 	}
 
 	@Test
-	void assumeGroupWithNoMatchingActiveTestGroup() {
-		setTestGroups(PERFORMANCE);
-		assertThatExceptionOfType(TestAbortedException.class).isThrownBy(() -> assumeGroup(LONG_RUNNING));
-	}
-
-	@Test
 	void assumeGroupWithMatchingActiveTestGroup() {
 		setTestGroups(LONG_RUNNING);
 		assertThatCode(() -> assumeGroup(LONG_RUNNING))
@@ -107,7 +100,7 @@ class TestGroupTests {
 			.isInstanceOf(IllegalArgumentException.class)
 			.withMessage(
 				"Unable to find test group 'bogus' when parsing testGroups value: '" + testGroups +
-				"'. Available groups include: [LONG_RUNNING,PERFORMANCE]");
+				"'. Available groups include: [LONG_RUNNING]");
 	}
 
 	private void setTestGroups(TestGroup... testGroups) {

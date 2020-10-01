@@ -30,7 +30,6 @@ import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -79,10 +78,6 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed(client, "https://spring.io/");
-		}
 	}
 
 	@Test
@@ -91,10 +86,6 @@ class MockMvcWebClientBuilderTests {
 		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
 		assertMockMvcUsed(client, "http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed(client, "https://spring.io/");
-		}
 	}
 
 	@Test // SPR-14066

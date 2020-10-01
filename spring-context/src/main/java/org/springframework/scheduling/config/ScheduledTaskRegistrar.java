@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -470,7 +470,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		}
 		if (this.taskScheduler != null) {
 			if (task.getInitialDelay() > 0) {
-				Date startTime = new Date(System.currentTimeMillis() + task.getInitialDelay());
+				Date startTime = new Date(this.taskScheduler.getClock().millis() + task.getInitialDelay());
 				scheduledTask.future =
 						this.taskScheduler.scheduleAtFixedRate(task.getRunnable(), startTime, task.getInterval());
 			}
@@ -519,7 +519,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		}
 		if (this.taskScheduler != null) {
 			if (task.getInitialDelay() > 0) {
-				Date startTime = new Date(System.currentTimeMillis() + task.getInitialDelay());
+				Date startTime = new Date(this.taskScheduler.getClock().millis() + task.getInitialDelay());
 				scheduledTask.future =
 						this.taskScheduler.scheduleWithFixedDelay(task.getRunnable(), startTime, task.getInterval());
 			}

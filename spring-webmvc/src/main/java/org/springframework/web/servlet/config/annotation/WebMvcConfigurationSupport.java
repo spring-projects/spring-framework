@@ -52,6 +52,7 @@ import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
+import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
@@ -208,6 +209,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationJsonPresent;
+
 	static {
 		ClassLoader classLoader = WebMvcConfigurationSupport.class.getClassLoader();
 		romePresent = ClassUtils.isPresent("com.rometools.rome.feed.WireFeed", classLoader);
@@ -219,6 +222,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		jackson2CborPresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.cbor.CBORFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
@@ -913,6 +917,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		else if (jsonbPresent) {
 			messageConverters.add(new JsonbHttpMessageConverter());
+		}
+		else if (kotlinSerializationJsonPresent) {
+			messageConverters.add(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2SmilePresent) {

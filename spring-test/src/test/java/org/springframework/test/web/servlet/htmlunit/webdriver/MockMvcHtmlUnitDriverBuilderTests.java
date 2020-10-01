@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -75,10 +74,6 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertMockMvcUsed("http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed("https://example.com/");
-		}
 	}
 
 	@Test
@@ -86,10 +81,6 @@ class MockMvcHtmlUnitDriverBuilderTests {
 		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMockMvcUsed("http://localhost/test");
-
-		if (TestGroup.PERFORMANCE.isActive()) {
-			assertMockMvcNotUsed("https://example.com/");
-		}
 	}
 
 	@Test

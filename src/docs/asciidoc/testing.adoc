@@ -6488,7 +6488,7 @@ of `AbstractTestNGSpringContextTests` for an example of how to instrument your t
 
 
 
-include::testing-webtestclient.adoc[leveloffset=+2]
+include::testing/testing-webtestclient.adoc[leveloffset=+2]
 
 
 
@@ -8440,7 +8440,6 @@ configuration. Check for the support for code completion on static members.
 Spring MVC Test's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
-
 
 
 [[testing-resources]]

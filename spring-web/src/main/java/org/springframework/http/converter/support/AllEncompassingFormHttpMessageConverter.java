@@ -20,6 +20,7 @@ import org.springframework.core.SpringProperties;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.JsonbHttpMessageConverter;
+import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -57,6 +58,8 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationJsonPresent;
+
 	static {
 		ClassLoader classLoader = AllEncompassingFormHttpMessageConverter.class.getClassLoader();
 		jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
@@ -66,6 +69,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		jackson2SmilePresent = ClassUtils.isPresent("com.fasterxml.jackson.dataformat.smile.SmileFactory", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
@@ -91,6 +95,9 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		else if (jsonbPresent) {
 			addPartConverter(new JsonbHttpMessageConverter());
+		}
+		else if (kotlinSerializationJsonPresent) {
+			addPartConverter(new KotlinSerializationJsonHttpMessageConverter());
 		}
 
 		if (jackson2XmlPresent && !shouldIgnoreXml) {

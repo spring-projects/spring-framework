@@ -22,8 +22,6 @@ import java.sql.SQLException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -44,8 +42,6 @@ import org.springframework.util.Assert;
  * @param <T> the result type
  */
 public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	@Nullable
 	private Constructor<T> mappedConstructor;
@@ -74,7 +70,6 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize(Class<T> mappedClass) {
 		super.initialize(mappedClass);

@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 3.0
  * @see DateTimeFormat
- * @deprecated as of 5.3.0, scheduled for removal in 6.0.
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
 @Deprecated
 public class JodaDateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport

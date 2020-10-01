@@ -52,14 +52,10 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
@@ -245,37 +241,6 @@ class ApplicationContextExpressionTests {
 			System.getProperties().remove("name");
 			System.getProperties().remove("country");
 		}
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void prototypeCreationIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		GenericApplicationContext ac = new GenericApplicationContext();
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("#{systemProperties.name}");
-		rbd.getPropertyValues().add("country", "#{systemProperties.country}");
-		ac.registerBeanDefinition("test", rbd);
-		ac.refresh();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		System.getProperties().put("name", "juergen");
-		System.getProperties().put("country", "UK");
-		try {
-			for (int i = 0; i < 100000; i++) {
-				TestBean tb = (TestBean) ac.getBean("test");
-				assertThat(tb.getName()).isEqualTo("juergen");
-				assertThat(tb.getCountry()).isEqualTo("UK");
-			}
-			sw.stop();
-		}
-		finally {
-			System.getProperties().remove("country");
-			System.getProperties().remove("name");
-		}
-		assertThat(sw.getTotalTimeMillis() < 6000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-		ac.close();
 	}
 
 	@Test

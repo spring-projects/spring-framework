@@ -1,13 +1,15 @@
 plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
-	id 'org.jetbrains.kotlin.jvm' version '1.4.0' apply false
+	id 'org.jetbrains.kotlin.jvm' version '1.4.10' apply false
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
-	id 'org.asciidoctor.jvm.convert' version '2.4.0'
+	id 'org.asciidoctor.jvm.convert' version '3.1.0'
+	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
 	id 'de.undercouch.download' version '4.1.1'
 	id "io.freefair.aspectj" version '5.1.1' apply false
 	id "com.github.ben-manes.versions" version '0.28.0'
 	id "me.champeau.gradle.jmh" version "0.5.0" apply false
+	id "org.jetbrains.kotlin.plugin.serialization" version "1.4.10" apply false
 }
 
 ext {
@@ -24,14 +26,14 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.11.2"
-			mavenBom "io.netty:netty-bom:4.1.51.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.0-SNAPSHOT"
-			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR6"
-			mavenBom "io.rsocket:rsocket-bom:1.1.0-SNAPSHOT"
+			mavenBom "io.netty:netty-bom:4.1.52.Final"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.0-RC1"
+			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR7"
+			mavenBom "io.rsocket:rsocket-bom:1.1.0-M2"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.31.v20200723"
-			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.0"
+			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.3.9"
-			mavenBom "org.junit:junit-bom:5.7.0-RC1"
+			mavenBom "org.junit:junit-bom:5.7.0"
 		}
 		dependencies {
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.13.3') {
@@ -87,10 +89,13 @@ configure(allprojects) { project ->
 			}
 			dependency "org.ogce:xpp3:1.1.6"
 			dependency "org.yaml:snakeyaml:1.26"
+			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.0-RC') {
+				entry 'kotlinx-serialization-core'
+			}
 
 			dependency "com.h2database:h2:1.4.200"
 			dependency "com.github.ben-manes.caffeine:caffeine:2.8.5"
-			dependency "com.github.librepdf:openpdf:1.3.20"
+			dependency "com.github.librepdf:openpdf:1.3.22"
 			dependency "com.rometools:rome:1.15.0"
 			dependency "commons-io:commons-io:2.5"
 			dependency "io.vavr:vavr:0.10.3"
@@ -122,18 +127,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.45"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.37') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.38') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.37') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.38') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.1.3.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.0.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -191,7 +196,7 @@ configure(allprojects) { project ->
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.5.10') {
+			dependencySet(group: 'org.mockito', version: '3.5.13') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -285,7 +290,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
-			maven { url "https://repo.spring.io/snapshot" } // Reactor and RSocket
+			maven { url "https://repo.spring.io/milestone" } // Reactor
 		}
 	}
 	configurations.all {
@@ -334,7 +339,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.36"
+		toolVersion = "8.36.1"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
@@ -375,7 +380,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
 			"https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/",
 			"https://junit.org/junit4/javadoc/4.13/",
-			"https://junit.org/junit5/docs/5.6.2/api/"
+			"https://junit.org/junit5/docs/5.7.0/api/"
 	] as String[]
 }
 
