@@ -33,9 +33,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * An adapter for a target JMS {@link javax.jms.ConnectionFactory}, applying the
- * given user credentials to every standard {@code createConnection()} call,
- * that is, implicitly invoking {@code createConnection(username, password)}
- * on the target. All other methods simply delegate to the corresponding methods
+ * given user credentials to every standard {@code createConnection()} or
+ * {@code createContext()} call, that is, implicitly invoking
+ * {@code createConnection(username, password)} or
+ * {@code createContext(username, password, sessionMode)}
+ * on the target.
+ * Following the JMS 2.0 Specification, the {@link JMSContext#AUTO_ACKNOWLEDGE}
+ * is used, if the sessionMode is not provided.
+ * All other methods simply delegate to the corresponding methods
  * of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have user
@@ -71,6 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 1.2
  * @see #createConnection
+ * @see #createContext
  * @see #createQueueConnection
  * @see #createTopicConnection
  */
@@ -296,9 +302,14 @@ public class UserCredentialsConnectionFactoryAdapter
 		}
 	}
 
+	/**
+	 * Delegates the call to the {@code createContext(sessionMode)},
+	 * using the {@link JMSContext#AUTO_ACKNOWLEDGE} as a value (JMS specification compliant).
+	 * @return the JMSContext
+	 */
 	@Override
 	public JMSContext createContext() {
-		return obtainTargetConnectionFactory().createContext();
+		return this.createContext(JMSContext.AUTO_ACKNOWLEDGE);
 	}
 
 	@Override
@@ -313,7 +324,35 @@ public class UserCredentialsConnectionFactoryAdapter
 
 	@Override
 	public JMSContext createContext(int sessionMode) {
-		return obtainTargetConnectionFactory().createContext(sessionMode);
+		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
+		if (threadCredentials != null) {
+			return doCreateContext(threadCredentials.username, threadCredentials.password, sessionMode);
+		}
+		else {
+			return doCreateContext(this.username, this.password, sessionMode);
+		}
+	}
+
+	/**
+	 * This implementation delegates to the {@code createContext(username, password, sessionMode)}
+	 * method of the target ConnectionFactory, passing in the specified user credentials.
+	 * If the specified username is empty, it will simply delegate to the standard
+	 * {@code createContext(sessionMode)} method of the target ConnectionFactory.
+	 * @param username the username to use
+	 * @param password the password to use
+	 * @param sessionMode the sessionMode to use.
+	 * @return the JMSContext
+	 * @see javax.jms.ConnectionFactory#createContext(String, String, int)
+	 * @see javax.jms.ConnectionFactory#createContext(int)
+	 */
+	private JMSContext doCreateContext(String username, String password, int sessionMode) {
+		ConnectionFactory target = obtainTargetConnectionFactory();
+		if (StringUtils.hasLength(username)) {
+			return target.createContext(username, password, sessionMode);
+		}
+		else {
+			return target.createContext(sessionMode);
+		}
 	}
 
 	private ConnectionFactory obtainTargetConnectionFactory() {
