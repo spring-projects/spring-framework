@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +112,6 @@ class MockMvcWebClientBuilderTests {
 
 	private void assertMockMvcUsed(WebClient client, String url) throws Exception {
 		assertThat(getResponse(client, url).getContentAsString()).isEqualTo("mvc");
-	}
-
-	private void assertMockMvcNotUsed(WebClient client, String url) throws Exception {
-		assertThat(getResponse(client, url).getContentAsString()).isNotEqualTo("mvc");
 	}
 
 	private WebResponse getResponse(WebClient client, String url) throws IOException {
