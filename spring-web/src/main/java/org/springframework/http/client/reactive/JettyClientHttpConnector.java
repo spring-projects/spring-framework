@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.reactive.client.ContentChunk;
+import org.eclipse.jetty.reactive.client.ReactiveRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -81,7 +83,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	 * Constructor with an {@link JettyResourceFactory} that will manage shared resources.
 	 * @param resourceFactory the {@link JettyResourceFactory} to use
 	 * @param customizer the lambda used to customize the {@link HttpClient}
-	 * @deprecated as of 5.2, in favor of {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
+	 * @deprecated as of 5.2, in favor of
+	 * {@link JettyClientHttpConnector#JettyClientHttpConnector(HttpClient, JettyResourceFactory)}
 	 */
 	@Deprecated
 	public JettyClientHttpConnector(JettyResourceFactory resourceFactory, @Nullable Consumer<HttpClient> customizer) {
@@ -114,14 +117,14 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 			}
 		}
 
-		JettyClientHttpRequest clientHttpRequest = new JettyClientHttpRequest(
-				this.httpClient.newRequest(uri).method(method.toString()), this.bufferFactory);
+		Request request = this.httpClient.newRequest(uri).method(method.toString());
 
-		return requestCallback.apply(clientHttpRequest).then(Mono.from(
-				clientHttpRequest.getReactiveRequest().response((response, chunks) -> {
-					Flux<DataBuffer> content = Flux.from(chunks).map(this::toDataBuffer);
-					return Mono.just(new JettyClientHttpResponse(response, content));
-				})));
+		return requestCallback.apply(new JettyClientHttpRequest(request, this.bufferFactory))
+				.then(Mono.from(ReactiveRequest.newBuilder(request).build()
+						.response((reactiveResponse, chunkPublisher) -> {
+							Flux<DataBuffer> content = Flux.from(chunkPublisher).map(this::toDataBuffer);
+							return Mono.just(new JettyClientHttpResponse(reactiveResponse, content));
+						})));
 	}
 
 	private DataBuffer toDataBuffer(ContentChunk chunk) {
