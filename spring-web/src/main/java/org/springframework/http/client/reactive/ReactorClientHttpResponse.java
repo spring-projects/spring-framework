@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -34,6 +36,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -58,7 +61,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory bufferFactory;
 
-	// 0 - not subscribed, 1 - subscribed, 2 - cancelled, 3 - cancelled via connector (before subscribe)
+	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
 	private final AtomicInteger state = new AtomicInteger(0);
 
 	private final String logPrefix;
@@ -100,20 +103,11 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 					if (this.state.compareAndSet(0, 1)) {
 						return;
 					}
-					// https://github.com/reactor/reactor-netty/issues/503
-					// FluxReceive rejects multiple subscribers, but not after a cancel().
-					// Subsequent subscribers after cancel() will not be rejected, but will hang instead.
-					// So we need to reject once in cancelled state.
 					if (this.state.get() == 2) {
-						throw new IllegalStateException(
-								"The client response body can only be consumed once.");
-					}
-					else if (this.state.get() == 3) {
 						throw new IllegalStateException(
 								"The client response body has been released already due to cancellation.");
 					}
 				})
-				.doOnCancel(() -> this.state.compareAndSet(1, 2))
 				.map(byteBuf -> {
 					byteBuf.retain();
 					return this.bufferFactory.wrap(byteBuf);
@@ -138,17 +132,29 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		this.response.cookies().values().stream().flatMap(Collection::stream)
-				.forEach(c ->
-
-					result.add(c.name(), ResponseCookie.fromClientResponse(c.name(), c.value())
-							.domain(c.domain())
-							.path(c.path())
-							.maxAge(c.maxAge())
-							.secure(c.isSecure())
-							.httpOnly(c.isHttpOnly())
-							.build()));
+		this.response.cookies().values().stream()
+				.flatMap(Collection::stream)
+				.forEach(cookie -> result.add(cookie.name(),
+						ResponseCookie.fromClientResponse(cookie.name(), cookie.value())
+								.domain(cookie.domain())
+								.path(cookie.path())
+								.maxAge(cookie.maxAge())
+								.secure(cookie.isSecure())
+								.httpOnly(cookie.isHttpOnly())
+								.sameSite(getSameSite(cookie))
+								.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
+	@Nullable
+	private static String getSameSite(Cookie cookie) {
+		if (cookie instanceof DefaultCookie) {
+			DefaultCookie defaultCookie = (DefaultCookie) cookie;
+			if (defaultCookie.sameSite() != null) {
+				return defaultCookie.sameSite().name();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -159,7 +165,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	 * reading was delayed for some reason.
 	 */
 	void releaseAfterCancel(HttpMethod method) {
-		if (mayHaveBody(method) && this.state.compareAndSet(0, 3)) {
+		if (mayHaveBody(method) && this.state.compareAndSet(0, 2)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(this.logPrefix + "Releasing body, not yet subscribed.");
 			}

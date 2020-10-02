@@ -444,8 +444,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Return the adapted interceptors as {@link HandlerInterceptor} array.
-	 * @return the array of {@link HandlerInterceptor HandlerInterceptors}, or
-	 * {@code null} if none
+	 * @return the array of {@link HandlerInterceptor HandlerInterceptor}s,
+	 * or {@code null} if none
 	 */
 	@Nullable
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
@@ -516,6 +516,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				CorsConfiguration globalConfig = getCorsConfigurationSource().getCorsConfiguration(request);
 				config = (globalConfig != null ? globalConfig.combine(config) : config);
 			}
+			if (config != null) {
+				config.validateAllowCredentials();
+			}
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 
@@ -569,7 +572,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Build a {@link HandlerExecutionChain} for the given handler, including
 	 * applicable interceptors.
 	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
-	 * with the given handler, the handler mappings common interceptors, and any
+	 * with the given handler, the common interceptors of the handler mapping, and any
 	 * {@link MappedInterceptor MappedInterceptors} matching to the current request URL. Interceptors
 	 * are added in the order they were registered. Subclasses may override this
 	 * in order to extend/rearrange the list of interceptors.
@@ -650,12 +653,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		if (CorsUtils.isPreFlightRequest(request)) {
 			HandlerInterceptor[] interceptors = chain.getInterceptors();
-			chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+			return new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
 		}
 		else {
 			chain.addInterceptor(0, new CorsInterceptor(config));
+			return chain;
 		}
-		return chain;
 	}
 
 

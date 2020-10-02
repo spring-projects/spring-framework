@@ -167,8 +167,7 @@ public class PathPattern implements Comparable<PathPattern> {
 			if (elem instanceof CaptureTheRestPathElement || elem instanceof WildcardTheRestPathElement) {
 				this.catchAll = true;
 			}
-			if (elem instanceof SeparatorPathElement && elem.next != null &&
-					elem.next instanceof WildcardPathElement && elem.next.next == null) {
+			if (elem instanceof SeparatorPathElement && elem.next instanceof WildcardPathElement && elem.next.next == null) {
 				this.endsWithSeparatorWildcard = true;
 			}
 			elem = elem.next;
@@ -250,7 +249,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	@Nullable
 	public PathRemainingMatchInfo matchStartOfPath(PathContainer pathContainer) {
 		if (this.head == null) {
-			return new PathRemainingMatchInfo(pathContainer);
+			return new PathRemainingMatchInfo(EMPTY_PATH, pathContainer);
 		}
 		else if (!hasLength(pathContainer)) {
 			return null;
@@ -263,15 +262,17 @@ public class PathPattern implements Comparable<PathPattern> {
 			return null;
 		}
 		else {
-			PathRemainingMatchInfo info;
+			PathContainer pathMatched;
+			PathContainer pathRemaining;
 			if (matchingContext.remainingPathIndex == pathContainer.elements().size()) {
-				info = new PathRemainingMatchInfo(EMPTY_PATH, matchingContext.getPathMatchResult());
+				pathMatched = pathContainer;
+				pathRemaining = EMPTY_PATH;
 			}
 			else {
-				info = new PathRemainingMatchInfo(pathContainer.subPath(matchingContext.remainingPathIndex),
-						matchingContext.getPathMatchResult());
+				pathMatched = pathContainer.subPath(0, matchingContext.remainingPathIndex);
+				pathRemaining = pathContainer.subPath(matchingContext.remainingPathIndex);
 			}
-			return info;
+			return new PathRemainingMatchInfo(pathMatched, pathRemaining, matchingContext.getPathMatchResult());
 		}
 	}
 
@@ -593,18 +594,30 @@ public class PathPattern implements Comparable<PathPattern> {
 	 */
 	public static class PathRemainingMatchInfo {
 
+		private final PathContainer pathMatched;
+
 		private final PathContainer pathRemaining;
 
 		private final PathMatchInfo pathMatchInfo;
 
 
-		PathRemainingMatchInfo(PathContainer pathRemaining) {
-			this(pathRemaining, PathMatchInfo.EMPTY);
+		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining) {
+			this(pathMatched, pathRemaining, PathMatchInfo.EMPTY);
 		}
 
-		PathRemainingMatchInfo(PathContainer pathRemaining, PathMatchInfo pathMatchInfo) {
+		PathRemainingMatchInfo(PathContainer pathMatched, PathContainer pathRemaining,
+				PathMatchInfo pathMatchInfo) {
 			this.pathRemaining = pathRemaining;
+			this.pathMatched = pathMatched;
 			this.pathMatchInfo = pathMatchInfo;
+		}
+
+		/**
+		 * Return the part of a path that was matched by a pattern.
+		 * @since 5.3
+		 */
+		public PathContainer getPathMatched() {
+			return this.pathMatched;
 		}
 
 		/**

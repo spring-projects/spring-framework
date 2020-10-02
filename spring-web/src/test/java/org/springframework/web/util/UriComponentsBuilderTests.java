@@ -924,30 +924,32 @@ class UriComponentsBuilderTests {
 		assertThat(components.toString()).isEqualTo("");
 	}
 
-	@Test
+	@Test  // gh-25243
 	void testCloneAndMerge() {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
-		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1").fragment("f1").encode();
+		builder1.scheme("http").host("e1.com").path("/p1").pathSegment("ps1").queryParam("q1", "x").fragment("f1").encode();
 
-		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		UriComponentsBuilder builder2 = builder1.cloneBuilder();
 		builder2.scheme("https").host("e2.com").path("p2").pathSegment("{ps2}").queryParam("q2").fragment("f2");
+
+		builder1.queryParam("q1", "y");  // one more entry for an existing parameter
 
 		UriComponents result1 = builder1.build();
 		assertThat(result1.getScheme()).isEqualTo("http");
 		assertThat(result1.getHost()).isEqualTo("e1.com");
 		assertThat(result1.getPath()).isEqualTo("/p1/ps1");
-		assertThat(result1.getQuery()).isEqualTo("q1");
+		assertThat(result1.getQuery()).isEqualTo("q1=x&q1=y");
 		assertThat(result1.getFragment()).isEqualTo("f1");
 
 		UriComponents result2 = builder2.buildAndExpand("ps2;a");
 		assertThat(result2.getScheme()).isEqualTo("https");
 		assertThat(result2.getHost()).isEqualTo("e2.com");
 		assertThat(result2.getPath()).isEqualTo("/p1/ps1/p2/ps2%3Ba");
-		assertThat(result2.getQuery()).isEqualTo("q1&q2");
+		assertThat(result2.getQuery()).isEqualTo("q1=x&q2");
 		assertThat(result2.getFragment()).isEqualTo("f2");
 	}
 
-	@Test // gh-24772
+	@Test  // gh-24772
 	void testDeepClone() {
 		HashMap<String, Object> vars = new HashMap<>();
 		vars.put("ps1", "foo");
@@ -957,7 +959,7 @@ class UriComponentsBuilderTests {
 		builder1.scheme("http").host("e1.com").userInfo("user:pwd").path("/p1").pathSegment("{ps1}")
 				.pathSegment("{ps2}").queryParam("q1").fragment("f1").uriVariables(vars).encode();
 
-		UriComponentsBuilder builder2 = (UriComponentsBuilder) builder1.clone();
+		UriComponentsBuilder builder2 = builder1.cloneBuilder();
 
 		UriComponents result1 = builder1.build();
 		assertThat(result1.getScheme()).isEqualTo("http");
@@ -1117,6 +1119,26 @@ class UriComponentsBuilderTests {
 		assertThat(result.getPort()).isEqualTo(-1);
 		assertThat(result.toUriString()).isEqualTo("https://example.com/rest/mobile/users/1");
 	}
+
+	@Test // gh-25737
+	void fromHttpRequestForwardedHeaderComma() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Forwarded", "for=192.0.2.0,for=192.0.2.1;proto=https;host=192.0.2.3:9090");
+		request.setScheme("http");
+		request.setServerPort(8080);
+		request.setServerName("example.com");
+		request.setRequestURI("/rest/mobile/users/1");
+
+		HttpRequest httpRequest = new ServletServerHttpRequest(request);
+		UriComponents result = UriComponentsBuilder.fromHttpRequest(httpRequest).build();
+
+		assertThat(result.getScheme()).isEqualTo("https");
+		assertThat(result.getHost()).isEqualTo("192.0.2.3");
+		assertThat(result.getPath()).isEqualTo("/rest/mobile/users/1");
+		assertThat(result.getPort()).isEqualTo(9090);
+		assertThat(result.toUriString()).isEqualTo("https://192.0.2.3:9090/rest/mobile/users/1");
+	}
+
 
 	@Test  // SPR-16364
 	void uriComponentsNotEqualAfterNormalization() {

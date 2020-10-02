@@ -32,7 +32,9 @@ import org.springframework.remoting.support.RemoteInvocation;
  *
  * @author Juergen Hoeller
  * @since 14.05.2003
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public interface RmiInvocationHandler extends Remote {
 
 	/**

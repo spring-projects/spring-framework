@@ -68,6 +68,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		context.register(WebConfig.class);
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "https://site1.com");
+		props.setProperty("myOriginPattern", "https://*.com");
 		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
 		context.register(PropertySourcesPlaceholderConfigurer.class);
 		context.refresh();
@@ -207,6 +208,26 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	}
 
 	@ParameterizedHttpServerTest
+	void customOriginPatternDefinedViaValueAttribute(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<String> entity = performGet("/origin-pattern-value-attribute", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
+		assertThat(entity.getBody()).isEqualTo("pattern-value-attribute");
+	}
+
+	@ParameterizedHttpServerTest
+	void customOriginPatternDefinedViaPlaceholder(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<String> entity = performGet("/origin-pattern-placeholder", this.headers, String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getAccessControlAllowOrigin()).isEqualTo("https://site1.com");
+		assertThat(entity.getBody()).isEqualTo("pattern-placeholder");
+	}
+
+	@ParameterizedHttpServerTest
 	void classLevel(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
@@ -261,12 +282,13 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 	@Configuration
 	@EnableWebFlux
 	@ComponentScan(resourcePattern = "**/CrossOriginAnnotationIntegrationTests*")
-	@SuppressWarnings({"unused", "WeakerAccess"})
+	@SuppressWarnings("WeakerAccess")
 	static class WebConfig {
 	}
 
 
-	@RestController @SuppressWarnings("unused")
+	@RestController
+	@SuppressWarnings("unused")
 	private static class MethodLevelController {
 
 		@GetMapping("/no")
@@ -335,6 +357,18 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 		public String customOriginDefinedViaPlaceholder() {
 			return "placeholder";
 		}
+
+		@CrossOrigin(originPatterns = "https://*.com")
+		@GetMapping("/origin-pattern-value-attribute")
+		public String customOriginPatternDefinedViaValueAttribute() {
+			return "pattern-value-attribute";
+		}
+
+		@CrossOrigin(originPatterns = "${myOriginPattern}")
+		@GetMapping("/origin-pattern-placeholder")
+		public String customOriginPatternDefinedViaPlaceholder() {
+			return "pattern-placeholder";
+		}
 	}
 
 
@@ -354,7 +388,7 @@ class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegr
 			return "bar";
 		}
 
-		@CrossOrigin(allowCredentials = "true")
+		@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 		@GetMapping("/baz")
 		public String baz() {
 			return "baz";

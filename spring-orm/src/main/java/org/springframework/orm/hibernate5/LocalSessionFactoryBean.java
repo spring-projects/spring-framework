@@ -58,8 +58,8 @@ import org.springframework.util.ClassUtils;
  * way to set up a shared Hibernate SessionFactory in a Spring application context; the
  * SessionFactory can then be passed to data access objects via dependency injection.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3/5.4, as of Spring 5.2.
- * Set up with Hibernate 5.2+, {@code LocalSessionFactoryBean} is an immediate alternative
+ * <p>Compatible with Hibernate 5.2/5.3/5.4, as of Spring 5.3.
+ * This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for common
  * JPA purposes: In particular with Hibernate 5.3/5.4, the Hibernate {@code SessionFactory}
  * will natively expose the JPA {@code EntityManagerFactory} interface as well, and

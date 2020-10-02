@@ -16,15 +16,17 @@
 
 package org.springframework.messaging.simp.broker;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -72,7 +74,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
+	private int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	@Nullable
 	private String selectorHeaderName = "selector";
@@ -83,7 +85,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	private final DestinationCache destinationCache = new DestinationCache();
 
-	private final SessionSubscriptionRegistry subscriptionRegistry = new SessionSubscriptionRegistry();
+	private final SessionRegistry sessionRegistry = new SessionRegistry();
 
 
 	/**
@@ -106,6 +108,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	 */
 	public void setCacheLimit(int cacheLimit) {
 		this.cacheLimit = cacheLimit;
+		this.destinationCache.ensureCacheLimit();
 	}
 
 	/**
@@ -142,378 +145,337 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		return this.selectorHeaderName;
 	}
 
-
 	@Override
 	protected void addSubscriptionInternal(
-			String sessionId, String subsId, String destination, Message<?> message) {
+			String sessionId, String subscriptionId, String destination, Message<?> message) {
 
+		boolean isPattern = this.pathMatcher.isPattern(destination);
 		Expression expression = getSelectorExpression(message.getHeaders());
-		this.subscriptionRegistry.addSubscription(sessionId, subsId, destination, expression);
-		this.destinationCache.updateAfterNewSubscription(destination, sessionId, subsId);
+		Subscription subscription = new Subscription(subscriptionId, destination, isPattern, expression);
+
+		this.sessionRegistry.addSubscription(sessionId, subscription);
+		this.destinationCache.updateAfterNewSubscription(sessionId, subscription);
 	}
 
 	@Nullable
 	private Expression getSelectorExpression(MessageHeaders headers) {
+		if (getSelectorHeaderName() == null) {
+			return null;
+		}
+		String selector = SimpMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
+		if (selector == null) {
+			return null;
+		}
 		Expression expression = null;
-		if (getSelectorHeaderName() != null) {
-			String selector = SimpMessageHeaderAccessor.getFirstNativeHeader(getSelectorHeaderName(), headers);
-			if (selector != null) {
-				try {
-					expression = this.expressionParser.parseExpression(selector);
-					this.selectorHeaderInUse = true;
-					if (logger.isTraceEnabled()) {
-						logger.trace("Subscription selector: [" + selector + "]");
-					}
-				}
-				catch (Throwable ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to parse selector: " + selector, ex);
-					}
-				}
+		try {
+			expression = this.expressionParser.parseExpression(selector);
+			this.selectorHeaderInUse = true;
+			if (logger.isTraceEnabled()) {
+				logger.trace("Subscription selector: [" + selector + "]");
+			}
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to parse selector: " + selector, ex);
 			}
 		}
 		return expression;
 	}
 
 	@Override
-	protected void removeSubscriptionInternal(String sessionId, String subsId, Message<?> message) {
-		SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
+	protected void removeSubscriptionInternal(String sessionId, String subscriptionId, Message<?> message) {
+		SessionInfo info = this.sessionRegistry.getSession(sessionId);
 		if (info != null) {
-			String destination = info.removeSubscription(subsId);
-			if (destination != null) {
-				this.destinationCache.updateAfterRemovedSubscription(sessionId, subsId);
+			Subscription subscription = info.removeSubscription(subscriptionId);
+			if (subscription != null) {
+				this.destinationCache.updateAfterRemovedSubscription(sessionId, subscription);
 			}
 		}
 	}
 
 	@Override
 	public void unregisterAllSubscriptions(String sessionId) {
-		SessionSubscriptionInfo info = this.subscriptionRegistry.removeSubscriptions(sessionId);
+		SessionInfo info = this.sessionRegistry.removeSubscriptions(sessionId);
 		if (info != null) {
-			this.destinationCache.updateAfterRemovedSession(info);
+			this.destinationCache.updateAfterRemovedSession(sessionId, info);
 		}
 	}
 
 	@Override
 	protected MultiValueMap<String, String> findSubscriptionsInternal(String destination, Message<?> message) {
-		MultiValueMap<String, String> result = this.destinationCache.getSubscriptions(destination, message);
-		return filterSubscriptions(result, message);
-	}
-
-	private MultiValueMap<String, String> filterSubscriptions(
-			MultiValueMap<String, String> allMatches, Message<?> message) {
-
+		MultiValueMap<String, String> allMatches = this.destinationCache.getSubscriptions(destination);
 		if (!this.selectorHeaderInUse) {
 			return allMatches;
 		}
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(allMatches.size());
-		allMatches.forEach((sessionId, subIds) -> {
-			for (String subId : subIds) {
-				SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
-				if (info == null) {
-					continue;
-				}
-				Subscription sub = info.getSubscription(subId);
-				if (sub == null) {
-					continue;
-				}
-				Expression expression = sub.getSelectorExpression();
-				if (expression == null) {
-					result.add(sessionId, subId);
-					continue;
-				}
-				try {
-					if (Boolean.TRUE.equals(expression.getValue(messageEvalContext, message, Boolean.class))) {
-						result.add(sessionId, subId);
+		allMatches.forEach((sessionId, subscriptionIds) -> {
+			SessionInfo info = this.sessionRegistry.getSession(sessionId);
+			if (info != null) {
+				for (String subscriptionId : subscriptionIds) {
+					Subscription subscription = info.getSubscription(subscriptionId);
+					if (subscription != null && evaluateExpression(subscription.getSelector(), message)) {
+						result.add(sessionId, subscription.getId());
 					}
-				}
-				catch (SpelEvaluationException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to evaluate selector: " + ex.getMessage());
-					}
-				}
-				catch (Throwable ex) {
-					logger.debug("Failed to evaluate selector", ex);
 				}
 			}
 		});
 		return result;
 	}
 
-	@Override
-	public String toString() {
-		return "DefaultSubscriptionRegistry[" + this.destinationCache + ", " + this.subscriptionRegistry + "]";
+	private boolean evaluateExpression(@Nullable Expression expression, Message<?> message) {
+		if (expression == null) {
+			return true;
+		}
+		try {
+			Boolean result = expression.getValue(messageEvalContext, message, Boolean.class);
+			if (Boolean.TRUE.equals(result)) {
+				return true;
+			}
+		}
+		catch (SpelEvaluationException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to evaluate selector: " + ex.getMessage());
+			}
+		}
+		catch (Throwable ex) {
+			logger.debug("Failed to evaluate selector", ex);
+		}
+		return false;
 	}
 
 
 	/**
-	 * A cache for destinations previously resolved via
+	 * Cache for destinations resolved previously via
 	 * {@link DefaultSubscriptionRegistry#findSubscriptionsInternal(String, Message)}.
 	 */
-	private class DestinationCache {
+	private final class DestinationCache {
 
-		/** Map from destination to {@code <sessionId, subscriptionId>} for fast look-ups. */
-		private final Map<String, LinkedMultiValueMap<String, String>> accessCache =
+		// destination -> [sessionId -> subscriptionId's]
+		private final Map<String, LinkedMultiValueMap<String, String>> destinationCache =
 				new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
 
-		/** Map from destination to {@code <sessionId, subscriptionId>} with locking. */
-		@SuppressWarnings("serial")
-		private final Map<String, LinkedMultiValueMap<String, String>> updateCache =
-				new LinkedHashMap<String, LinkedMultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
-					@Override
-					protected boolean removeEldestEntry(Map.Entry<String, LinkedMultiValueMap<String, String>> eldest) {
-						if (size() > getCacheLimit()) {
-							accessCache.remove(eldest.getKey());
-							return true;
-						}
-						else {
-							return false;
-						}
-					}
-				};
+		private final AtomicInteger cacheSize = new AtomicInteger();
 
+		private final Queue<String> cacheEvictionPolicy = new ConcurrentLinkedQueue<>();
 
-		public LinkedMultiValueMap<String, String> getSubscriptions(String destination, Message<?> message) {
-			LinkedMultiValueMap<String, String> result = this.accessCache.get(destination);
-			if (result == null) {
-				synchronized (this.updateCache) {
-					result = new LinkedMultiValueMap<>();
-					for (SessionSubscriptionInfo info : subscriptionRegistry.getAllSubscriptions()) {
-						for (String destinationPattern : info.getDestinations()) {
-							if (getPathMatcher().match(destinationPattern, destination)) {
-								for (Subscription sub : info.getSubscriptions(destinationPattern)) {
-									result.add(info.sessionId, sub.getId());
-								}
-							}
-						}
+		public LinkedMultiValueMap<String, String> getSubscriptions(String destination) {
+			LinkedMultiValueMap<String, String> sessionIdToSubscriptionIds = this.destinationCache.get(destination);
+			if (sessionIdToSubscriptionIds == null) {
+				sessionIdToSubscriptionIds = this.destinationCache.computeIfAbsent(destination, _destination -> {
+					LinkedMultiValueMap<String, String> matches = computeMatchingSubscriptions(destination);
+					// Update queue first, so that cacheSize <= queue.size(
+					this.cacheEvictionPolicy.add(destination);
+					this.cacheSize.incrementAndGet();
+					return matches;
+				});
+				ensureCacheLimit();
+			}
+			return sessionIdToSubscriptionIds;
+		}
+
+		private LinkedMultiValueMap<String, String> computeMatchingSubscriptions(String destination) {
+			LinkedMultiValueMap<String, String> sessionIdToSubscriptionIds = new LinkedMultiValueMap<>();
+			DefaultSubscriptionRegistry.this.sessionRegistry.forEachSubscription((sessionId, subscription) -> {
+				if (subscription.isPattern()) {
+					if (pathMatcher.match(subscription.getDestination(), destination)) {
+						addMatchedSubscriptionId(sessionIdToSubscriptionIds, sessionId, subscription.getId());
 					}
-					if (!result.isEmpty()) {
-						this.updateCache.put(destination, result.deepCopy());
-						this.accessCache.put(destination, result);
+				}
+				else if (destination.equals(subscription.getDestination())) {
+					addMatchedSubscriptionId(sessionIdToSubscriptionIds, sessionId, subscription.getId());
+				}
+			});
+			return sessionIdToSubscriptionIds;
+		}
+
+		private void addMatchedSubscriptionId(
+				LinkedMultiValueMap<String, String> sessionIdToSubscriptionIds,
+				String sessionId, String subscriptionId) {
+
+			sessionIdToSubscriptionIds.compute(sessionId, (_sessionId, subscriptionIds) -> {
+				if (subscriptionIds == null) {
+					return Collections.singletonList(subscriptionId);
+				}
+				else {
+					List<String> result = new ArrayList<>(subscriptionIds.size() + 1);
+					result.addAll(subscriptionIds);
+					result.add(subscriptionId);
+					return result;
+				}
+			});
+		}
+
+		private void ensureCacheLimit() {
+			int size = this.cacheSize.get();
+			if (size > cacheLimit) {
+				do {
+					if (this.cacheSize.compareAndSet(size, size - 1)) {
+						// Remove (vs poll): we expect an element
+						String head = this.cacheEvictionPolicy.remove();
+						this.destinationCache.remove(head);
+					}
+				} while ((size = this.cacheSize.get()) > cacheLimit);
+			}
+		}
+
+		public void updateAfterNewSubscription(String sessionId, Subscription subscription) {
+			if (subscription.isPattern()) {
+				for (String cachedDestination : this.destinationCache.keySet()) {
+					if (pathMatcher.match(subscription.getDestination(), cachedDestination)) {
+						addToDestination(cachedDestination, sessionId, subscription.getId());
 					}
 				}
 			}
-			return result;
-		}
-
-		public void updateAfterNewSubscription(String destination, String sessionId, String subsId) {
-			synchronized (this.updateCache) {
-				this.updateCache.forEach((cachedDestination, subscriptions) -> {
-					if (getPathMatcher().match(destination, cachedDestination)) {
-						// Subscription id's may also be populated via getSubscriptions()
-						List<String> subsForSession = subscriptions.get(sessionId);
-						if (subsForSession == null || !subsForSession.contains(subsId)) {
-							subscriptions.add(sessionId, subsId);
-							this.accessCache.put(cachedDestination, subscriptions.deepCopy());
-						}
-					}
-				});
+			else {
+				addToDestination(subscription.getDestination(), sessionId, subscription.getId());
 			}
 		}
 
-		public void updateAfterRemovedSubscription(String sessionId, String subsId) {
-			synchronized (this.updateCache) {
-				Set<String> destinationsToRemove = new HashSet<>();
-				this.updateCache.forEach((destination, sessionMap) -> {
-					List<String> subscriptions = sessionMap.get(sessionId);
-					if (subscriptions != null) {
-						subscriptions.remove(subsId);
-						if (subscriptions.isEmpty()) {
-							sessionMap.remove(sessionId);
-						}
-						if (sessionMap.isEmpty()) {
-							destinationsToRemove.add(destination);
-						}
-						else {
-							this.accessCache.put(destination, sessionMap.deepCopy());
-						}
+		private void addToDestination(String destination, String sessionId, String subscriptionId) {
+			this.destinationCache.computeIfPresent(destination, (_destination, sessionIdToSubscriptionIds) -> {
+				sessionIdToSubscriptionIds = sessionIdToSubscriptionIds.clone();
+				addMatchedSubscriptionId(sessionIdToSubscriptionIds, sessionId, subscriptionId);
+				return sessionIdToSubscriptionIds;
+			});
+		}
+
+		public void updateAfterRemovedSubscription(String sessionId, Subscription subscription) {
+			if (subscription.isPattern()) {
+				String subscriptionId = subscription.getId();
+				this.destinationCache.forEach((destination, sessionIdToSubscriptionIds) -> {
+					List<String> subscriptionIds = sessionIdToSubscriptionIds.get(sessionId);
+					if (subscriptionIds != null && subscriptionIds.contains(subscriptionId)) {
+						removeInternal(destination, sessionId, subscriptionId);
 					}
 				});
-				for (String destination : destinationsToRemove) {
-					this.updateCache.remove(destination);
-					this.accessCache.remove(destination);
-				}
+			}
+			else {
+				removeInternal(subscription.getDestination(), sessionId, subscription.getId());
 			}
 		}
 
-		public void updateAfterRemovedSession(SessionSubscriptionInfo info) {
-			synchronized (this.updateCache) {
-				Set<String> destinationsToRemove = new HashSet<>();
-				this.updateCache.forEach((destination, sessionMap) -> {
-					if (sessionMap.remove(info.getSessionId()) != null) {
-						if (sessionMap.isEmpty()) {
-							destinationsToRemove.add(destination);
-						}
-						else {
-							this.accessCache.put(destination, sessionMap.deepCopy());
-						}
+		private void removeInternal(String destination, String sessionId, String subscriptionId) {
+			this.destinationCache.computeIfPresent(destination, (_destination, sessionIdToSubscriptionIds) -> {
+				sessionIdToSubscriptionIds = sessionIdToSubscriptionIds.clone();
+				sessionIdToSubscriptionIds.computeIfPresent(sessionId, (_sessionId, subscriptionIds) -> {
+					/* Most likely case: single subscription per destination per session. */
+					if (subscriptionIds.size() == 1 && subscriptionId.equals(subscriptionIds.get(0))) {
+						return null;
 					}
+					subscriptionIds = new ArrayList<>(subscriptionIds);
+					subscriptionIds.remove(subscriptionId);
+					return (subscriptionIds.isEmpty() ? null : subscriptionIds);
 				});
-				for (String destination : destinationsToRemove) {
-					this.updateCache.remove(destination);
-					this.accessCache.remove(destination);
-				}
-			}
+				return sessionIdToSubscriptionIds;
+			});
 		}
 
-		@Override
-		public String toString() {
-			return "cache[" + this.accessCache.size() + " destination(s)]";
+		public void updateAfterRemovedSession(String sessionId, SessionInfo info) {
+			for (Subscription subscription : info.getSubscriptions()) {
+				updateAfterRemovedSubscription(sessionId, subscription);
+			}
 		}
 	}
 
-
 	/**
-	 * Provide access to session subscriptions by sessionId.
+	 * Registry for all session and their subscriptions.
 	 */
-	private static class SessionSubscriptionRegistry {
+	private static final class SessionRegistry {
 
-		// sessionId -> SessionSubscriptionInfo
-		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions = new ConcurrentHashMap<>();
+		private final ConcurrentMap<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 		@Nullable
-		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
+		public SessionInfo getSession(String sessionId) {
 			return this.sessions.get(sessionId);
 		}
 
-		public Collection<SessionSubscriptionInfo> getAllSubscriptions() {
-			return this.sessions.values();
+		public void forEachSubscription(BiConsumer<String, Subscription> consumer) {
+			this.sessions.forEach((sessionId, info) ->
+				info.getSubscriptions().forEach(subscription -> consumer.accept(sessionId, subscription)));
 		}
 
-		public SessionSubscriptionInfo addSubscription(String sessionId, String subscriptionId,
-				String destination, @Nullable Expression selectorExpression) {
-
-			SessionSubscriptionInfo info = this.sessions.get(sessionId);
-			if (info == null) {
-				info = new SessionSubscriptionInfo(sessionId);
-				SessionSubscriptionInfo value = this.sessions.putIfAbsent(sessionId, info);
-				if (value != null) {
-					info = value;
-				}
-			}
-			info.addSubscription(destination, subscriptionId, selectorExpression);
-			return info;
+		public void addSubscription(String sessionId, Subscription subscription) {
+			SessionInfo info = this.sessions.computeIfAbsent(sessionId, _sessionId -> new SessionInfo());
+			info.addSubscription(subscription);
 		}
 
 		@Nullable
-		public SessionSubscriptionInfo removeSubscriptions(String sessionId) {
+		public SessionInfo removeSubscriptions(String sessionId) {
 			return this.sessions.remove(sessionId);
-		}
-
-		@Override
-		public String toString() {
-			return "registry[" + this.sessions.size() + " sessions]";
 		}
 	}
 
-
 	/**
-	 * Hold subscriptions for a session.
+	 * Container for the subscriptions of a session.
 	 */
-	private static class SessionSubscriptionInfo {
+	private static final class SessionInfo {
 
-		private final String sessionId;
+		// subscriptionId -> Subscription
+		private final Map<String, Subscription> subscriptionMap = new ConcurrentHashMap<>();
 
-		// destination -> subscriptions
-		private final Map<String, Set<Subscription>> destinationLookup = new ConcurrentHashMap<>(4);
-
-		public SessionSubscriptionInfo(String sessionId) {
-			Assert.notNull(sessionId, "'sessionId' must not be null");
-			this.sessionId = sessionId;
-		}
-
-		public String getSessionId() {
-			return this.sessionId;
-		}
-
-		public Set<String> getDestinations() {
-			return this.destinationLookup.keySet();
-		}
-
-		public Set<Subscription> getSubscriptions(String destination) {
-			return this.destinationLookup.get(destination);
+		public Collection<Subscription> getSubscriptions() {
+			return this.subscriptionMap.values();
 		}
 
 		@Nullable
 		public Subscription getSubscription(String subscriptionId) {
-			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry :
-					this.destinationLookup.entrySet()) {
-				for (Subscription sub : destinationEntry.getValue()) {
-					if (sub.getId().equalsIgnoreCase(subscriptionId)) {
-						return sub;
-					}
-				}
-			}
-			return null;
+			return this.subscriptionMap.get(subscriptionId);
 		}
 
-		public void addSubscription(String destination, String subscriptionId, @Nullable Expression selectorExpression) {
-			Set<Subscription> subs = this.destinationLookup.get(destination);
-			if (subs == null) {
-				synchronized (this.destinationLookup) {
-					subs = this.destinationLookup.get(destination);
-					if (subs == null) {
-						subs = new CopyOnWriteArraySet<>();
-						this.destinationLookup.put(destination, subs);
-					}
-				}
-			}
-			subs.add(new Subscription(subscriptionId, selectorExpression));
+		public void addSubscription(Subscription subscription) {
+			this.subscriptionMap.putIfAbsent(subscription.getId(), subscription);
 		}
 
 		@Nullable
-		public String removeSubscription(String subscriptionId) {
-			for (Map.Entry<String, Set<DefaultSubscriptionRegistry.Subscription>> destinationEntry :
-					this.destinationLookup.entrySet()) {
-				Set<Subscription> subs = destinationEntry.getValue();
-				if (subs != null) {
-					for (Subscription sub : subs) {
-						if (sub.getId().equals(subscriptionId) && subs.remove(sub)) {
-							synchronized (this.destinationLookup) {
-								if (subs.isEmpty()) {
-									this.destinationLookup.remove(destinationEntry.getKey());
-								}
-							}
-							return destinationEntry.getKey();
-						}
-					}
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return "[sessionId=" + this.sessionId + ", subscriptions=" + this.destinationLookup + "]";
+		public Subscription removeSubscription(String subscriptionId) {
+			return this.subscriptionMap.remove(subscriptionId);
 		}
 	}
 
-
+	/**
+	 * Represents a subscription.
+	 */
 	private static final class Subscription {
 
 		private final String id;
 
-		@Nullable
-		private final Expression selectorExpression;
+		private final String destination;
 
-		public Subscription(String id, @Nullable Expression selector) {
+		private final boolean isPattern;
+
+		@Nullable
+		private final Expression selector;
+
+		public Subscription(String id, String destination, boolean isPattern, @Nullable Expression selector) {
 			Assert.notNull(id, "Subscription id must not be null");
+			Assert.notNull(destination, "Subscription destination must not be null");
 			this.id = id;
-			this.selectorExpression = selector;
+			this.selector = selector;
+			this.destination = destination;
+			this.isPattern = isPattern;
 		}
 
 		public String getId() {
 			return this.id;
 		}
 
+		public String getDestination() {
+			return this.destination;
+		}
+
+		public boolean isPattern() {
+			return this.isPattern;
+		}
+
 		@Nullable
-		public Expression getSelectorExpression() {
-			return this.selectorExpression;
+		public Expression getSelector() {
+			return this.selector;
 		}
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof Subscription && this.id.equals(((Subscription) other).id)));
+			return (this == other ||
+					(other instanceof Subscription && this.id.equals(((Subscription) other).id)));
 		}
 
 		@Override

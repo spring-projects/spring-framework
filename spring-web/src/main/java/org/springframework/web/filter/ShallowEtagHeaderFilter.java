@@ -99,7 +99,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		HttpServletResponse responseToUse = response;
-		if (!isAsyncDispatch(request) && !(response instanceof ContentCachingResponseWrapper)) {
+		if (!isAsyncDispatch(request) && !(response instanceof ConditionalContentCachingResponseWrapper)) {
 			responseToUse = new ConditionalContentCachingResponseWrapper(response, request);
 		}
 
@@ -111,10 +111,8 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	}
 
 	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		ContentCachingResponseWrapper wrapper =
-				WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
-
+		ConditionalContentCachingResponseWrapper wrapper =
+				WebUtils.getNativeResponse(response, ConditionalContentCachingResponseWrapper.class);
 		Assert.notNull(wrapper, "ContentCachingResponseWrapper not found");
 		HttpServletResponse rawResponse = (HttpServletResponse) wrapper.getResponse();
 
@@ -208,7 +206,6 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static class ConditionalContentCachingResponseWrapper extends ContentCachingResponseWrapper {
 
 		private final HttpServletRequest request;
-
 
 		ConditionalContentCachingResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
 			super(response);

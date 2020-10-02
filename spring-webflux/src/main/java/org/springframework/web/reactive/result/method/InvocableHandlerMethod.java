@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Configure the argument resolvers to use to use for resolving method
 	 * argument values against a {@code ServerWebExchange}.
 	 */
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+	public void setArgumentResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
 		this.resolvers.addResolvers(resolvers);
 	}
 

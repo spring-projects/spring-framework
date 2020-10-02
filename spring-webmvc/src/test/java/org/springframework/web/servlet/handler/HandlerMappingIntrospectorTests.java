@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
+import org.springframework.web.util.pattern.PatternParseException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -111,7 +113,7 @@ public class HandlerMappingIntrospectorTests {
 	@ValueSource(booleans = {true, false})
 	void getMatchable(boolean usePathPatterns) throws Exception {
 
-		PathPatternParser parser = new PathPatternParser();
+		TestPathPatternParser parser = new TestPathPatternParser();
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.registerBean("mapping", SimpleUrlHandlerMapping.class, () -> {
@@ -134,16 +136,14 @@ public class HandlerMappingIntrospectorTests {
 		MatchableHandlerMapping mapping = initIntrospector(context).getMatchableHandlerMapping(request);
 
 		assertThat(mapping).isNotNull();
-		assertThat(mapping).isEqualTo(context.getBean("mapping"));
 		assertThat(request.getAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE)).as("Attribute changes not ignored").isNull();
 
-		String pattern = "/p*/*";
-		PathPattern pathPattern = parser.parse(pattern);
-		assertThat(usePathPatterns ? mapping.match(request, pathPattern) : mapping.match(request, pattern)).isNotNull();
+		assertThat(mapping.match(request, "/p*/*")).isNotNull();
+		assertThat(mapping.match(request, "/b*/*")).isNull();
 
-		pattern = "/b*/*";
-		pathPattern = parser.parse(pattern);
-		assertThat(usePathPatterns ? mapping.match(request, pathPattern) : mapping.match(request, pattern)).isNull();
+		if (usePathPatterns) {
+			assertThat(parser.getParsedPatterns()).containsExactly("/path/*", "/p*/*", "/b*/*");
+		}
 	}
 
 	@Test
@@ -227,6 +227,22 @@ public class HandlerMappingIntrospectorTests {
 
 		@PostMapping("/path")
 		void handle() {
+		}
+	}
+
+	private static class TestPathPatternParser extends PathPatternParser {
+
+		private final List<String> parsedPatterns = new ArrayList<>();
+
+
+		public List<String> getParsedPatterns() {
+			return this.parsedPatterns;
+		}
+
+		@Override
+		public PathPattern parse(String pathPattern) throws PatternParseException {
+			this.parsedPatterns.add(pathPattern);
+			return super.parse(pathPattern);
 		}
 	}
 

@@ -41,7 +41,7 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Override
 	protected AsyncListenableTaskExecutor buildExecutor() {
-		concurrentExecutor.setThreadFactory(new CustomizableThreadFactory(THREAD_NAME_PREFIX));
+		concurrentExecutor.setThreadFactory(new CustomizableThreadFactory(this.threadNamePrefix));
 		return new ConcurrentTaskExecutor(concurrentExecutor);
 	}
 

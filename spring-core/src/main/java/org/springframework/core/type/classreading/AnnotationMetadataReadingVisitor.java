@@ -68,7 +68,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	 * to ensure that the hierarchical ordering of the entries is preserved.
 	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes
 	 */
-	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(4);
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<>(3);
 
 	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<>(4);
 

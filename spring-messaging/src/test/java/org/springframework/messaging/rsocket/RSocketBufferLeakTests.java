@@ -89,13 +89,12 @@ class RSocketBufferLeakTests {
 		requester = RSocketRequester.builder()
 				.rsocketConnector(conn -> conn.interceptors(registry -> registry.forRequester(payloadInterceptor)))
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
-				.connectTcp("localhost", 7000)
-				.block();
+				.tcp("localhost", 7000);
 	}
 
 	@AfterAll
 	void tearDownOnce() {
-		requester.rsocket().dispose();
+		requester.rsocketClient().dispose();
 		server.dispose();
 		context.close();
 	}
@@ -149,7 +148,8 @@ class RSocketBufferLeakTests {
 	}
 
 	@Test // gh-24741
-	@Disabled // pending https://github.com/rsocket/rsocket-java/pull/777
+	@Disabled
+		// pending https://github.com/rsocket/rsocket-java/pull/777
 	void noSuchRouteOnChannelInteraction() {
 		Flux<String> input = Flux.just("foo", "bar", "baz");
 		Flux<String> result = requester.route("no-such-route").data(input).retrieveFlux(String.class);
@@ -246,7 +246,7 @@ class RSocketBufferLeakTests {
 		void checkForLeaks() {
 			this.rsockets.stream().map(PayloadSavingDecorator::getPayloads)
 					.forEach(payloadInfoProcessor -> {
-						payloadInfoProcessor.complete();
+						payloadInfoProcessor.tryEmitComplete();
 						payloadInfoProcessor.asFlux()
 								.doOnNext(this::checkForLeak)
 								.blockLast();
@@ -291,18 +291,18 @@ class RSocketBufferLeakTests {
 
 			private final RSocket delegate;
 
-			private Sinks.StandaloneFluxSink<PayloadLeakInfo> payloads = Sinks.replayAll();
+			private Sinks.Many<PayloadLeakInfo> payloads = Sinks.many().replay().all();
 
 			PayloadSavingDecorator(RSocket delegate) {
 				this.delegate = delegate;
 			}
 
-			Sinks.StandaloneFluxSink<PayloadLeakInfo> getPayloads() {
+			Sinks.Many<PayloadLeakInfo> getPayloads() {
 				return this.payloads;
 			}
 
 			void reset() {
-				this.payloads = Sinks.replayAll();
+				this.payloads = Sinks.many().replay().all();
 			}
 
 			@Override
@@ -328,7 +328,7 @@ class RSocketBufferLeakTests {
 			}
 
 			private io.rsocket.Payload addPayload(io.rsocket.Payload payload) {
-				this.payloads.next(new PayloadLeakInfo(payload));
+				this.payloads.tryEmitNext(new PayloadLeakInfo(payload));
 				return payload;
 			}
 

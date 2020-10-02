@@ -18,11 +18,8 @@ package org.springframework.web.servlet.handler;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.util.ServletRequestPathUtils;
-import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -44,21 +41,6 @@ public interface MatchableHandlerMapping extends HandlerMapping {
 	@Nullable
 	default PathPatternParser getPatternParser() {
 		return null;
-	}
-
-	/**
-	 * Determine whether the request matches the given pattern. Use this method
-	 * when {@link #getPatternParser()} is not {@code null} which means that the
-	 * {@code HandlerMapping} has pre-parsed patterns enabled.
-	 * @param request the current request
-	 * @param pattern the pattern to match
-	 * @return the result from request matching, or {@code null} if none
-	 * @since 5.3
-	 */
-	@Nullable
-	default RequestMatchResult match(HttpServletRequest request, PathPattern pattern) {
-		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();
-		return (pattern.matches(path) ? new RequestMatchResult(pattern, path) : null);
 	}
 
 	/**

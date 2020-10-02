@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -31,6 +30,7 @@ import io.r2dbc.spi.Statement;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Value object representing value and {@code null} bindings
@@ -60,7 +60,7 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	 */
 	public Bindings(Collection<Binding> bindings) {
 		Assert.notNull(bindings, "Bindings must not be null");
-		Map<BindMarker, Binding> mapping = new LinkedHashMap<>(bindings.size());
+		Map<BindMarker, Binding> mapping = CollectionUtils.newLinkedHashMap(bindings.size());
 		bindings.forEach(binding -> mapping.put(binding.getBindMarker(), binding));
 		this.bindings = mapping;
 	}

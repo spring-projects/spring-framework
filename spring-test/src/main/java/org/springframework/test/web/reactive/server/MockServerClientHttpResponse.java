@@ -13,26 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.rsocket;
+package org.springframework.test.web.reactive.server;
+
+import org.springframework.http.client.reactive.ClientHttpResponse;
 
 /**
- * Strategy to apply configuration to a client side {@code RSocketFactory}.
- * that's being prepared by {@link RSocketRequester.Builder} to connect
- * to a server.
+ * Simple {@link ClientHttpResponse} extension that also exposes a result object
+ * from the underlying mock server exchange for further assertions on the state
+ * of the server response after the request is performed.
  *
  * @author Rossen Stoyanchev
- * @since 5.2
- * @deprecated as of 5.2.6 following the deprecation of
- * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
- * in RSocket 1.0 RC7. Please, use {@link RSocketConnectorConfigurer}.
+ * @since 5.3
  */
-@FunctionalInterface
-@Deprecated
-public interface ClientRSocketFactoryConfigurer {
+public interface MockServerClientHttpResponse extends ClientHttpResponse {
 
 	/**
-	 * Apply configuration to the given {@code ClientRSocketFactory}.
+	 * Return the result object with the server request and response.
 	 */
-	void configure(io.rsocket.RSocketFactory.ClientRSocketFactory rsocketFactory);
+	Object getServerResult();
 
 }

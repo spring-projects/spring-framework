@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 
@@ -150,7 +151,7 @@ public class ServerHttpResponseTests {
 		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 	}
 
-	@Test // gh-24186
+	@Test // gh-24186, gh-25753
 	void beforeCommitErrorShouldLeaveResponseNotCommitted() {
 
 		Consumer<Supplier<Mono<Void>>> tester = preCommitAction -> {
@@ -168,6 +169,15 @@ public class ServerHttpResponseTests {
 			assertThat(response.cookiesWritten).isFalse();
 			assertThat(response.isCommitted()).isFalse();
 			assertThat(response.getHeaders()).isEmpty();
+
+			// Handle the error
+			response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+			StepVerifier.create(response.setComplete()).verifyComplete();
+
+			assertThat(response.statusCodeWritten).isTrue();
+			assertThat(response.headersWritten).isTrue();
+			assertThat(response.cookiesWritten).isTrue();
+			assertThat(response.isCommitted()).isTrue();
 		};
 
 		tester.accept(() -> Mono.error(new IllegalStateException("Max sessions")));

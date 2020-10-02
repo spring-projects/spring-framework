@@ -184,12 +184,12 @@ final class MetadataEncoder {
 			CompositeByteBuf composite = this.allocator.compositeBuffer();
 			try {
 				if (this.route != null) {
-					io.rsocket.metadata.CompositeMetadataFlyweight.encodeAndAddMetadata(composite, this.allocator,
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(composite, this.allocator,
 							WellKnownMimeType.MESSAGE_RSOCKET_ROUTING, encodeRoute());
 				}
 				entries.forEach(entry -> {
 					Object value = entry.value();
-					io.rsocket.metadata.CompositeMetadataFlyweight.encodeAndAddMetadata(
+					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(
 							composite, this.allocator, entry.mimeType().toString(),
 							value instanceof ByteBuf ? (ByteBuf) value : PayloadUtils.asByteBuf(encodeEntry(entry)));
 				});
@@ -219,9 +219,8 @@ final class MetadataEncoder {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private ByteBuf encodeRoute() {
-		return io.rsocket.metadata.TaggingMetadataFlyweight.createRoutingMetadata(
+		return io.rsocket.metadata.TaggingMetadataCodec.createRoutingMetadata(
 				this.allocator, Collections.singletonList(this.route)).getContent();
 	}
 

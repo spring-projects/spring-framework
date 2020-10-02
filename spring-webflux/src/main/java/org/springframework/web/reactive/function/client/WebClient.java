@@ -57,7 +57,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * <p>For examples with a response body see:
  * <ul>
  * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
- * <li>{@link RequestHeadersSpec#exchange() exchange()}
+ * <li>{@link RequestHeadersSpec#exchangeToMono(Function) exchangeToMono()}
+ * <li>{@link RequestHeadersSpec#exchangeToFlux(Function) exchangeToFlux()}
  * </ul>
  * <p>For examples with a request body see:
  * <ul>
@@ -252,8 +253,7 @@ public interface WebClient {
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
-		 * Provide a consumer to modify every request being built just before the
-		 * call to {@link RequestHeadersSpec#exchange() exchange()}.
+		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
 		 * @since 5.1
 		 */
@@ -471,20 +471,104 @@ public interface WebClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
-		 * Perform the HTTP request and retrieve the response body:
+		 * Callback for access to the {@link ClientHttpRequest} that in turn
+		 * provides access to the native request of the underlying HTTP library.
+		 * This could be useful for setting advanced, per-request options that
+		 * exposed by the underlying library.
+		 * @param requestConsumer a consumer to access the
+		 * {@code ClientHttpRequest} with
+		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * @since 5.3
+		 */
+		S httpRequest(Consumer<ClientHttpRequest> requestConsumer);
+
+		/**
+		 * Proceed to declare how to extract the response. For example to extract
+		 * a {@link ResponseEntity} with status, headers, and body:
 		 * <p><pre>
-		 * Mono&lt;Person&gt; bodyMono = client.get()
+		 * Mono&lt;ResponseEntity&lt;Person&gt;&gt; entityMono = client.get()
+		 *     .uri("/persons/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .retrieve()
+		 *     .toEntity(Person.class);
+		 * </pre>
+		 * <p>Or if interested only in the body:
+		 * <p><pre>
+		 * Mono&lt;Person&gt; entityMono = client.get()
 		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
 		 *     .retrieve()
 		 *     .bodyToMono(Person.class);
 		 * </pre>
-		 * <p>This method is a shortcut to using {@link #exchange()} and
-		 * decoding the response body through {@link ClientResponse}.
-		 * @return {@code ResponseSpec} to specify how to decode the body
-		 * @see #exchange()
+		 * <p>By default, 4xx and 5xx responses result in a
+		 * {@link WebClientResponseException}. To customize error handling, use
+		 * {@link ResponseSpec#onStatus(Predicate, Function) onStatus} handlers.
 		 */
 		ResponseSpec retrieve();
+
+		/**
+		 * An alternative to {@link #retrieve()} that provides more control via
+		 * access to the {@link ClientResponse}. This can be useful for advanced
+		 * scenarios, for example to decode the response differently depending
+		 * on the response status:
+		 * <p><pre>
+		 * Mono&lt;Object&gt; entityMono = client.get()
+		 *     .uri("/persons/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchangeToMono(response -> {
+		 *         if (response.statusCode().equals(HttpStatus.OK)) {
+		 *             return response.bodyToMono(Person.class);
+		 *         }
+		 *         else if (response.statusCode().is4xxClientError()) {
+		 *             return response.bodyToMono(ErrorContainer.class);
+		 *         }
+		 *         else {
+		 *             return Mono.error(response.createException());
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> After the returned {@code Mono} completes,
+		 * the response body is automatically released if it hasn't been consumed.
+		 * If the response content is needed, the provided function must declare
+		 * how to decode it.
+		 * @param responseHandler the function to handle the response with
+		 * @param <V> the type of Object the response will be transformed to
+		 * @return a {@code Mono} produced from the response
+		 * @since 5.3
+		 */
+		<V> Mono<V> exchangeToMono(Function<ClientResponse, ? extends Mono<V>> responseHandler);
+
+		/**
+		 * An alternative to {@link #retrieve()} that provides more control via
+		 * access to the {@link ClientResponse}. This can be useful for advanced
+		 * scenarios, for example to decode the response differently depending
+		 * on the response status:
+		 * <p><pre>
+		 * Mono&lt;Object&gt; entityMono = client.get()
+		 *     .uri("/persons")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchangeToFlux(response -> {
+		 *         if (response.statusCode().equals(HttpStatus.OK)) {
+		 *             return response.bodyToFlux(Person.class);
+		 *         }
+		 *         else if (response.statusCode().is4xxClientError()) {
+		 *             return response.bodyToMono(ErrorContainer.class).flux();
+		 *         }
+		 *         else {
+		 *             return Flux.error(response.createException());
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> After the returned {@code Flux} completes,
+		 * the response body is automatically released if it hasn't been consumed.
+		 * If the response content is needed, the provided function must declare
+		 * how to decode it.
+		 * @param responseHandler the function to handle the response with
+		 * @param <V> the type of Objects the response will be transformed to
+		 * @return a {@code Flux} of Objects produced from the response
+		 * @since 5.3
+		 */
+		<V> Flux<V> exchangeToFlux(Function<ClientResponse, ? extends Flux<V>> responseHandler);
 
 		/**
 		 * Perform the HTTP request and return a {@link ClientResponse} with the
@@ -514,7 +598,14 @@ public interface WebClient {
 		 * if to consume the response.
 		 * @return a {@code Mono} for the response
 		 * @see #retrieve()
+		 * @deprecated since 5.3 due to the possibility to leak memory and/or
+		 * connections; please, use {@link #exchangeToMono(Function)},
+		 * {@link #exchangeToFlux(Function)}; consider also using
+		 * {@link #retrieve()} which provides access to the response status
+		 * and headers via {@link ResponseEntity} along with error status
+		 * handling.
 		 */
+		@Deprecated
 		Mono<ClientResponse> exchange();
 	}
 

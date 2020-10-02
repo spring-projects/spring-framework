@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +51,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -67,16 +67,10 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private static final byte[] NEWLINE_SEPARATOR = {'\n'};
 
-	private static final Map<MediaType, byte[]> STREAM_SEPARATORS;
-
 	private static final Map<String, JsonEncoding> ENCODINGS;
 
 	static {
-		STREAM_SEPARATORS = new HashMap<>(4);
-		STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
-		STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
-
-		ENCODINGS = new HashMap<>(JsonEncoding.values().length + 1);
+		ENCODINGS = CollectionUtils.newHashMap(JsonEncoding.values().length);
 		for (JsonEncoding encoding : JsonEncoding.values()) {
 			ENCODINGS.put(encoding.getJavaName(), encoding);
 		}
@@ -98,9 +92,6 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	/**
 	 * Configure "streaming" media types for which flushing should be performed
 	 * automatically vs at the end of the stream.
-	 * <p>By default this is set to {@link MediaType#APPLICATION_STREAM_JSON}.
-	 * @param mediaTypes one or more media types to add to the list
-	 * @see HttpMessageEncoder#getStreamingMediaTypes()
 	 */
 	public void setStreamingMediaTypes(List<MediaType> mediaTypes) {
 		this.streamingMediaTypes.clear();
@@ -138,7 +129,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 					.flux();
 		}
 		else {
-			byte[] separator = streamSeparator(mimeType);
+			byte[] separator = getStreamingMediaTypeSeparator(mimeType);
 			if (separator != null) { // streaming
 				try {
 					ObjectWriter writer = createObjectWriter(elementType, mimeType, hints);
@@ -268,11 +259,18 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		return writer;
 	}
 
+	/**
+	 * Return the separator to use for the given mime type.
+	 * <p>By default, this method returns new line {@code "\n"} if the given
+	 * mime type is one of the configured {@link #setStreamingMediaTypes(List)
+	 * streaming} mime types.
+	 * @since 5.3
+	 */
 	@Nullable
-	private byte[] streamSeparator(@Nullable MimeType mimeType) {
+	protected byte[] getStreamingMediaTypeSeparator(@Nullable MimeType mimeType) {
 		for (MediaType streamingMediaType : this.streamingMediaTypes) {
 			if (streamingMediaType.isCompatibleWith(mimeType)) {
-				return STREAM_SEPARATORS.getOrDefault(streamingMediaType, NEWLINE_SEPARATOR);
+				return NEWLINE_SEPARATOR;
 			}
 		}
 		return null;

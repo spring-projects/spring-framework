@@ -146,7 +146,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void setAwaitTerminationSeconds(int awaitTerminationSeconds) {
-		this.awaitTerminationMillis = awaitTerminationSeconds * 1000;
+		this.awaitTerminationMillis = awaitTerminationSeconds * 1000L;
 	}
 
 	/**

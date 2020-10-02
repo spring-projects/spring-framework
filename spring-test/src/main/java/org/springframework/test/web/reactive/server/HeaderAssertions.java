@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.reactive.server;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -30,6 +31,10 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.util.CollectionUtils;
+
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Assertions on headers of the response.
@@ -57,7 +62,42 @@ public class HeaderAssertions {
 	 * Expect a header with the given name to match the specified values.
 	 */
 	public WebTestClient.ResponseSpec valueEquals(String headerName, String... values) {
-		return assertHeader(headerName, Arrays.asList(values), getHeaders().get(headerName));
+		return assertHeader(headerName, Arrays.asList(values), getHeaders().getOrEmpty(headerName));
+	}
+
+	/**
+	 * Expect a header with the given name to match the given long value.
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec valueEquals(String headerName, long value) {
+		String actual = getHeaders().getFirst(headerName);
+		this.exchangeResult.assertWithDiagnostics(() ->
+				assertTrue("Response does not contain header '" + headerName + "'", actual != null));
+		return assertHeader(headerName, value, Long.parseLong(actual));
+	}
+
+	/**
+	 * Expect a header with the given name to match the specified long value
+	 * parsed into a date using the preferred date format described in RFC 7231.
+	 * <p>An {@link AssertionError} is thrown if the response does not contain
+	 * the specified header, or if the supplied {@code value} does not match the
+	 * primary header value.
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec valueEqualsDate(String headerName, long value) {
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String headerValue = getHeaders().getFirst(headerName);
+			assertNotNull("Response does not contain header '" + headerName + "'", headerValue);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setDate("expected", value);
+			headers.set("actual", headerValue);
+
+			assertEquals("Response header '" + headerName + "'='" + headerValue + "' " +
+							"does not match expected value '" + headers.getFirst("expected") + "'",
+					headers.getFirstDate("expected"), headers.getFirstDate("actual"));
+		});
+		return this.responseSpec;
 	}
 
 	/**
@@ -106,8 +146,11 @@ public class HeaderAssertions {
 	 * @since 5.1
 	 */
 	public WebTestClient.ResponseSpec value(String name, Matcher<? super String> matcher) {
-		String value = getRequiredValue(name);
-		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat(value, matcher));
+		String value = getHeaders().getFirst(name);
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String message = getMessage(name);
+			MatcherAssert.assertThat(message, value, matcher);
+		});
 		return this.responseSpec;
 	}
 
@@ -117,9 +160,12 @@ public class HeaderAssertions {
 	 * @param matcher the matcher to use
 	 * @since 5.3
 	 */
-	public WebTestClient.ResponseSpec values(String name, Matcher<Iterable<String>> matcher) {
-		List<String> values = getRequiredValues(name);
-		this.exchangeResult.assertWithDiagnostics(() -> MatcherAssert.assertThat(values, matcher));
+	public WebTestClient.ResponseSpec values(String name, Matcher<? super Iterable<String>> matcher) {
+		List<String> values = getHeaders().get(name);
+		this.exchangeResult.assertWithDiagnostics(() -> {
+			String message = getMessage(name);
+			MatcherAssert.assertThat(message, values, matcher);
+		});
 		return this.responseSpec;
 	}
 
@@ -154,7 +200,8 @@ public class HeaderAssertions {
 	private List<String> getRequiredValues(String name) {
 		List<String> values = getHeaders().get(name);
 		if (CollectionUtils.isEmpty(values)) {
-			AssertionErrors.fail(getMessage(name) + " not found");
+			this.exchangeResult.assertWithDiagnostics(() ->
+					AssertionErrors.fail(getMessage(name) + " not found"));
 		}
 		return values;
 	}
@@ -247,6 +294,14 @@ public class HeaderAssertions {
 	 */
 	public WebTestClient.ResponseSpec lastModified(long lastModified) {
 		return assertHeader("Last-Modified", lastModified, getHeaders().getLastModified());
+	}
+
+	/**
+	 * Expect a "Location" header with the given value.
+	 * @since 5.3
+	 */
+	public WebTestClient.ResponseSpec location(String location) {
+		return assertHeader("Location", URI.create(location), getHeaders().getLocation());
 	}
 
 

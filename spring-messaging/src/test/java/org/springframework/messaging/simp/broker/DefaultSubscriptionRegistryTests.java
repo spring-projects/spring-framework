@@ -97,6 +97,21 @@ public class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
+	public void registerSameSubscriptionTwice() {
+		String sessId = "sess01";
+		String subId = "subs01";
+		String dest = "/foo";
+
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
+		this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertThat(actual).isNotNull();
+		assertThat(actual.size()).isEqualTo(1);
+		assertThat(actual.get(sessId)).containsExactly(subId);
+	}
+
+	@Test
 	public void registerSubscriptionMultipleSessions() {
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
@@ -148,7 +163,7 @@ public class DefaultSubscriptionRegistryTests {
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
 		assertThat(actual).isNotNull();
 		assertThat(actual.size()).isEqualTo(1);
-		assertThat(actual.get(sess1)).isEqualTo(Arrays.asList(subs2, subs1));
+		assertThat(actual.get(sess1)).containsExactlyInAnyOrder(subs2, subs1);
 
 		this.registry.registerSubscription(subscribeMessage(sess2, subs1, destNasdaqIbm));
 		this.registry.registerSubscription(subscribeMessage(sess2, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
@@ -157,7 +172,7 @@ public class DefaultSubscriptionRegistryTests {
 		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
 		assertThat(actual).isNotNull();
 		assertThat(actual.size()).isEqualTo(2);
-		assertThat(actual.get(sess1)).isEqualTo(Arrays.asList(subs2, subs1));
+		assertThat(actual.get(sess1)).containsExactlyInAnyOrder(subs2, subs1);
 		assertThat(actual.get(sess2)).isEqualTo(Collections.singletonList(subs1));
 
 		this.registry.unregisterAllSubscriptions(sess1);
@@ -173,7 +188,7 @@ public class DefaultSubscriptionRegistryTests {
 		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
 		assertThat(actual).isNotNull();
 		assertThat(actual.size()).isEqualTo(2);
-		assertThat(actual.get(sess1)).isEqualTo(Arrays.asList(subs1, subs2));
+		assertThat(actual.get(sess1)).containsExactlyInAnyOrder(subs1, subs2);
 		assertThat(actual.get(sess2)).isEqualTo(Collections.singletonList(subs1));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));

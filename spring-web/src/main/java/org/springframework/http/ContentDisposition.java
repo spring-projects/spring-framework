@@ -129,7 +129,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal size} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -141,7 +141,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal creation-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -153,7 +153,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal modification-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -165,7 +165,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal read-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -562,7 +562,7 @@ public final class ContentDisposition {
 
 	private static class BuilderImpl implements Builder {
 
-		private String type;
+		private final String type;
 
 		@Nullable
 		private String name;

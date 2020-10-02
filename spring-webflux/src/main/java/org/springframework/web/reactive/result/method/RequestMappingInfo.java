@@ -146,6 +146,14 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
+	 * Return the mapping paths that are not patterns.
+	 * @since 5.3
+	 */
+	public Set<String> getDirectPaths() {
+		return this.patternsCondition.getDirectPaths();
+	}
+
+	/**
 	 * Returns the HTTP request methods of this {@link RequestMappingInfo};
 	 * or instance with 0 request methods, never {@code null}.
 	 */

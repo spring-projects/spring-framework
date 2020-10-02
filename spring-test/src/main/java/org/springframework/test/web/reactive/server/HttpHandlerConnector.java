@@ -25,6 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -83,8 +84,8 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	private Mono<ClientHttpResponse> doConnect(
 			HttpMethod httpMethod, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		MonoProcessor<Void> requestWriteCompletion = MonoProcessor.create();
-		MonoProcessor<Void> handlerCompletion = MonoProcessor.create();
+		MonoProcessor<Void> requestWriteCompletion = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<Void> handlerCompletion = MonoProcessor.fromSink(Sinks.one());
 		ClientHttpResponse[] savedResponse = new ClientHttpResponse[1];
 
 		MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);

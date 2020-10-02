@@ -67,7 +67,7 @@ final class Constants {
   static final String MODULE_MAIN_CLASS = "ModuleMainClass";
   static final String NEST_HOST = "NestHost";
   static final String NEST_MEMBERS = "NestMembers";
-  static final String PERMITTED_SUBTYPES = "PermittedSubtypes";
+  static final String PERMITTED_SUBCLASSES = "PermittedSubclasses";
   static final String RECORD = "Record";
 
   // ASM specific access flags.

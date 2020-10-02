@@ -1097,7 +1097,7 @@ might match only if the target entity type declares a static finder method (for 
 === The `ConversionService` API
 
 `ConversionService` defines a unified API for executing type conversion logic at
-runtime. Converters are often executed behind the following facade interface:
+runtime. Converters are often run behind the following facade interface:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1218,7 +1218,7 @@ it like you would for any other bean. The following example shows how to do so:
 ----
 	@Service
 	class MyService(private val conversionService: ConversionService) {
-		
+
 		fun doIt() {
 			conversionService.convert(...)
 		}
@@ -1362,8 +1362,7 @@ The `format` subpackages provide several `Formatter` implementations as a conven
 The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
 `PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
-a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
-formatting support based on the https://www.joda.org/joda-time/[Joda-Time library].
+a `java.text.DateFormat`.
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
@@ -1568,7 +1567,7 @@ example shows:
 A portable format annotation API exists in the `org.springframework.format.annotation`
 package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
 `Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
-(for millisecond timestamps) as well as JSR-310 `java.time` and Joda-Time value types.
+(for millisecond timestamps) as well as JSR-310 `java.time`.
 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
@@ -1701,8 +1700,7 @@ To do that, ensure that Spring does not register default formatters. Instead, re
 formatters manually with the help of:
 
 * `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
-* `org.springframework.format.datetime.DateFormatterRegistrar`, or
-`org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar` for Joda-Time.
+* `org.springframework.format.datetime.DateFormatterRegistrar`
 
 For example, the following Java configuration registers a global `yyyyMMdd` format:
 
@@ -1764,8 +1762,7 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 ----
 
 If you prefer XML-based configuration, you can use a
-`FormattingConversionServiceFactoryBean`. The following example shows how to do so (this time using Joda
-Time):
+`FormattingConversionServiceFactoryBean`. The following example shows how to do so:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -1785,9 +1782,9 @@ Time):
 			</property>
 			<property name="formatterRegistrars">
 				<set>
-					<bean class="org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar">
+					<bean class="org.springframework.format.datetime.standard.DateTimeFormatterRegistrar">
 						<property name="dateFormatter">
-							<bean class="org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean">
+							<bean class="org.springframework.format.datetime.standard.DateTimeFormatterFactoryBean">
 								<property name="pattern" value="yyyyMMdd"/>
 							</bean>
 						</property>

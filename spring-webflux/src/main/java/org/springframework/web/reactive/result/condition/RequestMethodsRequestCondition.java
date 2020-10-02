@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.condition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,7 @@ import java.util.Set;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.reactive.CorsUtils;
@@ -45,7 +45,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	private static final Map<HttpMethod, RequestMethodsRequestCondition> requestMethodConditionCache;
 
 	static {
-		requestMethodConditionCache = new HashMap<>(RequestMethod.values().length);
+		requestMethodConditionCache = CollectionUtils.newHashMap(RequestMethod.values().length);
 		for (RequestMethod method : RequestMethod.values()) {
 			requestMethodConditionCache.put(
 					HttpMethod.valueOf(method.name()), new RequestMethodsRequestCondition(method));

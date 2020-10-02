@@ -41,7 +41,9 @@ import org.springframework.util.ClassUtils;
  * @see #setServiceInterface
  * @see org.springframework.jms.remoting.JmsInvokerClientInterceptor
  * @see org.springframework.jms.remoting.JmsInvokerServiceExporter
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 		implements FactoryBean<Object>, BeanClassLoaderAware {
 

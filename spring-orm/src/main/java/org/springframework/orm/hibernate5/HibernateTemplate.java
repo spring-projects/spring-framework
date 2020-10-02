@@ -41,6 +41,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
+import org.hibernate.query.Query;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessException;
@@ -49,7 +50,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies Hibernate data access code. Automatically
@@ -89,23 +89,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.orm.hibernate5.support.OpenSessionInViewInterceptor
  */
 public class HibernateTemplate implements HibernateOperations, InitializingBean {
-
-	private static final Method createQueryMethod;
-
-	private static final Method getNamedQueryMethod;
-
-	static {
-		// Hibernate 5.2's createQuery method declares a new subtype as return type,
-		// so we need to use reflection for binary compatibility with 5.0/5.1 here.
-		try {
-			createQueryMethod = Session.class.getMethod("createQuery", String.class);
-			getNamedQueryMethod = Session.class.getMethod("getNamedQuery", String.class);
-		}
-		catch (NoSuchMethodException ex) {
-			throw new IllegalStateException("Incompatible Hibernate Session API", ex);
-		}
-	}
-
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -250,7 +233,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * <p>To specify the query region to be used for queries cached
 	 * by this template, set the "queryCacheRegion" property.
 	 * @see #setQueryCacheRegion
-	 * @see org.hibernate.Query#setCacheable
+	 * @see Query#setCacheable
 	 * @see Criteria#setCacheable
 	 */
 	public void setCacheQueries(boolean cacheQueries) {
@@ -271,7 +254,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * <p>The cache region will not take effect unless queries created by this
 	 * template are configured to be cached via the "cacheQueries" property.
 	 * @see #setCacheQueries
-	 * @see org.hibernate.Query#setCacheRegion
+	 * @see Query#setCacheRegion
 	 * @see Criteria#setCacheRegion
 	 */
 	public void setQueryCacheRegion(@Nullable String queryCacheRegion) {
@@ -359,7 +342,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException in case of Hibernate errors
 	 */
-	@SuppressWarnings("deprecation")
 	@Nullable
 	protected <T> T doExecute(HibernateCallback<T> action, boolean enforceNativeSession) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
@@ -374,7 +356,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 		if (session == null) {
 			session = obtainSessionFactory().openSession();
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 			isNew = true;
 		}
 
@@ -543,7 +525,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	}
 
 	@Override
-	@SuppressWarnings({"deprecation"})
 	public void load(Object entity, Serializable id) throws DataAccessException {
 		executeWithNativeSession(session -> {
 			session.load(entity, id);
@@ -887,11 +868,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> find(String queryString, @Nullable Object... values) throws DataAccessException {
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			Query<?> queryObject = session.createQuery(queryString);
 			prepareQuery(queryObject);
 			if (values != null) {
 				for (int i = 0; i < values.length; i++) {
@@ -912,7 +891,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedParam(String queryString, String[] paramNames, Object[] values)
 			throws DataAccessException {
 
@@ -920,8 +898,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			Query<?> queryObject = session.createQuery(queryString);
 			prepareQuery(queryObject);
 			for (int i = 0; i < values.length; i++) {
 				applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
@@ -932,12 +909,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByValueBean(String queryString, Object valueBean) throws DataAccessException {
-
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			Query<?> queryObject = session.createQuery(queryString);
 			prepareQuery(queryObject);
 			queryObject.setProperties(valueBean);
 			return queryObject.list();
@@ -951,11 +925,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedQuery(String queryName, @Nullable Object... values) throws DataAccessException {
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			Query<?> queryObject = session.getNamedQuery(queryName);
 			prepareQuery(queryObject);
 			if (values != null) {
 				for (int i = 0; i < values.length; i++) {
@@ -976,7 +948,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedQueryAndNamedParam(
 			String queryName, @Nullable String[] paramNames, @Nullable Object[] values)
 			throws DataAccessException {
@@ -985,8 +956,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = (org.hibernate.Query)
-					nonNull(ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			Query<?> queryObject = session.getNamedQuery(queryName);
 			prepareQuery(queryObject);
 			if (values != null) {
 				for (int i = 0; i < values.length; i++) {
@@ -999,12 +969,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 	public List<?> findByNamedQueryAndValueBean(String queryName, Object valueBean) throws DataAccessException {
-
 		return nonNull(executeWithNativeSession((HibernateCallback<List<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName));
+			Query<?> queryObject = session.getNamedQuery(queryName);
 			prepareQuery(queryObject);
 			queryObject.setProperties(valueBean);
 			return queryObject.list();
@@ -1018,11 +985,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "deprecation"})
 	public Iterator<?> iterate(String queryString, @Nullable Object... values) throws DataAccessException {
 		return nonNull(executeWithNativeSession((HibernateCallback<Iterator<?>>) session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			Query<?> queryObject = session.createQuery(queryString);
 			prepareQuery(queryObject);
 			if (values != null) {
 				for (int i = 0; i < values.length; i++) {
@@ -1046,11 +1011,9 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	@Deprecated
 	@Override
-	@SuppressWarnings({"rawtypes", "deprecation"})
 	public int bulkUpdate(String queryString, @Nullable Object... values) throws DataAccessException {
 		Integer result = executeWithNativeSession(session -> {
-			org.hibernate.Query queryObject = queryObject(
-					ReflectionUtils.invokeMethod(createQueryMethod, session, queryString));
+			Query<?> queryObject = session.createQuery(queryString);
 			prepareQuery(queryObject);
 			if (values != null) {
 				for (int i = 0; i < values.length; i++) {
@@ -1079,7 +1042,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see FlushMode#MANUAL
 	 */
 	protected void checkWriteOperationAllowed(Session session) throws InvalidDataAccessApiUsageException {
-		if (isCheckWriteOperations() && SessionFactoryUtils.getFlushMode(session).lessThan(FlushMode.COMMIT)) {
+		if (isCheckWriteOperations() && session.getHibernateFlushMode().lessThan(FlushMode.COMMIT)) {
 			throw new InvalidDataAccessApiUsageException(
 					"Write operations are not allowed in read-only mode (FlushMode.MANUAL): "+
 					"Turn your Session into FlushMode.COMMIT/AUTO or remove 'readOnly' marker from transaction definition.");
@@ -1121,8 +1084,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @see #setCacheQueries
 	 * @see #setQueryCacheRegion
 	 */
-	@SuppressWarnings({"rawtypes", "deprecation"})
-	protected void prepareQuery(org.hibernate.Query queryObject) {
+	protected void prepareQuery(Query<?> queryObject) {
 		if (isCacheQueries()) {
 			queryObject.setCacheable(true);
 			if (getQueryCacheRegion() != null) {
@@ -1150,9 +1112,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	 * @param value the value of the parameter
 	 * @throws HibernateException if thrown by the Query object
 	 */
-	@Deprecated
-	@SuppressWarnings({"rawtypes", "deprecation"})
-	protected void applyNamedParameterToQuery(org.hibernate.Query queryObject, String paramName, Object value)
+	protected void applyNamedParameterToQuery(Query<?> queryObject, String paramName, Object value)
 			throws HibernateException {
 
 		if (value instanceof Collection) {
@@ -1164,13 +1124,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		else {
 			queryObject.setParameter(paramName, value);
 		}
-	}
-
-	@Deprecated
-	@SuppressWarnings({"rawtypes", "deprecation"})
-	private static org.hibernate.Query queryObject(@Nullable Object result) {
-		Assert.state(result != null, "No Hibernate Query");
-		return (org.hibernate.Query) result;
 	}
 
 	private static <T> T nonNull(@Nullable T result) {
@@ -1193,7 +1146,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 
 		@Override
-		@SuppressWarnings({"rawtypes", "deprecation"})
 		@Nullable
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Session interface coming in...
@@ -1219,8 +1171,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 				if (retVal instanceof Criteria) {
 					prepareCriteria(((Criteria) retVal));
 				}
-				else if (retVal instanceof org.hibernate.Query) {
-					prepareQuery(((org.hibernate.Query) retVal));
+				else if (retVal instanceof Query) {
+					prepareQuery(((Query<?>) retVal));
 				}
 
 				return retVal;

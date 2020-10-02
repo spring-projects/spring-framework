@@ -103,13 +103,13 @@ The `MethodMatcher` interface is normally more important. The complete interface
 The `matches(Method, Class)` method is used to test whether this pointcut ever
 matches a given method on a target class. This evaluation can be performed when an AOP
 proxy is created to avoid the need for a test on every method invocation. If the
-two-argument `matches` method returns `true` for a given method, and the `isRuntime()` method
-for the MethodMatcher returns `true`, the three-argument matches method is invoked on
-every method invocation. This lets a pointcut look at the arguments passed to the
-method invocation immediately before the target advice is to execute.
+two-argument `matches` method returns `true` for a given method, and the `isRuntime()`
+method for the MethodMatcher returns `true`, the three-argument matches method is
+invoked on every method invocation. This lets a pointcut look at the arguments passed
+to the method invocation immediately before the target advice starts.
 
-Most `MethodMatcher` implementations are static, meaning that their `isRuntime()` method returns `false`.
-In this case, the three-argument `matches` method is never invoked.
+Most `MethodMatcher` implementations are static, meaning that their `isRuntime()` method
+returns `false`. In this case, the three-argument `matches` method is never invoked.
 
 TIP: If possible, try to make pointcuts static, allowing the AOP framework to cache the
 results of pointcut evaluation when an AOP proxy is created.
@@ -145,20 +145,20 @@ See the <<aop, previous chapter>> for a discussion of supported AspectJ pointcut
 [[aop-api-pointcuts-impls]]
 === Convenience Pointcut Implementations
 
-Spring provides several convenient pointcut implementations. You can use some of them directly.
-Others are intended to be subclassed in application-specific pointcuts.
+Spring provides several convenient pointcut implementations. You can use some of them
+directly; others are intended to be subclassed in application-specific pointcuts.
 
 
 [[aop-api-pointcuts-static]]
 ==== Static Pointcuts
 
-Static pointcuts are based on the method and the target class and cannot take into account the
-method's arguments. Static pointcuts suffice -- and are best -- for most usages.
-Spring can evaluate a static pointcut only once, when a method is first
-invoked. After that, there is no need to evaluate the pointcut again with each method
-invocation.
+Static pointcuts are based on the method and the target class and cannot take into account
+the method's arguments. Static pointcuts suffice -- and are best -- for most usages.
+Spring can evaluate a static pointcut only once, when a method is first invoked.
+After that, there is no need to evaluate the pointcut again with each method invocation.
 
-The rest of this section describes some of the static pointcut implementations that are included with Spring.
+The rest of this section describes some of the static pointcut implementations that are
+included with Spring.
 
 [[aop-api-pointcuts-regex]]
 ===== Regular Expression Pointcuts
@@ -168,9 +168,9 @@ frameworks besides Spring make this possible.
 `org.springframework.aop.support.JdkRegexpMethodPointcut` is a generic regular
 expression pointcut that uses the regular expression support in the JDK.
 
-With the `JdkRegexpMethodPointcut` class, you can provide a list of pattern strings. If
-any of these is a match, the pointcut evaluates to `true`. (So, the result is
-effectively the union of these pointcuts.)
+With the `JdkRegexpMethodPointcut` class, you can provide a list of pattern strings.
+If any of these is a match, the pointcut evaluates to `true`. (As a consequence,
+the resulting pointcut is effectively the union of the specified patterns.)
 
 The following example shows how to use `JdkRegexpMethodPointcut`:
 
@@ -232,7 +232,7 @@ The main example is the `control flow` pointcut.
 ===== Control Flow Pointcuts
 
 Spring control flow pointcuts are conceptually similar to AspectJ `cflow` pointcuts,
-although less powerful. (There is currently no way to specify that a pointcut executes
+although less powerful. (There is currently no way to specify that a pointcut runs
 below a join point matched by another pointcut.) A control flow pointcut matches the
 current call stack. For example, it might fire if the join point was invoked by a method
 in the `com.mycompany.web` package or by the `SomeCaller` class. Control flow pointcuts
@@ -425,7 +425,7 @@ The following listing shows the `MethodBeforeAdvice` interface:
 .Kotlin
 ----
 interface MethodBeforeAdvice : BeforeAdvice {
-	
+
 	fun before(m: Method, args: Array<Any>, target: Any)
 }
 ----
@@ -435,8 +435,8 @@ field before advice, although the usual objects apply to field interception and 
 unlikely for Spring to ever implement it.)
 
 Note that the return type is `void`. Before advice can insert custom behavior before the join
-point executes but cannot change the return value. If a before advice throws an
-exception, it aborts further execution of the interceptor chain. The exception
+point runs but cannot change the return value. If a before advice throws an
+exception, it stops further execution of the interceptor chain. The exception
 propagates back up the interceptor chain. If it is unchecked or on the signature of
 the invoked method, it is passed directly to the client. Otherwise, it is
 wrapped in an unchecked exception by the AOP proxy.
@@ -465,7 +465,7 @@ The following example shows a before advice in Spring, which counts all method i
 	class CountingBeforeAdvice : MethodBeforeAdvice {
 
 		var count: Int = 0
-		
+
 		override fun before(m: Method, args: Array<Any>, target: Any?) {
 			++count
 		}
@@ -509,7 +509,7 @@ The following advice is invoked if a `RemoteException` is thrown (including from
 .Kotlin
 ----
 	class RemoteThrowsAdvice : ThrowsAdvice {
-		
+
 		fun afterThrowing(ex: RemoteException) {
 			// Do something with remote exception
 		}
@@ -563,7 +563,7 @@ methods can be combined in a single class. The following listing shows the final
 .Kotlin
 ----
 	class CombinedThrowsAdvice : ThrowsAdvice {
-		
+
 		fun afterThrowing(ex: RemoteException) {
 			// Do something with remote exception
 		}
@@ -604,7 +604,7 @@ An after returning advice in Spring must implement the
 .Kotlin
 ----
 	interface AfterReturningAdvice : Advice {
-		
+
 		fun afterReturning(returnValue: Any, m: Method, args: Array<Any>, target: Any)
 	}
 ----
@@ -639,7 +639,7 @@ not thrown exceptions:
 
 		var count: Int = 0
 			private set
-		
+
 		override fun afterReturning(returnValue: Any?, m: Method, args: Array<Any>, target: Any?) {
 			++count
 		}
@@ -707,7 +707,7 @@ rather than the method, level. You can only use introduction advice with the
 	interface IntroductionAdvisor : Advisor, IntroductionInfo {
 
 		val classFilter: ClassFilter
-		
+
 		@Throws(IllegalArgumentException::class)
 		fun validateInterfaces()
 	}
@@ -829,7 +829,7 @@ The following example shows the example `LockMixin` class:
 		fun locked(): Boolean {
 			return this.locked
 		}
-		
+
 		override fun invoke(invocation: MethodInvocation): Any? {
 			if (locked() && invocation.method.name.indexOf("set") == 0) {
 				throw LockedException()

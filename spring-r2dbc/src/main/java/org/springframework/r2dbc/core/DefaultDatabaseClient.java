@@ -51,6 +51,7 @@ import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -84,6 +85,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 		this.namedParameterExpander = (namedParameters ? new NamedParameterExpander() : null);
 	}
 
+
+	@Override
+	public ConnectionFactory getConnectionFactory() {
+		return this.connectionFactory;
+	}
 
 	@Override
 	public GenericExecuteSpec sql(String sql) {
@@ -250,7 +256,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-
 			if (value instanceof Parameter) {
 				byIndex.put(index, (Parameter) value);
 			}
@@ -280,7 +285,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-
 			if (value instanceof Parameter) {
 				byName.put(name, (Parameter) value);
 			}
@@ -388,7 +392,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
 				Map<String, Parameter> remainderByName, Map<Integer, Parameter> remainderByIndex) {
 
-			Map<String, Parameter> namedBindings = new LinkedHashMap<>(parameterNames.size());
+			Map<String, Parameter> namedBindings = CollectionUtils.newLinkedHashMap(parameterNames.size());
 			for (String parameterName : parameterNames) {
 				Parameter parameter = getParameter(remainderByName, remainderByIndex, parameterNames, parameterName);
 				if (parameter == null) {

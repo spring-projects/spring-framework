@@ -94,7 +94,7 @@ final class RecordComponentWriter extends RecordComponentVisitor {
       final String name,
       final String descriptor,
       final String signature) {
-    super(/* latest api = */ Opcodes.ASM8);
+    super(/* latest api = */ Opcodes.ASM9);
     this.symbolTable = symbolTable;
     this.nameIndex = symbolTable.addConstantUtf8(name);
     this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);

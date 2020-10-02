@@ -557,7 +557,7 @@ class CronTriggerTests {
 		this.calendar.set(Calendar.MONTH, 2);
 		Date localDate = this.calendar.getTime();
 		TriggerContext context1 = getTriggerContext(localDate);
-		assertThatIllegalArgumentException().isThrownBy(() -> trigger.nextExecutionTime(context1));
+		assertThat(trigger.nextExecutionTime(context1)).isNull();
 	}
 
 	@ParameterizedCronTriggerTest

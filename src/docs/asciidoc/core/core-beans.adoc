@@ -42,7 +42,7 @@ information on using the `BeanFactory` instead of the `ApplicationContext,` see
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC container are called beans. A bean is an object that is
-instantiated, assembled, and otherwise managed by a Spring IoC container. Otherwise, a
+instantiated, assembled, and managed by a Spring IoC container. Otherwise, a
 bean is simply one of many objects in your application. Beans, and the dependencies
 among them, are reflected in the configuration metadata used by a container.
 
@@ -1471,7 +1471,7 @@ The following example shows various values being set:
 		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
 		<property name="url" value="jdbc:mysql://localhost:3306/mydb"/>
 		<property name="username" value="root"/>
-		<property name="password" value="masterkaoli"/>
+		<property name="password" value="misterkaoli"/>
 	</bean>
 ----
 
@@ -1491,7 +1491,7 @@ XML configuration:
 			p:driverClassName="com.mysql.jdbc.Driver"
 			p:url="jdbc:mysql://localhost:3306/mydb"
 			p:username="root"
-			p:password="masterkaoli"/>
+			p:password="misterkaoli"/>
 
 	</beans>
 ----
@@ -3193,10 +3193,10 @@ which explains the methods you need to implement in more detail.
 The `Scope` interface has four methods to get objects from the scope, remove them from
 the scope, and let them be destroyed.
 
-The session scope
-implementation, for example, returns the session-scoped bean (if it does not exist,
-the method returns a new instance of the bean, after having bound it to the session for
-future reference). The following method returns the object from the underlying scope:
+The session scope implementation, for example, returns the session-scoped bean (if it
+does not exist, the method returns a new instance of the bean, after having bound it to
+the session for future reference). The following method returns the object from the
+underlying scope:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3209,10 +3209,10 @@ future reference). The following method returns the object from the underlying s
 	fun get(name: String, objectFactory: ObjectFactory<*>): Any
 ----
 
-The session scope
-implementation, for example, removes the session-scoped bean from the underlying session.
-The object should be returned, but you can return null if the object with the specified
-name is not found. The following method removes the object from the underlying scope:
+The session scope implementation, for example, removes the session-scoped bean from the
+underlying session. The object should be returned, but you can return `null` if the
+object with the specified name is not found. The following method removes the object from
+the underlying scope:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3225,7 +3225,7 @@ name is not found. The following method removes the object from the underlying s
 	fun remove(name: String): Any
 ----
 
-The following method registers the callbacks the scope should execute when it is
+The following method registers a callback that the scope should invoke when it is
 destroyed or when the specified object in the scope is destroyed:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -3254,7 +3254,6 @@ The following method obtains the conversation identifier for the underlying scop
 ----
 	fun getConversationId(): String
 ----
-
 
 This identifier is different for each scope. For a session scoped implementation, this
 identifier can be the session identifier.
@@ -3628,7 +3627,7 @@ following example:
 	class DefaultBlogService : BlogService {
 
 		private var blogDao: BlogDao? = null
-		
+
 		// this is (unsurprisingly) the initialization callback method
 		fun init() {
 			if (blogDao == null) {
@@ -3689,10 +3688,10 @@ As of Spring 2.5, you have three options for controlling bean lifecycle behavior
 annotations>>. You can combine these mechanisms to control a given bean.
 
 NOTE: If multiple lifecycle mechanisms are configured for a bean and each mechanism is
-configured with a different method name, then each configured method is executed in the
+configured with a different method name, then each configured method is run in the
 order listed after this note. However, if the same method name is configured -- for example,
 `init()` for an initialization method -- for more than one of these lifecycle mechanisms,
-that method is executed once, as explained in the
+that method is run once, as explained in the
 <<beans-factory-lifecycle-default-init-destroy-methods, preceding section>>.
 
 Multiple lifecycle mechanisms configured for the same bean, with different
@@ -3782,7 +3781,7 @@ consider implementing `org.springframework.context.SmartLifecycle` instead.
 Also, please note that stop notifications are not guaranteed to come before destruction.
 On regular shutdown, all `Lifecycle` beans first receive a stop notification before
 the general destruction callbacks are being propagated. However, on hot refresh during a
-context's lifetime or on aborted refresh attempts, only destroy methods are called.
+context's lifetime or on stopped refresh attempts, only destroy methods are called.
 ====
 
 The order of startup and shutdown invocations can be important. If a "`depends-on`"
@@ -4183,7 +4182,7 @@ Spring container finishes instantiating, configuring, and initializing a bean, y
 plug in one or more custom `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
-in which these `BeanPostProcessor` instances execute by setting the `order` property.
+in which these `BeanPostProcessor` instances run by setting the `order` property.
 You can set this property only if the `BeanPostProcessor` implements the `Ordered`
 interface. If you write your own `BeanPostProcessor`, you should consider implementing
 the `Ordered` interface, too. For further details, see the javadoc of the
@@ -4425,7 +4424,8 @@ which these `BeanFactoryPostProcessor` instances run by setting the `order` prop
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface, too. See the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`] and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
 ====
@@ -4444,7 +4444,7 @@ in one container are not post-processed by `BeanFactoryPostProcessor` instances 
 container, even if both containers are part of the same hierarchy.
 ====
 
-A bean factory post-processor is automatically executed when it is declared inside an
+A bean factory post-processor is automatically run when it is declared inside an
 `ApplicationContext`, in order to apply changes to the configuration metadata that
 define the container. Spring includes a number of predefined bean factory
 post-processors, such as `PropertyOverrideConfigurer` and
@@ -4991,7 +4991,7 @@ The same applies for typed collections, as the following example shows:
 
 		@Autowired
 		lateinit var movieCatalogs: Set<MovieCatalog>
-		
+
 		// ...
 	}
 ----
@@ -5040,7 +5040,7 @@ corresponding bean names, as the following example shows:
 
 		@Autowired
 		lateinit var movieCatalogs: Map<String, MovieCatalog>
-		
+
 		// ...
 	}
 ----
@@ -5846,7 +5846,7 @@ configuration:
 
 		@Bean
 		fun stringStore() = StringStore()
-			
+
 		@Bean
 		fun integerStore() = IntegerStore()
 	}
@@ -5994,7 +5994,7 @@ named `movieFinder` injected into its setter method:
 
 		@Resource
 		private lateinit var movieFinder: MovieFinder
-		
+
 	}
 ----
 
@@ -6482,7 +6482,7 @@ You can also override the value for the `proxyMode`, as the following example sh
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
 	class SessionScopedUserService : UserService {
-		// ...	
+		// ...
 	}
 ----
 
@@ -6532,7 +6532,7 @@ are eligible for such autodetection:
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
-		// implementation elided for clarity	
+		// implementation elided for clarity
 	}
 ----
 
@@ -7157,7 +7157,7 @@ technique:
 	@Component
 	@Genre("Action")
 	class ActionMovieCatalog : MovieCatalog {
-		// ...	
+		// ...
 	}
 ----
 
@@ -9891,7 +9891,7 @@ it programmatically against the `Environment` API which is available through an
 	val ctx = AnnotationConfigApplicationContext().apply {
 		environment.setActiveProfiles("development")
 		register(SomeConfig::class.java, StandaloneDataConfig::class.java, JndiDataConfig::class.java)
-		refresh()	
+		refresh()
 	}
 ----
 
@@ -10330,7 +10330,7 @@ are as follows:
 	argument.required=The {0} argument is required.
 ----
 
-The next example shows a program to execute the `MessageSource` functionality.
+The next example shows a program to run the `MessageSource` functionality.
 Remember that all `ApplicationContext` implementations are also `MessageSource`
 implementations and so can be cast to the `MessageSource` interface.
 
@@ -11028,7 +11028,75 @@ location path as a classpath location. You can also use location paths (resource
 with special prefixes to force loading of definitions from the classpath or a URL,
 regardless of the actual context type.
 
+[[context-functionality-startup]]
+=== Application Startup tracking
 
+The `ApplicationContext` manages the lifecycle of Spring applications and provides a rich
+programming model around components. As a result, complex applications can have equally
+complex component graphs and startup phases.
+
+Tracking the application startup steps with specific metrics can help understand where
+time is being spent during the startup phase, but it can also be used as a way to better
+understand the context lifecycle as a whole.
+
+The `AbstractApplicationContext` (and its subclasses) is instrumented with an
+`ApplicationStartup`, which collects `StartupStep` data about various startup phases:
+
+* application context lifecycle (base packages scanning, config classes management)
+* beans lifecycle (instantiation, smart initialization, post processing)
+* application events processing
+
+Here is an example of instrumentation in the `AnnotationConfigApplicationContext`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// create a startup step and start recording
+	StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// create a startup step and start recording
+	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	// add tagging information to the current step
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	// perform the actual phase we're instrumenting
+	this.scanner.scan(basePackages);
+	// end the current step
+	scanPackages.end();
+----
+
+The application context is already instrumented with multiple steps.
+Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.
+For a complete list of existing startup steps, you can check out the
+<<application-startup-steps, dedicated appendix section>>.
+
+The default `ApplicationStartup` implementation is a no-op variant, for minimal overhead.
+This means no metrics will be collected during application startup by default.
+Spring Framework ships with an implementation for tracking startup steps with Java Flight Recorder:
+`FlightRecorderApplicationStartup`. To use this variant, you must configure an instance of it
+to the `ApplicationContext` as soon as it's been created.
+
+Developers can also use the `ApplicationStartup` infrastructure if they're providing their own
+`AbstractApplicationContext` subclass, or if they wish to collect more precise data.
+
+WARNING: `ApplicationStartup` is meant to be only used during application startup and for
+the core container; this is by no means a replacement for Java profilers or
+metrics libraries like https://micrometer.io[Micrometer].
+
+To start collecting custom `StartupStep`, components can either get the `ApplicationStartup`
+instance from the application context directly, make their component implement `ApplicationStartupAware`,
+or ask for the `ApplicationStartup` type on any injection point.
+
+NOTE: Developers should not use the `"spring.*"` namespace when creating custom startup steps.
+This namespace is reserved for internal Spring usage and is subject to change.
 
 [[context-create]]
 === Convenient ApplicationContext Instantiation for Web Applications

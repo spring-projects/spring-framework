@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -139,24 +140,19 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
-		Map<Integer, LifecycleGroup> phases = new HashMap<>();
+		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
+
 		lifecycleBeans.forEach((beanName, bean) -> {
 			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
 				int phase = getPhase(bean);
-				LifecycleGroup group = phases.get(phase);
-				if (group == null) {
-					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
-					phases.put(phase, group);
-				}
-				group.add(beanName, bean);
+				phases.computeIfAbsent(
+						phase,
+						p -> new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly)
+				).add(beanName, bean);
 			}
 		});
 		if (!phases.isEmpty()) {
-			List<Integer> keys = new ArrayList<>(phases.keySet());
-			Collections.sort(keys);
-			for (Integer key : keys) {
-				phases.get(key).start();
-			}
+			phases.values().forEach(LifecycleGroup::start);
 		}
 	}
 

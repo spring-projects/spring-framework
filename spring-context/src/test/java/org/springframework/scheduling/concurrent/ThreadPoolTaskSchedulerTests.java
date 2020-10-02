@@ -46,7 +46,7 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 
 	@Override
 	protected AsyncListenableTaskExecutor buildExecutor() {
-		scheduler.setThreadNamePrefix(THREAD_NAME_PREFIX);
+		scheduler.setThreadNamePrefix(this.threadNamePrefix);
 		scheduler.afterPropertiesSet();
 		return scheduler;
 	}
@@ -133,10 +133,6 @@ public class ThreadPoolTaskSchedulerTests extends AbstractSchedulingTaskExecutor
 		}
 	}
 
-
-	private void assertThreadNamePrefix(TestTask task) {
-		assertThat(task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length())).isEqualTo(THREAD_NAME_PREFIX);
-	}
 
 	private void await(TestTask task) {
 		await(task.latch);

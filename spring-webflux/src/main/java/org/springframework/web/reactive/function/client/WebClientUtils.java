@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.CodecException;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -56,4 +57,10 @@ abstract class WebClientUtils {
 						.body(list));
 	}
 
+	/**
+	 * Indicates whether the given exception should be wrapped.
+	 */
+	public static boolean shouldWrapException(Throwable t) {
+		return !(t instanceof WebClientException) && !(t instanceof CodecException);
+	}
 }

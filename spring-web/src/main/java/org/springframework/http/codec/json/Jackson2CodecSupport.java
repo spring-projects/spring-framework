@@ -27,7 +27,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.commons.logging.Log;
 
 import org.springframework.core.GenericTypeResolver;
@@ -35,6 +34,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpLogging;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -72,8 +72,9 @@ public abstract class Jackson2CodecSupport {
 
 	private static final List<MimeType> DEFAULT_MIME_TYPES = Collections.unmodifiableList(
 			Arrays.asList(
-					new MimeType("application", "json"),
-					new MimeType("application", "*+json")));
+					MediaType.APPLICATION_JSON,
+					new MediaType("application", "*+json"),
+					MediaType.APPLICATION_NDJSON));
 
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
@@ -111,8 +112,7 @@ public abstract class Jackson2CodecSupport {
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {
-		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		return typeFactory.constructType(GenericTypeResolver.resolveType(type, contextClass));
+		return this.objectMapper.constructType(GenericTypeResolver.resolveType(type, contextClass));
 	}
 
 	protected Map<String, Object> getHints(ResolvableType resolvableType) {

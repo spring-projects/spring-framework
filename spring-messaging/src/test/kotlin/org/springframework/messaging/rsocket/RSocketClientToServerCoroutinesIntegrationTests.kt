@@ -145,17 +145,17 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Controller
 	class ServerController {
 
-		val fireForgetPayloads = Sinks.replayAll<String>()
+		val fireForgetPayloads = Sinks.many().replay().all<String>()
 
 		@MessageMapping("receive")
 		fun receive(payload: String) {
-			fireForgetPayloads.next(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("receive-async")
 		suspend fun receiveAsync(payload: String) {
 			delay(10)
-			fireForgetPayloads.next(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("echo-async")
@@ -265,14 +265,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			requester = RSocketRequester.builder()
 					.rsocketConnector { connector -> connector.payloadDecoder(PayloadDecoder.ZERO_COPY) }
 					.rsocketStrategies(context.getBean(RSocketStrategies::class.java))
-					.connectTcp("localhost", 7000)
-					.block()!!
+					.tcp("localhost", 7000)
 		}
 
 		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
-			requester.rsocket().dispose()
+			requester.rsocketClient().dispose()
 			server.dispose()
 		}
 	}

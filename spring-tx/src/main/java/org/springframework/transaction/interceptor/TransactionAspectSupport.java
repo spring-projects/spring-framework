@@ -837,7 +837,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private static class KotlinDelegate {
 
-		static private boolean isSuspend(Method method) {
+		private static boolean isSuspend(Method method) {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
 			return function != null && function.isSuspend();
 		}
@@ -887,8 +887,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 								// target invocation exception
 								return completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));
 							}
-						})).subscriberContext(TransactionContextManager.getOrCreateContext())
-						.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+						})).contextWrite(TransactionContextManager.getOrCreateContext())
+						.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 			}
 
 			// Any other reactive type, typically a Flux
@@ -917,8 +917,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 							// target invocation exception
 							return completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));
 						}
-					})).subscriberContext(TransactionContextManager.getOrCreateContext())
-					.subscriberContext(TransactionContextManager.getOrCreateContextHolder()));
+					})).contextWrite(TransactionContextManager.getOrCreateContext())
+					.contextWrite(TransactionContextManager.getOrCreateContextHolder()));
 		}
 
 		@SuppressWarnings("serial")

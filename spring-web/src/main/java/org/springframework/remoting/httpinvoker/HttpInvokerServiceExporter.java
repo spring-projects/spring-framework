@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.remoting.rmi.RemoteInvocationSerializingExporter;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.web.HttpRequestHandler;
@@ -58,8 +57,10 @@ import org.springframework.web.util.NestedServletException;
  * @see HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  * @see org.springframework.remoting.caucho.HessianServiceExporter
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
-public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExporter implements HttpRequestHandler {
+@Deprecated
+public class HttpInvokerServiceExporter extends org.springframework.remoting.rmi.RemoteInvocationSerializingExporter implements HttpRequestHandler {
 
 	/**
 	 * Reads a remote invocation from the request, executes it,
@@ -167,7 +168,7 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			throws IOException {
 
 		try (ObjectOutputStream oos =
-				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)))) {
+					createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)))) {
 			doWriteRemoteInvocationResult(result, oos);
 		}
 	}

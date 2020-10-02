@@ -17,8 +17,8 @@
 package org.springframework.web.reactive.function.client
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitSingle
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec
@@ -69,6 +69,7 @@ inline fun <reified T : Any> RequestBodySpec.body(producer: Any): RequestHeaders
  * @author Sebastien Deleuze
  * @since 5.2
  */
+@Suppress("DEPRECATION")
 suspend fun RequestHeadersSpec<out RequestHeadersSpec<*>>.awaitExchange(): ClientResponse =
 		exchange().awaitSingle()
 

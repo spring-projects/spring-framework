@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,14 @@ public class SimpleThreadScope implements Scope {
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Map<String, Object> scope = this.threadScope.get();
-		return scope.computeIfAbsent(name, k -> objectFactory.getObject());
+		// NOTE: Do NOT modify the following to use Map::computeIfAbsent. For details,
+		// see https://github.com/spring-projects/spring-framework/issues/25801.
+		Object scopedObject = scope.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			scope.put(name, scopedObject);
+		}
+		return scopedObject;
 	}
 
 	@Override

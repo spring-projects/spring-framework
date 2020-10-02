@@ -48,13 +48,14 @@ public interface Opcodes {
   int ASM6 = 6 << 16 | 0 << 8;
   int ASM7 = 7 << 16 | 0 << 8;
   int ASM8 = 8 << 16 | 0 << 8;
+  int ASM9 = 9 << 16 | 0 << 8;
 
   /**
    * <i>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
    * will break existing code using it. Only code compiled with --enable-preview can use this.</i>
    * <p>SPRING PATCH: no preview mode check for ASM 9 experimental, enabling it by default.
    */
-  int ASM9_EXPERIMENTAL = 1 << 24 | 9 << 16 | 0 << 8;
+  int ASM10_EXPERIMENTAL = 1 << 24 | 10 << 16 | 0 << 8;
 
   /*
    * Internal flags used to redirect calls to deprecated methods. For instance, if a visitOldStuff
@@ -279,6 +280,7 @@ public interface Opcodes {
   int V13 = 0 << 16 | 57;
   int V14 = 0 << 16 | 58;
   int V15 = 0 << 16 | 59;
+  int V16 = 0 << 16 | 60;
 
   /**
    * Version flag indicating that the class is using 'preview' features.

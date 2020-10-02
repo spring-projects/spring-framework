@@ -51,7 +51,6 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
@@ -101,7 +100,11 @@ class DefaultServerRequest implements ServerRequest {
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
 		this.attributes = new ServletAttributesMap(servletRequest);
 
-		this.requestPath = ServletRequestPathUtils.getParsedRequestPath(servletRequest);
+		// DispatcherServlet parses the path but for other scenarios (e.g. tests) we might need to
+
+		this.requestPath = (ServletRequestPathUtils.hasParsedRequestPath(servletRequest) ?
+				ServletRequestPathUtils.getParsedRequestPath(servletRequest) :
+				ServletRequestPathUtils.parseAndCache(servletRequest));
 	}
 
 	private static List<MediaType> allSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
@@ -128,13 +131,8 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	@Override
-	public String path() {
-		return pathContainer().value();
-	}
-
-	@Override
-	public PathContainer pathContainer() {
-		return this.requestPath.pathWithinApplication();
+	public RequestPath requestPath() {
+		return this.requestPath;
 	}
 
 	@Override

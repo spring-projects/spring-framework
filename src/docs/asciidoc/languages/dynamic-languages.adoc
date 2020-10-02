@@ -67,7 +67,7 @@ The following example defines a class that has a dependency on the `Messenger` i
 
 The following example implements the `Messenger` interface in Groovy:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -282,7 +282,7 @@ surrounded by quotation marks. The following listing shows the changes that you
 (the developer) should make to the `Messenger.groovy` source file when the
 execution of the program is paused:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	package org.springframework.scripting
@@ -371,7 +371,7 @@ constructors and properties 100% clear, the following mixture of code and config
 does not work:
 
 .An approach that cannot work
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -462,7 +462,7 @@ The following bean definition uses the calculator defined in Groovy:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<-- from the file 'beans.xml' -->
+	<!-- from the file 'beans.xml' -->
 	<beans>
 		<lang:groovy id="calculator" script-source="classpath:calculator.groovy"/>
 	</beans>
@@ -480,9 +480,9 @@ Finally, the following small application exercises the preceding configuration:
 
 	public class Main {
 
-		public static void Main(String[] args) {
+		public static void main(String[] args) {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
-			Calculator calc = (Calculator) ctx.getBean("calculator");
+			Calculator calc = ctx.getBean("calculator", Calculator.class);
 			System.out.println(calc.add(2, 8));
 		}
 	}
@@ -596,7 +596,7 @@ description:
 
 ----
 BeanShell is a small, free, embeddable Java source interpreter with dynamic language
-features, written in Java. BeanShell dynamically executes standard Java syntax and
+features, written in Java. BeanShell dynamically runs standard Java syntax and
 extends it with common scripting conveniences such as loose types, commands, and method
 closures like those in Perl and JavaScript.
 ----
@@ -697,7 +697,7 @@ beans, you have to enable the "`refreshable beans`" functionality. See
 The following example shows an `org.springframework.web.servlet.mvc.Controller` implemented
 by using the Groovy dynamic language:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file '/WEB-INF/groovy/FortuneController.groovy'

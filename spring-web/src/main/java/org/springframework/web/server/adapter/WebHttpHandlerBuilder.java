@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -98,6 +99,9 @@ public final class WebHttpHandlerBuilder {
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
+	@Nullable
+	private Function<HttpHandler, HttpHandler> httpHandlerDecorator;
+
 
 	/**
 	 * Private constructor to use when initialized from an ApplicationContext.
@@ -120,6 +124,7 @@ public final class WebHttpHandlerBuilder {
 		this.codecConfigurer = other.codecConfigurer;
 		this.localeContextResolver = other.localeContextResolver;
 		this.forwardedHeaderTransformer = other.forwardedHeaderTransformer;
+		this.httpHandlerDecorator = other.httpHandlerDecorator;
 	}
 
 
@@ -192,14 +197,6 @@ public final class WebHttpHandlerBuilder {
 		}
 
 		try {
-			builder.localeContextResolver(
-					context.getBean(LOCALE_CONTEXT_RESOLVER_BEAN_NAME, LocaleContextResolver.class));
-		}
-		catch (NoSuchBeanDefinitionException ex) {
-			// Fall back on default
-		}
-
-		try {
 			builder.forwardedHeaderTransformer(
 					context.getBean(FORWARDED_HEADER_TRANSFORMER_BEAN_NAME, ForwardedHeaderTransformer.class));
 		}
@@ -234,7 +231,6 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	private void updateFilters() {
-
 		if (this.filters.isEmpty()) {
 			return;
 		}
@@ -352,12 +348,35 @@ public final class WebHttpHandlerBuilder {
 		return (this.forwardedHeaderTransformer != null);
 	}
 
+	/**
+	 * Configure a {@link Function} to decorate the {@link HttpHandler} returned
+	 * by this builder which effectively wraps the entire
+	 * {@link WebExceptionHandler} - {@link WebFilter} - {@link WebHandler}
+	 * processing chain. This provides access to the request and response before
+	 * the entire chain and likewise the ability to observe the result of
+	 * the entire chain.
+	 * @param handlerDecorator the decorator to apply
+	 * @since 5.3
+	 */
+	public WebHttpHandlerBuilder httpHandlerDecorator(Function<HttpHandler, HttpHandler> handlerDecorator) {
+		this.httpHandlerDecorator = (this.httpHandlerDecorator != null ?
+				handlerDecorator.andThen(this.httpHandlerDecorator) : handlerDecorator);
+		return this;
+	}
+
+	/**
+	 * Whether a decorator for {@link HttpHandler} is configured or not via
+	 * {@link #httpHandlerDecorator(Function)}.
+	 * @since 5.3
+	 */
+	public boolean hasHttpHandlerDecorator() {
+		return (this.httpHandlerDecorator != null);
+	}
 
 	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-
 		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
@@ -379,7 +398,7 @@ public final class WebHttpHandlerBuilder {
 		}
 		adapted.afterPropertiesSet();
 
-		return adapted;
+		return (this.httpHandlerDecorator != null ? this.httpHandlerDecorator.apply(adapted) : adapted);
 	}
 
 	/**

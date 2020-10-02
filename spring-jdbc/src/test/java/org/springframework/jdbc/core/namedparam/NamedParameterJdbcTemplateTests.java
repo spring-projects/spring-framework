@@ -22,10 +22,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -275,7 +275,7 @@ public class NamedParameterJdbcTemplateTests {
 
 		params.put("id", new SqlParameterValue(Types.DECIMAL, 1));
 		params.put("country", "UK");
-		final List<Customer> customers = new LinkedList<>();
+		final List<Customer> customers = new ArrayList<>();
 		namedParameterTemplate.query(SELECT_NAMED_PARAMETERS, params, rs -> {
 			Customer cust = new Customer();
 			cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -300,7 +300,7 @@ public class NamedParameterJdbcTemplateTests {
 		given(resultSet.getInt("id")).willReturn(1);
 		given(resultSet.getString("forename")).willReturn("rod");
 
-		final List<Customer> customers = new LinkedList<>();
+		final List<Customer> customers = new ArrayList<>();
 		namedParameterTemplate.query(SELECT_NO_PARAMETERS, rs -> {
 			Customer cust = new Customer();
 			cust.setId(rs.getInt(COLUMN_NAMES[0]));

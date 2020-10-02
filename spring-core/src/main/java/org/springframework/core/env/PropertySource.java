@@ -136,7 +136,7 @@ public abstract class PropertySource<T> {
 	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof PropertySource &&
-				ObjectUtils.nullSafeEquals(this.name, ((PropertySource<?>) other).name)));
+				ObjectUtils.nullSafeEquals(getName(), ((PropertySource<?>) other).getName())));
 	}
 
 	/**
@@ -145,7 +145,7 @@ public abstract class PropertySource<T> {
 	 */
 	@Override
 	public int hashCode() {
-		return ObjectUtils.nullSafeHashCode(this.name);
+		return ObjectUtils.nullSafeHashCode(getName());
 	}
 
 	/**
@@ -161,10 +161,10 @@ public abstract class PropertySource<T> {
 	public String toString() {
 		if (logger.isDebugEnabled()) {
 			return getClass().getSimpleName() + "@" + System.identityHashCode(this) +
-					" {name='" + this.name + "', properties=" + this.source + "}";
+					" {name='" + getName() + "', properties=" + getSource() + "}";
 		}
 		else {
-			return getClass().getSimpleName() + " {name='" + this.name + "'}";
+			return getClass().getSimpleName() + " {name='" + getName() + "'}";
 		}
 	}
 

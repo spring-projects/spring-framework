@@ -34,6 +34,7 @@ import org.xnio.IoFuture;
 import org.xnio.XnioWorker;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -72,7 +73,8 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	 * @param worker the Xnio worker
 	 */
 	public UndertowWebSocketClient(XnioWorker worker) {
-		this(worker, builder -> {});
+		this(worker, builder -> {
+		});
 	}
 
 	/**
@@ -153,7 +155,7 @@ public class UndertowWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completion = MonoProcessor.create();
+		MonoProcessor<Void> completion = MonoProcessor.fromSink(Sinks.one());
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {

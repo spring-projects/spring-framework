@@ -30,7 +30,7 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
- * visitPermittedSubtype} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
+ * visitPermittedSubclass} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
  * visitTypeAnnotation} | {@code visitAttribute} )* ( {@code visitNestMember} | {@code
  * visitInnerClass} | {@code visitRecordComponent} | {@code visitField} | {@code visitMethod} )*
  * {@code visitEnd}.
@@ -62,18 +62,19 @@ public abstract class ClassVisitor {
    * Constructs a new {@link ClassVisitor}.
    *
    * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7} or {@link
-   *     Opcodes#ASM8}.
+   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6}, {@link Opcodes#ASM7}, {@link
+   *     Opcodes#ASM8} or {@link Opcodes#ASM9}.
    * @param classVisitor the class visitor to which this visitor must delegate method calls. May be
    *     null.
    */
   public ClassVisitor(final int api, final ClassVisitor classVisitor) {
-    if (api != Opcodes.ASM8
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
         && api != Opcodes.ASM7
         && api != Opcodes.ASM6
         && api != Opcodes.ASM5
         && api != Opcodes.ASM4
-        && api != Opcodes.ASM9_EXPERIMENTAL) {
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
     // SPRING PATCH: no preview mode check for ASM 9 experimental
@@ -139,7 +140,7 @@ public abstract class ClassVisitor {
    */
   public ModuleVisitor visitModule(final String name, final int access, final String version) {
     if (api < Opcodes.ASM6) {
-      throw new UnsupportedOperationException("This feature requires ASM6");
+      throw new UnsupportedOperationException("Module requires ASM6");
     }
     if (cv != null) {
       return cv.visitModule(name, access, version);
@@ -159,7 +160,7 @@ public abstract class ClassVisitor {
    */
   public void visitNestHost(final String nestHost) {
     if (api < Opcodes.ASM7) {
-      throw new UnsupportedOperationException("This feature requires ASM7");
+      throw new UnsupportedOperationException("NestHost requires ASM7");
     }
     if (cv != null) {
       cv.visitNestHost(nestHost);
@@ -215,7 +216,7 @@ public abstract class ClassVisitor {
   public AnnotationVisitor visitTypeAnnotation(
       final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (api < Opcodes.ASM5) {
-      throw new UnsupportedOperationException("This feature requires ASM5");
+      throw new UnsupportedOperationException("TypeAnnotation requires ASM5");
     }
     if (cv != null) {
       return cv.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
@@ -245,7 +246,7 @@ public abstract class ClassVisitor {
    */
   public void visitNestMember(final String nestMember) {
     if (api < Opcodes.ASM7) {
-      throw new UnsupportedOperationException("This feature requires ASM7");
+      throw new UnsupportedOperationException("NestMember requires ASM7");
     }
     if (cv != null) {
       cv.visitNestMember(nestMember);
@@ -253,20 +254,17 @@ public abstract class ClassVisitor {
   }
 
   /**
-   * <b>Experimental, use at your own risk. This method will be renamed when it becomes stable, this
-   * will break existing code using it</b>. Visits a permitted subtypes. A permitted subtypes is one
-   * of the allowed subtypes of the current class.
+   * Visits a permitted subclasses. A permitted subclass is one of the allowed subclasses of the
+   * current class.
    *
-   * @param permittedSubtype the internal name of a permitted subtype.
-   * @deprecated this API is experimental.
+   * @param permittedSubclass the internal name of a permitted subclass.
    */
-  @Deprecated
-  public void visitPermittedSubtypeExperimental(final String permittedSubtype) {
-    if (api != Opcodes.ASM9_EXPERIMENTAL) {
-      throw new UnsupportedOperationException("This feature requires ASM9_EXPERIMENTAL");
+  public void visitPermittedSubclass(final String permittedSubclass) {
+    if (api < Opcodes.ASM9) {
+      throw new UnsupportedOperationException("PermittedSubclasses requires ASM9");
     }
     if (cv != null) {
-      cv.visitPermittedSubtypeExperimental(permittedSubtype);
+      cv.visitPermittedSubclass(permittedSubclass);
     }
   }
 
@@ -302,7 +300,7 @@ public abstract class ClassVisitor {
   public RecordComponentVisitor visitRecordComponent(
       final String name, final String descriptor, final String signature) {
     if (api < Opcodes.ASM8) {
-      throw new UnsupportedOperationException("This feature requires ASM8");
+      throw new UnsupportedOperationException("Record requires ASM8");
     }
     if (cv != null) {
       return cv.visitRecordComponent(name, descriptor, signature);

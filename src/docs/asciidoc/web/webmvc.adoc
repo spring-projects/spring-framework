@@ -518,7 +518,7 @@ The `DispatcherServlet` processes requests as follows:
   information about multipart handling.
 * An appropriate handler is searched for. If a handler is found, the execution chain
   associated with the handler (preprocessors, postprocessors, and controllers) is
-  executed in order to prepare a model or rendering. Alternatively, for annotated
+  run to prepare a model for rendering. Alternatively, for annotated
   controllers, the response can be rendered (within the `HandlerAdapter`) instead of
   returning a view.
 * If a model is returned, the view is rendered. If no model is returned (maybe due to
@@ -584,8 +584,8 @@ a principal. Interceptors must implement `HandlerInterceptor` from the
 `org.springframework.web.servlet` package with three methods that should provide enough
 flexibility to do all kinds of pre-processing and post-processing:
 
-* `preHandle(..)`: Before the actual handler is executed
-* `postHandle(..)`: After the handler is executed
+* `preHandle(..)`: Before the actual handler is run
+* `postHandle(..)`: After the handler is run
 * `afterCompletion(..)`: After the complete request has finished
 
 The `preHandle(..)` method returns a boolean value. You can use this method to break or
@@ -949,7 +949,7 @@ The `SessionLocaleResolver` lets you retrieve `Locale` and `TimeZone` from the
 session that might be associated with the user's request. In contrast to
 `CookieLocaleResolver`, this strategy stores locally chosen locale settings in the
 Servlet container's `HttpSession`. As a consequence, those settings are temporary
-for each session and are, therefore, lost when each session terminates.
+for each session and are, therefore, lost when each session ends.
 
 Note that there is no direct relationship with external session management mechanisms,
 such as the Spring Session project. This `SessionLocaleResolver` evaluates and
@@ -3381,6 +3381,39 @@ which allow rendering only a subset of all fields in an `Object`. To use it with
 NOTE: `@JsonView` allows an array of view classes, but you can specify only one per
 controller method. If you need to activate multiple views, you can use a composite interface.
 
+If you want to do the above programmatically, instead of declaring an `@JsonView` annotation,
+wrap the return value with `MappingJacksonValue` and use it to supply the serialization view:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@RestController
+	public class UserController {
+
+		@GetMapping("/user")
+		public MappingJacksonValue getUser() {
+			User user = new User("eric", "7!jd#h23");
+			MappingJacksonValue value = new MappingJacksonValue(user);
+			value.setSerializationView(User.WithoutPasswordView.class);
+			return value;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	class UserController {
+
+		@GetMapping("/user")
+		fun getUser(): MappingJacksonValue {
+			val value = MappingJacksonValue(User("eric", "7!jd#h23"))
+			value.serializationView = User.WithoutPasswordView::class.java
+			return value
+		}
+	}
+----
+
 For controllers that rely on view resolution, you can add the serialization view class
 to the model, as the following example shows:
 
@@ -4581,7 +4614,7 @@ Reactive return values are handled as follows:
 
 * A single-value promise is adapted to, similar to using `DeferredResult`. Examples
 include `Mono` (Reactor) or `Single` (RxJava).
-* A multi-value stream with a streaming media type (such as `application/stream+json`
+* A multi-value stream with a streaming media type (such as `application/x-ndjson`
 or `text/event-stream`) is adapted to, similar to using `ResponseBodyEmitter` or
 `SseEmitter`. Examples include `Flux` (Reactor) or `Observable` (RxJava).
 Applications can also return `Flux<ServerSentEvent>` or `Observable<ServerSentEvent>`.
@@ -4593,7 +4626,7 @@ TIP: Spring MVC supports Reactor and RxJava through the
 `spring-core`, which lets it adapt from multiple reactive libraries.
 
 For streaming to the response, reactive back pressure is supported, but writes to the
-response are still blocking and are executed on a separate thread through the
+response are still blocking and are run on a separate thread through the
 <<mvc-ann-async-configuration-spring-mvc, configured>> `TaskExecutor`, to avoid
 blocking the upstream source (such as a `Flux` returned from `WebClient`).
 By default, `SimpleAsyncTaskExecutor` is used for the blocking writes, but that is not
@@ -5410,7 +5443,7 @@ The following example shows how to achieve the same configuration in XML:
 
 This is a shortcut for defining a `ParameterizableViewController` that immediately
 forwards to a view when invoked. You can use it in static cases when there is no Java controller
-logic to execute before the view generates the response.
+logic to run before the view generates the response.
 
 The following example of Java configuration forwards a request for `/` to a view called `home`:
 
@@ -5934,7 +5967,7 @@ hook of the Spring `ApplicationContext`, as the following example shows:
 ----
 	@Component
 	class MyPostProcessor : BeanPostProcessor {
-		
+
 		override fun postProcessBeforeInitialization(bean: Any, name: String): Any {
 			// ...
 		}

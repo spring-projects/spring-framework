@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -76,6 +78,10 @@ public class HandlerMappingIntrospector
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
 
+	@Nullable
+	private Map<HandlerMapping, MatchableHandlerMapping> pathPatternMatchableHandlerMappings =
+			new ConcurrentHashMap<>();
+
 
 	/**
 	 * Constructor for use with {@link ApplicationContextAware}.
@@ -113,6 +119,7 @@ public class HandlerMappingIntrospector
 		if (this.handlerMappings == null) {
 			Assert.notNull(this.applicationContext, "No ApplicationContext");
 			this.handlerMappings = initHandlerMappings(this.applicationContext);
+			this.pathPatternMatchableHandlerMappings = initPathPatternMatchableHandlerMappings(this.handlerMappings);
 		}
 	}
 
@@ -130,6 +137,7 @@ public class HandlerMappingIntrospector
 	@Nullable
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
+		Assert.notNull(this.pathPatternMatchableHandlerMappings, "Handler mappings with PathPatterns not initialized");
 		HttpServletRequest wrapper = new RequestAttributeChangeIgnoringWrapper(request);
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			Object handler = handlerMapping.getHandler(wrapper);
@@ -137,7 +145,8 @@ public class HandlerMappingIntrospector
 				continue;
 			}
 			if (handlerMapping instanceof MatchableHandlerMapping) {
-				return ((MatchableHandlerMapping) handlerMapping);
+				return this.pathPatternMatchableHandlerMappings.getOrDefault(
+						handlerMapping, (MatchableHandlerMapping) handlerMapping);
 			}
 			throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
 		}
@@ -160,11 +169,9 @@ public class HandlerMappingIntrospector
 			if (handler == null) {
 				continue;
 			}
-			if (handler.getInterceptors() != null) {
-				for (HandlerInterceptor interceptor : handler.getInterceptors()) {
-					if (interceptor instanceof CorsConfigurationSource) {
-						return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
-					}
+			for (HandlerInterceptor interceptor : handler.getInterceptorList()) {
+				if (interceptor instanceof CorsConfigurationSource) {
+					return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrapper);
 				}
 			}
 			if (handler.getHandler() instanceof CorsConfigurationSource) {
@@ -210,6 +217,16 @@ public class HandlerMappingIntrospector
 			}
 		}
 		return result;
+	}
+
+	private static Map<HandlerMapping, MatchableHandlerMapping> initPathPatternMatchableHandlerMappings(
+			List<HandlerMapping> mappings) {
+
+		return mappings.stream()
+				.filter(mapping -> mapping instanceof MatchableHandlerMapping)
+				.map(mapping -> (MatchableHandlerMapping) mapping)
+				.filter(mapping -> mapping.getPatternParser() != null)
+				.collect(Collectors.toMap(mapping -> mapping, PathPatternMatchableHandlerMapping::new));
 	}
 
 

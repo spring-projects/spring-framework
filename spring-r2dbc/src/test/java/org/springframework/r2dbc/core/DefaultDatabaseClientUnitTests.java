@@ -46,6 +46,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.doReturn;
@@ -83,6 +84,15 @@ class DefaultDatabaseClientUnitTests {
 
 		databaseClientBuilder = DatabaseClient.builder().connectionFactory(
 				connectionFactory).bindMarkers(BindMarkersFactory.indexed("$", 1));
+	}
+
+	@Test
+	void connectionFactoryIsExposed() {
+		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		DatabaseClient databaseClient = DatabaseClient.builder()
+				.connectionFactory(connectionFactory)
+				.bindMarkers(BindMarkersFactory.anonymous("?")).build();
+		assertThat(databaseClient.getConnectionFactory()).isSameAs(connectionFactory);
 	}
 
 	@Test

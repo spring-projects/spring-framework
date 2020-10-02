@@ -61,7 +61,8 @@ dependencies {
 	testCompile("io.projectreactor:reactor-core")
 	testCompile("io.reactivex.rxjava3:rxjava")
 	testCompile("org.jetbrains.kotlin:kotlin-script-runtime")
-	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
+	testRuntime("org.jetbrains.kotlin:kotlin-scripting-jsr223")
+	testRuntime("org.jetbrains.kotlinx:kotlinx-coroutines-core") // https://github.com/gradle/gradle/issues/14017
 	testRuntime("org.jruby:jruby")
 	testRuntime("org.python:jython-standalone")
 	testRuntime("org.webjars:underscorejs")

@@ -33,14 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.Mockito.mock;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-@EnabledForTestGroups(PERFORMANCE)
+@EnabledForTestGroups(LONG_RUNNING)
 public class ScriptFactoryPostProcessorTests {
 
 	private static final String MESSAGE_TEXT = "Bingo";

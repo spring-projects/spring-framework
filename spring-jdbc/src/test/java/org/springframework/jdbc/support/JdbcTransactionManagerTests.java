@@ -28,6 +28,8 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 
 import org.springframework.core.testfixture.EnabledForTestGroups;
@@ -63,7 +65,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
@@ -969,18 +971,10 @@ public class JdbcTransactionManagerTests {
 		ordered.verify(con).close();
 	}
 
-	@Test
-	public void testTransactionWithLongTimeout() throws Exception {
-		doTestTransactionWithTimeout(10);
-	}
-
-	@Test
-	public void testTransactionWithShortTimeout() throws Exception {
-		doTestTransactionWithTimeout(1);
-	}
-
-	@EnabledForTestGroups(PERFORMANCE)
-	private void doTestTransactionWithTimeout(int timeout) throws Exception {
+	@ParameterizedTest(name = "transaction with {0} second timeout")
+	@ValueSource(ints = {1, 10})
+	@EnabledForTestGroups(LONG_RUNNING)
+	public void transactionWithTimeout(int timeout) throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.prepareStatement("some SQL statement")).willReturn(ps);

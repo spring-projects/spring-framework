@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -51,30 +50,19 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public class MappingJackson2XmlViewTests {
 
-	private MappingJackson2XmlView view;
+	private MappingJackson2XmlView view = new MappingJackson2XmlView();
 
-	private MockHttpServletRequest request;
+	private MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletResponse response;
+	private MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private Context jsContext;
+	private Context jsContext = ContextFactory.getGlobal().enterContext();
 
-	private ScriptableObject jsScope;
-
-
-	@BeforeEach
-	public void setUp() {
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-
-		jsContext = ContextFactory.getGlobal().enterContext();
-		jsScope = jsContext.initStandardObjects();
-
-		view = new MappingJackson2XmlView();
-	}
+	private ScriptableObject jsScope = jsContext.initStandardObjects();
 
 
 	@Test
@@ -93,7 +81,8 @@ public class MappingJackson2XmlViewTests {
 
 		assertThat(response.getHeader("Cache-Control")).isEqualTo("no-store");
 
-		assertThat(response.getContentType()).isEqualTo(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE);
+		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
+		assertThat(mediaType.isCompatibleWith(MediaType.parseMediaType(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE))).isTrue();
 
 		String jsonResult = response.getContentAsString();
 		assertThat(jsonResult.length() > 0).isTrue();
@@ -108,12 +97,14 @@ public class MappingJackson2XmlViewTests {
 		model.put("foo", "bar");
 
 		view.render(model, request, response);
-		assertThat(response.getContentType()).isEqualTo("application/xml");
+		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
+		assertThat(mediaType.isCompatibleWith(MediaType.APPLICATION_XML)).isTrue();
 
 		request.setAttribute(View.SELECTED_CONTENT_TYPE, new MediaType("application", "vnd.example-v2+xml"));
 		view.render(model, request, response);
 
-		assertThat(response.getContentType()).isEqualTo("application/vnd.example-v2+xml");
+		mediaType = MediaType.parseMediaType(response.getContentType());
+		assertThat(mediaType.isCompatibleWith(MediaType.parseMediaType("application/vnd.example-v2+xml"))).isTrue();
 	}
 
 	@Test
@@ -232,7 +223,8 @@ public class MappingJackson2XmlViewTests {
 		Object xmlResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "XML Stream", 1, null);
 		assertThat(xmlResult).as("XML Result did not eval as valid JavaScript").isNotNull();
-		assertThat(response.getContentType()).isEqualTo("application/xml");
+		MediaType mediaType = MediaType.parseMediaType(response.getContentType());
+		assertThat(mediaType.isCompatibleWith(MediaType.APPLICATION_XML)).isTrue();
 	}
 
 

@@ -72,7 +72,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class JndiRmiClientInterceptor extends JndiObjectLocator implements MethodInterceptor, InitializingBean {
 
 	private Class<?> serviceInterface;

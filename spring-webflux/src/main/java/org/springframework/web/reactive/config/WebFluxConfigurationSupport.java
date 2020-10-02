@@ -65,6 +65,10 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.server.WebSocketService;
+import org.springframework.web.reactive.socket.server.support.HandshakeWebSocketService;
+import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAdapter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
@@ -432,6 +436,36 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	@Bean
+	public WebSocketHandlerAdapter webFluxWebSocketHandlerAdapter() {
+		WebSocketHandlerAdapter adapter = new WebSocketHandlerAdapter(initWebSocketService());
+
+		// Lower the (default) priority for now, for backwards compatibility
+		int defaultOrder = adapter.getOrder();
+		adapter.setOrder(defaultOrder + 1);
+
+		return adapter;
+	}
+
+	private WebSocketService initWebSocketService() {
+		WebSocketService service = getWebSocketService();
+		if (service == null) {
+			try {
+				service = new HandshakeWebSocketService();
+			}
+			catch (IllegalStateException ex) {
+				// Don't fail, test environment perhaps
+				service = new NoUpgradeStrategyWebSocketService();
+			}
+		}
+		return service;
+	}
+
+	@Nullable
+	protected WebSocketService getWebSocketService() {
+		return null;
+	}
+
+	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler(
 			@Qualifier("webFluxAdapterRegistry") ReactiveAdapterRegistry reactiveAdapterRegistry,
 			ServerCodecConfigurer serverCodecConfigurer,
@@ -512,6 +546,15 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 		@Override
 		public void validate(@Nullable Object target, Errors errors) {
+		}
+	}
+
+
+	private static final class NoUpgradeStrategyWebSocketService implements WebSocketService {
+
+		@Override
+		public Mono<Void> handleRequest(ServerWebExchange exchange, WebSocketHandler webSocketHandler) {
+			return Mono.error(new IllegalStateException("No suitable RequestUpgradeStrategy"));
 		}
 	}
 

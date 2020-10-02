@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -95,7 +96,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		MonoProcessor<Void> completionMono = MonoProcessor.fromSink(Sinks.one());
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {

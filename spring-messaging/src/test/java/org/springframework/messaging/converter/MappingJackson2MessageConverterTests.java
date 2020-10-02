@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,9 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void defaultConstructor() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		assertThat(converter.getSupportedMimeTypes())
-				.contains(new MimeType("application", "json"));
+		assertThat(converter.getSupportedMimeTypes()).contains(new MimeType("application", "json"));
 		assertThat(converter.getObjectMapper().getDeserializationConfig()
-		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test  // SPR-12724
@@ -60,7 +59,7 @@ public class MappingJackson2MessageConverterTests {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(mimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(mimetype);
 		assertThat(converter.getObjectMapper().getDeserializationConfig()
-		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test  // SPR-12724
@@ -70,19 +69,14 @@ public class MappingJackson2MessageConverterTests {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter(jsonMimetype, xmlMimetype);
 		assertThat(converter.getSupportedMimeTypes()).contains(jsonMimetype, xmlMimetype);
 		assertThat(converter.getObjectMapper().getDeserializationConfig()
-		.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+				.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
 	}
 
 	@Test
 	public void fromMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{" +
-				"\"bytes\":\"AQI=\"," +
-				"\"array\":[\"Foo\",\"Bar\"]," +
-				"\"number\":42," +
-				"\"string\":\"Foo\"," +
-				"\"bool\":true," +
-				"\"fraction\":42.0}";
+		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 
@@ -97,8 +91,8 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void fromMessageUntyped() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],"
-				+ "\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		@SuppressWarnings("unchecked")
 		HashMap<String, Object> actual = (HashMap<String, Object>) converter.fromMessage(message, HashMap.class);
@@ -111,7 +105,7 @@ public class MappingJackson2MessageConverterTests {
 		assertThat(actual.get("bytes")).isEqualTo("AQI=");
 	}
 
-	@Test // gh-22386
+	@Test  // gh-22386
 	public void fromMessageMatchingInstance() {
 		MyBean myBean = new MyBean();
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
@@ -137,7 +131,7 @@ public class MappingJackson2MessageConverterTests {
 		assertThat(myBean.getString()).isEqualTo("string");
 	}
 
-	@Test // SPR-16252
+	@Test  // SPR-16252
 	public void fromMessageToList() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "[1, 2, 3, 4, 5, 6, 7, 8, 9]";
@@ -151,7 +145,7 @@ public class MappingJackson2MessageConverterTests {
 		assertThat(actual).isEqualTo(Arrays.asList(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L));
 	}
 
-	@Test // SPR-16486
+	@Test  // SPR-16486
 	public void fromMessageToMessageWithPojo() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		String payload = "{\"string\":\"foo\"}";
@@ -198,7 +192,7 @@ public class MappingJackson2MessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo(("\"" + payload + "\""));
+		assertThat(new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE)).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
@@ -214,7 +208,7 @@ public class MappingJackson2MessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertThat(message.getPayload()).isEqualTo(("\"" + payload + "\""));
+		assertThat(message.getPayload()).isEqualTo("\"" + payload + "\"");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
@@ -254,9 +248,12 @@ public class MappingJackson2MessageConverterTests {
 	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
-	void handleList(List<Long> payload) {}
+	void handleList(List<Long> payload) {
+	}
 
-	void handleMessage(Message<MyBean> message) {}
+	void handleMessage(Message<MyBean> message) {
+	}
+
 
 	public static class MyBean {
 

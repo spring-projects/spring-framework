@@ -91,13 +91,12 @@ public class RSocketClientToServerIntegrationTests {
 		requester = RSocketRequester.builder()
 				.metadataMimeType(metadataMimeType)
 				.rsocketStrategies(context.getBean(RSocketStrategies.class))
-				.connectTcp("localhost", 7000)
-				.block();
+				.tcp("localhost", 7000);
 	}
 
 	@AfterAll
 	public static void tearDownOnce() {
-		requester.rsocket().dispose();
+		requester.rsocketClient().dispose();
 		server.dispose();
 	}
 
@@ -225,14 +224,14 @@ public class RSocketClientToServerIntegrationTests {
 	@Controller
 	static class ServerController {
 
-		final Sinks.StandaloneFluxSink<String> fireForgetPayloads = Sinks.replayAll();
+		final Sinks.Many<String> fireForgetPayloads = Sinks.many().replay().all();
 
-		final Sinks.StandaloneFluxSink<String> metadataPushPayloads = Sinks.replayAll();
+		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
 
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.next(payload);
+			this.fireForgetPayloads.tryEmitNext(payload);
 		}
 
 		@MessageMapping("echo")
@@ -274,7 +273,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@ConnectMapping("foo-updates")
 		public void handleMetadata(@Header("foo") String foo) {
-			this.metadataPushPayloads.next(foo);
+			this.metadataPushPayloads.tryEmitNext(foo);
 		}
 
 		@MessageExceptionHandler

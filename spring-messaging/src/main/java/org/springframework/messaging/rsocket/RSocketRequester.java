@@ -17,11 +17,15 @@
 package org.springframework.messaging.rsocket;
 
 import java.net.URI;
+import java.util.List;
 import java.util.function.Consumer;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
+import io.rsocket.core.RSocketClient;
+import io.rsocket.loadbalance.LoadbalanceStrategy;
+import io.rsocket.loadbalance.LoadbalanceTarget;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
@@ -48,8 +52,18 @@ import org.springframework.util.MimeType;
 public interface RSocketRequester {
 
 	/**
-	 * Return the underlying sending RSocket.
+	 * Return the underlying {@link RSocketClient} used to make requests with.
+	 * @since 5.3
 	 */
+	RSocketClient rsocketClient();
+
+	/**
+	 * Return the underlying {@link RSocket} if the requester was created with a
+	 * "live" RSocket via {@link #wrap(RSocket, MimeType, MimeType, RSocketStrategies)}
+	 * or via one of the (deprecated) connect methods on the
+	 * {@code RSocketRequester} builder, or otherwise return {@code null}.
+	 */
+	@Nullable
 	RSocket rsocket();
 
 	/**
@@ -96,7 +110,6 @@ public interface RSocketRequester {
 	 */
 	RequestSpec metadata(Object metadata, @Nullable MimeType mimeType);
 
-
 	/**
 	 * Obtain a builder to create a client {@link RSocketRequester} by connecting
 	 * to an RSocket server.
@@ -106,14 +119,15 @@ public interface RSocketRequester {
 	}
 
 	/**
-	 * Wrap an existing {@link RSocket}. Typically used in client or server
-	 * responders to wrap the {@code RSocket} for the remote side.
+	 * Wrap an existing {@link RSocket}. Typically for internal framework use,
+	 * to wrap the remote {@code RSocket} in a client or server responder, but
+	 * it can also be used to wrap any {@link RSocket}.
 	 */
 	static RSocketRequester wrap(
 			RSocket rsocket, MimeType dataMimeType, MimeType metadataMimeType,
 			RSocketStrategies strategies) {
 
-		return new DefaultRSocketRequester(rsocket, dataMimeType, metadataMimeType, strategies);
+		return new DefaultRSocketRequester(null, rsocket, dataMimeType, metadataMimeType, strategies);
 	}
 
 
@@ -206,29 +220,6 @@ public interface RSocketRequester {
 		RSocketRequester.Builder rsocketConnector(RSocketConnectorConfigurer configurer);
 
 		/**
-		 * Callback to configure the {@code ClientRSocketFactory} directly.
-		 * <ul>
-		 * <li>The data and metadata mime types cannot be set directly
-		 * on the {@code ClientRSocketFactory} and will be overridden. Use the
-		 * shortcuts {@link #dataMimeType(MimeType)} and
-		 * {@link #metadataMimeType(MimeType)} on this builder instead.
-		 * <li>The frame decoder also cannot be set directly and instead is set
-		 * to match the configured {@code DataBufferFactory}.
-		 * <li>For the
-		 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory#setupPayload(Payload)
-		 * setupPayload}, consider using methods on this builder to specify the
-		 * route, other metadata, and data as Object values to be encoded.
-		 * <li>To configure client side responding, see
-		 * {@link RSocketMessageHandler#clientResponder(RSocketStrategies, Object...)}.
-		 * </ul>
-		 * @deprecated as of 5.2.6 following the deprecation of
-		 * {@link io.rsocket.RSocketFactory.ClientRSocketFactory RSocketFactory.ClientRSocketFactory}
-		 * in RSocket 1.0 RC7. Please, use {@link #rsocketConnector(RSocketConnectorConfigurer)}.
-		 */
-		@Deprecated
-		RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer);
-
-		/**
 		 * Configure this builder through a {@code Consumer}. This enables
 		 * libraries such as Spring Security to provide shortcuts for applying
 		 * a set of related customizations.
@@ -237,27 +228,84 @@ public interface RSocketRequester {
 		RSocketRequester.Builder apply(Consumer<RSocketRequester.Builder> configurer);
 
 		/**
+		 * Build an {@link RSocketRequester} with an
+		 * {@link io.rsocket.core.RSocketClient} that connects over TCP to the
+		 * given host and port. The requester can be used to make requests
+		 * concurrently. Requests are made over a shared connection that is also
+		 * re-established as needed when further requests are made.
+		 * @param host the host to connect to
+		 * @param port the port to connect to
+		 * @return the created {@code RSocketRequester}
+		 * @since 5.3
+		 */
+		RSocketRequester tcp(String host, int port);
+
+		/**
+		 * Build an {@link RSocketRequester} with an
+		 * {@link io.rsocket.core.RSocketClient} that connects over WebSocket to
+		 * the given URL. The requester can be used to make requests
+		 * concurrently. Requests are made over a shared connection that is also
+		 * re-established as needed when further requests are made.
+		 * @param uri the URL to connect to
+		 * @return the created {@code RSocketRequester}
+		 * @since 5.3
+		 */
+		RSocketRequester websocket(URI uri);
+
+		/**
+		 * Variant of {@link #tcp(String, int)} and {@link #websocket(URI)}
+		 * with an already initialized {@link ClientTransport}.
+		 * @param transport the transport to connect with
+		 * @return the created {@code RSocketRequester}
+		 * @since 5.3
+		 */
+		RSocketRequester transport(ClientTransport transport);
+
+		/**
+		 * Build an {@link RSocketRequester} with an
+		 * {@link io.rsocket.loadbalance.LoadbalanceRSocketClient} that will
+		 * connect to one of the given targets selected through the given
+		 * {@link io.rsocket.loadbalance.LoadbalanceRSocketClient}.
+		 * @param targetPublisher a {@code Publisher} that supplies a list of
+		 * target transports to loadbalance against; the given list may be
+		 * periodically updated by the {@code Publisher}.
+		 * @param loadbalanceStrategy the strategy to use for selecting from
+		 * the list of loadbalance targets.
+		 * @return the created {@code RSocketRequester}
+		 * @since 5.3
+		 */
+		RSocketRequester transports(
+				Publisher<List<LoadbalanceTarget>> targetPublisher,
+				LoadbalanceStrategy loadbalanceStrategy);
+
+		/**
 		 * Connect to the server over TCP.
 		 * @param host the server host
 		 * @param port the server port
 		 * @return an {@code RSocketRequester} for the connection
+		 * @deprecated as of 5.3 in favor of {@link #tcp(String, int)}
 		 * @see TcpClientTransport
 		 */
+		@Deprecated
 		Mono<RSocketRequester> connectTcp(String host, int port);
 
 		/**
 		 * Connect to the server over WebSocket.
 		 * @param uri the RSocket server endpoint URI
 		 * @return an {@code RSocketRequester} for the connection
+		 * @deprecated as of 5.3 in favor of {@link #websocket(URI)}
 		 * @see WebsocketClientTransport
 		 */
+		@Deprecated
 		Mono<RSocketRequester> connectWebSocket(URI uri);
 
 		/**
 		 * Connect to the server with the given {@code ClientTransport}.
 		 * @param transport the client transport to use
 		 * @return an {@code RSocketRequester} for the connection
+		 * @deprecated as of 5.3 in favor of {@link #transport(ClientTransport)}
 		 */
+		@Deprecated
 		Mono<RSocketRequester> connect(ClientTransport transport);
 
 	}

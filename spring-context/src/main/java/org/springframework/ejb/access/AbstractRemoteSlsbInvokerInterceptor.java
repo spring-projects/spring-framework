@@ -29,7 +29,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.lang.Nullable;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
-import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
 
 /**
  * Base class for interceptors proxying remote Stateless Session Beans.
@@ -121,8 +120,9 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * @return whether the exception should be treated as connect failure
 	 * @see org.springframework.remoting.rmi.RmiClientInterceptorUtils#isConnectFailure
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean isConnectFailure(RemoteException ex) {
-		return RmiClientInterceptorUtils.isConnectFailure(ex);
+		return org.springframework.remoting.rmi.RmiClientInterceptorUtils.isConnectFailure(ex);
 	}
 
 	@Nullable

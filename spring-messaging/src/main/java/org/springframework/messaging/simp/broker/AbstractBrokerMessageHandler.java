@@ -142,7 +142,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * @since 5.1
 	 */
 	public void setPreservePublishOrder(boolean preservePublishOrder) {
-		OrderedMessageSender.configureOutboundChannel(this.clientOutboundChannel, preservePublishOrder);
+		OrderedMessageChannelDecorator.configureInterceptor(this.clientOutboundChannel, preservePublishOrder);
 		this.preservePublishOrder = preservePublishOrder;
 	}
 
@@ -298,7 +298,7 @@ public abstract class AbstractBrokerMessageHandler
 	 */
 	protected MessageChannel getClientOutboundChannelForSession(String sessionId) {
 		return this.preservePublishOrder ?
-				new OrderedMessageSender(getClientOutboundChannel(), logger) : getClientOutboundChannel();
+				new OrderedMessageChannelDecorator(getClientOutboundChannel(), logger) : getClientOutboundChannel();
 	}
 
 

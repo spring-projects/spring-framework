@@ -17,7 +17,6 @@
 package org.springframework.web.cors;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ import org.springframework.http.server.PathContainer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
@@ -232,7 +232,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	 * Return all configured CORS mappings.
 	 */
 	public Map<String, CorsConfiguration> getCorsConfigurations() {
-		Map<String, CorsConfiguration> result = new HashMap<>(this.corsConfigurations.size());
+		Map<String, CorsConfiguration> result = CollectionUtils.newHashMap(this.corsConfigurations.size());
 		this.corsConfigurations.forEach((pattern, config) -> result.put(pattern.getPatternString(), config));
 		return Collections.unmodifiableMap(result);
 	}
