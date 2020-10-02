@@ -117,7 +117,7 @@ access to the HTTP request and response, including headers, body, method, and st
 
 
 [[webmvc-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -165,7 +165,7 @@ val map = request.params()
 
 
 [[webmvc-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -198,6 +198,35 @@ ServerResponse.created(location).build();
 ----
 val location: URI = ...
 ServerResponse.created(location).build()
+----
+
+You can also use an asynchronous result as the body, in the form of a `CompletableFuture`,
+`Publisher`, or any other type supported by the `ReactiveAdapterRegistry`. For instance:
+
+[source,java,role="primary"]
+.Java
+----
+Mono<Person> person = webClient.get().retrieve().bodyToMono(Person.class);
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person);
+----
+[source,kotlin,role="secondary"]
+.Kotlin
+----
+val person = webClient.get().retrieve().awaitBody<Person>()
+ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person)
+----
+
+If not just the body, but also the status or headers are based on an asynchronous type,
+you can use the static `async` method on `ServerResponse`, which
+accepts `CompletableFuture<ServerResponse>`, `Publisher<ServerResponse>`, or
+any other asynchronous type supported by the `ReactiveAdapterRegistry`. For instance:
+
+[source,java,role="primary"]
+.Java
+----
+Mono<ServerResponse> asyncResponse = webClient.get().retrieve().bodyToMono(Person.class)
+  .map(p -> ServerResponse.ok().header("Name", p.name()).body(p));
+ServerResponse.async(asyncResponse);
 ----
 
 

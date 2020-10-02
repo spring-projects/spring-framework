@@ -125,7 +125,7 @@ For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive L
 
 
 [[webflux-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -218,7 +218,7 @@ val parts = request.body(BodyExtractors.toParts()).asFlow()
 
 
 [[webflux-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
