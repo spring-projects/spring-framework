@@ -75,6 +75,7 @@ dependencies {
 jar {
 	reproducibleFileOrder = true
 	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+	manifest.attributes["Dependencies"] = "jdk.unsupported" // JBoss modules
 
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
