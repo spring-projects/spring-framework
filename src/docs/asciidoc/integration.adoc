@@ -4421,10 +4421,10 @@ This section describes how to send email with the Spring Framework.
 The following JAR needs to be on the classpath of your application in order to use
 the Spring Framework's email library:
 
-* The https://javaee.github.io/javamail/[JavaMail] library
+* The https://eclipse-ee4j.github.io/mail/[JavaMail] library
 
 This library is freely available on the web -- for example, in Maven Central as
-`com.sun.mail:javax.mail`.
+`com.sun.mail:jakarta.mail`.
 ****
 
 The Spring Framework provides a helpful utility library for sending email that shields
