@@ -19,6 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -170,11 +171,19 @@ import java.lang.annotation.Target;
  * attribute aliases. Consult the Javadoc for individual annotations as well
  * as the reference manual for details.
  *
+ * <h3>Annotation Attribute Supporting Multiple Aliases</h3>
+ * <p>As of Spring Framework 5.3, one annotation attribute supports
+ * the declaration of multiple aliases. For more information, see
+ * {@link AliasFors} please.
+ *
  * @author Sam Brannen
+ * @author ZiCheng Zhang
  * @since 4.2
  * @see MergedAnnotations
  * @see SynthesizedAnnotation
+ * @see AliasFors
  */
+@Repeatable(AliasFors.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented

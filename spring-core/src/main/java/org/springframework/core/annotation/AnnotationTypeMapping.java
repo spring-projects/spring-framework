@@ -41,8 +41,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author ZiCheng Zhang
  * @since 5.2
  * @see AnnotationTypeMappings
+ * @see AliasFors
  */
 final class AnnotationTypeMapping {
 
@@ -75,10 +77,16 @@ final class AnnotationTypeMapping {
 
 	private final AnnotationTypeMapping[] annotationValueSource;
 
+	/**
+	 * key:alias method, value:who declared
+	 */
 	private final Map<Method, List<Method>> aliasedBy;
 
 	private final boolean synthesizable;
 
+	/**
+	 * How many aliases are declared
+	 */
 	private final Set<Method> claimedAliases = new HashSet<>();
 
 
@@ -106,6 +114,35 @@ final class AnnotationTypeMapping {
 		this.synthesizable = computeSynthesizableFlag();
 	}
 
+	/**
+	 * todo
+	 * This constructor is compatible with the case of only declaring a single alias.
+	 * It should be replaced directly in the future
+	 * {@link #AnnotationTypeMapping(AnnotationTypeMapping, Class, Annotation)},
+	 * and there is no need to pass in {@code boolean enableMultipleAliases}
+	 */
+	AnnotationTypeMapping(@Nullable AnnotationTypeMapping source, Class<? extends Annotation> annotationType,
+						  @Nullable Annotation annotation, boolean enableMultipleAliases) {
+		this.source = source;
+		this.root = (source != null ? source.getRoot() : this);
+		this.distance = (source == null ? 0 : source.getDistance() + 1);
+		this.annotationType = annotationType;
+		this.metaTypes = merge(
+				source != null ? source.getMetaTypes() : null,
+				annotationType);
+		this.annotation = annotation;
+		this.attributes = AttributeMethods.forAnnotationType(annotationType);
+		this.mirrorSets = new MirrorSets();
+		this.aliasMappings = filledIntArray(this.attributes.size());
+		this.conventionMappings = filledIntArray(this.attributes.size());
+		this.annotationValueMappings = filledIntArray(this.attributes.size());
+		this.annotationValueSource = new AnnotationTypeMapping[this.attributes.size()];
+		this.aliasedBy = enableMultipleAliases ? resolveAliasedForsTargets() : resolveAliasedForTargets();
+		processAliases();
+		addConventionMappings();
+		addConventionAnnotationValues();
+		this.synthesizable = computeSynthesizableFlag();
+	}
 
 	private static <T> List<T> merge(@Nullable List<T> existing, T element) {
 		if (existing == null) {
@@ -125,6 +162,36 @@ final class AnnotationTypeMapping {
 			if (aliasFor != null) {
 				Method target = resolveAliasTarget(attribute, aliasFor);
 				aliasedBy.computeIfAbsent(target, key -> new ArrayList<>()).add(attribute);
+			}
+		}
+		return Collections.unmodifiableMap(aliasedBy);
+	}
+
+	/**
+	 * todo
+	 * This method is compatible with the case where only
+	 * a single alias is declared, and should be replaced
+	 * directly {@link #resolveAliasedForTargets}
+	 */
+	private Map<Method, List<Method>> resolveAliasedForsTargets() {
+		Map<Method, List<Method>> aliasedBy = new HashMap<>();
+		for (int i = 0; i < this.attributes.size(); i++) {
+			Method attribute = this.attributes.get(i);
+			AliasFors annotation = AnnotationsScanner.getDeclaredAnnotation(attribute, AliasFors.class);
+			if (null == annotation) {
+				AliasFor aliasFor = AnnotationsScanner.getDeclaredAnnotation(attribute, AliasFor.class);
+				if (aliasFor != null) {
+					Method target = resolveAliasTarget(attribute, aliasFor);
+					aliasedBy.computeIfAbsent(target, key -> new ArrayList<>()).add(attribute);
+				}
+				continue;
+			}
+			AliasFor[] aliasFors = annotation.value();
+			for (AliasFor aliasFor : aliasFors) {
+				if (aliasFor != null) {
+					Method target = resolveAliasTarget(attribute, aliasFor);
+					aliasedBy.computeIfAbsent(target, key -> new ArrayList<>()).add(attribute);
+				}
 			}
 		}
 		return Collections.unmodifiableMap(aliasedBy);

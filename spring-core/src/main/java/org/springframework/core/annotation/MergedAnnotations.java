@@ -129,11 +129,13 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author ZiCheng Zhang
  * @since 5.2
  * @see MergedAnnotation
  * @see MergedAnnotationCollectors
  * @see MergedAnnotationPredicates
  * @see MergedAnnotationSelectors
+ * @see AliasFors
  */
 public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>> {
 
@@ -411,6 +413,29 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
 		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
 		return TypeMappedAnnotations.from(source, annotations, repeatableContainers, annotationFilter);
+	}
+
+	/**
+	 * Create a new {@link MergedAnnotations} instance containing all
+	 * annotations and meta-annotations from the specified element and,
+	 * depending on the {@link SearchStrategy}, related inherited elements.
+	 *
+	 * <h3>Annotation Attribute Supporting Multiple Aliases</h3>
+	 * <p>As of Spring Framework 5.3, one annotation attribute supports
+	 * the declaration of multiple aliases. For more information, see
+	 * {@link AliasFors} please.
+	 *
+	 * @param element the source element
+	 * @param searchStrategy the search strategy to use
+	 * @param repeatableContainers the repeatable containers that may be used by
+	 * the element annotations or the meta-annotations
+	 * @return a {@link MergedAnnotations} instance containing the merged
+	 * element annotations
+	 */
+	static MergedAnnotations fromMultipleAliasesAnnotations(AnnotatedElement element, SearchStrategy searchStrategy,
+								  RepeatableContainers repeatableContainers) {
+		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+		return MultipleAliasAnnotations.from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
 	/**

@@ -81,14 +81,22 @@ import org.springframework.util.MultiValueMap;
  * search algorithm manually traverses type and method hierarchies and thereby
  * implicitly supports annotation inheritance without a need for {@code @Inherited}.
  *
+ * <h3>Annotation Attribute Supporting Multiple Aliases</h3>
+ * <p>As of Spring Framework 5.3, one annotation attribute supports the declaration
+ * of multiple aliases. Use {@link #getMergedAnnotationWithMultipleAliases} to
+ * get multiple aliases in an annotation attribute, instead of {@link #getMergedAnnotation}
+ * For more information, see {@link AliasFors} please.
+ *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author ZiCheng Zhang
  * @since 4.0
  * @see AliasFor
  * @see AnnotationAttributes
  * @see AnnotationUtils
  * @see BridgeMethodResolver
+ * @see AliasFors
  */
 public abstract class AnnotatedElementUtils {
 
@@ -390,6 +398,39 @@ public abstract class AnnotatedElementUtils {
 		return getAnnotations(element).stream()
 				.filter(MergedAnnotationPredicates.typeIn(annotationTypes))
 				.collect(MergedAnnotationCollectors.toAnnotationSet());
+	}
+
+	/**
+	 * Get the first annotation of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element},
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy, and synthesize
+	 * the result back into an annotation of the specified {@code annotationType}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 *
+	 * <h3>Annotation Attribute Supporting Multiple Aliases</h3>
+	 * <p>As of Spring Framework 5.3, an annotation attribute can declare
+	 * multiple aliases, for more detail ,see {@link AliasFors} please.
+	 *
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
+	 * @since 5.3
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see AliasFors
+	 */
+	@Nullable
+	public static <A extends Annotation> A getMergedAnnotationWithMultipleAliases(AnnotatedElement element, Class<A> annotationType) {
+		// Shortcut: directly present on the element, with no merging needed?
+		if (AnnotationFilter.PLAIN.matches(annotationType) ||
+				AnnotationsScanner.hasPlainJavaAnnotationsOnly(element)) {
+			return element.getDeclaredAnnotation(annotationType);
+		}
+		// Exhaustive retrieval of merged annotations...
+		return getMultipleAliasesAnnotations(element)
+				.get(annotationType, null, MergedAnnotationSelectors.firstDirectlyDeclared())
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
 
 	/**
@@ -758,6 +799,10 @@ public abstract class AnnotatedElementUtils {
 
 		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, repeatableContainers);
+	}
+
+	private static MergedAnnotations getMultipleAliasesAnnotations(AnnotatedElement element) {
+		return MergedAnnotations.fromMultipleAliasesAnnotations(element, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none());
 	}
 
 	private static MergedAnnotations findAnnotations(AnnotatedElement element) {

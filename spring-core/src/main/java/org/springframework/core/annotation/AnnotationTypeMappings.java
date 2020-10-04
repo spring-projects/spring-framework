@@ -40,8 +40,10 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * be searched once, regardless of how many times they are actually used.
  *
  * @author Phillip Webb
+ * @author ZiCheng Zhang
  * @since 5.2
  * @see AnnotationTypeMapping
+ * @see AliasFors
  */
 final class AnnotationTypeMappings {
 
@@ -69,6 +71,21 @@ final class AnnotationTypeMappings {
 		this.mappings.forEach(AnnotationTypeMapping::afterAllMappingsSet);
 	}
 
+	/**
+	 * todo
+	 * This constructor is compatible with the case of only declaring a single alias.
+	 * It should be replaced directly in the future
+	 * {@link #AnnotationTypeMappings(RepeatableContainers, AnnotationFilter, Class)},
+	 * and there is no need to pass in {@code boolean enableMultipleAliases}
+	 */
+	private AnnotationTypeMappings(RepeatableContainers repeatableContainers, AnnotationFilter filter,
+								   Class<? extends Annotation> annotationType, boolean enableMultipleAliases) {
+		this.repeatableContainers = repeatableContainers;
+		this.filter = filter;
+		this.mappings = new ArrayList<>();
+		addAllMappings(annotationType, enableMultipleAliases);
+		this.mappings.forEach(AnnotationTypeMapping::afterAllMappingsSet);
+	}
 
 	private void addAllMappings(Class<? extends Annotation> annotationType) {
 		Deque<AnnotationTypeMapping> queue = new ArrayDeque<>();
@@ -77,6 +94,37 @@ final class AnnotationTypeMappings {
 			AnnotationTypeMapping mapping = queue.removeFirst();
 			this.mappings.add(mapping);
 			addMetaAnnotationsToQueue(queue, mapping);
+		}
+	}
+
+	private void addAllMappings(Class<? extends Annotation> annotationType, boolean enableMultipleAliases) {
+		Deque<AnnotationTypeMapping> queue = new ArrayDeque<>();
+		addIfPossible(queue, null, annotationType, null, enableMultipleAliases);
+		while (!queue.isEmpty()) {
+			AnnotationTypeMapping mapping = queue.removeFirst();
+			this.mappings.add(mapping);
+			addMetaAnnotationsToQueue(queue, mapping, enableMultipleAliases);
+		}
+	}
+
+	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source, boolean enableMultipleAliases) {
+		Annotation[] metaAnnotations = AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
+		for (Annotation metaAnnotation : metaAnnotations) {
+			if (!isMappable(source, metaAnnotation)) {
+				continue;
+			}
+			Annotation[] repeatedAnnotations = this.repeatableContainers.findRepeatedAnnotations(metaAnnotation);
+			if (repeatedAnnotations != null) {
+				for (Annotation repeatedAnnotation : repeatedAnnotations) {
+					if (!isMappable(source, repeatedAnnotation)) {
+						continue;
+					}
+					addIfPossible(queue, source, repeatedAnnotation, enableMultipleAliases);
+				}
+			}
+			else {
+				addIfPossible(queue, source, metaAnnotation, enableMultipleAliases);
+			}
 		}
 	}
 
@@ -110,6 +158,25 @@ final class AnnotationTypeMappings {
 
 		try {
 			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann));
+		}
+		catch (Exception ex) {
+			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
+			if (failureLogger.isEnabled()) {
+				failureLogger.log("Failed to introspect meta-annotation " + annotationType.getName(),
+						(source != null ? source.getAnnotationType() : null), ex);
+			}
+		}
+	}
+
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source, Annotation ann, boolean enableMultipleAliases) {
+		addIfPossible(queue, source, ann.annotationType(), ann, enableMultipleAliases);
+	}
+
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, @Nullable AnnotationTypeMapping source,
+							   Class<? extends Annotation> annotationType, @Nullable Annotation ann,
+							   boolean enableMultipleAliases) {
+		try {
+			queue.addLast(new AnnotationTypeMapping(source, annotationType, ann, enableMultipleAliases));
 		}
 		catch (Exception ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -205,6 +272,34 @@ final class AnnotationTypeMappings {
 		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType);
 	}
 
+	/**
+	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
+	 *
+	 * <h3>Annotation Attribute Supporting Multiple Aliases</h3>
+	 * <p>As of Spring Framework 5.3, one annotation attribute supports
+	 * the declaration of multiple aliases. For more information, see
+	 * {@link AliasFors} please.
+	 *
+	 * @param annotationType the source annotation type
+	 * @param repeatableContainers the repeatable containers that may be used by
+	 * the meta-annotations
+	 * @param annotationFilter the annotation filter used to limit which
+	 * annotations are considered
+	 * @return type mappings for the annotation type
+	 */
+	static AnnotationTypeMappings forMultipleAnnotationType(Class<? extends Annotation> annotationType,
+													RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
+			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).batchGet(annotationType);
+		}
+		if (repeatableContainers == RepeatableContainers.none()) {
+			return noRepeatablesCache.computeIfAbsent(annotationFilter,
+					key -> new Cache(repeatableContainers, key)).batchGet(annotationType);
+		}
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType, true);
+	}
+
 	static void clearCache() {
 		standardRepeatablesCache.clear();
 		noRepeatablesCache.clear();
@@ -234,6 +329,16 @@ final class AnnotationTypeMappings {
 
 		/**
 		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
+		 * Supporting multiple aliases.
+		 * @param annotationType the annotation type
+		 * @return a new or existing {@link AnnotationTypeMappings} instance
+		 */
+		AnnotationTypeMappings batchGet(Class<? extends Annotation> annotationType) {
+			return this.mappings.computeIfAbsent(annotationType, this::batchCreateMappings);
+		}
+
+		/**
+		 * Get or create {@link AnnotationTypeMappings} for the specified annotation type.
 		 * @param annotationType the annotation type
 		 * @return a new or existing {@link AnnotationTypeMappings} instance
 		 */
@@ -243,6 +348,13 @@ final class AnnotationTypeMappings {
 
 		AnnotationTypeMappings createMappings(Class<? extends Annotation> annotationType) {
 			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType);
+		}
+
+		/**
+		 * Supporting multiple aliases.
+		 */
+		AnnotationTypeMappings batchCreateMappings(Class<? extends Annotation> annotationType) {
+			return new AnnotationTypeMappings(this.repeatableContainers, this.filter, annotationType,true);
 		}
 	}
 
