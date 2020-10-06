@@ -555,7 +555,7 @@ For instance, the last few lines of the example above can be improved in the fol
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-		.GET("", accept(APPLICATION_JSON), handler::listPeople)
+		.GET(accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson))
 	.build();
 ----
@@ -569,7 +569,7 @@ RouterFunction<ServerResponse> route = route()
 	val route = router {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST("/person", handler::createPerson)
 		}
 	}
@@ -587,7 +587,7 @@ We can further improve by using the `nest` method together with `accept`:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.build();
 ----
@@ -719,7 +719,7 @@ For instance, consider the following example:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople)
+				.GET(handler::listPeople)
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
@@ -738,7 +738,7 @@ For instance, consider the following example:
 	val route = router {
 		"/person".nest {
 			GET("/{id}", handler::getPerson)
-			GET("", handler::listPeople)
+			GET(handler::listPeople)
 			before { // <1>
 				ServerRequest.from(it)
 						.header("X-RequestHeader", "Value").build()
@@ -773,7 +773,7 @@ The following example shows how to do so:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {
