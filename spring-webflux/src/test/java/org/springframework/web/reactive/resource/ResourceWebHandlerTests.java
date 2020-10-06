@@ -631,6 +631,20 @@ public class ResourceWebHandlerTests {
 		assertThat(exchange.getResponse().getHeaders().getCacheControl()).isEqualTo("max-age=3600");
 	}
 
+	@Test
+	void ignoreLastModified() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(headers.getContentLength()).isEqualTo(17);
+		assertThat(headers.containsKey("Last-Modified")).isFalse();
+		assertResponseBody(exchange, "h1 { color:red; }");
+	}
+
 
 	private void setPathWithinHandlerMapping(ServerWebExchange exchange, String path) {
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,

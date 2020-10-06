@@ -5621,8 +5621,8 @@ In the next example, given a request that starts with `/resources`, the relative
 used to find and serve static resources relative to `/public` under the web application
 root or on the classpath under `/static`. The resources are served with a one-year future
 expiration to ensure maximum use of the browser cache and a reduction in HTTP requests
-made by the browser. The `Last-Modified` header is also evaluated and, if present, a `304`
-status code is returned.
+made by the browser. The `Last-Modified` information is deduced from `Resource#lastModified`
+so that HTTP conditional requests are supported with `"Last-Modified"` headers.
 
 The following listing shows how to do so with Java configuration:
 
@@ -5637,7 +5637,7 @@ The following listing shows how to do so with Java configuration:
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 		}
 	}
 ----
@@ -5651,7 +5651,7 @@ The following listing shows how to do so with Java configuration:
 		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
 			registry.addResourceHandler("/resources/**")
 					.addResourceLocations("/public", "classpath:/static/")
-					.setCachePeriod(31556926)
+					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)))
 		}
 	}
 ----

@@ -667,6 +667,18 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("max-age=3600");
 	}
 
+	@Test
+	public void ignoreLastModified() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/css");
+		assertThat(this.response.getContentLength()).isEqualTo(17);
+		assertThat(this.response.containsHeader("Last-Modified")).isFalse();
+		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+	}
+
 
 	private long resourceLastModified(String resourceName) throws IOException {
 		return new ClassPathResource(resourceName, getClass()).getFile().lastModified();

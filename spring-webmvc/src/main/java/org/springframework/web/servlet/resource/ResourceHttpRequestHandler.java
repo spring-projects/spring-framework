@@ -140,6 +140,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	private boolean useLastModified = true;
+
 
 	public ResourceHttpRequestHandler() {
 		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
@@ -346,6 +348,27 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		this.embeddedValueResolver = resolver;
 	}
 
+	/**
+	 * Return whether the {@link Resource#lastModified()} information is used
+	 * to drive HTTP responses when serving static resources.
+	 * @since 5.3
+	 */
+	public boolean isUseLastModified() {
+		return this.useLastModified;
+	}
+
+	/**
+	 * Set whether we should look at the {@link Resource#lastModified()}
+	 * when serving resources and use this information to drive {@code "Last-Modified"}
+	 * HTTP response headers.
+	 * <p>This option is enabled by default and should be turned off if the metadata of
+	 * the static files should be ignored.
+	 * @param useLastModified whether to use the resource last-modified information.
+	 * @since 5.3
+	 */
+	public void setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -498,7 +521,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		checkRequest(request);
 
 		// Header phase
-		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
+		if (isUseLastModified() && new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
 			logger.trace("Resource not modified");
 			return;
 		}
