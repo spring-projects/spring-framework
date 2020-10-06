@@ -131,7 +131,16 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	private DataBuffer toDataBuffer(ContentChunk chunk) {
-		DataBuffer buffer = this.bufferFactory.wrap(chunk.buffer);
+
+		// Originally we copy due to do:
+		// https://github.com/eclipse/jetty.project/issues/2429
+
+		// Now that the issue is marked fixed we need to replace the below with a
+		// PooledDataBuffer that adapts "release()" to "succeeded()", and also
+		// evaluate if the concern here is addressed.
+
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(chunk.buffer.capacity());
+		buffer.write(chunk.buffer);
 		chunk.callback.succeeded();
 		return buffer;
 	}
