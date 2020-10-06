@@ -245,10 +245,10 @@ public final class ResponseCookie extends HttpCookie {
 
 			@Nullable
 			private String initDomain(String domain) {
-				if (lenient && !StringUtils.isEmpty(domain)) {
-					String s = domain.trim();
-					if (s.startsWith("\"") && s.endsWith("\"")) {
-						if (s.substring(1, s.length() - 1).trim().isEmpty()) {
+				if (lenient && StringUtils.hasLength(domain)) {
+					String str = domain.trim();
+					if (str.startsWith("\"") && str.endsWith("\"")) {
+						if (str.substring(1, str.length() - 1).trim().isEmpty()) {
 							return null;
 						}
 					}

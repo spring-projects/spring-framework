@@ -688,6 +688,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		@Override
+		@Nullable
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}

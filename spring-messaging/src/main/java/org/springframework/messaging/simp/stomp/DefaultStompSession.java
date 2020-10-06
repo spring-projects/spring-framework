@@ -272,8 +272,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 	private boolean isEmpty(@Nullable Object payload) {
-		return payload == null || StringUtils.isEmpty(payload) ||
-				(payload instanceof byte[] && ((byte[]) payload).length == 0);
+		return (StringUtils.isEmpty(payload) || (payload instanceof byte[] && ((byte[]) payload).length == 0));
 	}
 
 	private void execute(Message<byte[]> message) {
