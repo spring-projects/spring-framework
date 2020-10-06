@@ -45,7 +45,7 @@ ext {
 	slf4jVersion         = "1.7.30"	  // spring-jcl + consistent 3rd party deps
 	tiles3Version        = "3.0.8"
 	tomcatVersion        = "9.0.37"
-	undertowVersion      = "2.0.31.Final"
+	undertowVersion      = "2.0.32.Final"
 
 	gradleScriptDir = "${rootProject.projectDir}/gradle"
 	withoutJclOverSlf4j = {
@@ -142,7 +142,7 @@ configure(allprojects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "8.36.1"
+		toolVersion = "8.36.2"
 		configDir = rootProject.file("src/checkstyle")
 	}
 
