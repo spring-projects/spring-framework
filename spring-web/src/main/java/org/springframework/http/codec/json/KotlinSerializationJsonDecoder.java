@@ -79,7 +79,7 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
-		return stringDecoder
+		return this.stringDecoder
 				.decodeToMono(inputStream, elementType, mimeType, hints)
 				.map(jsonText -> this.json.decodeFromString(serializer(elementType.getType()), jsonText));
 	}

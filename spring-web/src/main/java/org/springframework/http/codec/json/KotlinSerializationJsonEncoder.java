@@ -92,7 +92,7 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 	@Override
 	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType valueType, MimeType mimeType, Map<String, Object> hints) {
 		String json = this.json.encodeToString(serializer(valueType.getType()), value);
-		return charSequenceEncoder.encodeValue(json, bufferFactory, valueType, mimeType, null);
+		return this.charSequenceEncoder.encodeValue(json, bufferFactory, valueType, mimeType, null);
 	}
 
 	/**
