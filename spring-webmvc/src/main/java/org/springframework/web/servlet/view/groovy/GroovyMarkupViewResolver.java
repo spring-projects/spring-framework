@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.groovy;
 import java.util.Locale;
 
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
  * Convenience subclass of @link AbstractTemplateViewResolver} that supports
@@ -63,6 +64,11 @@ public class GroovyMarkupViewResolver extends AbstractTemplateViewResolver {
 	@Override
 	protected Class<?> requiredViewClass() {
 		return GroovyMarkupView.class;
+	}
+
+	@Override
+	protected AbstractUrlBasedView instantiateView() {
+		return (getViewClass() == GroovyMarkupView.class ? new GroovyMarkupView() : super.instantiateView());
 	}
 
 	/**
