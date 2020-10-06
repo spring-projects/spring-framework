@@ -225,6 +225,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
+		getProperties().put(AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY, "jta");
+
 		// Hibernate 5.1/5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
 		try {
 			// Try Hibernate 5.2
