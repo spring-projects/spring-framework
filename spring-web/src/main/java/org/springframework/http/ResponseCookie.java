@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,6 @@ public final class ResponseCookie extends HttpCookie {
 			long millis = this.maxAge.getSeconds() > 0 ? System.currentTimeMillis() + this.maxAge.toMillis() : 0;
 			sb.append(HttpHeaders.formatDate(millis));
 		}
-
 		if (this.secure) {
 			sb.append("; Secure");
 		}
@@ -160,7 +159,7 @@ public final class ResponseCookie extends HttpCookie {
 	 * with a name-value pair and may also include attributes.
 	 * @param name the cookie name
 	 * @param value the cookie value
-	 * @return the created cookie instance
+	 * @return a builder to create the cookie with
 	 */
 	public static ResponseCookieBuilder from(final String name, final String value) {
 

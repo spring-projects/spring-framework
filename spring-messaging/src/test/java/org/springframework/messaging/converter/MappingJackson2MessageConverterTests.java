@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,8 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void fromMessage() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{" +
-				"\"bytes\":\"AQI=\"," +
-				"\"array\":[\"Foo\",\"Bar\"]," +
-				"\"number\":42," +
-				"\"string\":\"Foo\"," +
-				"\"bool\":true," +
-				"\"fraction\":42.0}";
+		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"]," +
+				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 
@@ -245,9 +240,12 @@ public class MappingJackson2MessageConverterTests {
 	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
-	void handleList(List<Long> payload) {}
+	void handleList(List<Long> payload) {
+	}
 
-	void handleMessage(Message<MyBean> message) {}
+	void handleMessage(Message<MyBean> message) {
+	}
+
 
 	public static class MyBean {
 
