@@ -25,7 +25,7 @@ configure(allprojects) { project ->
 
 	dependencyManagement {
 		imports {
-			mavenBom "com.fasterxml.jackson:jackson-bom:2.11.2"
+			mavenBom "com.fasterxml.jackson:jackson-bom:2.11.3"
 			mavenBom "io.netty:netty-bom:4.1.52.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.0-RC1"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR7"
@@ -159,8 +159,8 @@ configure(allprojects) { project ->
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0.1'
-			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.1'
+			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0.3'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.3'
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.4"
 
 			dependency "org.jruby:jruby:9.2.13.0"
@@ -204,10 +204,10 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.10.0"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.43.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.44.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
-			dependency("org.seleniumhq.selenium:htmlunit-driver:2.43.1") {
+			dependency("org.seleniumhq.selenium:htmlunit-driver:2.44.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:selenium-java:3.141.59") {
