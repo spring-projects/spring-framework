@@ -133,7 +133,7 @@ public class UrlPathHelperTests {
 		assertEquals("/foo;a=b;c=d", helper.getRequestUri(request));
 
 		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
-		assertEquals("/foo;jsessionid=c0o7fszeb1", helper.getRequestUri(request));
+		assertEquals("/foo", helper.getRequestUri(request));
 	}
 
 	@Test
