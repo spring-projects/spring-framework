@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -76,18 +78,25 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
+	private final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+	@Nullable
+	private InetSocketAddress remoteAddress;
+
 	private byte[] body = new byte[0];
 
 
 	public DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
 		this.servletRequest = other.servletRequest();
-		this.messageConverters = other.messageConverters();
+		this.messageConverters = new ArrayList<>(other.messageConverters());
 		this.methodName = other.methodName();
 		this.uri = other.uri();
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
 		attributes(attributes -> attributes.putAll(other.attributes()));
+		params(params -> params.addAll(other.params()));
+		this.remoteAddress = other.remoteAddress().orElse(null);
 	}
 
 	@Override
@@ -157,9 +166,30 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	}
 
 	@Override
+	public ServerRequest.Builder param(String name, String... values) {
+		for (String value : values) {
+			this.params.add(name, value);
+		}
+		return this;
+	}
+
+	@Override
+	public ServerRequest.Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer) {
+		paramsConsumer.accept(this.params);
+		return this;
+	}
+
+	@Override
+	public ServerRequest.Builder remoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+		return this;
+	}
+
+
+	@Override
 	public ServerRequest build() {
-		return new BuiltServerRequest(this.servletRequest, this.methodName, this.uri,
-				this.headers, this.cookies, this.attributes, this.body, this.messageConverters);
+		return new BuiltServerRequest(this.servletRequest, this.methodName, this.uri, this.headers, this.cookies,
+				this.attributes, this.params, this.remoteAddress, this.body, this.messageConverters);
 	}
 
 
@@ -181,17 +211,24 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final List<HttpMessageConverter<?>> messageConverters;
 
+		private final MultiValueMap<String, String> params;
+
+		@Nullable
+		private final InetSocketAddress remoteAddress;
+
 		public BuiltServerRequest(HttpServletRequest servletRequest, String methodName, URI uri,
 				HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
-				Map<String, Object> attributes, byte[] body,
-				List<HttpMessageConverter<?>> messageConverters) {
+				Map<String, Object> attributes, MultiValueMap<String, String> params,
+				@Nullable InetSocketAddress remoteAddress, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
 
 			this.servletRequest = servletRequest;
 			this.methodName = methodName;
 			this.uri = uri;
-			this.headers = headers;
-			this.cookies = cookies;
-			this.attributes = attributes;
+			this.headers = new HttpHeaders(headers);
+			this.cookies = new LinkedMultiValueMap<>(cookies);
+			this.attributes = new LinkedHashMap<>(attributes);
+			this.params = new LinkedMultiValueMap<>(params);
+			this.remoteAddress = remoteAddress;
 			this.body = body;
 			this.messageConverters = messageConverters;
 		}
@@ -231,7 +268,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		@Override
 		public Optional<InetSocketAddress> remoteAddress() {
-			return Optional.empty();
+			return Optional.ofNullable(this.remoteAddress);
 		}
 
 		@Override
@@ -280,7 +317,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		@Override
 		public MultiValueMap<String, String> params() {
-			return new LinkedMultiValueMap<>();
+			return this.params;
 		}
 
 		@Override
