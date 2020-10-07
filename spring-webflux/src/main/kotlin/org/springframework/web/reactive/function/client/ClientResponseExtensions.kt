@@ -164,3 +164,23 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntityList(): ResponseE
  */
 suspend fun <T : Any> ClientResponse.awaitEntityList(clazz: KClass<T>): ResponseEntity<List<T>> =
 		toEntityList(clazz.java).awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.toBodilessEntity].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.3
+ */
+suspend fun ClientResponse.awaitBodilessEntity(): ResponseEntity<Void> =
+		toBodilessEntity().awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.createException].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.3
+ */
+suspend fun ClientResponse.createExceptionAndAwait(): WebClientResponseException =
+		createException().awaitSingle()
+
+

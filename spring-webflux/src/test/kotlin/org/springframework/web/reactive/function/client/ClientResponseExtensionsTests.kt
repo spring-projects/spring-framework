@@ -149,5 +149,25 @@ class ClientResponseExtensionsTests {
 		}
 	}
 
+	@Test
+	fun awaitBodilessEntity() {
+		val response = mockk<ClientResponse>()
+		val entity = mockk<ResponseEntity<Void>>()
+		every { response.toBodilessEntity() } returns Mono.just(entity)
+		runBlocking {
+			assertThat(response.awaitBodilessEntity()).isEqualTo(entity)
+		}
+	}
+
+	@Test
+	fun createExceptionAndAwait() {
+		val response = mockk<ClientResponse>()
+		val exception = mockk<WebClientResponseException>()
+		every { response.createException() } returns Mono.just(exception)
+		runBlocking {
+			assertThat(response.createExceptionAndAwait()).isEqualTo(exception)
+		}
+	}
+
 	class Foo
 }
