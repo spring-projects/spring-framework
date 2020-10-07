@@ -566,6 +566,15 @@ public abstract class ScriptUtils {
 	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
 			boolean ignoreFailedDrops, String[] commentPrefixes, @Nullable String separator,
 			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
+		final InitSqlFilterDefault filter = new InitSqlFilterDefault();
+		filter.setIgnoreFailedDrops(ignoreFailedDrops);
+		executeSqlScript(connection, resource, continueOnError, filter, commentPrefixes, separator,
+			blockCommentStartDelimiter, blockCommentEndDelimiter);
+	}
+
+	public static void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
+			InitSqlFilter sqlFilter, String[] commentPrefixes, @Nullable String separator,
+			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
 
 		try {
 			if (logger.isDebugEnabled()) {
@@ -596,6 +605,9 @@ public abstract class ScriptUtils {
 			Statement stmt = connection.createStatement();
 			try {
 				for (String statement : statements) {
+					if (sqlFilter != null && sqlFilter.shouldIgnore(statement)) {
+						continue;
+					}
 					stmtNumber++;
 					try {
 						stmt.execute(statement);
@@ -612,8 +624,11 @@ public abstract class ScriptUtils {
 						}
 					}
 					catch (SQLException ex) {
-						boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
-						if (continueOnError || (dropStatement && ignoreFailedDrops)) {
+						boolean ignore = continueOnError;
+						if (!continueOnError && sqlFilter != null) {
+							ignore = sqlFilter.shouldIgnoreOnFailed(statement);
+						}
+						if (ignore) {
 							if (logger.isDebugEnabled()) {
 								logger.debug(ScriptStatementFailedException.buildErrorMessage(statement, stmtNumber, resource), ex);
 							}

@@ -72,6 +72,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private boolean ignoreFailedDrops = false;
 
+	private String sqlIgnorePattern;
 
 	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with default settings.
@@ -241,6 +242,21 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
+	/**
+	 * regex pattern for ignore sql statement.
+	 *
+	 * @param sqlIgnorePattern regex pattern for ignore
+	 */
+	public void setSqlIgnorePattern(String sqlIgnorePattern) {
+		this.sqlIgnorePattern = sqlIgnorePattern;
+	}
+
+	/**
+	 * ignore delete|drop|update SQL.
+	 */
+	public void ignoreDeleteUpdateDrop() {
+		setSqlIgnorePattern("^\\s*(delete|drop|update).+");
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -249,9 +265,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	@Override
 	public void populate(Connection connection) throws ScriptException {
 		Assert.notNull(connection, "'connection' must not be null");
+		final InitSqlFilterDefault filter = new InitSqlFilterDefault();
+		filter.setIgnoreFailedDrops(ignoreFailedDrops);
+		if (sqlIgnorePattern != null) {
+			filter.setIgnorePattern(sqlIgnorePattern);
+		}
 		for (Resource script : this.scripts) {
 			EncodedResource encodedScript = new EncodedResource(script, this.sqlScriptEncoding);
-			ScriptUtils.executeSqlScript(connection, encodedScript, this.continueOnError, this.ignoreFailedDrops,
+			ScriptUtils.executeSqlScript(connection, encodedScript, this.continueOnError, filter,
 					this.commentPrefixes, this.separator, this.blockCommentStartDelimiter, this.blockCommentEndDelimiter);
 		}
 	}
