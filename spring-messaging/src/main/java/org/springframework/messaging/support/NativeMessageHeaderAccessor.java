@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,14 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 
 	/**
-	 * A protected constructor to create new headers.
+	 * Protected constructor to create a new instance.
 	 */
 	protected NativeMessageHeaderAccessor() {
 		this((Map<String, List<String>>) null);
 	}
 
 	/**
-	 * A protected constructor to create new headers.
+	 * Protected constructor to create an instance with the given native headers.
 	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
 	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
@@ -69,7 +69,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * A protected constructor accepting the headers of an existing message to copy.
+	 * Protected constructor that copies headers from another message.
 	 */
 	protected NativeMessageHeaderAccessor(Message<?> message) {
 		super(message);
@@ -84,13 +84,17 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 	}
 
+
+	/**
+	 * Subclasses can use this method to access the "native" headers sub-map.
+	 */
 	@SuppressWarnings("unchecked")
 	private Map<String, List<String>> getNativeHeaders() {
 		return (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 	}
 
 	/**
-	 * Return a copy of the native header values or an empty map.
+	 * Return a copy of the native headers sub-map, or an empty map.
 	 */
 	public Map<String, List<String>> toNativeHeaderMap() {
 		Map<String, List<String>> map = getNativeHeaders();
@@ -112,6 +116,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	/**
 	 * Whether the native header map contains the give header name.
+	 * @param headerName the name of the header
 	 */
 	public boolean containsNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
@@ -119,7 +124,9 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * @return all values for the specified native header or {@code null}.
+	 * Return all values for the specified native header, if present.
+	 * @param headerName the name of the header
+	 * @return the associated values, or {@code null} if none
 	 */
 	public List<String> getNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
@@ -127,13 +134,15 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	/**
-	 * @return the first value for the specified native header of {@code null}.
+	 * Return the first value for the specified native header, if present.
+	 * @param headerName the name of the header
+	 * @return the associated value, or {@code null} if none
 	 */
 	public String getFirstNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
 		if (map != null) {
 			List<String> values = map.get(headerName);
-			if (values != null) {
+			if (!CollectionUtils.isEmpty(values)) {
 				return values.get(0);
 			}
 		}
@@ -142,6 +151,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	/**
 	 * Set the specified native header value replacing existing values.
+	 * <p>In order for this to work, the accessor must be {@link #isMutable()
+	 * mutable}. See {@link MessageHeaderAccessor} for details.
 	 */
 	public void setNativeHeader(String name, String value) {
 		Assert.state(isMutable(), "Already immutable");
@@ -167,6 +178,10 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	/**
 	 * Add the specified native header value to existing values.
+	 * <p>In order for this to work, the accessor must be {@link #isMutable()
+	 * mutable}. See {@link MessageHeaderAccessor} for details.
+	 * @param name the name of the header
+	 * @param value the header value to set
 	 */
 	public void addNativeHeader(String name, String value) {
 		Assert.state(isMutable(), "Already immutable");
@@ -187,6 +202,10 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
+	/**
+	 * Add the specified native headers to existing values.
+	 * @param headers the headers to set
+	 */
 	public void addNativeHeaders(MultiValueMap<String, String> headers) {
 		if (headers == null) {
 			return;
@@ -198,21 +217,36 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		}
 	}
 
-	public List<String> removeNativeHeader(String name) {
+	/**
+	 * Remove the specified native header value replacing existing values.
+	 * <p>In order for this to work, the accessor must be {@link #isMutable()
+	 * mutable}. See {@link MessageHeaderAccessor} for details.
+	 * @param headerName the name of the header
+	 * @return the associated values, or {@code null} if the header was not present
+	 */
+	public List<String> removeNativeHeader(String headerName) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
-		if (nativeHeaders == null) {
+		if (CollectionUtils.isEmpty(nativeHeaders)) {
 			return null;
 		}
-		return nativeHeaders.remove(name);
+		return nativeHeaders.remove(headerName);
 	}
 
+
+	/**
+	 * Return the first value for the specified native header,
+	 * or {@code null} if none.
+	 * @param headerName the name of the header
+	 * @param headers the headers map to introspect
+	 * @return the associated value, or {@code null} if none
+	 */
 	@SuppressWarnings("unchecked")
 	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
 		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
 		if (map != null) {
 			List<String> values = map.get(headerName);
-			if (values != null) {
+			if (!CollectionUtils.isEmpty(values)) {
 				return values.get(0);
 			}
 		}
