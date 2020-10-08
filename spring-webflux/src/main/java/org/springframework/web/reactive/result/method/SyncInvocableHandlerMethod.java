@@ -102,7 +102,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		MonoProcessor<HandlerResult> processor = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<HandlerResult> processor = MonoProcessor.fromSink(Sinks.unsafe().one());
 		this.delegate.invoke(exchange, bindingContext, providedArgs).subscribeWith(processor);
 
 		if (processor.isTerminated()) {

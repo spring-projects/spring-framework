@@ -99,7 +99,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		String protocol = "echo-v1";
 		AtomicReference<HandshakeInfo> infoRef = new AtomicReference<>();
-		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.unsafe().one());
 
 		this.client.execute(getUrl("/sub-protocol"),
 				new WebSocketHandler() {
@@ -132,7 +132,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("my-header", "my-value");
-		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.unsafe().one());
 
 		this.client.execute(getUrl("/custom-header"), headers,
 				session -> session.receive()
@@ -148,7 +148,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void sessionClosing(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<CloseStatus> statusProcessor = MonoProcessor.fromSink(Sinks.unsafe().one());
 		this.client.execute(getUrl("/close"),
 				session -> {
 					logger.debug("Starting..");
@@ -169,7 +169,7 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	void cookie(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.one());
+		MonoProcessor<Object> output = MonoProcessor.fromSink(Sinks.unsafe().one());
 		AtomicReference<String> cookie = new AtomicReference<>();
 		this.client.execute(getUrl("/cookie"),
 				session -> {
