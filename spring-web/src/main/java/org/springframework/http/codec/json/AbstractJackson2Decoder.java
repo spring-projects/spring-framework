@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -94,13 +95,38 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		return this.maxInMemorySize;
 	}
 
+	/**
+	 * Called by {@link #canDecode(ResolvableType, MimeType)} when
+	 * {@link ObjectMapper#canDeserialize(JavaType, AtomicReference)} produces
+	 * an exception. {@link ObjectMapper} produces exceptions that are helpful
+	 * to debug why Jackson can't decode a certain message, but swallows them
+	 * and just returns false. Default implementation does nothing, but
+	 * subclasses can choose to override.
+	 * @param elementType the actual target type to decode to that was passed
+	 * to canDecode()
+	 * @param mimeType the element type to decode to that was passed to
+	 * canDecode()
+	 * @param throwable the throwable produced by Jackson explaining why
+	 * it couldn't be decoded
+	 */
+	protected void reportCanDecodeThrowable(ResolvableType elementType, @Nullable MimeType mimeType,
+			Throwable throwable) {
+	}
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		AtomicReference<Throwable> throwableReference = new AtomicReference<>();
 		JavaType javaType = getObjectMapper().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
-				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
+		boolean canDecode = (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
+				getObjectMapper().canDeserialize(javaType, throwableReference) && supportsMimeType(mimeType));
+
+		Throwable throwable = throwableReference.get();
+		if (throwable != null) {
+			reportCanDecodeThrowable(elementType, mimeType, throwable);
+		}
+
+		return canDecode;
 	}
 
 	@Override

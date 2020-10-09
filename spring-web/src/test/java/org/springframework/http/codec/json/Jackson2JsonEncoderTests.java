@@ -21,12 +21,17 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -39,6 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -238,6 +244,35 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 				.verifyComplete(),
 				new MimeType("application", "json", StandardCharsets.US_ASCII), null);
 
+	}
+
+	@Test
+	public void canEncodeReportsException() {
+		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
+		MimeType jsonType = APPLICATION_JSON;
+
+		Throwable expected = new IllegalArgumentException("Fake exception thrown by ObjectMapper.");
+		AtomicReference<Throwable> actual = new AtomicReference<>();
+
+		ObjectMapper objectMapper = Mockito.mock(ObjectMapper.class);
+		BDDMockito.given(objectMapper.canSerialize(BDDMockito.eq(Pojo.class), BDDMockito.any())).will(invocation -> {
+			AtomicReference<Throwable> throwableReference = invocation.getArgument(1);
+			throwableReference.set(expected);
+			return false;
+		});
+
+		Jackson2JsonEncoder reportingEncoder = new Jackson2JsonEncoder(objectMapper) {
+			@Override
+			protected void reportCanEncodeThrowable(ResolvableType elementType, @Nullable MimeType mimeType,
+					Throwable throwable) {
+				if (pojoType.equals(elementType) && jsonType.equals(mimeType)) {
+					actual.set(throwable);
+				}
+			}
+		};
+
+		assertThat(reportingEncoder.canEncode(pojoType, jsonType)).isFalse();
+		assertThat(actual.get()).isEqualTo(expected);
 	}
 
 

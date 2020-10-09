@@ -24,14 +24,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -45,6 +49,7 @@ import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.web.testfixture.xml.Pojo;
 
@@ -272,6 +277,35 @@ public class Jackson2JsonDecoderTests extends AbstractDecoderTests<Jackson2JsonD
 						.verifyComplete(),
 				MediaType.parseMediaType("application/json; charset=us-ascii"),
 				null);
+	}
+
+	@Test
+	public void canDecodeReportsException() {
+		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
+		MimeType jsonType = APPLICATION_JSON;
+
+		Throwable expected = new IllegalArgumentException("Fake exception thrown by ObjectMapper.");
+		AtomicReference<Throwable> actual = new AtomicReference<>();
+
+		ObjectMapper objectMapper = Mockito.mock(ObjectMapper.class);
+		BDDMockito.given(objectMapper.canDeserialize(BDDMockito.nullable(JavaType.class), BDDMockito.any())).will(invocation -> {
+			AtomicReference<Throwable> throwableReference = invocation.getArgument(1);
+			throwableReference.set(expected);
+			return false;
+		});
+
+		Jackson2JsonDecoder reportingEncoder = new Jackson2JsonDecoder(objectMapper) {
+			@Override
+			protected void reportCanDecodeThrowable(ResolvableType elementType, @Nullable MimeType mimeType,
+					Throwable throwable) {
+				if (pojoType.equals(elementType) && jsonType.equals(mimeType)) {
+					actual.set(throwable);
+				}
+			}
+		};
+
+		assertThat(reportingEncoder.canDecode(pojoType, jsonType)).isFalse();
+		assertThat(actual.get()).isEqualTo(expected);
 	}
 
 

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -98,6 +99,23 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		this.streamingMediaTypes.addAll(mediaTypes);
 	}
 
+	/**
+	 * Called by {@link #canEncode(ResolvableType, MimeType)} when
+	 * {@link ObjectMapper#canSerialize(Class, AtomicReference)} produces
+	 * an exception. {@link ObjectMapper} produces exceptions that are helpful
+	 * to debug why Jackson can't encode a certain message, but swallows them
+	 * and just returns false. Default implementation does nothing, but
+	 * subclasses can choose to override.
+	 * @param elementType the actual source type to encode that was passed to
+	 * canEncode()
+	 * @param mimeType the element type that we're trying to encode that was
+	 * passed to canEncode()
+	 * @param throwable the throwable produced by Jackson explaining why
+	 * it couldn't be encoded
+	 */
+	protected void reportCanEncodeThrowable(ResolvableType elementType, @Nullable MimeType mimeType,
+			Throwable throwable) {
+	}
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -111,8 +129,17 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 				return false;
 			}
 		}
-		return (Object.class == clazz ||
-				(!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
+		AtomicReference<Throwable> throwableReference = new AtomicReference<>();
+		boolean canEncode = (Object.class == clazz ||
+				(!String.class.isAssignableFrom(elementType.resolve(clazz)) &&
+						getObjectMapper().canSerialize(clazz, throwableReference)));
+
+		Throwable throwable = throwableReference.get();
+		if (throwable != null) {
+			reportCanEncodeThrowable(elementType, mimeType, throwable);
+		}
+
+		return canEncode;
 	}
 
 	@Override
