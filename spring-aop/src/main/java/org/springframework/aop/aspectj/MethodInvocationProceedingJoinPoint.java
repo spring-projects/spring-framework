@@ -221,10 +221,11 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		@Override
 		@Nullable
 		public String[] getParameterNames() {
-			if (this.parameterNames == null) {
-				this.parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+			String[] parameterNames = this.parameterNames;
+			if (parameterNames == null) {
+				this.parameterNames = parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
 			}
-			return this.parameterNames;
+			return parameterNames;
 		}
 
 		@Override
