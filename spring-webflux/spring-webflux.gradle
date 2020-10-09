@@ -26,7 +26,6 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")
-	optional("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile(testFixtures(project(":spring-beans")))
