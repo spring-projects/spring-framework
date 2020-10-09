@@ -13,6 +13,7 @@
 @rem See the License for the specific language governing permissions and
 @rem limitations under the License.
 @rem
+set DEFAULT_JVM_OPTS=-Dfile.encoding=UTF-8
 
 @if "%DEBUG%" == "" @echo off
 @rem ##########################################################################
