@@ -20,7 +20,6 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.tomcat.websocket.WsWebSocketContainer;
-import reactor.core.publisher.MonoProcessor;
 
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
@@ -45,10 +44,11 @@ public class TomcatWebSocketClient extends StandardWebSocketClient {
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected StandardWebSocketSession createWebSocketSession(Session session,
-			HandshakeInfo info, MonoProcessor<Void> completion) {
+			HandshakeInfo info, reactor.core.publisher.MonoProcessor<Void> completionMono) {
 
-			return new TomcatWebSocketSession(session, info, bufferFactory(), completion);
+			return new TomcatWebSocketSession(session, info, bufferFactory(), completionMono);
 	}
 
 }

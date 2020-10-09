@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.context.support.StaticApplicationContext;
@@ -342,8 +341,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.monoProcessor).isNotNull();
-		controller.monoProcessor.onNext("foo");
+		assertThat(controller.oneSink).isNotNull();
+		controller.oneSink.emitValue("foo", Sinks.EmitFailureHandler.FAIL_FAST);
 		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
 		assertThat(this.payloadCaptor.getValue()).isEqualTo("foo");
 	}
@@ -357,7 +356,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		controller.monoProcessor.onError(new IllegalStateException());
+		controller.oneSink.emitError(new IllegalStateException(), Sinks.EmitFailureHandler.FAIL_FAST);
 		assertThat(controller.exceptionCaught).isTrue();
 	}
 
@@ -370,8 +369,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/flux");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.fluxSink).isNotNull();
-		controller.fluxSink.tryEmitNext("foo");
+		assertThat(controller.manySink).isNotNull();
+		controller.manySink.tryEmitNext("foo");
 
 		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
@@ -585,22 +584,22 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Controller
 	private static class ReactiveController {
 
-		private MonoProcessor<String> monoProcessor;
+		private Sinks.One<String> oneSink;
 
-		private Sinks.Many<String> fluxSink;
+		private Sinks.Many<String> manySink;
 
 		private boolean exceptionCaught = false;
 
 		@MessageMapping("mono")
 		public Mono<String> handleMono() {
-			this.monoProcessor = MonoProcessor.fromSink(Sinks.one());
-			return this.monoProcessor;
+			this.oneSink = Sinks.one();
+			return this.oneSink.asMono();
 		}
 
 		@MessageMapping("flux")
 		public Flux<String> handleFlux() {
-			this.fluxSink = Sinks.many().unicast().onBackpressureBuffer();
-			return this.fluxSink.asFlux();
+			this.manySink = Sinks.many().unicast().onBackpressureBuffer();
+			return this.manySink.asFlux();
 		}
 
 		@MessageExceptionHandler(IllegalStateException.class)

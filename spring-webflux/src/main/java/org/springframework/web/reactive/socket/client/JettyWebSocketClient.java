@@ -26,7 +26,6 @@ import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.io.UpgradeListener;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.context.Lifecycle;
@@ -137,26 +136,25 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.fromSink(Sinks.one());
+		Sinks.Empty<Void> completionSink = Sinks.empty();
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Connecting to " + url);
 					}
-					Object jettyHandler = createHandler(url, handler, completionMono);
+					Object jettyHandler = createHandler(url, handler, completionSink);
 					ClientUpgradeRequest request = new ClientUpgradeRequest();
 					request.setSubProtocols(handler.getSubProtocols());
 					UpgradeListener upgradeListener = new DefaultUpgradeListener(headers);
 					return this.jettyClient.connect(jettyHandler, url, request, upgradeListener);
 				})
-				.then(completionMono);
+				.then(completionSink.asMono());
 	}
 
-	private Object createHandler(URI url, WebSocketHandler handler, MonoProcessor<Void> completion) {
+	private Object createHandler(URI url, WebSocketHandler handler, Sinks.Empty<Void> completion) {
 		return new JettyWebSocketHandlerAdapter(handler, session -> {
 			HandshakeInfo info = createHandshakeInfo(url, session);
-			return new JettyWebSocketSession(
-					session, info, DefaultDataBufferFactory.sharedInstance, completion);
+			return new JettyWebSocketSession(session, info, DefaultDataBufferFactory.sharedInstance, completion);
 		});
 	}
 

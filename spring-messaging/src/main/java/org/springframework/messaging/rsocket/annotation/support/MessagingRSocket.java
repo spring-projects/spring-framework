@@ -27,8 +27,6 @@ import io.rsocket.frame.FrameType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -162,8 +160,9 @@ class MessagingRSocket implements RSocket {
 				((NettyDataBuffer) dataBuffer).getNativeBuffer().refCnt() : 1;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Flux<Payload> handleAndReply(Payload firstPayload, FrameType frameType, Flux<Payload> payloads) {
-		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.fromSink(Sinks.one());
+		reactor.core.publisher.MonoProcessor<Flux<Payload>> replyMono = reactor.core.publisher.MonoProcessor.create();
 		MessageHeaders headers = createHeaders(firstPayload, frameType, replyMono);
 
 		AtomicBoolean read = new AtomicBoolean();
@@ -186,8 +185,9 @@ class MessagingRSocket implements RSocket {
 		return PayloadUtils.retainDataAndReleasePayload(payload, this.strategies.dataBufferFactory());
 	}
 
+	@SuppressWarnings("deprecation")
 	private MessageHeaders createHeaders(Payload payload, FrameType frameType,
-			@Nullable MonoProcessor<?> replyMono) {
+			@Nullable reactor.core.publisher.MonoProcessor<?> replyMono) {
 
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);

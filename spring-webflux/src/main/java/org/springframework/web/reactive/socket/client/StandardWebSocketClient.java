@@ -31,7 +31,6 @@ import javax.websocket.WebSocketContainer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
@@ -96,7 +95,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.fromSink(Sinks.one());
+		Sinks.Empty<Void> completionSink = Sinks.empty();
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {
@@ -104,16 +103,16 @@ public class StandardWebSocketClient implements WebSocketClient {
 					}
 					List<String> protocols = handler.getSubProtocols();
 					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
-					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
+					Endpoint endpoint = createEndpoint(url, handler, completionSink, configurator);
 					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
 					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
 				.subscribeOn(Schedulers.boundedElastic()) // connectToServer is blocking
-				.then(completionMono);
+				.then(completionSink.asMono());
 	}
 
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
-			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
+			Sinks.Empty<Void> completion, DefaultConfigurator configurator) {
 
 		return new StandardWebSocketHandlerAdapter(handler, session ->
 				createWebSocketSession(session, createHandshakeInfo(url, configurator), completion));
@@ -126,9 +125,18 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
-			MonoProcessor<Void> completion) {
+			Sinks.Empty<Void> completionSink) {
 
-		return new StandardWebSocketSession(session, info, DefaultDataBufferFactory.sharedInstance, completion);
+		return new StandardWebSocketSession(
+				session, info, DefaultDataBufferFactory.sharedInstance, completionSink);
+	}
+
+	@Deprecated
+	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
+			reactor.core.publisher.MonoProcessor<Void> completionMono) {
+
+		return new StandardWebSocketSession(
+				session, info, DefaultDataBufferFactory.sharedInstance, completionMono);
 	}
 
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {
