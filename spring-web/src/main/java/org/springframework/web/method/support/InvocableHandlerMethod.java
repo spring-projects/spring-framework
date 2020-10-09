@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
@@ -39,6 +41,7 @@ import org.springframework.web.method.HandlerMethod;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -185,12 +188,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
-		ReflectionUtils.makeAccessible(getBridgedMethod());
+		Method method = getBridgedMethod();
+		ReflectionUtils.makeAccessible(method);
 		try {
-			return getBridgedMethod().invoke(getBean(), args);
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				return CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+			}
+			return method.invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException ex) {
-			assertTargetBean(getBridgedMethod(), getBean(), args);
+			assertTargetBean(method, getBean(), args);
 			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
 			throw new IllegalStateException(formatInvokeError(text, args), ex);
 		}

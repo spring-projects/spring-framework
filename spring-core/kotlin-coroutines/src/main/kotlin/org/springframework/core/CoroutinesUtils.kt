@@ -52,21 +52,13 @@ internal fun <T: Any> monoToDeferred(source: Mono<T>) =
 		GlobalScope.async(Dispatchers.Unconfined) { source.awaitFirstOrNull() }
 
 /**
- * Return {@code true} if the method is a suspending function.
- *
- * @author Sebastien Deleuze
- * @since 5.2.2
- */
-internal fun isSuspendingFunction(method: Method) = method.kotlinFunction!!.isSuspend
-
-/**
  * Invoke a suspending function and converts it to [Mono] or [reactor.core.publisher.Flux].
  *
  * @author Sebastien Deleuze
  * @since 5.2
  */
 @Suppress("UNCHECKED_CAST")
-internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Publisher<*> {
+fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Publisher<*> {
 	val function = method.kotlinFunction!!
 	val mono = mono(Dispatchers.Unconfined) {
 		function.callSuspend(bean, *args.sliceArray(0..(args.size-2))).let { if (it == Unit) null else it }
