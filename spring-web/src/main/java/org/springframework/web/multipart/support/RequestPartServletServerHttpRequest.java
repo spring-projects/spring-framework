@@ -68,7 +68,7 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		this.multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
 		this.requestPartName = requestPartName;
 
-		HttpHeaders multipartHeaders = this.multipartRequest.getMultipartHeaders(this.requestPartName);
+		HttpHeaders multipartHeaders = this.multipartRequest.getMultipartHeaders(requestPartName);
 		if (multipartHeaders == null) {
 			throw new MissingServletRequestPartException(requestPartName);
 		}
