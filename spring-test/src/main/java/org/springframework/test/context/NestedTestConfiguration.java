@@ -23,18 +23,29 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
+
 /**
  * {@code @NestedTestConfiguration} is a type-level annotation that is used to
  * configure how Spring test configuration annotations are processed within
  * enclosing class hierarchies (i.e., for <em>inner</em> test classes).
  *
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
+ * <em>meta-present</em> on a test class, in its super type hierarchy, or in its
+ * enclosing class hierarchy, the default <em>enclosing configuration inheritance
+ * mode</em> will be used. See {@link #ENCLOSING_CONFIGURATION_PROPERTY_NAME} for
+ * details on how to change the default mode.
+ *
+ * <p>By default, if {@code @NestedTestConfiguration} is not <em>present</em> or
  * <em>meta-present</em> on a test class, configuration from the test class will
  * propagate to inner test classes (see {@link EnclosingConfiguration#INHERIT}).
  * If {@code @NestedTestConfiguration(OVERRIDE)} is used to switch the mode,
  * inner test classes will have to declare their own Spring test configuration
  * annotations. If you wish to explicitly configure the mode, annotate either
- * the inner test class or the enclosing class with
+ * the inner test class or an enclosing class with
  * {@code @NestedTestConfiguration(...}. Note that a
  * {@code @NestedTestConfiguration(...)} declaration is inherited within the
  * superclass hierarchy as well as within the enclosing class hierarchy. Thus,
@@ -57,14 +68,35 @@ import java.lang.annotation.Target;
  * @see ActiveProfiles @ActiveProfiles
  * @see TestPropertySource @TestPropertySource
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 public @interface NestedTestConfiguration {
 
 	/**
+	 * JVM system property used to change the default <em>enclosing configuration
+	 * inheritance mode</em>: {@value #ENCLOSING_CONFIGURATION_PROPERTY_NAME}.
+	 * <p>Supported values include enum constants defined in
+	 * {@link EnclosingConfiguration}, ignoring case. For example, the default
+	 * may be changed to {@link EnclosingConfiguration#OVERRIDE} by supplying
+	 * the following JVM system property via the command line.
+	 * <pre style="code">-Dspring.test.enclosing.configuration=override</pre>
+	 * <p>If the property is not set to {@code OVERRIDE}, test configuration for
+	 * an inner test class will be <em>inherited</em> according to
+	 * {@link EnclosingConfiguration#INHERIT} semantics by default.
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties SpringProperties}
+	 * mechanism.
+	 * @see #value
+	 */
+	String ENCLOSING_CONFIGURATION_PROPERTY_NAME = "spring.test.enclosing.configuration";
+
+
+	/**
 	 * Configures the {@link EnclosingConfiguration} mode.
+	 * @see EnclosingConfiguration#INHERIT
+	 * @see EnclosingConfiguration#OVERRIDE
 	 */
 	EnclosingConfiguration value();
 
@@ -72,6 +104,8 @@ public @interface NestedTestConfiguration {
 	/**
 	 * Enumeration of <em>modes</em> that dictate how test configuration from
 	 * enclosing classes is processed for inner test classes.
+	 * @see #INHERIT
+	 * @see #OVERRIDE
 	 */
 	enum EnclosingConfiguration {
 
@@ -87,7 +121,34 @@ public @interface NestedTestConfiguration {
 		 * <em>override</em> configuration from its
 		 * {@linkplain Class#getEnclosingClass() enclosing class}.
 		 */
-		OVERRIDE
+		OVERRIDE;
+
+
+		/**
+		 * Get the {@code EnclosingConfiguration} enum constant with the supplied
+		 * name, ignoring case.
+		 * @param name the name of the enum constant to retrieve
+		 * @return the corresponding enum constant or {@code null} if not found
+		 * @see EnclosingConfiguration#valueOf(String)
+		 */
+		@Nullable
+		public static EnclosingConfiguration from(@Nullable String name) {
+			if (name == null) {
+				return null;
+			}
+			try {
+				return EnclosingConfiguration.valueOf(name.trim().toUpperCase());
+			}
+			catch (IllegalArgumentException ex) {
+				Log logger = LogFactory.getLog(EnclosingConfiguration.class);
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format(
+						"Failed to parse enclosing configuration mode from '%s': %s",
+						name, ex.getMessage()));
+				}
+				return null;
+			}
+		}
 
 	}
 

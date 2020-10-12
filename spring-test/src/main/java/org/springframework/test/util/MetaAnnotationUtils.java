@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -318,12 +319,17 @@ public abstract class MetaAnnotationUtils {
 	}
 
 	private static EnclosingConfiguration lookUpEnclosingConfiguration(Class<?> clazz) {
-		// TODO Make the default EnclosingConfiguration mode globally configurable via SpringProperties.
 		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)
 				.stream(NestedTestConfiguration.class)
 				.map(mergedAnnotation -> mergedAnnotation.getEnum("value", EnclosingConfiguration.class))
 				.findFirst()
-				.orElse(EnclosingConfiguration.INHERIT);
+				.orElseGet(MetaAnnotationUtils::getDefaultEnclosingConfigurationMode);
+	}
+
+	private static EnclosingConfiguration getDefaultEnclosingConfigurationMode() {
+		String value = SpringProperties.getProperty(NestedTestConfiguration.ENCLOSING_CONFIGURATION_PROPERTY_NAME);
+		EnclosingConfiguration enclosingConfigurationMode = EnclosingConfiguration.from(value);
+		return (enclosingConfigurationMode != null ? enclosingConfigurationMode : EnclosingConfiguration.INHERIT);
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
