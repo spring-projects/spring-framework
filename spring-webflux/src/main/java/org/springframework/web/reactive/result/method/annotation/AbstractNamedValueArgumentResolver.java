@@ -92,7 +92,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		Object resolvedName = resolveEmbeddedValuesAndExpressions(namedValueInfo.name);
 		if (resolvedName == null) {
 			return Mono.error(new IllegalArgumentException(
 					"Specified name must not resolve to null: [" + namedValueInfo.name + "]"));
@@ -103,7 +103,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		return resolveName(resolvedName.toString(), nestedParameter, exchange)
 				.flatMap(arg -> {
 					if ("".equals(arg) && namedValueInfo.defaultValue != null) {
-						arg = resolveStringValue(namedValueInfo.defaultValue);
+						arg = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 					}
 					arg = applyConversion(arg, namedValueInfo, parameter, bindingContext, exchange);
 					handleResolvedValue(arg, namedValueInfo.name, parameter, model, exchange);
@@ -158,7 +158,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 	 * potentially containing placeholders and expressions.
 	 */
 	@Nullable
-	private Object resolveStringValue(String value) {
+	private Object resolveEmbeddedValuesAndExpressions(String value) {
 		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
@@ -209,7 +209,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		return Mono.fromSupplier(() -> {
 			Object value = null;
 			if (namedValueInfo.defaultValue != null) {
-				value = resolveStringValue(namedValueInfo.defaultValue);
+				value = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !parameter.isOptional()) {
 				handleMissingValue(namedValueInfo.name, parameter, exchange);

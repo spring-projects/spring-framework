@@ -139,12 +139,11 @@ public class RequestPartServletServerHttpRequestTests {
 		assertThat(result).isEqualTo(bytes);
 	}
 
-	@Test
+	@Test  // gh-25829
 	public void getBodyViaRequestPart() throws Exception {
 		byte[] bytes = "content".getBytes("UTF-8");
 		MockPart mockPart = new MockPart("part", bytes);
 		mockPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		mockRequest.addPart(mockPart);
 		this.mockRequest.addPart(mockPart);
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
 

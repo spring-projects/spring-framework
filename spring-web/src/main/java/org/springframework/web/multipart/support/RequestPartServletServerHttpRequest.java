@@ -84,7 +84,8 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	@Override
 	public InputStream getBody() throws IOException {
 		// Prefer Servlet Part resolution to cover file as well as parameter streams
-		if (this.multipartRequest instanceof StandardMultipartHttpServletRequest) {
+		boolean servletParts = (this.multipartRequest instanceof StandardMultipartHttpServletRequest);
+		if (servletParts) {
 			Part part = retrieveServletPart();
 			if (part != null) {
 				return part.getInputStream();
@@ -102,9 +103,11 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		}
 
 		// Fallback: Servlet Part resolution even if not indicated
-		Part part = retrieveServletPart();
-		if (part != null) {
-			return part.getInputStream();
+		if (!servletParts) {
+			Part part = retrieveServletPart();
+			if (part != null) {
+				return part.getInputStream();
+			}
 		}
 
 		throw new IllegalStateException("No body available for request part '" + this.requestPartName + "'");
