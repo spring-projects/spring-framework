@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.rsocket.Payload;
 import reactor.core.publisher.Flux;
@@ -35,8 +36,8 @@ import org.springframework.util.Assert;
 /**
  * Extension of {@link AbstractEncoderMethodReturnValueHandler} that
  * {@link #handleEncodedContent handles} encoded content by wrapping data buffers
- * as RSocket payloads and by passing those to the {@link reactor.core.publisher.MonoProcessor}
- * from the {@link #RESPONSE_HEADER} header.
+ * as RSocket payloads and by passing those through the {@link #RESPONSE_HEADER}
+ * header.
  *
  * @author Rossen Stoyanchev
  * @since 5.2
@@ -44,7 +45,7 @@ import org.springframework.util.Assert;
 public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodReturnValueHandler {
 
 	/**
-	 * Message header name that is expected to have a {@link reactor.core.publisher.MonoProcessor}
+	 * Message header name that is expected to have an {@link java.util.concurrent.atomic.AtomicReference}
 	 * which will receive the {@code Flux<Payload>} that represents the response.
 	 */
 	public static final String RESPONSE_HEADER = "rsocketResponse";
@@ -56,33 +57,30 @@ public class RSocketPayloadReturnValueHandler extends AbstractEncoderMethodRetur
 
 
 	@Override
-	@SuppressWarnings({"unchecked", "deprecation"})
 	protected Mono<Void> handleEncodedContent(
 			Flux<DataBuffer> encodedContent, MethodParameter returnType, Message<?> message) {
 
-		reactor.core.publisher.MonoProcessor<Flux<Payload>> replyMono = getReplyMono(message);
-		Assert.notNull(replyMono, "Missing '" + RESPONSE_HEADER + "'");
-		replyMono.onNext(encodedContent.map(PayloadUtils::createPayload));
-		replyMono.onComplete();
+		AtomicReference<Flux<Payload>> responseRef = getResponseReference(message);
+		Assert.notNull(responseRef, "Missing '" + RESPONSE_HEADER + "'");
+		responseRef.set(encodedContent.map(PayloadUtils::createPayload));
 		return Mono.empty();
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected Mono<Void> handleNoContent(MethodParameter returnType, Message<?> message) {
-		reactor.core.publisher.MonoProcessor<Flux<Payload>> replyMono = getReplyMono(message);
-		if (replyMono != null) {
-			replyMono.onComplete();
+		AtomicReference<Flux<Payload>> responseRef = getResponseReference(message);
+		if (responseRef != null) {
+			responseRef.set(Flux.empty());
 		}
 		return Mono.empty();
 	}
 
 	@Nullable
-	@SuppressWarnings({"unchecked", "deprecation"})
-	private reactor.core.publisher.MonoProcessor<Flux<Payload>> getReplyMono(Message<?> message) {
+	@SuppressWarnings("unchecked")
+	private AtomicReference<Flux<Payload>> getResponseReference(Message<?> message) {
 		Object headerValue = message.getHeaders().get(RESPONSE_HEADER);
-		Assert.state(headerValue == null || headerValue instanceof reactor.core.publisher.MonoProcessor, "Expected MonoProcessor");
-		return (reactor.core.publisher.MonoProcessor<Flux<Payload>>) headerValue;
+		Assert.state(headerValue == null || headerValue instanceof AtomicReference, "Expected AtomicReference");
+		return (AtomicReference<Flux<Payload>>) headerValue;
 	}
 
 }
