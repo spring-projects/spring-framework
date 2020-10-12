@@ -67,12 +67,6 @@ class SqlScriptNestedTests {
 	}
 
 	@Nested
-	// NOTE: the following @SpringJUnitConfig declaration must NOT be removed.
-	// This was added before the TestContext framework looked up configuration
-	// on enclosing classes for @Nested test classes. As such, this serves as a
-	// regression test and cannot be changed.
-	@SpringJUnitConfig(PopulatedSchemaDatabaseConfig.class)
-	@Transactional
 	class NestedTests {
 
 		@Autowired

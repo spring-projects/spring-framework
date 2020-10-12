@@ -46,6 +46,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  */
 @SpringJUnitConfig
 @TestExecutionListeners(FooTestExecutionListener.class)
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestExecutionListenersNestedTests {
 
 	private static final String FOO = "foo";

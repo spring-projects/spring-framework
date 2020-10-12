@@ -43,6 +43,7 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ANNO
  */
 @SpringJUnitConfig
 @TestConstructor(autowireMode = ALL)
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestConstructorNestedTests {
 
 	TestConstructorNestedTests(String text) {

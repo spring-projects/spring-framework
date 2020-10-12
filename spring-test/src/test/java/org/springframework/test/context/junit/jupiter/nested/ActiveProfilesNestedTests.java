@@ -46,6 +46,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  */
 @SpringJUnitConfig(Config1.class)
 @ActiveProfiles("1")
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ActiveProfilesNestedTests {
 
 	@Autowired

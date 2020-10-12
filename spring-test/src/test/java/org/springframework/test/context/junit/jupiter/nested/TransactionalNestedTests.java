@@ -53,6 +53,7 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 @SpringJUnitConfig
 @Transactional
 @Commit
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TransactionalNestedTests {
 
 	@Test

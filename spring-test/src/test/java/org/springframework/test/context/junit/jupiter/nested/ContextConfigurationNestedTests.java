@@ -44,6 +44,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitConfig(TopLevelConfig.class)
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ContextConfigurationNestedTests {
 
 	private static final String FOO = "foo";

@@ -30,13 +30,13 @@ import java.lang.annotation.Target;
  *
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
  * <em>meta-present</em> on a test class, configuration from the test class will
- * not propagate to inner test classes (see {@link EnclosingConfiguration#OVERRIDE}).
- * Consequently, inner test classes will have to declare their own Spring test
- * configuration annotations. If you wish for an inner test class to inherit
- * configuration from its enclosing class, annotate either the inner test class
- * or the enclosing class with
- * {@code @NestedTestConfiguration(EnclosingConfiguration.INHERIT)}. Note that
- * a {@code @NestedTestConfiguration(...)} declaration is inherited within the
+ * propagate to inner test classes (see {@link EnclosingConfiguration#INHERIT}).
+ * If {@code @NestedTestConfiguration(OVERRIDE)} is used to switch the mode,
+ * inner test classes will have to declare their own Spring test configuration
+ * annotations. If you wish to explicitly configure the mode, annotate either
+ * the inner test class or the enclosing class with
+ * {@code @NestedTestConfiguration(...}. Note that a
+ * {@code @NestedTestConfiguration(...)} declaration is inherited within the
  * superclass hierarchy as well as within the enclosing class hierarchy. Thus,
  * there is no need to redeclare the annotation unless you wish to switch the
  * mode.

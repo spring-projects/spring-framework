@@ -68,8 +68,8 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class MetaAnnotationUtils {
 
-	private static final ConcurrentLruCache<Class<?>, SearchStrategy> cachedSearchStrategies =
-			new ConcurrentLruCache<>(32, MetaAnnotationUtils::lookUpSearchStrategy);
+	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedSearchStrategies =
+			new ConcurrentLruCache<>(32, MetaAnnotationUtils::lookUpEnclosingConfiguration);
 
 
 	/**
@@ -301,35 +301,29 @@ public abstract class MetaAnnotationUtils {
 	 * class should be searched
 	 * @since 5.3
 	 * @see ClassUtils#isInnerClass(Class)
-	 * @see #getSearchStrategy(Class)
 	 */
 	public static boolean searchEnclosingClass(Class<?> clazz) {
 		return (ClassUtils.isInnerClass(clazz) &&
-				getSearchStrategy(clazz) == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES);
+				getEnclosingConfiguration(clazz) == EnclosingConfiguration.INHERIT);
 	}
 
 	/**
-	 * Get the {@link SearchStrategy} for the supplied class.
+	 * Get the {@link EnclosingConfiguration} mode for the supplied class.
 	 * @param clazz the class for which the search strategy should be resolved
 	 * @return the resolved search strategy
 	 * @since 5.3
 	 */
-	private static SearchStrategy getSearchStrategy(Class<?> clazz) {
+	private static EnclosingConfiguration getEnclosingConfiguration(Class<?> clazz) {
 		return cachedSearchStrategies.get(clazz);
 	}
 
-	private static SearchStrategy lookUpSearchStrategy(Class<?> clazz) {
-		EnclosingConfiguration enclosingConfiguration =
-			MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)
+	private static EnclosingConfiguration lookUpEnclosingConfiguration(Class<?> clazz) {
+		// TODO Make the default EnclosingConfiguration mode globally configurable via SpringProperties.
+		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)
 				.stream(NestedTestConfiguration.class)
 				.map(mergedAnnotation -> mergedAnnotation.getEnum("value", EnclosingConfiguration.class))
 				.findFirst()
-				.orElse(EnclosingConfiguration.OVERRIDE);
-		// TODO Switch the default EnclosingConfiguration mode to INHERIT.
-		// TODO Make the default EnclosingConfiguration mode globally configurable via SpringProperties.
-		return (enclosingConfiguration == EnclosingConfiguration.INHERIT ?
-				SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
-				SearchStrategy.TYPE_HIERARCHY);
+				.orElse(EnclosingConfiguration.INHERIT);
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
@@ -505,10 +499,12 @@ public abstract class MetaAnnotationUtils {
 		 */
 		@SuppressWarnings("unchecked")
 		public Set<T> findAllLocalMergedAnnotations() {
-			Class<T> annotationType = (Class<T>) getAnnotationType();
-			SearchStrategy searchStrategy = getSearchStrategy(getRootDeclaringClass());
+			SearchStrategy searchStrategy =
+					(getEnclosingConfiguration(getRootDeclaringClass()) == EnclosingConfiguration.INHERIT ?
+							SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
+							SearchStrategy.TYPE_HIERARCHY);
 			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
-					.stream(annotationType)
+					.stream((Class<T>) getAnnotationType())
 					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
 					.collect(MergedAnnotationCollectors.toAnnotationSet());
 		}

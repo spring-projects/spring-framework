@@ -42,6 +42,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  */
 @SpringJUnitConfig(Config.class)
 @TestPropertySource(properties = "p1 = v1")
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class TestPropertySourceNestedTests {
 
 	@Autowired
@@ -160,6 +161,12 @@ class TestPropertySourceNestedTests {
 				}
 
 				@Nested
+				// The following explicit INHERIT is necessary since this nested
+				// test class implements an interface whose enclosing class is
+				// annotated with @NestedTestConfiguration(OVERRIDE). In other
+				// words, the local declaration overrides the declaration
+				// "inherited" via the interface.
+				@NestedTestConfiguration(INHERIT)
 				class L5WithInheritedConfigAndTestInterfaceTests implements TestInterface {
 
 					@Autowired

@@ -45,6 +45,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  */
 @ExtendWith(SpringExtension.class)
 @ContextHierarchy(@ContextConfiguration(classes = ParentConfig.class))
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ContextHierarchyNestedTests {
 
 	private static final String FOO = "foo";
