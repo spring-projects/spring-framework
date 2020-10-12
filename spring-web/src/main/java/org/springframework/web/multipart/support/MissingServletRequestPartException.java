@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartResolver;
  *
  * <p>This may be because the request is not a multipart/form-data request,
  * because the part is not present in the request, or because the web
- * application is not configured correctly for processing  multipart requests,
+ * application is not configured correctly for processing multipart requests,
  * e.g. no {@link MultipartResolver}.
  *
  * @author Rossen Stoyanchev
@@ -35,17 +35,24 @@ import org.springframework.web.multipart.MultipartResolver;
 @SuppressWarnings("serial")
 public class MissingServletRequestPartException extends ServletException {
 
-	private final String partName;
+	private final String requestPartName;
 
 
-	public MissingServletRequestPartException(String partName) {
-		super("Required request part '" + partName + "' is not present");
-		this.partName = partName;
+	/**
+	 * Constructor for MissingServletRequestPartException.
+	 * @param requestPartName the name of the missing part of the multipart request
+	 */
+	public MissingServletRequestPartException(String requestPartName) {
+		super("Required request part '" + requestPartName + "' is not present");
+		this.requestPartName = requestPartName;
 	}
 
 
+	/**
+	 * Return the name of the offending part of the multipart request.
+	 */
 	public String getRequestPartName() {
-		return this.partName;
+		return this.requestPartName;
 	}
 
 }

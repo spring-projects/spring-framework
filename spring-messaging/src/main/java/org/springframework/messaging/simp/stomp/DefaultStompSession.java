@@ -111,7 +111,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
-	private volatile boolean closing = false;
+	private volatile boolean closing;
 
 
 	/**
@@ -256,7 +256,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private Message<byte[]> createMessage(StompHeaderAccessor accessor, @Nullable Object payload) {
 		accessor.updateSimpMessageHeadersFromStompHeaders();
 		Message<byte[]> message;
-		if (isEmpty(payload)) {
+		if (StringUtils.isEmpty(payload) || (payload instanceof byte[] && ((byte[]) payload).length == 0)) {
 			message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		}
 		else {
@@ -269,10 +269,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			}
 		}
 		return message;
-	}
-
-	private boolean isEmpty(@Nullable Object payload) {
-		return (StringUtils.isEmpty(payload) || (payload instanceof byte[] && ((byte[]) payload).length == 0));
 	}
 
 	private void execute(Message<byte[]> message) {
