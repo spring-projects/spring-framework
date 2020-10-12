@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,17 +62,23 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object NO_ARG_VALUE = new Object();
 
 
-	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+	private final List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 
+	/**
+	 * Create an instance from a {@code HandlerMethod}.
+	 */
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
 	}
 
+	/**
+	 * Create an instance from a bean instance and a method.
+	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
 	}
