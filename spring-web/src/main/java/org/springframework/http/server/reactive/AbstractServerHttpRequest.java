@@ -22,11 +22,8 @@ import java.net.URLDecoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLogging;
 import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -45,8 +42,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
 
-
-	protected final Log logger = HttpLogging.forLogName(getClass());
 
 	private final URI uri;
 
@@ -156,10 +151,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 			return URLDecoder.decode(value, "UTF-8");
 		}
 		catch (UnsupportedEncodingException ex) {
-			if (logger.isWarnEnabled()) {
-				logger.warn(getLogPrefix() + "Could not decode query value [" + value + "] as 'UTF-8'. " +
-						"Falling back on default encoding: " + ex.getMessage());
-			}
+			// Should never happen but we got a platform default fallback anyway.
 			return URLDecoder.decode(value);
 		}
 	}
