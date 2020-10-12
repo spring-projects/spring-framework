@@ -109,7 +109,7 @@ configure(allprojects) { project ->
 				entry 'activemq-stomp'
 			}
 			dependency "org.apache.bcel:bcel:6.0"
-			dependency "org.apache.commons:commons-pool2:2.8.1"
+			dependency "org.apache.commons:commons-pool2:2.9.0"
 			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
 				entry 'derby'
 				entry 'derbyclient'
