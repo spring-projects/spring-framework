@@ -139,23 +139,13 @@ public class RequestPartServletServerHttpRequestTests {
 		assertArrayEquals(bytes, result);
 	}
 
-	@Test
+	@Test  // gh-25829
 	public void getBodyViaRequestPart() throws Exception {
-		MockMultipartHttpServletRequest mockRequest = new MockMultipartHttpServletRequest() {
-			@Override
-			public HttpHeaders getMultipartHeaders(String paramOrFileName) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-				return headers;
-			}
-		};
-
 		byte[] bytes = "content".getBytes("UTF-8");
 		MockPart mockPart = new MockPart("part", bytes);
 		mockPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		mockRequest.addPart(mockPart);
-		mockRequest.addPart(mockPart);
-		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
+		this.mockRequest.addPart(mockPart);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
 
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertArrayEquals(bytes, result);
