@@ -163,6 +163,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			return findTransactionAttributeInEnclosingClassHierarchy(clazz);
 		}
 
+		@Nullable
 		private TransactionAttribute findTransactionAttributeInEnclosingClassHierarchy(Class<?> clazz) {
 			if (MetaAnnotationUtils.searchEnclosingClass(clazz)) {
 				return findTransactionAttribute(clazz.getEnclosingClass());

@@ -34,6 +34,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
 
@@ -57,6 +58,7 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 	// CharSequence encoding needed for now, see https://github.com/Kotlin/kotlinx.serialization/issues/204 for more details
 	private final CharSequenceEncoder charSequenceEncoder = CharSequenceEncoder.allMimeTypes();
 
+
 	public KotlinSerializationJsonEncoder() {
 		this(Json.Default);
 	}
@@ -66,15 +68,17 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 		this.json = json;
 	}
 
+
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		return super.canEncode(elementType, mimeType)
-				&& (!String.class.isAssignableFrom(elementType.toClass()))
-				&& (!ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
+	public boolean canEncode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return (super.canEncode(elementType, mimeType) && !String.class.isAssignableFrom(elementType.toClass()) &&
+				!ServerSentEvent.class.isAssignableFrom(elementType.toClass()));
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		if (inputStream instanceof Mono) {
 			return Mono.from(inputStream)
 					.map(value -> encodeValue(value, bufferFactory, elementType, mimeType, hints))
@@ -90,7 +94,9 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 	}
 
 	@Override
-	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType valueType, MimeType mimeType, Map<String, Object> hints) {
+	public DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory,
+			ResolvableType valueType, @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		String json = this.json.encodeToString(serializer(valueType.getType()), value);
 		return this.charSequenceEncoder.encodeValue(json, bufferFactory, valueType, mimeType, null);
 	}
@@ -111,4 +117,5 @@ public class KotlinSerializationJsonEncoder extends AbstractEncoder<Object> {
 		}
 		return serializer;
 	}
+
 }

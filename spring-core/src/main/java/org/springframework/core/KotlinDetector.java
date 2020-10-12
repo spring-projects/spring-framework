@@ -77,14 +77,13 @@ public abstract class KotlinDetector {
 
 	/**
 	 * Return {@code true} if the method is a suspending function.
-	 *
 	 * @author Sebastien Deleuze
 	 * @since 5.3
 	 */
 	public static boolean isSuspendingFunction(Method method) {
 		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
 			Class<?>[] types = method.getParameterTypes();
-			if ((types.length > 0) && "kotlin.coroutines.Continuation".equals(types[types.length - 1].getName())) {
+			if (types.length > 0 && "kotlin.coroutines.Continuation".equals(types[types.length - 1].getName())) {
 				return true;
 			}
 		}

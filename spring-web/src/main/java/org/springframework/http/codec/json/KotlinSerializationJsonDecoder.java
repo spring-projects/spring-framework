@@ -31,6 +31,7 @@ import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
 
@@ -58,6 +59,7 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 	// String decoding needed for now, see https://github.com/Kotlin/kotlinx.serialization/issues/204 for more details
 	private final StringDecoder stringDecoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
 
+
 	public KotlinSerializationJsonDecoder() {
 		this(Json.Default);
 	}
@@ -67,18 +69,23 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 		this.json = json;
 	}
 
+
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
-		return super.canDecode(elementType, mimeType) && (!CharSequence.class.isAssignableFrom(elementType.toClass()));
+	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		return (super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass()));
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return Flux.error(new UnsupportedOperationException());
 	}
 
 	@Override
-	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+
 		return this.stringDecoder
 				.decodeToMono(inputStream, elementType, mimeType, hints)
 				.map(jsonText -> this.json.decodeFromString(serializer(elementType.getType()), jsonText));
@@ -100,4 +107,5 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 		}
 		return serializer;
 	}
+
 }

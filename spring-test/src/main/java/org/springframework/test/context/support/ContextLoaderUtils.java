@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
@@ -249,11 +250,11 @@ abstract class ContextLoaderUtils {
 	}
 
 	private static void resolveContextConfigurationAttributes(List<ContextConfigurationAttributes> attributesList,
-			AnnotationDescriptor<ContextConfiguration> descriptor) {
+			@Nullable AnnotationDescriptor<ContextConfiguration> descriptor) {
 
 		if (descriptor != null) {
 			convertContextConfigToConfigAttributesAndAddToList(descriptor.synthesizeAnnotation(),
-				descriptor.getRootDeclaringClass(), attributesList);
+					descriptor.getRootDeclaringClass(), attributesList);
 			resolveContextConfigurationAttributes(attributesList, descriptor.next());
 		}
 	}
