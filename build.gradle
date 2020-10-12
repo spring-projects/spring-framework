@@ -102,7 +102,7 @@ configure(allprojects) { project ->
 				entry 'activemq-stomp'
 			}
 			dependency "org.apache.bcel:bcel:6.0"
-			dependency "org.apache.commons:commons-pool2:2.8.0"
+			dependency "org.apache.commons:commons-pool2:2.8.1"
 			dependencySet(group: 'org.apache.derby', version: '10.14.2.0') {
 				entry 'derby'
 				entry 'derbyclient'
@@ -118,7 +118,7 @@ configure(allprojects) { project ->
 			dependency "org.ehcache:ehcache:3.4.0"
 			dependency "org.hibernate:hibernate-core:5.4.22.Final"
 			dependency "org.hibernate:hibernate-validator:6.1.6.Final"
-			dependency "org.webjars:webjars-locator-core:0.45"
+			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
 			dependencySet(group: 'org.apache.tomcat', version: '9.0.37') {
