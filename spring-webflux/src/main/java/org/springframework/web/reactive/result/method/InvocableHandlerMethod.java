@@ -60,7 +60,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object NO_ARG_VALUE = new Object();
 
 
-	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
