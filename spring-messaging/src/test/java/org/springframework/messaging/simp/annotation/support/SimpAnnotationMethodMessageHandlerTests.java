@@ -341,8 +341,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.oneSink).isNotNull();
-		controller.oneSink.emitValue("foo", Sinks.EmitFailureHandler.FAIL_FAST);
+		assertThat(controller.sinkOne).isNotNull();
+		controller.sinkOne.emitValue("foo", Sinks.EmitFailureHandler.FAIL_FAST);
 		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
 		assertThat(this.payloadCaptor.getValue()).isEqualTo("foo");
 	}
@@ -356,7 +356,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/mono");
 		this.messageHandler.handleMessage(message);
 
-		controller.oneSink.emitError(new IllegalStateException(), Sinks.EmitFailureHandler.FAIL_FAST);
+		controller.sinkOne.emitError(new IllegalStateException(), Sinks.EmitFailureHandler.FAIL_FAST);
 		assertThat(controller.exceptionCaught).isTrue();
 	}
 
@@ -369,8 +369,8 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = createMessage("/app1/flux");
 		this.messageHandler.handleMessage(message);
 
-		assertThat(controller.manySink).isNotNull();
-		controller.manySink.tryEmitNext("foo");
+		assertThat(controller.sinkMany).isNotNull();
+		controller.sinkMany.tryEmitNext("foo");
 
 		verify(this.converter, never()).toMessage(any(), any(MessageHeaders.class));
 	}
@@ -584,22 +584,22 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	@Controller
 	private static class ReactiveController {
 
-		private Sinks.One<String> oneSink;
+		private Sinks.One<String> sinkOne;
 
-		private Sinks.Many<String> manySink;
+		private Sinks.Many<String> sinkMany;
 
 		private boolean exceptionCaught = false;
 
 		@MessageMapping("mono")
 		public Mono<String> handleMono() {
-			this.oneSink = Sinks.one();
-			return this.oneSink.asMono();
+			this.sinkOne = Sinks.one();
+			return this.sinkOne.asMono();
 		}
 
 		@MessageMapping("flux")
 		public Flux<String> handleFlux() {
-			this.manySink = Sinks.many().unicast().onBackpressureBuffer();
-			return this.manySink.asFlux();
+			this.sinkMany = Sinks.many().unicast().onBackpressureBuffer();
+			return this.sinkMany.asFlux();
 		}
 
 		@MessageExceptionHandler(IllegalStateException.class)

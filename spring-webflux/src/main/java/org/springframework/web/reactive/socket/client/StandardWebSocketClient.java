@@ -112,10 +112,10 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
-			Sinks.Empty<Void> completion, DefaultConfigurator configurator) {
+			Sinks.Empty<Void> completionSink, DefaultConfigurator configurator) {
 
 		return new StandardWebSocketHandlerAdapter(handler, session ->
-				createWebSocketSession(session, createHandshakeInfo(url, configurator), completion));
+				createWebSocketSession(session, createHandshakeInfo(url, configurator), completionSink));
 	}
 
 	private HandshakeInfo createHandshakeInfo(URI url, DefaultConfigurator configurator) {
@@ -124,19 +124,11 @@ public class StandardWebSocketClient implements WebSocketClient {
 		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
-	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
-			Sinks.Empty<Void> completionSink) {
+	protected StandardWebSocketSession createWebSocketSession(
+			Session session, HandshakeInfo info, Sinks.Empty<Void> completionSink) {
 
 		return new StandardWebSocketSession(
 				session, info, DefaultDataBufferFactory.sharedInstance, completionSink);
-	}
-
-	@Deprecated
-	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
-			reactor.core.publisher.MonoProcessor<Void> completionMono) {
-
-		return new StandardWebSocketSession(
-				session, info, DefaultDataBufferFactory.sharedInstance, completionMono);
 	}
 
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {

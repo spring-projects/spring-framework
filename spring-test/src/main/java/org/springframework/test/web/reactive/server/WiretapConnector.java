@@ -168,7 +168,6 @@ class WiretapConnector implements ClientHttpConnector {
 							.doOnComplete(this::handleOnComplete) : null;
 
 			if (publisher == null && publisherNested == null) {
-				// Ignore result: OK or not relevant
 				this.content.tryEmitEmpty();
 			}
 		}
@@ -206,14 +205,14 @@ class WiretapConnector implements ClientHttpConnector {
 
 
 		private void handleOnError(Throwable ex) {
-			// Ignore result: OK or not relevant
+			// Ignore result: signals cannot compete
 			this.content.tryEmitError(ex);
 		}
 
 		private void handleOnComplete() {
 			byte[] bytes = new byte[this.buffer.readableByteCount()];
 			this.buffer.read(bytes);
-			// Ignore result: OK or not relevant
+			// Ignore result: signals cannot compete
 			this.content.tryEmitValue(bytes);
 		}
 	}

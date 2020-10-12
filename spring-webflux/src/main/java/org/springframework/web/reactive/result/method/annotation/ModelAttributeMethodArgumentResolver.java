@@ -119,13 +119,13 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
 			return bindRequestParameters(binder, exchange)
-					.doOnError(ex -> bindingResultSink.emitError(ex, Sinks.EmitFailureHandler.FAIL_FAST))
+					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
 						BindingResult bindingResult = binder.getBindingResult();
 						model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResult);
 						model.put(name, value);
-						// serialized and buffered (should never fail)
+						// Ignore result: serialized and buffered (should never fail)
 						bindingResultSink.tryEmitValue(bindingResult);
 					})
 					.then(Mono.fromCallable(() -> {

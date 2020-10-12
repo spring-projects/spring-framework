@@ -75,7 +75,7 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 
 	@Override
 	public void close() {
-		// Ignore result: can't overflow, ok if not first or no one listens
+		// Ignore result: concurrent attempts to complete are ok
 		this.completionSink.tryEmitEmpty();
 	}
 

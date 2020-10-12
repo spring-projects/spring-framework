@@ -83,8 +83,9 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 	private Mono<ClientHttpResponse> doConnect(
 			HttpMethod httpMethod, URI uri, Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		Sinks.Empty<Void> requestWriteCompletion = Sinks.empty();
-		Sinks.Empty<Void> handlerCompletion = Sinks.empty();
+		// unsafe(): we're intercepting, already serialized Publisher signals
+		Sinks.Empty<Void> requestWriteSink = Sinks.unsafe().empty();
+		Sinks.Empty<Void> handlerSink = Sinks.unsafe().empty();
 		ClientHttpResponse[] savedResponse = new ClientHttpResponse[1];
 
 		MockClientHttpRequest mockClientRequest = new MockClientHttpRequest(httpMethod, uri);
@@ -96,8 +97,8 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 			ServerHttpResponse responseToUse = prepareResponse(mockServerResponse, mockServerRequest);
 			this.handler.handle(mockServerRequest, responseToUse).subscribe(
 					aVoid -> {},
-					handlerCompletion::tryEmitError,  // Ignore error: cached + serialized
-					handlerCompletion::tryEmitEmpty);
+					handlerSink::tryEmitError,  // Ignore result: signals cannot compete
+					handlerSink::tryEmitEmpty);
 			return Mono.empty();
 		});
 
@@ -110,10 +111,10 @@ public class HttpHandlerConnector implements ClientHttpConnector {
 		log("Writing client request for ", httpMethod, uri);
 		requestCallback.apply(mockClientRequest).subscribe(
 				aVoid -> {},
-				requestWriteCompletion::tryEmitError,  // Ignore error: cached + serialized
-				requestWriteCompletion::tryEmitEmpty);
+				requestWriteSink::tryEmitError,  // Ignore result: signals cannot compete
+				requestWriteSink::tryEmitEmpty);
 
-		return Mono.when(requestWriteCompletion.asMono(), handlerCompletion.asMono())
+		return Mono.when(requestWriteSink.asMono(), handlerSink.asMono())
 				.onErrorMap(ex -> {
 					ClientHttpResponse response = savedResponse[0];
 					return response != null ? new FailureAfterResponseCompletedException(response, ex) : ex;

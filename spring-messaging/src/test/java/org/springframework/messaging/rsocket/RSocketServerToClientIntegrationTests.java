@@ -200,10 +200,12 @@ class RSocketServerToClientIntegrationTests {
 
 		private void runTest(Runnable testEcho) {
 			Mono.fromRunnable(testEcho)
-					.doOnError(ex -> resultSink.emitError(ex, Sinks.EmitFailureHandler.FAIL_FAST))
-					.doOnSuccess(o -> resultSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST))
 					.subscribeOn(Schedulers.boundedElastic()) // StepVerifier will block
-					.subscribe();
+					.subscribe(
+							aVoid -> {},
+							ex -> resultSink.tryEmitError(ex), // Ignore result: signals cannot compete
+							() -> resultSink.tryEmitEmpty()
+					);
 		}
 
 		@MessageMapping("fnf")
@@ -218,7 +220,7 @@ class RSocketServerToClientIntegrationTests {
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.tryEmitNext(payload);
+			this.fireForgetPayloads.emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST);
 		}
 
 		@MessageMapping("echo")

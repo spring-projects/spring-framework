@@ -57,9 +57,10 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 
 		Object errors = getErrors(parameter, context);
 
-		// Initially Errors/BindingResult is a Mono in the model even if it cannot be declared
-		// as an async argument. That way it can be resolved first while the Mono can complete
-		// later at which point the model is also updated for further use.
+		// Initially ModelAttributeMethodArgumentResolver adds Errors/BindingResult as a
+		// Mono in the model even if it can't be declared as such on a controller method.
+		// This is done to enable early argument resolution here. When the Mono actually
+		// completes it is replaced in the model with the actual value.
 
 		if (Mono.class.isAssignableFrom(errors.getClass())) {
 			return ((Mono<?>) errors).cast(Object.class);

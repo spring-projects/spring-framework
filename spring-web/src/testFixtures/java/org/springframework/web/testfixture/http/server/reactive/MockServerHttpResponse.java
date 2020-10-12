@@ -65,11 +65,8 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 		this.writeHandler = body -> {
 			// Avoid .then() that causes data buffers to be discarded and released
 			Sinks.Empty<Void> completion = Sinks.unsafe().empty();
-			this.body = body
-					.doOnComplete(completion::tryEmitEmpty) // Ignore error: cached + serialized
-					.doOnError(completion::tryEmitError)
-					.cache();
-			this.body.subscribe();
+			this.body = body.cache();
+			this.body.subscribe(aVoid -> {}, completion::tryEmitError, completion::tryEmitEmpty); // Signals are serialized
 			return completion.asMono();
 		};
 	}
