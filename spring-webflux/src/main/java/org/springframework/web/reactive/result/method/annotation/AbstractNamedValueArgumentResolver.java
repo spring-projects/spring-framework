@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,9 +144,9 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				String type = parameter.getNestedParameterType().getName();
-				throw new IllegalArgumentException("Name for argument type [" + type + "] not " +
-						"available, and parameter name information not found in class file either.");
+				throw new IllegalArgumentException(
+						"Name for argument of type [" + parameter.getNestedParameterType().getName() +
+						"] not specified, and parameter name information not found in class file either.");
 			}
 		}
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			catch (TypeMismatchException ex) {
 				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
 						namedValueInfo.name, parameter, ex.getCause());
-
 			}
 		}
 
@@ -170,8 +169,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			name = parameter.getParameterName();
 			if (name == null) {
 				throw new IllegalArgumentException(
-						"Name for argument type [" + parameter.getNestedParameterType().getName() +
-						"] not available, and parameter name information not found in class file either.");
+						"Name for argument of type [" + parameter.getNestedParameterType().getName() +
+						"] not specified, and parameter name information not found in class file either.");
 			}
 		}
 		String defaultValue = (ValueConstants.DEFAULT_NONE.equals(info.defaultValue) ? null : info.defaultValue);
@@ -184,12 +183,12 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	@Nullable
 	private Object resolveStringValue(String value) {
-		if (this.configurableBeanFactory == null) {
+		if (this.configurableBeanFactory == null || this.expressionContext == null) {
 			return value;
 		}
 		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
 		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null || this.expressionContext == null) {
+		if (exprResolver == null) {
 			return value;
 		}
 		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
