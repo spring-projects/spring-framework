@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,59 +45,62 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 	private final MultipartHttpServletRequest multipartRequest;
 
-	private final String partName;
+	private final String requestPartName;
 
-	private final HttpHeaders headers;
+	private final HttpHeaders multipartHeaders;
 
 
 	/**
 	 * Create a new {@code RequestPartServletServerHttpRequest} instance.
 	 * @param request the current servlet request
-	 * @param partName the name of the part to adapt to the {@link ServerHttpRequest} contract
+	 * @param requestPartName the name of the part to adapt to the {@link ServerHttpRequest} contract
 	 * @throws MissingServletRequestPartException if the request part cannot be found
 	 * @throws MultipartException if MultipartHttpServletRequest cannot be initialized
 	 */
-	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName)
+	public RequestPartServletServerHttpRequest(HttpServletRequest request, String requestPartName)
 			throws MissingServletRequestPartException {
 
 		super(request);
 
 		this.multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
-		this.partName = partName;
+		this.requestPartName = requestPartName;
 
-		this.headers = this.multipartRequest.getMultipartHeaders(this.partName);
-		if (this.headers == null) {
-			throw new MissingServletRequestPartException(partName);
+		HttpHeaders multipartHeaders = this.multipartRequest.getMultipartHeaders(requestPartName);
+		if (multipartHeaders == null) {
+			throw new MissingServletRequestPartException(requestPartName);
 		}
+		this.multipartHeaders = multipartHeaders;
 	}
 
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return this.multipartHeaders;
 	}
-
 
 	@Override
 	public InputStream getBody() throws IOException {
+		// Prefer Servlet Part resolution to cover file as well as parameter streams
 		if (this.multipartRequest instanceof StandardMultipartHttpServletRequest) {
 			try {
-				return this.multipartRequest.getPart(this.partName).getInputStream();
+				return this.multipartRequest.getPart(this.requestPartName).getInputStream();
 			}
 			catch (Exception ex) {
-				throw new MultipartException("Could not parse multipart servlet request", ex);
+				throw new MultipartException("Failed to retrieve request part '" + this.requestPartName + "'", ex);
 			}
 		}
-		else {
-			MultipartFile file = this.multipartRequest.getFile(this.partName);
-			if (file != null) {
-				return file.getInputStream();
-			}
-			else {
-				String paramValue = this.multipartRequest.getParameter(this.partName);
-				return new ByteArrayInputStream(paramValue.getBytes(determineEncoding()));
-			}
+
+		// Spring-style distinction between MultipartFile and String parameters
+		MultipartFile file = this.multipartRequest.getFile(this.requestPartName);
+		if (file != null) {
+			return file.getInputStream();
 		}
+		String paramValue = this.multipartRequest.getParameter(this.requestPartName);
+		if (paramValue != null) {
+			return new ByteArrayInputStream(paramValue.getBytes(determineEncoding()));
+		}
+
+		throw new IllegalStateException("No body available for request part '" + this.requestPartName + "'");
 	}
 
 	private String determineEncoding() {

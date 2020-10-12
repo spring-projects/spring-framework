@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private WebDataBinderFactory dataBinderFactory;
-
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
+	private WebDataBinderFactory dataBinderFactory;
 
 
 	/**
@@ -83,19 +83,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
-	 * a {@link WebDataBinder} for data binding and type conversion purposes.
-	 * @param dataBinderFactory the data binder factory.
-	 */
-	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
-		this.dataBinderFactory = dataBinderFactory;
-	}
-
-	/**
 	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method argument values.
 	 */
 	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
-		this.argumentResolvers = argumentResolvers;
+		this.resolvers = argumentResolvers;
 	}
 
 	/**
@@ -105,6 +96,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them
+	 * to create a {@link WebDataBinder} for data binding and type conversion purposes.
+	 */
+	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
+		this.dataBinderFactory = dataBinderFactory;
 	}
 
 
@@ -153,9 +152,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (args[i] != null) {
 				continue;
 			}
-			if (this.argumentResolvers.supportsParameter(parameter)) {
+			if (this.resolvers.supportsParameter(parameter)) {
 				try {
-					args[i] = this.argumentResolvers.resolveArgument(
+					args[i] = this.resolvers.resolveArgument(
 							parameter, mavContainer, request, this.dataBinderFactory);
 					continue;
 				}
