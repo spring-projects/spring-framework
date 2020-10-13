@@ -66,8 +66,9 @@ public class HttpHeadResponseDecoratorTests {
 
 	@Test // gh-25908
 	public void writeWithGivenTransferEncoding() {
+		Flux<DataBuffer> body = Flux.just(toDataBuffer("data1"), toDataBuffer("data2"));
 		this.response.getHeaders().add(HttpHeaders.TRANSFER_ENCODING, "chunked");
-		this.response.writeWith(Flux.empty()).block();
+		this.response.writeWith(body).block();
 		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(-1);
 	}
 

@@ -56,7 +56,9 @@ public class HttpHeadResponseDecorator extends ServerHttpResponseDecorator {
 					.then();
 		}
 		else {
-			return Flux.from(body).then();
+			return Flux.from(body)
+					.doOnNext(DataBufferUtils::release)
+					.then();
 		}
 	}
 
