@@ -41,18 +41,22 @@ public class HttpHeadResponseDecorator extends ServerHttpResponseDecorator {
 	/**
 	 * Consume and release the body without writing.
 	 * <p>If the headers contain neither Content-Length nor Transfer-Encoding,
-	 * count the bytes and set Content-Length.
+	 * and the body is a {@link Mono}, count the bytes and set Content-Length.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public final Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		if (shouldSetContentLength()) {
-			return Flux.from(body)
-					.reduce(0, (current, buffer) -> {
-						int next = current + buffer.readableByteCount();
-						DataBufferUtils.release(buffer);
-						return next;
+		if (shouldSetContentLength() && body instanceof Mono) {
+			return ((Mono<? extends DataBuffer>) body)
+					.doOnSuccess(buffer -> {
+						if (buffer != null) {
+							getHeaders().setContentLength(buffer.readableByteCount());
+							DataBufferUtils.release(buffer);
+						}
+						else {
+							getHeaders().setContentLength(0);
+						}
 					})
-					.doOnNext(length -> getHeaders().setContentLength(length))
 					.then();
 		}
 		else {

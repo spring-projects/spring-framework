@@ -21,6 +21,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -50,10 +51,17 @@ public class HttpHeadResponseDecoratorTests {
 
 
 	@Test
-	public void write() {
+	public void writeWithFlux() {
 		Flux<DataBuffer> body = Flux.just(toDataBuffer("data1"), toDataBuffer("data2"));
 		this.response.writeWith(body).block();
-		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(10);
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(-1);
+	}
+
+	@Test
+	public void writeWithMono() {
+		Mono<DataBuffer> body = Mono.just(toDataBuffer("data1,data2"));
+		this.response.writeWith(body).block();
+		assertThat(this.response.getHeaders().getContentLength()).isEqualTo(11);
 	}
 
 	@Test // gh-23484
