@@ -1192,7 +1192,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void afterPrototypeCreation(String beanName) {
 		Object curVal = this.prototypesCurrentlyInCreation.get();
 		if (curVal instanceof String || ((Set<String>) curVal).size() == 1) {
-			prototypesCurrentlyInCreation.remove();
+			this.prototypesCurrentlyInCreation.remove();
 		}
 		else {
 			((Set<String>) curVal).remove(beanName);
