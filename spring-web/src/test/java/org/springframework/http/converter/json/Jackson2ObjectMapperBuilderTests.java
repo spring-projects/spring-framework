@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,7 +348,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	public void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().propertyNamingStrategy(strategy).build();
 		assertSame(strategy, objectMapper.getSerializationConfig().getPropertyNamingStrategy());
 		assertSame(strategy, objectMapper.getDeserializationConfig().getPropertyNamingStrategy());
@@ -436,7 +436,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		JsonSerializer<Number> serializer2 = new NumberSerializer(Integer.class);
 
 		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json()
-				.modules(new ArrayList<>()) // Disable well-known modules detection
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.serializers(serializer1)
 				.serializersByType(Collections.singletonMap(Boolean.class, serializer2))
 				.deserializersByType(deserializerMap)
@@ -617,6 +617,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	public static class JacksonVisibilityBean {
 
 		private String property1;
@@ -626,8 +627,8 @@ public class Jackson2ObjectMapperBuilderTests {
 		public String getProperty3() {
 			return null;
 		}
-
 	}
+
 
 	static class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
 
@@ -648,6 +649,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	@JsonDeserialize
 	static class DemoPojo {
 
@@ -660,8 +662,8 @@ public class Jackson2ObjectMapperBuilderTests {
 		public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
 			this.offsetDateTime = offsetDateTime;
 		}
-
 	}
+
 
 	static class Foo {}
 
