@@ -355,7 +355,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	public void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().propertyNamingStrategy(strategy).build();
 		assertThat(objectMapper.getSerializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
 		assertThat(objectMapper.getDeserializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
@@ -443,7 +443,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		JsonSerializer<Number> serializer2 = new NumberSerializer(Integer.class);
 
 		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json()
-				.modules(new ArrayList<>()) // Disable well-known modules detection
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.serializers(serializer1)
 				.serializersByType(Collections.singletonMap(Boolean.class, serializer2))
 				.deserializersByType(deserializerMap)
@@ -551,7 +551,6 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertThat(objectMapper.getFactory().getClass()).isEqualTo(SmileFactory.class);
 	}
 
-
 	@Test
 	public void visibility() throws JsonProcessingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
@@ -564,6 +563,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertThat(json).contains("property2");
 		assertThat(json).doesNotContain("property3");
 	}
+
 
 	public static class CustomIntegerModule extends Module {
 
@@ -651,6 +651,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	public static class JacksonVisibilityBean {
 
 		@SuppressWarnings("unused")
@@ -661,8 +662,8 @@ public class Jackson2ObjectMapperBuilderTests {
 		public String getProperty3() {
 			return null;
 		}
-
 	}
+
 
 	static class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
 
@@ -684,6 +685,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	@JsonDeserialize
 	static class DemoPojo {
 
@@ -696,12 +698,13 @@ public class Jackson2ObjectMapperBuilderTests {
 		public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
 			this.offsetDateTime = offsetDateTime;
 		}
-
 	}
+
 
 	@SuppressWarnings("serial")
 	public static class MyXmlFactory extends XmlFactory {
 	}
+
 
 	static class Foo {}
 
