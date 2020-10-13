@@ -60,14 +60,28 @@ import org.springframework.lang.Nullable;
  * classes in JUnit Jupiter; however, there may be other testing frameworks with
  * support for nested test classes that could also make use of this annotation.
  *
+ * <h3>Supported Annotations</h3>
+ * <p>The <em>Spring TestContext Framework</em> honors {@code @NestedTestConfiguration}
+ * semantics for the following annotations.
+ * <ul>
+ * <li>{@link BootstrapWith @BootstrapWith}</li>
+ * <li>{@link TestExecutionListeners @TestExecutionListeners}</li>
+ * <li>{@link ContextConfiguration @ContextConfiguration}</li>
+ * <li>{@link ContextHierarchy @ContextHierarchy}</li>
+ * <li>{@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}</li>
+ * <li>{@link ActiveProfiles @ActiveProfiles}</li>
+ * <li>{@link TestPropertySource @TestPropertySource}</li>
+ * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}</li>
+ * <li>{@link org.springframework.transaction.annotation.Transactional @Transactional}</li>
+ * <li>{@link org.springframework.test.annotation.Rollback @Rollback}</li>
+ * <li>{@link org.springframework.test.annotation.Commit @Commit}</li>
+ * <li>{@link TestConstructor @TestConstructor}</li>
+ * </ul>
+ *
  * @author Sam Brannen
  * @since 5.3
  * @see EnclosingConfiguration#INHERIT
  * @see EnclosingConfiguration#OVERRIDE
- * @see ContextConfiguration @ContextConfiguration
- * @see ContextHierarchy @ContextHierarchy
- * @see ActiveProfiles @ActiveProfiles
- * @see TestPropertySource @TestPropertySource
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
