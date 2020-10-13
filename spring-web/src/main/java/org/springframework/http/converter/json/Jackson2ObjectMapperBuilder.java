@@ -92,7 +92,7 @@ import org.springframework.util.xml.StaxUtils;
  * support for Kotlin classes and data classes</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -649,8 +649,8 @@ public class Jackson2ObjectMapperBuilder {
 	 * An option to apply additional customizations directly to the
 	 * {@code ObjectMapper} instances at the end, after all other config
 	 * properties of the builder have been applied.
-	 * @param configurer a configurer to apply; if invoked multiple times, all
-	 * configurers are applied in the same order.
+	 * @param configurer a configurer to apply. If several configurers are
+	 * registered, they will get applied in their registration order.
 	 * @since 5.3
 	 */
 	public Jackson2ObjectMapperBuilder postConfigurer(Consumer<ObjectMapper> configurer) {
