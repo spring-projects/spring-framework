@@ -79,6 +79,7 @@ import org.springframework.util.StringUtils;
  * <em>are</em> annotated with {@code @Transactional} but have the
  * {@link Transactional#propagation propagation} type set to
  * {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
+ * or {@link org.springframework.transaction.annotation.Propagation#NEVER NEVER}
  * will not be run within a transaction.
  *
  * <h3>Declarative Rollback and Commit Behavior</h3>
@@ -123,7 +124,8 @@ import org.springframework.util.StringUtils;
  * <tr><th>Attribute</th><th>Supported for test-managed transactions</th></tr>
  * <tr><td>{@link Transactional#value value} and {@link Transactional#transactionManager transactionManager}</td><td>yes</td></tr>
  * <tr><td>{@link Transactional#propagation propagation}</td>
- * <td>only {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED} is supported</td></tr>
+ * <td>only {@link org.springframework.transaction.annotation.Propagation#NOT_SUPPORTED NOT_SUPPORTED}
+ * and {@link org.springframework.transaction.annotation.Propagation#NEVER NEVER} are supported</td></tr>
  * <tr><td>{@link Transactional#isolation isolation}</td><td>no</td></tr>
  * <tr><td>{@link Transactional#timeout timeout}</td><td>no</td></tr>
  * <tr><td>{@link Transactional#readOnly readOnly}</td><td>no</td></tr>
@@ -213,7 +215,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 						"] found for test context " + testContext);
 			}
 
-			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED ||
+					transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
 				return;
 			}
 
