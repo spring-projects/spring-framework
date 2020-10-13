@@ -6749,7 +6749,7 @@ The following query gets the `id` and `name` columns from a table:
 .Kotlin
 ----
 	val first = client.sql("SELECT id, name FROM person")
-	        .fetch().awaitFirst()
+	        .fetch().awaitSingle()
 ----
 
 The following query uses a bind variable:
@@ -6766,7 +6766,7 @@ The following query uses a bind variable:
 ----
 	val first = client.sql("SELECT id, name FROM person WHERE WHERE first_name = :fn")
 	        .bind("fn", "Joe")
-	        .fetch().awaitFirst()
+	        .fetch().awaitSingle()
 ----
 
 You might have noticed the use of `fetch()` in the example above. `fetch()` is a
@@ -6776,7 +6776,7 @@ Calling `first()` returns the first row from the result and discards remaining r
 You can consume data with the following operators:
 
 * `first()` return the first row of the entire result. Its Kotlin Coroutine variant
-is named `awaitFirst()` for non-nullable return values and `awaitFirstOrNull()`
+is named `awaitSingle()` for non-nullable return values and `awaitSingleOrNull()`
 if the value is optional.
 * `one()` returns exactly one result and fails if the result contains more rows.
 Using Kotlin Coroutines, `awaitOne()` for exactly one value or `awaitOneOrNull()`

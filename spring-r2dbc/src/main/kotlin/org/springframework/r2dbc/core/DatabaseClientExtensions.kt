@@ -16,7 +16,7 @@
 
 package org.springframework.r2dbc.core
 
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 
 /**
  * Coroutines variant of [DatabaseClient.GenericExecuteSpec.then].
@@ -24,7 +24,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
  * @author Sebastien Deleuze
  */
 suspend fun DatabaseClient.GenericExecuteSpec.await() {
-	then().awaitFirstOrNull()
+	then().awaitSingleOrNull()
 }
 
 /**

@@ -172,7 +172,7 @@ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitFirst()
+	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
 ----
 

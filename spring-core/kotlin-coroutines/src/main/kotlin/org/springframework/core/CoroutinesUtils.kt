@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactor.asFlux
 
 import kotlinx.coroutines.reactor.mono
@@ -49,7 +49,7 @@ internal fun <T: Any> deferredToMono(source: Deferred<T>) =
  * @since 5.2
  */
 internal fun <T: Any> monoToDeferred(source: Mono<T>) =
-		GlobalScope.async(Dispatchers.Unconfined) { source.awaitFirstOrNull() }
+		GlobalScope.async(Dispatchers.Unconfined) { source.awaitSingleOrNull() }
 
 /**
  * Invoke a suspending function and converts it to [Mono] or [reactor.core.publisher.Flux].
