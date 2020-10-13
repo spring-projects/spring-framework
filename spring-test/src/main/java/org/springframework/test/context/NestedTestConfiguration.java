@@ -39,14 +39,14 @@ import org.springframework.lang.Nullable;
  * mode</em> will be used. See {@link #ENCLOSING_CONFIGURATION_PROPERTY_NAME} for
  * details on how to change the default mode.
  *
- * <p>By default, if {@code @NestedTestConfiguration} is not <em>present</em> or
- * <em>meta-present</em> on a test class, configuration from the test class will
- * propagate to inner test classes (see {@link EnclosingConfiguration#INHERIT}).
- * If {@code @NestedTestConfiguration(OVERRIDE)} is used to switch the mode,
+ * <p>When the {@link EnclosingConfiguration#INHERIT INHERIT} mode is in use,
+ * configuration from an enclosing test class will be inherited by inner test
+ * classes, analogous to the semantics within a test class inheritance hierarchy.
+ * When the {@link EnclosingConfiguration#OVERRIDE OVERRIDE} mode is in use,
  * inner test classes will have to declare their own Spring test configuration
  * annotations. If you wish to explicitly configure the mode, annotate either
- * the inner test class or an enclosing class with
- * {@code @NestedTestConfiguration(...}. Note that a
+ * the inner test class or one of its enclosing classes with
+ * {@code @NestedTestConfiguration(...)}. Note that a
  * {@code @NestedTestConfiguration(...)} declaration is inherited within the
  * superclass hierarchy as well as within the enclosing class hierarchy. Thus,
  * there is no need to redeclare the annotation unless you wish to switch the
@@ -57,7 +57,8 @@ import org.springframework.lang.Nullable;
  *
  * <p>As of Spring Framework 5.3, the use of this annotation typically only makes
  * sense in conjunction with {@link org.junit.jupiter.api.Nested @Nested} test
- * classes in JUnit Jupiter.
+ * classes in JUnit Jupiter; however, there may be other testing frameworks with
+ * support for nested test classes that could also make use of this annotation.
  *
  * @author Sam Brannen
  * @since 5.3
