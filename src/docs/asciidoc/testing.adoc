@@ -1670,13 +1670,14 @@ how to use the `@Repeat` annotation:
 [[integration-testing-annotations-junit-jupiter]]
 ==== Spring JUnit Jupiter Testing Annotations
 
-The following annotations are supported only when used in conjunction with the
+The following annotations are supported when used in conjunction with the
 <<testcontext-junit-jupiter-extension, `SpringExtension`>> and JUnit Jupiter
 (that is, the programming model in JUnit 5):
 
 * <<integration-testing-annotations-junit-jupiter-springjunitconfig>>
 * <<integration-testing-annotations-junit-jupiter-springjunitwebconfig>>
 * <<integration-testing-annotations-testconstructor>>
+* <<integration-testing-annotations-nestedtestconfiguration>>
 * <<integration-testing-annotations-junit-jupiter-enabledif>>
 * <<integration-testing-annotations-junit-jupiter-disabledif>>
 
@@ -1840,6 +1841,48 @@ with the `SpringExtension` for use with JUnit Jupiter. Note that the `SpringExte
 often automatically registered for you – for example, when using annotations such as
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` or various test-related annotations from
 Spring Boot Test.
+
+[[integration-testing-annotations-nestedtestconfiguration]]
+===== `@NestedTestConfiguration`
+
+`@NestedTestConfiguration` is a type-level annotation that is used to configure how
+Spring test configuration annotations are processed within enclosing class hierarchies
+for inner test classes.
+
+If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
+super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+configuration inheritance mode_ will be used. See the tip below for details on how to
+change the default mode.
+
+.Changing the default enclosing configuration inheritance mode
+[TIP]
+=====
+The default _enclosing configuration inheritance mode_ is `INHERIT`, but it can be
+changed by setting the `spring.test.enclosing.configuration` JVM system property to
+`OVERRIDE`. Alternatively, the default mode may be set via the `SpringProperties`
+mechanism.
+=====
+
+The <<testcontext-framework>> honors `@NestedTestConfiguration` semantics for the
+following annotations.
+
+* <<spring-testing-annotation-bootstrapwith>>
+* <<spring-testing-annotation-contextconfiguration>>
+* <<spring-testing-annotation-webappconfiguration>>
+* <<spring-testing-annotation-contexthierarchy>>
+* <<spring-testing-annotation-activeprofiles>>
+* <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dirtiescontext>>
+* <<spring-testing-annotation-testexecutionlisteners>>
+* `@Transactional`
+* <<spring-testing-annotation-commit>>
+* <<spring-testing-annotation-rollback>>
+* <<integration-testing-annotations-testconstructor>>
+
+NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction
+with `@Nested` test classes in JUnit Jupiter; however, there may be other testing
+frameworks with support for Spring and nested test classes that make use of this
+annotation.
 
 [[integration-testing-annotations-junit-jupiter-enabledif]]
 ===== `@EnabledIf`
