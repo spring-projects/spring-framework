@@ -107,7 +107,6 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.resource.AppCacheManifestTransformer;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.ContentVersionStrategy;
@@ -414,6 +413,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testResourcesWithResolversTransformers() throws Exception {
 		loadBeanDefinitions("mvc-config-resources-chain.xml");
 
@@ -452,7 +452,7 @@ public class MvcNamespaceTests {
 		assertThat(transformers).hasSize(3);
 		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
 		assertThat(transformers.get(1)).isInstanceOf(CssLinkResourceTransformer.class);
-		assertThat(transformers.get(2)).isInstanceOf(AppCacheManifestTransformer.class);
+		assertThat(transformers.get(2)).isInstanceOf(org.springframework.web.servlet.resource.AppCacheManifestTransformer.class);
 
 		CachingResourceTransformer cachingTransformer = (CachingResourceTransformer) transformers.get(0);
 		assertThat(cachingTransformer.getCache()).isInstanceOf(ConcurrentMapCache.class);
@@ -460,6 +460,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void testResourcesWithResolversTransformersCustom() throws Exception {
 		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml");
 
@@ -489,7 +490,7 @@ public class MvcNamespaceTests {
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers).hasSize(2);
 		assertThat(transformers.get(0)).isInstanceOf(CachingResourceTransformer.class);
-		assertThat(transformers.get(1)).isInstanceOf(AppCacheManifestTransformer.class);
+		assertThat(transformers.get(1)).isInstanceOf(org.springframework.web.servlet.resource.AppCacheManifestTransformer.class);
 	}
 
 	@Test
