@@ -19,6 +19,7 @@ package org.springframework.test.util;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -93,7 +94,15 @@ public abstract class MetaAnnotationUtils {
 	 */
 	@Nullable
 	public static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType) {
-		AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(clazz, annotationType);
+		return findMergedAnnotation(clazz, annotationType, MetaAnnotationUtils::searchEnclosingClass);
+	}
+
+	@Nullable
+	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
+			Predicate<Class<?>> searchEnclosingClass) {
+
+		AnnotationDescriptor<T> descriptor =
+				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
 		return (descriptor != null ? descriptor.synthesizeAnnotation() : null);
 	}
 
@@ -125,7 +134,8 @@ public abstract class MetaAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
-		return findAnnotationDescriptor(clazz, annotationType, new HashSet<>());
+		return findAnnotationDescriptor(clazz, annotationType, MetaAnnotationUtils::searchEnclosingClass,
+			new HashSet<>());
 	}
 
 	/**
@@ -140,7 +150,8 @@ public abstract class MetaAnnotationUtils {
 	 */
 	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
-			@Nullable Class<?> clazz, Class<T> annotationType, Set<Annotation> visited) {
+			@Nullable Class<?> clazz, Class<T> annotationType, Predicate<Class<?>> searchEnclosingClass,
+			Set<Annotation> visited) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
@@ -152,11 +163,13 @@ public abstract class MetaAnnotationUtils {
 			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
+		AnnotationDescriptor<T> descriptor = null;
+
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
 			Class<? extends Annotation> composedType = composedAnn.annotationType();
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedType.getName()) && visited.add(composedAnn)) {
-				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedType, annotationType, visited);
+				descriptor = findAnnotationDescriptor(composedType, annotationType, searchEnclosingClass, visited);
 				if (descriptor != null) {
 					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnn, descriptor.getAnnotation());
@@ -166,7 +179,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, annotationType, visited);
+			descriptor = findAnnotationDescriptor(ifc, annotationType, searchEnclosingClass, visited);
 			if (descriptor != null) {
 				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
 						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
@@ -174,15 +187,14 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		// Declared on a superclass?
-		AnnotationDescriptor<T> descriptor =
-				findAnnotationDescriptor(clazz.getSuperclass(), annotationType, visited);
+		descriptor = findAnnotationDescriptor(clazz.getSuperclass(), annotationType, searchEnclosingClass, visited);
 		if (descriptor != null) {
 			return descriptor;
 		}
 
 		// Declared on an enclosing class of an inner class?
-		if (searchEnclosingClass(clazz)) {
-			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, visited);
+		if (searchEnclosingClass.test(clazz)) {
+			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, searchEnclosingClass, visited);
 			if (descriptor != null) {
 				return descriptor;
 			}
@@ -301,6 +313,7 @@ public abstract class MetaAnnotationUtils {
 	 * class should be searched
 	 * @since 5.3
 	 * @see ClassUtils#isInnerClass(Class)
+	 * @see NestedTestConfiguration @NestedTestConfiguration
 	 */
 	public static boolean searchEnclosingClass(Class<?> clazz) {
 		return (ClassUtils.isInnerClass(clazz) &&
@@ -319,11 +332,13 @@ public abstract class MetaAnnotationUtils {
 	}
 
 	private static EnclosingConfiguration lookUpEnclosingConfiguration(Class<?> clazz) {
-		return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES)
-				.stream(NestedTestConfiguration.class)
-				.map(mergedAnnotation -> mergedAnnotation.getEnum("value", EnclosingConfiguration.class))
-				.findFirst()
-				.orElseGet(MetaAnnotationUtils::getDefaultEnclosingConfigurationMode);
+		// @NestedTestConfiguration should not be discovered on an enclosing class
+		// for a nested interface (which is always static), so our predicate simply
+		// ensures that the candidate class is an inner class.
+		Predicate<Class<?>> searchEnclosingClass = ClassUtils::isInnerClass;
+		NestedTestConfiguration nestedTestConfiguration =
+				findMergedAnnotation(clazz, NestedTestConfiguration.class, searchEnclosingClass);
+		return (nestedTestConfiguration != null ? nestedTestConfiguration.value() : getDefaultEnclosingConfigurationMode());
 	}
 
 	private static EnclosingConfiguration getDefaultEnclosingConfigurationMode() {

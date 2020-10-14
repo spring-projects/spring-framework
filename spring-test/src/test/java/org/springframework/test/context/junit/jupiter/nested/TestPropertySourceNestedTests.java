@@ -161,12 +161,6 @@ class TestPropertySourceNestedTests {
 				}
 
 				@Nested
-				// The following explicit INHERIT is necessary since this nested
-				// test class implements an interface whose enclosing class is
-				// annotated with @NestedTestConfiguration(OVERRIDE). In other
-				// words, the local declaration overrides the declaration
-				// "inherited" via the interface.
-				@NestedTestConfiguration(INHERIT)
 				class L5WithInheritedConfigAndTestInterfaceTests implements TestInterface {
 
 					@Autowired

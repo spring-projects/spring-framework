@@ -36,8 +36,11 @@ import org.springframework.lang.Nullable;
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
  * <em>meta-present</em> on a test class, in its super type hierarchy, or in its
  * enclosing class hierarchy, the default <em>enclosing configuration inheritance
- * mode</em> will be used. See {@link #ENCLOSING_CONFIGURATION_PROPERTY_NAME} for
- * details on how to change the default mode.
+ * mode</em> will be used. A {@code @NestedTestConfiguration} declaration on an
+ * enclosing class for a nested interface will be ignored when searching for the
+ * annotation on classes that implement the interface. See
+ * {@link #ENCLOSING_CONFIGURATION_PROPERTY_NAME} for details on how to change
+ * the default mode.
  *
  * <p>When the {@link EnclosingConfiguration#INHERIT INHERIT} mode is in use,
  * configuration from an enclosing test class will be inherited by inner test
