@@ -69,7 +69,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class MetaAnnotationUtils {
 
-	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedSearchStrategies =
+	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedEnclosingConfigurationModes =
 			new ConcurrentLruCache<>(32, MetaAnnotationUtils::lookUpEnclosingConfiguration);
 
 
@@ -125,7 +125,7 @@ public abstract class MetaAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
-		return findAnnotationDescriptor(clazz, new HashSet<>(), annotationType);
+		return findAnnotationDescriptor(clazz, annotationType, new HashSet<>());
 	}
 
 	/**
@@ -133,14 +133,14 @@ public abstract class MetaAnnotationUtils {
 	 * avoiding endless recursion by tracking which annotations have already been
 	 * <em>visited</em>.
 	 * @param clazz the class to look for annotations on
-	 * @param visited the set of annotations that have already been visited
 	 * @param annotationType the type of annotation to look for
+	 * @param visited the set of annotations that have already been visited
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
 	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
-			@Nullable Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
+			@Nullable Class<?> clazz, Class<T> annotationType, Set<Annotation> visited) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
@@ -156,7 +156,7 @@ public abstract class MetaAnnotationUtils {
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
 			Class<? extends Annotation> composedType = composedAnn.annotationType();
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedType.getName()) && visited.add(composedAnn)) {
-				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedType, visited, annotationType);
+				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedType, annotationType, visited);
 				if (descriptor != null) {
 					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnn, descriptor.getAnnotation());
@@ -166,7 +166,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
+			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, annotationType, visited);
 			if (descriptor != null) {
 				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
 						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
@@ -175,14 +175,14 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on a superclass?
 		AnnotationDescriptor<T> descriptor =
-				findAnnotationDescriptor(clazz.getSuperclass(), visited, annotationType);
+				findAnnotationDescriptor(clazz.getSuperclass(), annotationType, visited);
 		if (descriptor != null) {
 			return descriptor;
 		}
 
 		// Declared on an enclosing class of an inner class?
 		if (searchEnclosingClass(clazz)) {
-			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), visited, annotationType);
+			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, visited);
 			if (descriptor != null) {
 				return descriptor;
 			}
@@ -225,7 +225,7 @@ public abstract class MetaAnnotationUtils {
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
-		return findAnnotationDescriptorForTypes(clazz, new HashSet<>(), annotationTypes);
+		return findAnnotationDescriptorForTypes(clazz, annotationTypes, new HashSet<>());
 	}
 
 	/**
@@ -233,15 +233,14 @@ public abstract class MetaAnnotationUtils {
 	 * avoiding endless recursion by tracking which annotations have already been
 	 * <em>visited</em>.
 	 * @param clazz the class to look for annotations on
-	 * @param visited the set of annotations that have already been visited
 	 * @param annotationTypes the types of annotations to look for
+	 * @param visited the set of annotations that have already been visited
 	 * @return the corresponding annotation descriptor if one of the annotations
 	 * was found; otherwise {@code null}
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
 	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(@Nullable Class<?> clazz,
-			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
+			Class<? extends Annotation>[] annotationTypes, Set<Annotation> visited) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
 		if (clazz == null || Object.class == clazz) {
@@ -259,7 +258,7 @@ public abstract class MetaAnnotationUtils {
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
-						composedAnnotation.annotationType(), visited, annotationTypes);
+						composedAnnotation.annotationType(), annotationTypes, visited);
 				if (descriptor != null) {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
 							composedAnnotation, descriptor.getAnnotation(), annotationTypes);
@@ -269,7 +268,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
+			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, annotationTypes, visited);
 			if (descriptor != null) {
 				return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
 						descriptor.getComposedAnnotation(), descriptor.getAnnotation(), annotationTypes);
@@ -278,14 +277,14 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on a superclass?
 		UntypedAnnotationDescriptor descriptor =
-				findAnnotationDescriptorForTypes(clazz.getSuperclass(), visited, annotationTypes);
+				findAnnotationDescriptorForTypes(clazz.getSuperclass(), annotationTypes, visited);
 		if (descriptor != null) {
 			return descriptor;
 		}
 
 		// Declared on an enclosing class of an inner class?
 		if (searchEnclosingClass(clazz)) {
-			descriptor = findAnnotationDescriptorForTypes(clazz.getEnclosingClass(), visited, annotationTypes);
+			descriptor = findAnnotationDescriptorForTypes(clazz.getEnclosingClass(), annotationTypes, visited);
 			if (descriptor != null) {
 				return descriptor;
 			}
@@ -310,12 +309,13 @@ public abstract class MetaAnnotationUtils {
 
 	/**
 	 * Get the {@link EnclosingConfiguration} mode for the supplied class.
-	 * @param clazz the class for which the search strategy should be resolved
-	 * @return the resolved search strategy
+	 * @param clazz the class for which the enclosing configuration mode should
+	 * be resolved
+	 * @return the resolved enclosing configuration mode
 	 * @since 5.3
 	 */
 	private static EnclosingConfiguration getEnclosingConfiguration(Class<?> clazz) {
-		return cachedSearchStrategies.get(clazz);
+		return cachedEnclosingConfigurationModes.get(clazz);
 	}
 
 	private static EnclosingConfiguration lookUpEnclosingConfiguration(Class<?> clazz) {
