@@ -75,11 +75,8 @@ public abstract class TestPropertySourceUtils {
 
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-		return mergeTestPropertySources(findRepeatableAnnotations(testClass, TestPropertySource.class));
-	}
-
-	private static MergedTestPropertySources mergeTestPropertySources(
-			List<MergedAnnotation<TestPropertySource>> mergedAnnotations) {
+		List<MergedAnnotation<TestPropertySource>> mergedAnnotations =
+				findRepeatableAnnotations(testClass, TestPropertySource.class);
 
 		if (mergedAnnotations.isEmpty()) {
 			return MergedTestPropertySources.empty();
@@ -287,20 +284,15 @@ public abstract class TestPropertySourceUtils {
 	private static <T extends Annotation> void findRepeatableAnnotations(
 			Class<?> clazz, Class<T> annotationType, List<List<MergedAnnotation<T>>> listOfLists, int[] aggregateIndex) {
 
+		// Ensure we have a list for the current aggregate index.
+		if (listOfLists.size() < aggregateIndex[0] + 1) {
+			listOfLists.add(new ArrayList<>());
+		}
+
 		MergedAnnotations.from(clazz, SearchStrategy.DIRECT)
 			.stream(annotationType)
 			.sorted(highMetaDistancesFirst())
-			.forEach(annotation -> {
-				List<MergedAnnotation<T>> current = null;
-				if (listOfLists.size() < aggregateIndex[0] + 1) {
-					current = new ArrayList<>();
-					listOfLists.add(current);
-				}
-				else {
-					current = listOfLists.get(aggregateIndex[0]);
-				}
-				current.add(0, annotation);
-			});
+			.forEach(annotation -> listOfLists.get(aggregateIndex[0]).add(0, annotation));
 
 		aggregateIndex[0]++;
 
