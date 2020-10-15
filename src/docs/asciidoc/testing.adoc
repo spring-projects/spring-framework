@@ -1874,7 +1874,7 @@ following annotations.
 * <<spring-testing-annotation-testpropertysource>>
 * <<spring-testing-annotation-dirtiescontext>>
 * <<spring-testing-annotation-testexecutionlisteners>>
-* `@Transactional`
+* <<testcontext-tx,`@Transactional`>>
 * <<spring-testing-annotation-commit>>
 * <<spring-testing-annotation-rollback>>
 * <<integration-testing-annotations-testconstructor>>
@@ -1883,6 +1883,9 @@ NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjun
 with `@Nested` test classes in JUnit Jupiter; however, there may be other testing
 frameworks with support for Spring and nested test classes that make use of this
 annotation.
+
+See <<testcontext-junit-jupiter-nested-test-configuration>> for an example and further
+details.
 
 [[integration-testing-annotations-junit-jupiter-enabledif]]
 ===== `@EnabledIf`
@@ -2013,6 +2016,7 @@ You can use each of the following as a meta-annotation in conjunction with the
 * `@SpringJUnitConfig` _(only supported on JUnit Jupiter)_
 * `@SpringJUnitWebConfig` _(only supported on JUnit Jupiter)_
 * `@TestConstructor` _(only supported on JUnit Jupiter)_
+* `@NestedTestConfiguration` _(only supported on JUnit Jupiter)_
 * `@EnabledIf` _(only supported on JUnit Jupiter)_
 * `@DisabledIf` _(only supported on JUnit Jupiter)_
 
@@ -6491,6 +6495,95 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 
 Note that the use of `@RepeatedTest` from JUnit Jupiter lets the test method gain access
 to the `RepetitionInfo`.
+
+[[testcontext-junit-jupiter-nested-test-configuration]]
+===== `@Nested` test class configuration
+
+The _Spring TestContext Framework_ has supported the use of test-related annotations on
+`@Nested` test classes in JUnit Jupiter since Spring Framework 5.0; however, until Spring
+Framework 5.3 class-level test configuration annotations were not _inherited_ from
+enclosing classes like they are from superclasses.
+
+Spring Framework 5.3 introduces first-class support for inheriting test class
+configuration from enclosing classes, and such configuration will be inherited by
+default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
+an individual `@Nested` test class with
+`@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)`. An explicit
+`@NestedTestConfiguration` declaration will apply to the annotated test class as well as
+any of its subclasses and nested classes. Thus, you may annotate a top-level test class
+with `@NestedTestConfiguration`, and that will apply to all of its nested test classes
+recursively.
+
+In order to allow development teams to change the default to `OVERRIDE` – for example,
+for compatibility with Spring Framework 5.0 through 5.2 – the default mode can be changed
+globally via a JVM system property or a `spring.properties` file in the root of the
+classpath. See the <<integration-testing-annotations-nestedtestconfiguration, "Changing
+the default enclosing configuration inheritance mode">> note for details.
+
+Although the following "Hello World" example is very simplistic, it shows how to declare
+common configuration on a top-level class that is inherited by its `@Nested` test
+classes. In this particular example, only the `TestConfig` configuration class is
+inherited. Each nested test class provides its own set of active profiles, resulting in a
+distinct `ApplicationContext` for each nested test class (see
+<<testcontext-ctx-management-caching>> for details). Consult the list of
+<<integration-testing-annotations-nestedtestconfiguration, supported annotations>> to see
+which annotations can be inherited in `@Nested` test classes.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		class EnglishGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World");
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		class GermanGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt");
+			}
+		}
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		inner class EnglishGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World")
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		inner class GermanGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt")
+			}
+		}
+	}
+----
 
 [[testcontext-support-classes-testng]]
 ===== TestNG Support Classes
