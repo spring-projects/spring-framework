@@ -2085,7 +2085,7 @@ and others) and is equivalent to `required=false`.
 
 | `UriComponentsBuilder`
 | For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping. See <<mvc-uri-building>>.
+  the literal part of the servlet mapping. See <<mvc-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute, in contrast to model attributes stored in the session

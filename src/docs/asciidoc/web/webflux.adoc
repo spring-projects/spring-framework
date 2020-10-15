@@ -1903,8 +1903,8 @@ and others) and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, and path.
-  See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and
+  context path. See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute -- in contrast to model attributes stored in the session
