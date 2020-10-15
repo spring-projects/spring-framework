@@ -545,10 +545,12 @@ The following example uses both a location and a loader:
 
 
 NOTE: `@ContextConfiguration` provides support for inheriting resource locations or
-configuration classes as well as context initializers that are declared by superclasses.
+configuration classes as well as context initializers that are declared by superclasses
+or enclosing classes.
 
-See <<testcontext-ctx-management>> and the `@ContextConfiguration` javadocs for further
-details.
+See <<testcontext-ctx-management>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the `@ContextConfiguration`
+javadocs for further details.
 
 [[spring-testing-annotation-webappconfiguration]]
 ===== `@WebAppConfiguration`
@@ -742,12 +744,13 @@ be active:
 
 
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
-declared by superclasses by default. You can also resolve active bean definition profiles
-programmatically by implementing a custom
+declared by superclasses and enclosing classes by default. You can also resolve active
+bean definition profiles programmatically by implementing a custom
 <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver, `ActiveProfilesResolver`>>
 and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
-See <<testcontext-ctx-management-env-profiles>> and the
+See <<testcontext-ctx-management-env-profiles>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the
 {api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
 examples and further details.
 
@@ -1125,9 +1128,11 @@ The following example shows how to register two `TestExecutionListener` implemen
 <1> Register two `TestExecutionListener` implementations.
 
 
-By default, `@TestExecutionListeners` supports inherited listeners. See the
-{api-spring-framework}/test/context/TestExecutionListeners.html[javadoc]
-for an example and further details.
+By default, `@TestExecutionListeners` provides support for inheriting listeners from
+superclasses or enclosing classes. See
+<<testcontext-junit-jupiter-nested-test-configuration>> and the 
+{api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
+javadoc] for an example and further details.
 
 [[spring-testing-annotation-commit]]
 ===== `@Commit`
@@ -3189,6 +3194,9 @@ is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 In the next example, which uses XML resource locations, the `ApplicationContext` for
 `ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.
 Beans defined in `extended-config.xml` can, therefore, override (that is, replace) those
@@ -3659,6 +3667,9 @@ automatically inherit the `@ActiveProfiles` configuration from the base class. I
 following example, the declaration of `@ActiveProfiles` (as well as other annotations)
 has been moved to an abstract superclass, `AbstractIntegrationTest`:
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -3993,6 +4004,9 @@ test property sources as well.
 If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySource` is
 set to `false`, the locations or inlined properties, respectively, for the test class
 shadow and effectively replace the configuration defined by superclasses.
+
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
 
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 `base.properties` file as a test property source. In contrast, the `ApplicationContext`
