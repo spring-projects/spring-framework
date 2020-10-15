@@ -14,38 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function.server;
+package org.springframework.web.servlet.function;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
-import org.springframework.web.util.pattern.PathPatternParser;
+import org.springframework.lang.Nullable;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
- * Implementation of {@link RouterFunctions.Visitor} that changes the
- * {@link PathPatternParser} on path-related request predicates
- * (i.e. {@link RequestPredicates.PathPatternPredicate}).
- *
  * @author Arjen Poutsma
- * @since 5.3
  */
-class ChangePathPatternParserVisitor implements RouterFunctions.Visitor {
+class AttributesTestVisitor implements RouterFunctions.Visitor {
 
-	private final PathPatternParser parser;
+	@Nullable
+	private Map<String, Object> attributes;
 
+	private int visitCount;
 
-	public ChangePathPatternParserVisitor(PathPatternParser parser) {
-		Assert.notNull(parser, "Parser must not be null");
-		this.parser = parser;
+	public int visitCount() {
+		return this.visitCount;
 	}
 
 	@Override
 	public void startNested(RequestPredicate predicate) {
-		changeParser(predicate);
 	}
 
 	@Override
@@ -54,34 +50,23 @@ class ChangePathPatternParserVisitor implements RouterFunctions.Visitor {
 
 	@Override
 	public void route(RequestPredicate predicate, HandlerFunction<?> handlerFunction) {
-		changeParser(predicate);
+		assertThat(this.attributes).isNotNull();
+		this.attributes = null;
 	}
 
 	@Override
-	public void resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+	public void resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
 	}
 
 	@Override
 	public void attributes(Map<String, Object> attributes) {
+		assertThat(attributes).containsExactly(entry("foo", "bar"), entry("baz", "qux"));
+		this.attributes = attributes;
+		this.visitCount++;
 	}
 
 	@Override
 	public void unknown(RouterFunction<?> routerFunction) {
-	}
 
-	private void changeParser(RequestPredicate predicate) {
-		if (predicate instanceof Target) {
-			Target target = (Target) predicate;
-			target.changeParser(this.parser);
-		}
-	}
-
-
-	/**
-	 * Interface implemented by predicates that can change the parser.
-	 */
-	public interface Target {
-
-		void changeParser(PathPatternParser parser);
 	}
 }

@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -327,6 +328,35 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 
 		this.errorHandlers.add(0, (request, next) -> next.handle(request)
 				.onErrorResume(exceptionType, t -> responseProvider.apply(t, request)));
+		return this;
+	}
+
+	@Override
+	public RouterFunctions.Builder withAttribute(String name, Object value) {
+		Assert.hasLength(name, "Name must not be empty");
+		Assert.notNull(value, "Value must not be null");
+
+		if (this.routerFunctions.isEmpty()) {
+			throw new IllegalStateException("attributes can only be called after any other method (GET, path, etc.)");
+		}
+		int lastIdx = this.routerFunctions.size() - 1;
+		RouterFunction<ServerResponse> attributed = this.routerFunctions.get(lastIdx)
+				.withAttribute(name, value);
+		this.routerFunctions.set(lastIdx, attributed);
+		return this;
+	}
+
+	@Override
+	public RouterFunctions.Builder withAttributes(Consumer<Map<String, Object>> attributesConsumer) {
+		Assert.notNull(attributesConsumer, "AttributesConsumer must not be null");
+
+		if (this.routerFunctions.isEmpty()) {
+			throw new IllegalStateException("attributes can only be called after any other method (GET, path, etc.)");
+		}
+		int lastIdx = this.routerFunctions.size() - 1;
+		RouterFunction<ServerResponse> attributed = this.routerFunctions.get(lastIdx)
+				.withAttributes(attributesConsumer);
+		this.routerFunctions.set(lastIdx, attributed);
 		return this;
 	}
 

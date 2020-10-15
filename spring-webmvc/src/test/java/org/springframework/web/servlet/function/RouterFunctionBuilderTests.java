@@ -214,4 +214,23 @@ class RouterFunctionBuilderTests {
 				PathPatternsTestUtils.initRequest(httpMethod, null, requestUri, true, consumer), emptyList());
 	}
 
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/atts/1", request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.GET("/atts/2", request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				})
+				.build();
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
+
 }

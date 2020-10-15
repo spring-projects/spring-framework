@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.function;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -770,6 +773,27 @@ public abstract class RouterFunctions {
 				BiFunction<Throwable, ServerRequest, ServerResponse> responseProvider);
 
 		/**
+		 * Add an attribute with the given name and value to the last route built with this builder.
+		 * @param name the attribute name
+		 * @param value the attribute value
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder withAttribute(String name, Object value);
+
+		/**
+		 * Manipulate the attributes of the last route built with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used
+		 * to {@linkplain Map#put(Object, Object) overwrite} existing attributes,
+		 * {@linkplain Map#remove(Object) remove} attributes, or use any of the other
+		 * {@link Map} methods.
+		 * @param attributesConsumer a function that consumes the attributes map
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder withAttributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
 		 * Builds the {@code RouterFunction}. All created routes are
 		 * {@linkplain RouterFunction#and(RouterFunction) composed} with one another, and filters
 		 * (if any) are applied to the result.
@@ -812,6 +836,14 @@ public abstract class RouterFunctions {
 		 * @see RouterFunctions#resources(Function)
 		 */
 		void resources(Function<ServerRequest, Optional<Resource>> lookupFunction);
+
+		/**
+		 * Receive notification of a router function with attributes. The
+		 * given attributes apply to the router notification that follows this one.
+		 * @param attributes the attributes that apply to the following router
+		 * @since 5.3
+		 */
+		void attributes(Map<String, Object> attributes);
 
 		/**
 		 * Receive notification of an unknown router function. This method is called for router
@@ -1040,6 +1072,58 @@ public abstract class RouterFunctions {
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.resources(this.lookupFunction);
+		}
+	}
+
+
+	static final class AttributesRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
+
+		private final RouterFunction<T> delegate;
+
+		private final Map<String,Object> attributes;
+
+		public AttributesRouterFunction(RouterFunction<T> delegate, Map<String, Object> attributes) {
+			this.delegate = delegate;
+			this.attributes = initAttributes(attributes);
+		}
+
+		private static Map<String, Object> initAttributes(Map<String, Object> attributes) {
+			if (attributes.isEmpty()) {
+				return Collections.emptyMap();
+			}
+			else {
+				return Collections.unmodifiableMap(new LinkedHashMap<>(attributes));
+			}
+		}
+
+		@Override
+		public Optional<HandlerFunction<T>> route(ServerRequest request) {
+			return this.delegate.route(request);
+		}
+
+		@Override
+		public void accept(Visitor visitor) {
+			visitor.attributes(this.attributes);
+			this.delegate.accept(visitor);
+		}
+
+		@Override
+		public RouterFunction<T> withAttribute(String name, Object value) {
+			Assert.hasLength(name, "Name must not be empty");
+			Assert.notNull(value, "Value must not be null");
+
+			Map<String, Object> attributes = new LinkedHashMap<>(this.attributes);
+			attributes.put(name, value);
+			return new AttributesRouterFunction<>(this.delegate, attributes);
+		}
+
+		@Override
+		public RouterFunction<T> withAttributes(Consumer<Map<String, Object>> attributesConsumer) {
+			Assert.notNull(attributesConsumer, "AttributesConsumer must not be null");
+
+			Map<String, Object> attributes = new LinkedHashMap<>(this.attributes);
+			attributesConsumer.accept(attributes);
+			return new AttributesRouterFunction<>(this.delegate, attributes);
 		}
 	}
 
