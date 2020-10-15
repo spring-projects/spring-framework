@@ -1,0 +1,3 @@
+distribute:
+  optional-deployments:
+    - '.*\\.zip'
