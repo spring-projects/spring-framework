@@ -18,10 +18,10 @@ package org.springframework.core.io.support;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,7 +129,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection<?> input = (value instanceof Collection ? (Collection<?>) value : Arrays.asList((Object[]) value));
-			List<Resource> merged = new ArrayList<>();
+			Set<Resource> merged = new HashSet<>(input.size());
 			for (Object element : input) {
 				if (element instanceof String) {
 					// A location pattern: resolve it into a Resource array.
@@ -137,11 +137,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 					String pattern = resolvePath((String) element).trim();
 					try {
 						Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-						for (Resource resource : resources) {
-							if (!merged.contains(resource)) {
-								merged.add(resource);
-							}
-						}
+						merged.addAll(Arrays.asList(resources));
 					}
 					catch (IOException ex) {
 						// ignore - might be an unresolved placeholder or non-existing base directory
@@ -152,10 +148,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 				}
 				else if (element instanceof Resource) {
 					// A Resource object: add it to the result.
-					Resource resource = (Resource) element;
-					if (!merged.contains(resource)) {
-						merged.add(resource);
-					}
+					merged.add((Resource) element);
 				}
 				else {
 					throw new IllegalArgumentException("Cannot convert element [" + element + "] to [" +
