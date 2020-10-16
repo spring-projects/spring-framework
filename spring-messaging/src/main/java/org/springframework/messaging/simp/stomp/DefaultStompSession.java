@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +42,7 @@ import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.messaging.tcp.TcpConnectionConfiguration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.Assert;
@@ -378,6 +380,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 
 	// TcpConnectionHandler
+
+	@Override
+	public void beforeConnect(final TcpConnectionConfiguration connectionConfiguration) {
+		Map<String, String> attributes = new HashMap<>();
+		attributes.put(StompBrokerRelayMessageHandler.SESSION_ID_KEY, getSessionId());
+		connectionConfiguration.attributes(Collections.unmodifiableMap(attributes));
+	}
 
 	@Override
 	public void afterConnected(TcpConnection<byte[]> connection) {

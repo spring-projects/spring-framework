@@ -27,6 +27,11 @@ import org.springframework.messaging.Message;
  * @param <P> the type of payload for in and outbound messages
  */
 public interface TcpConnectionHandler<P> {
+	/**
+	 *	Invoked before connect.
+	 *	@param connectionConfiguration allows extending the functionality of the TCP client
+	 */
+	void beforeConnect(TcpConnectionConfiguration connectionConfiguration);
 
 	/**
 	 * Invoked after a connection is successfully established.

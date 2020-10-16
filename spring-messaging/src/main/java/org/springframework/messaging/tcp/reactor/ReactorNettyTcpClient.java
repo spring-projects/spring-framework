@@ -18,16 +18,22 @@ package org.springframework.messaging.tcp.reactor;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.util.AbstractConstant;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,6 +75,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 
 	private static final int PUBLISH_ON_BUFFER_SIZE = 16;
 
+	private static final Map<String, AttributeKey<String>> ATTRIBUTE_KEYS = Stream.of(
+			AttributeKey.<String>newInstance("sessionId")
+	) .collect(Collectors.toMap(AbstractConstant::name, Function.identity()));
 
 	private final TcpClient tcpClient;
 
@@ -186,7 +195,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
-		Mono<Void> connectMono = this.tcpClient
+		Mono<Void> connectMono = prepareTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
 				.connect()
 				.doOnError(handler::afterConnectFailure)
@@ -207,7 +216,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		// Report first connect to the ListenableFuture
 		CompletableFuture<Void> connectFuture = new CompletableFuture<>();
 
-		this.tcpClient
+		prepareTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
 				.connect()
 				.doOnNext(conn -> connectFuture.complete(null))
@@ -223,6 +232,17 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 				.subscribe();
 
 		return new CompletableToListenableFutureAdapter<>(connectFuture);
+	}
+
+	private TcpClient prepareTcpClient(TcpClient tcpClient, final TcpConnectionHandler<P> handler) {
+		Map<String, String> attributesMap = new HashMap<>();
+		handler.beforeConnect(attributesMap::putAll);
+		for(Map.Entry<String, String> attributesEntry : attributesMap.entrySet()) {
+			AttributeKey<String> attributeKey = ATTRIBUTE_KEYS.get(attributesEntry.getKey());
+			Assert.notNull(attributeKey, "attribute " + attributesEntry.getKey() + " is not recognized in this implementation");
+			tcpClient = tcpClient.attr(attributeKey, attributesEntry.getValue());
+		}
+		return tcpClient;
 	}
 
 	private ListenableFuture<Void> handleShuttingDownConnectFailure(TcpConnectionHandler<P> handler) {
@@ -336,5 +356,4 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			out.addAll(messages);
 		}
 	}
-
 }

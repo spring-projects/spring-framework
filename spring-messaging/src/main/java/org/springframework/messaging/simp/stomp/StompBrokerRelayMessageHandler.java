@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -41,6 +42,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.messaging.tcp.TcpConnectionConfiguration;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
@@ -80,6 +82,11 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * @since 4.0
  */
 public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler {
+
+	/**
+	 * The name of the key to hold the identifier of the Stomp session.
+	 */
+	public static final String SESSION_ID_KEY = "sessionId";
 
 	/**
 	 * The system session ID.
@@ -382,6 +389,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Return a String describing internal state and counters.
+	 * Return a String describing internal state and counters.
 	 * Effectively {@code toString()} on {@link #getStats() getStats()}.
 	 */
 	public String getStatsInfo() {
@@ -616,6 +624,13 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Nullable
 		protected TcpConnection<byte[]> getTcpConnection() {
 			return this.tcpConnection;
+		}
+
+		@Override
+		public void beforeConnect(final TcpConnectionConfiguration connectionConfiguration) {
+			Map<String, String> attributes = new HashMap<>();
+			attributes.put(StompBrokerRelayMessageHandler.SESSION_ID_KEY, getSessionId());
+			connectionConfiguration.attributes(Collections.unmodifiableMap(attributes));
 		}
 
 		@Override
