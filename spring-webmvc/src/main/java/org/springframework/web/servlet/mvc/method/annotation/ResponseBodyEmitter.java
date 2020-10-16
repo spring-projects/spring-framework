@@ -72,18 +72,21 @@ public class ResponseBodyEmitter {
 	/** Store send data before handler is initialized. */
 	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<>(8);
 
-	/** Store complete invocation before handler is initialized. */
+	/** Store successful completion before the handler is initialized. */
 	private boolean complete;
 
-	/** Store completeWithError invocation before handler is initialized. */
+	/** Store an error before the handler is initialized. */
 	@Nullable
 	private Throwable failure;
 
 	/**
-	 * After an IOException on send, the servlet container will provide an onError
-	 * callback that we'll handle as completeWithError (on container thread).
-	 * We use this flag to ignore competing attempts to completeWithError by
-	 * the application via try-catch. */
+	 * After an I/O error, we don't call {@link #completeWithError} directly but
+	 * wait for the Servlet container to call us via {@code AsyncListener#onError}
+	 * on a container thread at which point we call completeWithError.
+	 * This flag is used to ignore further calls to complete or completeWithError
+	 * that may come for example from an application try-catch block on the
+	 * thread of the I/O error.
+	 */
 	private boolean sendFailed;
 
 	private final DefaultCallback timeoutCallback = new DefaultCallback();
@@ -280,7 +283,10 @@ public class ResponseBodyEmitter {
 
 
 	/**
-	 * Handle sent objects and complete request processing.
+	 * Contract to handle the sending of event data, the completion of event
+	 * sending, and the registration of callbacks to be invoked in case of
+	 * timeout, error, and completion for any reason (including from the
+	 * container side).
 	 */
 	interface Handler {
 
