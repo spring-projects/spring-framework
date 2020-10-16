@@ -184,9 +184,11 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
 		int count = 0;
+		// 注意这里是个 for 循环，也就是每个文件是一个 resource
 		for (Resource resource : resources) {
 			count += loadBeanDefinitions(resource);
 		}
+		// 最后返回 counter，表示总共加载了多少的 BeanDefinition
 		return count;
 	}
 
