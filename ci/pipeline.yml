@@ -24,9 +24,16 @@ anchors:
     silent: true
     icon_emoji: ":concourse:"
     username: concourse-ci
-  sontatype-task-params: &sonatype-task-params
+  sonatype-task-params: &sonatype-task-params
     SONATYPE_USER_TOKEN: ((sonatype-user-token))
     SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
+  changelog-task-params: &changelog-task-params
+    name: generated-changelog/tag
+    tag: generated-changelog/tag
+    body: generated-changelog/changelog.md
+  github-task-params: &github-task-params
+    GITHUB_USERNAME: ((github-username))
+    GITHUB_TOKEN: ((github-ci-release-token))
 
 resource_types:
 - name: artifactory-resource
@@ -44,6 +51,7 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
     tag: latest
+
 resources:
 - name: git-repo
   type: git
@@ -136,6 +144,24 @@ resources:
   icon: slack
   source:
     url: ((slack-webhook-url))
+- name: github-pre-release
+  type: github-release
+  icon: briefcase-download-outline
+  source:
+    owner: spring-projects
+    repository: spring-framework
+    access_token: ((github-ci-release-token))
+    pre_release: true
+    release: false
+- name: github-release
+  type: github-release
+  icon: briefcase-download
+  source:
+    owner: spring-projects
+    repository: spring-framework
+    access_token: ((github-ci-release-token))
+    pre_release: false
+
 jobs:
 - name: build-spring-framework-ci-images
   plan:
@@ -335,6 +361,14 @@ jobs:
       params:
         RELEASE_TYPE: M
         <<: *artifactory-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: M
+        <<: *github-task-params
+    - put: github-pre-release
+      params:
+        <<: *changelog-task-params
 - name: stage-rc
   serial: true
   plan:
@@ -372,6 +406,14 @@ jobs:
       params:
         RELEASE_TYPE: RC
         <<: *artifactory-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: RC
+        <<: *github-task-params
+    - put: github-pre-release
+      params:
+        <<: *changelog-task-params
 - name: stage-release
   serial: true
   plan:
@@ -427,6 +469,15 @@ jobs:
       params:
         <<: *bintray-task-params
         <<: *sonatype-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: RELEASE
+        <<: *github-task-params
+    - put: github-release
+      params:
+        <<: *changelog-task-params
+
 groups:
 - name: "builds"
   jobs: ["build", "jdk11-build", "jdk14-build", "jdk15-build"]
