@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -706,6 +707,11 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	@Override
+	public UriComponentsBuilder queryParam(String name, Optional<?> value) {
+		return value.isPresent() ? queryParam(name, value.get()) : this;
 	}
 
 	@Override

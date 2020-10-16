@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -756,6 +757,18 @@ class UriComponentsBuilderTests {
 		expectedQueryParams.add("baz", "42");
 		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
 	}
+
+	@Test
+	void queryParamAsOptional() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		UriComponents result = builder.queryParam("baz", Optional.of("qux")).queryParam("foo", Optional.empty()).build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=qux");
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(1);
+		expectedQueryParams.add("baz", "qux");
+		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+	}
+
 
 	@Test
 	void emptyQueryParam() {
