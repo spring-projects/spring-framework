@@ -40,8 +40,8 @@ configure(allprojects) { project ->
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.13.3') {
 				entry 'log4j-api'
 				entry 'log4j-core'
-				entry 'log4j-slf4j-impl'
 				entry 'log4j-jul'
+				entry 'log4j-slf4j-impl'
 			}
 			dependency "org.slf4j:slf4j-api:1.7.30"
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
