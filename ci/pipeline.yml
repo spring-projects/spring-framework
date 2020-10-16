@@ -55,7 +55,7 @@ resource_types:
 resources:
 - name: git-repo
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: ((github-repo))
     username: ((github-username))
@@ -70,7 +70,7 @@ resources:
     location: Europe/Vienna
 - name: ci-images-git-repo
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: ((github-repo))
     branch: ((branch))
