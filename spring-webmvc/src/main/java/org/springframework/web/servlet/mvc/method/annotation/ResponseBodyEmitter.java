@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,10 +127,14 @@ public class ResponseBodyEmitter {
 	synchronized void initialize(Handler handler) throws IOException {
 		this.handler = handler;
 
-		for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
-			sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
+		try {
+			for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
+				sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
+			}
 		}
-		this.earlySendAttempts.clear();
+		finally {
+			this.earlySendAttempts.clear();
+		}
 
 		if (this.complete) {
 			if (this.failure != null) {
@@ -145,6 +149,13 @@ public class ResponseBodyEmitter {
 			this.handler.onError(this.errorCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
+	}
+
+	synchronized void initializeWithError(Throwable ex) {
+		this.complete = true;
+		this.failure = ex;
+		this.earlySendAttempts.clear();
+		this.errorCallback.accept(ex);
 	}
 
 	/**
@@ -182,7 +193,9 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
+		Assert.state(!this.complete,
+				"ResponseBodyEmitter has already completed" +
+						(this.failure != null ? " with error: " + this.failure : ""));
 		sendInternal(object, mediaType);
 	}
 
