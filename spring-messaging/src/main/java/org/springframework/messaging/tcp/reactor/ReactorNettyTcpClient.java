@@ -186,13 +186,26 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
-		Mono<Void> connectMono = this.tcpClient
+		Mono<Void> connectMono = extendTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
 				.connect()
 				.doOnError(handler::afterConnectFailure)
 				.then();
 
 		return new MonoToListenableFutureAdapter<>(connectMono);
+	}
+
+	/**
+	 * Provides an opportunity to initialize the {@link TcpClient} for the given
+	 * {@link TcpConnectionHandler} which may implement sub-interfaces such as
+	 * {@link org.springframework.messaging.simp.stomp.StompTcpConnectionHandler}
+	 * that expose further information.
+	 * @param tcpClient the candidate TcpClient
+	 * @param handler the handler for the TCP connection
+	 * @return the same handler or an updated instance
+	 */
+	protected TcpClient extendTcpClient(TcpClient tcpClient, TcpConnectionHandler<P> handler) {
+		return tcpClient;
 	}
 
 	@Override
@@ -207,7 +220,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		// Report first connect to the ListenableFuture
 		CompletableFuture<Void> connectFuture = new CompletableFuture<>();
 
-		this.tcpClient
+		extendTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
 				.connect()
 				.doOnNext(conn -> connectFuture.complete(null))

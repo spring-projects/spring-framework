@@ -41,7 +41,6 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
-import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
@@ -141,7 +140,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private final DefaultStats stats = new DefaultStats();
 
-	private final Map<String, StompConnectionHandler> connectionHandlers = new ConcurrentHashMap<>();
+	private final Map<String, RelayConnectionHandler> connectionHandlers = new ConcurrentHashMap<>();
 
 	@Nullable
 	private TaskScheduler taskScheduler;
@@ -451,7 +450,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			logger.debug("Forwarding " + accessor.getShortLogMessage(EMPTY_PAYLOAD));
 		}
 
-		SystemStompConnectionHandler handler = new SystemStompConnectionHandler(accessor);
+		SystemSessionConnectionHandler handler = new SystemSessionConnectionHandler(accessor);
 		this.connectionHandlers.put(handler.getSessionId(), handler);
 
 		this.stats.incrementConnectCount();
@@ -495,7 +494,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				throw new MessageDeliveryException("Message broker not active. Consider subscribing to " +
 						"receive BrokerAvailabilityEvent's from an ApplicationListener Spring bean.");
 			}
-			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
+			RelayConnectionHandler handler = this.connectionHandlers.get(sessionId);
 			if (handler != null) {
 				handler.sendStompErrorFrameToClient("Broker not available.");
 				handler.clearConnection();
@@ -562,14 +561,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			if (getVirtualHost() != null) {
 				stompAccessor.setHost(getVirtualHost());
 			}
-			StompConnectionHandler handler = new StompConnectionHandler(sessionId, stompAccessor);
+			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.stats.incrementConnectCount();
 			Assert.state(this.tcpClient != null, "No TCP client available");
 			this.tcpClient.connect(handler);
 		}
 		else if (StompCommand.DISCONNECT.equals(command)) {
-			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
+			RelayConnectionHandler handler = this.connectionHandlers.get(sessionId);
 			if (handler == null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Ignoring DISCONNECT in session " + sessionId + ". Connection already cleaned up.");
@@ -580,7 +579,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			handler.forward(message, stompAccessor);
 		}
 		else {
-			StompConnectionHandler handler = this.connectionHandlers.get(sessionId);
+			RelayConnectionHandler handler = this.connectionHandlers.get(sessionId);
 			if (handler == null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("No TCP connection for session " + sessionId + " in " + message);
@@ -611,7 +610,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private class StompConnectionHandler implements TcpConnectionHandler<byte[]> {
+	private class RelayConnectionHandler implements StompTcpConnectionHandler<byte[]> {
 
 		private final String sessionId;
 
@@ -634,11 +633,11 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		private long clientSendMessageTimestamp;
 
 
-		protected StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders) {
+		protected RelayConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders) {
 			this(sessionId, connectHeaders, true);
 		}
 
-		private StompConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders, boolean isClientSession) {
+		private RelayConnectionHandler(String sessionId, StompHeaderAccessor connectHeaders, boolean isClientSession) {
 			Assert.notNull(sessionId, "'sessionId' must not be null");
 			Assert.notNull(connectHeaders, "'connectHeaders' must not be null");
 			this.sessionId = sessionId;
@@ -662,6 +661,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return this.sessionId;
 		}
 
+		@Override
 		public StompHeaderAccessor getConnectHeaders() {
 			return this.connectHeaders;
 		}
@@ -968,9 +968,9 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	}
 
 
-	private class SystemStompConnectionHandler extends StompConnectionHandler {
+	private class SystemSessionConnectionHandler extends RelayConnectionHandler {
 
-		public SystemStompConnectionHandler(StompHeaderAccessor connectHeaders) {
+		public SystemSessionConnectionHandler(StompHeaderAccessor connectHeaders) {
 			super(SYSTEM_SESSION_ID, connectHeaders, false);
 		}
 
@@ -1099,7 +1099,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void run() {
 			long now = System.currentTimeMillis();
-			for (StompConnectionHandler handler : connectionHandlers.values()) {
+			for (RelayConnectionHandler handler : connectionHandlers.values()) {
 				handler.updateClientSendMessageCount(now);
 			}
 		}

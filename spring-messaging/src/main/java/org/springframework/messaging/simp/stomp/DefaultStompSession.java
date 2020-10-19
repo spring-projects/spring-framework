@@ -133,6 +133,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		return this.sessionId;
 	}
 
+	@Override
+	public StompHeaderAccessor getConnectHeaders() {
+		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.CONNECT);
+		accessor.addNativeHeaders(this.connectHeaders);
+		return accessor;
+	}
+
 	/**
 	 * Return the configured session handler.
 	 */
