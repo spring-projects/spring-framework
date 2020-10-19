@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.user;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -308,6 +309,12 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		@Override
 		public String getName() {
 			return this.name;
+		}
+
+		@Nullable
+		@Override
+		public Principal getPrincipal() {
+			return null;
 		}
 
 		@Override
