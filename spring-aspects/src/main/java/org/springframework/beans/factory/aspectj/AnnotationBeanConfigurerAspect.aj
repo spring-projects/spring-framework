@@ -89,6 +89,6 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDepe
 	 * This declaration shouldn't be needed,
 	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
 	 */
-	declare parents: @Configurable Serializable+ implements ConfigurableDeserializationSupport;
+	declare parents: @Configurable Serializable+ implements ConfigurableObject, ConfigurableDeserializationSupport;
 
 }
