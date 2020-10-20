@@ -263,14 +263,15 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
-				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);
-				if (view != null) {
-					this.objectMapper.writerWithView(view).writeValue(generator, payload);
+				try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding)) {
+					if (view != null) {
+						this.objectMapper.writerWithView(view).writeValue(generator, payload);
+					}
+					else {
+						this.objectMapper.writeValue(generator, payload);
+					}
+					payload = out.toByteArray();
 				}
-				else {
-					this.objectMapper.writeValue(generator, payload);
-				}
-				payload = out.toByteArray();
 			}
 			else {
 				// Assuming a text-based target payload

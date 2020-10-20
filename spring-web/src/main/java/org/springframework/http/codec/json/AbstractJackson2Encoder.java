@@ -149,7 +149,16 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 					return Flux.from(inputStream)
 							.map(value -> encodeStreamingValue(value, bufferFactory, hints, sequenceWriter, byteBuilder,
-									separator));
+									separator))
+							.doAfterTerminate(() -> {
+								try {
+									byteBuilder.release();
+									generator.close();
+								}
+								catch (IOException ex) {
+									logger.error("Could not close Encoder resources", ex);
+								}
+							});
 				}
 				catch (IOException ex) {
 					return Flux.error(ex);
@@ -172,30 +181,34 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 		ObjectWriter writer = createObjectWriter(valueType, mimeType, hints);
 		ByteArrayBuilder byteBuilder = new ByteArrayBuilder(writer.getFactory()._getBufferRecycler());
-		JsonEncoding encoding = getJsonEncoding(mimeType);
-
-		logValue(hints, value);
-
 		try {
-			JsonGenerator generator = getObjectMapper().getFactory().createGenerator(byteBuilder, encoding);
-			writer.writeValue(generator, value);
-			generator.flush();
-		}
-		catch (InvalidDefinitionException ex) {
-			throw new CodecException("Type definition error: " + ex.getType(), ex);
-		}
-		catch (JsonProcessingException ex) {
-			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
-		}
+			JsonEncoding encoding = getJsonEncoding(mimeType);
 
-		byte[] bytes = byteBuilder.toByteArray();
-		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
-		buffer.write(bytes);
+			logValue(hints, value);
 
-		return buffer;
+			try (JsonGenerator generator = getObjectMapper().getFactory().createGenerator(byteBuilder, encoding)) {
+				writer.writeValue(generator, value);
+				generator.flush();
+			}
+			catch (InvalidDefinitionException ex) {
+				throw new CodecException("Type definition error: " + ex.getType(), ex);
+			}
+			catch (JsonProcessingException ex) {
+				throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
+			}
+
+			byte[] bytes = byteBuilder.toByteArray();
+			DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
+			buffer.write(bytes);
+
+			return buffer;
+		}
+		finally {
+			byteBuilder.release();
+		}
 	}
 
 	private DataBuffer encodeStreamingValue(Object value, DataBufferFactory bufferFactory, @Nullable Map<String, Object> hints,
