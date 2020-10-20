@@ -307,8 +307,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		JsonEncoding encoding = getJsonEncoding(contentType);
-		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
-		try {
+
+		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding)) {
 			writePrefix(generator, object);
 
 			Object value = object;
