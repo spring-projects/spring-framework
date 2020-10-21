@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -184,6 +185,15 @@ public interface UriBuilder {
 	 * @see #queryParam(String, Collection)
 	 */
 	UriBuilder queryParam(String name, Object... values);
+
+	/**
+	 * Delegates to {@link #queryParam(String, Object...)} or {@link #queryParam(String, Object...)} if and only if optionalValue has a value.
+	 * No action will be taken, and the query parameter name will not be added, if optionalValue is empty.
+	 * @param name the query parameter name
+	 * @param optionalValue an Optional, either empty or holding the query parameter value.
+	 * @return
+	 */
+	UriBuilder queryParamIfPresent(String name, Optional<?> optionalValue);
 
 	/**
 	 * Variant of {@link #queryParam(String, Object...)} with a Collection.
