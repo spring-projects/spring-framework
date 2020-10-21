@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -697,15 +698,36 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
-				String valueAsString = (value != null ? value.toString() : null);
-				this.queryParams.add(name, valueAsString);
+				if (value instanceof Optional) {
+					// only add the query param if the optional value is present
+					Optional<?> optionalValue = (Optional<?>) value;
+					if (optionalValue.isPresent()) {
+						addQueryParam(name, optionalValue.get());
+					}
+					else {
+						// do not add the param with a null value since the incoming value type is Optional
+					}
+				}
+				else {
+					addQueryParam(name, value);
+				}
 			}
 		}
 		else {
-			this.queryParams.add(name, null);
+			addQueryParam(name, null);
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	/**
+	 * Add a query param, explicitly adding null if the passed value is itself null
+	 * @param name
+	 * @param value
+	 */
+	protected void addQueryParam(String name, Object value) {
+		String valueAsString = (value != null ? value.toString() : null);
+		this.queryParams.add(name, valueAsString);
 	}
 
 	@Override
