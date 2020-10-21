@@ -683,13 +683,12 @@ class Jackson2ObjectMapperBuilderTests {
 
 		@Override
 		public OffsetDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-			final String value = jsonParser.getValueAsString();
-			if (StringUtils.isEmpty(value)) {
+			String value = jsonParser.getValueAsString();
+			if (!StringUtils.hasLength(value)) {
 				return null;
 			}
 			try {
 				return OffsetDateTime.parse(value);
-
 			}
 			catch (DateTimeParseException exception) {
 				return OffsetDateTime.parse(value + CURRENT_ZONE_OFFSET);
