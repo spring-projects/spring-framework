@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -207,13 +208,28 @@ class UriComponentsBuilderTests {
 
 
 	@Test
-	void queryParamAsOptional() {
+	void queryParamIfPresent() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.optionalQueryParam("baz", Optional.of("qux")).optionalQueryParam("foo", Optional.empty()).build();
+		UriComponents result = builder.queryParamIfPresent("baz", Optional.of("qux")).queryParamIfPresent("foo", Optional.empty()).build();
 
 		assertThat(result.getQuery()).isEqualTo("baz=qux");
 		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(1);
 		expectedQueryParams.add("baz", "qux");
+		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+	}
+
+	@Test
+	void queryParamIfPresentCollection() {
+		Collection<String> c = new ArrayList<>();
+		c.add("foo");
+		c.add("bar");
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		UriComponents result = builder.queryParamIfPresent("baz", Optional.of(c)).build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=foo&baz=bar");
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(1);
+		expectedQueryParams.add("baz", "foo");
+		expectedQueryParams.add("baz", "bar");
 		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
 	}
 

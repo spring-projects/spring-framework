@@ -336,8 +336,8 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
-		public DefaultUriBuilder optionalQueryParam(String name, Optional<?> optionalValue) {
-			this.uriComponentsBuilder.optionalQueryParam(name, optionalValue);
+		public DefaultUriBuilder queryParamIfPresent(String name, Optional<?> optionalValue) {
+			this.uriComponentsBuilder.queryParamIfPresent(name, optionalValue);
 			return this;
 		}
 

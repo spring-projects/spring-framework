@@ -187,13 +187,13 @@ public interface UriBuilder {
 	UriBuilder queryParam(String name, Object... values);
 
 	/**
-	 * Append the given query parameter and value if and only if a value is present in the Optional.
-	 * No action will be taken, and the query parameter name will not be added, if the passed Optional is empty.
+	 * Delegates to {@link #queryParam(String, Object...)} or {@link #queryParam(String, Object...)} if and only if optionalValue has a value.
+	 * No action will be taken, and the query parameter name will not be added, if optionalValue is empty.
 	 * @param name the query parameter name
 	 * @param optionalValue an Optional, either empty or holding the query parameter value.
 	 * @return
 	 */
-	UriBuilder optionalQueryParam(String name, Optional<?> optionalValue);
+	UriBuilder queryParamIfPresent(String name, Optional<?> optionalValue);
 
 	/**
 	 * Variant of {@link #queryParam(String, Object...)} with a Collection.
