@@ -17,6 +17,7 @@ package org.springframework.core.codec;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
@@ -45,45 +47,41 @@ import org.springframework.util.MimeType;
 @BenchmarkMode(Mode.Throughput)
 public class StringDecoderBenchmark {
 
-	private static final ResolvableType ELEMENT_TYPE = ResolvableType.forClass(String.class);
-
 	@Benchmark
-	public void parseLines(DecodeState state, Blackhole blackhole) {
-		Flux<DataBuffer> input = Flux.fromIterable(state.chunks);
-		MimeType mimeType = state.mimeType;
-		List<String> lines = state.decoder.decode(input, ELEMENT_TYPE, mimeType, Collections.emptyMap())
-				.collectList()
-				.block();
-
-		blackhole.consume(lines);
+	public void parseSseLines(SseLinesState state, Blackhole blackhole) {
+		blackhole.consume(state.parseLines().blockLast());
 	}
+
 
 	@State(Scope.Benchmark)
 	@SuppressWarnings({"NotNullFieldNotInitialized", "ConstantConditions"})
-	public static class DecodeState {
+	public static class SseLinesState {
 
 		private static final Charset CHARSET = StandardCharsets.UTF_8;
 
-		byte[][] delimiterBytes;
+		private static final ResolvableType ELEMENT_TYPE = ResolvableType.forClass(String.class);
+
+
+		@Param("10240")
+		int totalSize;
+
+		@Param("2000")
+		int chunkSize;
 
 		List<DataBuffer> chunks;
 
-		StringDecoder decoder = StringDecoder.textPlainOnly();
+		StringDecoder decoder = StringDecoder.textPlainOnly(Arrays.asList("\r\n", "\n"), false);
 
 		MimeType mimeType = new MimeType("text", "plain", CHARSET);
 
+
 		@Setup(Level.Trial)
 		public void setup() {
-			this.delimiterBytes = new byte[][] {"\r\n".getBytes(CHARSET), "\n".getBytes(CHARSET)};
-
 			String eventTemplate = "id:$1\n" +
 					"event:some-event\n" +
 					":some-comment-$1-aa\n" +
 					":some-comment-$1-bb\n" +
 					"data:abcdefg-$1-hijklmnop-$1-qrstuvw-$1-xyz-$1\n\n";
-
-			int totalSize = 10 * 1024;
-			int chunkSize = 2000;
 
 			int eventLength = String.format(eventTemplate, String.format("%05d", 1)).length();
 			int eventCount = totalSize / eventLength;
@@ -101,6 +99,11 @@ public class StringDecoderBenchmark {
 					})
 					.collectList()
 					.block();
+		}
+
+		public Flux<String> parseLines() {
+			Flux<DataBuffer> input = Flux.fromIterable(this.chunks).doOnNext(DataBufferUtils::retain);
+			return this.decoder.decode(input, ELEMENT_TYPE, this.mimeType, Collections.emptyMap());
 		}
 	}
 
