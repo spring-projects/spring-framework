@@ -27,6 +27,7 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
+ * This is an an annotation-based equivalent of {@link TransactionalApplicationListener}.
  *
  * <p>If the event is not published within an active transaction, the event is discarded
  * unless the {@link #fallbackExecution} flag is explicitly set. If a transaction is
@@ -44,7 +45,10 @@ import org.springframework.core.annotation.AliasFor;
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Oliver Drotbohm
  * @since 4.2
+ * @see TransactionalApplicationListener
+ * @see TransactionalApplicationListenerMethodAdapter
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -59,6 +63,13 @@ public @interface TransactionalEventListener {
 	 * all unless {@link #fallbackExecution} has been enabled explicitly.
 	 */
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
+
+	/**
+	 * An optional identifier to uniquely reference the listener.
+	 * @since 5.3
+	 * @see TransactionalApplicationListener#getListenerId()
+	 */
+	String id() default "";
 
 	/**
 	 * Whether the event should be processed if no transaction is running.
