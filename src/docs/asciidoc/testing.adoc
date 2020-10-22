@@ -1882,6 +1882,9 @@ following annotations.
 * <<testcontext-tx,`@Transactional`>>
 * <<spring-testing-annotation-commit>>
 * <<spring-testing-annotation-rollback>>
+* <<spring-testing-annotation-sql>>
+* <<spring-testing-annotation-sqlconfig>>
+* <<spring-testing-annotation-sqlmergemode>>
 * <<integration-testing-annotations-testconstructor>>
 
 NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction

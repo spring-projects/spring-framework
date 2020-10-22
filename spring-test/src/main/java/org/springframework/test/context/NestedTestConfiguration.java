@@ -78,6 +78,9 @@ import org.springframework.lang.Nullable;
  * <li>{@link org.springframework.transaction.annotation.Transactional @Transactional}</li>
  * <li>{@link org.springframework.test.annotation.Rollback @Rollback}</li>
  * <li>{@link org.springframework.test.annotation.Commit @Commit}</li>
+ * <li>{@link org.springframework.test.context.jdbc.Sql @Sql}</li>
+ * <li>{@link org.springframework.test.context.jdbc.SqlConfig @SqlConfig}</li>
+ * <li>{@link org.springframework.test.context.jdbc.SqlMergeMode @SqlMergeMode}</li>
  * <li>{@link TestConstructor @TestConstructor}</li>
  * </ul>
  *

@@ -17,6 +17,7 @@
 package org.springframework.test.util;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -85,12 +86,16 @@ public abstract class MetaAnnotationUtils {
 	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
 	 * supplied class. The enclosing class hierarchy will only be searched if
 	 * appropriate.
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 5.3
 	 * @see AnnotatedElementUtils#findMergedAnnotation(java.lang.reflect.AnnotatedElement, Class)
 	 * @see #findAnnotationDescriptor(Class, Class)
+	 * @see #searchEnclosingClass(Class)
 	 */
 	@Nullable
 	public static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType) {
@@ -104,6 +109,53 @@ public abstract class MetaAnnotationUtils {
 		AnnotationDescriptor<T> descriptor =
 				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
 		return (descriptor != null ? descriptor.synthesizeAnnotation() : null);
+	}
+
+	/**
+	 * Get all <em>repeatable annotations</em> of the specified {@code annotationType}
+	 * within the annotation hierarchy <em>above</em> the supplied class; and for
+	 * each annotation found, merge that annotation's attributes with <em>matching</em>
+	 * attributes from annotations in lower levels of the annotation hierarchy and
+	 * synthesize the results back into an annotation of the specified {@code annotationType}.
+	 * <p>This method will find {@link java.lang.annotation.Inherited @Inherited}
+	 * annotations declared on superclasses if the supplied class does not have
+	 * any local declarations of the repeatable annotation. If no inherited
+	 * annotations are found, this method will search within the
+	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
+	 * supplied class. The enclosing class hierarchy will only be searched if
+	 * appropriate.
+	 * <p>The container type that holds the repeatable annotations will be looked up
+	 * via {@link java.lang.annotation.Repeatable}.
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
+	 * @param clazz the class on which to search for annotations (never {@code null})
+	 * @param annotationType the annotation type to find (never {@code null})
+	 * @return the set of all merged repeatable annotations found, or an empty set
+	 * if none were found
+	 * @since 5.3
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(java.lang.reflect.AnnotatedElement, Class)
+	 * @see #searchEnclosingClass(Class)
+	 */
+	public static <T extends Annotation> Set<T> getMergedRepeatableAnnotations(
+			Class<?> clazz, Class<T> annotationType) {
+
+		// Present (via @Inherited semantics), directly present, or meta-present?
+		Set<T> mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
+				.stream(annotationType)
+				.collect(MergedAnnotationCollectors.toAnnotationSet());
+
+		if (!mergedAnnotations.isEmpty()) {
+			return mergedAnnotations;
+		}
+
+		// Declared on an enclosing class of an inner class?
+		if (searchEnclosingClass(clazz)) {
+			// Then mimic @Inherited semantics within the enclosing class hierarchy.
+			return getMergedRepeatableAnnotations(clazz.getEnclosingClass(), annotationType);
+		}
+
+		return Collections.emptySet();
 	}
 
 	/**

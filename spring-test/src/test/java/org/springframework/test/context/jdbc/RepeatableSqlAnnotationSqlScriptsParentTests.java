@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,12 @@ import org.springframework.test.context.ContextConfiguration;
 @Sql("schema.sql")
 @Sql("data.sql")
 @DirtiesContext
-class RepeatableSqlAnnotationSqlScriptsTests extends AbstractTransactionalTests {
+class RepeatableSqlAnnotationSqlScriptsParentTests extends AbstractTransactionalTests {
 
 	@Test
 	@Order(1)
 	void classLevelScripts() {
-		assertNumUsers(1);
+		assertUsers("Dilbert");
 	}
 
 	@Test
@@ -51,9 +51,9 @@ class RepeatableSqlAnnotationSqlScriptsTests extends AbstractTransactionalTests 
 	@Sql("schema.sql")
 	@Sql("data.sql")
 	@Sql("data-add-dogbert.sql")
-	@Order(1)
+	@Order(2)
 	void methodLevelScripts() {
-		assertNumUsers(2);
+		assertUsers("Dilbert", "Dogbert");
 	}
 
 }

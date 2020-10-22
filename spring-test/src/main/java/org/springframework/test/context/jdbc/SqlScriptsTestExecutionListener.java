@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.jdbc;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +41,7 @@ import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
+import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
@@ -162,18 +162,33 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	}
 
 	/**
-	 * Get the {@code @SqlMergeMode} annotation declared on the supplied {@code element}.
+	 * Get the {@code @SqlMergeMode} annotation declared on the supplied class.
 	 */
 	@Nullable
-	private SqlMergeMode getSqlMergeModeFor(AnnotatedElement element) {
-		return AnnotatedElementUtils.findMergedAnnotation(element, SqlMergeMode.class);
+	private SqlMergeMode getSqlMergeModeFor(Class<?> clazz) {
+		return MetaAnnotationUtils.findMergedAnnotation(clazz, SqlMergeMode.class);
 	}
 
 	/**
-	 * Get the {@code @Sql} annotations declared on the supplied {@code element}.
+	 * Get the {@code @SqlMergeMode} annotation declared on the supplied method.
 	 */
-	private Set<Sql> getSqlAnnotationsFor(AnnotatedElement element) {
-		return AnnotatedElementUtils.getMergedRepeatableAnnotations(element, Sql.class, SqlGroup.class);
+	@Nullable
+	private SqlMergeMode getSqlMergeModeFor(Method method) {
+		return AnnotatedElementUtils.findMergedAnnotation(method, SqlMergeMode.class);
+	}
+
+	/**
+	 * Get the {@code @Sql} annotations declared on the supplied class.
+	 */
+	private Set<Sql> getSqlAnnotationsFor(Class<?> clazz) {
+		return MetaAnnotationUtils.getMergedRepeatableAnnotations(clazz, Sql.class);
+	}
+
+	/**
+	 * Get the {@code @Sql} annotations declared on the supplied method.
+	 */
+	private Set<Sql> getSqlAnnotationsFor(Method method) {
+		return AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Sql.class, SqlGroup.class);
 	}
 
 	/**
