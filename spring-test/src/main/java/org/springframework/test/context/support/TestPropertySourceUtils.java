@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,16 +76,15 @@ public abstract class TestPropertySourceUtils {
 
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-		List<MergedAnnotation<TestPropertySource>> mergedAnnotations =
-				findRepeatableAnnotations(testClass, TestPropertySource.class);
+		List<TestPropertySourceAttributes> attributesList =
+				findRepeatableAnnotations(testClass, TestPropertySource.class)
+					.map(TestPropertySourceAttributes::new)
+					.collect(Collectors.toList());
 
-		if (mergedAnnotations.isEmpty()) {
+		if (attributesList.isEmpty()) {
 			return MergedTestPropertySources.empty();
 		}
 
-		List<TestPropertySourceAttributes> attributesList = mergedAnnotations.stream()
-				.map(TestPropertySourceAttributes::new)
-				.collect(Collectors.toList());
 		return new MergedTestPropertySources(mergeLocations(attributesList), mergeProperties(attributesList));
 	}
 
@@ -273,12 +273,12 @@ public abstract class TestPropertySourceUtils {
 		return map;
 	}
 
-	private static <T extends Annotation> List<MergedAnnotation<T>> findRepeatableAnnotations(
+	private static <T extends Annotation> Stream<MergedAnnotation<T>> findRepeatableAnnotations(
 			Class<?> clazz, Class<T> annotationType) {
 
 		List<List<MergedAnnotation<T>>> listOfLists = new ArrayList<>();
 		findRepeatableAnnotations(clazz, annotationType, listOfLists, new int[] {0});
-		return listOfLists.stream().flatMap(List::stream).collect(Collectors.toList());
+		return listOfLists.stream().flatMap(List::stream);
 	}
 
 	private static <T extends Annotation> void findRepeatableAnnotations(
