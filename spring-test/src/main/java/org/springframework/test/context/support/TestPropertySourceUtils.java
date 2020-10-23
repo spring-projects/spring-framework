@@ -44,9 +44,9 @@ import org.springframework.core.env.PropertySources;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -308,7 +308,7 @@ public abstract class TestPropertySourceUtils {
 		}
 
 		// Declared on an enclosing class of an inner class?
-		if (MetaAnnotationUtils.searchEnclosingClass(clazz)) {
+		if (TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
 			findRepeatableAnnotations(clazz.getEnclosingClass(), annotationType, listOfLists, aggregateIndex);
 		}
 	}

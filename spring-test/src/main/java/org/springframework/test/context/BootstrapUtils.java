@@ -26,8 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.test.util.MetaAnnotationUtils;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -155,7 +154,7 @@ abstract class BootstrapUtils {
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
 		Set<BootstrapWith> annotations = new LinkedHashSet<>();
 		AnnotationDescriptor<BootstrapWith> descriptor =
-				MetaAnnotationUtils.findAnnotationDescriptor(testClass, BootstrapWith.class);
+				TestContextAnnotationUtils.findAnnotationDescriptor(testClass, BootstrapWith.class);
 		while (descriptor != null) {
 			annotations.addAll(descriptor.findAllLocalMergedAnnotations());
 			descriptor = descriptor.next();
@@ -180,7 +179,7 @@ abstract class BootstrapUtils {
 	}
 
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
-		boolean webApp = (MetaAnnotationUtils.findMergedAnnotation(testClass, webAppConfigurationClass) != null);
+		boolean webApp = (TestContextAnnotationUtils.findMergedAnnotation(testClass, webAppConfigurationClass) != null);
 		String bootstrapperClassName = (webApp ? DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME :
 				DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME);
 		return ClassUtils.forName(bootstrapperClassName, BootstrapUtils.class.getClassLoader());

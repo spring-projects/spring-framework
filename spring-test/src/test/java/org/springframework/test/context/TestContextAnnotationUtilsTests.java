@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.util;
+package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -32,26 +32,24 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.NestedTestConfiguration;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
-import org.springframework.test.util.MetaAnnotationUtils.UntypedAnnotationDescriptor;
+import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.context.TestContextAnnotationUtils.UntypedAnnotationDescriptor;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
-import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptor;
-import static org.springframework.test.util.MetaAnnotationUtils.findAnnotationDescriptorForTypes;
-import static org.springframework.test.util.MetaAnnotationUtils.searchEnclosingClass;
+import static org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptor;
+import static org.springframework.test.context.TestContextAnnotationUtils.findAnnotationDescriptorForTypes;
+import static org.springframework.test.context.TestContextAnnotationUtils.searchEnclosingClass;
 
 /**
- * Unit tests for {@link MetaAnnotationUtils}.
+ * Unit tests for {@link TestContextAnnotationUtils}.
  *
  * @author Sam Brannen
  * @since 4.0
  * @see OverriddenMetaAnnotationAttributesTests
  */
-class MetaAnnotationUtilsTests {
+class TestContextAnnotationUtilsTests {
 
 	@Nested
 	@DisplayName("searchEnclosingClass() tests")
@@ -398,7 +396,7 @@ class MetaAnnotationUtilsTests {
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(startClass);
 			assertThat(descriptor.getAnnotationType()).isEqualTo(annotationType);
 			assertThat(((ContextConfiguration) descriptor.getAnnotation()).value()).isEqualTo(new Class<?>[] {});
-			assertThat(descriptor.getAnnotationAttributes().getClassArray("classes")).isEqualTo(new Class<?>[] {MetaAnnotationUtilsTests.class});
+			assertThat(descriptor.getAnnotationAttributes().getClassArray("classes")).isEqualTo(new Class<?>[] {TestContextAnnotationUtilsTests.class});
 			assertThat(descriptor.getComposedAnnotation()).isNotNull();
 			assertThat(descriptor.getComposedAnnotationType()).isEqualTo(MetaConfig.class);
 		}
@@ -619,7 +617,7 @@ class MetaAnnotationUtilsTests {
 	class MetaConfigWithDefaultAttributesTestCase {
 	}
 
-	@MetaConfig(classes = MetaAnnotationUtilsTests.class)
+	@MetaConfig(classes = TestContextAnnotationUtilsTests.class)
 	class MetaConfigWithOverriddenAttributesTestCase {
 	}
 

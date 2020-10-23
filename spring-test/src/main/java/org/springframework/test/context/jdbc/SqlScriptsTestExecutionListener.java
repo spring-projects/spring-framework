@@ -34,6 +34,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
@@ -41,7 +42,6 @@ import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
@@ -166,7 +166,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 */
 	@Nullable
 	private SqlMergeMode getSqlMergeModeFor(Class<?> clazz) {
-		return MetaAnnotationUtils.findMergedAnnotation(clazz, SqlMergeMode.class);
+		return TestContextAnnotationUtils.findMergedAnnotation(clazz, SqlMergeMode.class);
 	}
 
 	/**
@@ -181,7 +181,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * Get the {@code @Sql} annotations declared on the supplied class.
 	 */
 	private Set<Sql> getSqlAnnotationsFor(Class<?> clazz) {
-		return MetaAnnotationUtils.getMergedRepeatableAnnotations(clazz, Sql.class);
+		return TestContextAnnotationUtils.getMergedRepeatableAnnotations(clazz, Sql.class);
 	}
 
 	/**

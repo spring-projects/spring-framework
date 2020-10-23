@@ -24,9 +24,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
-import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -100,7 +100,7 @@ class MergedSqlConfig {
 		enforceCommentPrefixAliases(localAttributes);
 
 		// Get global attributes, if any.
-		SqlConfig globalSqlConfig = MetaAnnotationUtils.findMergedAnnotation(testClass, SqlConfig.class);
+		SqlConfig globalSqlConfig = TestContextAnnotationUtils.findMergedAnnotation(testClass, SqlConfig.class);
 
 		// Use local attributes only?
 		if (globalSqlConfig == null) {

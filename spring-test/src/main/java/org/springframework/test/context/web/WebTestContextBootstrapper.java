@@ -19,9 +19,9 @@ package org.springframework.test.context.web;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
-import org.springframework.test.util.MetaAnnotationUtils;
 
 /**
  * Web-specific implementation of the {@link TestContextBootstrapper} SPI.
@@ -73,7 +73,7 @@ public class WebTestContextBootstrapper extends DefaultTestContextBootstrapper {
 
 	@Nullable
 	private static WebAppConfiguration getWebAppConfiguration(Class<?> testClass) {
-		return MetaAnnotationUtils.findMergedAnnotation(testClass, WebAppConfiguration.class);
+		return TestContextAnnotationUtils.findMergedAnnotation(testClass, WebAppConfiguration.class);
 	}
 
 }

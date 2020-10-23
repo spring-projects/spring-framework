@@ -35,8 +35,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -167,7 +167,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 		@Nullable
 		private TransactionAttribute findTransactionAttributeInEnclosingClassHierarchy(Class<?> clazz) {
-			if (MetaAnnotationUtils.searchEnclosingClass(clazz)) {
+			if (TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
 				return findTransactionAttribute(clazz.getEnclosingClass());
 			}
 			return null;
@@ -401,7 +401,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
 		Class<?> testClass = testContext.getTestClass();
-		Rollback rollback = MetaAnnotationUtils.findMergedAnnotation(testClass, Rollback.class);
+		Rollback rollback = TestContextAnnotationUtils.findMergedAnnotation(testClass, Rollback.class);
 		boolean rollbackPresent = (rollback != null);
 
 		if (rollbackPresent) {

@@ -17,35 +17,20 @@
 package org.springframework.test.util;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
-import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotationCollectors;
-import org.springframework.core.annotation.MergedAnnotationPredicates;
-import org.springframework.core.annotation.MergedAnnotations;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.NestedTestConfiguration;
-import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.ObjectUtils;
 
 /**
  * {@code MetaAnnotationUtils} is a collection of utility methods that complements
  * the standard support already available in {@link AnnotationUtils}.
- *
- * <p>Mainly for internal use within the framework.
  *
  * <p>Whereas {@code AnnotationUtils} provides utilities for <em>getting</em> or
  * <em>finding</em> an annotation, {@code MetaAnnotationUtils} goes a step further
@@ -68,95 +53,11 @@ import org.springframework.util.ObjectUtils;
  * @since 4.0
  * @see AnnotationUtils
  * @see AnnotationDescriptor
+ * @deprecated as of Spring Framework 5.3 in favor of
+ * {@link org.springframework.test.context.TestContextAnnotationUtils}
  */
+@Deprecated
 public abstract class MetaAnnotationUtils {
-
-	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedEnclosingConfigurationModes =
-			new ConcurrentLruCache<>(32, MetaAnnotationUtils::lookUpEnclosingConfiguration);
-
-
-	/**
-	 * Find the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied class, merge that
-	 * annotation's attributes with <em>matching</em> attributes from annotations
-	 * in lower levels of the annotation hierarchy, and synthesize the result back
-	 * into an annotation of the specified {@code annotationType}.
-	 * <p>In the context of this method, the term "above" means within the
-	 * {@linkplain Class#getSuperclass() superclass} hierarchy or within the
-	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
-	 * supplied class. The enclosing class hierarchy will only be searched if
-	 * appropriate.
-	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
-	 * are fully supported, both within a single annotation and within annotation
-	 * hierarchies.
-	 * @param clazz the class to look for annotations on
-	 * @param annotationType the type of annotation to look for
-	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
-	 * @since 5.3
-	 * @see AnnotatedElementUtils#findMergedAnnotation(java.lang.reflect.AnnotatedElement, Class)
-	 * @see #findAnnotationDescriptor(Class, Class)
-	 * @see #searchEnclosingClass(Class)
-	 */
-	@Nullable
-	public static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType) {
-		return findMergedAnnotation(clazz, annotationType, MetaAnnotationUtils::searchEnclosingClass);
-	}
-
-	@Nullable
-	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
-			Predicate<Class<?>> searchEnclosingClass) {
-
-		AnnotationDescriptor<T> descriptor =
-				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
-		return (descriptor != null ? descriptor.synthesizeAnnotation() : null);
-	}
-
-	/**
-	 * Get all <em>repeatable annotations</em> of the specified {@code annotationType}
-	 * within the annotation hierarchy <em>above</em> the supplied class; and for
-	 * each annotation found, merge that annotation's attributes with <em>matching</em>
-	 * attributes from annotations in lower levels of the annotation hierarchy and
-	 * synthesize the results back into an annotation of the specified {@code annotationType}.
-	 * <p>This method will find {@link java.lang.annotation.Inherited @Inherited}
-	 * annotations declared on superclasses if the supplied class does not have
-	 * any local declarations of the repeatable annotation. If no inherited
-	 * annotations are found, this method will search within the
-	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
-	 * supplied class. The enclosing class hierarchy will only be searched if
-	 * appropriate.
-	 * <p>The container type that holds the repeatable annotations will be looked up
-	 * via {@link java.lang.annotation.Repeatable}.
-	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
-	 * are fully supported, both within a single annotation and within annotation
-	 * hierarchies.
-	 * @param clazz the class on which to search for annotations (never {@code null})
-	 * @param annotationType the annotation type to find (never {@code null})
-	 * @return the set of all merged repeatable annotations found, or an empty set
-	 * if none were found
-	 * @since 5.3
-	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(java.lang.reflect.AnnotatedElement, Class)
-	 * @see #searchEnclosingClass(Class)
-	 */
-	public static <T extends Annotation> Set<T> getMergedRepeatableAnnotations(
-			Class<?> clazz, Class<T> annotationType) {
-
-		// Present (via @Inherited semantics), directly present, or meta-present?
-		Set<T> mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
-				.stream(annotationType)
-				.collect(MergedAnnotationCollectors.toAnnotationSet());
-
-		if (!mergedAnnotations.isEmpty()) {
-			return mergedAnnotations;
-		}
-
-		// Declared on an enclosing class of an inner class?
-		if (searchEnclosingClass(clazz)) {
-			// Then mimic @Inherited semantics within the enclosing class hierarchy.
-			return getMergedRepeatableAnnotations(clazz.getEnclosingClass(), annotationType);
-		}
-
-		return Collections.emptySet();
-	}
 
 	/**
 	 * Find the {@link AnnotationDescriptor} for the supplied {@code annotationType}
@@ -186,8 +87,7 @@ public abstract class MetaAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
-		return findAnnotationDescriptor(clazz, annotationType, MetaAnnotationUtils::searchEnclosingClass,
-			new HashSet<>());
+		return findAnnotationDescriptor(clazz, new HashSet<>(), annotationType);
 	}
 
 	/**
@@ -195,15 +95,14 @@ public abstract class MetaAnnotationUtils {
 	 * avoiding endless recursion by tracking which annotations have already been
 	 * <em>visited</em>.
 	 * @param clazz the class to look for annotations on
-	 * @param annotationType the type of annotation to look for
 	 * @param visited the set of annotations that have already been visited
+	 * @param annotationType the type of annotation to look for
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
 	@Nullable
 	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
-			@Nullable Class<?> clazz, Class<T> annotationType, Predicate<Class<?>> searchEnclosingClass,
-			Set<Annotation> visited) {
+			@Nullable Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
@@ -215,13 +114,11 @@ public abstract class MetaAnnotationUtils {
 			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
-		AnnotationDescriptor<T> descriptor = null;
-
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnn : clazz.getDeclaredAnnotations()) {
 			Class<? extends Annotation> composedType = composedAnn.annotationType();
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedType.getName()) && visited.add(composedAnn)) {
-				descriptor = findAnnotationDescriptor(composedType, annotationType, searchEnclosingClass, visited);
+				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedType, visited, annotationType);
 				if (descriptor != null) {
 					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnn, descriptor.getAnnotation());
@@ -231,7 +128,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			descriptor = findAnnotationDescriptor(ifc, annotationType, searchEnclosingClass, visited);
+			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
 				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
 						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
@@ -239,20 +136,7 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		// Declared on a superclass?
-		descriptor = findAnnotationDescriptor(clazz.getSuperclass(), annotationType, searchEnclosingClass, visited);
-		if (descriptor != null) {
-			return descriptor;
-		}
-
-		// Declared on an enclosing class of an inner class?
-		if (searchEnclosingClass.test(clazz)) {
-			descriptor = findAnnotationDescriptor(clazz.getEnclosingClass(), annotationType, searchEnclosingClass, visited);
-			if (descriptor != null) {
-				return descriptor;
-			}
-		}
-
-		return null;
+		return findAnnotationDescriptor(clazz.getSuperclass(), visited, annotationType);
 	}
 
 	/**
@@ -289,7 +173,7 @@ public abstract class MetaAnnotationUtils {
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
-		return findAnnotationDescriptorForTypes(clazz, annotationTypes, new HashSet<>());
+		return findAnnotationDescriptorForTypes(clazz, new HashSet<>(), annotationTypes);
 	}
 
 	/**
@@ -297,14 +181,15 @@ public abstract class MetaAnnotationUtils {
 	 * avoiding endless recursion by tracking which annotations have already been
 	 * <em>visited</em>.
 	 * @param clazz the class to look for annotations on
-	 * @param annotationTypes the types of annotations to look for
 	 * @param visited the set of annotations that have already been visited
+	 * @param annotationTypes the types of annotations to look for
 	 * @return the corresponding annotation descriptor if one of the annotations
 	 * was found; otherwise {@code null}
 	 */
+	@SuppressWarnings("unchecked")
 	@Nullable
 	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(@Nullable Class<?> clazz,
-			Class<? extends Annotation>[] annotationTypes, Set<Annotation> visited) {
+			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
 		if (clazz == null || Object.class == clazz) {
@@ -314,7 +199,7 @@ public abstract class MetaAnnotationUtils {
 		// Declared locally?
 		for (Class<? extends Annotation> annotationType : annotationTypes) {
 			if (AnnotationUtils.isAnnotationDeclaredLocally(annotationType, clazz)) {
-				return new UntypedAnnotationDescriptor(clazz, clazz.getAnnotation(annotationType), annotationTypes);
+				return new UntypedAnnotationDescriptor(clazz, clazz.getAnnotation(annotationType));
 			}
 		}
 
@@ -322,81 +207,25 @@ public abstract class MetaAnnotationUtils {
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
-						composedAnnotation.annotationType(), annotationTypes, visited);
+						composedAnnotation.annotationType(), visited, annotationTypes);
 				if (descriptor != null) {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
-							composedAnnotation, descriptor.getAnnotation(), annotationTypes);
+							composedAnnotation, descriptor.getAnnotation());
 				}
 			}
 		}
 
 		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
-			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, annotationTypes, visited);
+			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
 			if (descriptor != null) {
 				return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
-						descriptor.getComposedAnnotation(), descriptor.getAnnotation(), annotationTypes);
+						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 
 		// Declared on a superclass?
-		UntypedAnnotationDescriptor descriptor =
-				findAnnotationDescriptorForTypes(clazz.getSuperclass(), annotationTypes, visited);
-		if (descriptor != null) {
-			return descriptor;
-		}
-
-		// Declared on an enclosing class of an inner class?
-		if (searchEnclosingClass(clazz)) {
-			descriptor = findAnnotationDescriptorForTypes(clazz.getEnclosingClass(), annotationTypes, visited);
-			if (descriptor != null) {
-				return descriptor;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Determine if annotations on the enclosing class of the supplied class
-	 * should be searched by algorithms in {@link MetaAnnotationUtils}.
-	 * @param clazz the class whose enclosing class should potentially be searched
-	 * @return {@code true} if the supplied class is an inner class whose enclosing
-	 * class should be searched
-	 * @since 5.3
-	 * @see ClassUtils#isInnerClass(Class)
-	 * @see NestedTestConfiguration @NestedTestConfiguration
-	 */
-	public static boolean searchEnclosingClass(Class<?> clazz) {
-		return (ClassUtils.isInnerClass(clazz) &&
-				getEnclosingConfiguration(clazz) == EnclosingConfiguration.INHERIT);
-	}
-
-	/**
-	 * Get the {@link EnclosingConfiguration} mode for the supplied class.
-	 * @param clazz the class for which the enclosing configuration mode should
-	 * be resolved
-	 * @return the resolved enclosing configuration mode
-	 * @since 5.3
-	 */
-	private static EnclosingConfiguration getEnclosingConfiguration(Class<?> clazz) {
-		return cachedEnclosingConfigurationModes.get(clazz);
-	}
-
-	private static EnclosingConfiguration lookUpEnclosingConfiguration(Class<?> clazz) {
-		// @NestedTestConfiguration should not be discovered on an enclosing class
-		// for a nested interface (which is always static), so our predicate simply
-		// ensures that the candidate class is an inner class.
-		Predicate<Class<?>> searchEnclosingClass = ClassUtils::isInnerClass;
-		NestedTestConfiguration nestedTestConfiguration =
-				findMergedAnnotation(clazz, NestedTestConfiguration.class, searchEnclosingClass);
-		return (nestedTestConfiguration != null ? nestedTestConfiguration.value() : getDefaultEnclosingConfigurationMode());
-	}
-
-	private static EnclosingConfiguration getDefaultEnclosingConfigurationMode() {
-		String value = SpringProperties.getProperty(NestedTestConfiguration.ENCLOSING_CONFIGURATION_PROPERTY_NAME);
-		EnclosingConfiguration enclosingConfigurationMode = EnclosingConfiguration.from(value);
-		return (enclosingConfigurationMode != null ? enclosingConfigurationMode : EnclosingConfiguration.INHERIT);
+		return findAnnotationDescriptorForTypes(clazz.getSuperclass(), visited, annotationTypes);
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
@@ -533,56 +362,6 @@ public abstract class MetaAnnotationUtils {
 		}
 
 		/**
-		 * Find the next {@link AnnotationDescriptor} for the specified
-		 * {@linkplain #getAnnotationType() annotation type} in the hierarchy
-		 * above the {@linkplain #getRootDeclaringClass() root declaring class}
-		 * of this descriptor.
-		 * <p>If a corresponding annotation is found in the superclass hierarchy
-		 * of the root declaring class, that will be returned. Otherwise, an
-		 * attempt will be made to find a corresponding annotation in the
-		 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of
-		 * the root declaring class if
-		 * {@linkplain MetaAnnotationUtils#searchEnclosingClass appropriate}.
-		 * @return the next corresponding annotation descriptor if the annotation
-		 * was found; otherwise {@code null}
-		 * @since 5.3
-		 */
-		@Nullable
-		@SuppressWarnings("unchecked")
-		public AnnotationDescriptor<T> next() {
-			Class<T> annotationType = (Class<T>) getAnnotationType();
-			// Declared on a superclass?
-			AnnotationDescriptor<T> descriptor =
-					findAnnotationDescriptor(getRootDeclaringClass().getSuperclass(), annotationType);
-			// Declared on an enclosing class of an inner class?
-			if (descriptor == null && searchEnclosingClass(getRootDeclaringClass())) {
-				descriptor = findAnnotationDescriptor(getRootDeclaringClass().getEnclosingClass(), annotationType);
-			}
-			return descriptor;
-		}
-
-		/**
-		 * Find <strong>all</strong> annotations of the specified
-		 * {@linkplain #getAnnotationType() annotation type} that are present or
-		 * meta-present on the {@linkplain #getRootDeclaringClass() root declaring
-		 * class} of this descriptor.
-		 * @return the set of all merged, synthesized {@code Annotations} found,
-		 * or an empty set if none were found
-		 * @since 5.3
-		 */
-		@SuppressWarnings("unchecked")
-		public Set<T> findAllLocalMergedAnnotations() {
-			SearchStrategy searchStrategy =
-					(getEnclosingConfiguration(getRootDeclaringClass()) == EnclosingConfiguration.INHERIT ?
-							SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
-							SearchStrategy.TYPE_HIERARCHY);
-			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
-					.stream((Class<T>) getAnnotationType())
-					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-					.collect(MergedAnnotationCollectors.toAnnotationSet());
-		}
-
-		/**
 		 * Provide a textual representation of this {@code AnnotationDescriptor}.
 		 */
 		@Override
@@ -604,48 +383,20 @@ public abstract class MetaAnnotationUtils {
 	 */
 	public static class UntypedAnnotationDescriptor extends AnnotationDescriptor<Annotation> {
 
-		@Nullable
-		private final Class<? extends Annotation>[] annotationTypes;
-
-		/**
-		 * Create a new {@plain UntypedAnnotationDescriptor}.
-		 * @deprecated As of Spring Framework 5.3, in favor of
-		 * {@link UntypedAnnotationDescriptor#UntypedAnnotationDescriptor(Class, Annotation, Class[])}
-		 */
-		@Deprecated
 		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Annotation annotation) {
-			this(rootDeclaringClass, annotation, null);
+			this(rootDeclaringClass, rootDeclaringClass, null, annotation);
 		}
 
-		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Annotation annotation,
-				@Nullable Class<? extends Annotation>[] annotationTypes) {
-
-			this(rootDeclaringClass, rootDeclaringClass, null, annotation, annotationTypes);
-		}
-
-		/**
-		 * Create a new {@plain UntypedAnnotationDescriptor}.
-		 * @deprecated As of Spring Framework 5.3, in favor of
-		 * {@link UntypedAnnotationDescriptor#UntypedAnnotationDescriptor(Class, Class, Annotation, Annotation, Class[])}
-		 */
-		@Deprecated
 		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				@Nullable Annotation composedAnnotation, Annotation annotation) {
 
-			this(rootDeclaringClass, declaringClass, composedAnnotation, annotation, null);
-		}
-
-		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				@Nullable Annotation composedAnnotation, Annotation annotation,
-				@Nullable Class<? extends Annotation>[] annotationTypes) {
-
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
-			this.annotationTypes = annotationTypes;
 		}
 
 		/**
 		 * Throws an {@link UnsupportedOperationException} since the type of annotation
-		 * represented by an {@code UntypedAnnotationDescriptor} is unknown.
+		 * represented by the {@link #getAnnotationAttributes AnnotationAttributes} in
+		 * an {@code UntypedAnnotationDescriptor} is unknown.
 		 * @since 4.2
 		 */
 		@Override
@@ -653,52 +404,6 @@ public abstract class MetaAnnotationUtils {
 			throw new UnsupportedOperationException(
 					"synthesizeAnnotation() is unsupported in UntypedAnnotationDescriptor");
 		}
-
-		/**
-		 * Find the next {@link UntypedAnnotationDescriptor} for the specified
-		 * annotation types in the hierarchy above the
-		 * {@linkplain #getRootDeclaringClass() root declaring class} of this
-		 * descriptor.
-		 * <p>If one of the corresponding annotations is found in the superclass
-		 * hierarchy of the root declaring class, that will be returned. Otherwise,
-		 * an attempt will be made to find a corresponding annotation in the
-		 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of
-		 * the root declaring class if
-		 * {@linkplain MetaAnnotationUtils#searchEnclosingClass appropriate}.
-		 * @return the next corresponding annotation descriptor if one of the
-		 * annotations was found; otherwise {@code null}
-		 * @since 5.3
-		 * @see AnnotationDescriptor#next()
-		 */
-		@Override
-		@Nullable
-		public UntypedAnnotationDescriptor next() {
-			if (ObjectUtils.isEmpty(this.annotationTypes)) {
-				throw new UnsupportedOperationException(
-						"next() is unsupported if UntypedAnnotationDescriptor is instantiated without 'annotationTypes'");
-			}
-
-			// Declared on a superclass?
-			UntypedAnnotationDescriptor descriptor =
-					findAnnotationDescriptorForTypes(getRootDeclaringClass().getSuperclass(), this.annotationTypes);
-			// Declared on an enclosing class of an inner class?
-			if (descriptor == null && searchEnclosingClass(getRootDeclaringClass())) {
-				descriptor = findAnnotationDescriptorForTypes(getRootDeclaringClass().getEnclosingClass(), this.annotationTypes);
-			}
-			return descriptor;
-		}
-
-		/**
-		 * Throws an {@link UnsupportedOperationException} since the type of annotation
-		 * represented by an {@code UntypedAnnotationDescriptor} is unknown.
-		 * @since 5.3
-		 */
-		@Override
-		public Set<Annotation> findAllLocalMergedAnnotations() {
-			throw new UnsupportedOperationException(
-					"findAllLocalMergedAnnotations() is unsupported in UntypedAnnotationDescriptor");
-		}
-
 	}
 
 }

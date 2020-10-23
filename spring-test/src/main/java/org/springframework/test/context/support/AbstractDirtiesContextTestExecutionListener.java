@@ -29,7 +29,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.util.MetaAnnotationUtils;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -97,7 +97,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		DirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);
-		DirtiesContext classAnn = MetaAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext classAnn = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean methodAnnotated = (methodAnn != null);
 		boolean classAnnotated = (classAnn != null);
 		MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
@@ -134,7 +134,7 @@ public abstract class AbstractDirtiesContextTestExecutionListener extends Abstra
 		Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		DirtiesContext dirtiesContext = MetaAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext dirtiesContext = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean classAnnotated = (dirtiesContext != null);
 		ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
 
