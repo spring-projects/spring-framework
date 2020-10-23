@@ -177,8 +177,7 @@ class MessagingRSocket implements RSocket {
 					}
 				})
 				.thenMany(Flux.defer(() -> responseRef.get() != null ?
-						responseRef.get() :
-						Mono.error(new IllegalStateException("Something went wrong: reply Mono not set"))));
+						responseRef.get() : Mono.error(new IllegalStateException("Expected response"))));
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {
