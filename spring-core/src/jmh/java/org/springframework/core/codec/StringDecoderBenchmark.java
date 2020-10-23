@@ -84,12 +84,12 @@ public class StringDecoderBenchmark {
 					"data:abcdefg-$1-hijklmnop-$1-qrstuvw-$1-xyz-$1\n\n";
 
 			int eventLength = String.format(eventTemplate, String.format("%05d", 1)).length();
-			int eventCount = totalSize / eventLength;
+			int eventCount = this.totalSize / eventLength;
 			DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 			this.chunks = Flux.range(1, eventCount)
 					.map(index -> String.format(eventTemplate, String.format("%05d", index)))
-					.buffer(chunkSize > eventLength ? chunkSize / eventLength : 1)
+					.buffer(this.chunkSize > eventLength ? this.chunkSize / eventLength : 1)
 					.map(strings -> String.join("", strings))
 					.map(chunk -> {
 						byte[] bytes = chunk.getBytes(CHARSET);
