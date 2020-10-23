@@ -43,7 +43,8 @@ import org.springframework.util.ObjectUtils;
 /**
  * {@code TestContextAnnotationUtils} is a collection of utility methods that
  * complements the standard support already available in {@link AnnotationUtils}
- * and {@link AnnotatedElementUtils}.
+ * and {@link AnnotatedElementUtils}, while transparently honoring
+ * {@link NestedTestConfiguration @NestedTestConfiguration} semantics.
  *
  * <p>Mainly for internal use within the <em>Spring TestContext Framework</em>.
  *
@@ -56,8 +57,8 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>The additional information provided by an {@code AnnotationDescriptor} is
  * required by the <em>Spring TestContext Framework</em> in order to be able to
- * support class hierarchy traversals for annotations such as
- * {@link ContextConfiguration @ContextConfiguration},
+ * support class inheritance and enclosing class hierarchy traversals for
+ * annotations such as {@link ContextConfiguration @ContextConfiguration},
  * {@link TestExecutionListeners @TestExecutionListeners}, and
  * {@link ActiveProfiles @ActiveProfiles} which offer support for merging and
  * overriding various <em>inherited</em> annotation attributes &mdash; for
@@ -84,8 +85,9 @@ public abstract class TestContextAnnotationUtils {
 	 * <p>In the context of this method, the term "above" means within the
 	 * {@linkplain Class#getSuperclass() superclass} hierarchy or within the
 	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
-	 * supplied class. The enclosing class hierarchy will only be searched if
-	 * appropriate.
+	 * supplied class. The enclosing class hierarchy will only be searched
+	 * according to {@link NestedTestConfiguration @NestedTestConfiguration}
+	 * semantics.
 	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
 	 * are fully supported, both within a single annotation and within annotation
 	 * hierarchies.
@@ -121,8 +123,9 @@ public abstract class TestContextAnnotationUtils {
 	 * any local declarations of the repeatable annotation. If no inherited
 	 * annotations are found, this method will search within the
 	 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of the
-	 * supplied class. The enclosing class hierarchy will only be searched if
-	 * appropriate.
+	 * supplied class. The enclosing class hierarchy will only be searched
+	 * according to {@link NestedTestConfiguration @NestedTestConfiguration}
+	 * semantics.
 	 * <p>The container type that holds the repeatable annotations will be looked up
 	 * via {@link java.lang.annotation.Repeatable}.
 	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
@@ -158,8 +161,9 @@ public abstract class TestContextAnnotationUtils {
 
 	/**
 	 * Find the {@link AnnotationDescriptor} for the supplied {@code annotationType}
-	 * on the supplied {@link Class}, traversing its annotations, interfaces, and
-	 * superclasses if no annotation can be found on the given class itself.
+	 * on the supplied {@link Class}, traversing its annotations, interfaces,
+	 * superclasses, and enclosing classes if no annotation can be found on the
+	 * given class itself.
 	 * <p>This method explicitly handles class-level annotations which are not
 	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
 	 * well as meta-annotations</em>.
@@ -167,13 +171,17 @@ public abstract class TestContextAnnotationUtils {
 	 * <ol>
 	 * <li>Search for the annotation on the given class and return a corresponding
 	 * {@code AnnotationDescriptor} if found.
-	 * <li>Recursively search through all annotations that the given class declares.
-	 * <li>Recursively search through all interfaces implemented by the given class.
-	 * <li>Recursively search through the superclass hierarchy of the given class.
+	 * <li>Recursively search through all annotations that the given class declares.</li>
+	 * <li>Recursively search through all interfaces implemented by the given class.</li>
+	 * <li>Recursively search through the superclass hierarchy of the given class.</li>
+	 * <li>Recursively search through the enclosing class hierarchy of the given class
+	 * if appropriate according to {@link NestedTestConfiguration @NestedTestConfiguration}
+	 * semantics.</li>
 	 * </ol>
 	 * <p>In this context, the term <em>recursively</em> means that the search
 	 * process continues by returning to step #1 with the current annotation,
-	 * interface, or superclass as the class to look for annotations on.
+	 * interface, superclass, or enclosing class as the class to look for
+	 * annotations on.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
 	 * @return the corresponding annotation descriptor if the annotation was found;
@@ -194,6 +202,8 @@ public abstract class TestContextAnnotationUtils {
 	 * <em>visited</em>.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
+	 * @param searchEnclosingClass a predicate which evaluates to {@code true}
+	 * if a search should be performed on the enclosing class
 	 * @param visited the set of annotations that have already been visited
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
@@ -258,24 +268,28 @@ public abstract class TestContextAnnotationUtils {
 	 * in the inheritance hierarchy of the specified {@code clazz} (including
 	 * the specified {@code clazz} itself) which declares at least one of the
 	 * specified {@code annotationTypes}.
-	 * <p>This method traverses the annotations, interfaces, and superclasses
-	 * of the specified {@code clazz} if no annotation can be found on the given
-	 * class itself.
+	 * <p>This method traverses the annotations, interfaces, superclasses, and
+	 * enclosing classes of the specified {@code clazz} if no annotation can be
+	 * found on the given class itself.
 	 * <p>This method explicitly handles class-level annotations which are not
 	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
 	 * well as meta-annotations</em>.
 	 * <p>The algorithm operates as follows:
 	 * <ol>
-	 * <li>Search for a local declaration of one of the annotation types on
-	 * the given class and return a corresponding {@code UntypedAnnotationDescriptor}
+	 * <li>Search for a local declaration of one of the annotation types on the
+	 * given class and return a corresponding {@code UntypedAnnotationDescriptor}
 	 * if found.
-	 * <li>Recursively search through all annotations that the given class declares.
-	 * <li>Recursively search through all interfaces implemented by the given class.
-	 * <li>Recursively search through the superclass hierarchy of the given class.
+	 * <li>Recursively search through all annotations that the given class declares.</li>
+	 * <li>Recursively search through all interfaces implemented by the given class.</li>
+	 * <li>Recursively search through the superclass hierarchy of the given class.</li>
+	 * <li>Recursively search through the enclosing class hierarchy of the given class
+	 * if appropriate according to {@link NestedTestConfiguration @NestedTestConfiguration}
+	 * semantics.</li>
 	 * </ol>
 	 * <p>In this context, the term <em>recursively</em> means that the search
 	 * process continues by returning to step #1 with the current annotation,
-	 * interface, or superclass as the class to look for annotations on.
+	 * interface, superclass, or enclosing class as the class to look for
+	 * annotations on.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationTypes the types of annotations to look for
 	 * @return the corresponding annotation descriptor if one of the annotations
@@ -287,6 +301,7 @@ public abstract class TestContextAnnotationUtils {
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
+		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
 		return findAnnotationDescriptorForTypes(clazz, annotationTypes, new HashSet<>());
 	}
 
@@ -304,7 +319,6 @@ public abstract class TestContextAnnotationUtils {
 	private static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(@Nullable Class<?> clazz,
 			Class<? extends Annotation>[] annotationTypes, Set<Annotation> visited) {
 
-		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -357,7 +371,8 @@ public abstract class TestContextAnnotationUtils {
 
 	/**
 	 * Determine if annotations on the enclosing class of the supplied class
-	 * should be searched by algorithms in {@link TestContextAnnotationUtils}.
+	 * should be searched by annotation search algorithms within the <em>Spring
+	 * TestContext Framework</em>.
 	 * @param clazz the class whose enclosing class should potentially be searched
 	 * @return {@code true} if the supplied class is an inner class whose enclosing
 	 * class should be searched
@@ -464,11 +479,11 @@ public abstract class TestContextAnnotationUtils {
 
 		private final AnnotationAttributes annotationAttributes;
 
-		public AnnotationDescriptor(Class<?> rootDeclaringClass, T annotation) {
+		AnnotationDescriptor(Class<?> rootDeclaringClass, T annotation) {
 			this(rootDeclaringClass, rootDeclaringClass, null, annotation);
 		}
 
-		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
+		AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				@Nullable Annotation composedAnnotation, T annotation) {
 
 			Assert.notNull(rootDeclaringClass, "'rootDeclaringClass' must not be null");
@@ -536,8 +551,7 @@ public abstract class TestContextAnnotationUtils {
 		 * of the root declaring class, that will be returned. Otherwise, an
 		 * attempt will be made to find a corresponding annotation in the
 		 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of
-		 * the root declaring class if
-		 * {@linkplain TestContextAnnotationUtils#searchEnclosingClass appropriate}.
+		 * the root declaring class if {@linkplain #searchEnclosingClass appropriate}.
 		 * @return the next corresponding annotation descriptor if the annotation
 		 * was found; otherwise {@code null}
 		 */
@@ -596,18 +610,17 @@ public abstract class TestContextAnnotationUtils {
 
 		private final Class<? extends Annotation>[] annotationTypes;
 
-		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Annotation annotation,
+		UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Annotation annotation,
 				Class<? extends Annotation>[] annotationTypes) {
 
 			this(rootDeclaringClass, rootDeclaringClass, null, annotation, annotationTypes);
 		}
 
-		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
+		UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				@Nullable Annotation composedAnnotation, Annotation annotation,
 				Class<? extends Annotation>[] annotationTypes) {
 
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
-			assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
 			this.annotationTypes = annotationTypes;
 		}
 
@@ -630,8 +643,7 @@ public abstract class TestContextAnnotationUtils {
 		 * hierarchy of the root declaring class, that will be returned. Otherwise,
 		 * an attempt will be made to find a corresponding annotation in the
 		 * {@linkplain Class#getEnclosingClass() enclosing class} hierarchy of
-		 * the root declaring class if
-		 * {@linkplain TestContextAnnotationUtils#searchEnclosingClass appropriate}.
+		 * the root declaring class if {@linkplain #searchEnclosingClass appropriate}.
 		 * @return the next corresponding annotation descriptor if one of the
 		 * annotations was found; otherwise {@code null}
 		 * @see AnnotationDescriptor#next()
@@ -658,7 +670,6 @@ public abstract class TestContextAnnotationUtils {
 			throw new UnsupportedOperationException(
 					"findAllLocalMergedAnnotations() is unsupported in UntypedAnnotationDescriptor");
 		}
-
 	}
 
 }
