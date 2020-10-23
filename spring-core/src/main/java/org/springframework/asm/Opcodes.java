@@ -53,7 +53,7 @@ public interface Opcodes {
   /**
    * <i>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
    * will break existing code using it. Only code compiled with --enable-preview can use this.</i>
-   * <p>SPRING PATCH: no preview mode check for ASM 9 experimental, enabling it by default.
+   * <p>SPRING PATCH: no preview mode check for ASM 10 experimental, enabling it by default.
    */
   int ASM10_EXPERIMENTAL = 1 << 24 | 10 << 16 | 0 << 8;
 
