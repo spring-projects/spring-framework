@@ -710,22 +710,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	}
 
 	@Override
-	public UriComponentsBuilder queryParamIfPresent(String name, Optional<?> optionalValue) {
-		if (optionalValue.isPresent()) {
-			Object value = optionalValue.get();
-			if (value instanceof Collection) {
-				queryParam(name, (Collection) value);
-			}
-			else {
-				queryParam(name, value);
-			}
-		}
-		return this;
+	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
+		return queryParam(name, (CollectionUtils.isEmpty(values) ? EMPTY_VALUES : values.toArray()));
 	}
 
 	@Override
-	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
-		return queryParam(name, (CollectionUtils.isEmpty(values) ? EMPTY_VALUES : values.toArray()));
+	public UriComponentsBuilder queryParamIfPresent(String name, Optional<?> value) {
+		value.ifPresent(o -> {
+			if (o instanceof Collection) {
+				queryParam(name, (Collection<?>) o);
+			}
+			else {
+				queryParam(name, o);
+			}
+		});
+		return this;
 	}
 
 	/**
