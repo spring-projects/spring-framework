@@ -698,7 +698,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
-				String valueAsString = (value != null ? value.toString() : null);
+				String valueAsString = getQueryParamValue(value);
 				this.queryParams.add(name, valueAsString);
 			}
 		}
@@ -707,6 +707,16 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		}
 		resetSchemeSpecificPart();
 		return this;
+	}
+
+	@Nullable
+	private String getQueryParamValue(@Nullable Object value) {
+		if (value != null) {
+			return (value instanceof Optional ?
+					((Optional<?>) value).map(Object::toString).orElse(null) :
+					value.toString());
+		}
+		return null;
 	}
 
 	@Override

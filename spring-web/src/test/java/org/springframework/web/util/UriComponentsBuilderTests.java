@@ -749,14 +749,24 @@ class UriComponentsBuilderTests {
 
 	@Test
 	void queryParamWithList() {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.queryParam("baz", Arrays.asList("qux", 42)).build();
+		List<String> values = Arrays.asList("qux", "42");
+		UriComponents result = UriComponentsBuilder.newInstance().queryParam("baz", values).build();
 
 		assertThat(result.getQuery()).isEqualTo("baz=qux&baz=42");
-		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
-		expectedQueryParams.add("baz", "qux");
-		expectedQueryParams.add("baz", "42");
-		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+		assertThat(result.getQueryParams()).containsOnlyKeys("baz").containsEntry("baz", values);
+	}
+
+	@Test
+	void queryParamWithOptionalValue() {
+		UriComponents result = UriComponentsBuilder.newInstance()
+				.queryParam("foo", Optional.empty())
+				.queryParam("baz", Optional.of("qux"), 42)
+				.build();
+
+		assertThat(result.getQuery()).isEqualTo("foo&baz=qux&baz=42");
+		assertThat(result.getQueryParams()).containsOnlyKeys("foo", "baz")
+				.containsEntry("foo", Collections.singletonList(null))
+				.containsEntry("baz", Arrays.asList("qux", "42"));
 	}
 
 	@Test
