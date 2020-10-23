@@ -43,8 +43,6 @@ import java.util.stream.IntStream;
 import javax.annotation.Priority;
 import javax.security.auth.Subject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeansException;
@@ -120,8 +118,6 @@ import static org.mockito.Mockito.verify;
  * @author Stephane Nicoll
  */
 class DefaultListableBeanFactoryTests {
-
-	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 	private DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 
