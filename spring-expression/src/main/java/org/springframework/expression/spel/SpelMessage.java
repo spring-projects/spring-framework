@@ -189,8 +189,8 @@ public enum SpelMessage {
 	RUN_OUT_OF_ARGUMENTS(Kind.ERROR, 1051,
 			"Unexpectedly ran out of arguments"),
 
-	UNABLE_TO_GROW_COLLECTION(Kind.ERROR, 1052,
-			"Unable to grow collection"),
+	UNABLE_TO_GROW(Kind.ERROR, 1052,
+			"Unable to grow {0}"),
 
 	UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE(Kind.ERROR, 1053,
 			"Unable to grow collection: unable to determine list element type"),

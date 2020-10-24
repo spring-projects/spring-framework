@@ -56,7 +56,7 @@ import org.springframework.util.ReflectionUtils;
 // TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
-	private enum IndexedType {ARRAY, LIST, MAP, STRING, OBJECT}
+	private enum IndexedType {ARRAY, LIST, ITERABLE, MAP, STRING, OBJECT}
 
 
 	// These fields are used when the indexer is being used as a property read accessor.
@@ -159,7 +159,7 @@ public class Indexer extends SpelNodeImpl {
 
 		// If the object is something that looks indexable by an integer,
 		// attempt to treat the index value as a number
-		if (target.getClass().isArray() || target instanceof Collection || target instanceof String) {
+		if (target.getClass().isArray() || target instanceof Iterable || target instanceof String) {
 			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
 			if (target.getClass().isArray()) {
 				this.indexedType = IndexedType.ARRAY;
@@ -172,6 +172,10 @@ public class Indexer extends SpelNodeImpl {
 				return new CollectionIndexingValueRef((Collection<?>) target, idx, targetDescriptor,
 						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections(),
 						state.getConfiguration().getMaximumAutoGrowSize());
+			}
+			else if (target instanceof Iterable) {
+				this.indexedType = IndexedType.ITERABLE;
+				return new IterableIndexingValueRef((Iterable<?>) target, idx, targetDescriptor);
 			}
 			else {
 				this.indexedType = IndexedType.STRING;
@@ -197,7 +201,7 @@ public class Indexer extends SpelNodeImpl {
 		if (this.indexedType == IndexedType.ARRAY) {
 			return (this.exitTypeDescriptor != null);
 		}
-		else if (this.indexedType == IndexedType.LIST) {
+		else if (this.indexedType == IndexedType.LIST || this.indexedType == IndexedType.ITERABLE) {
 			return this.children[0].isCompilable();
 		}
 		else if (this.indexedType == IndexedType.MAP) {
@@ -269,6 +273,16 @@ public class Indexer extends SpelNodeImpl {
 			this.children[0].generateCode(mv, cf);
 			cf.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
+		}
+
+		else if (this.indexedType == IndexedType.ITERABLE) {
+			mv.visitTypeInsn(CHECKCAST, "java/lang/Iterable");
+
+			cf.enterCompilationScope();
+			this.children[0].generateCode(mv, cf);
+			cf.exitCompilationScope();
+
+			mv.visitMethodInsn(INVOKESTATIC, "org/springframework/expression/spel/ast/Indexer", "getFromIterableIdx", "(Ljava/lang/Iterable;I)Ljava/lang/Object;", false);
 		}
 
 		else if (this.indexedType == IndexedType.MAP) {
@@ -455,6 +469,16 @@ public class Indexer extends SpelNodeImpl {
 		return result;
 	}
 
+	public static Object getFromIterableIdx(Iterable<?> it, int idx) {
+		int pos = 0;
+		for (Object o : it) {
+			if (pos == idx) {
+				return o;
+			}
+			pos++;
+		}
+		throw new IllegalStateException("Failed to find indexed element " + idx + ": " + it);
+	}
 
 	private class ArrayIndexingValueRef implements ValueRef {
 
@@ -704,7 +728,7 @@ public class Indexer extends SpelNodeImpl {
 							this.collection.size(), this.index);
 				}
 				if (this.index >= this.maximumSize) {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION);
+					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW, "collection");
 				}
 				if (this.collectionEntryDescriptor.getElementTypeDescriptor() == null) {
 					throw new SpelEvaluationException(
@@ -721,7 +745,7 @@ public class Indexer extends SpelNodeImpl {
 					}
 				}
 				catch (Throwable ex) {
-					throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
+					throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW, "collection");
 				}
 			}
 		}
@@ -739,6 +763,49 @@ public class Indexer extends SpelNodeImpl {
 		@Override
 		public boolean isWritable() {
 			return true;
+		}
+	}
+
+	@SuppressWarnings({"rawtypes"})
+	private class IterableIndexingValueRef implements ValueRef {
+
+		private final Iterable iterable;
+
+		private final int index;
+
+		private final TypeDescriptor targetDescriptor;
+
+		public IterableIndexingValueRef(Iterable iterable, int index, TypeDescriptor targetDescriptor) {
+			this.iterable = iterable;
+			this.index = index;
+			this.targetDescriptor = targetDescriptor;
+		}
+
+		@Override
+		public TypedValue getValue() {
+			exitTypeDescriptor = CodeFlow.toDescriptor(Object.class);
+			Object o = getFromIterableIdx(this.iterable, this.index);
+			return new TypedValue(o, this.targetDescriptor.elementTypeDescriptor(o));
+		}
+
+		@Override
+		public void setValue(@Nullable Object newValue) {
+			throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW, "'Iterable', not growable");
+		}
+
+		@Nullable
+		private Constructor<?> getDefaultConstructor(Class<?> type) {
+			try {
+				return ReflectionUtils.accessibleConstructor(type);
+			}
+			catch (Throwable ex) {
+				return null;
+			}
+		}
+
+		@Override
+		public boolean isWritable() {
+			return false;
 		}
 	}
 

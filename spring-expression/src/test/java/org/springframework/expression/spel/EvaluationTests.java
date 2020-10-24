@@ -671,7 +671,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 			e.setValue(ctx, "3");
 		}
 		catch (SpelEvaluationException see) {
-			assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW_COLLECTION);
+			assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW);
 			assertThat(instance.getFoo().size()).isEqualTo(3);
 		}
 	}

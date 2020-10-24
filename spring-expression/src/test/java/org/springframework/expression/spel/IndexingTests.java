@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -318,6 +319,55 @@ public class IndexingTests {
 	}
 
 	public List property2;
+
+	@Test
+	public void indexIntoGenericPropertyContainingIterable() {
+		List<String> list = new ArrayList<>();
+		list.add("foo");
+		list.add("bar");
+		parametizedIterable = new ParametizedIterable<>(list);
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("parametizedIterable");
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("org.springframework.expression.spel.IndexingTests$ParametizedIterable<java.lang.String>");
+		assertThat(expression.getValue(this)).isEqualTo(parametizedIterable);
+		expression = parser.parseExpression("parametizedIterable[0]");
+		assertThat(expression.getValue(this)).isEqualTo("foo");
+		expression = parser.parseExpression("parametizedIterable[1]");
+		assertThat(expression.getValue(this)).isEqualTo("bar");
+	}
+
+	@Test
+	public void indexIntoGenericPropertyContainingGrowingIterable() {
+		List<String> list = new ArrayList<>();
+		parametizedIterable = new ParametizedIterable<>(list);
+		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
+		SpelExpressionParser parser = new SpelExpressionParser(configuration);
+		Expression expression = parser.parseExpression("parametizedIterable");
+		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("org.springframework.expression.spel.IndexingTests$ParametizedIterable<java.lang.String>");
+		assertThat(expression.getValue(this)).isEqualTo(parametizedIterable);
+		expression = parser.parseExpression("parametizedIterable[0]");
+		try {
+			expression.setValue(this, "bar");
+		}
+		catch (EvaluationException ex) {
+			assertThat(ex.getMessage()).startsWith("EL1052E");
+		}
+	}
+
+	public ParametizedIterable<String> parametizedIterable;
+
+	private final class ParametizedIterable <T>implements Iterable<T> {
+		private final List<T> property;
+
+		private ParametizedIterable(List<T> property) {
+			this.property = property;
+		}
+
+		@Override
+		public Iterator<T> iterator() {
+			return property.iterator();
+		}
+	}
 
 	@Test
 	public void indexIntoGenericPropertyContainingArray() {

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -948,6 +949,28 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable()).isTrue();
 		assertCanCompile(expression);
 		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
+
+		expression = parser.parseExpression("#doFormat([0], 'there')");
+		context = new StandardEvaluationContext(new IterableItems(List.of("hey %s")));
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class, Object[].class));
+		((SpelExpression) expression).setEvaluationContext(context);
+
+		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
+		assertThat(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable()).isTrue();
+		assertCanCompile(expression);
+		assertThat(expression.getValue(String.class)).isEqualTo("hey there");
+
+		expression = parser.parseExpression("#doFormat([1], 'there')");
+		context = new StandardEvaluationContext(new IterableItems(List.of("hey %s", "there %s")));
+		context.registerFunction("doFormat",
+				DelegatingStringFormat.class.getDeclaredMethod("format", String.class, Object[].class));
+		((SpelExpression) expression).setEvaluationContext(context);
+
+		assertThat(expression.getValue(String.class)).isEqualTo("there there");
+		assertThat(((SpelNodeImpl) ((SpelExpression) expression).getAST()).isCompilable()).isTrue();
+		assertCanCompile(expression);
+		assertThat(expression.getValue(String.class)).isEqualTo("there there");
 
 		expression = parser.parseExpression("#doFormat([0], #arg)");
 		context = new StandardEvaluationContext(new Object[] {"hey %s"});
@@ -6253,6 +6276,20 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			_valueL2 = value==null?null:new Long(value);
 			_valueD2 = value==null?null:new Double(value);
 			_valueF2 = value==null?null:new Float(value);
+		}
+	}
+
+	public class IterableItems implements Iterable<String> {
+
+		private List<String> items;
+
+		public IterableItems(List<String> items) {
+			this.items = items;
+		}
+
+		@Override
+		public Iterator<String> iterator() {
+			return items.iterator();
 		}
 	}
 
