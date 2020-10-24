@@ -384,7 +384,7 @@ public abstract class TestContextAnnotationUtils {
 		return (ClassUtils.isInnerClass(clazz) &&
 				getEnclosingConfiguration(clazz) == EnclosingConfiguration.INHERIT);
 	}
-	
+
 	static void clearCaches() {
 		defaultEnclosingConfigurationMode = null;
 	}

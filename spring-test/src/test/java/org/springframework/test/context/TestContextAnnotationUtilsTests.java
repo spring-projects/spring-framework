@@ -55,7 +55,7 @@ class TestContextAnnotationUtilsTests {
 	@Nested
 	@DisplayName("searchEnclosingClass() tests")
 	class SearchEnclosingClassTests {
-		
+
 		@BeforeEach
 		void clearCaches() {
 			TestContextAnnotationUtils.clearCaches();
