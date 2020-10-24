@@ -75,7 +75,7 @@ public abstract class TestContextAnnotationUtils {
 	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedEnclosingConfigurationModes =
 			new ConcurrentLruCache<>(32, TestContextAnnotationUtils::lookUpEnclosingConfiguration);
 
-	private static EnclosingConfiguration defaultEnclosingConfigurationMode;
+	private static volatile EnclosingConfiguration defaultEnclosingConfigurationMode;
 
 	/**
 	 * Find the first annotation of the specified {@code annotationType} within

@@ -57,6 +57,7 @@ class TestContextAnnotationUtilsTests {
 	class SearchEnclosingClassTests {
 
 		@BeforeEach
+		@AfterEach
 		void clearCaches() {
 			TestContextAnnotationUtils.clearCaches();
 		}
