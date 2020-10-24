@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,11 @@ class TestContextAnnotationUtilsTests {
 	@Nested
 	@DisplayName("searchEnclosingClass() tests")
 	class SearchEnclosingClassTests {
+		
+		@BeforeEach
+		void clearCaches() {
+			TestContextAnnotationUtils.clearCaches();
+		}
 
 		@AfterEach
 		void clearGlobalFlag() {

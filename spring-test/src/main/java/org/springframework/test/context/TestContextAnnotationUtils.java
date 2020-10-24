@@ -75,6 +75,7 @@ public abstract class TestContextAnnotationUtils {
 	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedEnclosingConfigurationModes =
 			new ConcurrentLruCache<>(32, TestContextAnnotationUtils::lookUpEnclosingConfiguration);
 
+	private static EnclosingConfiguration defaultEnclosingConfigurationMode;
 
 	/**
 	 * Find the first annotation of the specified {@code annotationType} within
@@ -383,6 +384,10 @@ public abstract class TestContextAnnotationUtils {
 		return (ClassUtils.isInnerClass(clazz) &&
 				getEnclosingConfiguration(clazz) == EnclosingConfiguration.INHERIT);
 	}
+	
+	static void clearCaches() {
+		defaultEnclosingConfigurationMode = null;
+	}
 
 	/**
 	 * Get the {@link EnclosingConfiguration} mode for the supplied class.
@@ -405,9 +410,13 @@ public abstract class TestContextAnnotationUtils {
 	}
 
 	private static EnclosingConfiguration getDefaultEnclosingConfigurationMode() {
-		String value = SpringProperties.getProperty(NestedTestConfiguration.ENCLOSING_CONFIGURATION_PROPERTY_NAME);
-		EnclosingConfiguration enclosingConfigurationMode = EnclosingConfiguration.from(value);
-		return (enclosingConfigurationMode != null ? enclosingConfigurationMode : EnclosingConfiguration.INHERIT);
+		if (defaultEnclosingConfigurationMode == null) {
+			String value = SpringProperties.getProperty(NestedTestConfiguration.ENCLOSING_CONFIGURATION_PROPERTY_NAME);
+			EnclosingConfiguration enclosingConfigurationMode = EnclosingConfiguration.from(value);
+			defaultEnclosingConfigurationMode =
+					(enclosingConfigurationMode != null ? enclosingConfigurationMode : EnclosingConfiguration.INHERIT);
+		}
+		return defaultEnclosingConfigurationMode;
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
