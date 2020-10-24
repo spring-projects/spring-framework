@@ -105,18 +105,60 @@ public class ConcurrentLruCache<K, V> {
 			}
 			// Generate value first, to prevent size inconsistency
 			V value = this.generator.apply(key);
-			int cacheSize = this.size;
-			if (cacheSize == this.sizeLimit) {
+			if (this.size == this.sizeLimit) {
 				K leastUsed = this.queue.poll();
 				if (leastUsed != null) {
 					this.cache.remove(leastUsed);
-					cacheSize--;
 				}
 			}
 			this.queue.offer(key);
 			this.cache.put(key, value);
-			this.size = cacheSize + 1;
+			this.size = this.cache.size();
 			return value;
+		}
+		finally {
+			this.lock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Determine whether the given key is present in this cache.
+	 * @param key the key to check for
+	 * @return {@code true} if the key is present,
+	 * {@code false} if there was no matching key
+	 */
+	public boolean contains(K key) {
+		return this.cache.containsKey(key);
+	}
+
+	/**
+	 * Immediately remove the given key and any associated value.
+	 * @param key the key to evict the entry for
+	 * @return {@code true} if the key was present before,
+	 * {@code false} if there was no matching key
+	 */
+	public boolean remove(K key) {
+		this.lock.writeLock().lock();
+		try {
+			boolean wasPresent = (this.cache.remove(key) != null);
+			this.queue.remove(key);
+			this.size = this.cache.size();
+			return wasPresent;
+		}
+		finally {
+			this.lock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Immediately remove all entries from this cache.
+	 */
+	public void clear() {
+		this.lock.writeLock().lock();
+		try {
+			this.cache.clear();
+			this.queue.clear();
+			this.size = 0;
 		}
 		finally {
 			this.lock.writeLock().unlock();
