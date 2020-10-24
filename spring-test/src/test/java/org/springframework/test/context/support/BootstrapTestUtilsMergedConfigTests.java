@@ -24,11 +24,14 @@ import java.lang.annotation.Target;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.BootstrapTestUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.BootstrapTestUtilsMergedConfigTests.EmptyConfigTestCase.Nested;
 import org.springframework.test.context.web.WebDelegatingSmartContextLoader;
 import org.springframework.test.context.web.WebMergedContextConfiguration;
 
@@ -352,6 +355,109 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 				array(BarConfig.class), AnnotationConfigContextLoader.class);
 	}
 
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void buildMergedConfigWithDuplicateConfigurationOnSuperclassAndSubclass() {
+		compareApplesToApples(AppleConfigTestCase.class, DuplicateConfigAppleConfigTestCase.class);
+		compareApplesToApples(DuplicateConfigAppleConfigTestCase.class, SubDuplicateConfigAppleConfigTestCase.class);
+		compareApplesToOranges(ApplesAndOrangesConfigTestCase.class, DuplicateConfigApplesAndOrangesConfigTestCase.class);
+		compareApplesToOranges(DuplicateConfigApplesAndOrangesConfigTestCase.class, SubDuplicateConfigApplesAndOrangesConfigTestCase.class);
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void buildMergedConfigWithDuplicateConfigurationOnEnclosingClassAndNestedClass() {
+		compareApplesToApples(AppleConfigTestCase.class, AppleConfigTestCase.Nested.class);
+		compareApplesToApples(AppleConfigTestCase.Nested.class, AppleConfigTestCase.Nested.DoubleNested.class);
+	}
+
+	private void compareApplesToApples(Class<?> parent, Class<?> child) {
+		MergedContextConfiguration parentMergedConfig = buildMergedContextConfiguration(parent);
+		assertMergedConfig(parentMergedConfig, parent, EMPTY_STRING_ARRAY, array(AppleConfig.class),
+				DelegatingSmartContextLoader.class);
+
+		MergedContextConfiguration childMergedConfig = buildMergedContextConfiguration(child);
+		assertMergedConfig(childMergedConfig, child, EMPTY_STRING_ARRAY, array(AppleConfig.class),
+				DelegatingSmartContextLoader.class);
+
+		assertThat(parentMergedConfig.getActiveProfiles()).as("active profiles")
+			.containsExactly("apples")
+			.isEqualTo(childMergedConfig.getActiveProfiles());
+		assertThat(parentMergedConfig).isEqualTo(childMergedConfig);
+	}
+
+	private void compareApplesToOranges(Class<?> parent, Class<?> child) {
+		MergedContextConfiguration parentMergedConfig = buildMergedContextConfiguration(parent);
+		assertMergedConfig(parentMergedConfig, parent, EMPTY_STRING_ARRAY, array(AppleConfig.class),
+				DelegatingSmartContextLoader.class);
+
+		MergedContextConfiguration childMergedConfig = buildMergedContextConfiguration(child);
+		assertMergedConfig(childMergedConfig, child, EMPTY_STRING_ARRAY, array(AppleConfig.class),
+				DelegatingSmartContextLoader.class);
+
+		assertThat(parentMergedConfig.getActiveProfiles()).as("active profiles")
+			.containsExactly("apples", "oranges")
+			.isEqualTo(childMergedConfig.getActiveProfiles());
+		assertThat(parentMergedConfig).isEqualTo(childMergedConfig);
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void buildMergedConfigWithEmptyConfigurationOnSuperclassAndSubclass() {
+		// not equal because different defaults are detected for each class
+		assertEmptyConfigsAreNotEqual(EmptyConfigTestCase.class, SubEmptyConfigTestCase.class, SubSubEmptyConfigTestCase.class);
+	}
+
+	private void assertEmptyConfigsAreNotEqual(Class<?> parent, Class<?> child, Class<?> grandchild) {
+		MergedContextConfiguration parentMergedConfig = buildMergedContextConfiguration(parent);
+		assertMergedConfig(parentMergedConfig, parent, EMPTY_STRING_ARRAY,
+				array(EmptyConfigTestCase.Config.class), DelegatingSmartContextLoader.class);
+
+		MergedContextConfiguration childMergedConfig = buildMergedContextConfiguration(child);
+		assertMergedConfig(childMergedConfig, child, EMPTY_STRING_ARRAY,
+				array(EmptyConfigTestCase.Config.class, SubEmptyConfigTestCase.Config.class), DelegatingSmartContextLoader.class);
+
+		assertThat(parentMergedConfig.getActiveProfiles()).as("active profiles")
+			.isEqualTo(childMergedConfig.getActiveProfiles());
+		assertThat(parentMergedConfig).isNotEqualTo(childMergedConfig);
+
+		MergedContextConfiguration grandchildMergedConfig = buildMergedContextConfiguration(grandchild);
+		assertMergedConfig(grandchildMergedConfig, grandchild, EMPTY_STRING_ARRAY,
+				array(EmptyConfigTestCase.Config.class, SubEmptyConfigTestCase.Config.class, SubSubEmptyConfigTestCase.Config.class),
+				DelegatingSmartContextLoader.class);
+
+		assertThat(childMergedConfig.getActiveProfiles()).as("active profiles")
+			.isEqualTo(grandchildMergedConfig.getActiveProfiles());
+		assertThat(childMergedConfig).isNotEqualTo(grandchildMergedConfig);
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void buildMergedConfigWithEmptyConfigurationOnEnclosingClassAndExplicitConfigOnNestedClass() {
+		Class<EmptyConfigTestCase> enclosingClass = EmptyConfigTestCase.class;
+		Class<Nested> nestedClass = EmptyConfigTestCase.Nested.class;
+
+		MergedContextConfiguration enclosingMergedConfig = buildMergedContextConfiguration(enclosingClass);
+		assertMergedConfig(enclosingMergedConfig, enclosingClass, EMPTY_STRING_ARRAY,
+				array(EmptyConfigTestCase.Config.class), DelegatingSmartContextLoader.class);
+
+		MergedContextConfiguration nestedMergedConfig = buildMergedContextConfiguration(nestedClass);
+		assertMergedConfig(nestedMergedConfig, nestedClass, EMPTY_STRING_ARRAY,
+				array(EmptyConfigTestCase.Config.class, AppleConfig.class), DelegatingSmartContextLoader.class);
+
+		assertThat(enclosingMergedConfig.getActiveProfiles()).as("active profiles")
+			.isEqualTo(nestedMergedConfig.getActiveProfiles());
+		assertThat(enclosingMergedConfig).isNotEqualTo(nestedMergedConfig);
+	}
+
 
 	@ContextConfiguration
 	@Retention(RetentionPolicy.RUNTIME)
@@ -394,6 +500,88 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	@ContextConfiguration(locations = "../../../../../example/foo.xml")
 	@TestPropertySource("../../../../../example/foo.properties")
 	static class RelativeFooXmlLocation {
+	}
+
+	static class AppleConfig {
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles("apples")
+	static class AppleConfigTestCase {
+
+		@ContextConfiguration(classes = AppleConfig.class)
+		@ActiveProfiles({"apples", "apples"})
+		class Nested {
+
+			@ContextConfiguration(classes = AppleConfig.class)
+			@ActiveProfiles({"apples", "apples", "apples"})
+			class DoubleNested {
+			}
+		}
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles({"apples", "apples"})
+	static class DuplicateConfigAppleConfigTestCase extends AppleConfigTestCase {
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles({"apples", "apples", "apples"})
+	static class SubDuplicateConfigAppleConfigTestCase extends DuplicateConfigAppleConfigTestCase {
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles({"apples", "oranges"})
+	static class ApplesAndOrangesConfigTestCase {
+
+		@ContextConfiguration(classes = AppleConfig.class)
+		@ActiveProfiles(profiles = {"oranges", "apples"}, inheritProfiles = false)
+		class Nested {
+
+			@ContextConfiguration(classes = AppleConfig.class)
+			@ActiveProfiles(profiles = {"apples", "oranges", "apples"}, inheritProfiles = false)
+			class DoubleNested {
+			}
+		}
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles(profiles = {"oranges", "apples"}, inheritProfiles = false)
+	static class DuplicateConfigApplesAndOrangesConfigTestCase extends ApplesAndOrangesConfigTestCase {
+	}
+
+	@ContextConfiguration(classes = AppleConfig.class)
+	@ActiveProfiles(profiles = {"apples", "oranges", "apples"}, inheritProfiles = false)
+	static class SubDuplicateConfigApplesAndOrangesConfigTestCase extends DuplicateConfigApplesAndOrangesConfigTestCase {
+	}
+
+	@ContextConfiguration
+	static class EmptyConfigTestCase {
+
+		@ContextConfiguration(classes = AppleConfig.class)
+		class Nested {
+			// inner classes cannot have static nested @Configuration classes
+		}
+
+		@Configuration
+		static class Config {
+		}
+	}
+
+	@ContextConfiguration
+	static class SubEmptyConfigTestCase extends EmptyConfigTestCase {
+
+		@Configuration
+		static class Config {
+		}
+	}
+
+	@ContextConfiguration
+	static class SubSubEmptyConfigTestCase extends SubEmptyConfigTestCase {
+
+		@Configuration
+		static class Config {
+		}
 	}
 
 }

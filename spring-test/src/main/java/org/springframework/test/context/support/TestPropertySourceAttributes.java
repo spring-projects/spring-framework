@@ -17,7 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +25,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.log.LogMessage;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -53,6 +55,8 @@ class TestPropertySourceAttributes {
 
 	private final Class<?> declaringClass;
 
+	private final MergedAnnotation<?> rootAnnotation;
+
 	private final List<String> locations = new ArrayList<>();
 
 	private final boolean inheritLocations;
@@ -64,25 +68,83 @@ class TestPropertySourceAttributes {
 
 	TestPropertySourceAttributes(MergedAnnotation<TestPropertySource> annotation) {
 		this.declaringClass = declaringClass(annotation);
+		this.rootAnnotation = annotation.getRoot();
 		this.inheritLocations = annotation.getBoolean("inheritLocations");
 		this.inheritProperties = annotation.getBoolean("inheritProperties");
-		mergePropertiesAndLocations(annotation);
+		addPropertiesAndLocationsFrom(annotation);
 	}
 
-	private void mergePropertiesAndLocations(MergedAnnotation<TestPropertySource> annotation) {
-		String[] locations = annotation.getStringArray("locations");
-		String[] properties = annotation.getStringArray("properties");
+	/**
+	 * Merge this {@code TestPropertySourceAttributes} instance with the
+	 * supplied {@code TestPropertySourceAttributes}, asserting that the two sets
+	 * of test property source attributes have identical values for the
+	 * {@link TestPropertySource#inheritLocations} and
+	 * {@link TestPropertySource#inheritProperties} flags and that the two
+	 * underlying annotations were declared on the same class.
+	 * @since 5.2
+	 */
+	void mergeWith(TestPropertySourceAttributes attributes) {
+		Assert.state(attributes.declaringClass == this.declaringClass,
+				() -> "Detected @TestPropertySource declarations within an aggregate index "
+						+ "with different sources: " + this.declaringClass.getName() + " and "
+						+ attributes.declaringClass.getName());
+		logger.trace(LogMessage.format("Retrieved %s for declaring class [%s].",
+				attributes, this.declaringClass.getName()));
+		assertSameBooleanAttribute(this.inheritLocations, attributes.inheritLocations,
+				"inheritLocations", attributes);
+		assertSameBooleanAttribute(this.inheritProperties, attributes.inheritProperties,
+				"inheritProperties", attributes);
+		mergePropertiesAndLocationsFrom(attributes);
+	}
+
+	private void assertSameBooleanAttribute(boolean expected, boolean actual,
+			String attributeName, TestPropertySourceAttributes that) {
+
+		Assert.isTrue(expected == actual, () -> String.format(
+				"@%s on %s and @%s on %s must declare the same value for '%s' as other " +
+				"directly present or meta-present @TestPropertySource annotations",
+			this.rootAnnotation.getType().getSimpleName(), this.declaringClass.getSimpleName(),
+			that.rootAnnotation.getType().getSimpleName(), that.declaringClass.getSimpleName(),
+			attributeName));
+	}
+
+	private void addPropertiesAndLocationsFrom(MergedAnnotation<TestPropertySource> mergedAnnotation) {
+		String[] locations = mergedAnnotation.getStringArray("locations");
+		String[] properties = mergedAnnotation.getStringArray("properties");
+		addPropertiesAndLocations(locations, properties, declaringClass(mergedAnnotation), false);
+	}
+
+	private void mergePropertiesAndLocationsFrom(TestPropertySourceAttributes attributes) {
+		addPropertiesAndLocations(attributes.getLocations(), attributes.getProperties(),
+				attributes.getDeclaringClass(), true);
+	}
+
+	private void addPropertiesAndLocations(String[] locations, String[] properties,
+			Class<?> declaringClass, boolean prepend) {
+
 		if (ObjectUtils.isEmpty(locations) && ObjectUtils.isEmpty(properties)) {
-			Collections.addAll(this.locations, detectDefaultPropertiesFile(annotation));
+			addAll(prepend, this.locations, detectDefaultPropertiesFile(declaringClass));
 		}
 		else {
-			Collections.addAll(this.locations, locations);
-			Collections.addAll(this.properties, properties);
+			addAll(prepend, this.locations, locations);
+			addAll(prepend, this.properties, properties);
 		}
 	}
 
-	private String detectDefaultPropertiesFile(MergedAnnotation<TestPropertySource> annotation) {
-		Class<?> testClass = declaringClass(annotation);
+	/**
+	 * Add all of the supplied elements to the provided list, honoring the
+	 * {@code prepend} flag.
+	 * <p>If the {@code prepend} flag is {@code false}, the elements will appended
+	 * to the list.
+	 * @param prepend whether the elements should be prepended to the list
+	 * @param list the list to which to add the elements
+	 * @param elements the elements to add to the list
+	 */
+	private void addAll(boolean prepend, List<String> list, String... elements) {
+		list.addAll((prepend ? 0 : list.size()), Arrays.asList(elements));
+	}
+
+	private String detectDefaultPropertiesFile(Class<?> testClass) {
 		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
 		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
 		if (!classPathResource.exists()) {
@@ -151,6 +213,45 @@ class TestPropertySourceAttributes {
 	 */
 	boolean isInheritProperties() {
 		return this.inheritProperties;
+	}
+
+	boolean isEmpty() {
+		return (this.locations.isEmpty() && this.properties.isEmpty());
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || other.getClass() != getClass()) {
+			return false;
+		}
+
+		TestPropertySourceAttributes that = (TestPropertySourceAttributes) other;
+		if (!this.locations.equals(that.locations)) {
+			return false;
+		}
+		if (!this.properties.equals(that.properties)) {
+			return false;
+		}
+		if (this.inheritLocations != that.inheritLocations) {
+			return false;
+		}
+		if (this.inheritProperties != that.inheritProperties) {
+			return false;
+		}
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.locations.hashCode();
+		result = 31 * result + this.properties.hashCode();
+		result = 31 * result + (this.inheritLocations ? 1231 : 1237);
+		result = 31 * result + (this.inheritProperties ? 1231 : 1237);
+		return result;
 	}
 
 	/**
