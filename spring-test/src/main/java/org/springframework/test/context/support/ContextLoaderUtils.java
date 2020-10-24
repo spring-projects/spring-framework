@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
@@ -127,8 +126,7 @@ abstract class ContextLoaderUtils {
 			List<ContextConfigurationAttributes> configAttributesList = new ArrayList<>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = AnnotationUtils.synthesizeAnnotation(
-						desc.getAnnotationAttributes(), ContextConfiguration.class, desc.getRootDeclaringClass());
+				ContextConfiguration contextConfiguration = (ContextConfiguration) desc.synthesizeAnnotation();
 				convertContextConfigToConfigAttributesAndAddToList(
 						contextConfiguration, rootDeclaringClass, configAttributesList);
 			}

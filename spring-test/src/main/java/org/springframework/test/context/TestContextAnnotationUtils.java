@@ -193,6 +193,7 @@ public abstract class TestContextAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
+		Assert.notNull(annotationType, "Annotation type must not be null");
 		return findAnnotationDescriptor(clazz, annotationType, TestContextAnnotationUtils::searchEnclosingClass,
 			new HashSet<>());
 	}
@@ -214,7 +215,6 @@ public abstract class TestContextAnnotationUtils {
 			@Nullable Class<?> clazz, Class<T> annotationType, Predicate<Class<?>> searchEnclosingClass,
 			Set<Annotation> visited) {
 
-		Assert.notNull(annotationType, "Annotation type must not be null");
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -515,7 +515,7 @@ public abstract class TestContextAnnotationUtils {
 			return this.declaringClass;
 		}
 
-		public T getAnnotation() {
+		T getAnnotation() {
 			return this.annotation;
 		}
 
@@ -533,21 +533,21 @@ public abstract class TestContextAnnotationUtils {
 		}
 
 		@SuppressWarnings("unchecked")
-		public Class<T> getAnnotationType() {
+		Class<T> getAnnotationType() {
 			return (Class<T>) this.annotation.annotationType();
 		}
 
-		public AnnotationAttributes getAnnotationAttributes() {
+		AnnotationAttributes getAnnotationAttributes() {
 			return this.annotationAttributes;
 		}
 
 		@Nullable
-		public Annotation getComposedAnnotation() {
+		Annotation getComposedAnnotation() {
 			return this.composedAnnotation;
 		}
 
 		@Nullable
-		public Class<? extends Annotation> getComposedAnnotationType() {
+		Class<? extends Annotation> getComposedAnnotationType() {
 			return (this.composedAnnotation != null ? this.composedAnnotation.annotationType() : null);
 		}
 
@@ -631,16 +631,6 @@ public abstract class TestContextAnnotationUtils {
 
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
 			this.annotationTypes = annotationTypes;
-		}
-
-		/**
-		 * Throws an {@link UnsupportedOperationException} since the type of annotation
-		 * represented by an {@code UntypedAnnotationDescriptor} is unknown.
-		 */
-		@Override
-		public Annotation synthesizeAnnotation() {
-			throw new UnsupportedOperationException(
-					"synthesizeAnnotation() is unsupported in UntypedAnnotationDescriptor");
 		}
 
 		/**
