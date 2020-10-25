@@ -41,6 +41,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.aspectj.AspectJJtaTransactionManagementConfiguration;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
@@ -95,12 +96,9 @@ class EnableTransactionManagementIntegrationTests {
 	void repositoryUsesAspectJAdviceMode() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(Config.class, AspectJTxConfig.class);
-		// this test is a bit fragile, but gets the job done, proving that an
-		// attempt was made to look up the AJ aspect. It's due to classpath issues
-		// in .integration-tests that it's not found.
-		assertThatExceptionOfType(Exception.class)
-			.isThrownBy(ctx::refresh)
-			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
+		ctx.refresh();
+		final AspectJJtaTransactionManagementConfiguration config = (AspectJJtaTransactionManagementConfiguration) ctx.getBean("org.springframework.transaction.aspectj.AspectJJtaTransactionManagementConfiguration");
+		assertThat(config).isNotNull();
 	}
 
 	@Test
