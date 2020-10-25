@@ -16,13 +16,10 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import kotlin.reflect.KFunction;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -135,9 +132,7 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(content);
-			boolean isUnwrapped = KotlinDetector.isKotlinReflectPresent() &&
-					KotlinDetector.isKotlinType(returnType.getContainingClass()) &&
-					KotlinDelegate.isSuspend(returnType.getMethod()) &&
+			boolean isUnwrapped = KotlinDetector.isSuspendingFunction(returnType.getMethod()) &&
 					!COROUTINES_FLOW_CLASS_NAME.equals(returnValueType.toClass().getName());
 			ResolvableType genericType = isUnwrapped ? returnValueType : returnValueType.getGeneric();
 			elementType = getElementType(adapter, genericType);
@@ -217,20 +212,5 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 	 * @return completion {@code Mono<Void>} for the handling
 	 */
 	protected abstract Mono<Void> handleNoContent(MethodParameter returnType, Message<?> message);
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		private static boolean isSuspend(@Nullable Method method) {
-			if (method == null) {
-				return false;
-			}
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return (function != null && function.isSuspend());
-		}
-	}
 
 }
