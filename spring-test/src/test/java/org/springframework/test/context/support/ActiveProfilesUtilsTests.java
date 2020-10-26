@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,12 +65,12 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 
 	@Test
 	public void resolveActiveProfilesWithDuplicatedProfiles() {
-		assertResolvedProfiles(DuplicatedProfiles.class, "foo", "bar", "baz");
+		assertResolvedProfiles(DuplicatedProfiles.class, "bar", "baz", "foo");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedDuplicatedProfiles() {
-		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "foo", "bar", "baz", "cat", "dog");
+		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "bar", "baz", "cat", "dog", "foo");
 	}
 
 	@Test
@@ -90,12 +90,12 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedAnnotations() {
-		assertResolvedProfiles(LocationsBar.class, "foo", "bar");
+		assertResolvedProfiles(LocationsBar.class, "bar", "foo");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithOverriddenAnnotation() {
-		assertResolvedProfiles(Animals.class, "dog", "cat");
+		assertResolvedProfiles(Animals.class, "cat", "dog");
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
-		assertResolvedProfiles(MetaLocationsBar.class, "foo", "bar");
+		assertResolvedProfiles(MetaLocationsBar.class, "bar", "foo");
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithOverriddenMetaAnnotation() {
-		assertResolvedProfiles(MetaAnimals.class, "dog", "cat");
+		assertResolvedProfiles(MetaAnimals.class, "cat", "dog");
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithMergedInheritedResolver() {
-		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "foo", "bar");
+		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "bar", "foo");
 	}
 
 	/**
