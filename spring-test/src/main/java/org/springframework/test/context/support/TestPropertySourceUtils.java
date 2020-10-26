@@ -126,16 +126,15 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	private static boolean duplicationDetected(TestPropertySourceAttributes currentAttributes,
-			TestPropertySourceAttributes previousAttributes) {
+			@Nullable TestPropertySourceAttributes previousAttributes) {
 
 		boolean duplicationDetected =
 				(currentAttributes.equals(previousAttributes) && !currentAttributes.isEmpty());
 
 		if (duplicationDetected && logger.isDebugEnabled()) {
-			logger.debug(String.format("Ignoring duplicate %s declaration on %s, "
-					+ "since it is also declared on %s.", currentAttributes,
-					previousAttributes.getDeclaringClass().getName(),
-					currentAttributes.getDeclaringClass().getName()));
+			logger.debug(String.format("Ignoring duplicate %s declaration on %s since it is also declared on %s",
+					currentAttributes, currentAttributes.getDeclaringClass().getName(),
+					previousAttributes.getDeclaringClass().getName()));
 		}
 
 		return duplicationDetected;

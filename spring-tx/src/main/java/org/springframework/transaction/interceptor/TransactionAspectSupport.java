@@ -851,6 +851,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 
 		@SuppressWarnings("unchecked")
+		@Nullable
 		private static Object awaitSingleOrNull(Publisher<?> publisher, Object continuation) {
 			return AwaitKt.awaitSingleOrNull(publisher, (Continuation<Object>) continuation);
 		}

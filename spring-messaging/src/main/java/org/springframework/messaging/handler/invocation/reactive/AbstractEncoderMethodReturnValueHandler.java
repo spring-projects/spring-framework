@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.handler.invocation.reactive;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +121,6 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 				handleEncodedContent(Flux.from(publisher), returnType, message));
 	}
 
-	@SuppressWarnings("unchecked")
 	private Flux<DataBuffer> encodeContent(
 			@Nullable Object content, MethodParameter returnType, DataBufferFactory bufferFactory,
 			@Nullable MimeType mimeType, Map<String, Object> hints) {
@@ -132,9 +132,10 @@ public abstract class AbstractEncoderMethodReturnValueHandler implements Handler
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(content);
-			boolean isUnwrapped = KotlinDetector.isSuspendingFunction(returnType.getMethod()) &&
-					!COROUTINES_FLOW_CLASS_NAME.equals(returnValueType.toClass().getName());
-			ResolvableType genericType = isUnwrapped ? returnValueType : returnValueType.getGeneric();
+			Method method = returnType.getMethod();
+			boolean isUnwrapped = (method != null && KotlinDetector.isSuspendingFunction(method) &&
+					!COROUTINES_FLOW_CLASS_NAME.equals(returnValueType.toClass().getName()));
+			ResolvableType genericType = (isUnwrapped ? returnValueType : returnValueType.getGeneric());
 			elementType = getElementType(adapter, genericType);
 		}
 		else {

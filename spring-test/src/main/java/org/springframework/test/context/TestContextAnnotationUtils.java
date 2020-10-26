@@ -75,7 +75,9 @@ public abstract class TestContextAnnotationUtils {
 	private static final ConcurrentLruCache<Class<?>, EnclosingConfiguration> cachedEnclosingConfigurationModes =
 			new ConcurrentLruCache<>(32, TestContextAnnotationUtils::lookUpEnclosingConfiguration);
 
+	@Nullable
 	private static volatile EnclosingConfiguration defaultEnclosingConfigurationMode;
+
 
 	/**
 	 * Find the first annotation of the specified {@code annotationType} within
@@ -411,13 +413,15 @@ public abstract class TestContextAnnotationUtils {
 	}
 
 	private static EnclosingConfiguration getDefaultEnclosingConfigurationMode() {
-		if (defaultEnclosingConfigurationMode == null) {
+		EnclosingConfiguration defaultConfigurationMode = defaultEnclosingConfigurationMode;
+		if (defaultConfigurationMode == null) {
 			String value = SpringProperties.getProperty(NestedTestConfiguration.ENCLOSING_CONFIGURATION_PROPERTY_NAME);
 			EnclosingConfiguration enclosingConfigurationMode = EnclosingConfiguration.from(value);
-			defaultEnclosingConfigurationMode =
+			defaultConfigurationMode =
 					(enclosingConfigurationMode != null ? enclosingConfigurationMode : EnclosingConfiguration.INHERIT);
+			defaultEnclosingConfigurationMode = defaultConfigurationMode;
 		}
-		return defaultEnclosingConfigurationMode;
+		return defaultConfigurationMode;
 	}
 
 	private static void assertNonEmptyAnnotationTypeArray(Class<?>[] annotationTypes, String message) {
@@ -503,9 +507,10 @@ public abstract class TestContextAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+			AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
 					rootDeclaringClass, annotation.annotationType().getName(), false, false);
-			Assert.state(this.annotationAttributes != null, "No annotation attributes");
+			Assert.state(attributes != null, "No annotation attributes");
+			this.annotationAttributes = attributes;
 		}
 
 		public Class<?> getRootDeclaringClass() {
