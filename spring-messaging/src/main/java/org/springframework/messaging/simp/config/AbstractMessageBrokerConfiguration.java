@@ -36,6 +36,7 @@ import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.GsonMessageConverter;
 import org.springframework.messaging.converter.JsonbMessageConverter;
+import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -101,6 +102,8 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final boolean jsonbPresent;
 
+	private static final boolean kotlinSerializationJsonPresent;
+
 
 	static {
 		ClassLoader classLoader = AbstractMessageBrokerConfiguration.class.getClassLoader();
@@ -108,6 +111,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
 		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
+		kotlinSerializationJsonPresent = ClassUtils.isPresent("kotlinx.serialization.json.Json", classLoader);
 	}
 
 
@@ -410,6 +414,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			}
 			else if (jsonbPresent) {
 				converters.add(new JsonbMessageConverter());
+			}
+			else if (kotlinSerializationJsonPresent) {
+				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);

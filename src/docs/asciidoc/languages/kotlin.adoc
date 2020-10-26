@@ -389,7 +389,7 @@ project for more details.
 === Kotlin multiplatform serialization
 
 As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
-supported in Spring MVC and Spring WebFlux. The builtin support currently only targets JSON format.
+supported in Spring MVC, Spring WebFlux and Spring Messaging. The builtin support currently only targets JSON format.
 
 To enable it, follow https://github.com/Kotlin/kotlinx.serialization#setup[those instructions] and make sure neither
 Jackson, GSON or JSONB are in the classpath.
