@@ -30,22 +30,29 @@ import org.springframework.lang.Nullable;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
- * @since 3.1
+ * @since 5.3
  * @param <K> the key type
  * @param <V> the value element type
  * @see CollectionUtils#toMultiValueMap
  * @see LinkedMultiValueMap
  */
 @SuppressWarnings("serial")
-class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
+public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
 	private final Map<K, List<V>> targetMap;
 
 
-	MultiValueMapAdapter(Map<K, List<V>> targetMap) {
+	/**
+	 * Wrap the given target {@link Map} as a {@link MultiValueMap} adapter.
+	 * @param targetMap the plain target {@code Map}
+	 */
+	public MultiValueMapAdapter(Map<K, List<V>> targetMap) {
+		Assert.notNull(targetMap, "'targetMap' must not be null");
 		this.targetMap = targetMap;
 	}
 
+
+	// MultiValueMap implementation
 
 	@Override
 	@Nullable
@@ -95,6 +102,9 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 		});
 		return singleValueMap;
 	}
+
+
+	// Map implementation
 
 	@Override
 	public int size() {
