@@ -50,6 +50,8 @@ abstract class ActiveProfilesUtils {
 
 	private static final Log logger = LogFactory.getLog(ActiveProfilesUtils.class);
 
+	private static final DefaultActiveProfilesResolver defaultActiveProfilesResolver = new DefaultActiveProfilesResolver();
+
 
 	/**
 	 * Resolve <em>active bean definition profiles</em> for the supplied {@link Class}.
@@ -86,20 +88,21 @@ abstract class ActiveProfilesUtils {
 						annotation, descriptor.getDeclaringClass().getName()));
 			}
 
+			ActiveProfilesResolver resolver;
 			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
 			if (ActiveProfilesResolver.class == resolverClass) {
-				resolverClass = DefaultActiveProfilesResolver.class;
+				resolver = defaultActiveProfilesResolver;
 			}
-
-			ActiveProfilesResolver resolver;
-			try {
-				resolver = BeanUtils.instantiateClass(resolverClass, ActiveProfilesResolver.class);
-			}
-			catch (Exception ex) {
-				String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
-						"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
-				logger.error(msg);
-				throw new IllegalStateException(msg, ex);
+			else {
+				try {
+					resolver = BeanUtils.instantiateClass(resolverClass, ActiveProfilesResolver.class);
+				}
+				catch (Exception ex) {
+					String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
+							"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
+					logger.error(msg);
+					throw new IllegalStateException(msg, ex);
+				}
 			}
 
 			String[] profiles = resolver.resolve(rootDeclaringClass);
