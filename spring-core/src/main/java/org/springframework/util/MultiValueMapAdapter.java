@@ -48,6 +48,8 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 	}
 
 
+	// MultiValueMap implementation
+
 	@Override
 	@Nullable
 	public V getFirst(K key) {
@@ -96,6 +98,9 @@ class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 		});
 		return singleValueMap;
 	}
+
+
+	// Map implementation
 
 	@Override
 	public int size() {
