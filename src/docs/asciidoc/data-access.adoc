@@ -6617,7 +6617,7 @@ including error handling. It includes the following topics:
 * <<r2dbc-DatabaseClient-examples-statement>>
 * <<r2dbc-DatabaseClient-examples-query>>
 * <<r2dbc-DatabaseClient-examples-update>>
-* <<r2dbc-DatbaseClient-filter>>
+* <<r2dbc-DatabaseClient-filter>>
 * <<r2dbc-auto-generated-keys>>
 
 [[r2dbc-DatabaseClient]]
@@ -6949,7 +6949,15 @@ The following example shows a simpler variant using `IN` predicates:
 	    .bind("tuples", arrayOf(35, 50))
 ----
 
-[[r2dbc-DatbaseClient-filter]]
+NOTE: R2DBC itself does not support Collection-like values. Nevertheless,
+expanding a given `List` in the example above works for named parameters
+in Spring's R2DBC support, e.g. for use in `IN` clauses as shown above.
+However, inserting or updating array-typed columns (e.g. in Postgres)
+requires an array type that is supported by the underlying R2DBC driver:
+typically a Java array, e.g. `String[]` to update a `text[]` column.
+Do not pass `Collection<String>` or the like as an array parameter.
+
+[[r2dbc-DatabaseClient-filter]]
 ===== Statement Filters
 
 Sometimes it you need to fine-tune options on the actual `Statement`
@@ -7418,10 +7426,9 @@ of DAO implementations and transaction demarcation. Most of these patterns can b
 directly translated to all other supported ORM tools. The later sections in this
 chapter then cover the other ORM technologies and show brief examples.
 
-NOTE: As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
-and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
-Note that the Hibernate team does not maintain any versions prior to 5.1 anymore and
-is likely to focus on 5.3+ exclusively soon.
+NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
+`HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
+Is is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
 
 
 [[orm-session-factory-setup]]
@@ -7997,10 +8004,10 @@ You can use this option for full JPA capabilities in a Spring-based application 
 This includes web containers such as Tomcat, stand-alone applications, and
 integration tests with sophisticated persistence requirements.
 
-NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative is
-to go with Hibernate 5.2 or 5.3 and set up a native Hibernate `LocalSessionFactoryBean`
-instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
-with JPA access code as well as native Hibernate access code.
+NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative
+is to set up a native Hibernate `LocalSessionFactoryBean` instead of a plain JPA
+`LocalContainerEntityManagerFactoryBean`, letting it interact with JPA access code
+as well as native Hibernate access code.
 See <<orm-jpa-hibernate, Native Hibernate setup for JPA interaction>> for details.
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
@@ -8370,10 +8377,9 @@ Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the <<orm-jpa-dialect, next section>> for details on the `JpaDialect` mechanism.
 
 NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
-of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
-adapting to several Hibernate specifics and providing JDBC interaction.
-This makes particular sense in combination with `LocalSessionFactoryBean` setup.
-See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
+of interacting with JPA access code, adapting to several Hibernate specifics and providing
+JDBC interaction. This makes particular sense in combination with `LocalSessionFactoryBean`
+setup. See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
 
 
 [[orm-jpa-dialect]]
@@ -8445,9 +8451,8 @@ less portable) but is set up for the server's JTA environment.
 [[orm-jpa-hibernate]]
 ==== Native Hibernate Setup and Native Hibernate Transactions for JPA Interaction
 
-As of Spring Framework 5.1 and Hibernate 5.2/5.3, a native `LocalSessionFactoryBean`
-setup in combination with `HibernateTransactionManager` allows for interaction with
-`@PersistenceContext` and other JPA access code. A Hibernate
+A native `LocalSessionFactoryBean` setup in combination with `HibernateTransactionManager`
+allows for interaction with `@PersistenceContext` and other JPA access code. A Hibernate
 `SessionFactory` natively implements JPA's `EntityManagerFactory` interface now
 and a Hibernate `Session` handle natively is a JPA `EntityManager`.
 Spring's JPA support facilities automatically detect native Hibernate sessions.
