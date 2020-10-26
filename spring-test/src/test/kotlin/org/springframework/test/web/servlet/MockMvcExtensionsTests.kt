@@ -80,6 +80,9 @@ class MockMvcExtensionsTests {
 			match(matcher)
 		}.andDo {
 			handle(handler)
+			handle {
+				matcherInvoked = true
+			}
 		}
 		assertThat(matcherInvoked).isTrue()
 		assertThat(handlerInvoked).isTrue()
