@@ -48,7 +48,7 @@ import org.reactivestreams.Publisher;
 public interface ExecuteFunction {
 
 	/**
-	 * Execute the given {@link Statement} for a stream of {@link Result}s.
+	 * Execute the given {@link Statement} for a stream of {@link Result} objects.
 	 * @param statement the request to execute
 	 * @return the delayed result stream
 	 */

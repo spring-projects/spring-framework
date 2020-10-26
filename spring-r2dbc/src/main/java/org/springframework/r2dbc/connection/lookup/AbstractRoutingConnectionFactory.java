@@ -167,6 +167,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 */
 	protected ConnectionFactory resolveSpecifiedConnectionFactory(Object connectionFactory)
 			throws IllegalArgumentException {
+
 		if (connectionFactory instanceof ConnectionFactory) {
 			return (ConnectionFactory) connectionFactory;
 		}
@@ -174,17 +175,14 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 			return this.connectionFactoryLookup.getConnectionFactory((String) connectionFactory);
 		}
 		else {
-			throw new IllegalArgumentException(
-					"Illegal connection factory value - only 'io.r2dbc.spi.ConnectionFactory' and 'String' supported: "
-							+ connectionFactory);
+			throw new IllegalArgumentException("Illegal connection factory value - " +
+					"only 'io.r2dbc.spi.ConnectionFactory' and 'String' supported: " + connectionFactory);
 		}
 	}
 
 	@Override
 	public Mono<Connection> create() {
-		return determineTargetConnectionFactory() //
-				.map(ConnectionFactory::create) //
-				.flatMap(Mono::from);
+		return determineTargetConnectionFactory().map(ConnectionFactory::create).flatMap(Mono::from);
 	}
 
 	@Override
