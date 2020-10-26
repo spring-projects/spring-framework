@@ -27,9 +27,9 @@ import org.springframework.transaction.ReactiveTransactionManager
  * @author Mark Paluch
  */
 class CoroutinesTransactionInterceptorTests : AbstractCoroutinesTransactionAspectTests() {
-	override fun advised(target: Any, ptm: ReactiveTransactionManager, tas: Array<TransactionAttributeSource>): Any {
+	override fun advised(target: Any, rtm: ReactiveTransactionManager, tas: Array<TransactionAttributeSource>): Any {
 		val ti = TransactionInterceptor()
-		ti.transactionManager = ptm
+		ti.transactionManager = rtm
 		ti.setTransactionAttributeSources(*tas)
 		val pf = ProxyFactory(target)
 		pf.addAdvice(0, ti)
@@ -41,10 +41,10 @@ class CoroutinesTransactionInterceptorTests : AbstractCoroutinesTransactionAspec
 	 * target object and transaction setup.
 	 * Creates a TransactionInterceptor and applies it.
 	 */
-	override fun advised(target: Any, ptm: ReactiveTransactionManager, tas: TransactionAttributeSource): Any {
+	override fun advised(target: Any, rtm: ReactiveTransactionManager, tas: TransactionAttributeSource): Any {
 		val ti = TransactionInterceptor()
-		ti.transactionManager = ptm
-		Assertions.assertThat(ti.transactionManager).isEqualTo(ptm)
+		ti.transactionManager = rtm
+		Assertions.assertThat(ti.transactionManager).isEqualTo(rtm)
 		ti.transactionAttributeSource = tas
 		Assertions.assertThat(ti.transactionAttributeSource).isEqualTo(tas)
 		val pf = ProxyFactory(target)
