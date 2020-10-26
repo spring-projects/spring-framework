@@ -46,16 +46,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
 		@Override
-		public void onStartup(ServletContext servletCxt) {
+		public void onStartup(ServletContext servletContext) {
 
 			// Load Spring web application configuration
-			AnnotationConfigWebApplicationContext ac = new AnnotationConfigWebApplicationContext();
-			ac.register(AppConfig.class);
-			ac.refresh();
+			AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+			context.register(AppConfig.class);
 
 			// Create and register the DispatcherServlet
-			DispatcherServlet servlet = new DispatcherServlet(ac);
-			ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
+			DispatcherServlet servlet = new DispatcherServlet(context);
+			ServletRegistration.Dynamic registration = servletContext.addServlet("app", servlet);
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/app/*");
 		}
@@ -66,16 +65,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 ----
 	class MyWebApplicationInitializer : WebApplicationInitializer {
 
-		override fun onStartup(servletCxt: ServletContext) {
+		override fun onStartup(servletContext: ServletContext) {
 
 			// Load Spring web application configuration
-			val ac = AnnotationConfigWebApplicationContext()
-			ac.register(AppConfig::class.java)
-			ac.refresh()
+			val context = AnnotationConfigWebApplicationContext()
+			context.register(AppConfig::class.java)
 
 			// Create and register the DispatcherServlet
-			val servlet = DispatcherServlet(ac)
-			val registration = servletCxt.addServlet("app", servlet)
+			val servlet = DispatcherServlet(context)
+			val registration = servletContext.addServlet("app", servlet)
 			registration.setLoadOnStartup(1)
 			registration.addMapping("/app/*")
 		}
