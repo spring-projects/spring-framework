@@ -88,7 +88,7 @@ configure(allprojects) { project ->
 				entry 'jibx-run'
 			}
 			dependency "org.ogce:xpp3:1.1.6"
-			dependency "org.yaml:snakeyaml:1.26"
+			dependency "org.yaml:snakeyaml:1.27"
 			dependencySet(group: 'org.jetbrains.kotlinx', version: '1.0.0') {
 				entry 'kotlinx-serialization-core'
 				entry 'kotlinx-serialization-json'
