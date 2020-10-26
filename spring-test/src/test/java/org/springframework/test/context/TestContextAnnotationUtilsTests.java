@@ -47,8 +47,9 @@ import static org.springframework.test.context.TestContextAnnotationUtils.search
  * Unit tests for {@link TestContextAnnotationUtils}.
  *
  * @author Sam Brannen
- * @since 4.0
- * @see OverriddenMetaAnnotationAttributesTests
+ * @since 5.3, though originally since 4.0 for the deprecated
+ * {@link org.springframework.test.util.MetaAnnotationUtils} support
+ * @see OverriddenMetaAnnotationAttributesTestContextAnnotationUtilsTests
  */
 class TestContextAnnotationUtilsTests {
 
@@ -167,8 +168,6 @@ class TestContextAnnotationUtilsTests {
 
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(HasLocalAndMetaComponentAnnotation.class);
 			assertThat(descriptor.getAnnotationType()).isEqualTo(annotationType);
-			assertThat(descriptor.getComposedAnnotation()).isNull();
-			assertThat(descriptor.getComposedAnnotationType()).isNull();
 		}
 
 		@Test
@@ -186,7 +185,6 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(ClassWithMetaAnnotatedInterface.class);
 			assertThat(descriptor.getDeclaringClass()).isEqualTo(Meta1.class);
 			assertThat(descriptor.getAnnotation()).isEqualTo(rawAnnotation);
-			assertThat(descriptor.getComposedAnnotation().annotationType()).isEqualTo(Meta1.class);
 		}
 
 		@Test
@@ -198,10 +196,8 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor.getRootDeclaringClass()).as("rootDeclaringClass").isEqualTo(MetaAnnotatedAndSuperAnnotatedContextConfigClass.class);
 			assertThat(descriptor.getDeclaringClass()).as("declaringClass").isEqualTo(MetaConfig.class);
 			assertThat(descriptor.getAnnotationType()).as("annotationType").isEqualTo(ContextConfiguration.class);
-			assertThat(descriptor.getComposedAnnotation()).as("composedAnnotation should not be null").isNotNull();
-			assertThat(descriptor.getComposedAnnotationType()).as("composedAnnotationType").isEqualTo(MetaConfig.class);
 
-			assertThat(descriptor.getAnnotationAttributes().getClassArray("classes")).as("configured classes").isEqualTo(new Class<?>[] {String.class});
+			assertThat(descriptor.getAnnotation().classes()).as("configured classes").containsExactly(String.class);
 		}
 
 		@Test
@@ -220,8 +216,8 @@ class TestContextAnnotationUtilsTests {
 		 */
 		@Test
 		void findAnnotationDescriptorOnMetaMetaAnnotatedClass() {
-			Class<MetaMetaAnnotatedClass> startClass = MetaMetaAnnotatedClass.class;
-			assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2", MetaMeta.class);
+			Class<?> startClass = MetaMetaAnnotatedClass.class;
+			assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2");
 		}
 
 		/**
@@ -229,8 +225,8 @@ class TestContextAnnotationUtilsTests {
 		 */
 		@Test
 		void findAnnotationDescriptorOnMetaMetaMetaAnnotatedClass() {
-			Class<MetaMetaMetaAnnotatedClass> startClass = MetaMetaMetaAnnotatedClass.class;
-			assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2", MetaMetaMeta.class);
+			Class<?> startClass = MetaMetaMetaAnnotatedClass.class;
+			assertAtComponentOnComposedAnnotation(startClass, startClass, Meta2.class, "meta2");
 		}
 
 		/**
@@ -263,11 +259,11 @@ class TestContextAnnotationUtilsTests {
 		private void assertAtComponentOnComposedAnnotation(
 				Class<?> startClass, Class<?> rootDeclaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
 
-			assertAtComponentOnComposedAnnotation(startClass, rootDeclaringClass, composedAnnotationType, name, composedAnnotationType);
+			assertAtComponentOnComposedAnnotation(startClass, rootDeclaringClass, composedAnnotationType, name);
 		}
 
 		private void assertAtComponentOnComposedAnnotation(Class<?> startClass, Class<?> rootDeclaringClass,
-				Class<?> declaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
+				Class<?> declaringClass, String name) {
 
 			AnnotationDescriptor<Component> descriptor = findAnnotationDescriptor(startClass, Component.class);
 			assertThat(descriptor).as("AnnotationDescriptor should not be null").isNotNull();
@@ -275,8 +271,6 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor.getDeclaringClass()).as("declaringClass").isEqualTo(declaringClass);
 			assertThat(descriptor.getAnnotationType()).as("annotationType").isEqualTo(Component.class);
 			assertThat(descriptor.getAnnotation().value()).as("component name").isEqualTo(name);
-			assertThat(descriptor.getComposedAnnotation()).as("composedAnnotation should not be null").isNotNull();
-			assertThat(descriptor.getComposedAnnotationType()).as("composedAnnotationType").isEqualTo(composedAnnotationType);
 		}
 
 	}
@@ -362,13 +356,11 @@ class TestContextAnnotationUtilsTests {
 					HasLocalAndMetaComponentAnnotation.class, Transactional.class, annotationType, Order.class);
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(HasLocalAndMetaComponentAnnotation.class);
 			assertThat(descriptor.getAnnotationType()).isEqualTo(annotationType);
-			assertThat(descriptor.getComposedAnnotation()).isNull();
-			assertThat(descriptor.getComposedAnnotationType()).isNull();
 		}
 
 		@Test
 		void findAnnotationDescriptorForTypesWithMetaComponentAnnotation() {
-			Class<HasMetaComponentAnnotation> startClass = HasMetaComponentAnnotation.class;
+			Class<?> startClass = HasMetaComponentAnnotation.class;
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta1", Meta1.class);
 		}
 
@@ -384,10 +376,9 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor).isNotNull();
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(startClass);
 			assertThat(descriptor.getAnnotationType()).isEqualTo(annotationType);
-			assertThat(((ContextConfiguration) descriptor.getAnnotation()).value()).isEqualTo(new Class<?>[] {});
-			assertThat(descriptor.getAnnotationAttributes().getClassArray("classes")).isEqualTo(new Class<?>[] {MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class});
-			assertThat(descriptor.getComposedAnnotation()).isNotNull();
-			assertThat(descriptor.getComposedAnnotationType()).isEqualTo(MetaConfig.class);
+			assertThat(((ContextConfiguration) descriptor.getAnnotation()).value()).isEmpty();
+			assertThat(((ContextConfiguration) descriptor.getAnnotation()).classes())
+				.containsExactly(MetaConfig.DevConfig.class, MetaConfig.ProductionConfig.class);
 		}
 
 		@Test
@@ -402,15 +393,14 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor).isNotNull();
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(startClass);
 			assertThat(descriptor.getAnnotationType()).isEqualTo(annotationType);
-			assertThat(((ContextConfiguration) descriptor.getAnnotation()).value()).isEqualTo(new Class<?>[] {});
-			assertThat(descriptor.getAnnotationAttributes().getClassArray("classes")).isEqualTo(new Class<?>[] {TestContextAnnotationUtilsTests.class});
-			assertThat(descriptor.getComposedAnnotation()).isNotNull();
-			assertThat(descriptor.getComposedAnnotationType()).isEqualTo(MetaConfig.class);
+			assertThat(((ContextConfiguration) descriptor.getAnnotation()).value()).isEmpty();
+			assertThat(((ContextConfiguration) descriptor.getAnnotation()).classes())
+				.containsExactly(TestContextAnnotationUtilsTests.class);
 		}
 
 		@Test
 		void findAnnotationDescriptorForTypesForInterfaceWithMetaAnnotation() {
-			Class<InterfaceWithMetaAnnotation> startClass = InterfaceWithMetaAnnotation.class;
+			Class<?> startClass = InterfaceWithMetaAnnotation.class;
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta1", Meta1.class);
 		}
 
@@ -426,12 +416,11 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor.getRootDeclaringClass()).isEqualTo(ClassWithMetaAnnotatedInterface.class);
 			assertThat(descriptor.getDeclaringClass()).isEqualTo(Meta1.class);
 			assertThat(descriptor.getAnnotation()).isEqualTo(rawAnnotation);
-			assertThat(descriptor.getComposedAnnotation().annotationType()).isEqualTo(Meta1.class);
 		}
 
 		@Test
 		void findAnnotationDescriptorForTypesForClassWithLocalMetaAnnotationAndMetaAnnotatedInterface() {
-			Class<ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
+			Class<?> startClass = ClassWithLocalMetaAnnotationAndMetaAnnotatedInterface.class;
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(startClass, "meta2", Meta2.class);
 		}
 
@@ -447,9 +436,9 @@ class TestContextAnnotationUtilsTests {
 		 */
 		@Test
 		void findAnnotationDescriptorForTypesOnMetaMetaAnnotatedClass() {
-			Class<MetaMetaAnnotatedClass> startClass = MetaMetaAnnotatedClass.class;
+			Class<?> startClass = MetaMetaAnnotatedClass.class;
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(
-					startClass, startClass, Meta2.class, "meta2", MetaMeta.class);
+					startClass, startClass, Meta2.class, "meta2");
 		}
 
 		/**
@@ -457,9 +446,9 @@ class TestContextAnnotationUtilsTests {
 		 */
 		@Test
 		void findAnnotationDescriptorForTypesOnMetaMetaMetaAnnotatedClass() {
-			Class<MetaMetaMetaAnnotatedClass> startClass = MetaMetaMetaAnnotatedClass.class;
+			Class<?> startClass = MetaMetaMetaAnnotatedClass.class;
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(
-					startClass, startClass, Meta2.class, "meta2", MetaMetaMeta.class);
+					startClass, startClass, Meta2.class, "meta2");
 		}
 
 		/**
@@ -497,13 +486,12 @@ class TestContextAnnotationUtilsTests {
 				Class<?> rootDeclaringClass, String name, Class<? extends Annotation> composedAnnotationType) {
 
 			assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(
-					startClass, rootDeclaringClass, composedAnnotationType, name, composedAnnotationType);
+					startClass, rootDeclaringClass, composedAnnotationType, name);
 		}
 
 		@SuppressWarnings("unchecked")
 		private void assertAtComponentOnComposedAnnotationForMultipleCandidateTypes(Class<?> startClass,
-				Class<?> rootDeclaringClass, Class<?> declaringClass, String name,
-				Class<? extends Annotation> composedAnnotationType) {
+				Class<?> rootDeclaringClass, Class<?> declaringClass, String name) {
 
 			Class<Component> annotationType = Component.class;
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
@@ -514,8 +502,6 @@ class TestContextAnnotationUtilsTests {
 			assertThat(descriptor.getDeclaringClass()).as("declaringClass").isEqualTo(declaringClass);
 			assertThat(descriptor.getAnnotationType()).as("annotationType").isEqualTo(annotationType);
 			assertThat(((Component) descriptor.getAnnotation()).value()).as("component name").isEqualTo(name);
-			assertThat(descriptor.getComposedAnnotation()).as("composedAnnotation should not be null").isNotNull();
-			assertThat(descriptor.getComposedAnnotationType()).as("composedAnnotationType").isEqualTo(composedAnnotationType);
 		}
 
 	}

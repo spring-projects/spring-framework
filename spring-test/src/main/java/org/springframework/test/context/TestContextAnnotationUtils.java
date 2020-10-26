@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotationCollectors;
@@ -112,7 +111,7 @@ public abstract class TestContextAnnotationUtils {
 
 		AnnotationDescriptor<T> descriptor =
 				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
-		return (descriptor != null ? descriptor.synthesizeAnnotation() : null);
+		return (descriptor != null ? descriptor.getAnnotation() : null);
 	}
 
 	/**
@@ -234,8 +233,7 @@ public abstract class TestContextAnnotationUtils {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedType.getName()) && visited.add(composedAnn)) {
 				descriptor = findAnnotationDescriptor(composedType, annotationType, searchEnclosingClass, visited);
 				if (descriptor != null) {
-					return new AnnotationDescriptor<>(
-							clazz, descriptor.getDeclaringClass(), composedAnn, descriptor.getAnnotation());
+					return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(), descriptor.getAnnotation());
 				}
 			}
 		}
@@ -244,8 +242,7 @@ public abstract class TestContextAnnotationUtils {
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			descriptor = findAnnotationDescriptor(ifc, annotationType, searchEnclosingClass, visited);
 			if (descriptor != null) {
-				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
-						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
+				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(), descriptor.getAnnotation());
 			}
 		}
 
@@ -340,7 +337,7 @@ public abstract class TestContextAnnotationUtils {
 						composedAnnotation.annotationType(), annotationTypes, visited);
 				if (descriptor != null) {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
-							composedAnnotation, descriptor.getAnnotation(), annotationTypes);
+							descriptor.getAnnotation(), annotationTypes);
 				}
 			}
 		}
@@ -350,7 +347,7 @@ public abstract class TestContextAnnotationUtils {
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, annotationTypes, visited);
 			if (descriptor != null) {
 				return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
-						descriptor.getComposedAnnotation(), descriptor.getAnnotation(), annotationTypes);
+						descriptor.getAnnotation(), annotationTypes);
 			}
 		}
 
@@ -439,19 +436,16 @@ public abstract class TestContextAnnotationUtils {
 	/**
 	 * Descriptor for an {@link Annotation}, including the {@linkplain
 	 * #getDeclaringClass() class} on which the annotation is <em>declared</em>
-	 * as well as the actual {@linkplain #getAnnotation() annotation} instance.
-	 * <p>If the annotation is used as a meta-annotation, the descriptor also includes
-	 * the {@linkplain #getComposedAnnotation() composed annotation} on which the
-	 * annotation is present. In such cases, the <em>root declaring class</em> is
-	 * not directly annotated with the annotation but rather indirectly via the
-	 * composed annotation.
+	 * as well as the {@linkplain #getAnnotation() merged annotation} instance.
+	 * <p>If the annotation is used as a meta-annotation, the <em>root declaring
+	 * class</em> is not directly annotated with the annotation but rather
+	 * indirectly via a composed annotation.
 	 * <p>Given the following example, if we are searching for the {@code @Transactional}
 	 * annotation <em>on</em> the {@code TransactionalTests} class, then the
 	 * properties of the {@code AnnotationDescriptor} would be as follows.
 	 * <ul>
 	 * <li>rootDeclaringClass: {@code TransactionalTests} class object</li>
 	 * <li>declaringClass: {@code TransactionalTests} class object</li>
-	 * <li>composedAnnotation: {@code null}</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
 	 * <p><pre style="code">
@@ -465,7 +459,6 @@ public abstract class TestContextAnnotationUtils {
 	 * <ul>
 	 * <li>rootDeclaringClass: {@code UserRepositoryTests} class object</li>
 	 * <li>declaringClass: {@code RepositoryTests} class object</li>
-	 * <li>composedAnnotation: instance of the {@code RepositoryTests} annotation</li>
 	 * <li>annotation: instance of the {@code Transactional} annotation</li>
 	 * </ul>
 	 * <p><pre style="code">
@@ -486,31 +479,23 @@ public abstract class TestContextAnnotationUtils {
 
 		private final Class<?> declaringClass;
 
-		@Nullable
-		private final Annotation composedAnnotation;
-
 		private final T annotation;
 
-		private final AnnotationAttributes annotationAttributes;
-
 		AnnotationDescriptor(Class<?> rootDeclaringClass, T annotation) {
-			this(rootDeclaringClass, rootDeclaringClass, null, annotation);
+			this(rootDeclaringClass, rootDeclaringClass, annotation);
 		}
 
-		AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				@Nullable Annotation composedAnnotation, T annotation) {
-
+		@SuppressWarnings("unchecked")
+		AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass, T annotation) {
 			Assert.notNull(rootDeclaringClass, "'rootDeclaringClass' must not be null");
 			Assert.notNull(declaringClass, "'declaringClass' must not be null");
 			Assert.notNull(annotation, "Annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
-			this.composedAnnotation = composedAnnotation;
-			this.annotation = annotation;
-			AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
-					rootDeclaringClass, annotation.annotationType().getName(), false, false);
-			Assert.state(attributes != null, "No annotation attributes");
-			this.annotationAttributes = attributes;
+			this.annotation = (T) AnnotatedElementUtils.findMergedAnnotation(
+					rootDeclaringClass, annotation.annotationType());
+			Assert.state(this.annotation != null,
+					() -> "Failed to find merged annotation for " + annotation);
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -521,21 +506,11 @@ public abstract class TestContextAnnotationUtils {
 			return this.declaringClass;
 		}
 
-		T getAnnotation() {
-			return this.annotation;
-		}
-
 		/**
-		 * Synthesize the merged {@link #getAnnotationAttributes AnnotationAttributes}
-		 * in this descriptor back into an annotation of the target
-		 * {@linkplain #getAnnotationType annotation type}.
-		 * @see #getAnnotationAttributes()
-		 * @see #getAnnotationType()
-		 * @see AnnotationUtils#synthesizeAnnotation(java.util.Map, Class, java.lang.reflect.AnnotatedElement)
+		 * Get the merged annotation for this descriptor.
 		 */
-		public T synthesizeAnnotation() {
-			return AnnotationUtils.synthesizeAnnotation(
-					getAnnotationAttributes(), getAnnotationType(), getRootDeclaringClass());
+		public T getAnnotation() {
+			return this.annotation;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -543,25 +518,10 @@ public abstract class TestContextAnnotationUtils {
 			return (Class<T>) this.annotation.annotationType();
 		}
 
-		AnnotationAttributes getAnnotationAttributes() {
-			return this.annotationAttributes;
-		}
-
-		@Nullable
-		Annotation getComposedAnnotation() {
-			return this.composedAnnotation;
-		}
-
-		@Nullable
-		Class<? extends Annotation> getComposedAnnotationType() {
-			return (this.composedAnnotation != null ? this.composedAnnotation.annotationType() : null);
-		}
-
 		/**
-		 * Find the next {@link AnnotationDescriptor} for the specified
-		 * {@linkplain #getAnnotationType() annotation type} in the hierarchy
-		 * above the {@linkplain #getRootDeclaringClass() root declaring class}
-		 * of this descriptor.
+		 * Find the next {@link AnnotationDescriptor} for the specified annotation
+		 * type in the hierarchy above the {@linkplain #getRootDeclaringClass()
+		 * root declaring class} of this descriptor.
 		 * <p>If a corresponding annotation is found in the superclass hierarchy
 		 * of the root declaring class, that will be returned. Otherwise, an
 		 * attempt will be made to find a corresponding annotation in the
@@ -583,10 +543,9 @@ public abstract class TestContextAnnotationUtils {
 		}
 
 		/**
-		 * Find <strong>all</strong> annotations of the specified
-		 * {@linkplain #getAnnotationType() annotation type} that are present or
-		 * meta-present on the {@linkplain #getRootDeclaringClass() root declaring
-		 * class} of this descriptor.
+		 * Find <strong>all</strong> annotations of the specified annotation type
+		 * that are present or meta-present on the {@linkplain #getRootDeclaringClass()
+		 * root declaring class} of this descriptor.
 		 * @return the set of all merged, synthesized {@code Annotations} found,
 		 * or an empty set if none were found
 		 */
@@ -609,7 +568,6 @@ public abstract class TestContextAnnotationUtils {
 			return new ToStringCreator(this)
 					.append("rootDeclaringClass", this.rootDeclaringClass.getName())
 					.append("declaringClass", this.declaringClass.getName())
-					.append("composedAnnotation", this.composedAnnotation)
 					.append("annotation", this.annotation)
 					.toString();
 		}
@@ -628,14 +586,13 @@ public abstract class TestContextAnnotationUtils {
 		UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Annotation annotation,
 				Class<? extends Annotation>[] annotationTypes) {
 
-			this(rootDeclaringClass, rootDeclaringClass, null, annotation, annotationTypes);
+			this(rootDeclaringClass, rootDeclaringClass, annotation, annotationTypes);
 		}
 
 		UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
-				@Nullable Annotation composedAnnotation, Annotation annotation,
-				Class<? extends Annotation>[] annotationTypes) {
+				Annotation annotation, Class<? extends Annotation>[] annotationTypes) {
 
-			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
+			super(rootDeclaringClass, declaringClass, annotation);
 			this.annotationTypes = annotationTypes;
 		}
 

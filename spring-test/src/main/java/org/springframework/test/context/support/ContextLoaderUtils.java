@@ -126,7 +126,7 @@ abstract class ContextLoaderUtils {
 			List<ContextConfigurationAttributes> configAttributesList = new ArrayList<>();
 
 			if (contextConfigDeclaredLocally) {
-				ContextConfiguration contextConfiguration = (ContextConfiguration) desc.synthesizeAnnotation();
+				ContextConfiguration contextConfiguration = (ContextConfiguration) desc.getAnnotation();
 				convertContextConfigToConfigAttributesAndAddToList(
 						contextConfiguration, rootDeclaringClass, configAttributesList);
 			}
@@ -245,7 +245,7 @@ abstract class ContextLoaderUtils {
 		ContextConfiguration previousAnnotation = null;
 		Class<?> previousDeclaringClass = null;
 		while (descriptor != null) {
-			ContextConfiguration currentAnnotation = descriptor.synthesizeAnnotation();
+			ContextConfiguration currentAnnotation = descriptor.getAnnotation();
 			// Don't ignore duplicate @ContextConfiguration declaration without resources,
 			// because the ContextLoader will likely detect default resources specific to the
 			// annotated class.
