@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,7 +55,7 @@ public class FlashAttributeResultMatchers {
 	/**
 	 * Assert a flash attribute's value.
 	 */
-	public ResultMatcher attribute(String name, Object value) {
+	public ResultMatcher attribute(String name, @Nullable Object value) {
 		return result -> assertEquals("Flash attribute '" + name + "'", value, result.getFlashMap().get(name));
 	}
 
