@@ -16,11 +16,8 @@
 
 package org.springframework.test.context.support;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,8 +68,9 @@ abstract class ActiveProfilesUtils {
 	static String[] resolveActiveProfiles(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		List<String[]> profileArrays = new ArrayList<>();
+		Set<String> activeProfiles = new TreeSet<>();
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, ActiveProfiles.class);
+
 		if (descriptor == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
@@ -106,22 +104,14 @@ abstract class ActiveProfilesUtils {
 
 			String[] profiles = resolver.resolve(rootDeclaringClass);
 			if (!ObjectUtils.isEmpty(profiles)) {
-				profileArrays.add(profiles);
+				for (String profile : profiles) {
+					if (StringUtils.hasText(profile)) {
+						activeProfiles.add(profile.trim());
+					}
+				}
 			}
 
 			descriptor = (annotation.inheritProfiles() ? descriptor.next() : null);
-		}
-
-		// Reverse the list so that we can traverse "down" the hierarchy.
-		Collections.reverse(profileArrays);
-
-		Set<String> activeProfiles = new LinkedHashSet<>();
-		for (String[] profiles : profileArrays) {
-			for (String profile : profiles) {
-				if (StringUtils.hasText(profile)) {
-					activeProfiles.add(profile.trim());
-				}
-			}
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
