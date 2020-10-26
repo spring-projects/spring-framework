@@ -69,17 +69,17 @@ class TestContextAnnotationUtilsTests {
 
 		@Test
 		void standardDefaultMode() {
-			assertThat(searchEnclosingClass(OuterTestCase1.class)).isFalse();
-			assertThat(searchEnclosingClass(OuterTestCase1.NestedTestCase.class)).isTrue();
-			assertThat(searchEnclosingClass(OuterTestCase1.NestedTestCase.DoubleNestedTestCase.class)).isTrue();
+			assertThat(searchEnclosingClass(OuterTestCase.class)).isFalse();
+			assertThat(searchEnclosingClass(OuterTestCase.NestedTestCase.class)).isTrue();
+			assertThat(searchEnclosingClass(OuterTestCase.NestedTestCase.DoubleNestedTestCase.class)).isTrue();
 		}
 
 		@Test
 		void overriddenDefaultMode() {
 			setGlobalFlag("\t" + OVERRIDE.name().toLowerCase() + "   ");
-			assertThat(searchEnclosingClass(OuterTestCase2.class)).isFalse();
-			assertThat(searchEnclosingClass(OuterTestCase2.NestedTestCase.class)).isFalse();
-			assertThat(searchEnclosingClass(OuterTestCase2.NestedTestCase.DoubleNestedTestCase.class)).isFalse();
+			assertThat(searchEnclosingClass(OuterTestCase.class)).isFalse();
+			assertThat(searchEnclosingClass(OuterTestCase.NestedTestCase.class)).isFalse();
+			assertThat(searchEnclosingClass(OuterTestCase.NestedTestCase.DoubleNestedTestCase.class)).isFalse();
 		}
 
 		private void setGlobalFlag(String flag) {
@@ -675,16 +675,7 @@ class TestContextAnnotationUtilsTests {
 	static class MetaAnnotatedAndSuperAnnotatedContextConfigClass extends AnnotatedContextConfigClass {
 	}
 
-	// We need two variants of "OuterTestCase", since the results for searchEnclosingClass() get cached.
-	static class OuterTestCase1 {
-		class NestedTestCase {
-			class DoubleNestedTestCase {
-			}
-		}
-	}
-
-	// We need two variants of "OuterTestCase", since the results for searchEnclosingClass() get cached.
-	static class OuterTestCase2 {
+	static class OuterTestCase {
 		class NestedTestCase {
 			class DoubleNestedTestCase {
 			}

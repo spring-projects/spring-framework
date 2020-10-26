@@ -386,6 +386,7 @@ public abstract class TestContextAnnotationUtils {
 	}
 
 	static void clearCaches() {
+		cachedEnclosingConfigurationModes.clear();
 		defaultEnclosingConfigurationMode = null;
 	}
 
