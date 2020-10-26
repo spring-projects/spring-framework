@@ -1191,11 +1191,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@SuppressWarnings("unchecked")
 	protected void afterPrototypeCreation(String beanName) {
 		Object curVal = this.prototypesCurrentlyInCreation.get();
-		if (curVal instanceof String || ((Set<String>) curVal).size() == 1) {
+		if (curVal instanceof String) {
 			this.prototypesCurrentlyInCreation.remove();
 		}
-		else {
-			((Set<String>) curVal).remove(beanName);
+		else if (curVal instanceof Set) {
+			Set<String> beanNameSet = (Set<String>) curVal;
+			beanNameSet.remove(beanName);
+			if (beanNameSet.isEmpty()) {
+				this.prototypesCurrentlyInCreation.remove();
+			}
 		}
 	}
 
