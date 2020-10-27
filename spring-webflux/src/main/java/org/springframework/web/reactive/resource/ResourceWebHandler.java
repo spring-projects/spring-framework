@@ -355,11 +355,6 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						setHeaders(exchange, resource, mediaType);
 
 						// Content phase
-						if (HttpMethod.HEAD.matches(exchange.getRequest().getMethodValue())) {
-							exchange.getResponse().getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
-							return Mono.empty();
-						}
-
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
 						return writer.write(Mono.just(resource),

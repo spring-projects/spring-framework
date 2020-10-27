@@ -511,10 +511,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		setHeaders(response, resource, mediaType);
 
 		// Content phase
-		if (METHOD_HEAD.equals(request.getMethod())) {
-			return;
-		}
-
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");

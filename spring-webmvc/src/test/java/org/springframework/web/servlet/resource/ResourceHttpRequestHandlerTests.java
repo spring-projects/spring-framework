@@ -118,7 +118,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
-		assertThat(this.response.getContentAsByteArray().length).isEqualTo(0);
 	}
 
 	@Test
@@ -684,6 +683,20 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
 		assertThat(this.response.getHeaderValues("Content-Encoding")).containsExactly("gzip");
 		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
+	}
+
+	@Test // gh-25976
+	public void partialContentWithHttpHead() throws Exception {
+		this.request.setMethod("HEAD");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getContentType()).isEqualTo("text/plain");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/10");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
 	}
 
 	@Test  // SPR-14005
