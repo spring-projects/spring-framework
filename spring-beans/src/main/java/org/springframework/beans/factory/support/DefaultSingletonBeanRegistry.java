@@ -71,11 +71,11 @@ import org.springframework.util.StringUtils;
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
 	/** Cache of singleton objects: bean name to bean instance. */
-	//缓存单例对象
+	//单例对象的cache
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name to ObjectFactory. */
-	//单例工厂缓存：Bean名称到ObjectFactory
+	//单例对象工厂的cache：Bean名称到ObjectFactory
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 
@@ -189,9 +189,21 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 
+		/*
+		 * 首先，从一级缓存 singletonObjects 获取
+		 * 如果，没有且当前指定的 beanName 正在创建，就再从二级缓存 earlySingletonObjects 中获取
+		 * 如果，还是没有获取到且允许 singletonFactories 通过 #getObject() 获取，则从三级缓存 singletonFactories 获取。
+		 * 如果获取到，则通过其 #getObject() 方法，获取对象，并将其加入到二级缓存 earlySingletonObjects 中，并从三级缓存 singletonFactories 删除
+		 */
 		// 从单例缓冲中加载 bean
 		Object singletonObject = this.singletonObjects.get(beanName);
 		// 缓存中的 bean 为空，且当前 bean 正在创建
+
+		/*
+		 * isSingletonCurrentlyInCreation()：判断当前 singleton bean 是否处于创建中。
+		 * bean 处于创建中也就是说 bean 在初始化但是没有完成初始化，有一个这样的过程其实和 Spring 解决 bean 循环依赖的理念相辅相成，
+		 * 因为 Spring 解决 singleton bean 的核心就在于提前曝光 bean。
+		 */
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			// 加锁
 			synchronized (this.singletonObjects) {
@@ -199,6 +211,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				singletonObject = this.earlySingletonObjects.get(beanName);
 
 				// earlySingletonObjects 中没有，且允许提前创建
+				/*
+				 * allowEarlyReference：从字面意思上面理解就是允许提前拿到引用。
+				 * 其实真正的意思是是否允许从 singletonFactories 缓存中通过 getObject() 拿到对象，
+				 * 为什么会有这样一个字段呢？原因就在于 singletonFactories 才是 Spring 解决 singleton bean 的诀窍所在
+				 *
+				 */
 				if (singletonObject == null && allowEarlyReference) {
 					// 从 singletonFactories 中获取对应的 ObjectFactory
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
@@ -275,7 +293,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {
-					//加入缓存
+					//加入缓存  添加至一级缓存，同时从二级、三级缓存中删除
 					addSingleton(beanName, singletonObject);
 				}
 			}
