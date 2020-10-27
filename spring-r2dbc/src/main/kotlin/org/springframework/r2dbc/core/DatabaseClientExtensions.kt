@@ -28,7 +28,7 @@ suspend fun DatabaseClient.GenericExecuteSpec.await() {
 }
 
 /**
- * Extension for [DatabaseClient.BindSpec.bind] providing a variant leveraging reified type parameters
+ * Extension for [DatabaseClient.GenericExecuteSpec.bind] providing a variant leveraging reified type parameters
  *
  * @author Mark Paluch
  * @author Ibanga Enoobong Ime
@@ -37,7 +37,7 @@ suspend fun DatabaseClient.GenericExecuteSpec.await() {
 inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, value: T?) = bind(index, Parameter.fromOrEmpty(value, T::class.java))
 
 /**
- * Extension for [DatabaseClient.BindSpec.bind] providing a variant leveraging reified type parameters
+ * Extension for [DatabaseClient.GenericExecuteSpec.bind] providing a variant leveraging reified type parameters
  *
  * @author Mark Paluch
  * @author Ibanga Enoobong Ime
