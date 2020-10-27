@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@ExtendWith(GzipSupport.class)
 public class ResourceHttpRequestHandlerTests {
 
 	private ResourceHttpRequestHandler handler;
@@ -653,6 +655,35 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(ranges[9]).isEqualTo("Content-Type: text/plain");
 		assertThat(ranges[10]).isEqualTo("Content-Range: bytes 8-9/10");
 		assertThat(ranges[11]).isEqualTo("t.");
+	}
+
+	@Test // gh-25976
+	public void partialContentByteRangeWithEncodedResource(GzipSupport.GzippedFiles gzippedFiles) throws Exception {
+		String path = "js/foo.js";
+		gzippedFiles.create(path);
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setResourceResolvers(Arrays.asList(new EncodedResourceResolver(), new PathResourceResolver()));
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setServletContext(new MockServletContext());
+		handler.afterPropertiesSet();
+
+		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, path);
+		handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getHeaderNames()).containsExactlyInAnyOrder(
+				"Content-Type", "Content-Length", "Content-Range", "Accept-Ranges",
+				"Last-Modified", "Content-Encoding", "Vary");
+
+		assertThat(this.response.getContentType()).isEqualTo("text/javascript");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/66");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
+		assertThat(this.response.getHeaderValues("Content-Encoding")).containsExactly("gzip");
+		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
 	}
 
 	@Test  // SPR-14005
