@@ -299,6 +299,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		}
 	}
 
+	@Suppress("DEPRECATION")
 	private fun checkReactiveTransaction(expected: Boolean) {
 		Mono.subscriberContext().handle { context: Context, sink: SynchronousSink<Any?> ->
 			if (context.hasKey(TransactionContext::class.java) != expected) {
