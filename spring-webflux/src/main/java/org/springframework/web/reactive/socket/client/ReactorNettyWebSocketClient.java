@@ -67,7 +67,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	/**
 	 * Constructor that accepts an existing {@link HttpClient} builder
-	 * with a default {@link WebsocketClientSpec.Builder}.
+	 * with a default {@link reactor.netty.http.client.WebsocketClientSpec.Builder}.
 	 * @since 5.1
 	 */
 	public ReactorNettyWebSocketClient(HttpClient httpClient) {
@@ -76,7 +76,7 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 
 	/**
 	 * Constructor that accepts an existing {@link HttpClient} builder
-	 * and a pre-configured {@link WebsocketClientSpec.Builder}.
+	 * and a pre-configured {@link reactor.netty.http.client.WebsocketClientSpec.Builder}.
 	 * @since 5.3
 	 */
 	public ReactorNettyWebSocketClient(
@@ -132,7 +132,8 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * @param maxFramePayloadLength the max length for frames.
 	 * @since 5.2
 	 * @deprecated as of 5.3 in favor of providing a supplier of
-	 * {@link WebsocketClientSpec.Builder} with a constructor argument.
+	 * {@link reactor.netty.http.client.WebsocketClientSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setMaxFramePayloadLength(int maxFramePayloadLength) {
@@ -160,7 +161,8 @@ public class ReactorNettyWebSocketClient implements WebSocketClient {
 	 * @param handlePing whether to let Ping frames through for handling
 	 * @since 5.2.4
 	 * @deprecated as of 5.3 in favor of providing a supplier of
-	 * {@link WebsocketClientSpec.Builder} with a constructor argument.
+	 * {@link reactor.netty.http.client.WebsocketClientSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setHandlePing(boolean handlePing) {

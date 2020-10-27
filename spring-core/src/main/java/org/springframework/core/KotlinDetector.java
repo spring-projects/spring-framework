@@ -77,7 +77,6 @@ public abstract class KotlinDetector {
 
 	/**
 	 * Return {@code true} if the method is a suspending function.
-	 * @author Sebastien Deleuze
 	 * @since 5.3
 	 */
 	public static boolean isSuspendingFunction(Method method) {
