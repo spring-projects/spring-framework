@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -375,15 +375,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 						// Check the media type for the resource
 						MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(null);
+						setHeaders(exchange, resource, mediaType);
 
 						// Content phase
-						if (HttpMethod.HEAD.matches(exchange.getRequest().getMethodValue())) {
-							setHeaders(exchange, resource, mediaType);
-							exchange.getResponse().getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
-							return Mono.empty();
-						}
-
-						setHeaders(exchange, resource, mediaType);
 						ResourceHttpMessageWriter writer = getResourceHttpMessageWriter();
 						Assert.state(writer != null, "No ResourceHttpMessageWriter");
 						return writer.write(Mono.just(resource),
@@ -558,6 +552,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 		if (mediaType != null) {
 			headers.setContentType(mediaType);
 		}
+
 		if (resource instanceof HttpResource) {
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			exchange.getResponse().getHeaders().putAll(resourceHeaders);
