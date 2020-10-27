@@ -803,22 +803,30 @@ expressions:
 .Java
 ----
 	// evals to 1856
-	int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context);
+	int year = (Integer) parser.parseExpression("birthdate.year + 1900").getValue(context);
 
-	String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);
+	String city = (String) parser.parseExpression("placeOfBirth.city").getValue(context);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	// evals to 1856
-	val year = parser.parseExpression("Birthdate.Year + 1900").getValue(context) as Int
+	val year = parser.parseExpression("birthdate.year + 1900").getValue(context) as Int
 
-	val city = parser.parseExpression("placeOfBirth.City").getValue(context) as String
+	val city = parser.parseExpression("placeOfBirth.city").getValue(context) as String
 ----
 
-Case insensitivity is allowed for the first letter of property names. The contents of
-arrays and lists are obtained by using square bracket notation, as the following example
-shows:
+[NOTE]
+====
+Case insensitivity is allowed for the first letter of property names. Thus, the
+expressions in the above example may be written as `Birthdate.Year + 1900` and
+`PlaceOfBirth.City`, respectively. In addition, properties may optionally be accessed via
+method invocations -- for example, `getPlaceOfBirth().getCity()` instead of
+`placeOfBirth.city`.
+====
+
+The contents of arrays and lists are obtained by using square bracket notation, as the
+following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
