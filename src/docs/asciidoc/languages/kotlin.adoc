@@ -434,7 +434,7 @@ dependencies {
 }
 ----
 
-Version `1.4.0-M1` and above are supported.
+Version `1.4.0` and above are supported.
 
 === How Reactive translates to Coroutines?
 
