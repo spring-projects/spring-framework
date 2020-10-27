@@ -121,10 +121,6 @@ public class ResourceWebHandlerTests {
 		assertEquals(headers.getLastModified() / 1000, resourceLastModifiedDate("test/foo.css") / 1000);
 		assertEquals("bytes", headers.getFirst("Accept-Ranges"));
 		assertEquals(1, headers.get("Accept-Ranges").size());
-
-		StepVerifier.create(exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written"))
-				.verify();
 	}
 
 	@Test
