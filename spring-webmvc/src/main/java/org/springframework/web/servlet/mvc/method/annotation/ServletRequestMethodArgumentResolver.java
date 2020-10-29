@@ -50,7 +50,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * <li>{@link MultipartRequest}
  * <li>{@link HttpSession}
  * <li>{@link PushBuilder} (as of Spring 5.0 on Servlet 4.0)
- * <li>{@link Principal}
+ * <li>{@link Principal} but only if not annotated in order to allow custom
+ * resolvers to resolve it, and the falling back on
+ * {@link PrincipalMethodArgumentResolver}.
  * <li>{@link InputStream}
  * <li>{@link Reader}
  * <li>{@link HttpMethod} (as of Spring 4.0)
