@@ -102,7 +102,7 @@ To change the limit for default codecs, use the following:
 .Java
 ----
 	WebClient webClient = WebClient.builder()
-			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024));
+			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
