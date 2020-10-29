@@ -130,7 +130,8 @@ public class DefaultWebClientTests {
 	@Test
 	public void defaultHeaderAndCookie() {
 		WebClient client = this.builder
-				.defaultHeader("Accept", "application/json").defaultCookie("id", "123")
+				.defaultHeader("Accept", "application/json")
+				.defaultCookie("id", "123")
 				.build();
 
 		client.get().uri("/path").exchange().block(Duration.ofSeconds(10));
@@ -155,6 +156,35 @@ public class DefaultWebClientTests {
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Accept")).isEqualTo("application/xml");
 		assertThat(request.cookies().getFirst("id")).isEqualTo("456");
+	}
+
+	@Test
+	public void defaultHeaderAndCookieCopies() {
+		WebClient client1 = this.builder
+				.defaultHeader("Accept", "application/json")
+				.defaultCookie("id", "123")
+				.build();
+		WebClient client2 = this.builder
+				.defaultHeader("Accept", "application/xml")
+				.defaultCookies(cookies -> cookies.set("id", "456"))
+				.build();
+
+		client1.get().uri("/path")
+				.exchange().block(Duration.ofSeconds(10));
+
+		ClientRequest request = verifyAndGetRequest();
+		assertThat(request.headers().getFirst("Accept")).isEqualTo("application/json");
+		assertThat(request.cookies().getFirst("id")).isEqualTo("123");
+
+
+		client2.get().uri("/path")
+				.exchange().block(Duration.ofSeconds(10));
+
+		request = verifyAndGetRequest();
+		assertThat(request.headers().getFirst("Accept")).isEqualTo("application/xml");
+		assertThat(request.cookies().getFirst("id")).isEqualTo("456");
+
+
 	}
 
 	@Test
