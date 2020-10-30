@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -55,6 +56,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.TypeUtils;
 
 /**
@@ -308,7 +310,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		JsonEncoding encoding = getJsonEncoding(contentType);
 
-		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding)) {
+		OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
+		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputStream, encoding)) {
 			writePrefix(generator, object);
 
 			Object value = object;
