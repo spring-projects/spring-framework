@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.function;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -52,36 +53,32 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest getFooRequest = initRequest("GET", "/foo");
 
-		Optional<Integer> responseStatus = route.route(getFooRequest)
+		Optional<HttpStatus> responseStatus = route.route(getFooRequest)
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(200);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.OK);
 
 		ServerRequest headFooRequest = initRequest("HEAD", "/foo");
 
 		responseStatus = route.route(headFooRequest)
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(202);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.ACCEPTED);
 
 		ServerRequest barRequest = initRequest("POST", "/", req -> req.setContentType("text/plain"));
 
 		responseStatus = route.route(barRequest)
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(204);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.NO_CONTENT);
 
 		ServerRequest invalidRequest = initRequest("POST", "/");
 
 		responseStatus = route.route(invalidRequest)
 				.map(handlerFunction -> handle(handlerFunction, invalidRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
+				.map(ServerResponse::statusCode);
 
-		assertThat(responseStatus.isPresent()).isFalse();
+		assertThat(responseStatus).isEmpty();
 	}
 
 	private static ServerResponse handle(HandlerFunction<ServerResponse> handlerFunction,
@@ -105,19 +102,17 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest resourceRequest = initRequest("GET", "/resources/response.txt");
 
-		Optional<Integer> responseStatus = route.route(resourceRequest)
+		Optional<HttpStatus> responseStatus = route.route(resourceRequest)
 				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(200);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.OK);
 
 		ServerRequest invalidRequest = initRequest("POST", "/resources/foo.txt");
 
 		responseStatus = route.route(invalidRequest)
 				.map(handlerFunction -> handle(handlerFunction, invalidRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.isPresent()).isFalse();
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).isEmpty();
 	}
 
 	@Test
@@ -132,11 +127,10 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest fooRequest = initRequest("GET", "/foo/bar/baz");
 
-		Optional<Integer> responseStatus = route.route(fooRequest)
+		Optional<HttpStatus> responseStatus = route.route(fooRequest)
 				.map(handlerFunction -> handle(handlerFunction, fooRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(200);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.OK);
 	}
 
 	@Test
@@ -181,12 +175,32 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest barRequest = initRequest("GET", "/bar");
 
-		Optional<Integer> responseStatus = route.route(barRequest)
+		Optional<HttpStatus> responseStatus = route.route(barRequest)
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
-				.map(ServerResponse::statusCode)
-				.map(HttpStatus::value);
-		assertThat(responseStatus.get().intValue()).isEqualTo(500);
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+
+	@Test
+	public void multipleOnErrors() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/error", request -> {
+					throw new IOException();
+				})
+				.onError(IOException.class, (t, r) -> ServerResponse.status(200).build())
+				.onError(Exception.class, (t, r) -> ServerResponse.status(201).build())
+				.build();
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/error");
+		ServerRequest serverRequest = new DefaultServerRequest(servletRequest, emptyList());
+
+		Optional<HttpStatus> responseStatus = route.route(serverRequest)
+				.map(handlerFunction -> handle(handlerFunction, serverRequest))
+				.map(ServerResponse::statusCode);
+		assertThat(responseStatus).contains(HttpStatus.OK);
+
+	}
+
 
 
 	private ServerRequest initRequest(String httpMethod, String requestUri) {
@@ -199,5 +213,24 @@ class RouterFunctionBuilderTests {
 		return new DefaultServerRequest(
 				PathPatternsTestUtils.initRequest(httpMethod, null, requestUri, true, consumer), emptyList());
 	}
+
+	@Test
+	public void attributes() {
+		RouterFunction<ServerResponse> route = RouterFunctions.route()
+				.GET("/atts/1", request -> ServerResponse.ok().build())
+				.withAttribute("foo", "bar")
+				.withAttribute("baz", "qux")
+				.GET("/atts/2", request -> ServerResponse.ok().build())
+				.withAttributes(atts -> {
+					atts.put("foo", "bar");
+					atts.put("baz", "qux");
+				})
+				.build();
+
+		AttributesTestVisitor visitor = new AttributesTestVisitor();
+		route.accept(visitor);
+		assertThat(visitor.visitCount()).isEqualTo(2);
+	}
+
 
 }

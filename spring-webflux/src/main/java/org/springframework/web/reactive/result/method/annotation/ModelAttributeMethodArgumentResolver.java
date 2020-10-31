@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
@@ -111,20 +110,23 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
+		// unsafe(): we're intercepting, already serialized Publisher signals
+		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
+
 		Map<String, Object> model = context.getModel().asMap();
-		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.fromSink(Sinks.one());
-		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
+		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
 			return bindRequestParameters(binder, exchange)
-					.doOnError(bindingResultMono::onError)
+					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
-						BindingResult errors = binder.getBindingResult();
-						model.put(BindingResult.MODEL_KEY_PREFIX + name, errors);
+						BindingResult bindingResult = binder.getBindingResult();
+						model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResult);
 						model.put(name, value);
-						bindingResultMono.onNext(errors);
+						// Ignore result: serialized and buffered (should never fail)
+						bindingResultSink.tryEmitValue(bindingResult);
 					})
 					.then(Mono.fromCallable(() -> {
 						BindingResult errors = binder.getBindingResult();

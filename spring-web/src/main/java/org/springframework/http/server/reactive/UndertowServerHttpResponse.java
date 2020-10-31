@@ -205,10 +205,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			int total = buffer.remaining();
 			int written = writeByteBuffer(buffer);
 
-			if (logger.isTraceEnabled()) {
-				logger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
-			}
-			else if (rsWriteLogger.isTraceEnabled()) {
+			if (rsWriteLogger.isTraceEnabled()) {
 				rsWriteLogger.trace(getLogPrefix() + "Wrote " + written + " of " + total + " bytes");
 			}
 			if (written != total) {

@@ -19,7 +19,7 @@ package org.springframework.messaging.rsocket
 import io.rsocket.transport.ClientTransport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
@@ -103,7 +103,7 @@ inline fun <reified T : Any> RSocketRequester.RequestSpec.dataWithType(flow: Flo
  * @since 5.2
  */
 suspend fun RSocketRequester.RetrieveSpec.sendAndAwait() {
-	send().awaitFirstOrNull()
+	send().awaitSingleOrNull()
 }
 
 /**
@@ -122,7 +122,7 @@ suspend inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveAndAw
  * @since 5.2.1
  */
 suspend inline fun <reified T : Any> RSocketRequester.RetrieveSpec.retrieveAndAwaitOrNull(): T? =
-		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitFirstOrNull()
+		retrieveMono(object : ParameterizedTypeReference<T>() {}).awaitSingleOrNull()
 
 /**
  * Coroutines variant of [RSocketRequester.RetrieveSpec.retrieveFlux].

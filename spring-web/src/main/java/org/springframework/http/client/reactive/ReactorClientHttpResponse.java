@@ -62,7 +62,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	private final NettyDataBufferFactory bufferFactory;
 
 	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
-	private final AtomicInteger state = new AtomicInteger(0);
+	private final AtomicInteger state = new AtomicInteger();
 
 	private final String logPrefix;
 

@@ -102,7 +102,7 @@ To change the limit for default codecs, use the following:
 .Java
 ----
 	WebClient webClient = WebClient.builder()
-			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024));
+			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
 			.build();
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -537,10 +537,10 @@ responses, use `onStatus` handlers as follows:
 
 
 [[webflux-client-exchange]]
-== `exchangeToMono()`
+== Exchange
 
-The `exchangeToMono()` and `exchangeToFlux()` methods are useful for more advanced
-cases that require more control, such as to decode the response differently
+The `exchangeToMono()` and `exchangeToFlux()` methods (or `awaitExchange { }` and `exchangeToFlow { }` in Kotlin)
+are useful for more advanced cases that require more control, such as to decode the response differently
 depending on the response status:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -564,6 +564,20 @@ depending on the response status:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+    val entity = client.get()
+        .uri("/persons/1")
+        .accept(MediaType.APPLICATION_JSON)
+        .awaitExchange {
+            if (response.statusCode() == HttpStatus.OK) {
+                return response.awaitBody<Person>();
+            }
+            else if (response.statusCode().is4xxClientError) {
+                return response.awaitBody<ErrorContainer>();
+            }
+            else {
+                return response.createExceptionAndAwait();
+            }
+        }
 ----
 
 When using the above, after the returned `Mono` or `Flux` completes, the response body

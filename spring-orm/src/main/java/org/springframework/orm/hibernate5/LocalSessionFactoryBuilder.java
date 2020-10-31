@@ -211,6 +211,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
+		getProperties().put(AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY, "jta");
 		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
 				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT);
 

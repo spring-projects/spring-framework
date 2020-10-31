@@ -93,8 +93,34 @@ public final class ContentDisposition {
 
 
 	/**
-	 * Return the disposition type, like for example {@literal inline}, {@literal attachment},
-	 * {@literal form-data}, or {@code null} if not defined.
+	 * Return whether the {@link #getType() type} is {@literal "attachment"}.
+	 * @since 5.3
+	 */
+	public boolean isAttachment() {
+		return (this.type != null && this.type.equalsIgnoreCase("attachment"));
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal "form-data"}.
+	 * @since 5.3
+	 */
+	public boolean isFormData() {
+		return (this.type != null && this.type.equalsIgnoreCase("form-data"));
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal "inline"}.
+	 * @since 5.3
+	 */
+	public boolean isInline() {
+		return (this.type != null && this.type.equalsIgnoreCase("inline"));
+	}
+
+	/**
+	 * Return the disposition type.
+	 * @see #isAttachment()
+	 * @see #isFormData()
+	 * @see #isInline()
 	 */
 	@Nullable
 	public String getType() {
@@ -174,7 +200,6 @@ public final class ContentDisposition {
 		return this.readDate;
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
@@ -253,6 +278,30 @@ public final class ContentDisposition {
 		return sb.toString();
 	}
 
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "attachment"}.
+	 * @since 5.3
+	 */
+	public static Builder attachment() {
+		return builder("attachment");
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "form-data"}.
+	 * @since 5.3
+	 */
+	public static Builder formData() {
+		return builder("form-data");
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "inline"}.
+	 * @since 5.3
+	 */
+	public static Builder inline() {
+		return builder("inline");
+	}
 
 	/**
 	 * Return a builder for a {@code ContentDisposition}.

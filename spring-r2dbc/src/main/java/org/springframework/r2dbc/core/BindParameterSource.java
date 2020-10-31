@@ -46,7 +46,7 @@ interface BindParameterSource {
 	/**
 	 * Return the parameter value for the requested named parameter.
 	 * @param paramName the name of the parameter
-	 * @return the value of the specified parameter, can be {@code null}
+	 * @return the value of the specified parameter (can be {@code null})
 	 * @throws IllegalArgumentException if there is no value
 	 * for the requested parameter
 	 */
@@ -64,8 +64,8 @@ interface BindParameterSource {
 	}
 
 	/**
-	 * Return parameter names of the underlying parameter source.
-	 * @return parameter names of the underlying parameter source.
+	 * Return the parameter names of the underlying parameter source.
+	 * @return an iterator over the parameter names
 	 */
 	Iterable<String> getParameterNames();
 

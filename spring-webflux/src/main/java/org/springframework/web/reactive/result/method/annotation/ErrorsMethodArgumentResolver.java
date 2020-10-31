@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,12 @@ public class ErrorsMethodArgumentResolver extends HandlerMethodArgumentResolverS
 			MethodParameter parameter, BindingContext context, ServerWebExchange exchange) {
 
 		Object errors = getErrors(parameter, context);
+
+		// Initially ModelAttributeMethodArgumentResolver adds Errors/BindingResult as a
+		// Mono in the model even if it can't be declared as such on a controller method.
+		// This is done to enable early argument resolution here. When the Mono actually
+		// completes it is replaced in the model with the actual value.
+
 		if (Mono.class.isAssignableFrom(errors.getClass())) {
 			return ((Mono<?>) errors).cast(Object.class);
 		}

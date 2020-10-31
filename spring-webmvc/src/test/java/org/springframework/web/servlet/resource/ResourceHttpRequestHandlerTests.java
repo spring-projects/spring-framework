@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -58,6 +59,7 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@ExtendWith(GzipSupport.class)
 public class ResourceHttpRequestHandlerTests {
 
 	private ResourceHttpRequestHandler handler;
@@ -116,7 +118,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(this.response.getHeaders("Accept-Ranges").size()).isEqualTo(1);
-		assertThat(this.response.getContentAsByteArray().length).isEqualTo(0);
 	}
 
 	@Test
@@ -657,6 +658,49 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(ranges[11]).isEqualTo("t.");
 	}
 
+	@Test // gh-25976
+	public void partialContentByteRangeWithEncodedResource(GzipSupport.GzippedFiles gzippedFiles) throws Exception {
+		String path = "js/foo.js";
+		gzippedFiles.create(path);
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setResourceResolvers(Arrays.asList(new EncodedResourceResolver(), new PathResourceResolver()));
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setServletContext(new MockServletContext());
+		handler.afterPropertiesSet();
+
+		this.request.addHeader("Accept-Encoding", "gzip");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, path);
+		handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getHeaderNames()).containsExactlyInAnyOrder(
+				"Content-Type", "Content-Length", "Content-Range", "Accept-Ranges",
+				"Last-Modified", "Content-Encoding", "Vary");
+
+		assertThat(this.response.getContentType()).isEqualTo("text/javascript");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/66");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
+		assertThat(this.response.getHeaderValues("Content-Encoding")).containsExactly("gzip");
+		assertThat(this.response.getHeaderValues("Vary")).containsExactly("Accept-Encoding");
+	}
+
+	@Test // gh-25976
+	public void partialContentWithHttpHead() throws Exception {
+		this.request.setMethod("HEAD");
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getStatus()).isEqualTo(206);
+		assertThat(this.response.getContentType()).isEqualTo("text/plain");
+		assertThat(this.response.getContentLength()).isEqualTo(2);
+		assertThat(this.response.getHeader("Content-Range")).isEqualTo("bytes 0-1/10");
+		assertThat(this.response.getHeaderValues("Accept-Ranges")).containsExactly("bytes");
+	}
+
 	@Test  // SPR-14005
 	public void doOverwriteExistingCacheControlHeaders() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
@@ -665,6 +709,18 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("max-age=3600");
+	}
+
+	@Test
+	public void ignoreLastModified() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/css");
+		assertThat(this.response.getContentLength()).isEqualTo(17);
+		assertThat(this.response.containsHeader("Last-Modified")).isFalse();
+		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
 	}
 
 

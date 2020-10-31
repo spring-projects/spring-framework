@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -697,7 +698,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
-				String valueAsString = (value != null ? value.toString() : null);
+				String valueAsString = getQueryParamValue(value);
 				this.queryParams.add(name, valueAsString);
 			}
 		}
@@ -708,9 +709,32 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
+	@Nullable
+	private String getQueryParamValue(@Nullable Object value) {
+		if (value != null) {
+			return (value instanceof Optional ?
+					((Optional<?>) value).map(Object::toString).orElse(null) :
+					value.toString());
+		}
+		return null;
+	}
+
 	@Override
 	public UriComponentsBuilder queryParam(String name, @Nullable Collection<?> values) {
 		return queryParam(name, (CollectionUtils.isEmpty(values) ? EMPTY_VALUES : values.toArray()));
+	}
+
+	@Override
+	public UriComponentsBuilder queryParamIfPresent(String name, Optional<?> value) {
+		value.ifPresent(o -> {
+			if (o instanceof Collection) {
+				queryParam(name, (Collection<?>) o);
+			}
+			else {
+				queryParam(name, o);
+			}
+		});
+		return this;
 	}
 
 	/**

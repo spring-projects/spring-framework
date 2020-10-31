@@ -63,7 +63,7 @@ public abstract class AbstractBrokerMessageHandler
 	@Nullable
 	private ApplicationEventPublisher eventPublisher;
 
-	private AtomicBoolean brokerAvailable = new AtomicBoolean(false);
+	private AtomicBoolean brokerAvailable = new AtomicBoolean();
 
 	private final BrokerAvailabilityEvent availableEvent = new BrokerAvailabilityEvent(true, this);
 
@@ -125,6 +125,12 @@ public abstract class AbstractBrokerMessageHandler
 		return this.brokerChannel;
 	}
 
+	/**
+	 * Return destination prefixes prefixes to use to filter messages to forward
+	 * to the broker. Messages that have a destination and where the destination
+	 * doesn't match are ignored.
+	 * <p>By default this is not set.
+	 */
 	public Collection<String> getDestinationPrefixes() {
 		return this.destinationPrefixes;
 	}

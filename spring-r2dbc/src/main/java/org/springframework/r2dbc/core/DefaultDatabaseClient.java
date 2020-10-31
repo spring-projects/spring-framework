@@ -104,17 +104,14 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action)
-			throws DataAccessException {
+	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
 
 		return Mono.usingWhen(connectionMono, connectionCloseHolder -> {
-
 			// Create close-suppressing Connection proxy
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
-
 					try {
 						return action.apply(connectionToUse);
 					}
@@ -129,18 +126,14 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action)
-			throws DataAccessException {
+	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
 
 		return Flux.usingWhen(connectionMono, connectionCloseHolder -> {
-
-			// Create close-suppressing Connection proxy, also preparing returned
-			// Statements.
+			// Create close-suppressing Connection proxy, also preparing returned Statements.
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
-
 					try {
 						return action.apply(connectionToUse);
 					}
@@ -237,7 +230,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			this.byIndex = Collections.emptyMap();
 			this.byName = Collections.emptyMap();
 			this.sqlSupplier = sqlSupplier;
-			this.filterFunction = StatementFilterFunctions.empty();
+			this.filterFunction = StatementFilterFunction.EMPTY_FILTER;
 		}
 
 		DefaultGenericExecuteSpec(Map<Integer, Parameter> byIndex, Map<String, Parameter> byName,
@@ -309,7 +302,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
 			Assert.notNull(filter, "Statement FilterFunction must not be null");
-			return new DefaultGenericExecuteSpec(this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
+			return new DefaultGenericExecuteSpec(
+					this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
 		}
 
 		@Override
@@ -458,7 +452,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
 			return sql;
 		}
-
 	}
 
 

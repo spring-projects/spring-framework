@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		List<String> allowed = Collections.singletonList("https://mydomain1.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
-		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
+		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		List<String> allowed = Arrays.asList("https://mydomain1.example", "https://mydomain2.example", "http://mydomain3.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(allowed);
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
-		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
+		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
 		interceptor.setAllowedOrigins(Collections.singletonList("*"));
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
-		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
+		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Collections.emptyList());
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
-		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
+		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class OriginHandshakeInterceptorTests extends AbstractHttpRequestTests {
 		this.servletRequest.setServerName("mydomain2.example");
 		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(Arrays.asList("http://mydomain1.example"));
 		assertThat(interceptor.beforeHandshake(request, response, wsHandler, attributes)).isTrue();
-		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo((long) servletResponse.getStatus());
+		assertThat(HttpStatus.FORBIDDEN.value()).isNotEqualTo(servletResponse.getStatus());
 	}
 
 	@Test

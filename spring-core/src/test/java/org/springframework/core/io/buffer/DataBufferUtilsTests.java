@@ -886,18 +886,38 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void matcher2(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		DataBuffer foo = stringBuffer("fooobar");
+		DataBuffer foo = stringBuffer("foooobar");
 
 		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
 		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
-		int result = matcher.match(foo);
-		assertThat(result).isEqualTo(2);
-		foo.readPosition(2);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(3);
-		foo.readPosition(3);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(-1);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
+
+		release(foo);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcher3(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foooobar");
+
+		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
 
 		release(foo);
 	}

@@ -554,6 +554,32 @@ public interface ServerRequest {
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
+		 * Add a parameter with the given name and value.
+		 * @param name the parameter name
+		 * @param values the parameter value(s)
+		 * @return this builder
+		 */
+		Builder param(String name, String... values);
+
+		/**
+		 * Manipulate this request's parameters with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param paramsConsumer a function that consumes the parameters map
+		 * @return this builder
+		 */
+		Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer);
+
+		/**
+		 * Set the remote address of the request.
+		 * @param remoteAddress the remote address
+		 * @return this builder
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
+
+		/**
 		 * Build the request.
 		 * @return the built request
 		 */

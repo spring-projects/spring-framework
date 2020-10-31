@@ -1903,8 +1903,8 @@ and others) and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, and path.
-  See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and
+  context path. See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute -- in contrast to model attributes stored in the session
@@ -3224,7 +3224,7 @@ initialize instances of `WebDataBinder`. Those, in turn, are used to:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.

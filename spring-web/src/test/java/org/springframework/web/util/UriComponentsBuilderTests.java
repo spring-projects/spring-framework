@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -747,14 +749,48 @@ class UriComponentsBuilderTests {
 
 	@Test
 	void queryParamWithList() {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		UriComponents result = builder.queryParam("baz", Arrays.asList("qux", 42)).build();
+		List<String> values = Arrays.asList("qux", "42");
+		UriComponents result = UriComponentsBuilder.newInstance().queryParam("baz", values).build();
 
 		assertThat(result.getQuery()).isEqualTo("baz=qux&baz=42");
-		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
-		expectedQueryParams.add("baz", "qux");
-		expectedQueryParams.add("baz", "42");
-		assertThat(result.getQueryParams()).isEqualTo(expectedQueryParams);
+		assertThat(result.getQueryParams()).containsOnlyKeys("baz").containsEntry("baz", values);
+	}
+
+	@Test
+	void queryParamWithOptionalValue() {
+		UriComponents result = UriComponentsBuilder.newInstance()
+				.queryParam("foo", Optional.empty())
+				.queryParam("baz", Optional.of("qux"), 42)
+				.build();
+
+		assertThat(result.getQuery()).isEqualTo("foo&baz=qux&baz=42");
+		assertThat(result.getQueryParams()).containsOnlyKeys("foo", "baz")
+				.containsEntry("foo", Collections.singletonList(null))
+				.containsEntry("baz", Arrays.asList("qux", "42"));
+	}
+
+	@Test
+	void queryParamIfPresent() {
+		UriComponents result = UriComponentsBuilder.newInstance()
+				.queryParamIfPresent("baz", Optional.of("qux"))
+				.queryParamIfPresent("foo", Optional.empty())
+				.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=qux");
+		assertThat(result.getQueryParams())
+				.containsOnlyKeys("baz")
+				.containsEntry("baz", Collections.singletonList("qux"));
+	}
+
+	@Test
+	void queryParamIfPresentCollection() {
+		List<String> values = Arrays.asList("foo", "bar");
+		UriComponents result = UriComponentsBuilder.newInstance()
+				.queryParamIfPresent("baz", Optional.of(values))
+				.build();
+
+		assertThat(result.getQuery()).isEqualTo("baz=foo&baz=bar");
+		assertThat(result.getQueryParams()).containsOnlyKeys("baz").containsEntry("baz", values);
 	}
 
 	@Test

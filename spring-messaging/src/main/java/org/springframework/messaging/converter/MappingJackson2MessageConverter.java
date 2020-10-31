@@ -52,7 +52,7 @@ import org.springframework.util.MimeType;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.9 and higher, as of Spring 5.1.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -247,14 +247,15 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
-				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);
-				if (view != null) {
-					this.objectMapper.writerWithView(view).writeValue(generator, payload);
+				try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding)) {
+					if (view != null) {
+						this.objectMapper.writerWithView(view).writeValue(generator, payload);
+					}
+					else {
+						this.objectMapper.writeValue(generator, payload);
+					}
+					payload = out.toByteArray();
 				}
-				else {
-					this.objectMapper.writeValue(generator, payload);
-				}
-				payload = out.toByteArray();
 			}
 			else {
 				// Assuming a text-based target payload

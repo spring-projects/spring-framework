@@ -351,7 +351,7 @@ public class OpenEntityManagerInViewTests {
 		final OpenEntityManagerInViewFilter filter2 = new OpenEntityManagerInViewFilter();
 		filter2.init(filterConfig2);
 
-		final AtomicInteger count = new AtomicInteger(0);
+		final AtomicInteger count = new AtomicInteger();
 
 		final FilterChain filterChain = (servletRequest, servletResponse) -> {
 			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
@@ -359,7 +359,7 @@ public class OpenEntityManagerInViewTests {
 			count.incrementAndGet();
 		};
 
-		final AtomicInteger count2 = new AtomicInteger(0);
+		final AtomicInteger count2 = new AtomicInteger();
 
 		final FilterChain filterChain2 = (servletRequest, servletResponse) -> {
 			assertThat(TransactionSynchronizationManager.hasResource(factory2)).isTrue();

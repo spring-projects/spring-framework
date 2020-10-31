@@ -52,6 +52,7 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 			Function<Connection, Flux<Result>> resultFunction,
 			Function<Connection, Mono<Integer>> updatedRowsFunction,
 			BiFunction<Row, RowMetadata, T> mappingFunction) {
+
 		this.sql = sql;
 		this.connectionAccessor = connectionAccessor;
 		this.resultFunction = resultFunction;
@@ -64,18 +65,14 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 	public Mono<T> one() {
 		return all().buffer(2)
 				.flatMap(list -> {
-
 					if (list.isEmpty()) {
 						return Mono.empty();
 					}
-
 					if (list.size() > 1) {
 						return Mono.error(new IncorrectResultSizeDataAccessException(
-								String.format("Query [%s] returned non unique result.",
-										this.sql),
+								String.format("Query [%s] returned non unique result.", this.sql),
 								1));
 					}
-
 					return Mono.just(list.get(0));
 				}).next();
 	}

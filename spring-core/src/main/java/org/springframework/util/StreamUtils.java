@@ -84,7 +84,7 @@ public abstract class StreamUtils {
 			return "";
 		}
 
-		StringBuilder out = new StringBuilder();
+		StringBuilder out = new StringBuilder(BUFFER_SIZE);
 		InputStreamReader reader = new InputStreamReader(in, charset);
 		char[] buffer = new char[BUFFER_SIZE];
 		int charsRead;

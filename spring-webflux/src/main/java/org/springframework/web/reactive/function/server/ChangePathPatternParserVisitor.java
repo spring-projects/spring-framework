@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -58,6 +59,10 @@ class ChangePathPatternParserVisitor implements RouterFunctions.Visitor {
 
 	@Override
 	public void resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+	}
+
+	@Override
+	public void attributes(Map<String, Object> attributes) {
 	}
 
 	@Override

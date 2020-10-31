@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts String to a Boolean.
@@ -48,6 +49,7 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 
 
 	@Override
+	@Nullable
 	public Boolean convert(String source) {
 		String value = source.trim();
 		if (value.isEmpty()) {

@@ -67,12 +67,12 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
 	void resolveActiveProfilesWithDuplicatedProfiles() {
-		assertResolvedProfiles(DuplicatedProfiles.class, "foo", "bar", "baz");
+		assertResolvedProfiles(DuplicatedProfiles.class, "bar", "baz", "foo");
 	}
 
 	@Test
 	void resolveActiveProfilesWithLocalAndInheritedDuplicatedProfiles() {
-		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "foo", "bar", "baz", "cat", "dog");
+		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "bar", "baz", "cat", "dog", "foo");
 	}
 
 	@Test
@@ -92,12 +92,12 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
 	void resolveActiveProfilesWithLocalAndInheritedAnnotations() {
-		assertResolvedProfiles(LocationsBar.class, "foo", "bar");
+		assertResolvedProfiles(LocationsBar.class, "bar", "foo");
 	}
 
 	@Test
 	void resolveActiveProfilesWithOverriddenAnnotation() {
-		assertResolvedProfiles(Animals.class, "dog", "cat");
+		assertResolvedProfiles(Animals.class, "cat", "dog");
 	}
 
 	/**
@@ -129,7 +129,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 */
 	@Test
 	void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
-		assertResolvedProfiles(MetaLocationsBar.class, "foo", "bar");
+		assertResolvedProfiles(MetaLocationsBar.class, "bar", "foo");
 	}
 
 	/**
@@ -137,7 +137,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 */
 	@Test
 	void resolveActiveProfilesWithOverriddenMetaAnnotation() {
-		assertResolvedProfiles(MetaAnimals.class, "dog", "cat");
+		assertResolvedProfiles(MetaAnimals.class, "cat", "dog");
 	}
 
 	/**
@@ -161,7 +161,7 @@ class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsTests {
 	 */
 	@Test
 	void resolveActiveProfilesWithMergedInheritedResolver() {
-		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "foo", "bar");
+		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "bar", "foo");
 	}
 
 	/**

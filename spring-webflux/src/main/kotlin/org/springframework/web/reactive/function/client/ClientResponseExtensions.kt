@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function.client
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
@@ -115,7 +115,7 @@ suspend fun <T : Any> ClientResponse.awaitBody(clazz: KClass<T>): T =
  * @since 5.2
  */
 suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
-		bodyToMono<T>().awaitFirstOrNull()
+		bodyToMono<T>().awaitSingleOrNull()
 
 /**
  * `KClass` nullable coroutines variant of [ClientResponse.bodyToMono].
@@ -125,7 +125,7 @@ suspend inline fun <reified T : Any> ClientResponse.awaitBodyOrNull(): T? =
  * @since 5.3
  */
 suspend fun <T : Any> ClientResponse.awaitBodyOrNull(clazz: KClass<T>): T? =
-		bodyToMono(clazz.java).awaitFirstOrNull()
+		bodyToMono(clazz.java).awaitSingleOrNull()
 
 /**
  * Coroutines variant of [ClientResponse.toEntity].
@@ -164,3 +164,23 @@ suspend inline fun <reified T : Any> ClientResponse.awaitEntityList(): ResponseE
  */
 suspend fun <T : Any> ClientResponse.awaitEntityList(clazz: KClass<T>): ResponseEntity<List<T>> =
 		toEntityList(clazz.java).awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.toBodilessEntity].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.3
+ */
+suspend fun ClientResponse.awaitBodilessEntity(): ResponseEntity<Void> =
+		toBodilessEntity().awaitSingle()
+
+/**
+ * Coroutines variant of [ClientResponse.createException].
+ *
+ * @author Sebastien Deleuze
+ * @since 5.3
+ */
+suspend fun ClientResponse.createExceptionAndAwait(): WebClientResponseException =
+		createException().awaitSingle()
+
+

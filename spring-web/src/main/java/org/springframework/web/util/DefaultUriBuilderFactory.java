@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
@@ -341,6 +342,18 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		}
 
 		@Override
+		public DefaultUriBuilder queryParamIfPresent(String name, Optional<?> value) {
+			this.uriComponentsBuilder.queryParamIfPresent(name, value);
+			return this;
+		}
+
+		@Override
+		public DefaultUriBuilder queryParams(MultiValueMap<String, String> params) {
+			this.uriComponentsBuilder.queryParams(params);
+			return this;
+		}
+
+		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, Object... values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
 			return this;
@@ -349,12 +362,6 @@ public class DefaultUriBuilderFactory implements UriBuilderFactory {
 		@Override
 		public DefaultUriBuilder replaceQueryParam(String name, @Nullable Collection<?> values) {
 			this.uriComponentsBuilder.replaceQueryParam(name, values);
-			return this;
-		}
-
-		@Override
-		public DefaultUriBuilder queryParams(MultiValueMap<String, String> params) {
-			this.uriComponentsBuilder.queryParams(params);
 			return this;
 		}
 

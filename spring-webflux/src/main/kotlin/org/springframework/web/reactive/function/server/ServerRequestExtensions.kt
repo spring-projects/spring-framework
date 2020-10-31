@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function.server
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.core.ParameterizedTypeReference
@@ -99,7 +99,7 @@ suspend fun <T : Any> ServerRequest.awaitBody(clazz: KClass<T>): T =
  * @since 5.2
  */
 suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
-		bodyToMono<T>().awaitFirstOrNull()
+		bodyToMono<T>().awaitSingleOrNull()
 
 /**
  * `KClass` nullable Coroutines variant of [ServerRequest.bodyToMono].
@@ -109,7 +109,7 @@ suspend inline fun <reified T : Any> ServerRequest.awaitBodyOrNull(): T? =
  * @since 5.3
  */
 suspend fun <T : Any> ServerRequest.awaitBodyOrNull(clazz: KClass<T>): T? =
-		bodyToMono(clazz.java).awaitFirstOrNull()
+		bodyToMono(clazz.java).awaitSingleOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.formData].
@@ -136,7 +136,7 @@ suspend fun ServerRequest.awaitMultipartData(): MultiValueMap<String, Part> =
  * @since 5.2
  */
 suspend fun ServerRequest.awaitPrincipal(): Principal? =
-		principal().awaitFirstOrNull()
+		principal().awaitSingleOrNull()
 
 /**
  * Coroutines variant of [ServerRequest.session].

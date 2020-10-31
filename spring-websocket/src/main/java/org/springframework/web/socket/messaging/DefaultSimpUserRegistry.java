@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			synchronized (this.sessionLock) {
 				LocalSimpUser simpUser = this.users.get(name);
 				if (simpUser == null) {
-					simpUser = new LocalSimpUser(name);
+					simpUser = new LocalSimpUser(name, user);
 					this.users.put(name, simpUser);
 				}
 				LocalSimpSession session = new LocalSimpSession(sessionId, simpUser);
@@ -193,16 +193,25 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final String name;
 
+		private final Principal user;
+
 		private final Map<String, SimpSession> userSessions = new ConcurrentHashMap<>(1);
 
-		public LocalSimpUser(String userName) {
+		public LocalSimpUser(String userName, Principal user) {
 			Assert.notNull(userName, "User name must not be null");
 			this.name = userName;
+			this.user = user;
 		}
 
 		@Override
 		public String getName() {
 			return this.name;
+		}
+
+		@Nullable
+		@Override
+		public Principal getPrincipal() {
+			return this.user;
 		}
 
 		@Override

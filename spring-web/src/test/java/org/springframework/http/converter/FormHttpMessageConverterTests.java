@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -176,12 +178,15 @@ public class FormHttpMessageConverterTests {
 		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
 		parts.add("xml", entity);
 
+		Map<String, String> parameters = new LinkedHashMap<>(2);
+		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("foo", "bar");
+
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
+		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		// SPR-17030
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary");
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();

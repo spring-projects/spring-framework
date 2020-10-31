@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 public interface QueryOperation extends Supplier<String> {
 
 	/**
-	 * Returns the string-representation of this operation to
+	 * Return the string-representation of this operation to
 	 * be used with {@link io.r2dbc.spi.Statement} creation.
 	 * @return the operation as SQL string
 	 * @see io.r2dbc.spi.Connection#createStatement(String)

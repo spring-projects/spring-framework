@@ -608,7 +608,8 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		return (this.removeSemicolonContent ? removeSemicolonContentInternal(requestUri) : requestUri);
+		return (this.removeSemicolonContent ?
+				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {
@@ -620,6 +621,22 @@ public class UrlPathHelper {
 			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
 		}
 		return requestUri;
+	}
+
+	private String removeJsessionid(String requestUri) {
+		String key = ";jsessionid=";
+		int index = requestUri.toLowerCase().indexOf(key);
+		if (index == -1) {
+			return requestUri;
+		}
+		String start = requestUri.substring(0, index);
+		for (int i = key.length(); i < requestUri.length(); i++) {
+			char c = requestUri.charAt(i);
+			if (c == ';' || c == '/') {
+				return start + requestUri.substring(i);
+			}
+		}
+		return start;
 	}
 
 	/**
@@ -726,7 +743,13 @@ public class UrlPathHelper {
 	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
 	 * </ul>
 	 */
-	public static final UrlPathHelper rawPathInstance = new UrlPathHelper();
+	public static final UrlPathHelper rawPathInstance = new UrlPathHelper() {
+
+		@Override
+		public String removeSemicolonContent(String requestUri) {
+			return requestUri;
+		}
+	};
 
 	static {
 		rawPathInstance.setAlwaysUseFullPath(true);

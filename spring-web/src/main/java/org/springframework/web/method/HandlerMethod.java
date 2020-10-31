@@ -35,6 +35,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -62,7 +63,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class HandlerMethod {
 
 	/** Logger that is available to subclasses. */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected static final Log logger = LogFactory.getLog(HandlerMethod.class);
 
 	private final Object bean;
 
@@ -471,6 +472,12 @@ public class HandlerMethod {
 
 		protected HandlerMethodParameter(HandlerMethodParameter original) {
 			super(original);
+		}
+
+		@Override
+		@NonNull
+		public Method getMethod() {
+			return HandlerMethod.this.bridgedMethod;
 		}
 
 		@Override

@@ -354,7 +354,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().propertyNamingStrategy(strategy).build();
 		assertThat(objectMapper.getSerializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
 		assertThat(objectMapper.getDeserializationConfig().getPropertyNamingStrategy()).isSameAs(strategy);
@@ -430,9 +430,8 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(output).doesNotContain("value2");
 	}
 
-	@Test // gh-23017
+	@Test  // gh-23017
 	void postConfigurer() {
-
 		JacksonAnnotationIntrospector introspector1 = new JacksonAnnotationIntrospector();
 		JacksonAnnotationIntrospector introspector2 = new JacksonAnnotationIntrospector();
 
@@ -456,7 +455,7 @@ class Jackson2ObjectMapperBuilderTests {
 		JsonSerializer<Number> serializer2 = new NumberSerializer(Integer.class);
 
 		Jackson2ObjectMapperBuilder builder = Jackson2ObjectMapperBuilder.json()
-				.modules(new ArrayList<>()) // Disable well-known modules detection
+				.modules(new ArrayList<>())  // Disable well-known modules detection
 				.serializers(serializer1)
 				.serializersByType(Collections.singletonMap(Boolean.class, serializer2))
 				.deserializersByType(deserializerMap)
@@ -564,7 +563,6 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(objectMapper.getFactory().getClass()).isEqualTo(SmileFactory.class);
 	}
 
-
 	@Test
 	void visibility() throws JsonProcessingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
@@ -577,6 +575,7 @@ class Jackson2ObjectMapperBuilderTests {
 		assertThat(json).contains("property2");
 		assertThat(json).doesNotContain("property3");
 	}
+
 
 	static class CustomIntegerModule extends Module {
 
@@ -664,6 +663,7 @@ class Jackson2ObjectMapperBuilderTests {
 		}
 	}
 
+
 	static class JacksonVisibilityBean {
 
 		@SuppressWarnings("unused")
@@ -674,8 +674,8 @@ class Jackson2ObjectMapperBuilderTests {
 		public String getProperty3() {
 			return null;
 		}
-
 	}
+
 
 	static class OffsetDateTimeDeserializer extends JsonDeserializer<OffsetDateTime> {
 
@@ -683,19 +683,19 @@ class Jackson2ObjectMapperBuilderTests {
 
 		@Override
 		public OffsetDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-			final String value = jsonParser.getValueAsString();
-			if (StringUtils.isEmpty(value)) {
+			String value = jsonParser.getValueAsString();
+			if (!StringUtils.hasLength(value)) {
 				return null;
 			}
 			try {
 				return OffsetDateTime.parse(value);
-
 			}
 			catch (DateTimeParseException exception) {
 				return OffsetDateTime.parse(value + CURRENT_ZONE_OFFSET);
 			}
 		}
 	}
+
 
 	@JsonDeserialize
 	static class DemoPojo {
@@ -709,12 +709,13 @@ class Jackson2ObjectMapperBuilderTests {
 		public void setOffsetDateTime(OffsetDateTime offsetDateTime) {
 			this.offsetDateTime = offsetDateTime;
 		}
-
 	}
+
 
 	@SuppressWarnings("serial")
 	public static class MyXmlFactory extends XmlFactory {
 	}
+
 
 	static class Foo {}
 

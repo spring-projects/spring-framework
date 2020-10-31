@@ -53,7 +53,10 @@ import org.springframework.util.ObjectUtils;
  * @since 4.0
  * @see AnnotationUtils
  * @see AnnotationDescriptor
+ * @deprecated as of Spring Framework 5.3 in favor of
+ * {@link org.springframework.test.context.TestContextAnnotationUtils}
  */
+@Deprecated
 public abstract class MetaAnnotationUtils {
 
 	/**
@@ -123,7 +126,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
@@ -212,7 +215,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
 			if (descriptor != null) {

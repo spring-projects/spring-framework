@@ -106,6 +106,9 @@ dokka {
 		externalDocumentationLink {
 			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
 		}
+		externalDocumentationLink {
+			url = new URL("https://r2dbc.io/spec/0.8.3.RELEASE/api/")
+		}
 	}
 }
 

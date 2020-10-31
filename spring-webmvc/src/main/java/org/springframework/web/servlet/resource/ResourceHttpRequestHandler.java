@@ -140,6 +140,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	@Nullable
 	private StringValueResolver embeddedValueResolver;
 
+	private boolean useLastModified = true;
+
 
 	public ResourceHttpRequestHandler() {
 		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
@@ -346,6 +348,27 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		this.embeddedValueResolver = resolver;
 	}
 
+	/**
+	 * Return whether the {@link Resource#lastModified()} information is used
+	 * to drive HTTP responses when serving static resources.
+	 * @since 5.3
+	 */
+	public boolean isUseLastModified() {
+		return this.useLastModified;
+	}
+
+	/**
+	 * Set whether we should look at the {@link Resource#lastModified()}
+	 * when serving resources and use this information to drive {@code "Last-Modified"}
+	 * HTTP response headers.
+	 * <p>This option is enabled by default and should be turned off if the metadata of
+	 * the static files should be ignored.
+	 * @param useLastModified whether to use the resource last-modified information.
+	 * @since 5.3
+	 */
+	public void setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -498,7 +521,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		checkRequest(request);
 
 		// Header phase
-		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
+		if (isUseLastModified() && new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
 			logger.trace("Resource not modified");
 			return;
 		}
@@ -508,22 +531,16 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		// Check the media type for the resource
 		MediaType mediaType = getMediaType(request, resource);
+		setHeaders(response, resource, mediaType);
 
 		// Content phase
-		if (METHOD_HEAD.equals(request.getMethod())) {
-			setHeaders(response, resource, mediaType);
-			return;
-		}
-
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			Assert.state(this.resourceHttpMessageConverter != null, "Not initialized");
-			setHeaders(response, resource, mediaType);
 			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
 		}
 		else {
 			Assert.state(this.resourceRegionHttpMessageConverter != null, "Not initialized");
-			response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
@@ -532,7 +549,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 						HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
 			}
 			catch (IllegalArgumentException ex) {
-				response.setHeader("Content-Range", "bytes */" + resource.contentLength());
+				response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
 				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 		}
@@ -750,6 +767,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
+
 		if (resource instanceof HttpResource) {
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			resourceHeaders.forEach((headerName, headerValues) -> {
@@ -765,6 +783,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				}
 			});
 		}
+
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
 

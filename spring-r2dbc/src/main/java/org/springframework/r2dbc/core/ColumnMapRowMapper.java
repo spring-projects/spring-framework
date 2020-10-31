@@ -48,7 +48,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  */
 public class ColumnMapRowMapper implements BiFunction<Row, RowMetadata, Map<String, Object>> {
 
-	/** Default instance. */
+	/** A default {@code ColumnMapRowMapper} instance. */
 	public final static ColumnMapRowMapper INSTANCE = new ColumnMapRowMapper();
 
 

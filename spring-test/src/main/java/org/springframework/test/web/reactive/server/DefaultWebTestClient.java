@@ -213,7 +213,6 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
-			this.uriTemplate = null;
 			this.uri = uri;
 			return this;
 		}

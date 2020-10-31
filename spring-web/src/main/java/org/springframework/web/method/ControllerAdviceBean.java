@@ -16,13 +16,21 @@
 
 package org.springframework.web.method;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -128,7 +136,7 @@ public class ControllerAdviceBean implements Ordered {
 
 	/**
 	 * Get the order value for the contained bean.
-	 * <p>As of Spring Framework 5.2, the order value is lazily retrieved using
+	 * <p>As of Spring Framework 5.3, the order value is lazily retrieved using
 	 * the following algorithm and cached. Note, however, that a
 	 * {@link ControllerAdvice @ControllerAdvice} bean that is configured as a
 	 * scoped bean &mdash; for example, as a request-scoped or session-scoped
@@ -137,6 +145,8 @@ public class ControllerAdviceBean implements Ordered {
 	 * <ul>
 	 * <li>If the {@linkplain #resolveBean resolved bean} implements {@link Ordered},
 	 * use the value returned by {@link Ordered#getOrder()}.</li>
+	 * <li>If the {@linkplain org.springframework.context.annotation.Bean factory method}
+	 * is known, use the value returned by {@link OrderUtils#getOrder(AnnotatedElement)}.
 	 * <li>If the {@linkplain #getBeanType() bean type} is known, use the value returned
 	 * by {@link OrderUtils#getOrder(Class, int)} with {@link Ordered#LOWEST_PRECEDENCE}
 	 * used as the default order value.</li>
@@ -148,9 +158,10 @@ public class ControllerAdviceBean implements Ordered {
 	@Override
 	public int getOrder() {
 		if (this.order == null) {
+			String beanName = null;
 			Object resolvedBean = null;
 			if (this.beanFactory != null && this.beanOrName instanceof String) {
-				String beanName = (String) this.beanOrName;
+				beanName = (String) this.beanOrName;
 				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
 				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);
 				// Avoid eager @ControllerAdvice bean resolution for scoped proxies,
@@ -168,11 +179,30 @@ public class ControllerAdviceBean implements Ordered {
 			if (resolvedBean instanceof Ordered) {
 				this.order = ((Ordered) resolvedBean).getOrder();
 			}
-			else if (this.beanType != null) {
-				this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
-			}
 			else {
-				this.order = Ordered.LOWEST_PRECEDENCE;
+				if (beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
+					ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) this.beanFactory;
+					try {
+						BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
+						if (bd instanceof RootBeanDefinition) {
+							Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+							if (factoryMethod != null) {
+								this.order = OrderUtils.getOrder(factoryMethod);
+							}
+						}
+					}
+					catch (NoSuchBeanDefinitionException ex) {
+						// ignore -> probably a manually registered singleton
+					}
+				}
+				if (this.order == null) {
+					if (this.beanType != null) {
+						this.order = OrderUtils.getOrder(this.beanType, Ordered.LOWEST_PRECEDENCE);
+					}
+					else {
+						this.order = Ordered.LOWEST_PRECEDENCE;
+					}
+				}
 			}
 		}
 		return this.order;
@@ -260,14 +290,19 @@ public class ControllerAdviceBean implements Ordered {
 	 * @see Ordered
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
+		ListableBeanFactory beanFactory = context;
+		if (context instanceof ConfigurableApplicationContext) {
+			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory above
+			beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
+		}
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
-		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, Object.class)) {
+		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class)) {
 			if (!ScopedProxyUtils.isScopedTarget(name)) {
-				ControllerAdvice controllerAdvice = context.findAnnotationOnBean(name, ControllerAdvice.class);
+				ControllerAdvice controllerAdvice = beanFactory.findAnnotationOnBean(name, ControllerAdvice.class);
 				if (controllerAdvice != null) {
 					// Use the @ControllerAdvice annotation found by findAnnotationOnBean()
 					// in order to avoid a subsequent lookup of the same annotation.
-					adviceBeans.add(new ControllerAdviceBean(name, context, controllerAdvice));
+					adviceBeans.add(new ControllerAdviceBean(name, beanFactory, controllerAdvice));
 				}
 			}
 		}

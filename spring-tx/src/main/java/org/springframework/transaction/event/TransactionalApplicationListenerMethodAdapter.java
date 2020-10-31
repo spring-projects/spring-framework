@@ -17,14 +17,19 @@
 package org.springframework.transaction.event;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link GenericApplicationListener} adapter that delegates the processing of
@@ -38,22 +43,76 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
- * @since 4.2
- * @see ApplicationListenerMethodAdapter
+ * @since 5.3
  * @see TransactionalEventListener
+ * @see TransactionalApplicationListener
+ * @see TransactionalApplicationListenerAdapter
  */
-class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerMethodAdapter {
+public class TransactionalApplicationListenerMethodAdapter extends ApplicationListenerMethodAdapter
+		implements TransactionalApplicationListener<ApplicationEvent> {
 
 	private final TransactionalEventListener annotation;
 
+	private final TransactionPhase transactionPhase;
 
-	public ApplicationListenerMethodTransactionalAdapter(String beanName, Class<?> targetClass, Method method) {
+	@Nullable
+	private volatile String listenerId;
+
+	private final List<SynchronizationCallback> callbacks = new CopyOnWriteArrayList<>();
+
+
+	/**
+	 * Construct a new TransactionalApplicationListenerMethodAdapter.
+	 * @param beanName the name of the bean to invoke the listener method on
+	 * @param targetClass the target class that the method is declared on
+	 * @param method the listener method to invoke
+	 */
+	public TransactionalApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		TransactionalEventListener ann = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		TransactionalEventListener ann =
+				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
 		if (ann == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
 		}
 		this.annotation = ann;
+		this.transactionPhase = ann.phase();
+	}
+
+
+	@Override
+	public TransactionPhase getTransactionPhase() {
+		return this.transactionPhase;
+	}
+
+	@Override
+	public String getListenerId() {
+		String id = this.listenerId;
+		if (id == null) {
+			id = this.annotation.id();
+			if (id.isEmpty()) {
+				id = getDefaultListenerId();
+			}
+			this.listenerId = id;
+		}
+		return id;
+	}
+
+	/**
+	 * Determine the default id for the target listener, to be applied in case of
+	 * no {@link TransactionalEventListener#id() annotation-specified id value}.
+	 * <p>The default implementation builds a method name with parameter types.
+	 * @see #getListenerId()
+	 */
+	protected String getDefaultListenerId() {
+		Method method = getTargetMethod();
+		return ClassUtils.getQualifiedMethodName(method) +
+				"(" + StringUtils.arrayToDelimitedString(method.getParameterTypes(), ",") + ")";
+	}
+
+	@Override
+	public void addCallback(SynchronizationCallback callback) {
+		Assert.notNull(callback, "SynchronizationCallback must not be null");
+		this.callbacks.add(callback);
 	}
 
 
@@ -61,8 +120,8 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (TransactionSynchronizationManager.isSynchronizationActive() &&
 				TransactionSynchronizationManager.isActualTransactionActive()) {
-			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
-			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
+			TransactionSynchronizationManager.registerSynchronization(
+					new TransactionalApplicationListenerSynchronization<>(event, this, this.callbacks));
 		}
 		else if (this.annotation.fallbackExecution()) {
 			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK && logger.isWarnEnabled()) {
@@ -75,57 +134,6 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 			if (logger.isDebugEnabled()) {
 				logger.debug("No transaction is active - skipping " + event);
 			}
-		}
-	}
-
-	private TransactionSynchronization createTransactionSynchronization(ApplicationEvent event) {
-		return new TransactionSynchronizationEventAdapter(this, event, this.annotation.phase());
-	}
-
-
-	private static class TransactionSynchronizationEventAdapter implements TransactionSynchronization {
-
-		private final ApplicationListenerMethodAdapter listener;
-
-		private final ApplicationEvent event;
-
-		private final TransactionPhase phase;
-
-		public TransactionSynchronizationEventAdapter(ApplicationListenerMethodAdapter listener,
-				ApplicationEvent event, TransactionPhase phase) {
-
-			this.listener = listener;
-			this.event = event;
-			this.phase = phase;
-		}
-
-		@Override
-		public int getOrder() {
-			return this.listener.getOrder();
-		}
-
-		@Override
-		public void beforeCommit(boolean readOnly) {
-			if (this.phase == TransactionPhase.BEFORE_COMMIT) {
-				processEvent();
-			}
-		}
-
-		@Override
-		public void afterCompletion(int status) {
-			if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
-				processEvent();
-			}
-			else if (this.phase == TransactionPhase.AFTER_ROLLBACK && status == STATUS_ROLLED_BACK) {
-				processEvent();
-			}
-			else if (this.phase == TransactionPhase.AFTER_COMPLETION) {
-				processEvent();
-			}
-		}
-
-		protected void processEvent() {
-			this.listener.processEvent(this.event);
 		}
 	}
 

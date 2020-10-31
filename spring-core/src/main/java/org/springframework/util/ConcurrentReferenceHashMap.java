@@ -474,7 +474,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		 * The total number of references contained in this segment. This includes chained
 		 * references and references that have been garbage collected but not purged.
 		 */
-		private final AtomicInteger count = new AtomicInteger(0);
+		private final AtomicInteger count = new AtomicInteger();
 
 		/**
 		 * The threshold when resizing of the references should occur. When {@code count}

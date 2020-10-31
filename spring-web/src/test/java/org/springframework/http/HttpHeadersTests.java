@@ -384,7 +384,7 @@ public class HttpHeadersTests {
 		assertThat(disposition).isNotNull();
 		assertThat(headers.getContentDisposition()).as("Invalid Content-Disposition header").isEqualTo(ContentDisposition.empty());
 
-		disposition = ContentDisposition.builder("attachment").name("foo").filename("foo.txt").size(123L).build();
+		disposition = ContentDisposition.attachment().name("foo").filename("foo.txt").size(123L).build();
 		headers.setContentDisposition(disposition);
 		assertThat(headers.getContentDisposition()).as("Invalid Content-Disposition header").isEqualTo(disposition);
 	}

@@ -118,10 +118,6 @@ public class ResourceWebHandlerTests {
 		assertThat(resourceLastModifiedDate("test/foo.css") / 1000).isEqualTo(headers.getLastModified() / 1000);
 		assertThat(headers.getFirst("Accept-Ranges")).isEqualTo("bytes");
 		assertThat(headers.get("Accept-Ranges").size()).isEqualTo(1);
-
-		StepVerifier.create(exchange.getResponse().getBody())
-				.expectErrorMatches(ex -> ex.getMessage().startsWith("No content was written"))
-				.verify();
 	}
 
 	@Test
@@ -629,6 +625,20 @@ public class ResourceWebHandlerTests {
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getCacheControl()).isEqualTo("max-age=3600");
+	}
+
+	@Test
+	void ignoreLastModified() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, "foo.css");
+		this.handler.setUseLastModified(false);
+		this.handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(headers.getContentLength()).isEqualTo(17);
+		assertThat(headers.containsKey("Last-Modified")).isFalse();
+		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
 
