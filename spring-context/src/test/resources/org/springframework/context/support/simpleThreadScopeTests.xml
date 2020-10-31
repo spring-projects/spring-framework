@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+		<property name="scopes">
+			<map>
+				<entry key="thread">
+					<bean class="org.springframework.context.support.SimpleThreadScope" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<!--
+		NOTE: The bean names removeNodeStatusScreen and removeNodeStatusPresenter are seemingly
+		quite odd for TestBean instances; however, these have been chosen due to the fact that
+		they end up in the same bucket within a HashMap/ConcurrentHashMap initialized with the
+		default initial capacity.
+
+		For details see: https://github.com/spring-projects/spring-framework/issues/25801
+	 -->
+	<bean id="removeNodeStatusScreen" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread">
+		<property name="spouse" ref="removeNodeStatusPresenter" />
+	</bean>
+
+	<bean id="removeNodeStatusPresenter" class="org.springframework.beans.testfixture.beans.TestBean" scope="thread" />
+
+</beans>

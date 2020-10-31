@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+	Tests for independent prototype behavior.
+-->
+<beans>
+
+	<!-- Simple target -->
+	<bean id="test" class="org.springframework.beans.testfixture.beans.SideEffectBean">
+		<property name="count"><value>10</value></property>
+	</bean>
+
+	<bean id="prototypeTarget" class="org.springframework.beans.testfixture.beans.SideEffectBean" scope="prototype">
+		<property name="count"><value>10</value></property>
+	</bean>
+
+	<bean id="debugInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
+
+	<bean id="singleton" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>debugInterceptor,test</value></property>
+	</bean>
+
+	<bean id="prototype" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>debugInterceptor,prototypeTarget</value></property>
+		<property name="singleton"><value>false</value></property>
+	</bean>
+
+	<bean id="cglibPrototype"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames"><value>debugInterceptor,prototypeTarget</value></property>
+		<property name="singleton"><value>false</value></property>
+		<!-- Force the use of CGLIB -->
+		<property name="proxyTargetClass"><value>true</value></property>
+	</bean>
+
+</beans>

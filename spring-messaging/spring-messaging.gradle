@@ -1,0 +1,41 @@
+description = "Spring Messaging"
+
+apply plugin: "kotlin"
+
+dependencies {
+	compile(project(":spring-beans"))
+	compile(project(":spring-core"))
+	compileOnly(project(":kotlin-coroutines"))
+	optional(project(":spring-context"))
+	optional(project(":spring-oxm"))
+	optional("io.projectreactor.netty:reactor-netty-http")
+	optional("io.rsocket:rsocket-core")
+	optional("io.rsocket:rsocket-transport-netty")
+	optional("com.fasterxml.jackson.core:jackson-databind")
+	optional("com.google.code.gson:gson")
+	optional("javax.json.bind:javax.json.bind-api")
+	optional("javax.xml.bind:jaxb-api")
+	optional("com.google.protobuf:protobuf-java-util")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+	testCompile(project(":kotlin-coroutines"))
+	testCompile(testFixtures(project(":spring-core")))
+	testCompile("javax.inject:javax.inject-tck")
+	testCompile("javax.servlet:javax.servlet-api")
+	testCompile("javax.validation:validation-api")
+	testCompile("com.thoughtworks.xstream:xstream")
+	testCompile("org.apache.activemq:activemq-broker")
+	testCompile("org.apache.activemq:activemq-kahadb-store")
+	testCompile("org.apache.activemq:activemq-stomp")
+	testCompile("io.projectreactor:reactor-test")
+	testCompile "io.reactivex.rxjava3:rxjava"
+	testCompile("org.jetbrains.kotlin:kotlin-reflect")
+	testCompile("org.jetbrains.kotlin:kotlin-stdlib")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
+	testRuntime("com.sun.activation:javax.activation")
+	testRuntime("com.sun.xml.bind:jaxb-core")
+	testRuntime("com.sun.xml.bind:jaxb-impl")
+	testRuntime("javax.json:javax.json-api")
+	testRuntime("org.apache.johnzon:johnzon-jsonb")
+	testRuntime(project(":spring-context"))
+}

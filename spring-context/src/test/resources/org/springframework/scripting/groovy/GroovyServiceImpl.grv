@@ -1,0 +1,11 @@
+package org.springframework.scripting.groovy;
+
+@Log
+public class GroovyServiceImpl implements TestService {
+
+  public String sayHello() {
+    throw new TestException("GroovyServiceImpl");
+  }
+
+
+}

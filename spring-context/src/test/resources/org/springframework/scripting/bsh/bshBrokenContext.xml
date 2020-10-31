@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+				"https://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="broken" class="org.springframework.scripting.bsh.BshScriptFactory">
+		<constructor-arg value="classpath:org/springframework/scripting/bsh/Broken.bsh"/>
+		<constructor-arg value="org.springframework.scripting.Messenger"/>
+	</bean>
+</beans>

@@ -1,0 +1,30 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:websocket="http://www.springframework.org/schema/websocket"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+	<websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
+		<websocket:stomp-endpoint path="/foo,/bar">
+			<websocket:handshake-handler ref="myHandler"/>
+		</websocket:stomp-endpoint>
+		<websocket:simple-broker prefix="/topic"/>
+		<websocket:argument-resolvers>
+			<bean class="org.springframework.web.socket.config.CustomArgumentResolver" />
+			<ref bean="myArgumentResolver" />
+		</websocket:argument-resolvers>
+		<websocket:return-value-handlers>
+			<bean class="org.springframework.web.socket.config.CustomReturnValueHandler" />
+			<ref bean="myReturnValueHandler" />
+		</websocket:return-value-handlers>
+	</websocket:message-broker>
+
+	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
+
+	<bean id="myInterceptor" class="org.springframework.web.socket.config.TestChannelInterceptor"/>
+
+	<bean id="myArgumentResolver" class="org.springframework.web.socket.config.CustomArgumentResolver" />
+
+	<bean id="myReturnValueHandler" class="org.springframework.web.socket.config.CustomReturnValueHandler" />
+
+</beans>

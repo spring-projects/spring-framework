@@ -1,0 +1,9 @@
+# Tooling related information for the beans namespace
+http\://www.springframework.org/schema/beans@name=beans Namespace
+http\://www.springframework.org/schema/beans@prefix=beans
+http\://www.springframework.org/schema/beans@icon=org/springframework/beans/factory/xml/spring-beans.gif
+
+# Tooling related information for the util namespace
+http\://www.springframework.org/schema/util@name=util Namespace
+http\://www.springframework.org/schema/util@prefix=util
+http\://www.springframework.org/schema/util@icon=org/springframework/beans/factory/xml/spring-util.gif

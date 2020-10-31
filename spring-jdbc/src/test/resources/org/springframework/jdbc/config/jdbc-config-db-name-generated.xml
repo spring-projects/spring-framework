@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans" xmlns="http://www.springframework.org/schema/jdbc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc https://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd">
+
+	<embedded-database id="dataSource" database-name="shouldBeOverriddenByGeneratedName" generate-name="true">
+		<script location="classpath:org/springframework/jdbc/config/db-schema.sql" />
+		<script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+	</embedded-database>
+
+</beans:beans>
