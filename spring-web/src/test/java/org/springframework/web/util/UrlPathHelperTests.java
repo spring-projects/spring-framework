@@ -104,6 +104,9 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo+bar");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo+bar");
+
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
 	}
 
 	@Test

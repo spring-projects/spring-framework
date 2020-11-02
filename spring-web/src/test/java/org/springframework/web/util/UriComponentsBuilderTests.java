@@ -1200,4 +1200,9 @@ class UriComponentsBuilderTests {
 		assertThat(UriComponentsBuilder.fromUriString("/path?q={asa}asa").toUriString()).isEqualTo("/path?q=%7Basa%7Dasa");
 	}
 
+	@Test
+	void verifyDoubleSlashReplacedWithSingleOne() {
+		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build().getPath();
+		assertThat(path).isEqualTo("/home/path");
+	}
 }
