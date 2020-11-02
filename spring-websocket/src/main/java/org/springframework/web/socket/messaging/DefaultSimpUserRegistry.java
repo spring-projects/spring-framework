@@ -27,6 +27,7 @@ import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.SimpSession;
@@ -34,7 +35,6 @@ import org.springframework.messaging.simp.user.SimpSubscription;
 import org.springframework.messaging.simp.user.SimpSubscriptionMatcher;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
@@ -84,19 +84,16 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	public void onApplicationEvent(ApplicationEvent event) {
 		AbstractSubProtocolEvent subProtocolEvent = (AbstractSubProtocolEvent) event;
 		Message<?> message = subProtocolEvent.getMessage();
+		MessageHeaders headers = message.getHeaders();
 
-		SimpMessageHeaderAccessor accessor =
-				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
-		Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
-
-		String sessionId = accessor.getSessionId();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		Assert.state(sessionId != null, "No session id");
 
 		if (event instanceof SessionSubscribeEvent) {
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
-				String id = accessor.getSubscriptionId();
-				String destination = accessor.getDestination();
+				String id = SimpMessageHeaderAccessor.getSubscriptionId(headers);
+				String destination = SimpMessageHeaderAccessor.getDestination(headers);
 				if (id != null && destination != null) {
 					session.addSubscription(id, destination);
 				}
@@ -137,7 +134,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		else if (event instanceof SessionUnsubscribeEvent) {
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
-				String subscriptionId = accessor.getSubscriptionId();
+				String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 				if (subscriptionId != null) {
 					session.removeSubscription(subscriptionId);
 				}
