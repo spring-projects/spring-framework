@@ -65,12 +65,12 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 
 	@Test
 	public void resolveActiveProfilesWithDuplicatedProfiles() {
-		assertResolvedProfiles(DuplicatedProfiles.class, "bar", "baz", "foo");
+		assertResolvedProfiles(DuplicatedProfiles.class, "foo", "bar", "baz");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedDuplicatedProfiles() {
-		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "bar", "baz", "cat", "dog", "foo");
+		assertResolvedProfiles(ExtendedDuplicatedProfiles.class, "foo", "bar", "baz", "cat", "dog");
 	}
 
 	@Test
@@ -90,12 +90,12 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedAnnotations() {
-		assertResolvedProfiles(LocationsBar.class, "bar", "foo");
+		assertResolvedProfiles(LocationsBar.class, "foo", "bar");
 	}
 
 	@Test
 	public void resolveActiveProfilesWithOverriddenAnnotation() {
-		assertResolvedProfiles(Animals.class, "cat", "dog");
+		assertResolvedProfiles(Animals.class, "dog", "cat");
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithLocalAndInheritedMetaAnnotations() {
-		assertResolvedProfiles(MetaLocationsBar.class, "bar", "foo");
+		assertResolvedProfiles(MetaLocationsBar.class, "foo", "bar");
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithOverriddenMetaAnnotation() {
-		assertResolvedProfiles(MetaAnimals.class, "cat", "dog");
+		assertResolvedProfiles(MetaAnimals.class, "dog", "cat");
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class ActiveProfilesUtilsTests extends AbstractContextConfigurationUtilsT
 	 */
 	@Test
 	public void resolveActiveProfilesWithMergedInheritedResolver() {
-		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "bar", "foo");
+		assertResolvedProfiles(MergedInheritedFooActiveProfilesResolverTestCase.class, "foo", "bar");
 	}
 
 	/**
