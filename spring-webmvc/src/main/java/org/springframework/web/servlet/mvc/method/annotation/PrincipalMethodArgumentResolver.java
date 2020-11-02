@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.security.Principal;
@@ -29,8 +30,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 /**
  * Resolves an argument of type {@link Principal}, similar to
  * {@link ServletRequestMethodArgumentResolver} but irrespective of whether the
- * argument is annotated or not. This is doen to enable custom argument
- * resolution of a {@link Principal} argument (with custom annotation).
+ * argument is annotated or not. This is done to enable custom argument
+ * resolution of a {@link Principal} argument (with a custom annotation).
  *
  * @author Rossen Stoyanchev
  * @since 5.3.1
