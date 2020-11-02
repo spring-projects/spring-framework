@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.test.context;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -533,8 +533,8 @@ public class MergedContextConfiguration implements Serializable {
 			return EMPTY_STRING_ARRAY;
 		}
 
-		// Active profiles must be unique and sorted
-		Set<String> profilesSet = new TreeSet<>(Arrays.asList(activeProfiles));
+		// Active profiles must be unique
+		Set<String> profilesSet = new LinkedHashSet<>(Arrays.asList(activeProfiles));
 		return StringUtils.toStringArray(profilesSet);
 	}
 
