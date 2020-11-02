@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -111,8 +112,23 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 				return false;
 			}
 		}
-		return (Object.class == clazz ||
-				(!String.class.isAssignableFrom(elementType.resolve(clazz)) && getObjectMapper().canSerialize(clazz)));
+		if (String.class.isAssignableFrom(elementType.resolve(clazz))) {
+			return false;
+		}
+		if (Object.class == clazz) {
+			return true;
+		}
+		if (!logger.isDebugEnabled()) {
+			return getObjectMapper().canSerialize(clazz);
+		}
+		else {
+			AtomicReference<Throwable> causeRef = new AtomicReference<>();
+			if (getObjectMapper().canSerialize(clazz, causeRef)) {
+				return true;
+			}
+			logWarningIfNecessary(clazz, causeRef.get());
+			return false;
+		}
 	}
 
 	@Override
