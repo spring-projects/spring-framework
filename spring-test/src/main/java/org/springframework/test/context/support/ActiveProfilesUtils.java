@@ -17,7 +17,6 @@
 package org.springframework.test.context.support;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -110,14 +109,14 @@ abstract class ActiveProfilesUtils {
 
 			String[] profiles = resolver.resolve(rootDeclaringClass);
 			if (!ObjectUtils.isEmpty(profiles)) {
-				profileArrays.add(profiles);
+				// Prepend to the list so that we can later traverse "down" the hierarchy
+				// to ensure that we retain the top-down profile registration order
+				// within a test class hierarchy.
+				profileArrays.add(0, profiles);
 			}
 
 			descriptor = (annotation.inheritProfiles() ? descriptor.next() : null);
 		}
-
-		// Reverse the list so that we can traverse "down" the hierarchy.
-		Collections.reverse(profileArrays);
 
 		Set<String> activeProfiles = new LinkedHashSet<>();
 		for (String[] profiles : profileArrays) {
