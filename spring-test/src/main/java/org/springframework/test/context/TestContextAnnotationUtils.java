@@ -19,14 +19,15 @@ package org.springframework.test.context;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
-import org.springframework.core.annotation.MergedAnnotationCollectors;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -146,7 +147,8 @@ public abstract class TestContextAnnotationUtils {
 		// Present (via @Inherited semantics), directly present, or meta-present?
 		Set<T> mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(annotationType)
-				.collect(MergedAnnotationCollectors.toAnnotationSet());
+				.map(MergedAnnotation::synthesize)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 
 		if (!mergedAnnotations.isEmpty()) {
 			return mergedAnnotations;
@@ -545,19 +547,18 @@ public abstract class TestContextAnnotationUtils {
 		/**
 		 * Find <strong>all</strong> annotations of the specified annotation type
 		 * that are present or meta-present on the {@linkplain #getRootDeclaringClass()
-		 * root declaring class} of this descriptor.
+		 * root declaring class} of this descriptor or on any interfaces that the
+		 * root declaring class implements.
 		 * @return the set of all merged, synthesized {@code Annotations} found,
 		 * or an empty set if none were found
 		 */
 		public Set<T> findAllLocalMergedAnnotations() {
-			SearchStrategy searchStrategy =
-					(getEnclosingConfiguration(getRootDeclaringClass()) == EnclosingConfiguration.INHERIT ?
-							SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
-							SearchStrategy.TYPE_HIERARCHY);
+			SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
 			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
 					.stream(getAnnotationType())
 					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-					.collect(MergedAnnotationCollectors.toAnnotationSet());
+					.map(MergedAnnotation::synthesize)
+					.collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 
 		/**
