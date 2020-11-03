@@ -847,6 +847,30 @@ public interface WebClient {
 		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
 
 		/**
+		 * Return a {@code ResponseEntity} with the body decoded to a {@code Flux}
+		 * of elements of the given type. For an error response (status code of
+		 * 4xx or 5xx), the {@code Mono} emits a {@link WebClientException}.
+		 * Use {@link #onStatus(Predicate, Function)} to customize error response
+		 * handling.
+		 * <p><strong>Note:</strong> The {@code Flux} representing the body must
+		 * be subscribed to or else associated resources will not be released.
+		 * @param elementType the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the resulting {@code ResponseEntity}
+		 * @since 5.3.1
+		 */
+		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType);
+
+		/**
+		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param elementTypeReference the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the resulting {@code ResponseEntity}
+		 * @since 5.3.1
+		 */
+		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeReference);
+
+		/**
 		 * Return the response as a delayed list of {@code ResponseEntity}s. By default, if the
 		 * response has status code 4xx or 5xx, the {@code Mono} will contain a
 		 * {@link WebClientException}. This can be overridden with

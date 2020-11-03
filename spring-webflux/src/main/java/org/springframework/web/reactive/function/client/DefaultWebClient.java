@@ -623,6 +623,22 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType) {
+			return this.responseMono.map(response ->
+					ResponseEntity.status(response.rawStatusCode())
+							.headers(response.headers().asHttpHeaders())
+							.body(response.bodyToFlux(elementType)));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeReference) {
+			return this.responseMono.map(response ->
+					ResponseEntity.status(response.rawStatusCode())
+							.headers(response.headers().asHttpHeaders())
+							.body(response.bodyToFlux(elementTypeReference)));
+		}
+
+		@Override
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
 					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
