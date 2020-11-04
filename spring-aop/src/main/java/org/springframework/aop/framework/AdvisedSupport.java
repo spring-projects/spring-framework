@@ -242,6 +242,11 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	@Override
+	public int getAdvisorCount() {
+		return this.advisors.size();
+	}
+
+	@Override
 	public void addAdvisor(Advisor advisor) {
 		int pos = this.advisors.size();
 		addAdvisor(pos, advisor);
@@ -532,11 +537,6 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		// Initialize transient fields.
 		this.methodCache = new ConcurrentHashMap<>(32);
-	}
-
-	@Override
-	public int getAdvisorCount() {
-		return advisors.size();
 	}
 
 	@Override

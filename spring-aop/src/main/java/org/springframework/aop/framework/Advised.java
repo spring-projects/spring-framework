@@ -115,6 +115,15 @@ public interface Advised extends TargetClassAware {
 	Advisor[] getAdvisors();
 
 	/**
+	 * Return the number of advisors applying to this proxy.
+	 * <p>The default implementation delegates to {@code getAdvisors().length}.
+	 * @since 5.3.1
+	 */
+	default int getAdvisorCount() {
+		return getAdvisors().length;
+	}
+
+	/**
 	 * Add an advisor at the end of the advisor chain.
 	 * <p>The Advisor may be an {@link org.springframework.aop.IntroductionAdvisor},
 	 * in which new interfaces will be available when a proxy is next obtained
@@ -222,13 +231,5 @@ public interface Advised extends TargetClassAware {
 	 * @return a string description of the proxy configuration
 	 */
 	String toProxyConfigString();
-
-	/**
-	 * Equivalent to {@code getAdvisors().length}
-	 * @return count of advisors of this advised
-	 */
-	default int getAdvisorCount() {
-		return getAdvisors().length;
-	}
 
 }
