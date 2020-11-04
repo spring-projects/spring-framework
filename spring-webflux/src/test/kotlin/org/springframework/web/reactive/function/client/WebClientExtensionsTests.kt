@@ -125,5 +125,23 @@ class WebClientExtensionsTests {
 		}
 	}
 
+	@Test
+	fun `ResponseSpec#toEntity with reified type parameters`() {
+		responseSpec.toEntity<List<Foo>>()
+		verify { responseSpec.toEntity(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#toEntityList with reified type parameters`() {
+		responseSpec.toEntityList<List<Foo>>()
+		verify { responseSpec.toEntityList(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
+	@Test
+	fun `ResponseSpec#toEntityFlux with reified type parameters`() {
+		responseSpec.toEntityFlux<List<Foo>>()
+		verify { responseSpec.toEntityFlux(object : ParameterizedTypeReference<List<Foo>>() {}) }
+	}
+
 	class Foo
 }
