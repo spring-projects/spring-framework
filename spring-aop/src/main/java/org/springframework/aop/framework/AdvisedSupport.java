@@ -476,14 +476,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
-		MethodCacheKey cacheKey = new MethodCacheKey(method);
-		List<Object> cached = this.methodCache.get(cacheKey);
-		if (cached == null) {
-			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(
-					this, method, targetClass);
-			this.methodCache.put(cacheKey, cached);
-		}
-		return cached;
+		return this.methodCache.computeIfAbsent(new MethodCacheKey(method), k ->
+				this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(this, method, targetClass));
 	}
 
 	/**
