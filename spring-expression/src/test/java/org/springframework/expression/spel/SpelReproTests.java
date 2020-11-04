@@ -76,7 +76,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 public class SpelReproTests extends AbstractExpressionTests {
 
-
 	@Test
 	public void NPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
