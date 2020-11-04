@@ -19,15 +19,14 @@ package org.springframework.test.context;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotationCollectors;
 import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -147,8 +146,7 @@ public abstract class TestContextAnnotationUtils {
 		// Present (via @Inherited semantics), directly present, or meta-present?
 		Set<T> mergedAnnotations = MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
 				.stream(annotationType)
-				.map(MergedAnnotation::synthesize)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
+				.collect(MergedAnnotationCollectors.toAnnotationSet());
 
 		if (!mergedAnnotations.isEmpty()) {
 			return mergedAnnotations;
@@ -557,8 +555,7 @@ public abstract class TestContextAnnotationUtils {
 			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
 					.stream(getAnnotationType())
 					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
-					.map(MergedAnnotation::synthesize)
-					.collect(Collectors.toCollection(LinkedHashSet::new));
+					.collect(MergedAnnotationCollectors.toAnnotationSet());
 		}
 
 		/**
