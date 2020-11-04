@@ -618,10 +618,11 @@ public class UrlPathHelper {
 		}
 		StringBuilder sb = new StringBuilder(requestUri);
 		while (semicolonIndex != -1) {
-			int slashIndex = requestUri.indexOf('/', semicolonIndex);
-			if (slashIndex >= 0) {
-				sb.delete(semicolonIndex, slashIndex);
+			int slashIndex = requestUri.indexOf('/', semicolonIndex + 1);
+			if (slashIndex == -1) {
+				slashIndex = sb.length();
 			}
+			sb.delete(semicolonIndex, slashIndex);
 			semicolonIndex = sb.indexOf(";", semicolonIndex);
 		}
 		return sb.toString();
