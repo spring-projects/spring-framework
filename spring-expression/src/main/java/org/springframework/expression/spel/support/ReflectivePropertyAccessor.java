@@ -395,6 +395,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (method == null) {
 			method = findMethodForProperty(getPropertyMethodSuffixes(propertyName),
 					"is", clazz, mustBeStatic, 0, BOOLEAN_TYPES);
+			if (method == null) {
+				// Record-style plain accessor method, e.g. name()
+				method = findMethodForProperty(new String[] {propertyName},
+						"", clazz, mustBeStatic, 0, ANY_TYPES);
+			}
 		}
 		return method;
 	}
@@ -683,12 +688,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					return true;
 				}
 				getterName = "is" + StringUtils.capitalize(name);
-				return getterName.equals(method.getName());
+				if (getterName.equals(method.getName())) {
+					return true;
+				}
 			}
-			else {
-				Field field = (Field) this.member;
-				return field.getName().equals(name);
-			}
+			return this.member.getName().equals(name);
 		}
 
 		@Override
