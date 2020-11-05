@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -613,7 +613,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object cachedFieldValue;
@@ -644,21 +644,20 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 				synchronized (this) {
 					if (!this.cached) {
+						Object cachedFieldValue = null;
 						if (value != null || this.required) {
-							this.cachedFieldValue = desc;
+							cachedFieldValue = desc;
 							registerDependentBeans(beanName, autowiredBeanNames);
 							if (autowiredBeanNames.size() == 1) {
 								String autowiredBeanName = autowiredBeanNames.iterator().next();
 								if (beanFactory.containsBean(autowiredBeanName) &&
 										beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-									this.cachedFieldValue = new ShortcutDependencyDescriptor(
+									cachedFieldValue = new ShortcutDependencyDescriptor(
 											desc, autowiredBeanName, field.getType());
 								}
 							}
 						}
-						else {
-							this.cachedFieldValue = null;
-						}
+						this.cachedFieldValue = cachedFieldValue;
 						this.cached = true;
 					}
 				}
@@ -678,7 +677,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 		private final boolean required;
 
-		private volatile boolean cached = false;
+		private volatile boolean cached;
 
 		@Nullable
 		private volatile Object[] cachedMethodArguments;
