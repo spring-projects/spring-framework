@@ -68,7 +68,7 @@ import org.springframework.util.StringUtils;
  */
 public final class SpelCompiler implements Opcodes {
 
-	private static final int CLASSES_DEFINED_LIMIT = 10;
+	private static final int CLASSES_DEFINED_LIMIT = 100;
 
 	private static final Log logger = LogFactory.getLog(SpelCompiler.class);
 
@@ -92,7 +92,7 @@ public final class SpelCompiler implements Opcodes {
 	/**
 	 * Attempt compilation of the supplied expression. A check is made to see
 	 * if it is compilable before compilation proceeds. The check involves
-	 * visiting all the nodes in the expression Ast and ensuring enough state
+	 * visiting all the nodes in the expression AST and ensuring enough state
 	 * is known about them that bytecode can be generated for them.
 	 * @param expression the expression to compile
 	 * @return an instance of the class implementing the compiled expression,
@@ -127,7 +127,7 @@ public final class SpelCompiler implements Opcodes {
 
 	/**
 	 * Generate the class that encapsulates the compiled expression and define it.
-	 * The  generated class will be a subtype of CompiledExpression.
+	 * The generated class will be a subtype of CompiledExpression.
 	 * @param expressionToCompile the expression to be compiled
 	 * @return the expression call, or {@code null} if the decision was to opt out of
 	 * compilation during code generation
@@ -290,6 +290,9 @@ public final class SpelCompiler implements Opcodes {
 	}
 
 
+	/**
+	 * An ASM ClassWriter extension bound to the SpelCompiler's ClassLoader.
+	 */
 	private class ExpressionClassWriter extends ClassWriter {
 
 		public ExpressionClassWriter() {

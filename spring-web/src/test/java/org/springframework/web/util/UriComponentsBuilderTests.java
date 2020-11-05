@@ -614,7 +614,7 @@ class UriComponentsBuilderTests {
 		assertThat(after.getPath()).isEqualTo("/foo/");
 	}
 
-	@Test // gh-19890
+	@Test  // gh-19890
 	void fromHttpRequestWithEmptyScheme() {
 		HttpRequest request = new HttpRequest() {
 			@Override
@@ -896,7 +896,7 @@ class UriComponentsBuilderTests {
 		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isNull();
 	}
 
-	@Test // gh-24444
+	@Test  // gh-24444
 	void opaqueUriDoesNotResetOnNullInput() throws URISyntaxException {
 		URI uri = new URI("urn:ietf:wg:oauth:2.0:oob");
 		UriComponents result = UriComponentsBuilder.fromUri(uri)
@@ -1156,7 +1156,7 @@ class UriComponentsBuilderTests {
 		assertThat(result.toUriString()).isEqualTo("https://example.com/rest/mobile/users/1");
 	}
 
-	@Test // gh-25737
+	@Test  // gh-25737
 	void fromHttpRequestForwardedHeaderComma() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Forwarded", "for=192.0.2.0,for=192.0.2.1;proto=https;host=192.0.2.3:9090");
