@@ -30,7 +30,7 @@ configure(allprojects) { project ->
 			mavenBom "io.projectreactor:reactor-bom:2020.0.0"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR8"
 			mavenBom "io.rsocket:rsocket-bom:1.1.0"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.33.v20201020"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.34.v20201102"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.4.10"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.4.0"
 			mavenBom "org.junit:junit-bom:5.7.0"
@@ -190,14 +190,14 @@ configure(allprojects) { project ->
 			dependency "org.testng:testng:7.3.0"
 			dependency "org.hamcrest:hamcrest:2.1"
 			dependency "org.awaitility:awaitility:3.1.6"
-			dependency "org.assertj:assertj-core:3.17.2"
+			dependency "org.assertj:assertj-core:3.18.0"
 			dependencySet(group: 'org.xmlunit', version: '2.6.2') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '3.5.15') {
+			dependencySet(group: 'org.mockito', version: '3.6.0') {
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
