@@ -223,7 +223,8 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		public String[] getParameterNames() {
 			String[] parameterNames = this.parameterNames;
 			if (parameterNames == null) {
-				this.parameterNames = parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+				parameterNames = parameterNameDiscoverer.getParameterNames(getMethod());
+				this.parameterNames = parameterNames;
 			}
 			return parameterNames;
 		}
