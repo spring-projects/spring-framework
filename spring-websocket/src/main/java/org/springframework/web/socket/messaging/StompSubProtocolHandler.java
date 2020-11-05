@@ -312,8 +312,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 			catch (Throwable ex) {
 				if (logger.isErrorEnabled()) {
-					logger.error("Failed to send client message to application via MessageChannel" +
-							" in session " + session.getId() + ". Sending STOMP ERROR to client.", ex);
+					String errorText = "Failed to send message to MessageChannel in session " + session.getId();
+					if (logger.isDebugEnabled()) {
+						logger.debug(errorText, ex);
+					}
+					else {
+						logger.error(errorText + ":" + ex.getMessage());
+					}
 				}
 				handleError(session, ex, message);
 			}
