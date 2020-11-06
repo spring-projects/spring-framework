@@ -39,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView1;
 import org.springframework.http.codec.json.JacksonViewBean.MyJacksonView3;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -212,6 +213,25 @@ public class Jackson2JsonEncoderTests extends AbstractEncoderTests<Jackson2JsonE
 								.andThen(DataBufferUtils::release))
 						.verifyComplete(),
 				null, hints);
+	}
+
+	@Test
+	public void jacksonValue() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.setSerializationView(MyJacksonView1.class);
+
+		ResolvableType type = ResolvableType.forClass(MappingJacksonValue.class);
+
+		testEncode(Mono.just(jacksonValue), type, step -> step
+						.consumeNextWith(expectString("{\"withView1\":\"with\"}")
+								.andThen(DataBufferUtils::release))
+						.verifyComplete(),
+				null, Collections.emptyMap());
 	}
 
 	@Test // gh-22771
