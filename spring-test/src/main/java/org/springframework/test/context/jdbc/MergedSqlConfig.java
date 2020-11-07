@@ -19,12 +19,12 @@ package org.springframework.test.context.jdbc;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.jdbc.SqlConfig.ErrorMode;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 import org.springframework.util.Assert;
@@ -100,13 +100,14 @@ class MergedSqlConfig {
 		enforceCommentPrefixAliases(localAttributes);
 
 		// Get global attributes, if any.
-		AnnotationAttributes globalAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
-				testClass, SqlConfig.class.getName(), false, false);
+		SqlConfig globalSqlConfig = TestContextAnnotationUtils.findMergedAnnotation(testClass, SqlConfig.class);
 
 		// Use local attributes only?
-		if (globalAttributes == null) {
+		if (globalSqlConfig == null) {
 			return localAttributes;
 		}
+
+		AnnotationAttributes globalAttributes = AnnotationUtils.getAnnotationAttributes(globalSqlConfig, false, false);
 
 		// Enforce comment prefix aliases within the global @SqlConfig.
 		enforceCommentPrefixAliases(globalAttributes);

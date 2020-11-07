@@ -134,6 +134,18 @@ public class CorsRegistration {
 		return this;
 	}
 
+	/**
+	 * Apply the given {@code CorsConfiguration} to the one being configured via
+	 * {@link CorsConfiguration#combine(CorsConfiguration)} which in turn has been
+	 * initialized with {@link CorsConfiguration#applyPermitDefaultValues()}.
+	 * @param other the configuration to apply
+	 * @since 5.3
+	 */
+	public CorsRegistration combine(CorsConfiguration other) {
+		this.config.combine(other);
+		return this;
+	}
+
 	protected String getPathPattern() {
 		return this.pathPattern;
 	}

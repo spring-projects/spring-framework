@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -97,10 +98,22 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		JavaType javaType = getObjectMapper().getTypeFactory().constructType(elementType.getType());
+		JavaType javaType = getObjectMapper().constructType(elementType.getType());
 		// Skip String: CharSequenceDecoder + "*/*" comes after
-		return (!CharSequence.class.isAssignableFrom(elementType.toClass()) &&
-				getObjectMapper().canDeserialize(javaType) && supportsMimeType(mimeType));
+		if (CharSequence.class.isAssignableFrom(elementType.toClass()) || !supportsMimeType(mimeType)) {
+			return false;
+		}
+		if (!logger.isDebugEnabled()) {
+			return getObjectMapper().canDeserialize(javaType);
+		}
+		else {
+			AtomicReference<Throwable> causeRef = new AtomicReference<>();
+			if (getObjectMapper().canDeserialize(javaType, causeRef)) {
+				return true;
+			}
+			logWarningIfNecessary(javaType, causeRef.get());
+			return false;
+		}
 	}
 
 	@Override

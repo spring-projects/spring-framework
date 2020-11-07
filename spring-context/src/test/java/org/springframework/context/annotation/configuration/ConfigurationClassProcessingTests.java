@@ -307,6 +307,23 @@ public class ConfigurationClassProcessingTests {
 		assertThat(tb.getLawyer()).isEqualTo(ctx.getBean(NestedTestBean.class));
 	}
 
+	@Test  // gh-26019
+	public void autowiringWithDynamicPrototypeBeanClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ConfigWithDynamicPrototype.class, PrototypeDependency.class);
+
+		PrototypeInterface p1 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p1).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p1).prototypeDependency).isNotNull();
+
+		PrototypeInterface p2 = ctx.getBean(PrototypeInterface.class, 2);
+		assertThat(p2).isInstanceOf(PrototypeTwo.class);
+
+		PrototypeInterface p3 = ctx.getBean(PrototypeInterface.class, 1);
+		assertThat(p3).isInstanceOf(PrototypeOne.class);
+		assertThat(((PrototypeOne) p3).prototypeDependency).isNotNull();
+	}
+
 
 	/**
 	 * Creates a new {@link BeanFactory}, populates it with a {@link BeanDefinition}
@@ -629,6 +646,44 @@ public class ConfigurationClassProcessingTests {
 			TestBean tb = new TestBean();
 			tb.setLawyer(other);
 			return tb;
+		}
+	}
+
+
+	static class PrototypeDependency {
+	}
+
+	interface PrototypeInterface {
+	}
+
+	static class PrototypeOne extends AbstractPrototype {
+
+		@Autowired
+		PrototypeDependency prototypeDependency;
+
+	}
+
+	static class PrototypeTwo extends AbstractPrototype {
+
+		// no autowired dependency here, in contrast to above
+	}
+
+	static class AbstractPrototype implements PrototypeInterface {
+	}
+
+	@Configuration
+	static class ConfigWithDynamicPrototype {
+
+		@Bean
+		@Scope(value = "prototype")
+		public PrototypeInterface getDemoBean( int i) {
+			switch ( i) {
+				case 1: return new PrototypeOne();
+				case 2:
+				default:
+					return new PrototypeTwo();
+
+			}
 		}
 	}
 

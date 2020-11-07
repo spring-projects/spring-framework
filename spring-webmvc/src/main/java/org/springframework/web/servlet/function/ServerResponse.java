@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -36,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -216,6 +218,31 @@ public interface ServerResponse {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
 
+	/**
+	 * Create a (built) response with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 *
+	 * <p>This method can be used to set the response status code, headers, and
+	 * body based on an asynchronous result. If only the body is asynchronous,
+	 * {@link BodyBuilder#body(Object)} can be used instead.
+	 *
+	 * <p><strong>Note</strong> that
+	 * {@linkplain RenderingResponse rendering responses}, as returned by
+	 * {@link BodyBuilder#render}, are <strong>not</strong> supported as value
+	 * for {@code asyncResponse}. Use WebFlux.fn for asynchronous rendering.
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @return the asynchronous response
+	 * @since 5.3
+	 */
+	static ServerResponse async(Object asyncResponse) {
+		return AsyncServerResponse.create(asyncResponse);
+	}
+
 
 	/**
 	 * Defines a builder that adds headers to the response.
@@ -374,10 +401,13 @@ public interface ServerResponse {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Set the body of the response to the given {@code Object} and return it.
+		 * Set the body of the response to the given {@code Object} and return
+		 * it.
 		 *
-		 * <p>Asynchronous response bodies are supported by providing a {@link CompletionStage} or
-		 * {@link Publisher} as body.
+		 * <p>Asynchronous response bodies are supported by providing a
+		 * {@link CompletionStage} or {@link Publisher} as body (or any
+		 * asynchronous producer of a single entity that can be adapted via the
+		 * {@link ReactiveAdapterRegistry}).
 		 * @param body the body of the response
 		 * @return the built response
 		 */

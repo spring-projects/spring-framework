@@ -389,6 +389,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "unknown ext in path params");
 		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "unknown ext in filename");
 		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "safe extensions");
+		assertContentDisposition(processor, true, "/hello.json;jsessionid=foo.bar", "jsessionid shouldn't cause issue");
 
 		// encoded dot
 		assertContentDisposition(processor, true, "/hello%2Edataless;a=b;setup.json", "encoded dot in filename");
@@ -398,6 +399,25 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/hello.bat");
 		assertContentDisposition(processor, true, "/bonjour", "forwarded URL");
 		this.servletRequest.removeAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
+	}
+
+	@Test
+	public void addContentDispositionHeaderToErrorResponse() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.addMediaType("pdf", new MediaType("application", "pdf"));
+		factory.afterPropertiesSet();
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				Collections.singletonList(new StringHttpMessageConverter()),
+				factory.getObject());
+
+		this.servletRequest.setRequestURI("/hello.dataless");
+		this.servletResponse.setStatus(400);
+
+		processor.handleReturnValue("body", this.returnTypeString, this.container, this.request);
+
+		String header = servletResponse.getHeader("Content-Disposition");
+		assertThat(header).isEqualTo("inline;filename=f.txt");
 	}
 
 	@Test
@@ -724,10 +744,14 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		String header = servletResponse.getHeader("Content-Disposition");
 		if (expectContentDisposition) {
-			assertThat(header).as("Expected 'Content-Disposition' header. Use case: '" + comment + "'").isEqualTo("inline;filename=f.txt");
+			assertThat(header)
+					.as("Expected 'Content-Disposition' header. Use case: '" + comment + "'")
+					.isEqualTo("inline;filename=f.txt");
 		}
 		else {
-			assertThat(header).as("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'").isNull();
+			assertThat(header)
+					.as("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'")
+					.isNull();
 		}
 
 		this.servletRequest = new MockHttpServletRequest();

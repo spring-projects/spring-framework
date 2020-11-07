@@ -16,9 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation
 
+import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.async.WebAsyncUtils
 import org.springframework.web.servlet.handler.PathPatternsParameterizedTest
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
@@ -71,6 +73,17 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 		assertThat(response.contentAsString).isEqualTo("value1-12")
 	}
 
+	@PathPatternsParameterizedTest
+	fun suspendingMethod(usePathPatterns: Boolean) {
+		initDispatcherServlet(CoroutinesController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/suspending")
+		request.isAsyncSupported = true
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(WebAsyncUtils.getAsyncManager(request).concurrentResult).isEqualTo("foo")
+	}
+
 
 	data class DataClass(val param1: String, val param2: Int)
 
@@ -84,6 +97,17 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 
 		@RequestMapping("/bind-optional-parameter")
 		fun handle(data: DataClassWithOptionalParameter) = "${data.param1}-${data.param2}"
+	}
+
+	@RestController
+	class CoroutinesController {
+
+		@Suppress("RedundantSuspendModifier")
+		@RequestMapping("/suspending")
+		suspend fun handle(): String {
+			return "foo"
+		}
+
 	}
 
 }

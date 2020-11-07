@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -30,10 +29,8 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Testing variations on map access.
@@ -75,8 +72,8 @@ public class MapAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testGetValue(){
-		Map<String,String> props1 = new HashMap<>();
+	public void testGetValue() {
+		Map<String, String> props1 = new HashMap<>();
 		props1.put("key1", "value1");
 		props1.put("key2", "value2");
 		props1.put("key3", "value3");
@@ -96,25 +93,6 @@ public class MapAccessTests extends AbstractExpressionTests {
 		ExpressionParser spelExpressionParser = new SpelExpressionParser();
 		Expression expr = spelExpressionParser.parseExpression("#root['key']");
 		assertThat(expr.getValue(map)).isEqualTo("value");
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetValuePerformance() throws Exception {
-		Map<String, String> map = new HashMap<>();
-		map.put("key", "value");
-		EvaluationContext context = new StandardEvaluationContext(map);
-
-		ExpressionParser spelExpressionParser = new SpelExpressionParser();
-		Expression expr = spelExpressionParser.parseExpression("#root['key']");
-
-		StopWatch s = new StopWatch();
-		s.start();
-		for (int i = 0; i < 10000; i++) {
-			expr.getValue(context);
-		}
-		s.stop();
-		assertThat(s.getTotalTimeMillis()).isLessThan(200L);
 	}
 
 
@@ -166,11 +144,11 @@ public class MapAccessTests extends AbstractExpressionTests {
 			this.priority = priority;
 		}
 
-		public Map<String,String> getProperties() {
+		public Map<String, String> getProperties() {
 			return properties;
 		}
 
-		public void setProperties(Map<String,String> properties) {
+		public void setProperties(Map<String, String> properties) {
 			this.properties = properties;
 		}
 	}
@@ -185,7 +163,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map<? ,?>) target).get(name));
+			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		@Override
@@ -196,7 +174,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-			((Map<Object,Object>) target).put(name, newValue);
+			((Map<Object, Object>) target).put(name, newValue);
 		}
 
 		@Override

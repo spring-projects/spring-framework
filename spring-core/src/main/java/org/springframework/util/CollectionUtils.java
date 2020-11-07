@@ -457,7 +457,6 @@ public abstract class CollectionUtils {
 	 * @since 3.1
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> targetMap) {
-		Assert.notNull(targetMap, "'targetMap' must not be null");
 		return new MultiValueMapAdapter<>(targetMap);
 	}
 

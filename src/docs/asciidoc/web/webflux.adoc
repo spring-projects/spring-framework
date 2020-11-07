@@ -612,10 +612,12 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 The `DefaultServerWebExchange` uses the configured
 `HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data` content
-into a `MultiValueMap`. At present,
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is the only
-third-party library supported and the only library we know for non-blocking parsing of
-multipart requests. It is enabled through the `ServerCodecConfigurer` bean
+into a `MultiValueMap`.
+By default, this is the `DefaultPartHttpMessageReader`, which does not have any third-party
+dependencies.
+Alternatively, the `SynchronossPartHttpMessageReader` can be used, which is based on the
+https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] library.
+Both are configured through the `ServerCodecConfigurer` bean
 (see the <<webflux-web-handler-api, Web Handler API>>).
 
 To parse multipart data in streaming fashion, you can use the `Flux<Part>` returned from an
@@ -804,9 +806,11 @@ consistently for access to the cached form data versus reading from the raw requ
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
 encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
 another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`. At present
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
-actual parsing.
+collects the parts into a `MultiValueMap`.
+By default, the `DefaultPartHttpMessageReader` is used, but this can be changed through the
+`ServerCodecConfigurer`.
+For more information about the `DefaultPartHttpMessageReader`, refer to to the
+{api-spring-framework}/http/codec/multipart/DefaultPartHttpMessageReader.html[javadoc of `DefaultPartHttpMessageReader`].
 
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
@@ -964,6 +968,17 @@ The following example shows how to do so for client-side requests:
 			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
 			.build()
 ----
+
+
+[[webflux-logging-appenders]]
+==== Appenders
+
+Logging libraries such as SLF4J and Log4J 2 provide asynchronous loggers that avoid
+blocking. While those have their own drawbacks such as potentially dropping messages
+that could not be queued for logging, they are the best available options currently
+for use in a reactive, non-blocking application.
+
+
 
 [[webflux-codecs-custom]]
 ==== Custom codecs
@@ -1888,8 +1903,8 @@ and others) and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, and path.
-  See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and
+  context path. See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute -- in contrast to model attributes stored in the session
@@ -3209,7 +3224,7 @@ initialize instances of `WebDataBinder`. Those, in turn, are used to:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.

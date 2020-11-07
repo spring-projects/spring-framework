@@ -545,10 +545,12 @@ The following example uses both a location and a loader:
 
 
 NOTE: `@ContextConfiguration` provides support for inheriting resource locations or
-configuration classes as well as context initializers that are declared by superclasses.
+configuration classes as well as context initializers that are declared by superclasses
+or enclosing classes.
 
-See <<testcontext-ctx-management>> and the `@ContextConfiguration` javadocs for further
-details.
+See <<testcontext-ctx-management>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the `@ContextConfiguration`
+javadocs for further details.
 
 [[spring-testing-annotation-webappconfiguration]]
 ===== `@WebAppConfiguration`
@@ -742,12 +744,13 @@ be active:
 
 
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
-declared by superclasses by default. You can also resolve active bean definition profiles
-programmatically by implementing a custom
+declared by superclasses and enclosing classes by default. You can also resolve active
+bean definition profiles programmatically by implementing a custom
 <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver, `ActiveProfilesResolver`>>
 and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
-See <<testcontext-ctx-management-env-profiles>> and the
+See <<testcontext-ctx-management-env-profiles>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the
 {api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
 examples and further details.
 
@@ -1125,9 +1128,11 @@ The following example shows how to register two `TestExecutionListener` implemen
 <1> Register two `TestExecutionListener` implementations.
 
 
-By default, `@TestExecutionListeners` supports inherited listeners. See the
-{api-spring-framework}/test/context/TestExecutionListeners.html[javadoc]
-for an example and further details.
+By default, `@TestExecutionListeners` provides support for inheriting listeners from
+superclasses or enclosing classes. See
+<<testcontext-junit-jupiter-nested-test-configuration>> and the 
+{api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
+javadoc] for an example and further details.
 
 [[spring-testing-annotation-commit]]
 ===== `@Commit`
@@ -1670,13 +1675,14 @@ how to use the `@Repeat` annotation:
 [[integration-testing-annotations-junit-jupiter]]
 ==== Spring JUnit Jupiter Testing Annotations
 
-The following annotations are supported only when used in conjunction with the
+The following annotations are supported when used in conjunction with the
 <<testcontext-junit-jupiter-extension, `SpringExtension`>> and JUnit Jupiter
 (that is, the programming model in JUnit 5):
 
 * <<integration-testing-annotations-junit-jupiter-springjunitconfig>>
 * <<integration-testing-annotations-junit-jupiter-springjunitwebconfig>>
 * <<integration-testing-annotations-testconstructor>>
+* <<integration-testing-annotations-nestedtestconfiguration>>
 * <<integration-testing-annotations-junit-jupiter-enabledif>>
 * <<integration-testing-annotations-junit-jupiter-disabledif>>
 
@@ -1841,6 +1847,54 @@ often automatically registered for you – for example, when using annotations s
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` or various test-related annotations from
 Spring Boot Test.
 
+[[integration-testing-annotations-nestedtestconfiguration]]
+===== `@NestedTestConfiguration`
+
+`@NestedTestConfiguration` is a type-level annotation that is used to configure how
+Spring test configuration annotations are processed within enclosing class hierarchies
+for inner test classes.
+
+If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
+super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+configuration inheritance mode_ will be used. See the tip below for details on how to
+change the default mode.
+
+.Changing the default enclosing configuration inheritance mode
+[TIP]
+=====
+The default _enclosing configuration inheritance mode_ is `INHERIT`, but it can be
+changed by setting the `spring.test.enclosing.configuration` JVM system property to
+`OVERRIDE`. Alternatively, the default mode may be set via the `SpringProperties`
+mechanism.
+=====
+
+The <<testcontext-framework>> honors `@NestedTestConfiguration` semantics for the
+following annotations.
+
+* <<spring-testing-annotation-bootstrapwith>>
+* <<spring-testing-annotation-contextconfiguration>>
+* <<spring-testing-annotation-webappconfiguration>>
+* <<spring-testing-annotation-contexthierarchy>>
+* <<spring-testing-annotation-activeprofiles>>
+* <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dirtiescontext>>
+* <<spring-testing-annotation-testexecutionlisteners>>
+* <<testcontext-tx,`@Transactional`>>
+* <<spring-testing-annotation-commit>>
+* <<spring-testing-annotation-rollback>>
+* <<spring-testing-annotation-sql>>
+* <<spring-testing-annotation-sqlconfig>>
+* <<spring-testing-annotation-sqlmergemode>>
+* <<integration-testing-annotations-testconstructor>>
+
+NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction
+with `@Nested` test classes in JUnit Jupiter; however, there may be other testing
+frameworks with support for Spring and nested test classes that make use of this
+annotation.
+
+See <<testcontext-junit-jupiter-nested-test-configuration>> for an example and further
+details.
+
 [[integration-testing-annotations-junit-jupiter-enabledif]]
 ===== `@EnabledIf`
 
@@ -1970,6 +2024,7 @@ You can use each of the following as a meta-annotation in conjunction with the
 * `@SpringJUnitConfig` _(only supported on JUnit Jupiter)_
 * `@SpringJUnitWebConfig` _(only supported on JUnit Jupiter)_
 * `@TestConstructor` _(only supported on JUnit Jupiter)_
+* `@NestedTestConfiguration` _(only supported on JUnit Jupiter)_
 * `@EnabledIf` _(only supported on JUnit Jupiter)_
 * `@DisabledIf` _(only supported on JUnit Jupiter)_
 
@@ -3142,6 +3197,9 @@ is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 In the next example, which uses XML resource locations, the `ApplicationContext` for
 `ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.
 Beans defined in `extended-config.xml` can, therefore, override (that is, replace) those
@@ -3612,6 +3670,9 @@ automatically inherit the `@ActiveProfiles` configuration from the base class. I
 following example, the declaration of `@ActiveProfiles` (as well as other annotations)
 has been moved to an abstract superclass, `AbstractIntegrationTest`:
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -3947,6 +4008,9 @@ If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySour
 set to `false`, the locations or inlined properties, respectively, for the test class
 shadow and effectively replace the configuration defined by superclasses.
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 `base.properties` file as a test property source. In contrast, the `ApplicationContext`
 for `ExtendedTest` is loaded by using the `base.properties` and `extended.properties`
@@ -4029,11 +4093,14 @@ integration tests that need to add properties with dynamic values to the set of
 `PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
 integration test.
 
-NOTE: The `@DynamicPropertySource` annotation and its supporting infrastructure were
+[NOTE]
+====
+The `@DynamicPropertySource` annotation and its supporting infrastructure were
 originally designed to allow properties from
 https://www.testcontainers.org/[Testcontainers] based tests to be exposed easily to
 Spring integration tests. However, this feature may also be used with any form of
 external resource whose lifecycle is maintained outside the test's `ApplicationContext`.
+====
 
 In contrast to the <<testcontext-ctx-management-property-sources,`@TestPropertySource`>>
 annotation that is applied at the class level, `@DynamicPropertySource` must be applied
@@ -4047,6 +4114,15 @@ available to components within the test's `ApplicationContext` via the `redis.ho
 `redis.port` properties. These properties can be accessed via Spring's `Environment`
 abstraction or injected directly into Spring-managed components – for example, via
 `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
+
+[TIP]
+====
+If you use `@DynamicPropertySource` in a base class and discover that tests in subclasses
+fail because the dynamic properties change between subclasses, you may need to annotate
+your base class with <<spring-testing-annotation-dirtiescontext, `@DirtiesContext`>> to
+ensure that each subclass gets its own `ApplicationContext` with the correct dynamic
+properties.
+====
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -4394,10 +4470,10 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext>>). This instructs Spring
-to remove the context from the cache and rebuild the application context before running
-the next test that requires the same application context. Note that support for the
-`@DirtiesContext` annotation is provided by the
+`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext, Spring Testing
+Annotations>>). This instructs Spring to remove the context from the cache and rebuild
+the application context before running the next test that requires the same application
+context. Note that support for the `@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 
@@ -5056,7 +5132,7 @@ hierarchy runs within a transaction. Test methods that are not annotated with
 that `@Transactional` is not supported on test lifecycle methods — for example, methods
 annotated with JUnit Jupiter's `@BeforeAll`, `@BeforeEach`, etc. Furthermore, tests that
 are annotated with `@Transactional` but have the `propagation` attribute set to
-`NOT_SUPPORTED` are not run within a transaction.
+`NOT_SUPPORTED` or `NEVER` are not run within a transaction.
 
 [[testcontext-tx-attribute-support]]
 .`@Transactional` attribute support
@@ -5065,7 +5141,7 @@ are annotated with `@Transactional` but have the `propagation` attribute set to
 
 |`value` and `transactionManager` |yes
 
-|`propagation` |only `Propagation.NOT_SUPPORTED` is supported
+|`propagation` |only `Propagation.NOT_SUPPORTED` and `Propagation.NEVER` are supported
 
 |`isolation` |no
 
@@ -6449,6 +6525,95 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 Note that the use of `@RepeatedTest` from JUnit Jupiter lets the test method gain access
 to the `RepetitionInfo`.
 
+[[testcontext-junit-jupiter-nested-test-configuration]]
+===== `@Nested` test class configuration
+
+The _Spring TestContext Framework_ has supported the use of test-related annotations on
+`@Nested` test classes in JUnit Jupiter since Spring Framework 5.0; however, until Spring
+Framework 5.3 class-level test configuration annotations were not _inherited_ from
+enclosing classes like they are from superclasses.
+
+Spring Framework 5.3 introduces first-class support for inheriting test class
+configuration from enclosing classes, and such configuration will be inherited by
+default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
+an individual `@Nested` test class with
+`@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)`. An explicit
+`@NestedTestConfiguration` declaration will apply to the annotated test class as well as
+any of its subclasses and nested classes. Thus, you may annotate a top-level test class
+with `@NestedTestConfiguration`, and that will apply to all of its nested test classes
+recursively.
+
+In order to allow development teams to change the default to `OVERRIDE` – for example,
+for compatibility with Spring Framework 5.0 through 5.2 – the default mode can be changed
+globally via a JVM system property or a `spring.properties` file in the root of the
+classpath. See the <<integration-testing-annotations-nestedtestconfiguration, "Changing
+the default enclosing configuration inheritance mode">> note for details.
+
+Although the following "Hello World" example is very simplistic, it shows how to declare
+common configuration on a top-level class that is inherited by its `@Nested` test
+classes. In this particular example, only the `TestConfig` configuration class is
+inherited. Each nested test class provides its own set of active profiles, resulting in a
+distinct `ApplicationContext` for each nested test class (see
+<<testcontext-ctx-management-caching>> for details). Consult the list of
+<<integration-testing-annotations-nestedtestconfiguration, supported annotations>> to see
+which annotations can be inherited in `@Nested` test classes.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		class EnglishGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World");
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		class GermanGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt");
+			}
+		}
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		inner class EnglishGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World")
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		inner class GermanGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt")
+			}
+		}
+	}
+----
+
 [[testcontext-support-classes-testng]]
 ===== TestNG Support Classes
 
@@ -6488,7 +6653,7 @@ of `AbstractTestNGSpringContextTests` for an example of how to instrument your t
 
 
 
-include::testing-webtestclient.adoc[leveloffset=+2]
+include::testing/testing-webtestclient.adoc[leveloffset=+2]
 
 
 
@@ -8440,7 +8605,6 @@ configuration. Check for the support for code completion on static members.
 Spring MVC Test's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
-
 
 
 [[testing-resources]]

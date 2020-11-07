@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.apache.commons.logging.Log;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +30,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
@@ -58,8 +56,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * the response status and headers.
 	 */
 	private enum State {NEW, COMMITTING, COMMIT_ACTION_FAILED, COMMITTED}
-
-	protected final Log logger = HttpLogging.forLogName(getClass());
 
 
 	private final DataBufferFactory dataBufferFactory;

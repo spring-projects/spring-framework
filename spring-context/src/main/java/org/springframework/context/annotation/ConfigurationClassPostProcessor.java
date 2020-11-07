@@ -99,7 +99,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @see #setBeanNameGenerator
 	 */
 	public static final AnnotationBeanNameGenerator IMPORT_BEAN_NAME_GENERATOR =
-			new FullyQualifiedAnnotationBeanNameGenerator();
+			FullyQualifiedAnnotationBeanNameGenerator.INSTANCE;
 
 	private static final String IMPORT_REGISTRY_BEAN_NAME =
 			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
@@ -433,7 +433,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return;
 		}
 		if (IN_NATIVE_IMAGE) {
-			throw new BeanDefinitionStoreException("@Configuration classes need to be marked as proxyBeanMethods=false. Found: " + configBeanDefs.keySet());
+			throw new BeanDefinitionStoreException("@Configuration classes need to be marked as " +
+					"proxyBeanMethods=false. Found: " + configBeanDefs.keySet());
 		}
 
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();

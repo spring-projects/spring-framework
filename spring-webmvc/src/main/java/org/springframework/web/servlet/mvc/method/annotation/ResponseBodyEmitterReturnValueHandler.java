@@ -172,10 +172,17 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		// Headers will be flushed at the first write
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
-		DeferredResult<?> deferredResult = new DeferredResult<>(emitter.getTimeout());
-		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
+		HttpMessageConvertingHandler handler;
+		try {
+			DeferredResult<?> deferredResult = new DeferredResult<>(emitter.getTimeout());
+			WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
+			handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);
+		}
+		catch (Throwable ex) {
+			emitter.initializeWithError(ex);
+			throw ex;
+		}
 
-		HttpMessageConvertingHandler handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);
 		emitter.initialize(handler);
 	}
 

@@ -30,21 +30,20 @@ public interface RowsFetchSpec<T> {
 
 	/**
 	 * Get exactly zero or one result.
-	 *
-	 * @return a mono emitting one element. {@link Mono#empty()} if no match found.
+	 * @return a Mono emitting one element, or {@link Mono#empty()} if no match found.
 	 * Completes with {@code IncorrectResultSizeDataAccessException} if more than one match found
 	 */
 	Mono<T> one();
 
 	/**
 	 * Get the first or no result.
-	 * @return a mono emitting the first element. {@link Mono#empty()} if no match found
+	 * @return a Mono emitting the first element, or {@link Mono#empty()} if no match found
 	 */
 	Mono<T> first();
 
 	/**
 	 * Get all matching elements.
-	 * @return a flux emitting all results
+	 * @return a Flux emitting all results
 	 */
 	Flux<T> all();
 

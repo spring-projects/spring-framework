@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.converter;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +26,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -92,7 +95,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 	/**
-	 * Allows sub-classes to add more supported mime types.
+	 * Allows subclasses to add more supported mime types.
 	 * @since 5.2.2
 	 */
 	protected void addSupportedMimeTypes(MimeType... supportedMimeTypes) {
@@ -167,21 +170,6 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	}
 
 
-	/**
-	 * Returns the default content type for the payload. Called when
-	 * {@link #toMessage(Object, MessageHeaders)} is invoked without message headers or
-	 * without a content type header.
-	 * <p>By default, this returns the first element of the {@link #getSupportedMimeTypes()
-	 * supportedMimeTypes}, if any. Can be overridden in sub-classes.
-	 * @param payload the payload being converted to message
-	 * @return the content type, or {@code null} if not known
-	 */
-	@Nullable
-	protected MimeType getDefaultContentType(Object payload) {
-		List<MimeType> mimeTypes = getSupportedMimeTypes();
-		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
-	}
-
 	@Override
 	@Nullable
 	public final Object fromMessage(Message<?> message, Class<?> targetClass) {
@@ -195,10 +183,6 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 			return null;
 		}
 		return convertFromInternal(message, targetClass, conversionHint);
-	}
-
-	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
-		return (supports(targetClass) && supportsMimeType(message.getHeaders()));
 	}
 
 	@Override
@@ -240,6 +224,11 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 		return builder.build();
 	}
 
+
+	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
+		return (supports(targetClass) && supportsMimeType(message.getHeaders()));
+	}
+
 	protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {
 		return (supports(payload.getClass()) && supportsMimeType(headers));
 	}
@@ -263,6 +252,22 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	@Nullable
 	protected MimeType getMimeType(@Nullable MessageHeaders headers) {
 		return (headers != null && this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
+	}
+
+	/**
+	 * Return the default content type for the payload. Called when
+	 * {@link #toMessage(Object, MessageHeaders)} is invoked without
+	 * message headers or without a content type header.
+	 * <p>By default, this returns the first element of the
+	 * {@link #getSupportedMimeTypes() supportedMimeTypes}, if any.
+	 * Can be overridden in subclasses.
+	 * @param payload the payload being converted to a message
+	 * @return the content type, or {@code null} if not known
+	 */
+	@Nullable
+	protected MimeType getDefaultContentType(Object payload) {
+		List<MimeType> mimeTypes = getSupportedMimeTypes();
+		return (!mimeTypes.isEmpty() ? mimeTypes.get(0) : null);
 	}
 
 
@@ -305,6 +310,21 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 			Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {
 
 		return null;
+	}
+
+
+	static Type getResolvedType(Class<?> targetClass, @Nullable Object conversionHint) {
+		if (conversionHint instanceof MethodParameter) {
+			MethodParameter param = (MethodParameter) conversionHint;
+			param = param.nestedIfOptional();
+			if (Message.class.isAssignableFrom(param.getParameterType())) {
+				param = param.nested();
+			}
+			Type genericParameterType = param.getNestedGenericParameterType();
+			Class<?> contextClass = param.getContainingClass();
+			return GenericTypeResolver.resolveType(genericParameterType, contextClass);
+		}
+		return targetClass;
 	}
 
 }

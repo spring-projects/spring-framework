@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,10 @@ import org.springframework.util.ObjectUtils;
  * @since 4.0
  * @see AnnotationUtils
  * @see AnnotationDescriptor
+ * @deprecated as of Spring Framework 5.3 in favor of
+ * {@link org.springframework.test.context.TestContextAnnotationUtils}
  */
+@Deprecated
 public abstract class MetaAnnotationUtils {
 
 	/**
@@ -123,7 +126,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
@@ -212,7 +215,7 @@ public abstract class MetaAnnotationUtils {
 			}
 		}
 
-		// Declared on interface?
+		// Declared on an interface?
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
 			if (descriptor != null) {
@@ -374,7 +377,7 @@ public abstract class MetaAnnotationUtils {
 
 
 	/**
-	 * <em>Untyped</em> extension of {@code AnnotationDescriptor} that is used
+	 * <em>Untyped</em> extension of {@link AnnotationDescriptor} that is used
 	 * to describe the declaration of one of several candidate annotation types
 	 * where the actual annotation type cannot be predetermined.
 	 */
@@ -399,7 +402,7 @@ public abstract class MetaAnnotationUtils {
 		@Override
 		public Annotation synthesizeAnnotation() {
 			throw new UnsupportedOperationException(
-					"getMergedAnnotation() is unsupported in UntypedAnnotationDescriptor");
+					"synthesizeAnnotation() is unsupported in UntypedAnnotationDescriptor");
 		}
 	}
 

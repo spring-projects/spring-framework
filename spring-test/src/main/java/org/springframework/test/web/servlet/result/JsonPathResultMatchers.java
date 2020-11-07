@@ -107,7 +107,7 @@ public class JsonPathResultMatchers {
 	 * @see #value(Matcher)
 	 * @see #value(Matcher, Class)
 	 */
-	public ResultMatcher value(Object expectedValue) {
+	public ResultMatcher value(@Nullable Object expectedValue) {
 		return result -> this.jsonPathHelper.assertValue(getContent(result), expectedValue);
 	}
 

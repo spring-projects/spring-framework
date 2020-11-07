@@ -16,13 +16,10 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import kotlin.reflect.KFunction;
-import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -131,9 +128,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		ResolvableType actualElementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			boolean isUnwrapped = KotlinDetector.isKotlinReflectPresent() &&
-					KotlinDetector.isKotlinType(bodyParameter.getContainingClass()) &&
-					KotlinDelegate.isSuspend(bodyParameter.getMethod()) &&
+			boolean isUnwrapped = KotlinDetector.isSuspendingFunction(bodyParameter.getMethod()) &&
 					!COROUTINES_FLOW_CLASS_NAME.equals(bodyType.toClass().getName());
 			ResolvableType genericType = isUnwrapped ? bodyType : bodyType.getGeneric();
 			elementType = getElementType(adapter, genericType);
@@ -201,18 +196,6 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 			}
 		}
 		return writableMediaTypes;
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Kotlin at runtime.
-	 */
-	private static class KotlinDelegate {
-
-		private static boolean isSuspend(Method method) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
-		}
 	}
 
 }

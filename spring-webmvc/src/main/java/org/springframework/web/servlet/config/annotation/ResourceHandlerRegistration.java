@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.cache.Cache;
+import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -49,6 +50,8 @@ public class ResourceHandlerRegistration {
 
 	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
+
+	private boolean useLastModified = true;
 
 
 	/**
@@ -106,6 +109,18 @@ public class ResourceHandlerRegistration {
 	 */
 	public ResourceHandlerRegistration setCacheControl(CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
+		return this;
+	}
+
+	/**
+	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
+	 * <p>This configuration is set to {@code true} by default.
+	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3
+	 */
+	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
 		return this;
 	}
 
@@ -172,6 +187,7 @@ public class ResourceHandlerRegistration {
 		else if (this.cachePeriod != null) {
 			handler.setCacheSeconds(this.cachePeriod);
 		}
+		handler.setUseLastModified(this.useLastModified);
 		return handler;
 	}
 

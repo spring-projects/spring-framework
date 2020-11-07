@@ -43,10 +43,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Priority;
 import javax.security.auth.Subject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -80,7 +77,6 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.testfixture.beans.DependenciesBean;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
-import org.springframework.beans.testfixture.beans.LifecycleBean;
 import org.springframework.beans.testfixture.beans.NestedTestBean;
 import org.springframework.beans.testfixture.beans.SideEffectBean;
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -93,13 +89,9 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -126,8 +118,6 @@ import static org.mockito.Mockito.verify;
  * @author Stephane Nicoll
  */
 class DefaultListableBeanFactoryTests {
-
-	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
 	private DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 
@@ -2353,163 +2343,6 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			lbf.getBean("test");
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 3000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationWithDependencyCheckIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.addBeanPostProcessor(new LifecycleBean.PostProcessor());
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			lbf.getBean("test");
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 3000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationWithConstructorArgumentsIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("juergen");
-		rbd.getConstructorArgumentValues().addGenericArgumentValue("99");
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) lbf.getBean("test");
-			assertThat(tb.getName()).isEqualTo("juergen");
-			assertThat(tb.getAge()).isEqualTo(99);
-		}
-		sw.stop();
-		assertThat(sw.getTotalTimeMillis() < 3000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference("spouse"));
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		lbf.freezeConfiguration();
-		TestBean spouse = (TestBean) lbf.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) lbf.getBean("test");
-			assertThat(tb.getSpouse()).isSameAs(spouse);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationWithPropertiesIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().add("name", "juergen");
-		rbd.getPropertyValues().add("age", "99");
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) lbf.getBean("test");
-			assertThat(tb.getName()).isEqualTo("juergen");
-			assertThat(tb.getAge()).isEqualTo(99);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void prototypeCreationWithResolvedPropertiesIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
-		rbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-		rbd.getPropertyValues().add("spouse", new RuntimeBeanReference("spouse"));
-		lbf.registerBeanDefinition("test", rbd);
-		lbf.registerBeanDefinition("spouse", new RootBeanDefinition(TestBean.class));
-		lbf.freezeConfiguration();
-		TestBean spouse = (TestBean) lbf.getBean("spouse");
-		StopWatch sw = new StopWatch();
-		sw.start("prototype");
-		for (int i = 0; i < 100000; i++) {
-			TestBean tb = (TestBean) lbf.getBean("test");
-			assertThat(tb.getSpouse()).isSameAs(spouse);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 4000).as("Prototype creation took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void singletonLookupByNameIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("singleton");
-		for (int i = 0; i < 1000000; i++) {
-			lbf.getBean("test");
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 1000).as("Singleton lookup took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void singletonLookupByTypeIsFastEnough() {
-		Assume.notLogging(factoryLog);
-		lbf.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
-		lbf.freezeConfiguration();
-		StopWatch sw = new StopWatch();
-		sw.start("singleton");
-		for (int i = 0; i < 1000000; i++) {
-			lbf.getBean(TestBean.class);
-		}
-		sw.stop();
-		// System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 1000).as("Singleton lookup took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
 	void beanPostProcessorWithWrappedObjectAndDisposableBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
@@ -2844,55 +2677,6 @@ class DefaultListableBeanFactoryTests {
 		assertThat(holder.getNonPublicEnum()).isEqualTo(NonPublicEnum.VALUE_1);
 	}
 
-	/**
-	 * Test that by-type bean lookup caching is working effectively by searching for a
-	 * bean of type B 10K times within a container having 1K additional beans of type A.
-	 * Prior to by-type caching, each bean lookup would traverse the entire container
-	 * (all 1001 beans), performing expensive assignability checks, etc. Now these
-	 * operations are necessary only once, providing a dramatic performance improvement.
-	 * On load-free modern hardware (e.g. an 8-core MPB), this method should complete well
-	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
-	 * hardware the method will take ~13000 ms. See SPR-6870.
-	 */
-	@Test
-	@Timeout(1)
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void byTypeLookupIsFastEnough() {
-		for (int i = 0; i < 1000; i++) {
-			lbf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
-		}
-		lbf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
-
-		lbf.freezeConfiguration();
-
-		for (int i = 0; i < 10000; i++) {
-			lbf.getBean(B.class);
-		}
-	}
-
-	@Test
-	@Timeout(1)
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void registrationOfManyBeanDefinitionsIsFastEnough() {
-		lbf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
-		// lbf.getBean("b");
-
-		for (int i = 0; i < 100000; i++) {
-			lbf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
-		}
-	}
-
-	@Test
-	@Timeout(1)
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	void registrationOfManySingletonsIsFastEnough() {
-		lbf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
-		// lbf.getBean("b");
-
-		for (int i = 0; i < 100000; i++) {
-			lbf.registerSingleton("a" + i, new A());
-		}
-	}
 
 	@SuppressWarnings("deprecation")
 	private int registerBeanDefinitions(Properties p) {
@@ -2903,11 +2687,6 @@ class DefaultListableBeanFactoryTests {
 	private int registerBeanDefinitions(Properties p, String prefix) {
 		return (new org.springframework.beans.factory.support.PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, prefix);
 	}
-
-
-	static class A { }
-
-	static class B { }
 
 
 	public static class NoDependencies {

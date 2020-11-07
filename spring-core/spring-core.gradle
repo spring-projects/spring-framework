@@ -55,26 +55,27 @@ dependencies {
 	optional("io.reactivex.rxjava3:rxjava")
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
-	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("com.google.code.findbugs:jsr305")
-	testCompile("org.xmlunit:xmlunit-assertj")
-	testCompile("org.xmlunit:xmlunit-matchers")
+	testCompile("javax.annotation:javax.annotation-api")
 	testCompile("javax.xml.bind:jaxb-api")
 	testCompile("com.fasterxml.woodstox:woodstox-core")
+	testCompile("org.xmlunit:xmlunit-assertj")
+	testCompile("org.xmlunit:xmlunit-matchers")
 	testCompile(project(":kotlin-coroutines"))
 	testCompile("io.projectreactor.tools:blockhound")
-	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("io.projectreactor:reactor-test")
-	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-params")
+	testFixturesImplementation("org.assertj:assertj-core")
 	testFixturesImplementation("org.xmlunit:xmlunit-assertj")
 }
 
 jar {
 	reproducibleFileOrder = true
 	preserveFileTimestamps = false // maybe not necessary here, but good for reproducibility
+	manifest.attributes["Dependencies"] = "jdk.unsupported" // JBoss modules
 
 	// Inline repackaged cglib classes directly into spring-core jar
 	dependsOn cglibRepackJar
@@ -98,7 +99,7 @@ jar {
 }
 
 test {
-	// make sure the classes dir is used on the test classpath (required by ResourceTests)
+	// Make sure the classes dir is used on the test classpath (required by ResourceTests)
 	// When test fixtures are involved, the JAR is used by default
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }

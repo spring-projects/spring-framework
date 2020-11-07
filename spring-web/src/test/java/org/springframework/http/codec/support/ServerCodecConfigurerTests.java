@@ -77,7 +77,7 @@ public class ServerCodecConfigurerTests {
 
 	private final ServerCodecConfigurer configurer = new DefaultServerCodecConfigurer();
 
-	private final AtomicInteger index = new AtomicInteger(0);
+	private final AtomicInteger index = new AtomicInteger();
 
 
 	@Test

@@ -21,10 +21,12 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
 
 import io.vavr.control.Try;
-import kotlin.reflect.KFunction;
-import kotlin.reflect.jvm.ReflectJvmMapping;
+import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.reactive.AwaitKt;
+import kotlinx.coroutines.reactive.ReactiveFlowKt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,6 +35,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.KotlinDetector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -44,7 +47,6 @@ import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.transaction.TransactionUsageException;
 import org.springframework.transaction.reactive.TransactionContextManager;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.util.Assert;
@@ -78,6 +80,7 @@ import org.springframework.util.StringUtils;
  * @author Stéphane Nicoll
  * @author Sam Brannen
  * @author Mark Paluch
+ * @author Sebastien Deleuze
  * @since 1.1
  * @see PlatformTransactionManager
  * @see ReactiveTransactionManager
@@ -95,6 +98,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Key to use to store the default transaction manager.
 	 */
 	private static final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
+
+	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	/**
 	 * Vavr library present on the classpath?
@@ -336,21 +341,20 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		final TransactionManager tm = determineTransactionManager(txAttr);
 
 		if (this.reactiveAdapterRegistry != null && tm instanceof ReactiveTransactionManager) {
+			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
+			boolean hasSuspendingFlowReturnType = isSuspendingFunction && COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName());
 			ReactiveTransactionSupport txSupport = this.transactionSupportCache.computeIfAbsent(method, key -> {
-				if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
-					throw new TransactionUsageException(
-							"Unsupported annotated transaction on suspending function detected: " + method +
-							". Use TransactionalOperator.transactional extensions instead.");
-				}
-				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(method.getReturnType());
+				Class<?> reactiveType = (isSuspendingFunction ? (hasSuspendingFlowReturnType ? Flux.class : Mono.class) : method.getReturnType());
+				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
 				if (adapter == null) {
 					throw new IllegalStateException("Cannot apply reactive transaction to non-reactive return type: " +
 							method.getReturnType());
 				}
 				return new ReactiveTransactionSupport(adapter);
 			});
-			return txSupport.invokeWithinTransaction(
-					method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
+			Publisher<?> publisher = (Publisher<?>) txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
+			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow(publisher) :
+					KotlinDelegate.awaitSingleOrNull(publisher, ((CoroutinesInvocationCallback) invocation).getContinuation())) : publisher);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -785,6 +789,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		Object proceedWithInvocation() throws Throwable;
 	}
 
+	protected interface CoroutinesInvocationCallback extends InvocationCallback {
+
+		Object getContinuation();
+	}
+
 
 	/**
 	 * Internal holder class for a Throwable in a callback transaction model.
@@ -837,9 +846,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	private static class KotlinDelegate {
 
-		private static boolean isSuspend(Method method) {
-			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return function != null && function.isSuspend();
+		private static Object asFlow(Publisher<?> publisher) {
+			return ReactiveFlowKt.asFlow(publisher);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Nullable
+		private static Object awaitSingleOrNull(Publisher<?> publisher, Object continuation) {
+			return AwaitKt.awaitSingleOrNull(publisher, (Continuation<Object>) continuation);
 		}
 	}
 

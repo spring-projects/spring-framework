@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,6 +200,17 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolveMultipartFileListMissing() throws Exception {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, MultipartFile.class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
+	}
+
+	@Test
 	public void resolveMultipartFileArray() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected1 = new MockMultipartFile("mfilearray", "Hello World 1".getBytes());
@@ -218,6 +229,17 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(parts.length).isEqualTo(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
+	}
+
+	@Test
+	public void resolveMultipartFileArrayMissing() throws Exception {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		request.addFile(new MockMultipartFile("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(MultipartFile[].class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test
@@ -258,6 +280,19 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolvePartListMissing() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(List.class, Part.class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
+	}
+
+	@Test
 	public void resolvePartArray() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockPart expected1 = new MockPart("pfilearray", "Hello World 1".getBytes());
@@ -278,6 +313,19 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(parts.length).isEqualTo(2);
 		assertThat(expected1).isEqualTo(parts[0]);
 		assertThat(expected2).isEqualTo(parts[1]);
+	}
+
+	@Test
+	public void resolvePartArrayMissing() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		request.addPart(new MockPart("other", "Hello World 3".getBytes()));
+		webRequest = new ServletWebRequest(request);
+
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Part[].class);
+		assertThatExceptionOfType(MissingServletRequestPartException.class).isThrownBy(() ->
+				resolver.resolveArgument(param, null, webRequest, null));
 	}
 
 	@Test

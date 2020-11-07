@@ -339,7 +339,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final LimitedPartBodyStreamStorageFactory storageFactory;
 
-		private final AtomicInteger terminated = new AtomicInteger(0);
+		private final AtomicInteger terminated = new AtomicInteger();
 
 		FluxSinkAdapterListener(
 				FluxSink<Part> sink, MultipartContext context, LimitedPartBodyStreamStorageFactory factory) {

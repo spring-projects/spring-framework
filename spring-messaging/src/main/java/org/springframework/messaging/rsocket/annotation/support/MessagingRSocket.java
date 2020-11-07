@@ -18,7 +18,7 @@ package org.springframework.messaging.rsocket.annotation.support;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.Payload;
@@ -27,8 +27,6 @@ import io.rsocket.frame.FrameType;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -162,9 +160,10 @@ class MessagingRSocket implements RSocket {
 				((NettyDataBuffer) dataBuffer).getNativeBuffer().refCnt() : 1;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Flux<Payload> handleAndReply(Payload firstPayload, FrameType frameType, Flux<Payload> payloads) {
-		MonoProcessor<Flux<Payload>> replyMono = MonoProcessor.fromSink(Sinks.one());
-		MessageHeaders headers = createHeaders(firstPayload, frameType, replyMono);
+		AtomicReference<Flux<Payload>> responseRef = new AtomicReference<>();
+		MessageHeaders headers = createHeaders(firstPayload, frameType, responseRef);
 
 		AtomicBoolean read = new AtomicBoolean();
 		Flux<DataBuffer> buffers = payloads.map(this::retainDataAndReleasePayload).doOnSubscribe(s -> read.set(true));
@@ -177,17 +176,16 @@ class MessagingRSocket implements RSocket {
 						firstPayload.release();
 					}
 				})
-				.thenMany(Flux.defer(() -> replyMono.isTerminated() ?
-						replyMono.flatMapMany(Function.identity()) :
-						Mono.error(new IllegalStateException("Something went wrong: reply Mono not set"))));
+				.thenMany(Flux.defer(() -> responseRef.get() != null ?
+						responseRef.get() : Mono.error(new IllegalStateException("Expected response"))));
 	}
 
 	private DataBuffer retainDataAndReleasePayload(Payload payload) {
 		return PayloadUtils.retainDataAndReleasePayload(payload, this.strategies.dataBufferFactory());
 	}
 
-	private MessageHeaders createHeaders(Payload payload, FrameType frameType,
-			@Nullable MonoProcessor<?> replyMono) {
+	private MessageHeaders createHeaders(
+			Payload payload, FrameType frameType, @Nullable AtomicReference<Flux<Payload>> responseRef) {
 
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
@@ -208,8 +206,8 @@ class MessagingRSocket implements RSocket {
 		headers.setContentType(this.dataMimeType);
 		headers.setHeader(RSocketFrameTypeMessageCondition.FRAME_TYPE_HEADER, frameType);
 		headers.setHeader(RSocketRequesterMethodArgumentResolver.RSOCKET_REQUESTER_HEADER, this.requester);
-		if (replyMono != null) {
-			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, replyMono);
+		if (responseRef != null) {
+			headers.setHeader(RSocketPayloadReturnValueHandler.RESPONSE_HEADER, responseRef);
 		}
 		headers.setHeader(HandlerMethodReturnValueHandler.DATA_BUFFER_FACTORY_HEADER,
 				this.strategies.dataBufferFactory());

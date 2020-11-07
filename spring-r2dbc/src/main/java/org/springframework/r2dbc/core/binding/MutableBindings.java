@@ -36,7 +36,7 @@ public class MutableBindings extends Bindings {
 
 	/**
 	 * Create new {@link MutableBindings}.
-	 * @param markers must not be {@code null}.
+	 * @param markers the {@link BindMarkers} to wrap
 	 */
 	public MutableBindings(BindMarkers markers) {
 		super(new LinkedHashMap<>());
@@ -66,8 +66,8 @@ public class MutableBindings extends Bindings {
 
 	/**
 	 * Bind a value to {@link BindMarker}.
-	 * @param marker must not be {@code null}
-	 * @param value must not be {@code null}
+	 * @param marker the {@link BindMarker} to bind to
+	 * @param value the value to bind
 	 */
 	public MutableBindings bind(BindMarker marker, Object value) {
 		Assert.notNull(marker, "BindMarker must not be null");
@@ -79,7 +79,7 @@ public class MutableBindings extends Bindings {
 	/**
 	 * Bind a value and return the related {@link BindMarker}.
 	 * Increments {@link BindMarkers} state.
-	 * @param value must not be {@code null}
+	 * @param value the value to bind
 	 */
 	public BindMarker bind(Object value) {
 		Assert.notNull(value, "Value must not be null");
@@ -90,8 +90,8 @@ public class MutableBindings extends Bindings {
 
 	/**
 	 * Bind a {@code NULL} value to {@link BindMarker}.
-	 * @param marker must not be {@code null}
-	 * @param valueType must not be {@code null}
+	 * @param marker the {@link BindMarker} to bind to
+	 * @param valueType the value type
 	 */
 	public MutableBindings bindNull(BindMarker marker, Class<?> valueType) {
 		Assert.notNull(marker, "BindMarker must not be null");
@@ -103,7 +103,7 @@ public class MutableBindings extends Bindings {
 	/**
 	 * Bind a {@code NULL} value and return the related {@link BindMarker}.
 	 * Increments {@link BindMarkers} state.
-	 * @param valueType must not be {@code null}
+	 * @param valueType the value type
 	 */
 	public BindMarker bindNull(Class<?> valueType) {
 		Assert.notNull(valueType, "Value type must not be null");

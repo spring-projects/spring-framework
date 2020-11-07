@@ -35,7 +35,8 @@ import java.util.Map;
  * @param <K> the key type
  * @param <V> the value element type
  */
-public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V> implements Serializable, Cloneable {
+public class LinkedMultiValueMap<K, V> extends MultiValueMapAdapter<K, V>  // new public base class in 5.3
+		implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = 3801124242820219131L;
 

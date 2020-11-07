@@ -212,6 +212,12 @@ public class ResourceHandlerRegistryTests {
 		assertThat(transformers.get(2)).isSameAs(cssLinkTransformer);
 	}
 
+	@Test
+	void ignoreLastModified() {
+		this.registration.setUseLastModified(false);
+		assertThat(getHandler("/resources/**").isUseLastModified()).isFalse();
+	}
+
 
 	private ResourceWebHandler getHandler(String pathPattern) {
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) this.registry.getHandlerMapping();

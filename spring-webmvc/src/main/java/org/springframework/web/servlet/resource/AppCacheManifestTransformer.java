@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Brian Clozel
  * @since 4.1
  * @see <a href="https://html.spec.whatwg.org/multipage/browsers.html#offline">HTML5 offline applications spec</a>
- * @deprecated as of 5.3 since browser support is going away, scheduled for removal in 6.0.
+ * @deprecated as of 5.3 since browser support is going away
  */
 @Deprecated
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {

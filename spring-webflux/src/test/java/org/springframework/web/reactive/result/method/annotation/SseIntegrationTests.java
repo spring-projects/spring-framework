@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
@@ -224,7 +224,9 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
 
-		private MonoProcessor<Void> cancellation = MonoProcessor.fromSink(Sinks.one());
+		private final Sinks.Empty<Void> cancelSink = Sinks.empty();
+
+		private Mono<Void> cancellation = cancelSink.asMono();
 
 
 		@GetMapping("/string")
@@ -250,7 +252,7 @@ class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		Flux<String> infinite() {
 			return Flux.just(0, 1).map(l -> "foo " + l)
 					.mergeWith(Flux.never())
-					.doOnCancel(() -> cancellation.onComplete());
+					.doOnCancel(() -> cancelSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST));
 		}
 	}
 

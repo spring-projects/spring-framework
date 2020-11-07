@@ -104,6 +104,9 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo+bar");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo+bar");
+
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
 	}
 
 	@Test
@@ -126,7 +129,7 @@ public class UrlPathHelperTests {
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo;a=b;c=d");
 
 		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
-		assertThat(helper.getRequestUri(request)).isEqualTo("/foo;jsessionid=c0o7fszeb1");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/foo");
 	}
 
 	@Test

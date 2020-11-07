@@ -317,9 +317,9 @@ public class RSocketClientToServerIntegrationTests {
 
 		private RSocket delegate;
 
-		private final AtomicInteger fireAndForgetCount = new AtomicInteger(0);
+		private final AtomicInteger fireAndForgetCount = new AtomicInteger();
 
-		private final AtomicInteger metadataPushCount = new AtomicInteger(0);
+		private final AtomicInteger metadataPushCount = new AtomicInteger();
 
 
 		public int getFireAndForgetCount() {

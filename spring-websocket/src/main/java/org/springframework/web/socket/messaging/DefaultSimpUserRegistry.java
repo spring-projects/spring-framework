@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.simp.user.SimpSession;
@@ -34,7 +35,6 @@ import org.springframework.messaging.simp.user.SimpSubscription;
 import org.springframework.messaging.simp.user.SimpSubscriptionMatcher;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
-import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
@@ -84,19 +84,16 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	public void onApplicationEvent(ApplicationEvent event) {
 		AbstractSubProtocolEvent subProtocolEvent = (AbstractSubProtocolEvent) event;
 		Message<?> message = subProtocolEvent.getMessage();
+		MessageHeaders headers = message.getHeaders();
 
-		SimpMessageHeaderAccessor accessor =
-				MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
-		Assert.state(accessor != null, "No SimpMessageHeaderAccessor");
-
-		String sessionId = accessor.getSessionId();
+		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		Assert.state(sessionId != null, "No session id");
 
 		if (event instanceof SessionSubscribeEvent) {
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
-				String id = accessor.getSubscriptionId();
-				String destination = accessor.getDestination();
+				String id = SimpMessageHeaderAccessor.getSubscriptionId(headers);
+				String destination = SimpMessageHeaderAccessor.getDestination(headers);
 				if (id != null && destination != null) {
 					session.addSubscription(id, destination);
 				}
@@ -114,7 +111,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			synchronized (this.sessionLock) {
 				LocalSimpUser simpUser = this.users.get(name);
 				if (simpUser == null) {
-					simpUser = new LocalSimpUser(name);
+					simpUser = new LocalSimpUser(name, user);
 					this.users.put(name, simpUser);
 				}
 				LocalSimpSession session = new LocalSimpSession(sessionId, simpUser);
@@ -137,7 +134,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		else if (event instanceof SessionUnsubscribeEvent) {
 			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
-				String subscriptionId = accessor.getSubscriptionId();
+				String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 				if (subscriptionId != null) {
 					session.removeSubscription(subscriptionId);
 				}
@@ -193,16 +190,25 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final String name;
 
+		private final Principal user;
+
 		private final Map<String, SimpSession> userSessions = new ConcurrentHashMap<>(1);
 
-		public LocalSimpUser(String userName) {
+		public LocalSimpUser(String userName, Principal user) {
 			Assert.notNull(userName, "User name must not be null");
 			this.name = userName;
+			this.user = user;
 		}
 
 		@Override
 		public String getName() {
 			return this.name;
+		}
+
+		@Nullable
+		@Override
+		public Principal getPrincipal() {
+			return this.user;
 		}
 
 		@Override

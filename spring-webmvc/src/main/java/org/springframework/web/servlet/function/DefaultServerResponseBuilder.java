@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,17 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -54,6 +50,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Default {@link ServerResponse.BodyBuilder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
@@ -184,6 +181,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public ServerResponse build(
 			BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+
 		return new WriterFunctionResponse(this.statusCode, this.headers, this.cookies, writeFunction);
 	}
 
@@ -229,17 +227,16 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	/**
 	 * Abstract base class for {@link ServerResponse} implementations.
 	 */
-	abstract static class AbstractServerResponse implements ServerResponse {
+	abstract static class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 		private static final Set<HttpMethod> SAFE_METHODS =	EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+
 
 		final int statusCode;
 
 		private final HttpHeaders headers;
 
 		private final MultiValueMap<String, Cookie> cookies;
-
-		private final List<ErrorHandler<?>> errorHandlers = new ArrayList<>();
 
 
 		protected AbstractServerResponse(
@@ -249,14 +246,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 			this.cookies =
 					CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<>(cookies));
-		}
-
-		protected <T extends ServerResponse> void addErrorHandler(Predicate<Throwable> predicate,
-				BiFunction<Throwable, ServerRequest, T> errorHandler) {
-
-			Assert.notNull(predicate, "Predicate must not be null");
-			Assert.notNull(errorHandler, "ErrorHandler must not be null");
-			this.errorHandlers.add(new ErrorHandler<>(predicate, errorHandler));
 		}
 
 
@@ -322,8 +311,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 			if (servletResponse.getCharacterEncoding() == null &&
 					this.headers.getContentType() != null &&
 					this.headers.getContentType().getCharset() != null) {
-				servletResponse
-						.setCharacterEncoding(this.headers.getContentType().getCharset().name());
+				servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
 			}
 		}
 
@@ -334,60 +322,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Nullable
-		protected abstract ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context)
-		throws ServletException, IOException;
-
-		@Nullable
-		protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
-
-			return this.errorHandlers.stream()
-					.filter(errorHandler -> errorHandler.test(t))
-					.findFirst()
-					.map(errorHandler -> {
-						ServerRequest serverRequest =
-								(ServerRequest) servletRequest
-										.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
-						ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
-						try {
-							return serverResponse.writeTo(servletRequest, servletResponse, context);
-						}
-						catch (ServletException ex) {
-							throw new RuntimeException(ex);
-						}
-						catch (IOException ex) {
-							throw new UncheckedIOException(ex);
-						}
-					})
-					.orElseThrow(() -> new RuntimeException(t));
-		}
-
-
-		private static class ErrorHandler<T extends ServerResponse> {
-
-			private final Predicate<Throwable> predicate;
-
-			private final BiFunction<Throwable, ServerRequest, T>
-					responseProvider;
-
-			public ErrorHandler(Predicate<Throwable> predicate,
-					BiFunction<Throwable, ServerRequest, T> responseProvider) {
-				Assert.notNull(predicate, "Predicate must not be null");
-				Assert.notNull(responseProvider, "ResponseProvider must not be null");
-				this.predicate = predicate;
-				this.responseProvider = responseProvider;
-			}
-
-			public boolean test(Throwable t) {
-				return this.predicate.test(t);
-			}
-
-			public T handle(Throwable t, ServerRequest serverRequest) {
-				return this.responseProvider.apply(t, serverRequest);
-			}
-		}
-
+		protected abstract ModelAndView writeToInternal(
+				HttpServletRequest request, HttpServletResponse response, Context context)
+				throws ServletException, IOException;
 
 	}
 
@@ -396,24 +333,20 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction;
 
-
-		public WriterFunctionResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies,
+		public WriterFunctionResponse(int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
+
 			super(statusCode, headers, cookies);
 			Assert.notNull(writeFunction, "WriteFunction must not be null");
 			this.writeFunction = writeFunction;
 		}
 
 		@Override
-		protected ModelAndView writeToInternal(HttpServletRequest request,
-				HttpServletResponse response, Context context) {
+		protected ModelAndView writeToInternal(
+				HttpServletRequest request, HttpServletResponse response, Context context) {
+
 			return this.writeFunction.apply(request, response);
 		}
 	}
-
-
-
-
 
 }

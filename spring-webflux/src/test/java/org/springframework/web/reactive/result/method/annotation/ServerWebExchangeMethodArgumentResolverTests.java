@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,23 @@ public class ServerWebExchangeMethodArgumentResolverTests {
 
 		assertThat(value).isNotNull();
 		assertThat(value.getClass()).isEqualTo(UriComponentsBuilder.class);
-		assertThat(((UriComponentsBuilder) value).path("/next").toUriString()).isEqualTo("https://example.org:9999/next");
+		assertThat(((UriComponentsBuilder) value).path("/next").toUriString())
+				.isEqualTo("https://example.org:9999/next");
 	}
 
+	@Test // gh-25822
+	public void resolveUriComponentsBuilderWithContextPath() {
+		ServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("https://example.org:9999/app/path?q=foo").contextPath("/app"));
+
+		MethodParameter param = this.testMethod.arg(UriComponentsBuilder.class);
+		Object value = this.resolver.resolveArgument(param, new BindingContext(), exchange).block();
+
+		assertThat(value).isNotNull();
+		assertThat(value.getClass()).isEqualTo(UriComponentsBuilder.class);
+		assertThat(((UriComponentsBuilder) value).path("/next").toUriString())
+				.isEqualTo("https://example.org:9999/app/next");
+	}
 
 
 	@SuppressWarnings("unused")

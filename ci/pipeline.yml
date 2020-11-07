@@ -1,28 +1,61 @@
+anchors:
+  artifactory-task-params: &artifactory-task-params
+    ARTIFACTORY_SERVER: ((artifactory-server))
+    ARTIFACTORY_USERNAME: ((artifactory-username))
+    ARTIFACTORY_PASSWORD: ((artifactory-password))
+  bintray-task-params: &bintray-task-params
+    BINTRAY_SUBJECT: ((bintray-subject))
+    BINTRAY_REPO: ((bintray-repo))
+    BINTRAY_USERNAME: ((bintray-username))
+    BINTRAY_API_KEY: ((bintray-api-key))
+  docker-resource-source: &docker-resource-source
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+    tag: 5.3.x
+  gradle-enterprise-task-params: &gradle-enterprise-task-params
+    GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
+    GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
+    GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+  slack-fail-params: &slack-fail-params
+    text: >
+      :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
+      [$TEXT_FILE_CONTENT]
+    text_file: git-repo/build/build-scan-uri.txt
+    silent: true
+    icon_emoji: ":concourse:"
+    username: concourse-ci
+  sonatype-task-params: &sonatype-task-params
+    SONATYPE_USER_TOKEN: ((sonatype-user-token))
+    SONATYPE_PASSWORD_TOKEN: ((sonatype-user-token-password))
+  changelog-task-params: &changelog-task-params
+    name: generated-changelog/tag
+    tag: generated-changelog/tag
+    body: generated-changelog/changelog.md
+  github-task-params: &github-task-params
+    GITHUB_USERNAME: ((github-username))
+    GITHUB_TOKEN: ((github-ci-release-token))
+
 resource_types:
 - name: artifactory-resource
   type: docker-image
   source:
     repository: springio/artifactory-resource
-    tag: 0.0.12-SNAPSHOT
+    tag: 0.0.12
 - name: github-status-resource
   type: docker-image
   source:
     repository: dpb587/github-status-resource
     tag: master
-- name: email
-  type: docker-image
-  source:
-    repository: pcfseceng/email-resource
-    tag: 1.0.19
 - name: slack-notification
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
     tag: latest
+
 resources:
 - name: git-repo
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: ((github-repo))
     username: ((github-username))
@@ -37,7 +70,7 @@ resources:
     location: Europe/Vienna
 - name: ci-images-git-repo
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: ((github-repo))
     branch: ((branch))
@@ -46,34 +79,26 @@ resources:
   type: docker-image
   icon: docker
   source:
+    <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci-image
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    tag: 5.3.x
 - name: spring-framework-jdk11-ci-image
   type: docker-image
   icon: docker
   source:
+    <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-jdk11-ci-image
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    tag: 5.3.x
 - name: spring-framework-jdk14-ci-image
   type: docker-image
   icon: docker
   source:
+    <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-jdk14-ci-image
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    tag: 5.3.x
 - name: spring-framework-jdk15-ci-image
   type: docker-image
   icon: docker
   source:
+    <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-jdk15-ci-image
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
-    tag: 5.3.x
 - name: artifactory-repo
   type: artifactory-resource
   icon: package-variant
@@ -119,6 +144,24 @@ resources:
   icon: slack
   source:
     url: ((slack-webhook-url))
+- name: github-pre-release
+  type: github-release
+  icon: briefcase-download-outline
+  source:
+    owner: spring-projects
+    repository: spring-framework
+    access_token: ((github-ci-release-token))
+    pre_release: true
+    release: false
+- name: github-release
+  type: github-release
+  icon: briefcase-download
+  source:
+    owner: spring-projects
+    repository: spring-framework
+    access_token: ((github-ci-release-token))
+    pre_release: false
+
 jobs:
 - name: build-spring-framework-ci-images
   plan:
@@ -158,23 +201,14 @@ jobs:
       file: git-repo/ci/tasks/build-project.yml
       params:
         BRANCH: ((branch))
-        GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-        GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-        GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+        <<: *gradle-enterprise-task-params
     on_failure:
       do:
       - put: repo-status-build
         params: { state: "failure", commit: "git-repo" }
       - put: slack-alert
         params:
-          text: >
-            :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
-            [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
-            [<$TEXT_FILE_CONTENT|build scan>]
-          text_file: git-repo/build/build-scan-uri.txt
-          silent: true
-          icon_emoji: ":concourse:"
-          username: concourse-ci
+          <<: *slack-fail-params
   - put: repo-status-build
     params: { state: "success", commit: "git-repo" }
   - put: artifactory-repo
@@ -224,23 +258,14 @@ jobs:
       file: git-repo/ci/tasks/check-project.yml
       params:
         BRANCH: ((branch))
-        GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-        GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-        GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+        <<: *gradle-enterprise-task-params
     on_failure:
       do:
       - put: repo-status-jdk11-build
         params: { state: "failure", commit: "git-repo" }
       - put: slack-alert
         params:
-          text: >
-            :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
-            [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
-            [<$TEXT_FILE_CONTENT|build scan>]
-          text_file: git-repo/build/build-scan-uri.txt
-          silent: true
-          icon_emoji: ":concourse:"
-          username: concourse-ci
+          <<: *slack-fail-params
   - put: repo-status-jdk11-build
     params: { state: "success", commit: "git-repo" }
 - name: jdk14-build
@@ -261,23 +286,14 @@ jobs:
         file: git-repo/ci/tasks/check-project.yml
         params:
           BRANCH: ((branch))
-          GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+          <<: *gradle-enterprise-task-params
       on_failure:
         do:
           - put: repo-status-jdk14-build
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
-              text: >
-                :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
-                [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
-                [<$TEXT_FILE_CONTENT|build scan>]
-              text_file: git-repo/build/build-scan-uri.txt
-              silent: true
-              icon_emoji: ":concourse:"
-              username: concourse-ci
+              <<: *slack-fail-params
     - put: repo-status-jdk14-build
       params: { state: "success", commit: "git-repo" }
 - name: jdk15-build
@@ -298,23 +314,14 @@ jobs:
           file: git-repo/ci/tasks/check-project.yml
           params:
             BRANCH: ((branch))
-            GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-            GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-            GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+            <<: *gradle-enterprise-task-params
       on_failure:
         do:
           - put: repo-status-jdk15-build
             params: { state: "failure", commit: "git-repo" }
           - put: slack-alert
             params:
-              text: >
-                :concourse-failed: ${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!
-                [<https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|build log>]
-                [<$TEXT_FILE_CONTENT|build scan>]
-              text_file: git-repo/build/build-scan-uri.txt
-              silent: true
-              icon_emoji: ":concourse:"
-              username: concourse-ci
+              <<: *slack-fail-params
     - put: repo-status-jdk15-build
       params: { state: "success", commit: "git-repo" }
 - name: stage-milestone
@@ -328,9 +335,7 @@ jobs:
       file: git-repo/ci/tasks/stage-version.yml
       params:
         RELEASE_TYPE: M
-        GRADLE_ENTERPRISE_ACCESS_KEY: ((gradle_enterprise_secret_access_key))
-        GRADLE_ENTERPRISE_CACHE_USERNAME: ((gradle_enterprise_cache_user.username))
-        GRADLE_ENTERPRISE_CACHE_PASSWORD: ((gradle_enterprise_cache_user.password))
+        <<: *gradle-enterprise-task-params
     - put: artifactory-repo
       params:
         <<: *artifactory-params
@@ -355,13 +360,128 @@ jobs:
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: M
-        ARTIFACTORY_SERVER: ((artifactory-server))
-        ARTIFACTORY_USERNAME: ((artifactory-username))
-        ARTIFACTORY_PASSWORD: ((artifactory-password))
+        <<: *artifactory-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: M
+        <<: *github-task-params
+    - put: github-pre-release
+      params:
+        <<: *changelog-task-params
+- name: stage-rc
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - task: stage
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/stage-version.yml
+      params:
+        RELEASE_TYPE: RC
+        <<: *gradle-enterprise-task-params
+    - put: artifactory-repo
+      params:
+        <<: *artifactory-params
+        repo: libs-staging-local
+    - put: git-repo
+      params:
+        repository: stage-git-repo
+- name: promote-rc
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - get: artifactory-repo
+      trigger: false
+      passed: [stage-rc]
+      params:
+        download_artifacts: false
+        save_build_info: true
+    - task: promote
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/promote-version.yml
+      params:
+        RELEASE_TYPE: RC
+        <<: *artifactory-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: RC
+        <<: *github-task-params
+    - put: github-pre-release
+      params:
+        <<: *changelog-task-params
+- name: stage-release
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - task: stage
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/stage-version.yml
+      params:
+        RELEASE_TYPE: RELEASE
+        <<: *gradle-enterprise-task-params
+    - put: artifactory-repo
+      params:
+        <<: *artifactory-params
+        repo: libs-staging-local
+    - put: git-repo
+      params:
+        repository: stage-git-repo
+- name: promote-release
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+      trigger: false
+    - get: artifactory-repo
+      trigger: false
+      passed: [stage-release]
+      params:
+        download_artifacts: false
+        save_build_info: true
+    - task: promote
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/promote-version.yml
+      params:
+        RELEASE_TYPE: RELEASE
+        <<: *artifactory-task-params
+        <<: *bintray-task-params
+- name: sync-to-maven-central
+  serial: true
+  plan:
+    - get: spring-framework-ci-image
+    - get: git-repo
+    - get: artifactory-repo
+      trigger: true
+      passed: [promote-release]
+      params:
+        download_artifacts: false
+        save_build_info: true
+    - task: sync-to-maven-central
+      image: spring-framework-ci-image
+      file: git-repo/ci/tasks/sync-to-maven-central.yml
+      params:
+        <<: *bintray-task-params
+        <<: *sonatype-task-params
+    - task: generate-changelog
+      file: git-repo/ci/tasks/generate-changelog.yml
+      params:
+        RELEASE_TYPE: RELEASE
+        <<: *github-task-params
+    - put: github-release
+      params:
+        <<: *changelog-task-params
+
 groups:
-- name: "Build"
+- name: "builds"
   jobs: ["build", "jdk11-build", "jdk14-build", "jdk15-build"]
-- name: "Release"
-  jobs: ["stage-milestone", "promote-milestone"]
-- name: "CI Images"
+- name: "releases"
+  jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone","promote-rc", "promote-release", "sync-to-maven-central"]
+- name: "ci-images"
   jobs: ["build-spring-framework-ci-images"]

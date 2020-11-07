@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
+import org.springframework.test.context.TestContextAnnotationUtils;
 
 /**
  * Utility methods for working with {@link TestConstructor @TestConstructor}.
@@ -133,7 +134,7 @@ public abstract class TestConstructorUtils {
 		AutowireMode autowireMode = null;
 
 		// Is the test class annotated with @TestConstructor?
-		TestConstructor testConstructor = AnnotatedElementUtils.findMergedAnnotation(testClass, TestConstructor.class);
+		TestConstructor testConstructor = TestContextAnnotationUtils.findMergedAnnotation(testClass, TestConstructor.class);
 		if (testConstructor != null) {
 			autowireMode = testConstructor.autowireMode();
 		}

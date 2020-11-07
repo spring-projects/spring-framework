@@ -39,8 +39,8 @@ public interface BindMarker {
 	/**
 	 * Bind the given {@code value} to the {@link Statement} using the underlying binding strategy.
 	 * @param bindTarget the target to bind the value to
-	 * @param value the actual value. Must not be {@code null}
-	 * Use {@link #bindNull(BindTarget, Class)} for {@code null} values
+	 * @param value the actual value (must not be {@code null};
+	 * use {@link #bindNull(BindTarget, Class)} for {@code null} values)
 	 * @see Statement#bind
 	 */
 	void bind(BindTarget bindTarget, Object value);
@@ -48,7 +48,7 @@ public interface BindMarker {
 	/**
 	 * Bind a {@code null} value to the {@link Statement} using the underlying binding strategy.
 	 * @param bindTarget the target to bind the value to
-	 * @param valueType value type, must not be {@code null}
+	 * @param valueType the value type (must not be {@code null})
 	 * @see Statement#bindNull
 	 */
 	void bindNull(BindTarget bindTarget, Class<?> valueType);

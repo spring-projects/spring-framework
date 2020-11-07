@@ -120,10 +120,8 @@ class WebClientIntegrationTests {
 	void retrieve(ClientHttpConnector connector) {
 		startServer(connector);
 
-		prepareResponse(response -> response.setHeader("Content-Type", "text/plain")
-						.addHeader("Set-Cookie", "testkey1=testvalue1;")
-						.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
-						.setBody("Hello Spring!"));
+		prepareResponse(response ->
+				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
@@ -281,7 +279,7 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
-	void retrieveJsonArrayAsResponseEntity(ClientHttpConnector connector) {
+	void retrieveJsonArrayAsResponseEntityList(ClientHttpConnector connector) {
 		startServer(connector);
 
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
@@ -303,6 +301,39 @@ class WebClientIntegrationTests {
 					assertThat(entity.getBody()).isEqualTo(Arrays.asList(pojo1, pojo2));
 				})
 				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
+	void retrieveJsonArrayAsResponseEntityFlux(ClientHttpConnector connector) {
+		startServer(connector);
+
+		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		ResponseEntity<Flux<Pojo>> entity = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntityFlux(Pojo.class)
+				.block(Duration.ofSeconds(3));
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(58);
+
+		assertThat(entity.getBody()).isNotNull();
+		StepVerifier.create(entity.getBody())
+				.expectNext(new Pojo("foo1", "bar1"))
+				.expectNext(new Pojo("foo2", "bar2"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {
@@ -839,8 +870,7 @@ class WebClientIntegrationTests {
 		Mono<String> result = this.webClient.get()
 				.uri("/greeting")
 				.header("X-Test-Header", "testvalue")
-				.exchange()
-				.flatMap(response -> response.bodyToMono(String.class));
+				.retrieve().bodyToMono(String.class);
 
 		StepVerifier.create(result)
 				.expectNext("Hello Spring!")
@@ -864,8 +894,7 @@ class WebClientIntegrationTests {
 
 		Mono<ResponseEntity<Pojo>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.flatMap(response -> response.toEntity(Pojo.class));
+				.retrieve().toEntity(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -892,8 +921,7 @@ class WebClientIntegrationTests {
 
 		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.flatMap(ClientResponse::toBodilessEntity);
+				.retrieve().toBodilessEntity();
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -921,8 +949,7 @@ class WebClientIntegrationTests {
 
 		Mono<ResponseEntity<List<Pojo>>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
-				.exchange()
-				.flatMap(response -> response.toEntityList(Pojo.class));
+				.retrieve().toEntityList(Pojo.class);
 
 		StepVerifier.create(result)
 				.consumeNextWith(entity -> {
@@ -950,8 +977,7 @@ class WebClientIntegrationTests {
 
 		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.uri("/noContent")
-				.exchange()
-				.flatMap(response -> response.toEntity(Void.class));
+				.retrieve().toBodilessEntity();
 
 		StepVerifier.create(result)
 				.assertNext(r -> assertThat(r.getStatusCode().is2xxSuccessful()).isTrue())
@@ -965,10 +991,11 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> response.setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
-		Mono<ClientResponse> result = this.webClient.get().uri("/greeting").exchange();
+		Mono<ResponseEntity<Void>> result = this.webClient.get().uri("/greeting")
+				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
-				.consumeNextWith(response -> assertThat(response.statusCode()).isEqualTo(HttpStatus.NOT_FOUND))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND))
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 
@@ -989,12 +1016,12 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> response.setResponseCode(errorStatus)
 				.setHeader("Content-Type", "text/plain").setBody(errorMessage));
 
-		Mono<ClientResponse> result = this.webClient.get()
+		Mono<ResponseEntity<Void>> result = this.webClient.get()
 				.uri("/unknownPage")
-				.exchange();
+				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
-				.consumeNextWith(response -> assertThat(response.rawStatusCode()).isEqualTo(555))
+				.consumeNextWith(entity -> assertThat(entity.getStatusCodeValue()).isEqualTo(555))
 				.expectComplete()
 				.verify(Duration.ofSeconds(3));
 
@@ -1010,10 +1037,16 @@ class WebClientIntegrationTests {
 		startServer(connector);
 
 		String uri = "/api/v4/groups/1";
-		Mono<ClientResponse> responseMono = WebClient.builder().build().get().uri(uri).exchange();
+		Mono<ResponseEntity<Void>> responseMono = WebClient.builder().build().get().uri(uri)
+				.retrieve().toBodilessEntity();
 
 		StepVerifier.create(responseMono)
-				.expectErrorMessage("URI is not absolute: " + uri)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
+					WebClientRequestException ex = (WebClientRequestException) throwable;
+					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
+					assertThat(ex.getUri()).isEqualTo(URI.create(uri));
+				})
 				.verify(Duration.ofSeconds(5));
 	}
 
@@ -1097,15 +1130,12 @@ class WebClientIntegrationTests {
 		prepareResponse(response -> response
 				.setHeader("Content-Type", "text/plain")
 				.addHeader("Set-Cookie", "testkey1=testvalue1;")
-				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; Secure")
+				.addHeader("Set-Cookie", "testkey2=testvalue2; Max-Age=42; HttpOnly; SameSite=Lax; Secure")
 				.setBody("test"));
 
-		Mono<ClientResponse> result = this.webClient.get()
+		this.webClient.get()
 				.uri("/test")
-				.exchange();
-
-		StepVerifier.create(result)
-				.consumeNextWith(response -> {
+				.exchangeToMono(response -> {
 					assertThat(response.cookies()).containsOnlyKeys("testkey1", "testkey2");
 
 					ResponseCookie cookie1 = response.cookies().get("testkey1").get(0);
@@ -1118,12 +1148,31 @@ class WebClientIntegrationTests {
 					assertThat(cookie2.getValue()).isEqualTo("testvalue2");
 					assertThat(cookie2.isSecure()).isTrue();
 					assertThat(cookie2.isHttpOnly()).isTrue();
+					assertThat(cookie2.getSameSite()).isEqualTo("Lax");
 					assertThat(cookie2.getMaxAge().getSeconds()).isEqualTo(42);
+
+					return response.releaseBody();
 				})
-				.expectComplete()
-				.verify(Duration.ofSeconds(3));
+				.block(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
+	}
+
+	@ParameterizedWebClientTest
+	void invalidDomain(ClientHttpConnector connector) {
+		startServer(connector);
+
+		String url = "http://example.invalid";
+		Mono<Void> result = this.webClient.get().uri(url).retrieve().bodyToMono(Void.class);
+
+		StepVerifier.create(result)
+				.expectErrorSatisfies(throwable -> {
+					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
+					WebClientRequestException ex = (WebClientRequestException) throwable;
+					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
+					assertThat(ex.getUri()).isEqualTo(URI.create(url));
+				})
+				.verify();
 	}
 
 

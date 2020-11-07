@@ -123,7 +123,7 @@ public class WebHttpHandlerBuilderTests {
 		BiFunction<ServerHttpRequest, String, ServerHttpRequest> mutator =
 				(req, value) -> req.mutate().headers(headers -> headers.add("My-Header", value)).build();
 
-		AtomicBoolean success = new AtomicBoolean(false);
+		AtomicBoolean success = new AtomicBoolean();
 		HttpHandler httpHandler = WebHttpHandlerBuilder
 				.webHandler(exchange -> {
 					HttpHeaders headers = exchange.getRequest().getHeaders();

@@ -200,7 +200,7 @@ public final class CloseStatus {
 	 * @since 5.3
 	 */
 	public static CloseStatus create(int code, @Nullable String reason) {
-		if (StringUtils.isEmpty(reason)) {
+		if (!StringUtils.hasText(reason)) {
 			switch (code) {
 				case 1000:
 					return NORMAL;
