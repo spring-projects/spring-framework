@@ -284,7 +284,7 @@ public class ViewResolverRegistry {
 
 	protected List<ViewResolver> getViewResolvers() {
 		if (this.contentNegotiatingResolver != null) {
-			return Collections.<ViewResolver>singletonList(this.contentNegotiatingResolver);
+			return Collections.singletonList(this.contentNegotiatingResolver);
 		}
 		else {
 			return this.viewResolvers;
