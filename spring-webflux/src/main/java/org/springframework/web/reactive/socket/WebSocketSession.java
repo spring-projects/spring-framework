@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ public interface WebSocketSession {
 	 * is closed. In a typical {@link WebSocketHandler} implementation this
 	 * stream is composed into the overall processing flow, so that when the
 	 * connection is closed, handling will end.
-	 *
 	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
 	 * for more details and examples of how to handle the session.
 	 */
@@ -76,7 +75,6 @@ public interface WebSocketSession {
 	 * Give a source of outgoing messages, write the messages and return a
 	 * {@code Mono<Void>} that completes when the source completes and writing
 	 * is done.
-	 *
 	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
 	 * for more details and examples of how to handle the session.
 	 */
