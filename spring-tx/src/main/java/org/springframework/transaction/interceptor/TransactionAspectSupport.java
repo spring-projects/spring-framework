@@ -352,9 +352,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				return new ReactiveTransactionSupport(adapter);
 			});
-			Publisher<?> publisher = (Publisher<?>) txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
-			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow(publisher) :
-					KotlinDelegate.awaitSingleOrNull(publisher, ((CoroutinesInvocationCallback) invocation).getContinuation())) : publisher);
+			Object result = txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
+			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow((Publisher<?>) result) :
+					KotlinDelegate.awaitSingleOrNull((Publisher<?>) result, ((CoroutinesInvocationCallback) invocation).getContinuation())) : result);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);

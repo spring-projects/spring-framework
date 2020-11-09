@@ -17,6 +17,9 @@
 package org.springframework.transaction.annotation
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -83,12 +86,36 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		runBlocking {
 			try {
 				proxy.suspendingValueFailure()
+				Assertions.fail("No exception thrown as expected")
 			}
 			catch (ex: IllegalStateException) {
 			}
-
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
+	}
+
+	@Test
+	fun suspendingFlowSuccess() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		runBlocking {
+			Assertions.assertThat(proxy.suspendingFlowSuccess().toList()).containsExactly("foo", "foo")
+		}
+		assertReactiveGetTransactionAndCommitCount(1)
+	}
+
+	@Test
+	fun flowSuccess() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		runBlocking {
+			Assertions.assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
+		}
+		assertReactiveGetTransactionAndCommitCount(1)
 	}
 
 	private fun assertReactiveGetTransactionAndCommitCount(expectedCount: Int) {
@@ -121,6 +148,23 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		open suspend fun suspendingValueFailure(): String {
 			delay(10)
 			throw IllegalStateException()
+		}
+
+		open fun flowSuccess(): Flow<String> {
+			return flow {
+				emit("foo")
+				delay(10)
+				emit("foo")
+			}
+		}
+
+		open suspend fun suspendingFlowSuccess(): Flow<String> {
+			delay(10)
+			return flow {
+				emit("foo")
+				delay(10)
+				emit("foo")
+			}
 		}
 	}
 }
