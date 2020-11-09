@@ -80,8 +80,6 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		assertReactiveGetTransactionAndRollbackCount(1)
 	}
 
-
-
 	private fun assertReactiveGetTransactionAndCommitCount(expectedCount: Int) {
 		Assertions.assertThat(rtm.begun).isEqualTo(expectedCount)
 		Assertions.assertThat(rtm.commits).isEqualTo(expectedCount)
