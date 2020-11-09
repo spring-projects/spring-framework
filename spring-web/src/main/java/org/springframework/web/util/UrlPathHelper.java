@@ -618,9 +618,9 @@ public class UrlPathHelper {
 		}
 		StringBuilder sb = new StringBuilder(requestUri);
 		while (semicolonIndex != -1) {
-			int slashIndex = requestUri.indexOf('/', semicolonIndex + 1);
+			int slashIndex = sb.indexOf("/", semicolonIndex + 1);
 			if (slashIndex == -1) {
-				slashIndex = sb.length();
+				return sb.substring(0, semicolonIndex);
 			}
 			sb.delete(semicolonIndex, slashIndex);
 			semicolonIndex = sb.indexOf(";", semicolonIndex);

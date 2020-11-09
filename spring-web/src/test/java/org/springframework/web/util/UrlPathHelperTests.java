@@ -115,6 +115,9 @@ public class UrlPathHelperTests {
 		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar");
 
+		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R/baz;test");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar/baz");
+
 		// SPR-13455
 		request.setRequestURI("/foo/;test/1");
 		request.setServletPath("/foo/1");
