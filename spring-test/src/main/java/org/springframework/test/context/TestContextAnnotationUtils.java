@@ -492,10 +492,11 @@ public abstract class TestContextAnnotationUtils {
 			Assert.notNull(annotation, "Annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
-			this.annotation = (T) AnnotatedElementUtils.findMergedAnnotation(
+			T mergedAnnotation = (T) AnnotatedElementUtils.findMergedAnnotation(
 					rootDeclaringClass, annotation.annotationType());
-			Assert.state(this.annotation != null,
+			Assert.state(mergedAnnotation != null,
 					() -> "Failed to find merged annotation for " + annotation);
+			this.annotation = mergedAnnotation;
 		}
 
 		public Class<?> getRootDeclaringClass() {
