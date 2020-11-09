@@ -875,8 +875,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 			String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
-			// Optimize for Mono
-			if (Mono.class.isAssignableFrom(method.getReturnType())) {
+			// For Mono and suspending functions not returning kotlinx.coroutines.flow.Flow
+			if (Mono.class.isAssignableFrom(method.getReturnType()) || (KotlinDetector.isSuspendingFunction(method) && !COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {
 				return TransactionContextManager.currentContext().flatMap(context ->
 						createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMap(it -> {
 							try {

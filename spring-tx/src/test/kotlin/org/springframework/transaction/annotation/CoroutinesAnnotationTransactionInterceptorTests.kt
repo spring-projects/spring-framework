@@ -19,7 +19,6 @@ package org.springframework.transaction.annotation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.transaction.interceptor.TransactionInterceptor
@@ -64,7 +63,6 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 	}
 
 	@Test
-	@Disabled("Currently fails due to gh-25998")
 	fun suspendingValueSuccess() {
 		val proxyFactory = ProxyFactory()
 		proxyFactory.setTarget(TestWithCoroutines())
