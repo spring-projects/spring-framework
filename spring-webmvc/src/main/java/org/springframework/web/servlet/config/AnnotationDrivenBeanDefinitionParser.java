@@ -162,7 +162,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean javaxValidationPresent;
 
-	private static boolean romePresent;
+	private static final boolean romePresent;
 
 	private static final boolean jaxb2Present;
 
@@ -208,7 +208,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 
 		if (element.hasAttribute("enable-matrix-variables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
+			boolean enableMatrixVariables = Boolean.parseBoolean(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
 
