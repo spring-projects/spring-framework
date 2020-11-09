@@ -185,6 +185,7 @@ class DefaultWebClient implements WebClient {
 			this.httpMethod = httpMethod;
 		}
 
+
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
 			attribute(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
@@ -243,18 +244,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestBodySpec attribute(String name, Object value) {
-			this.attributes.put(name, value);
-			return this;
-		}
-
-		@Override
-		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
-			attributesConsumer.accept(this.attributes);
-			return this;
-		}
-
-		@Override
 		public DefaultRequestBodyUriSpec accept(MediaType... acceptableMediaTypes) {
 			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
@@ -299,6 +288,18 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			this.attributes.put(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			attributesConsumer.accept(this.attributes);
 			return this;
 		}
 
@@ -497,12 +498,14 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
 
+		
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
