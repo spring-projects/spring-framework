@@ -38,29 +38,24 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return Principal.class.isAssignableFrom(paramType);
+		return Principal.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
-		Class<?> paramType = parameter.getParameterType();
-
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (request == null) {
-			throw new IllegalStateException(
-					"Current request is not of type [HttpServletRequest]: " + webRequest);
+			throw new IllegalStateException("Current request is not of type HttpServletRequest: " + webRequest);
 		}
 
 		Principal principal = request.getUserPrincipal();
-		if (principal != null && !paramType.isInstance(principal)) {
-			throw new IllegalStateException(
-					"Current user principal is not of type [" + paramType.getName() + "]: " + principal);
+		if (principal != null && !parameter.getParameterType().isInstance(principal)) {
+			throw new IllegalStateException("Current user principal is not of type [" +
+					parameter.getParameterType().getName() + "]: " + principal);
 		}
 
 		return principal;
