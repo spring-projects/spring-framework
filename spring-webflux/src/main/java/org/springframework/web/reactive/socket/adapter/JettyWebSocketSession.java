@@ -114,6 +114,11 @@ public class JettyWebSocketSession extends AbstractListenerWebSocketSession<Sess
 	}
 
 	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
+	}
+
+	@Override
 	public Mono<Void> close(CloseStatus status) {
 		getDelegate().close(status.getCode(), status.getReason());
 		return Mono.empty();

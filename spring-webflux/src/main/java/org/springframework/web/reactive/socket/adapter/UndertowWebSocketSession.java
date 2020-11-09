@@ -109,6 +109,11 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 	}
 
 	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
+	}
+
+	@Override
 	public Mono<Void> close(CloseStatus status) {
 		CloseMessage cm = new CloseMessage(status.getCode(), status.getReason());
 		if (!getDelegate().isCloseFrameSent()) {
