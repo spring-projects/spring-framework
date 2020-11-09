@@ -505,7 +505,7 @@ class DefaultWebClient implements WebClient {
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
 
-		
+
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
