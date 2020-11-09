@@ -22,9 +22,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
-import org.springframework.transaction.TransactionManager
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import org.springframework.transaction.testfixture.CallCountingTransactionManager
 import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager
 
 /**
@@ -32,13 +30,9 @@ import org.springframework.transaction.testfixture.ReactiveCallCountingTransacti
  */
 class CoroutinesAnnotationTransactionInterceptorTests {
 
-	private val ptm = CallCountingTransactionManager()
-
 	private val rtm = ReactiveCallCountingTransactionManager()
 
 	private val source = AnnotationTransactionAttributeSource()
-
-	private val ti = TransactionInterceptor((ptm as TransactionManager), source)
 
 	@Test
 	fun suspendingNoValueSuccess() {
