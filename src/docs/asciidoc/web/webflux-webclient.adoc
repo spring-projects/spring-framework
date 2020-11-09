@@ -831,7 +831,7 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 
 
 [[webflux-client-filter]]
-== Client Filters
+== Filters
 
 You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
 in order to intercept and modify requests, as the following example shows:
@@ -887,9 +887,36 @@ a filter for basic authentication through a static factory method:
 			.build()
 ----
 
-Filters apply globally to every request. To change a filter's behavior for a specific
-request, you can add request attributes to the `ClientRequest` that can then be accessed
-by all filters in the chain, as the following example shows:
+You can create a new `WebClient` instance by using another as a starting point. This allows
+insert or removing filters without affecting the original `WebClient`. Below is an example
+that inserts a basic authentication filter at index 0:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
+
+	WebClient client = webClient.mutate()
+			.filters(filterList -> {
+				filterList.add(0, basicAuthentication("user", "password"));
+			})
+			.build();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = webClient.mutate()
+			.filters { it.add(0, basicAuthentication("user", "password")) }
+			.build()
+----
+
+
+[[webflux-client-attributes]]
+== Attributes
+
+You can add attributes to a request. This is convenient if you want to pass information
+through the filter chain and influence the behavior of filters for a given request.
+For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -912,10 +939,11 @@ by all filters in the chain, as the following example shows:
 .Kotlin
 ----
 	val client = WebClient.builder()
-				.filter { request, _ ->
-			val usr = request.attributes()["myAttribute"];
-			// ...
-		}.build()
+			.filter { request, _ ->
+				val usr = request.attributes()["myAttribute"];
+				// ...
+			}
+			.build()
 
 		client.get().uri("https://example.org/")
 				.attribute("myAttribute", "...")
@@ -923,29 +951,44 @@ by all filters in the chain, as the following example shows:
 				.awaitBody<Unit>()
 ----
 
-You can also replicate an existing `WebClient`, insert new filters, or remove already
-registered filters. The following example, inserts a basic authentication filter at
-index 0:
+
+[[webflux-client-context]]
+== Context
+
+<<webflux-client-attributes>> provide a convenient way to pass information to the filter
+chain but they only influence the current request. If you want to pass information that
+propagates to additional requests that are nested, e.g. via `flatMap`, or executed after,
+e.g. via `concatMap`, then you'll need to use the Reactor `Context`.
+
+`WebClient` exposes a method to populate the Reactor `Context` for a given request.
+This information is available to filters for the current request and it also propagates
+to subsequent requests or other reactive clients participating in the downstream
+processing chain. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
-
-	WebClient client = webClient.mutate()
-			.filters(filterList -> {
-				filterList.add(0, basicAuthentication("user", "password"));
-			})
+	WebClient client = WebClient.builder()
+			.filter((request, next) ->
+					Mono.deferContextual(contextView -> {
+						String value = contextView.get("foo");
+						// ...
+					}))
 			.build();
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	val client = webClient.mutate()
-			.filters { it.add(0, basicAuthentication("user", "password")) }
-			.build()
+
+	client.get().uri("https://example.org/")
+			.context(context -> context.put("foo", ...))
+			.retrieve()
+			.bodyToMono(String.class)
+			.flatMap(body -> {
+					// perform nested request (context propagates automatically)...
+			});
 ----
 
+Note that you can also specify how to populate the context through the `defaultRequest`
+method at the level of the `WebClient.Builder` and that applies to all requests.
+This could be used for to example to pass information from `ThreadLocal` storage onto
+a Reactor processing chain in a Spring MVC application.
 
 
 [[webflux-client-synchronous]]

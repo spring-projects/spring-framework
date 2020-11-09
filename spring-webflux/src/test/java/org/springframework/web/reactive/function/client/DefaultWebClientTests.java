@@ -130,6 +130,34 @@ public class DefaultWebClientTests {
 	}
 
 	@Test
+	public void contextFromThreadLocal() {
+		WebClient client = this.builder
+				.filter((request, next) ->
+						// Async, continue on different thread
+						Mono.delay(Duration.ofMillis(10)).then(next.exchange(request)))
+				.filter((request, next) ->
+						Mono.deferContextual(contextView -> {
+							String fooValue = contextView.get("foo");
+							return next.exchange(ClientRequest.from(request).header("foo", fooValue).build());
+						}))
+				.build();
+
+		ThreadLocal<String> fooHolder = new ThreadLocal<>();
+		fooHolder.set("bar");
+		try {
+			client.get().uri("/path")
+					.context(context -> context.put("foo", fooHolder.get()))
+					.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
+		}
+		finally {
+			fooHolder.remove();
+		}
+
+		ClientRequest request = verifyAndGetRequest();
+		assertThat(request.headers().getFirst("foo")).isEqualTo("bar");
+	}
+
+	@Test
 	public void httpRequest() {
 		this.builder.build().get().uri("/path")
 				.httpRequest(httpRequest -> {})
@@ -196,8 +224,6 @@ public class DefaultWebClientTests {
 		request = verifyAndGetRequest();
 		assertThat(request.headers().getFirst("Accept")).isEqualTo("application/xml");
 		assertThat(request.cookies().getFirst("id")).isEqualTo("456");
-
-
 	}
 
 	@Test

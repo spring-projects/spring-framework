@@ -29,6 +29,7 @@ import java.util.function.Predicate;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -469,6 +470,17 @@ public interface WebClient {
 		 * @return this builder
 		 */
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Provide a function to populate the Reactor {@code Context}. In contrast
+		 * to {@link #attribute(String, Object) attributes} which apply only to
+		 * the current request, the Reactor {@code Context} transparently propagates
+		 * to the downstream processing chain which may include other nested or
+		 * successive calls over HTTP or via other reactive clients.
+		 * @param contextModifier the function to modify the context with
+		 * @since 5.3.1
+		 */
+		S context(Function<Context, Context> contextModifier);
 
 		/**
 		 * Callback for access to the {@link ClientHttpRequest} that in turn

@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -174,6 +175,9 @@ class DefaultWebClient implements WebClient {
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
 		@Nullable
+		private Function<Context, Context> contextModifier;
+
+		@Nullable
 		private Consumer<ClientHttpRequest> httpRequestConsumer;
 
 
@@ -299,6 +303,13 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		public RequestBodySpec context(Function<Context, Context> contextModifier) {
+			this.contextModifier = (this.contextModifier != null ?
+					this.contextModifier.andThen(contextModifier) : contextModifier);
+			return this;
+		}
+
+		@Override
 		public RequestBodySpec httpRequest(Consumer<ClientHttpRequest> requestConsumer) {
 			this.httpRequestConsumer = (this.httpRequestConsumer != null ?
 					this.httpRequestConsumer.andThen(requestConsumer) : requestConsumer);
@@ -412,9 +423,15 @@ class DefaultWebClient implements WebClient {
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
-			return Mono.defer(() -> exchangeFunction.exchange(request)
-					.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
-					.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR));
+			return Mono.defer(() -> {
+				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
+						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
+						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
+				if (this.contextModifier != null) {
+					responseMono = responseMono.contextWrite(this.contextModifier);
+				}
+				return responseMono;
+			});
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
