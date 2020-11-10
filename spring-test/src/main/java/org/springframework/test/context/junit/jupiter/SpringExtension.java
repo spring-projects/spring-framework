@@ -98,10 +98,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	private static final List<Class<? extends Annotation>> JUPITER_ANNOTATION_TYPES =
 			Arrays.asList(BeforeAll.class, AfterAll.class, BeforeEach.class, AfterEach.class, Testable.class);
 
-	private static final MethodFilter autowiredTestOrLifecycleMethodFilter = method ->
-			(ReflectionUtils.USER_DECLARED_METHODS.matches(method) &&
-				!Modifier.isPrivate(method.getModifiers()) &&
-				isAutowiredTestOrLifecycleMethod(method));
+	private static final MethodFilter autowiredTestOrLifecycleMethodFilter =
+			ReflectionUtils.USER_DECLARED_METHODS
+				.and(method -> !Modifier.isPrivate(method.getModifiers()))
+				.and(SpringExtension::isAutowiredTestOrLifecycleMethod);
 
 
 	/**

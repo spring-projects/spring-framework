@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -824,6 +824,18 @@ public abstract class ReflectionUtils {
 		 * @param method the method to check
 		 */
 		boolean matches(Method method);
+
+		/**
+		 * Create a composite filter based on this filter <em>and</em> the provided
+		 * filter.
+		 * <p>If this filter does not match, the next filter will not be applied.
+		 * @param next the next {@code MethodFilter}
+		 * @return a composite {@code MethodFilter}
+		 * @since 5.3.2
+		 */
+		default MethodFilter and(MethodFilter next) {
+			return method -> matches(method) && next.matches(method);
+		}
 	}
 
 
@@ -852,6 +864,18 @@ public abstract class ReflectionUtils {
 		 * @param field the field to check
 		 */
 		boolean matches(Field field);
+
+		/**
+		 * Create a composite filter based on this filter <em>and</em> the provided
+		 * filter.
+		 * <p>If this filter does not match, the next filter will not be applied.
+		 * @param next the next {@code FieldFilter}
+		 * @return a composite {@code FieldFilter}
+		 * @since 5.3.2
+		 */
+		default FieldFilter and(FieldFilter next) {
+			return field -> matches(field) && next.matches(field);
+		}
 	}
 
 }

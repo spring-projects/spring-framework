@@ -186,12 +186,7 @@ class ReflectionUtilsTests {
 	@Test
 	void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestObject.class, mc, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method m) {
-				return Modifier.isProtected(m.getModifiers());
-			}
-		});
+		ReflectionUtils.doWithMethods(TestObject.class, mc, method -> Modifier.isProtected(method.getModifiers()));
 		assertThat(mc.getMethodNames().isEmpty()).isFalse();
 		assertThat(mc.getMethodNames().contains("clone")).as("Must find protected method on Object").isTrue();
 		assertThat(mc.getMethodNames().contains("finalize")).as("Must find protected method on Object").isTrue();
