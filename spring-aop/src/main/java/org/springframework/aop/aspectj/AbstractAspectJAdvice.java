@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,13 +350,12 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.discoveredThrowingType;
 	}
 
-	private boolean isVariableName(String name) {
-		char[] chars = name.toCharArray();
-		if (!Character.isJavaIdentifierStart(chars[0])) {
+	private static boolean isVariableName(String name) {
+		if (!Character.isJavaIdentifierStart(name.charAt(0))) {
 			return false;
 		}
-		for (int i = 1; i < chars.length; i++) {
-			if (!Character.isJavaIdentifierPart(chars[i])) {
+		for (char ch: name.toCharArray()) {
+			if (!Character.isJavaIdentifierPart(ch)) {
 				return false;
 			}
 		}
