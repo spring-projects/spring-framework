@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public @interface ActiveProfiles {
 	 * <p>The default value is {@code true}, which means that a test
 	 * class will <em>inherit</em> bean definition profiles defined by a
 	 * test superclass. Specifically, the bean definition profiles for a test
-	 * class will be added to the list of bean definition profiles
+	 * class will be appended to the list of bean definition profiles
 	 * defined by a test superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of bean definition profiles.
 	 * <p>If {@code inheritProfiles} is set to {@code false}, the bean

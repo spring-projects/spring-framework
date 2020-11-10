@@ -104,6 +104,9 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo+bar");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo+bar");
+
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
 	}
 
 	@Test
@@ -111,6 +114,9 @@ public class UrlPathHelperTests {
 		helper.setRemoveSemicolonContent(true);
 		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar");
+
+		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R/baz;test");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar/baz");
 
 		// SPR-13455
 		request.setRequestURI("/foo/;test/1");

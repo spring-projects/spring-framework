@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -174,12 +175,16 @@ class DefaultWebClient implements WebClient {
 		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
 		@Nullable
+		private Function<Context, Context> contextModifier;
+
+		@Nullable
 		private Consumer<ClientHttpRequest> httpRequestConsumer;
 
 
 		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
 			this.httpMethod = httpMethod;
 		}
+
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
@@ -239,18 +244,6 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
-		public RequestBodySpec attribute(String name, Object value) {
-			this.attributes.put(name, value);
-			return this;
-		}
-
-		@Override
-		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
-			attributesConsumer.accept(this.attributes);
-			return this;
-		}
-
-		@Override
 		public DefaultRequestBodyUriSpec accept(MediaType... acceptableMediaTypes) {
 			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
@@ -295,6 +288,25 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public DefaultRequestBodyUriSpec ifNoneMatch(String... ifNoneMatches) {
 			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attribute(String name, Object value) {
+			this.attributes.put(name, value);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			attributesConsumer.accept(this.attributes);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec context(Function<Context, Context> contextModifier) {
+			this.contextModifier = (this.contextModifier != null ?
+					this.contextModifier.andThen(contextModifier) : contextModifier);
 			return this;
 		}
 
@@ -412,9 +424,15 @@ class DefaultWebClient implements WebClient {
 			ClientRequest request = (this.inserter != null ?
 					initRequestBuilder().body(this.inserter).build() :
 					initRequestBuilder().build());
-			return Mono.defer(() -> exchangeFunction.exchange(request)
-					.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
-					.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR));
+			return Mono.defer(() -> {
+				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
+						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
+						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
+				if (this.contextModifier != null) {
+					responseMono = responseMono.contextWrite(this.contextModifier);
+				}
+				return responseMono;
+			});
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
@@ -480,11 +498,13 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+
 		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 		}
+
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
@@ -620,6 +640,22 @@ class DefaultWebClient implements WebClient {
 			return this.responseMono.flatMap(response ->
 					WebClientUtils.mapToEntityList(response,
 							handleBodyFlux(response, response.bodyToFlux(elementTypeRef))));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType) {
+			return this.responseMono.map(response ->
+					ResponseEntity.status(response.rawStatusCode())
+							.headers(response.headers().asHttpHeaders())
+							.body(response.bodyToFlux(elementType)));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeReference) {
+			return this.responseMono.map(response ->
+					ResponseEntity.status(response.rawStatusCode())
+							.headers(response.headers().asHttpHeaders())
+							.body(response.bodyToFlux(elementTypeReference)));
 		}
 
 		@Override

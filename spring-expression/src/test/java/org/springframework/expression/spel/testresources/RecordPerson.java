@@ -16,30 +16,26 @@
 
 package org.springframework.expression.spel.testresources;
 
-public class Person {
+public class RecordPerson {
 
-	private String privateName;
+	private String name;
 
-	Company company;
+	private Company company;
 
-	public Person(String name) {
-		this.privateName = name;
+	public RecordPerson(String name) {
+		this.name = name;
 	}
 
-	public Person(String name, Company company) {
-		this.privateName = name;
+	public RecordPerson(String name, Company company) {
+		this.name = name;
 		this.company = company;
 	}
 
-	public String getName() {
-		return privateName;
+	public String name() {
+		return name;
 	}
 
-	public void setName(String n) {
-		this.privateName = n;
-	}
-
-	public Company getCompany() {
+	public Company company() {
 		return company;
 	}
 

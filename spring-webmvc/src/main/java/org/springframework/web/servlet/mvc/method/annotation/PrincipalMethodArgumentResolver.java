@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.security.Principal;
@@ -29,37 +30,32 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 /**
  * Resolves an argument of type {@link Principal}, similar to
  * {@link ServletRequestMethodArgumentResolver} but irrespective of whether the
- * argument is annotated or not. This is doen to enable custom argument
- * resolution of a {@link Principal} argument (with custom annotation).
+ * argument is annotated or not. This is done to enable custom argument
+ * resolution of a {@link Principal} argument (with a custom annotation).
  *
  * @author Rossen Stoyanchev
  * @since 5.3.1
  */
 public class PrincipalMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		return Principal.class.isAssignableFrom(paramType);
+		return Principal.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
-		Class<?> paramType = parameter.getParameterType();
-
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (request == null) {
-			throw new IllegalStateException(
-					"Current request is not of type [HttpServletRequest]: " + webRequest);
+			throw new IllegalStateException("Current request is not of type HttpServletRequest: " + webRequest);
 		}
 
 		Principal principal = request.getUserPrincipal();
-		if (principal != null && !paramType.isInstance(principal)) {
-			throw new IllegalStateException(
-					"Current user principal is not of type [" + paramType.getName() + "]: " + principal);
+		if (principal != null && !parameter.getParameterType().isInstance(principal)) {
+			throw new IllegalStateException("Current user principal is not of type [" +
+					parameter.getParameterType().getName() + "]: " + principal);
 		}
 
 		return principal;

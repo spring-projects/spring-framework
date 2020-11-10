@@ -373,6 +373,8 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	void buildMergedConfigWithDuplicateConfigurationOnEnclosingClassAndNestedClass() {
 		compareApplesToApples(AppleConfigTestCase.class, AppleConfigTestCase.Nested.class);
 		compareApplesToApples(AppleConfigTestCase.Nested.class, AppleConfigTestCase.Nested.DoubleNested.class);
+		compareApplesToOranges(ApplesAndOrangesConfigTestCase.class, ApplesAndOrangesConfigTestCase.Nested.class);
+		compareApplesToOranges(ApplesAndOrangesConfigTestCase.Nested.class, ApplesAndOrangesConfigTestCase.Nested.DoubleNested.class);
 	}
 
 	private void compareApplesToApples(Class<?> parent, Class<?> child) {
@@ -400,7 +402,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 				DelegatingSmartContextLoader.class);
 
 		assertThat(parentMergedConfig.getActiveProfiles()).as("active profiles")
-			.containsExactly("apples", "oranges")
+			.containsExactly("oranges", "apples")
 			.isEqualTo(childMergedConfig.getActiveProfiles());
 		assertThat(parentMergedConfig).isEqualTo(childMergedConfig);
 	}
@@ -531,7 +533,7 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 	}
 
 	@ContextConfiguration(classes = AppleConfig.class)
-	@ActiveProfiles({"apples", "oranges"})
+	@ActiveProfiles({"oranges", "apples"})
 	static class ApplesAndOrangesConfigTestCase {
 
 		@ContextConfiguration(classes = AppleConfig.class)
@@ -539,19 +541,19 @@ class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUt
 		class Nested {
 
 			@ContextConfiguration(classes = AppleConfig.class)
-			@ActiveProfiles(profiles = {"apples", "oranges", "apples"}, inheritProfiles = false)
+			@ActiveProfiles(profiles = {"oranges", "apples", "oranges"}, inheritProfiles = false)
 			class DoubleNested {
 			}
 		}
 	}
 
 	@ContextConfiguration(classes = AppleConfig.class)
-	@ActiveProfiles(profiles = {"oranges", "apples"}, inheritProfiles = false)
+	@ActiveProfiles(profiles = {"oranges", "apples", "oranges"}, inheritProfiles = false)
 	static class DuplicateConfigApplesAndOrangesConfigTestCase extends ApplesAndOrangesConfigTestCase {
 	}
 
 	@ContextConfiguration(classes = AppleConfig.class)
-	@ActiveProfiles(profiles = {"apples", "oranges", "apples"}, inheritProfiles = false)
+	@ActiveProfiles(profiles = {"oranges", "apples", "oranges"}, inheritProfiles = false)
 	static class SubDuplicateConfigApplesAndOrangesConfigTestCase extends DuplicateConfigApplesAndOrangesConfigTestCase {
 	}
 

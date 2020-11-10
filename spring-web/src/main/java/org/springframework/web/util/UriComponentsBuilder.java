@@ -1023,15 +1023,21 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 			if (this.path.length() == 0) {
 				return null;
 			}
-			String path = this.path.toString();
-			while (true) {
-				int index = path.indexOf("//");
-				if (index == -1) {
-					break;
+			String sanitized = getSanitizedPath(this.path);
+			return new HierarchicalUriComponents.FullPathComponent(sanitized);
+		}
+
+		private static String getSanitizedPath(final StringBuilder path) {
+			int index = path.indexOf("//");
+			if (index >= 0) {
+				StringBuilder sanitized = new StringBuilder(path);
+				while (index != -1) {
+					sanitized.deleteCharAt(index);
+					index = sanitized.indexOf("//", index);
 				}
-				path = path.substring(0, index) + path.substring(index + 1);
+				return sanitized.toString();
 			}
-			return new HierarchicalUriComponents.FullPathComponent(path);
+			return path.toString();
 		}
 
 		public void removeTrailingSlash() {

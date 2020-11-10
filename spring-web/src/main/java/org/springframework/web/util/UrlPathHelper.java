@@ -401,18 +401,17 @@ public class UrlPathHelper {
 	 * <li>replace all "//" by "/"</li>
 	 * </ul>
 	 */
-	private String getSanitizedPath(final String path) {
-		String sanitized = path;
-		while (true) {
-			int index = sanitized.indexOf("//");
-			if (index < 0) {
-				break;
+	private static String getSanitizedPath(final String path) {
+		int index = path.indexOf("//");
+		if (index >= 0) {
+			StringBuilder sanitized = new StringBuilder(path);
+			while (index != -1) {
+				sanitized.deleteCharAt(index);
+				index = sanitized.indexOf("//", index);
 			}
-			else {
-				sanitized = sanitized.substring(0, index) + sanitized.substring(index + 1);
-			}
+			return sanitized.toString();
 		}
-		return sanitized;
+		return path;
 	}
 
 	/**
@@ -612,15 +611,21 @@ public class UrlPathHelper {
 				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
 	}
 
-	private String removeSemicolonContentInternal(String requestUri) {
+	private static String removeSemicolonContentInternal(String requestUri) {
 		int semicolonIndex = requestUri.indexOf(';');
-		while (semicolonIndex != -1) {
-			int slashIndex = requestUri.indexOf('/', semicolonIndex);
-			String start = requestUri.substring(0, semicolonIndex);
-			requestUri = (slashIndex != -1) ? start + requestUri.substring(slashIndex) : start;
-			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
+		if (semicolonIndex == -1) {
+			return requestUri;
 		}
-		return requestUri;
+		StringBuilder sb = new StringBuilder(requestUri);
+		while (semicolonIndex != -1) {
+			int slashIndex = sb.indexOf("/", semicolonIndex + 1);
+			if (slashIndex == -1) {
+				return sb.substring(0, semicolonIndex);
+			}
+			sb.delete(semicolonIndex, slashIndex);
+			semicolonIndex = sb.indexOf(";", semicolonIndex);
+		}
+		return sb.toString();
 	}
 
 	private String removeJsessionid(String requestUri) {

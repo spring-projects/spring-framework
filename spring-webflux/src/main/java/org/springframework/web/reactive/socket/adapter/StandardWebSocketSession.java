@@ -104,6 +104,11 @@ public class StandardWebSocketSession extends AbstractListenerWebSocketSession<S
 	}
 
 	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
+	}
+
+	@Override
 	public Mono<Void> close(CloseStatus status) {
 		try {
 			CloseReason.CloseCode code = CloseCodes.getCloseCode(status.getCode());

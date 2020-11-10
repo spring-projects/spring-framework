@@ -125,7 +125,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	public CglibAopProxy(AdvisedSupport config) throws AopConfigException {
 		Assert.notNull(config, "AdvisedSupport must not be null");
-		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
+		if (config.getAdvisorCount() == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
 		this.advised = config;
@@ -942,11 +942,11 @@ class CglibAopProxy implements AopProxy, Serializable {
 			}
 			// Advice instance identity is unimportant to the proxy class:
 			// All that matters is type and ordering.
-			Advisor[] thisAdvisors = this.advised.getAdvisors();
-			Advisor[] thatAdvisors = otherAdvised.getAdvisors();
-			if (thisAdvisors.length != thatAdvisors.length) {
+			if (this.advised.getAdvisorCount() != otherAdvised.getAdvisorCount()) {
 				return false;
 			}
+			Advisor[] thisAdvisors = this.advised.getAdvisors();
+			Advisor[] thatAdvisors = otherAdvised.getAdvisors();
 			for (int i = 0; i < thisAdvisors.length; i++) {
 				Advisor thisAdvisor = thisAdvisors[i];
 				Advisor thatAdvisor = thatAdvisors[i];

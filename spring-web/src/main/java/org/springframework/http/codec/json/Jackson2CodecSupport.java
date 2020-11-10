@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 
@@ -108,7 +109,34 @@ public abstract class Jackson2CodecSupport {
 
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
-		return (mimeType == null || this.mimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
+		if (mimeType == null) {
+			return true;
+		}
+		for (MimeType supportedMimeType : this.mimeTypes) {
+			if (supportedMimeType.isCompatibleWith(mimeType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determine whether to log the given exception coming from a
+	 * {@link ObjectMapper#canDeserialize} / {@link ObjectMapper#canSerialize} check.
+	 * @param type the class that Jackson tested for (de-)serializability
+	 * @param cause the Jackson-thrown exception to evaluate
+	 * (typically a {@link JsonMappingException})
+	 * @since 5.3.1
+	 */
+	protected void logWarningIfNecessary(Type type, @Nullable Throwable cause) {
+		if (cause == null) {
+			return;
+		}
+		if (logger.isDebugEnabled()) {
+			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
+					"serialization for type [" + type + "]";
+			logger.debug(msg, cause);
+		}
 	}
 
 	protected JavaType getJavaType(Type type, @Nullable Class<?> contextClass) {

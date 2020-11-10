@@ -279,7 +279,7 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
-	void retrieveJsonArrayAsResponseEntity(ClientHttpConnector connector) {
+	void retrieveJsonArrayAsResponseEntityList(ClientHttpConnector connector) {
 		startServer(connector);
 
 		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
@@ -301,6 +301,39 @@ class WebClientIntegrationTests {
 					assertThat(entity.getBody()).isEqualTo(Arrays.asList(pojo1, pojo2));
 				})
 				.expectComplete().verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
+	void retrieveJsonArrayAsResponseEntityFlux(ClientHttpConnector connector) {
+		startServer(connector);
+
+		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		ResponseEntity<Flux<Pojo>> entity = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntityFlux(Pojo.class)
+				.block(Duration.ofSeconds(3));
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(58);
+
+		assertThat(entity.getBody()).isNotNull();
+		StepVerifier.create(entity.getBody())
+				.expectNext(new Pojo("foo1", "bar1"))
+				.expectNext(new Pojo("foo2", "bar2"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
 
 		expectRequestCount(1);
 		expectRequest(request -> {

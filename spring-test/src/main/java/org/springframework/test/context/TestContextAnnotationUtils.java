@@ -492,10 +492,11 @@ public abstract class TestContextAnnotationUtils {
 			Assert.notNull(annotation, "Annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
-			this.annotation = (T) AnnotatedElementUtils.findMergedAnnotation(
+			T mergedAnnotation = (T) AnnotatedElementUtils.findMergedAnnotation(
 					rootDeclaringClass, annotation.annotationType());
-			Assert.state(this.annotation != null,
+			Assert.state(mergedAnnotation != null,
 					() -> "Failed to find merged annotation for " + annotation);
+			this.annotation = mergedAnnotation;
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -545,15 +546,13 @@ public abstract class TestContextAnnotationUtils {
 		/**
 		 * Find <strong>all</strong> annotations of the specified annotation type
 		 * that are present or meta-present on the {@linkplain #getRootDeclaringClass()
-		 * root declaring class} of this descriptor.
+		 * root declaring class} of this descriptor or on any interfaces that the
+		 * root declaring class implements.
 		 * @return the set of all merged, synthesized {@code Annotations} found,
 		 * or an empty set if none were found
 		 */
 		public Set<T> findAllLocalMergedAnnotations() {
-			SearchStrategy searchStrategy =
-					(getEnclosingConfiguration(getRootDeclaringClass()) == EnclosingConfiguration.INHERIT ?
-							SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
-							SearchStrategy.TYPE_HIERARCHY);
+			SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
 			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
 					.stream(getAnnotationType())
 					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))

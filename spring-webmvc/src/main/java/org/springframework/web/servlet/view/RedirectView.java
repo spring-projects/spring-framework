@@ -398,7 +398,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(name);
-		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
+		return (uriVars != null) ? uriVars : Collections.emptyMap();
 	}
 
 	/**

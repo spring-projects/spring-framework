@@ -50,6 +50,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
@@ -100,6 +101,7 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -122,9 +124,12 @@ import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.resource.WebJarsResourceResolver;
+import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.servlet.theme.CookieThemeResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
+import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.RedirectView;
@@ -225,10 +230,10 @@ public class MvcNamespaceTests {
 		assertThat(appContext.getBean(ConversionService.class)).isNotNull();
 		assertThat(appContext.getBean(LocalValidatorFactoryBean.class)).isNotNull();
 		assertThat(appContext.getBean(Validator.class)).isNotNull();
-		assertThat(appContext.getBean("themeResolver", ThemeResolver.class)).isNotNull();
 		assertThat(appContext.getBean("localeResolver", LocaleResolver.class)).isNotNull();
-		assertThat(appContext.getBean("flashMapManager", FlashMapManager.class)).isNotNull();
+		assertThat(appContext.getBean("themeResolver", ThemeResolver.class)).isNotNull();
 		assertThat(appContext.getBean("viewNameTranslator", RequestToViewNameTranslator.class)).isNotNull();
+		assertThat(appContext.getBean("flashMapManager", FlashMapManager.class)).isNotNull();
 
 		// default web binding initializer behavior test
 		request = new MockHttpServletRequest("GET", "/");
@@ -260,6 +265,23 @@ public class MvcNamespaceTests {
 		assertThat(introspector.getHandlerMappings().size()).isEqualTo(2);
 		assertThat(introspector.getHandlerMappings().get(0)).isSameAs(mapping);
 		assertThat(introspector.getHandlerMappings().get(1).getClass()).isEqualTo(BeanNameUrlHandlerMapping.class);
+	}
+
+	@Test  // gh-25290
+	public void testDefaultConfigWithBeansInParentContext() throws Exception {
+		StaticApplicationContext parent = new StaticApplicationContext();
+		parent.registerSingleton("localeResolver", CookieLocaleResolver.class);
+		parent.registerSingleton("themeResolver", CookieThemeResolver.class);
+		parent.registerSingleton("viewNameTranslator", DefaultRequestToViewNameTranslator.class);
+		parent.registerSingleton("flashMapManager", SessionFlashMapManager.class);
+		parent.refresh();
+		appContext.setParent(parent);
+
+		loadBeanDefinitions("mvc-config.xml");
+		assertThat(appContext.getBean("localeResolver")).isSameAs(parent.getBean("localeResolver"));
+		assertThat(appContext.getBean("themeResolver")).isSameAs(parent.getBean("themeResolver"));
+		assertThat(appContext.getBean("viewNameTranslator")).isSameAs(parent.getBean("viewNameTranslator"));
+		assertThat(appContext.getBean("flashMapManager")).isSameAs(parent.getBean("flashMapManager"));
 	}
 
 	@Test

@@ -1288,10 +1288,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param registry the PropertyEditorRegistry to initialize
 	 */
 	protected void registerCustomEditors(PropertyEditorRegistry registry) {
-		PropertyEditorRegistrySupport registrySupport =
-				(registry instanceof PropertyEditorRegistrySupport ? (PropertyEditorRegistrySupport) registry : null);
-		if (registrySupport != null) {
-			registrySupport.useConfigValueEditors();
+		if (registry instanceof PropertyEditorRegistrySupport) {
+			((PropertyEditorRegistrySupport) registry).useConfigValueEditors();
 		}
 		if (!this.propertyEditorRegistrars.isEmpty()) {
 			for (PropertyEditorRegistrar registrar : this.propertyEditorRegistrars) {

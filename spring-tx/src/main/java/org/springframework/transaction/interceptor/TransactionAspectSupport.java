@@ -352,9 +352,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				return new ReactiveTransactionSupport(adapter);
 			});
-			Publisher<?> publisher = (Publisher<?>) txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
-			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow(publisher) :
-					KotlinDelegate.awaitSingleOrNull(publisher, ((CoroutinesInvocationCallback) invocation).getContinuation())) : publisher);
+			Object result = txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
+			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow((Publisher<?>) result) :
+					KotlinDelegate.awaitSingleOrNull((Publisher<?>) result, ((CoroutinesInvocationCallback) invocation).getContinuation())) : result);
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -875,8 +875,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 			String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
-			// Optimize for Mono
-			if (Mono.class.isAssignableFrom(method.getReturnType())) {
+			// For Mono and suspending functions not returning kotlinx.coroutines.flow.Flow
+			if (Mono.class.isAssignableFrom(method.getReturnType()) || (KotlinDetector.isSuspendingFunction(method) && !COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {
 				return TransactionContextManager.currentContext().flatMap(context ->
 						createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMap(it -> {
 							try {
