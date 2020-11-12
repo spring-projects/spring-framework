@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.SqlParameterValue;
  * in particular with {@link NamedParameterJdbcTemplate}.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class SqlParameterSourceUtils {
@@ -67,16 +68,12 @@ public class SqlParameterSourceUtils {
 	 * @param source the source of parameter values and type information
 	 * @param parameterName the name of the parameter
 	 * @return the value object
+	 * @see SqlParameterValue
 	 */
 	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
 		int sqlType = source.getSqlType(parameterName);
 		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
-			if (source.getTypeName(parameterName) != null) {
-				return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
-			}
-			else {
-				return new SqlParameterValue(sqlType, source.getValue(parameterName));
-			}
+			return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
 		}
 		else {
 			return source.getValue(parameterName);
