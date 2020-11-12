@@ -104,7 +104,7 @@ public abstract class ExchangeFunctions {
 					.connect(httpMethod, url, httpRequest -> clientRequest.writeTo(httpRequest, this.strategies))
 					.doOnRequest(n -> logRequest(clientRequest))
 					.doOnCancel(() -> logger.debug(logPrefix + "Cancel signal (to close connection)"))
-					.onErrorResume(WebClientUtils::shouldWrapException, t -> wrapException(t, clientRequest))
+					.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, t -> wrapException(t, clientRequest))
 					.map(httpResponse -> {
 						logResponse(httpResponse, logPrefix);
 						return new DefaultClientResponse(

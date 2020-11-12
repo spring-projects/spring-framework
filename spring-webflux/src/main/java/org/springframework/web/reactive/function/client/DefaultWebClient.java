@@ -543,16 +543,10 @@ class DefaultWebClient implements WebClient {
 			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementTypeRef)));
 		}
 
-		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> bodyPublisher) {
+		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> body) {
+			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
 			Mono<T> result = statusHandlers(response);
-			Mono<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
-							t -> wrapException(t, response));
-			if (result != null) {
-				return result.switchIfEmpty(wrappedExceptions);
-			}
-			else {
-				return wrappedExceptions;
-			}
+			return (result != null ? result.switchIfEmpty(body) : body);
 		}
 
 		@Override
@@ -567,16 +561,10 @@ class DefaultWebClient implements WebClient {
 			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementTypeRef)));
 		}
 
-		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> bodyPublisher) {
+		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> body) {
+			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
 			Mono<T> result = statusHandlers(response);
-			Flux<T> wrappedExceptions = bodyPublisher.onErrorResume(WebClientUtils::shouldWrapException,
-					t -> wrapException(t, response));
-			if (result != null) {
-				return result.flux().switchIfEmpty(wrappedExceptions);
-			}
-			else {
-				return wrappedExceptions;
-			}
+			return (result != null ? result.flux().switchIfEmpty(body) : body);
 		}
 
 		@Nullable
@@ -608,10 +596,8 @@ class DefaultWebClient implements WebClient {
 			return result.checkpoint(description);
 		}
 
-		private <T> Mono<T> wrapException(Throwable throwable, ClientResponse response) {
-			return response.createException()
-					.map(responseException -> responseException.initCause(throwable))
-					.flatMap(Mono::error);
+		private <T> Function<Throwable, Mono<? extends T>> exceptionWrappingFunction(ClientResponse response) {
+			return t -> response.createException().flatMap(ex -> Mono.error(ex.initCause(t)));
 		}
 
 		@Override
