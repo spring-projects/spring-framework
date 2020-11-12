@@ -578,7 +578,7 @@ public class UrlPathHelper {
 			return requestUri;
 		}
 		String start = requestUri.substring(0, index);
-		for (int i = key.length(); i < requestUri.length(); i++) {
+		for (int i = index + key.length(); i < requestUri.length(); i++) {
 			char c = requestUri.charAt(i);
 			if (c == ';' || c == '/') {
 				return start + requestUri.substring(i);
