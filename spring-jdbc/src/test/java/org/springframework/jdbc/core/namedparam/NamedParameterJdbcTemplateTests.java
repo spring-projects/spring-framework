@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -508,10 +508,11 @@ public class NamedParameterJdbcTemplateTests {
 
 	@Test
 	public void testBatchUpdateWithSqlParameterSourcePlusTypeInfo() throws Exception {
-		SqlParameterSource[] ids = new SqlParameterSource[2];
-		ids[0] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
-		ids[1] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
-		final int[] rowsAffected = new int[] {1, 2};
+		SqlParameterSource[] ids = new SqlParameterSource[3];
+		ids[0] = new MapSqlParameterSource().addValue("id", null, Types.NULL);
+		ids[1] = new MapSqlParameterSource().addValue("id", 100, Types.NUMERIC);
+		ids[2] = new MapSqlParameterSource().addValue("id", 200, Types.NUMERIC);
+		final int[] rowsAffected = new int[] {1, 2, 3};
 
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
@@ -519,13 +520,15 @@ public class NamedParameterJdbcTemplateTests {
 
 		int[] actualRowsAffected = namedParameterTemplate.batchUpdate(
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
-		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertTrue("executed 3 updates", actualRowsAffected.length == 3);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+		assertEquals(rowsAffected[2], actualRowsAffected[2]);
 		verify(connection).prepareStatement("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?");
+		verify(preparedStatement).setNull(1, Types.NULL);
 		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
 		verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
-		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement, times(3)).addBatch();
 		verify(preparedStatement, atLeastOnce()).close();
 		verify(connection, atLeastOnce()).close();
 	}
