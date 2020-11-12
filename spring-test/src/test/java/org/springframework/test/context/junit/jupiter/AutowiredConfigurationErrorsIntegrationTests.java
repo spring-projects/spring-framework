@@ -18,10 +18,12 @@ package org.springframework.test.context.junit.jupiter;
 
 import java.util.stream.Stream;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -31,18 +33,20 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.platform.testkit.engine.Event;
+import org.junit.platform.testkit.engine.EventConditions;
 import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.allOf;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventConditions.container;
 import static org.junit.platform.testkit.engine.EventConditions.event;
 import static org.junit.platform.testkit.engine.EventConditions.finishedWithFailure;
-import static org.junit.platform.testkit.engine.EventConditions.test;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.instanceOf;
 import static org.junit.platform.testkit.engine.TestExecutionResultConditions.message;
 
@@ -54,6 +58,9 @@ import static org.junit.platform.testkit.engine.TestExecutionResultConditions.me
  * @since 5.3.2
  */
 class AutowiredConfigurationErrorsIntegrationTests {
+
+	private static final String DISPLAY_NAME = "TEST";
+
 
 	@ParameterizedTest
 	@ValueSource(classes = {
@@ -69,7 +76,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		testEventsFor(testClass)
 			.assertStatistics(stats -> stats.started(1).succeeded(0).failed(1))
 			.assertThatEvents().haveExactly(1,
-				event(test("test("),
+				event(testWithDisplayName(DISPLAY_NAME),
 				finishedWithFailure(
 					instanceOf(IllegalStateException.class),
 					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))));
@@ -84,18 +91,18 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	@Test
 	void autowiredAndNonAutowiredTestMethods() {
 		testEventsFor(AutowiredAndNonAutowiredTestMethods.class)
-		.assertStatistics(stats -> stats.started(2).succeeded(0).failed(2))
-		.assertThatEvents()
-			.haveExactly(1,
-				event(test("autowired(org.junit.jupiter.api.TestInfo)"),
-				finishedWithFailure(
-					instanceOf(IllegalStateException.class),
-					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))))
-			.haveExactly(1,
-				event(test("nonAutowired(org.junit.jupiter.api.TestInfo)"),
-				finishedWithFailure(
-					instanceOf(IllegalStateException.class),
-					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))));
+			.assertStatistics(stats -> stats.started(2).succeeded(0).failed(2))
+			.assertThatEvents()
+				.haveExactly(1,
+					event(testWithDisplayName("autowired(TestInfo)"),
+					finishedWithFailure(
+						instanceOf(IllegalStateException.class),
+						message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))))
+				.haveExactly(1,
+					event(testWithDisplayName("nonAutowired(TestInfo)"),
+					finishedWithFailure(
+						instanceOf(IllegalStateException.class),
+						message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))));
 	}
 
 
@@ -139,6 +146,10 @@ class AutowiredConfigurationErrorsIntegrationTests {
 			.containerEvents();
 	}
 
+	private static Condition<Event> testWithDisplayName(String displayName) {
+		return allOf(EventConditions.test(), EventConditions.displayName(displayName));
+	}
+
 
 	@SpringJUnitConfig(Config.class)
 	@FailingTestCase
@@ -150,6 +161,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		}
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 	}
@@ -165,6 +177,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		}
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 	}
@@ -174,6 +187,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	static class StaticAutowiredAfterAllMethod {
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 
@@ -189,6 +203,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	static class NonStaticAutowiredAfterAllMethod {
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 
@@ -208,6 +223,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		}
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 	}
@@ -217,6 +233,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	static class AutowiredAfterEachMethod {
 
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test() {
 		}
 
@@ -232,6 +249,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 
 		@Autowired
 		@Test
+		@DisplayName(DISPLAY_NAME)
 		void test(TestInfo testInfo) {
 		}
 	}
@@ -255,7 +273,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	static class AutowiredRepeatedTestMethod {
 
 		@Autowired
-		@RepeatedTest(1)
+		@RepeatedTest(value = 1, name = DISPLAY_NAME)
 		void test(TestInfo testInfo) {
 		}
 	}
@@ -276,7 +294,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 	static class AutowiredParameterizedTestMethod {
 
 		@Autowired
-		@ParameterizedTest
+		@ParameterizedTest(name = DISPLAY_NAME)
 		@ValueSource(strings = "ignored")
 		void test(TestInfo testInfo) {
 		}
