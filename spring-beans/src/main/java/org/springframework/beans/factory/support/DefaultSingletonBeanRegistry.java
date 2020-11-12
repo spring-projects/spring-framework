@@ -213,55 +213,59 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 		Assert.notNull(beanName, "Bean name must not be null");
-		synchronized (this.singletonObjects) {
-			Object singletonObject = this.singletonObjects.get(beanName);
-			if (singletonObject == null) {
-				if (this.singletonsCurrentlyInDestruction) {
-					throw new BeanCreationNotAllowedException(beanName,
-							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
-							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
-				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
-				}
-				beforeSingletonCreation(beanName);
-				boolean newSingleton = false;
-				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
-				if (recordSuppressedExceptions) {
-					this.suppressedExceptions = new LinkedHashSet<>();
-				}
-				try {
-					singletonObject = singletonFactory.getObject();
-					newSingleton = true;
-				}
-				catch (IllegalStateException ex) {
-					// Has the singleton object implicitly appeared in the meantime ->
-					// if yes, proceed with it since the exception indicates that state.
-					singletonObject = this.singletonObjects.get(beanName);
-					if (singletonObject == null) {
-						throw ex;
+		// Quick check for existing instance without full singleton lock
+		Object singletonObject = this.singletonObjects.get(beanName);
+		if (singletonObject == null) {
+			synchronized (this.singletonObjects) {
+				singletonObject = this.singletonObjects.get(beanName);
+				if (singletonObject == null) {
+					if (this.singletonsCurrentlyInDestruction) {
+						throw new BeanCreationNotAllowedException(beanName,
+								"Singleton bean creation not allowed while singletons of this factory are in destruction " +
+								"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
 					}
-				}
-				catch (BeanCreationException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
+					}
+					beforeSingletonCreation(beanName);
+					boolean newSingleton = false;
+					boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 					if (recordSuppressedExceptions) {
-						for (Exception suppressedException : this.suppressedExceptions) {
-							ex.addRelatedCause(suppressedException);
+						this.suppressedExceptions = new LinkedHashSet<>();
+					}
+					try {
+						singletonObject = singletonFactory.getObject();
+						newSingleton = true;
+					}
+					catch (IllegalStateException ex) {
+						// Has the singleton object implicitly appeared in the meantime ->
+						// if yes, proceed with it since the exception indicates that state.
+						singletonObject = this.singletonObjects.get(beanName);
+						if (singletonObject == null) {
+							throw ex;
 						}
 					}
-					throw ex;
-				}
-				finally {
-					if (recordSuppressedExceptions) {
-						this.suppressedExceptions = null;
+					catch (BeanCreationException ex) {
+						if (recordSuppressedExceptions) {
+							for (Exception suppressedException : this.suppressedExceptions) {
+								ex.addRelatedCause(suppressedException);
+							}
+						}
+						throw ex;
 					}
-					afterSingletonCreation(beanName);
-				}
-				if (newSingleton) {
-					addSingleton(beanName, singletonObject);
+					finally {
+						if (recordSuppressedExceptions) {
+							this.suppressedExceptions = null;
+						}
+						afterSingletonCreation(beanName);
+					}
+					if (newSingleton) {
+						addSingleton(beanName, singletonObject);
+					}
 				}
 			}
-			return singletonObject;
 		}
+		return singletonObject;
 	}
 
 	/**
