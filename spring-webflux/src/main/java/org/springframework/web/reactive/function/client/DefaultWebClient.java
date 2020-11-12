@@ -534,25 +534,29 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public <T> Mono<T> bodyToMono(Class<T> elementClass) {
 			Assert.notNull(elementClass, "Class must not be null");
-			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementClass)));
+			return this.responseMono.flatMap(response ->
+					handleBodyMono(response, response.bodyToMono(elementClass)));
 		}
 
 		@Override
 		public <T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef) {
 			Assert.notNull(elementTypeRef, "ParameterizedTypeReference must not be null");
-			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementTypeRef)));
+			return this.responseMono.flatMap(response ->
+					handleBodyMono(response, response.bodyToMono(elementTypeRef)));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementClass) {
 			Assert.notNull(elementClass, "Class must not be null");
-			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementClass)));
+			return this.responseMono.flatMapMany(response ->
+					handleBodyFlux(response, response.bodyToFlux(elementClass)));
 		}
 
 		@Override
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
 			Assert.notNull(elementTypeRef, "ParameterizedTypeReference must not be null");
-			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementTypeRef)));
+			return this.responseMono.flatMapMany(response ->
+					handleBodyFlux(response, response.bodyToFlux(elementTypeRef)));
 		}
 
 		@Override
@@ -585,18 +589,14 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType) {
-			return this.responseMono.map(response ->
-					ResponseEntity.status(response.rawStatusCode())
-							.headers(response.headers().asHttpHeaders())
-							.body(response.bodyToFlux(elementType)));
+			return this.responseMono.flatMap(response ->
+					handlerEntityFlux(response, response.bodyToFlux(elementType)));
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeReference) {
-			return this.responseMono.map(response ->
-					ResponseEntity.status(response.rawStatusCode())
-							.headers(response.headers().asHttpHeaders())
-							.body(response.bodyToFlux(elementTypeReference)));
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeRef) {
+			return this.responseMono.flatMap(response ->
+					handlerEntityFlux(response, response.bodyToFlux(elementTypeRef)));
 		}
 
 		@Override
@@ -617,6 +617,16 @@ class DefaultWebClient implements WebClient {
 			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
 			Mono<T> result = applyStatusHandlers(response);
 			return (result != null ? result.flux().switchIfEmpty(body) : body);
+		}
+
+		private  <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
+			ResponseEntity<Flux<T>> entity = new ResponseEntity<>(
+					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response)),
+					response.headers().asHttpHeaders(),
+					response.rawStatusCode());
+
+			Mono<ResponseEntity<Flux<T>>> result = applyStatusHandlers(response);
+			return (result != null ? result.defaultIfEmpty(entity) : Mono.just(entity));
 		}
 
 		private <T> Function<Throwable, Mono<? extends T>> exceptionWrappingFunction(ClientResponse response) {
