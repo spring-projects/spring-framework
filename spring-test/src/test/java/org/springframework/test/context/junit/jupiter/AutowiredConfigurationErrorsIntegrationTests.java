@@ -69,7 +69,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		testEventsFor(testClass)
 			.assertStatistics(stats -> stats.started(1).succeeded(0).failed(1))
 			.assertThatEvents().haveExactly(1,
-				event(test("test"),
+				event(test("test("),
 				finishedWithFailure(
 					instanceOf(IllegalStateException.class),
 					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))));
@@ -87,12 +87,12 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		.assertStatistics(stats -> stats.started(2).succeeded(0).failed(2))
 		.assertThatEvents()
 			.haveExactly(1,
-				event(test("autowired"),
+				event(test("autowired(org.junit.jupiter.api.TestInfo)"),
 				finishedWithFailure(
 					instanceOf(IllegalStateException.class),
 					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))))
 			.haveExactly(1,
-				event(test("nonAutowired"),
+				event(test("nonAutowired(org.junit.jupiter.api.TestInfo)"),
 				finishedWithFailure(
 					instanceOf(IllegalStateException.class),
 					message(msg -> msg.matches(".+must not be annotated with @Autowired.+")))));
@@ -256,7 +256,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 
 		@Autowired
 		@RepeatedTest(1)
-		void repeatedTest(TestInfo testInfo) {
+		void test(TestInfo testInfo) {
 		}
 	}
 
@@ -278,7 +278,7 @@ class AutowiredConfigurationErrorsIntegrationTests {
 		@Autowired
 		@ParameterizedTest
 		@ValueSource(strings = "ignored")
-		void parameterizedTest(TestInfo testInfo) {
+		void test(TestInfo testInfo) {
 		}
 	}
 
