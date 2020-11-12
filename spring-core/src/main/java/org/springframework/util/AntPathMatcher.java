@@ -644,7 +644,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
-		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
+		private static final String DEFAULT_VARIABLE_PATTERN = "((?s).*)";
 
 		private final String rawPattern;
 
