@@ -129,11 +129,19 @@ public class UrlPathHelperTests {
 	public void getRequestKeepSemicolonContent() {
 		helper.setRemoveSemicolonContent(false);
 
-		request.setRequestURI("/foo;a=b;c=d");
-		assertEquals("/foo;a=b;c=d", helper.getRequestUri(request));
+		testKeepSemicolonContent("/foo;a=b;c=d", "/foo;a=b;c=d");
+		testKeepSemicolonContent("/test;jsessionid=1234", "/test");
+		testKeepSemicolonContent("/test;JSESSIONID=1234", "/test");
+		testKeepSemicolonContent("/test;jsessionid=1234;a=b", "/test;a=b");
+		testKeepSemicolonContent("/test;a=b;jsessionid=1234;c=d", "/test;a=b;c=d");
+		testKeepSemicolonContent("/test;jsessionid=1234/anotherTest", "/test/anotherTest");
+		testKeepSemicolonContent("/test;jsessionid=;a=b", "/test;a=b");
+		testKeepSemicolonContent("/somethingLongerThan12;jsessionid=1234", "/somethingLongerThan12");
+	}
 
-		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
-		assertEquals("/foo", helper.getRequestUri(request));
+	private void testKeepSemicolonContent(String requestUri, String expectedPath) {
+		request.setRequestURI(requestUri);
+		assertEquals(expectedPath, helper.getRequestUri(request));
 	}
 
 	@Test
