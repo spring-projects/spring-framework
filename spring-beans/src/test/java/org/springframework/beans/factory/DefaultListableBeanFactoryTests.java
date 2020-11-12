@@ -785,13 +785,13 @@ class DefaultListableBeanFactoryTests {
 		factory.registerBeanDefinition("child", childDefinition);
 		factory.registerAlias("parent", "alias");
 
-		TestBean child = (TestBean) factory.getBean("child");
+		TestBean child = factory.getBean("child", TestBean.class);
 		assertThat(child.getName()).isEqualTo(EXPECTED_NAME);
 		assertThat(child.getAge()).isEqualTo(EXPECTED_AGE);
-		Object mergedBeanDefinition1 = factory.getMergedBeanDefinition("child");
-		Object mergedBeanDefinition2 = factory.getMergedBeanDefinition("child");
+		BeanDefinition mergedBeanDefinition1 = factory.getMergedBeanDefinition("child");
+		BeanDefinition mergedBeanDefinition2 = factory.getMergedBeanDefinition("child");
 
-		assertThat(mergedBeanDefinition1).as("Use cached merged bean definition").isEqualTo(mergedBeanDefinition2);
+		assertThat(mergedBeanDefinition1).as("Use cached merged bean definition").isSameAs(mergedBeanDefinition2);
 	}
 
 	@Test
