@@ -543,12 +543,6 @@ class DefaultWebClient implements WebClient {
 			return this.responseMono.flatMap(response -> handleBodyMono(response, response.bodyToMono(elementTypeRef)));
 		}
 
-		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> body) {
-			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
-			Mono<T> result = statusHandlers(response);
-			return (result != null ? result.switchIfEmpty(body) : body);
-		}
-
 		@Override
 		public <T> Flux<T> bodyToFlux(Class<T> elementClass) {
 			Assert.notNull(elementClass, "Class must not be null");
@@ -559,45 +553,6 @@ class DefaultWebClient implements WebClient {
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef) {
 			Assert.notNull(elementTypeRef, "ParameterizedTypeReference must not be null");
 			return this.responseMono.flatMapMany(response -> handleBodyFlux(response, response.bodyToFlux(elementTypeRef)));
-		}
-
-		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> body) {
-			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
-			Mono<T> result = statusHandlers(response);
-			return (result != null ? result.flux().switchIfEmpty(body) : body);
-		}
-
-		@Nullable
-		private <T> Mono<T> statusHandlers(ClientResponse response) {
-			int statusCode = response.rawStatusCode();
-			for (StatusHandler handler : this.statusHandlers) {
-				if (handler.test(statusCode)) {
-					Mono<? extends Throwable> exMono;
-					try {
-						exMono = handler.apply(response);
-						exMono = exMono.flatMap(ex -> releaseIfNotConsumed(response, ex));
-						exMono = exMono.onErrorResume(ex -> releaseIfNotConsumed(response, ex));
-					}
-					catch (Throwable ex2) {
-						exMono = releaseIfNotConsumed(response, ex2);
-					}
-					Mono<T> result = exMono.flatMap(Mono::error);
-					HttpRequest request = this.requestSupplier.get();
-					return insertCheckpoint(result, statusCode, request);
-				}
-			}
-			return null;
-		}
-
-		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
-			String httpMethod = request.getMethodValue();
-			URI uri = request.getURI();
-			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
-			return result.checkpoint(description);
-		}
-
-		private <T> Function<Throwable, Mono<? extends T>> exceptionWrappingFunction(ClientResponse response) {
-			return t -> response.createException().flatMap(ex -> Mono.error(ex.initCause(t)));
 		}
 
 		@Override
@@ -650,6 +605,51 @@ class DefaultWebClient implements WebClient {
 					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
 							.flatMap(entity -> response.releaseBody().thenReturn(entity))
 			);
+		}
+
+		private <T> Mono<T> handleBodyMono(ClientResponse response, Mono<T> body) {
+			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
+			Mono<T> result = applyStatusHandlers(response);
+			return (result != null ? result.switchIfEmpty(body) : body);
+		}
+
+		private <T> Publisher<T> handleBodyFlux(ClientResponse response, Flux<T> body) {
+			body = body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response));
+			Mono<T> result = applyStatusHandlers(response);
+			return (result != null ? result.flux().switchIfEmpty(body) : body);
+		}
+
+		private <T> Function<Throwable, Mono<? extends T>> exceptionWrappingFunction(ClientResponse response) {
+			return t -> response.createException().flatMap(ex -> Mono.error(ex.initCause(t)));
+		}
+
+		@Nullable
+		private <T> Mono<T> applyStatusHandlers(ClientResponse response) {
+			int statusCode = response.rawStatusCode();
+			for (StatusHandler handler : this.statusHandlers) {
+				if (handler.test(statusCode)) {
+					Mono<? extends Throwable> exMono;
+					try {
+						exMono = handler.apply(response);
+						exMono = exMono.flatMap(ex -> releaseIfNotConsumed(response, ex));
+						exMono = exMono.onErrorResume(ex -> releaseIfNotConsumed(response, ex));
+					}
+					catch (Throwable ex2) {
+						exMono = releaseIfNotConsumed(response, ex2);
+					}
+					Mono<T> result = exMono.flatMap(Mono::error);
+					HttpRequest request = this.requestSupplier.get();
+					return insertCheckpoint(result, statusCode, request);
+				}
+			}
+			return null;
+		}
+
+		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
+			String httpMethod = request.getMethodValue();
+			URI uri = request.getURI();
+			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
+			return result.checkpoint(description);
 		}
 
 
