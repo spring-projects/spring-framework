@@ -25,8 +25,6 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyTenSevenDialect;
@@ -39,6 +37,8 @@ import org.hibernate.dialect.Oracle12cDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SybaseDialect;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.lang.Nullable;
@@ -82,8 +82,8 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public HibernateJpaVendorAdapter() {
 		this.persistenceProvider = new SpringHibernateJpaPersistenceProvider();
-		this.entityManagerFactoryInterface = SessionFactory.class;
-		this.entityManagerInterface = Session.class;
+		this.entityManagerFactoryInterface = SessionFactoryImplementor.class;
+		this.entityManagerInterface = SessionImplementor.class;
 	}
 
 
