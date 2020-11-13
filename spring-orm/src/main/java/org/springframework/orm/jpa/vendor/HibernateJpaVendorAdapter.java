@@ -25,6 +25,8 @@ import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyTenSevenDialect;
@@ -37,8 +39,6 @@ import org.hibernate.dialect.Oracle12cDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2012Dialect;
 import org.hibernate.dialect.SybaseDialect;
-import org.hibernate.engine.spi.SessionFactoryImplementor;
-import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.lang.Nullable;
@@ -48,9 +48,9 @@ import org.springframework.lang.Nullable;
  * EntityManager. Developed and tested against Hibernate 5.3 and 5.4;
  * backwards-compatible with Hibernate 5.2 at runtime on a best-effort basis.
  *
- * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
- * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
- * Also supports the detection of annotated packages (through
+ * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
+ * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
+ * configuration settings. Also supports the detection of annotated packages (through
  * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()}),
  * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
  * along with Spring-driven entity scanning which requires no {@code persistence.xml}
@@ -82,8 +82,8 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public HibernateJpaVendorAdapter() {
 		this.persistenceProvider = new SpringHibernateJpaPersistenceProvider();
-		this.entityManagerFactoryInterface = SessionFactoryImplementor.class;
-		this.entityManagerInterface = SessionImplementor.class;
+		this.entityManagerFactoryInterface = SessionFactory.class;  // as of Spring 5.3
+		this.entityManagerInterface = Session.class;  // as of Spring 5.3
 	}
 
 
