@@ -387,6 +387,18 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static final String TEXT_XML_VALUE = "text/xml";
 
+	/**
+	 * Public constant media type for {@code application/java-archive}.
+	 * @since ?.?.?
+	 */
+	public static final MediaType APPLICATION_JAVA_ARCHIVE;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JAVA_ARCHIVE}.
+	 * @since ?.?.?
+	 */
+	public static final String APPLICATION_JAVA_ARCHIVE_VALUE = "application/java-archive";
+
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
 
@@ -419,6 +431,7 @@ public class MediaType extends MimeType implements Serializable {
 		TEXT_MARKDOWN = new MediaType("text", "markdown");
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
+		APPLICATION_JAVA_ARCHIVE = new MediaType("application", "java-archive");
 	}
 
 
