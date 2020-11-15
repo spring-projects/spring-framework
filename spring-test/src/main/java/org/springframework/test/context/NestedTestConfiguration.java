@@ -74,6 +74,7 @@ import org.springframework.lang.Nullable;
  * <li>{@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}</li>
  * <li>{@link ActiveProfiles @ActiveProfiles}</li>
  * <li>{@link TestPropertySource @TestPropertySource}</li>
+ * <li>{@link DynamicPropertySource @DynamicPropertySource}</li>
  * <li>{@link org.springframework.test.annotation.DirtiesContext @DirtiesContext}</li>
  * <li>{@link org.springframework.transaction.annotation.Transactional @Transactional}</li>
  * <li>{@link org.springframework.test.annotation.Rollback @Rollback}</li>

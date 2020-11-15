@@ -41,6 +41,11 @@ import java.lang.annotation.Target;
  * is resolved. Typically, method references are used to supply values, as in the
  * example below.
  *
+ * <p>As of Spring Framework 5.3.2, dynamic properties from methods annotated with
+ * {@code @DynamicPropertySource} will be <em>inherited</em> from enclosing test
+ * classes, analogous to inheritance from superclasses and interfaces. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ *
  * <p><strong>NOTE</strong>: if you use {@code @DynamicPropertySource} in a base
  * class and discover that tests in subclasses fail because the dynamic properties
  * change between subclasses, you may need to annotate your base class with

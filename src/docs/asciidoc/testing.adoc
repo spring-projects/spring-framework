@@ -1877,6 +1877,7 @@ following annotations.
 * <<spring-testing-annotation-contexthierarchy>>
 * <<spring-testing-annotation-activeprofiles>>
 * <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dynamicpropertysource>>
 * <<spring-testing-annotation-dirtiescontext>>
 * <<spring-testing-annotation-testexecutionlisteners>>
 * <<testcontext-tx,`@Transactional`>>
