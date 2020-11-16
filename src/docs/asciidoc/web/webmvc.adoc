@@ -2216,6 +2216,13 @@ type conversion through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by reg
 `Formatters` with the `FormattingConversionService`.
 See <<core.adoc#format, Spring Field Formatting>>.
 
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
+
+
 
 [[mvc-ann-matrix-variables]]
 ==== Matrix Variables

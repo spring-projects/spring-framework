@@ -2009,6 +2009,12 @@ By default, simple types (such as `int`, `long`, `Date`, and others) are support
 can be customized through a `WebDataBinder` (see <<webflux-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
 
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
+
 
 [[webflux-ann-matrix-variables]]
 ==== Matrix Variables
