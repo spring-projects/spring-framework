@@ -58,9 +58,9 @@ public class UrlPathHelper {
 	 * {@link #getLookupPathForRequest resolved} lookupPath.
 	 * @since 5.3
 	 */
-	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".path";
+	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".PATH";
 
-	private static boolean isServlet4Present =
+	private static final boolean isServlet4Present =
 			ClassUtils.isPresent("javax.servlet.http.HttpServletMapping",
 					UrlPathHelper.class.getClassLoader());
 
