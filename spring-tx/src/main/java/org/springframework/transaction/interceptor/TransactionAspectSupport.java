@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.NamedThreadLocal;
@@ -342,9 +343,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		if (this.reactiveAdapterRegistry != null && tm instanceof ReactiveTransactionManager) {
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
-			boolean hasSuspendingFlowReturnType = isSuspendingFunction && COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName());
+			boolean hasSuspendingFlowReturnType = isSuspendingFunction &&
+					COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName());
+			if (isSuspendingFunction && !(invocation instanceof CoroutinesInvocationCallback)) {
+				throw new IllegalStateException("Coroutines invocation not supported: " + method);
+			}
+			CoroutinesInvocationCallback corInv = (isSuspendingFunction ? (CoroutinesInvocationCallback) invocation : null);
+
 			ReactiveTransactionSupport txSupport = this.transactionSupportCache.computeIfAbsent(method, key -> {
-				Class<?> reactiveType = (isSuspendingFunction ? (hasSuspendingFlowReturnType ? Flux.class : Mono.class) : method.getReturnType());
+				Class<?> reactiveType =
+						(isSuspendingFunction ? (hasSuspendingFlowReturnType ? Flux.class : Mono.class) : method.getReturnType());
 				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(reactiveType);
 				if (adapter == null) {
 					throw new IllegalStateException("Cannot apply reactive transaction to non-reactive return type: " +
@@ -352,9 +360,18 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 				return new ReactiveTransactionSupport(adapter);
 			});
-			Object result = txSupport.invokeWithinTransaction(method, targetClass, invocation, txAttr, (ReactiveTransactionManager) tm);
-			return (isSuspendingFunction ? (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow((Publisher<?>) result) :
-					KotlinDelegate.awaitSingleOrNull((Publisher<?>) result, ((CoroutinesInvocationCallback) invocation).getContinuation())) : result);
+
+			InvocationCallback callback = invocation;
+			if (corInv != null) {
+				callback = () -> CoroutinesUtils.invokeSuspendingFunction(method, corInv.getTarget(), corInv.getArguments());
+			}
+			Object result = txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, (ReactiveTransactionManager) tm);
+			if (corInv != null) {
+				Publisher<?> pr = (Publisher<?>) result;
+				return (hasSuspendingFlowReturnType ? KotlinDelegate.asFlow(pr) :
+						KotlinDelegate.awaitSingleOrNull(pr, corInv.getContinuation()));
+			}
+			return result;
 		}
 
 		PlatformTransactionManager ptm = asPlatformTransactionManager(tm);
@@ -789,9 +806,20 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		Object proceedWithInvocation() throws Throwable;
 	}
 
+
+	/**
+	 * Coroutines-supporting extension of the callback interface.
+	 */
 	protected interface CoroutinesInvocationCallback extends InvocationCallback {
 
-		Object getContinuation();
+		Object getTarget();
+
+		Object[] getArguments();
+
+		default Object getContinuation() {
+			Object[] args = getArguments();
+			return args[args.length - 1];
+		}
 	}
 
 
@@ -876,7 +904,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 			// For Mono and suspending functions not returning kotlinx.coroutines.flow.Flow
-			if (Mono.class.isAssignableFrom(method.getReturnType()) || (KotlinDetector.isSuspendingFunction(method) && !COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {
+			if (Mono.class.isAssignableFrom(method.getReturnType()) || (KotlinDetector.isSuspendingFunction(method) &&
+					!COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {
+
 				return TransactionContextManager.currentContext().flatMap(context ->
 						createTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMap(it -> {
 							try {
