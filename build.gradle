@@ -1,5 +1,6 @@
 buildscript {
 	repositories {
+		gradlePluginPortal()
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
@@ -148,7 +149,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		mavenCentral()
-		maven { url "https://repo.spring.io/libs-release" }
+		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 	}
 
 	dependencies {
