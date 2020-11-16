@@ -7419,16 +7419,17 @@ exception hierarchies.
 [[orm-hibernate]]
 === Hibernate
 
-We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring
-environment, using it to demonstrate the approach that Spring takes towards integrating
-OR mappers. This section covers many issues in detail and shows different variations
-of DAO implementations and transaction demarcation. Most of these patterns can be
-directly translated to all other supported ORM tools. The later sections in this
-chapter then cover the other ORM technologies and show brief examples.
+We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring environment,
+using it to demonstrate the approach that Spring takes towards integrating OR mappers.
+This section covers many issues in detail and shows different variations of DAO
+implementations and transaction demarcation. Most of these patterns can be directly
+translated to all other supported ORM tools. The later sections in this chapter then
+cover the other ORM technologies and show brief examples.
 
 NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
 `HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
 Is is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
+For use with `HibernateJpaVendorAdapter`, Hibernate Search needs to be upgraded to 5.11.6.
 
 
 [[orm-session-factory-setup]]
