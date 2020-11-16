@@ -18,6 +18,7 @@ import org.asciidoctor.gradle.AsciidoctorTask
 
 buildscript {
 	repositories {
+		gradlePluginPortal()
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
 	dependencies {
