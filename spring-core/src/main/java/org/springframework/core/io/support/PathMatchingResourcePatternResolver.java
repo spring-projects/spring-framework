@@ -432,6 +432,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
 						filePath = StringUtils.capitalize(filePath);
 					}
+					// # can appear in directories/filenames, java.net.URL should not treat it as a fragment
+					filePath = StringUtils.replace(filePath, "#", "%23");
+					// Build URL that points to the root of the jar file
 					UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
 							ResourceUtils.FILE_URL_PREFIX + filePath + ResourceUtils.JAR_URL_SEPARATOR);
 					// Potentially overlapping with URLClassLoader.getURLs() result above!
