@@ -386,9 +386,8 @@ public final class ResponseCookie extends HttpCookie {
 				start = 1;
 				end--;
 			}
-			char[] chars = value.toCharArray();
 			for (int i = start; i < end; i++) {
-				char c = chars[i];
+				char c = value.charAt(i);
 				if (c < 0x21 || c == 0x22 || c == 0x2c || c == 0x3b || c == 0x5c || c == 0x7f) {
 					throw new IllegalArgumentException(
 							"RFC2616 cookie value cannot have '" + c + "'");

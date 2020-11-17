@@ -475,8 +475,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
 				Character.isLowerCase(candidateToken.charAt(0))) {
-			char[] tokenChars = candidateToken.toCharArray();
-			for (char tokenChar : tokenChars) {
+			for (int i = 1; i < candidateToken.length(); i++) {
+				char tokenChar = candidateToken.charAt(i);
 				if (!Character.isJavaIdentifierPart(tokenChar)) {
 					return null;
 				}
