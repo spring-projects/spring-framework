@@ -485,7 +485,8 @@ public final class ContentDisposition {
 		}
 		boolean escaped = false;
 		StringBuilder sb = new StringBuilder();
-		for (char c : filename.toCharArray()) {
+		for (int i = 0; i < filename.length() ; i++) {
+			char c = filename.charAt(i);
 			if (!escaped && c == '"') {
 				sb.append("\\\"");
 			}
