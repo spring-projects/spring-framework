@@ -351,15 +351,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	private static boolean isVariableName(String name) {
-		if (!Character.isJavaIdentifierStart(name.charAt(0))) {
-			return false;
-		}
-		for (int i = 1; i < name.length(); i++) {
-			if (!Character.isJavaIdentifierPart(name.charAt(i))) {
-				return false;
-			}
-		}
-		return true;
+		return AspectJProxyUtils.isVariableName(name);
 	}
 
 
