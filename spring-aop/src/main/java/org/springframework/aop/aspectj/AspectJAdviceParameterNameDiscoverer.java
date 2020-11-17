@@ -470,22 +470,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	@Nullable
 	private String maybeExtractVariableName(@Nullable String candidateToken) {
-		if (!StringUtils.hasLength(candidateToken)) {
-			return null;
-		}
-		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
-				Character.isLowerCase(candidateToken.charAt(0))) {
-			for (int i = 1; i < candidateToken.length(); i++) {
-				char tokenChar = candidateToken.charAt(i);
-				if (!Character.isJavaIdentifierPart(tokenChar)) {
-					return null;
-				}
-			}
+		if (AspectJProxyUtils.isVariableName(candidateToken)) {
 			return candidateToken;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
