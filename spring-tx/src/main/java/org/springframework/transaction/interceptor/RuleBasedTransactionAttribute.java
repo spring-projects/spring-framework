@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 /**
  * TransactionAttribute implementation that works out whether a given exception
  * should cause transaction rollback by applying a number of rollback rules,
- * both positive and negative. If no rules are relevant to the exception, it
+ * both positive and negative. If no custom rollback rules apply, this attribute
  * behaves like DefaultTransactionAttribute (rolling back on runtime exceptions).
  *
  * <p>{@link TransactionAttributeEditor} creates objects of this class.
