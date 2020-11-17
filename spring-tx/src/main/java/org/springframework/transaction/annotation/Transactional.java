@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,9 @@ import org.springframework.transaction.TransactionDefinition;
  * {@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}
  * class, and in fact {@link AnnotationTransactionAttributeSource} will directly
  * convert the data to the latter class, so that Spring's transaction support code
- * does not have to know about annotations. If no rules are relevant to the exception,
- * it will be treated like
- * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}
- * (rolling back on {@link RuntimeException} and {@link Error} but not on checked
- * exceptions).
+ * does not have to know about annotations. If no custom rollback rules apply,
+ * the transaction will roll back on {@link RuntimeException} and {@link Error}
+ * but not on checked exceptions.
  *
  * <p>For specific information about the semantics of this annotation's attributes,
  * consult the {@link org.springframework.transaction.TransactionDefinition} and

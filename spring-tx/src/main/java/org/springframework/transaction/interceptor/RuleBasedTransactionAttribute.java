@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
 /**
  * TransactionAttribute implementation that works out whether a given exception
  * should cause transaction rollback by applying a number of rollback rules,
- * both positive and negative. If no rules are relevant to the exception, it
+ * both positive and negative. If no custom rollback rules apply, this attribute
  * behaves like DefaultTransactionAttribute (rolling back on runtime exceptions).
  *
  * <p>{@link TransactionAttributeEditor} creates objects of this class.
