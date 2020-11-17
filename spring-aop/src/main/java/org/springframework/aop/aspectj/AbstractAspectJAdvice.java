@@ -354,8 +354,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (!Character.isJavaIdentifierStart(name.charAt(0))) {
 			return false;
 		}
-		for (char ch: name.toCharArray()) {
-			if (!Character.isJavaIdentifierPart(ch)) {
+		for (int i = 1; i < name.length(); i++) {
+			if (!Character.isJavaIdentifierPart(name.charAt(i))) {
 				return false;
 			}
 		}
