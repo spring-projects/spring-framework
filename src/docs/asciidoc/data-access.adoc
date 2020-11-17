@@ -184,7 +184,7 @@ transaction management. The following listing shows the definition of the
 		@Throws(TransactionException::class)
 		fun rollback(status: TransactionStatus)
 	}
----- 
+----
 
 This is primarily a service provider interface (SPI), although you can use it
 <<transaction-programmatic-ptm, programmatically>> from your application code. Because
@@ -241,7 +241,7 @@ listing shows the transaction strategy defined by
 		@Throws(TransactionException::class)
 		fun rollback(status: ReactiveTransaction): Mono<Void>
 	}
----- 
+----
 
 The reactive transaction manager is primarily a service provider interface (SPI),
 although you can use it <<transaction-programmatic-rtm, programmatically>> from your
@@ -566,7 +566,7 @@ abstractions mentioned earlier.
 
 
 [[transaction-declarative]]
-=== Declarative transaction management
+=== Declarative Transaction Management
 
 NOTE: Most Spring Framework users choose declarative transaction management. This option has
 the least impact on application code and, hence, is most consistent with the ideals of a
@@ -637,7 +637,7 @@ around method invocations.
 
 NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
 
-Spring Frameworks's `TransactionInterceptor` provides transaction management for
+Spring Framework's `TransactionInterceptor` provides transaction management for
 imperative and reactive programming models. The interceptor detects the desired flavor of
 transaction management by inspecting the method return type. Methods returning a reactive
 type such as `Publisher` or Kotlin `Flow` (or a subtype of those) qualify for reactive
@@ -647,6 +647,18 @@ imperative transaction management.
 Transaction management flavors impact which transaction manager is required. Imperative
 transactions require a `PlatformTransactionManager`, while reactive transactions use
 `ReactiveTransactionManager` implementations.
+
+[NOTE]
+====
+`@Transactional` commonly works with thread-bound transactions managed by
+`PlatformTransactionManager`, exposing a transaction to all data access operations within
+the current execution thread. Note: This does _not_ propagate to newly started threads
+within the method.
+
+A reactive transaction managed by `ReactiveTransactionManager` uses the Reactor context
+instead of thread-local attributes. As a consequence, all participating data access
+operations need to execute within the same Reactor context in the same reactive pipeline.
+====
 
 The following image shows a conceptual view of calling a method on a transactional proxy:
 
@@ -1737,7 +1749,7 @@ in the application context:
 
 		@Transactional("account")
 		public void doSomething() { ... }
-		
+
 		@Transactional("reactive-account")
 		public Mono<Void> doSomethingReactive() { ... }
 	}
@@ -2442,7 +2454,7 @@ the `TransactionOperator` resembles the next example:
 			// the code in this method runs in a transactional context
 			
             Mono<Object> update = updateOperation1();
-			
+
 			return update.then(resultOfUpdateOperation2).as(transactionalOperator::transactional);
 		}
 	}
@@ -2529,7 +2541,7 @@ following example shows customization of the transactional settings for a specif
 
 		public SimpleService(ReactiveTransactionManager transactionManager) {
 			DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-			
+
 			// the transaction settings can be set here explicitly if so desired
 			definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
 			definition.setTimeout(30); // 30 seconds
@@ -2627,7 +2639,7 @@ following example shows how to do so:
 	def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 	Mono<ReactiveTransaction> reactiveTx = txManager.getReactiveTransaction(def);
-	
+
 	reactiveTx.flatMap(status -> {
 
 		Mono<Object> tx = ...; // put your business logic here
@@ -2841,30 +2853,29 @@ specific to each technology.
 
 Spring provides a convenient translation from technology-specific exceptions, such as
 `SQLException` to its own exception class hierarchy, which has `DataAccessException` as
-the root exception. These exceptions wrap the original exception so that there is never any
-risk that you might lose any information about what might have gone wrong.
+the root exception. These exceptions wrap the original exception so that there is never
+any risk that you might lose any information about what might have gone wrong.
 
 In addition to JDBC exceptions, Spring can also wrap JPA- and Hibernate-specific exceptions,
-converting them to a set of focused runtime exceptions.
-This lets you handle most non-recoverable persistence exceptions
-in only the appropriate layers, without having annoying boilerplate
-catch-and-throw blocks and exception declarations in your DAOs. (You can still trap
-and handle exceptions anywhere you need to though.) As mentioned above, JDBC
-exceptions (including database-specific dialects) are also converted to the same
+converting them to a set of focused runtime exceptions. This lets you handle most
+non-recoverable persistence exceptions in only the appropriate layers, without having
+annoying boilerplate catch-and-throw blocks and exception declarations in your DAOs.
+(You can still trap and handle exceptions anywhere you need to though.) As mentioned above,
+JDBC exceptions (including database-specific dialects) are also converted to the same
 hierarchy, meaning that you can perform some operations with JDBC within a consistent
 programming model.
 
-The preceding discussion holds true for the various template classes in Spring's support for various ORM
-frameworks. If you use the interceptor-based classes, the application must care
-about handling `HibernateExceptions` and `PersistenceExceptions` itself, preferably by
-delegating to the `convertHibernateAccessException(..)` or
-`convertJpaAccessException()` methods, respectively, of `SessionFactoryUtils`. These methods convert the exceptions
+The preceding discussion holds true for the various template classes in Spring's support
+for various ORM frameworks. If you use the interceptor-based classes, the application must
+care about handling `HibernateExceptions` and `PersistenceExceptions` itself, preferably by
+delegating to the `convertHibernateAccessException(..)` or `convertJpaAccessException(..)`
+methods, respectively, of `SessionFactoryUtils`. These methods convert the exceptions
 to exceptions that are compatible with the exceptions in the `org.springframework.dao`
-exception hierarchy. As `PersistenceExceptions` are unchecked, they can  get
-thrown, too (sacrificing generic DAO abstraction in terms of exceptions, though).
+exception hierarchy. As `PersistenceExceptions` are unchecked, they can get thrown, too
+(sacrificing generic DAO abstraction in terms of exceptions, though).
 
-The following image shows the exception hierarchy that Spring provides. (Note that the
-class hierarchy detailed in the image shows only a subset of the entire
+The following image shows the exception hierarchy that Spring provides.
+(Note that the class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
 image::images/DataAccessException.png[]
@@ -2989,7 +3000,7 @@ this `DataSource`. The following example autowires a `DataSource`:
 ----
 	@Repository
 	class JdbcMovieFinder(dataSource: DataSource) : MovieFinder {
-		
+
 		private val jdbcTemplate = JdbcTemplate(dataSource)
 
 		// ...
@@ -3250,8 +3261,8 @@ The following query finds and populates a single domain object:
 ----
 	val actor = jdbcTemplate.queryForObject(
 				"select first_name, last_name from t_actor where id = ?",
-				arrayOf(1212L)) { rs, _ -> 
-			Actor(rs.getString("first_name"), rs.getString("last_name")) 
+				arrayOf(1212L)) { rs, _ ->
+			Actor(rs.getString("first_name"), rs.getString("last_name"))
 		}
 ----
 
@@ -3503,7 +3514,7 @@ method with `@Autowired`. The following example shows how to do so:
 	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao { // <2>
 
 		private val jdbcTemplate = JdbcTemplate(dataSource) // <3>
-		
+
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
@@ -3842,10 +3853,10 @@ translator:
 	private val jdbcTemplate = JdbcTemplate(dataSource).apply {
 		// create a custom translator and set the DataSource for the default translation lookup
 		exceptionTranslator = CustomSQLErrorCodesTranslator().apply {
-			this.dataSource = dataSource 
+			this.dataSource = dataSource
 		}
 	}
-	
+
 	fun updateShippingCharge(orderId: Long, pct: Long) {
 		// use the prepared JdbcTemplate for this update
 		this.jdbcTemplate!!.update("update orders" +
@@ -4069,8 +4080,8 @@ on Oracle but may not work on other platforms:
 	val name = "Rob"
 
 	val keyHolder = GeneratedKeyHolder()
-	jdbcTemplate.update({ 
-		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) } 
+	jdbcTemplate.update({
+		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) }
 	}, keyHolder)
 
 	// keyHolder.getKey() now contains the generated key
@@ -4229,14 +4240,14 @@ interface that wraps a single `Connection` that is not closed after each use.
 This is not multi-threading capable.
 
 If any client code calls `close` on the assumption of a pooled connection (as when using
-persistence tools), you should set the `suppressClose` property to `true`. This setting returns a
-close-suppressing proxy that wraps the physical connection. Note that you can no longer
-cast this to a native Oracle `Connection` or a similar object.
+persistence tools), you should set the `suppressClose` property to `true`. This setting
+returns a close-suppressing proxy that wraps the physical connection. Note that you can
+no longer cast this to a native Oracle `Connection` or a similar object.
 
-`SingleConnectionDataSource` is primarily a test class. For example, it enables easy testing of code outside an
-application server, in conjunction with a simple JNDI environment. In contrast to
-`DriverManagerDataSource`, it reuses the same connection all the time, avoiding
-excessive creation of physical connections.
+`SingleConnectionDataSource` is primarily a test class. It typically enables easy testing
+of code outside an application server, in conjunction with a simple JNDI environment.
+In contrast to `DriverManagerDataSource`, it reuses the same connection all the time,
+avoiding excessive creation of physical connections.
 
 
 
@@ -5008,7 +5019,7 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 		private var procReadActor = SimpleJdbcCall(JdbcTemplate(dataSource).apply {
 			isResultsMapCaseInsensitive = true
 		}).withProcedureName("read_actor")
-		
+
 		// ... additional methods
 	}
 ----
@@ -5766,7 +5777,7 @@ the supplied `ResultSet`, as follows:
 	import org.springframework.jdbc.core.RowMapper
 
 	class GenreMapper : RowMapper<Genre> {
-		
+
 		override fun mapRow(rs: ResultSet, rowNum: Int): Genre {
 			return Genre(rs.getString("name"))
 		}
@@ -6777,7 +6788,7 @@ chapter then cover the other ORM technologies and show brief examples.
 NOTE: As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
 and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
 Note that the Hibernate team does not maintain any versions prior to 5.1 anymore and
-is likely to focus on 5.3+ exclusively soon.
+is likely to focus on 5.4+ exclusively soon.
 
 
 [[orm-session-factory-setup]]
@@ -6884,7 +6895,7 @@ implementation resembles the following example, based on the plain Hibernate API
 .Kotlin
 ----
 	class ProductDaoImpl(private val sessionFactory: SessionFactory) : ProductDao {
-		
+
 		fun loadProductsByCategory(category: String): Collection<*> {
 			return sessionFactory.currentSession
 					.createQuery("from test.Product product where product.category=?")
@@ -7092,7 +7103,7 @@ and an example for a business method implementation:
 ----
 	class ProductServiceImpl(transactionManager: PlatformTransactionManager,
 							private val productDao: ProductDao) : ProductService {
-		
+
 		private val transactionTemplate = TransactionTemplate(transactionManager)
 
 		fun increasePriceOfAllProductsInCategory(category: String) {
@@ -7354,7 +7365,7 @@ This includes web containers such as Tomcat, stand-alone applications, and
 integration tests with sophisticated persistence requirements.
 
 NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative is
-to go with Hibernate 5.2 or 5.3 and set up a native Hibernate `LocalSessionFactoryBean`
+to go with Hibernate 5.2/5.3/5.4 and set up a native Hibernate `LocalSessionFactoryBean`
 instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
 with JPA access code as well as native Hibernate access code.
 See <<orm-jpa-hibernate, Native Hibernate setup for JPA interaction>> for details.
@@ -7726,7 +7737,7 @@ Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the <<orm-jpa-dialect, next section>> for details on the `JpaDialect` mechanism.
 
 NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
-of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
+of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3/5.4,
 adapting to several Hibernate specifics and providing JDBC interaction.
 This makes particular sense in combination with `LocalSessionFactoryBean` setup.
 See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
@@ -7801,7 +7812,7 @@ less portable) but is set up for the server's JTA environment.
 [[orm-jpa-hibernate]]
 ==== Native Hibernate Setup and Native Hibernate Transactions for JPA Interaction
 
-As of Spring Framework 5.1 and Hibernate 5.2/5.3, a native `LocalSessionFactoryBean`
+As of Spring Framework 5.1 and Hibernate 5.2/5.3/5.4, a native `LocalSessionFactoryBean`
 setup in combination with `HibernateTransactionManager` allows for interaction with
 `@PersistenceContext` and other JPA access code. A Hibernate
 `SessionFactory` natively implements JPA's `EntityManagerFactory` interface now
@@ -8160,8 +8171,8 @@ can do so by using the following `applicationContext.xml`:
 ----
 
 This application context uses XStream, but we could have used any of the other marshaller
-instances described later in this chapter. Note that, by default, XStream does not require any further
-configuration, so the bean definition is rather simple. Also note that the
+instances described later in this chapter. Note that, by default, XStream does not require
+any further configuration, so the bean definition is rather simple. Also note that the
 `XStreamMarshaller` implements both `Marshaller` and `Unmarshaller`, so we can refer to the
 `xstreamMarshaller` bean in both the `marshaller` and `unmarshaller` property of the
 application.
@@ -8179,8 +8190,8 @@ This sample application produces the following `settings.xml` file:
 [[oxm-schema-based-config]]
 === XML Configuration Namespace
 
-You can configure marshallers more concisely by using tags from the OXM namespace. To
-make these tags available, you must first reference the appropriate schema in the
+You can configure marshallers more concisely by using tags from the OXM namespace.
+To make these tags available, you must first reference the appropriate schema in the
 preamble of the XML configuration file. The following example shows how to do so:
 
 [source,xml,indent=0]
@@ -8423,7 +8434,7 @@ vulnerabilities do not get invoked.
 
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As a result, it is rather unsuitable for usage
-within Web services.
+within Web Services.
 
 
 
