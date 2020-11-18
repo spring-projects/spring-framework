@@ -41,6 +41,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.web.reactive.function.BodyExtractors;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -321,6 +322,39 @@ class WebClientIntegrationTests {
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
 				.toEntityFlux(Pojo.class)
+				.block(Duration.ofSeconds(3));
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(entity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+		assertThat(entity.getHeaders().getContentLength()).isEqualTo(58);
+
+		assertThat(entity.getBody()).isNotNull();
+		StepVerifier.create(entity.getBody())
+				.expectNext(new Pojo("foo1", "bar1"))
+				.expectNext(new Pojo("foo2", "bar2"))
+				.expectComplete()
+				.verify(Duration.ofSeconds(3));
+
+		expectRequestCount(1);
+		expectRequest(request -> {
+			assertThat(request.getPath()).isEqualTo("/json");
+			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
+		});
+	}
+
+	@ParameterizedWebClientTest
+	void retrieveJsonArrayAsResponseEntityFluxWithBodyExtractor(ClientHttpConnector connector) {
+		startServer(connector);
+
+		String content = "[{\"bar\":\"bar1\",\"foo\":\"foo1\"}, {\"bar\":\"bar2\",\"foo\":\"foo2\"}]";
+		prepareResponse(response -> response
+				.setHeader("Content-Type", "application/json").setBody(content));
+
+		ResponseEntity<Flux<Pojo>> entity = this.webClient.get()
+				.uri("/json").accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntityFlux(BodyExtractors.toFlux(Pojo.class))
 				.block(Duration.ofSeconds(3));
 
 		assertThat(entity).isNotNull();
