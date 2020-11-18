@@ -16,11 +16,12 @@
 
 package org.springframework.web.socket.server.support;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.WebUtils;
@@ -45,7 +47,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Set<String> allowedOrigins = new LinkedHashSet<>();
+	private final CorsConfiguration corsConfiguration = new CorsConfiguration();
 
 
 	/**
@@ -74,8 +76,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origins Collection must not be null");
-		this.allowedOrigins.clear();
-		this.allowedOrigins.addAll(allowedOrigins);
+		this.corsConfiguration.setAllowedOrigins(new ArrayList<>(allowedOrigins));
 	}
 
 	/**
@@ -84,7 +85,33 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 * @see #setAllowedOrigins
 	 */
 	public Collection<String> getAllowedOrigins() {
-		return Collections.unmodifiableSet(this.allowedOrigins);
+		if (this.corsConfiguration.getAllowedOrigins() == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOrigins()));
+	}
+
+	/**
+	 * Configure allowed {@code Origin} pattern header values.
+	 *
+	 * @see CorsConfiguration#setAllowedOriginPatterns(List)
+	 */
+	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
+		Assert.notNull(allowedOriginPatterns, "Allowed origin patterns Collection must not be null");
+		this.corsConfiguration.setAllowedOriginPatterns(new ArrayList<>(allowedOriginPatterns));
+	}
+
+	/**
+	 * Return the allowed {@code Origin} pattern header values.
+	 *
+	 * @since 5.3.2
+	 * @see CorsConfiguration#getAllowedOriginPatterns()
+	 */
+	public Collection<String> getAllowedOriginPatterns() {
+		if (this.corsConfiguration.getAllowedOriginPatterns() == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOriginPatterns()));
 	}
 
 
@@ -92,7 +119,7 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
-		if (!WebUtils.isSameOrigin(request) && !WebUtils.isValidOrigin(request, this.allowedOrigins)) {
+		if (!WebUtils.isSameOrigin(request) && this.corsConfiguration.checkOrigin(request.getHeaders().getOrigin()) == null) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value " +

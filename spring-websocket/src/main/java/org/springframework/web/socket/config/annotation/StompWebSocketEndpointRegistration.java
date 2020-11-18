@@ -61,4 +61,11 @@ public interface StompWebSocketEndpointRegistration {
 	 */
 	StompWebSocketEndpointRegistration setAllowedOrigins(String... origins);
 
+	/**
+	 * Configure allowed {@code Origin} header values.
+	 *
+	 * @see org.springframework.web.cors.CorsConfiguration#setAllowedOriginPatterns(java.util.List)
+	 */
+	StompWebSocketEndpointRegistration setAllowedOriginPatterns(String... originPatterns);
+
 }

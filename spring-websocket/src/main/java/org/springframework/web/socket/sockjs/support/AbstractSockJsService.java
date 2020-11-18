@@ -99,6 +99,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	protected final Set<String> allowedOrigins = new LinkedHashSet<>();
 
+	protected final Set<String> allowedOriginPatterns = new LinkedHashSet<>();
+
 	private final SockJsRequestHandler infoHandler = new InfoHandler();
 
 	private final SockJsRequestHandler iframeHandler = new IframeHandler();
@@ -320,12 +322,32 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
+	 * Configure allowed {@code Origin} header values.
+	 *
+	 * @see org.springframework.web.cors.CorsConfiguration#setAllowedOriginPatterns(java.util.List)
+	 */
+	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
+		Assert.notNull(allowedOriginPatterns, "Allowed origin patterns Collection must not be null");
+		this.allowedOriginPatterns.clear();
+		this.allowedOriginPatterns.addAll(allowedOriginPatterns);
+	}
+
+	/**
 	 * Return configure allowed {@code Origin} header values.
 	 * @since 4.1.2
 	 * @see #setAllowedOrigins
 	 */
 	public Collection<String> getAllowedOrigins() {
 		return Collections.unmodifiableSet(this.allowedOrigins);
+	}
+
+	/**
+	 * Return configure allowed {@code Origin} pattern header values.
+	 * @since 5.3.2
+	 * @see #setAllowedOriginPatterns
+	 */
+	public Collection<String> getAllowedOriginPatterns() {
+		return Collections.unmodifiableSet(this.allowedOriginPatterns);
 	}
 
 
@@ -498,6 +520,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		if (!this.suppressCors && (request.getHeader(HttpHeaders.ORIGIN) != null)) {
 			CorsConfiguration config = new CorsConfiguration();
 			config.setAllowedOrigins(new ArrayList<>(this.allowedOrigins));
+			config.setAllowedOriginPatterns(new ArrayList<>(this.allowedOriginPatterns));
 			config.addAllowedMethod("*");
 			config.setAllowCredentials(true);
 			config.setMaxAge(ONE_YEAR);
