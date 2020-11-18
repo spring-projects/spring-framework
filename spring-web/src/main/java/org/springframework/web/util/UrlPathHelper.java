@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.MappingMatch;
 
@@ -60,9 +61,8 @@ public class UrlPathHelper {
 	 */
 	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".PATH";
 
-	private static final boolean isServlet4Present =
-			ClassUtils.isPresent("javax.servlet.http.HttpServletMapping",
-					UrlPathHelper.class.getClassLoader());
+	private static final boolean servlet4Present =
+			ClassUtils.hasMethod(HttpServletRequest.class, "getHttpServletMapping");
 
 	/**
 	 * Special WebSphere request attribute, indicating the original request URI.
@@ -260,12 +260,15 @@ public class UrlPathHelper {
 		}
 	}
 
+	/**
+	 * Check whether servlet path determination can be skipped for the given request.
+	 * @param request current HTTP request
+	 * @return {@code true} if the request mapping has not been achieved using a path
+	 * or if the servlet has been mapped to root; {@code false} otherwise
+	 */
 	private boolean skipServletPathDetermination(HttpServletRequest request) {
-		if (isServlet4Present) {
-			if (request.getHttpServletMapping().getMappingMatch() != null) {
-				return !request.getHttpServletMapping().getMappingMatch().equals(MappingMatch.PATH) ||
-						request.getHttpServletMapping().getPattern().equals("/*");
-			}
+		if (servlet4Present) {
+			return Servlet4Delegate.skipServletPathDetermination(request);
 		}
 		return false;
 	}
@@ -761,6 +764,20 @@ public class UrlPathHelper {
 		rawPathInstance.setUrlDecode(false);
 		rawPathInstance.setRemoveSemicolonContent(false);
 		rawPathInstance.setReadOnly();
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Servlet 4 {@link HttpServletMapping}
+	 * and {@link MappingMatch} at runtime.
+	 */
+	private static class Servlet4Delegate {
+
+		public static boolean skipServletPathDetermination(HttpServletRequest request) {
+			HttpServletMapping mapping = request.getHttpServletMapping();
+			MappingMatch match = mapping.getMappingMatch();
+			return (match != null && (!match.equals(MappingMatch.PATH) || mapping.getPattern().equals("/*")));
+		}
 	}
 
 }
