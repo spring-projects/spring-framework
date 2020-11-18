@@ -15,7 +15,7 @@
  */
 
 package org.springframework.context;
-
+//A3 Conflicting changes
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 
