@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,11 @@ public interface StompWebSocketEndpointRegistration {
 	StompWebSocketEndpointRegistration setAllowedOrigins(String... origins);
 
 	/**
-	 * Configure allowed {@code Origin} header values.
-	 *
-	 * @see org.springframework.web.cors.CorsConfiguration#setAllowedOriginPatterns(java.util.List)
+	 * A variant of {@link #setAllowedOrigins(String...)} that accepts flexible
+	 * domain patterns, e.g. {@code "https://*.domain1.com"}. Furthermore it
+	 * always sets the {@code Access-Control-Allow-Origin} response header to
+	 * the matched origin and never to {@code "*"}, nor to any other pattern.
+	 * @since 5.3.2
 	 */
 	StompWebSocketEndpointRegistration setAllowedOriginPatterns(String... originPatterns);
 

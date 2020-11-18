@@ -132,13 +132,11 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
-		OriginHandshakeInterceptor originHandshakeInterceptor = new OriginHandshakeInterceptor(this.allowedOrigins);
-		interceptors.add(originHandshakeInterceptor);
-
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(this.allowedOrigins);
+		interceptors.add(interceptor);
 		if (!ObjectUtils.isEmpty(this.allowedOriginPatterns)) {
-			originHandshakeInterceptor.setAllowedOriginPatterns(this.allowedOriginPatterns);
+			interceptor.setAllowedOriginPatterns(this.allowedOriginPatterns);
 		}
-
 		return interceptors.toArray(new HandshakeInterceptor[0]);
 	}
 

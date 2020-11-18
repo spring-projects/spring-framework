@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,18 +82,19 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	/**
 	 * Return the allowed {@code Origin} header values.
 	 * @since 4.1.5
-	 * @see #setAllowedOrigins
 	 */
 	public Collection<String> getAllowedOrigins() {
-		if (this.corsConfiguration.getAllowedOrigins() == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOrigins()));
+		return (this.corsConfiguration.getAllowedOrigins() != null ?
+				Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOrigins())) :
+				Collections.emptyList());
 	}
 
 	/**
-	 * Configure allowed {@code Origin} pattern header values.
-	 *
+	 * A variant of {@link #setAllowedOrigins(Collection)} that accepts flexible
+	 * domain patterns, e.g. {@code "https://*.domain1.com"}. Furthermore it
+	 * always sets the {@code Access-Control-Allow-Origin} response header to
+	 * the matched origin and never to {@code "*"}, nor to any other pattern.
+	 * @since 5.3.2
 	 * @see CorsConfiguration#setAllowedOriginPatterns(List)
 	 */
 	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
@@ -108,10 +109,9 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 * @see CorsConfiguration#getAllowedOriginPatterns()
 	 */
 	public Collection<String> getAllowedOriginPatterns() {
-		if (this.corsConfiguration.getAllowedOriginPatterns() == null) {
-			return Collections.emptyList();
-		}
-		return Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOriginPatterns()));
+		return (this.corsConfiguration.getAllowedOriginPatterns() != null ?
+				Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOriginPatterns())) :
+				Collections.emptyList());
 	}
 
 
@@ -119,7 +119,8 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
 
-		if (!WebUtils.isSameOrigin(request) && this.corsConfiguration.checkOrigin(request.getHeaders().getOrigin()) == null) {
+		if (!WebUtils.isSameOrigin(request) &&
+				this.corsConfiguration.checkOrigin(request.getHeaders().getOrigin()) == null) {
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Handshake request rejected, Origin header value " +

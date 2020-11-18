@@ -322,9 +322,12 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values.
-	 *
-	 * @see org.springframework.web.cors.CorsConfiguration#setAllowedOriginPatterns(java.util.List)
+	 * A variant of {@link #setAllowedOrigins(Collection)} that accepts flexible
+	 * domain patterns, e.g. {@code "https://*.domain1.com"}. Furthermore it
+	 * always sets the {@code Access-Control-Allow-Origin} response header to
+	 * the matched origin and never to {@code "*"}, nor to any other pattern.
+	 * <p>By default this is not set.
+	 * @since 5.2.3
 	 */
 	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
 		Assert.notNull(allowedOriginPatterns, "Allowed origin patterns Collection must not be null");
