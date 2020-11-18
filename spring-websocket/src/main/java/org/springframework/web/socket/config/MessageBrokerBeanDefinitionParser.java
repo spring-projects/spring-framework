@@ -60,6 +60,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -358,7 +359,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, ctx);
 			String allowedOrigins = element.getAttribute("allowed-origins");
 			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
-			interceptors.add(new OriginHandshakeInterceptor(origins));
+			String allowedOriginPatterns = element.getAttribute("allowed-origin-patterns");
+			List<String> originPatterns = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginPatterns, ","));
+			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(origins);
+			if (!ObjectUtils.isEmpty(originPatterns)) {
+				interceptor.setAllowedOriginPatterns(originPatterns);
+			}
+			interceptors.add(interceptor);
 			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 			cargs.addIndexedArgumentValue(0, subProtoHandler);
 			cargs.addIndexedArgumentValue(1, handler);
