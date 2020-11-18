@@ -344,7 +344,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			return false;
 		}
 
-		if (!this.allowedOrigins.contains("*")) {
+		if (!getAllowedOrigins().isEmpty() && !getAllowedOrigins().contains("*") ||
+				!getAllowedOriginPatterns().isEmpty()) {
 			TransportType transportType = TransportType.fromValue(transport);
 			if (transportType == null || !transportType.supportsOrigin()) {
 				if (logger.isWarnEnabled()) {
