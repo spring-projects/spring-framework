@@ -904,6 +904,7 @@ public interface WebClient {
 		 * @param bodyExtractor the {@code BodyExtractor} that reads from the response
 		 * @param <T> the body element type
 		 * @return the {@code ResponseEntity}
+		 * @since 5.3.2
 		 */
 		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> bodyExtractor);
 
