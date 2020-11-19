@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,8 @@ public @interface CrossOrigin {
 	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma},
 	 * <p>Exposed headers are listed in the {@code Access-Control-Expose-Headers}
 	 * response header of actual CORS requests.
+	 * <p>The special value {@code "*"} allows all headers to be exposed for
+	 * non-credentialed requests.
 	 * <p>By default no headers are listed as exposed.
 	 */
 	String[] exposedHeaders() default {};

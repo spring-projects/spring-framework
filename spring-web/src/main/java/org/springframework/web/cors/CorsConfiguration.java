@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,13 +253,11 @@ public class CorsConfiguration {
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
 	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
 	 * actual response might have and can be exposed.
-	 * <p>Note that {@code "*"} is not a valid exposed header value.
+	 * <p>The special value {@code "*"} allows all headers to be exposed for
+	 * non-credentialed requests.
 	 * <p>By default this is not set.
 	 */
 	public void setExposedHeaders(@Nullable List<String> exposedHeaders) {
-		if (exposedHeaders != null && exposedHeaders.contains(ALL)) {
-			throw new IllegalArgumentException("'*' is not a valid exposed header value");
-		}
 		this.exposedHeaders = (exposedHeaders != null ? new ArrayList<>(exposedHeaders) : null);
 	}
 
@@ -275,12 +273,10 @@ public class CorsConfiguration {
 
 	/**
 	 * Add a response header to expose.
-	 * <p>Note that {@code "*"} is not a valid exposed header value.
+	 * <p>The special value {@code "*"} allows all headers to be exposed for
+	 * non-credentialed requests.
 	 */
 	public void addExposedHeader(String exposedHeader) {
-		if (ALL.equals(exposedHeader)) {
-			throw new IllegalArgumentException("'*' is not a valid exposed header value");
-		}
 		if (this.exposedHeaders == null) {
 			this.exposedHeaders = new ArrayList<>(4);
 		}
