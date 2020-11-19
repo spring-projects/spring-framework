@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.standard.SpelCompiler;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -56,6 +57,20 @@ public class InlineCollectionTests {
 		final StandardEvaluationContext standardEvaluationContext = new StandardEvaluationContext(new AHolder());
 		standardEvaluationContext.setVariable("a", 2);
 		assertThat(list.getValue(new ExpressionState(standardEvaluationContext))).isEqualTo(Arrays.asList(1, -2, 3, 4));
+	}
+
+	@Test
+	public void testListCanBeCompiled() {
+		SpelExpression listExpression = parseExpression("{1, -2, 3, 4}");
+		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isTrue();
+		assertThat(SpelCompiler.compile(listExpression)).isTrue();
+	}
+
+	@Test
+	public void testDynamicListCantBeCompiled() {
+		SpelExpression listExpression = parseExpression("{1, 5-2, 3, 4}");
+		assertThat(((SpelNodeImpl) listExpression.getAST()).isCompilable()).isFalse();
+		assertThat(SpelCompiler.compile(listExpression)).isFalse();
 	}
 
 	@Test
@@ -139,15 +154,18 @@ public class InlineCollectionTests {
 	}
 
 	private InlineMap parseMap(String s) {
-		ExpressionParser parser = new SpelExpressionParser();
-		SpelExpression expression = (SpelExpression) parser.parseExpression(s);
+		SpelExpression expression = parseExpression(s);
 		return (InlineMap) expression.getAST();
 	}
 
 	private InlineList parseList(String s) {
-		ExpressionParser parser = new SpelExpressionParser();
-		SpelExpression expression = (SpelExpression) parser.parseExpression(s);
+		SpelExpression expression = parseExpression(s);
 		return (InlineList) expression.getAST();
+	}
+
+	private SpelExpression parseExpression(final String s) {
+		ExpressionParser parser = new SpelExpressionParser();
+		return (SpelExpression) parser.parseExpression(s);
 	}
 
 	private static class AHolder {
