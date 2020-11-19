@@ -826,16 +826,15 @@ public abstract class ReflectionUtils {
 		boolean matches(Method method);
 
 		/**
-		 * Create a composite filter based on this filter <em>and</em> the provided
-		 * filter.
+		 * Create a composite filter based on this filter <em>and</em> the provided filter.
 		 * <p>If this filter does not match, the next filter will not be applied.
 		 * @param next the next {@code MethodFilter}
 		 * @return a composite {@code MethodFilter}
-		 * @throws IllegalArgumentException if method's argument is {@code null}
+		 * @throws IllegalArgumentException if the MethodFilter argument is {@code null}
 		 * @since 5.3.2
 		 */
 		default MethodFilter and(MethodFilter next) {
-			Assert.notNull(next, "Next MethodFilter must not be null!");
+			Assert.notNull(next, "Next MethodFilter must not be null");
 			return method -> matches(method) && next.matches(method);
 		}
 	}
@@ -868,14 +867,15 @@ public abstract class ReflectionUtils {
 		boolean matches(Field field);
 
 		/**
-		 * Create a composite filter based on this filter <em>and</em> the provided
-		 * filter.
+		 * Create a composite filter based on this filter <em>and</em> the provided filter.
 		 * <p>If this filter does not match, the next filter will not be applied.
 		 * @param next the next {@code FieldFilter}
 		 * @return a composite {@code FieldFilter}
+		 * @throws IllegalArgumentException if the FieldFilter argument is {@code null}
 		 * @since 5.3.2
 		 */
 		default FieldFilter and(FieldFilter next) {
+			Assert.notNull(next, "Next FieldFilter must not be null");
 			return field -> matches(field) && next.matches(field);
 		}
 	}
