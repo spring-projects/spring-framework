@@ -831,9 +831,11 @@ public abstract class ReflectionUtils {
 		 * <p>If this filter does not match, the next filter will not be applied.
 		 * @param next the next {@code MethodFilter}
 		 * @return a composite {@code MethodFilter}
+		 * @throws IllegalArgumentException if method's argument is {@code null}
 		 * @since 5.3.2
 		 */
 		default MethodFilter and(MethodFilter next) {
+			Assert.notNull(next, "Next MethodFilter must not be null!");
 			return method -> matches(method) && next.matches(method);
 		}
 	}
