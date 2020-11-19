@@ -1400,6 +1400,7 @@
 	Comma-separated list of response headers other than simple headers (i.e.
 	Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Pragma) that an
 	actual response might have and can be exposed.
+	The special value "*" allows all headers to be exposed for non-credentialed requests.
 	Empty by default.
 								]]></xsd:documentation>
 							</xsd:annotation>
