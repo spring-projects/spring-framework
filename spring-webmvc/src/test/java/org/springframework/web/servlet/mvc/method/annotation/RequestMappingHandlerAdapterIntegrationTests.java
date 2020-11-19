@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.awt.*;
+import java.awt.Color;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
