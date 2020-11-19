@@ -8,9 +8,9 @@ plugins {
 	id 'org.asciidoctor.jvm.pdf' version '2.4.0'
 	id 'de.undercouch.download' version '4.1.1'
 	id "io.freefair.aspectj" version '4.1.6' apply false
+	id "com.github.ben-manes.versions" version '0.28.0'
 	id 'com.gradle.build-scan' version '3.2'
 	id "com.jfrog.artifactory" version '4.12.0' apply false
-	id "com.github.ben-manes.versions" version '0.24.0'
 }
 
 apply from: "$rootDir/gradle/build-scan-user-data.gradle"
@@ -147,7 +147,7 @@ configure(allprojects) { project ->
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.12") {
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
