@@ -128,14 +128,14 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.39') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.40') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.39') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.40') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
@@ -154,7 +154,7 @@ configure(allprojects) { project ->
 				entry 'okhttp'
 				entry 'mockwebserver'
 			}
-			dependency("org.apache.httpcomponents:httpclient:4.5.12") {
+			dependency("org.apache.httpcomponents:httpclient:4.5.13") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.apache.httpcomponents:httpasyncclient:4.1.4") {
