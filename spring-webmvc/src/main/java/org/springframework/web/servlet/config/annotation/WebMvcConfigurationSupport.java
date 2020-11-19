@@ -682,7 +682,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerFunctionAdapter handlerFunctionAdapter() {
-		return new HandlerFunctionAdapter();
+		HandlerFunctionAdapter adapter = new HandlerFunctionAdapter();
+
+		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
+		configureAsyncSupport(configurer);
+		if (configurer.getTimeout() != null) {
+			adapter.setAsyncRequestTimeout(configurer.getTimeout());
+		}
+		return adapter;
 	}
 
 	/**

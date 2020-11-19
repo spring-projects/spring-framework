@@ -18,6 +18,7 @@ package org.springframework.web.servlet.function;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -240,7 +241,33 @@ public interface ServerResponse {
 	 * @since 5.3
 	 */
 	static ServerResponse async(Object asyncResponse) {
-		return AsyncServerResponse.create(asyncResponse);
+		return AsyncServerResponse.create(asyncResponse, null);
+	}
+
+	/**
+	 * Create a (built) response with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 *
+	 * <p>This method can be used to set the response status code, headers, and
+	 * body based on an asynchronous result. If only the body is asynchronous,
+	 * {@link BodyBuilder#body(Object)} can be used instead.
+	 *
+	 * <p><strong>Note</strong> that
+	 * {@linkplain RenderingResponse rendering responses}, as returned by
+	 * {@link BodyBuilder#render}, are <strong>not</strong> supported as value
+	 * for {@code asyncResponse}. Use WebFlux.fn for asynchronous rendering.
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @param timeout maximum time period to wait for before timing out
+	 * @return the asynchronous response
+	 * @since 5.3.2
+	 */
+	static ServerResponse async(Object asyncResponse, Duration timeout) {
+		return AsyncServerResponse.create(asyncResponse, timeout);
 	}
 
 

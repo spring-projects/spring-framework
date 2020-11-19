@@ -25,11 +25,11 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -61,6 +61,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -358,32 +359,39 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		@Override
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
+		protected ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+				Context context) throws ServletException, IOException {
 
-			AsyncContext asyncContext = servletRequest.startAsync(servletRequest, servletResponse);
-			entity().whenComplete((entity, throwable) -> {
-				try {
-					if (entity != null) {
-
-						tryWriteEntityWithMessageConverters(entity,
-								(HttpServletRequest) asyncContext.getRequest(),
-								(HttpServletResponse) asyncContext.getResponse(),
-								context);
-					}
-					else if (throwable != null) {
-						handleError(throwable, servletRequest, servletResponse, context);
-					}
-				}
-				catch (ServletException | IOException ex) {
-					logger.warn("Asynchronous execution resulted in exception", ex);
-				}
-				finally {
-					asyncContext.complete();
-				}
-			});
+			DeferredResult<?> deferredResult = createDeferredResult(servletRequest, servletResponse, context);
+			AsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
 			return null;
 		}
+
+		private DeferredResult<?> createDeferredResult(HttpServletRequest request, HttpServletResponse response,
+				Context context) {
+
+			DeferredResult<?> result = new DeferredResult<>();
+			entity().handle((value, ex) -> {
+				if (ex != null) {
+					if (ex instanceof CompletionException && ex.getCause() != null) {
+						ex = ex.getCause();
+					}
+					result.setErrorResult(ex);
+				}
+				else {
+					try {
+						tryWriteEntityWithMessageConverters(value, request, response, context);
+						result.setResult(null);
+					}
+					catch (ServletException | IOException writeException) {
+						result.setErrorResult(writeException);
+					}
+				}
+				return null;
+			});
+			return result;
+		}
+
 	}
 
 
@@ -399,35 +407,46 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		}
 
 		@Override
-		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context) {
+		protected ModelAndView writeToInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+				Context context) throws ServletException, IOException {
 
-			AsyncContext asyncContext = servletRequest.startAsync(servletRequest,
-					new NoContentLengthResponseWrapper(servletResponse));
-			entity().subscribe(new ProducingSubscriber(asyncContext, context));
+			DeferredResult<?> deferredResult = new DeferredResult<>();
+			AsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
+
+			entity().subscribe(new DeferredResultSubscriber(servletRequest, servletResponse, context, deferredResult));
 			return null;
 		}
 
-		@SuppressWarnings("SubscriberImplementation")
-		private class ProducingSubscriber implements Subscriber<T> {
 
-			private final AsyncContext asyncContext;
+		private class DeferredResultSubscriber implements Subscriber<T> {
+
+			private final HttpServletRequest servletRequest;
+
+			private final HttpServletResponse servletResponse;
 
 			private final Context context;
+
+			private final DeferredResult<?> deferredResult;
 
 			@Nullable
 			private Subscription subscription;
 
-			public ProducingSubscriber(AsyncContext asyncContext, Context context) {
-				this.asyncContext = asyncContext;
+
+			public DeferredResultSubscriber(HttpServletRequest servletRequest,
+					HttpServletResponse servletResponse, Context context,
+					DeferredResult<?> deferredResult) {
+
+				this.servletRequest = servletRequest;
+				this.servletResponse = new NoContentLengthResponseWrapper(servletResponse);
 				this.context = context;
+				this.deferredResult = deferredResult;
 			}
 
 			@Override
 			public void onSubscribe(Subscription s) {
 				if (this.subscription == null) {
 					this.subscription = s;
-					this.subscription.request(Long.MAX_VALUE);
+					this.subscription.request(1);
 				}
 				else {
 					s.cancel();
@@ -435,32 +454,34 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			}
 
 			@Override
-			public void onNext(T element) {
-				HttpServletRequest servletRequest = (HttpServletRequest) this.asyncContext.getRequest();
-				HttpServletResponse servletResponse = (HttpServletResponse) this.asyncContext.getResponse();
+			public void onNext(T t) {
+				Assert.state(this.subscription != null, "No subscription");
 				try {
-					tryWriteEntityWithMessageConverters(element, servletRequest, servletResponse, this.context);
+					tryWriteEntityWithMessageConverters(t, this.servletRequest, this.servletResponse, this.context);
+					this.servletResponse.getOutputStream().flush();
+					this.subscription.request(1);
 				}
 				catch (ServletException | IOException ex) {
-					onError(ex);
+					this.subscription.cancel();
+					this.deferredResult.setErrorResult(ex);
 				}
 			}
 
 			@Override
 			public void onError(Throwable t) {
-				try {
-					handleError(t, (HttpServletRequest) this.asyncContext.getRequest(),
-							(HttpServletResponse) this.asyncContext.getResponse(), this.context);
-				}
-				catch (ServletException | IOException ex) {
-					logger.warn("Asynchronous execution resulted in exception", ex);
-				}
-				this.asyncContext.complete();
+				this.deferredResult.setErrorResult(t);
 			}
 
 			@Override
 			public void onComplete() {
-				this.asyncContext.complete();
+				try {
+					this.servletResponse.getOutputStream().flush();
+					this.deferredResult.setResult(null);
+				}
+				catch (IOException ex) {
+					this.deferredResult.setErrorResult(ex);
+				}
+
 			}
 		}
 
