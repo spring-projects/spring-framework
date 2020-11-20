@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.cache.support;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,8 +39,6 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
-	private volatile Set<String> cacheNames = Collections.emptySet();
-
 
 	// Early cache initialization on startup
 
@@ -62,15 +58,10 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		Collection<? extends Cache> caches = loadCaches();
 
 		synchronized (this.cacheMap) {
-			this.cacheNames = Collections.emptySet();
 			this.cacheMap.clear();
-			Set<String> cacheNames = new LinkedHashSet<>(caches.size());
 			for (Cache cache : caches) {
-				String name = cache.getName();
-				this.cacheMap.put(name, decorateCache(cache));
-				cacheNames.add(name);
+				this.cacheMap.put(cache.getName(), decorateCache(cache));
 			}
-			this.cacheNames = Collections.unmodifiableSet(cacheNames);
 		}
 	}
 
@@ -87,31 +78,15 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	@Override
 	@Nullable
 	public Cache getCache(String name) {
-		// Quick check for existing cache...
-		Cache cache = this.cacheMap.get(name);
-		if (cache != null) {
-			return cache;
-		}
-
-		// The provider may support on-demand cache creation...
-		Cache missingCache = getMissingCache(name);
-		if (missingCache != null) {
-			// Fully synchronize now for missing cache registration
-			synchronized (this.cacheMap) {
-				cache = this.cacheMap.get(name);
-				if (cache == null) {
-					cache = decorateCache(missingCache);
-					this.cacheMap.put(name, cache);
-					updateCacheNames(name);
-				}
-			}
-		}
-		return cache;
+		return this.cacheMap.computeIfAbsent(name, k -> {
+			Cache missingCache = getMissingCache(k);
+			return missingCache == null ? null : decorateCache(missingCache);
+		});
 	}
 
 	@Override
 	public Collection<String> getCacheNames() {
-		return this.cacheNames;
+		return Collections.unmodifiableSet(cacheMap.keySet());
 	}
 
 
@@ -139,27 +114,8 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 */
 	@Deprecated
 	protected final void addCache(Cache cache) {
-		String name = cache.getName();
-		synchronized (this.cacheMap) {
-			if (this.cacheMap.put(name, decorateCache(cache)) == null) {
-				updateCacheNames(name);
-			}
-		}
+		this.cacheMap.put(cache.getName(), decorateCache(cache));
 	}
-
-	/**
-	 * Update the exposed {@link #cacheNames} set with the given name.
-	 * <p>This will always be called within a full {@link #cacheMap} lock
-	 * and effectively behaves like a {@code CopyOnWriteArraySet} with
-	 * preserved order but exposed as an unmodifiable reference.
-	 * @param name the name of the cache to be added
-	 */
-	private void updateCacheNames(String name) {
-		Set<String> cacheNames = new LinkedHashSet<>(this.cacheNames);
-		cacheNames.add(name);
-		this.cacheNames = Collections.unmodifiableSet(cacheNames);
-	}
-
 
 	// Overridable template methods for cache initialization
 
