@@ -19,7 +19,6 @@ package org.springframework.aop.aspectj;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -32,11 +31,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
 
-import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.MethodMatchers;
 import org.springframework.aop.support.StaticMethodMatcher;
@@ -46,7 +45,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -629,19 +627,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		if (this.aspectJAdviceMethod.getParameterCount() == 0) {
 			actualArgs = null;
 		}
-		try {
-			ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
-			// TODO AopUtils.invokeJoinpointUsingReflection
-			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new AopInvocationException("Mismatch on arguments to advice method [" +
-					this.aspectJAdviceMethod + "]; pointcut expression [" +
-					this.pointcut.getPointcutExpression() + "]", ex);
-		}
-		catch (InvocationTargetException ex) {
-			throw ex.getTargetException();
-		}
+		return AopUtils.invokeJoinpointUsingReflection(this.aspectInstanceFactory.getAspectInstance(), this.aspectJAdviceMethod, actualArgs);
 	}
 
 	/**
