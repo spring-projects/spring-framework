@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -267,13 +268,13 @@ class MimeTypeTests {
 		assertThat(mimeType.getParameter("attr")).isEqualTo("'v>alue'");
 	}
 
-	@Test // SPR-16630
+	@Test  // SPR-16630
 	void parseMimeTypeWithSpacesAroundEquals() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("multipart/x-mixed-replace;boundary = --myboundary");
 		assertThat(mimeType.getParameter("boundary")).isEqualTo("--myboundary");
 	}
 
-	@Test // SPR-16630
+	@Test  // SPR-16630
 	void parseMimeTypeWithSpacesAroundEqualsAndQuotedValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain; foo = \" bar \" ");
 		assertThat(mimeType.getParameter("foo")).isEqualTo("\" bar \"");
@@ -303,14 +304,14 @@ class MimeTypeTests {
 		assertThat(mimeTypes.size()).as("Invalid amount of mime types").isEqualTo(0);
 	}
 
-	@Test // gh-23241
+	@Test  // gh-23241
 	void parseMimeTypesWithTrailingComma() {
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes("text/plain, text/html,");
 		assertThat(mimeTypes).as("No mime types returned").isNotNull();
 		assertThat(mimeTypes.size()).as("Incorrect number of mime types").isEqualTo(2);
 	}
 
-	@Test // SPR-17459
+	@Test  // SPR-17459
 	void parseMimeTypesWithQuotedParameters() {
 		testWithQuotedParameters("foo/bar;param=\",\"");
 		testWithQuotedParameters("foo/bar;param=\"s,a,\"");
@@ -332,7 +333,7 @@ class MimeTypeTests {
 		assertThat(type.getSubtypeSuffix()).isEqualTo("json");
 	}
 
-	@Test // gh-25350
+	@Test  // gh-25350
 	void wildcardSubtypeCompatibleWithSuffix() {
 		MimeType applicationStar = new MimeType("application", "*");
 		MimeType applicationVndJson = new MimeType("application", "vnd.something+json");
@@ -411,6 +412,14 @@ class MimeTypeTests {
 		assertThat(m1).isEqualTo(m2);
 		assertThat(m1.compareTo(m2)).isEqualTo(0);
 		assertThat(m2.compareTo(m1)).isEqualTo(0);
+	}
+
+	@Test  // gh-26127
+	void serialize() throws Exception {
+		MimeType original = new MimeType("text", "plain", StandardCharsets.UTF_8);
+		MimeType deserialized = SerializationTestUtils.serializeAndDeserialize(original);
+		assertThat(deserialized).isEqualTo(original);
+		assertThat(original).isEqualTo(deserialized);
 	}
 
 }

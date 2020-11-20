@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.BitSet;
@@ -104,7 +106,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	private final Map<String, String> parameters;
 
 	@Nullable
-	private Charset resolvedCharset;
+	private transient Charset resolvedCharset;
 
 	@Nullable
 	private volatile String toStringValue;
@@ -184,9 +186,9 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		this.subtype = subtype.toLowerCase(Locale.ENGLISH);
 		if (!CollectionUtils.isEmpty(parameters)) {
 			Map<String, String> map = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
-			parameters.forEach((attribute, value) -> {
-				checkParameters(attribute, value);
-				map.put(attribute, value);
+			parameters.forEach((parameter, value) -> {
+				checkParameters(parameter, value);
+				map.put(parameter, value);
 			});
 			this.parameters = Collections.unmodifiableMap(map);
 		}
@@ -224,11 +226,11 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 	}
 
-	protected void checkParameters(String attribute, String value) {
-		Assert.hasLength(attribute, "'attribute' must not be empty");
+	protected void checkParameters(String parameter, String value) {
+		Assert.hasLength(parameter, "'parameter' must not be empty");
 		Assert.hasLength(value, "'value' must not be empty");
-		checkToken(attribute);
-		if (PARAM_CHARSET.equals(attribute)) {
+		checkToken(parameter);
+		if (PARAM_CHARSET.equals(parameter)) {
 			if (this.resolvedCharset == null) {
 				this.resolvedCharset = Charset.forName(unquote(value));
 			}
@@ -589,6 +591,17 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 
 		return 0;
+	}
+
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		// Rely on default serialization, just initialize state after deserialization.
+		ois.defaultReadObject();
+
+		// Initialize transient fields.
+		String charsetName = getParameter(PARAM_CHARSET);
+		if (charsetName != null) {
+			this.resolvedCharset = Charset.forName(unquote(charsetName));
+		}
 	}
 
 
