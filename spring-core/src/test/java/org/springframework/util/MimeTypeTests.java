@@ -343,8 +343,9 @@ class MimeTypeTests {
 	private void testWithQuotedParameters(String... mimeTypes) {
 		String s = String.join(",", mimeTypes);
 		List<MimeType> actual = MimeTypeUtils.parseMimeTypes(s);
+
 		assertThat(actual.size()).isEqualTo(mimeTypes.length);
-		for (int i=0; i < mimeTypes.length; i++) {
+		for (int i = 0; i < mimeTypes.length; i++) {
 			assertThat(actual.get(i).toString()).isEqualTo(mimeTypes[i]);
 		}
 	}
@@ -371,6 +372,7 @@ class MimeTypeTests {
 
 		List<MimeType> result = new ArrayList<>(expected);
 		Random rnd = new Random();
+
 		// shuffle & sort 10 times
 		for (int i = 0; i < 10; i++) {
 			Collections.shuffle(result, rnd);
@@ -400,11 +402,7 @@ class MimeTypeTests {
 		assertThat(m2.compareTo(m1) != 0).as("Invalid comparison result").isTrue();
 	}
 
-	/**
-	 * SPR-13157
-	 * @since 4.2
-	 */
-	@Test
+	@Test  // SPR-13157
 	void equalsIsCaseInsensitiveForCharsets() {
 		MimeType m1 = new MimeType("text", "plain", singletonMap("charset", "UTF-8"));
 		MimeType m2 = new MimeType("text", "plain", singletonMap("charset", "utf-8"));
