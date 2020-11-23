@@ -30,6 +30,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -44,9 +45,9 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 	/** THe default charset used by the writer. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	protected final List<MediaType> supportedMediaTypes;
+	private final List<MediaType> supportedMediaTypes;
 
-	protected Charset charset = DEFAULT_CHARSET;
+	private Charset charset = DEFAULT_CHARSET;
 
 
 	/**
@@ -62,6 +63,18 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 	 */
 	public Charset getCharset() {
 		return this.charset;
+	}
+
+	/**
+	 * Set the character set to use for part headers such as
+	 * "Content-Disposition" (and its filename parameter).
+	 * <p>By default this is set to "UTF-8". If changed from this default,
+	 * the "Content-Type" header will have a "charset" parameter that specifies
+	 * the character set used.
+	 */
+	public void setCharset(Charset charset) {
+		Assert.notNull(charset, "Charset must not be null");
+		this.charset = charset;
 	}
 
 	public List<MediaType> getWritableMediaTypes() {
