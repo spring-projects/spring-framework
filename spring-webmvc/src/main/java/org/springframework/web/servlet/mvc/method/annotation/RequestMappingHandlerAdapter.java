@@ -880,10 +880,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			asyncManager.registerCallableInterceptors(this.callableInterceptors);
 			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
-			if (asyncManager.hasConcurrentResult() &&
-					asyncManager.getConcurrentResultContext().length > 0 &&
-					asyncManager.getConcurrentResultContext()[0] instanceof ModelAndViewContainer) {
-
+			if (asyncManager.hasConcurrentResult()) {
 				Object result = asyncManager.getConcurrentResult();
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 				asyncManager.clearConcurrentResult();
