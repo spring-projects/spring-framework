@@ -367,8 +367,9 @@ class ReactiveAdapterRegistryTests {
 	private static class ExtendedFlux<T> extends Flux<T> {
 
 		@Override
-		public void subscribe(CoreSubscriber actual) {
+		public void subscribe(CoreSubscriber<? super T> actual) {
 			throw new UnsupportedOperationException();
 		}
 	}
+
 }
