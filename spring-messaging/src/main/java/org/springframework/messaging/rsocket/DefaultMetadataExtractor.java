@@ -31,6 +31,8 @@ import io.rsocket.Payload;
 import io.rsocket.metadata.CompositeMetadata;
 import io.rsocket.metadata.RoutingMetadata;
 import io.rsocket.metadata.WellKnownMimeType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -51,6 +53,9 @@ import org.springframework.util.MimeType;
  * @since 5.2
  */
 public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtractorRegistry {
+
+	private static final Log logger = LogFactory.getLog(DefaultMetadataExtractor.class);
+
 
 	private final List<Decoder<?>> decoders;
 
@@ -119,6 +124,10 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 		else {
 			extractEntry(payload.metadata().slice(), metadataMimeType.toString(), result);
 		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Values extracted from metadata: " + result +
+					" with registrations for " + this.registrations.keySet() + ".");
+		}
 		return result;
 	}
 
@@ -175,7 +184,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 
 		@Override
 		public String toString() {
-			return "mimeType=" + this.mimeType + ", targetType=" + this.targetType;
+			return "\"" + this.mimeType + "\" => " + this.targetType;
 		}
 	}
 
