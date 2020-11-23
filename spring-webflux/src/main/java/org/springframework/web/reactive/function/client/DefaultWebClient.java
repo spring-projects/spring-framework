@@ -306,6 +306,7 @@ class DefaultWebClient implements WebClient {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public RequestBodySpec context(Function<Context, Context> contextModifier) {
 			this.contextModifier = (this.contextModifier != null ?
 					this.contextModifier.andThen(contextModifier) : contextModifier);

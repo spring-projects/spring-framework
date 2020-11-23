@@ -951,6 +951,11 @@ For example:
 				.awaitBody<Unit>()
 ----
 
+Note that you can configure a `defaultRequest` callback globally at the
+`WebClient.Builder` level which lets you insert attributes into all requests,
+which could be used for example in a Spring MVC application to populate
+request attributes based on `ThreadLocal` data.
+
 
 [[webflux-client-context]]
 == Context
@@ -960,10 +965,8 @@ chain but they only influence the current request. If you want to pass informati
 propagates to additional requests that are nested, e.g. via `flatMap`, or executed after,
 e.g. via `concatMap`, then you'll need to use the Reactor `Context`.
 
-`WebClient` exposes a method to populate the Reactor `Context` for a given request.
-This information is available to filters for the current request and it also propagates
-to subsequent requests or other reactive clients participating in the downstream
-processing chain. For example:
+The Reactor `Context` needs to be populated at the end of a reactive chain in order to
+apply to all operations. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -977,18 +980,14 @@ processing chain. For example:
 			.build();
 
 	client.get().uri("https://example.org/")
-			.context(context -> context.put("foo", ...))
 			.retrieve()
 			.bodyToMono(String.class)
 			.flatMap(body -> {
 					// perform nested request (context propagates automatically)...
-			});
+			})
+			.contextWrite(context -> context.put("foo", ...));
 ----
 
-Note that you can also specify how to populate the context through the `defaultRequest`
-method at the level of the `WebClient.Builder` and that applies to all requests.
-This could be used for to example to pass information from `ThreadLocal` storage onto
-a Reactor processing chain in a Spring MVC application.
 
 
 [[webflux-client-synchronous]]
