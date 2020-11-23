@@ -253,6 +253,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Nullable
 	private Map<String, CorsConfiguration> corsConfigurations;
 
+	@Nullable
+	private AsyncSupportConfigurer asyncSupportConfigurer;
+
 
 	/**
 	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
@@ -652,8 +655,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			adapter.setResponseBodyAdvice(Collections.singletonList(new JsonViewResponseBodyAdvice()));
 		}
 
-		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
-		configureAsyncSupport(configurer);
+		AsyncSupportConfigurer configurer = getAsyncSupportConfigurer();
 		if (configurer.getTaskExecutor() != null) {
 			adapter.setTaskExecutor(configurer.getTaskExecutor());
 		}
@@ -684,8 +686,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public HandlerFunctionAdapter handlerFunctionAdapter() {
 		HandlerFunctionAdapter adapter = new HandlerFunctionAdapter();
 
-		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
-		configureAsyncSupport(configurer);
+		AsyncSupportConfigurer configurer = getAsyncSupportConfigurer();
 		if (configurer.getTimeout() != null) {
 			adapter.setAsyncRequestTimeout(configurer.getTimeout());
 		}
@@ -715,13 +716,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Nullable
 	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
-	}
-
-	/**
-	 * Override this method to configure asynchronous request processing options.
-	 * @see AsyncSupportConfigurer
-	 */
-	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
 	/**
@@ -943,6 +937,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 			messageConverters.add(new MappingJackson2CborHttpMessageConverter(builder.build()));
 		}
+	}
+
+	/**
+	 * Callback for building the {@link AsyncSupportConfigurer}.
+	 * Delegates to {@link #configureAsyncSupport(AsyncSupportConfigurer)}.
+	 * @since 5.3.2
+	 */
+	protected AsyncSupportConfigurer getAsyncSupportConfigurer() {
+		if (this.asyncSupportConfigurer == null) {
+			this.asyncSupportConfigurer = new AsyncSupportConfigurer();
+			configureAsyncSupport(this.asyncSupportConfigurer);
+		}
+		return this.asyncSupportConfigurer;
+	}
+
+	/**
+	 * Override this method to configure asynchronous request processing options.
+	 * @see AsyncSupportConfigurer
+	 */
+	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
 	/**
