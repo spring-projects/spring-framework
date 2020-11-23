@@ -149,7 +149,9 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	/**
 	 * Set the character set to use for part headers such as
 	 * "Content-Disposition" (and its filename parameter).
-	 * <p>By default this is set to "UTF-8".
+	 * <p>By default this is set to "UTF-8". If changed from this default,
+	 * the "Content-Type" header will have a "charset" parameter that specifies
+	 * the character set used.
 	 */
 	public void setCharset(Charset charset) {
 		Assert.notNull(charset, "Charset must not be null");

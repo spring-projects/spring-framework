@@ -190,7 +190,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(contentType.isCompatibleWith(mediaType)).isTrue();
 		assertThat(contentType.getParameter("type")).isEqualTo("foo");
 		assertThat(contentType.getParameter("boundary")).isNotEmpty();
-		assertThat(contentType.getParameter("charset")).isEqualTo("UTF-8");
+		assertThat(contentType.getParameter("charset")).isNull();
 
 		MultiValueMap<String, Part> requestParts = parse(this.response, hints);
 		assertThat(requestParts.size()).isEqualTo(2);

@@ -102,7 +102,11 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 			params.putAll(mediaType.getParameters());
 		}
 		params.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
-		params.put("charset", getCharset().name());
+		Charset charset = getCharset();
+		if (!charset.equals(StandardCharsets.UTF_8) &&
+				!charset.equals(StandardCharsets.US_ASCII) ) {
+			params.put("charset", getCharset().name());
+		}
 
 		mediaType = (mediaType != null ? mediaType : MediaType.MULTIPART_FORM_DATA);
 		mediaType = new MediaType(mediaType, params);
