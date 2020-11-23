@@ -64,7 +64,7 @@ eclipse.classpath.file.whenMerged {
 }
 
 // Ensure that JMH sources and resources are treated as test classpath entries
-// so that they can see test dependencies such as JUnit Jupiter APIs.
+// so that they can see test fixtures.
 // https://github.com/melix/jmh-gradle-plugin/issues/157
 eclipse.classpath.file.whenMerged {
 	entries.findAll { it.path =~ /src\/jmh\/(java|resources)/ }.each {
