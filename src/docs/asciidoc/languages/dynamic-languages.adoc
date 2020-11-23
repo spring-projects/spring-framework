@@ -92,7 +92,7 @@ container. Using the dynamic-language-backed beans with a plain `BeanFactory`
 implementation is supported, but you have to manage the plumbing of the Spring internals
 to do so.
 
-For more information on schema-based configuration, see <<appendix.adoc#xsd-configuration,
+For more information on schema-based configuration, see <<xsd-schemas-lang,
 XML Schema-based Configuration>>.
 ====
 
@@ -176,7 +176,7 @@ of your dynamic language source files.
 The final step in the list in the <<dynamic-language-beans-concepts, preceding section>>
 involves defining dynamic-language-backed bean definitions, one for each bean that you
 want to configure (this is no different from normal JavaBean configuration). However,
-instead of specifying the fully qualified classname of the class that is to be
+instead of specifying the fully qualified class name of the class that is to be
 instantiated and configured by the container, you can use the `<lang:language/>`
 element to define the dynamic language-backed bean.
 
@@ -848,7 +848,7 @@ The `lang` elements in Spring XML configuration deal with exposing objects that 
 written in a dynamic language (such as Groovy or BeanShell) as beans in the Spring container.
 
 These elements (and the dynamic language support) are comprehensively covered in
-<<integration.adoc#dynamic-language, Dynamic Language Support>>. See that chapter
+<<dynamic-language, Dynamic Language Support>>. See that section
 for full details on this support and the `lang` elements.
 
 To use the elements in the `lang` schema, you need to have the following preamble at the
