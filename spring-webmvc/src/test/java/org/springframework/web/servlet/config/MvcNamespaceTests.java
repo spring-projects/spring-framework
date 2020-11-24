@@ -206,7 +206,9 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(manager.resolveMediaTypes(webRequest))
+				.as("Should not resolve file extensions by default")
+				.containsExactly(MediaType.ALL);
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertThat(adapter).isNotNull();
@@ -743,13 +745,17 @@ public class MvcNamespaceTests {
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setParameter("format", "xml");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(MediaType.valueOf("application/rss+xml")));
+		assertThat(manager.resolveMediaTypes(webRequest))
+				.containsExactly(MediaType.valueOf("application/rss+xml"));
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertThat(compositeResolver).isNotNull();
-		assertThat(compositeResolver.getViewResolvers().size()).as("Actual: " + compositeResolver.getViewResolvers()).isEqualTo(1);
+		assertThat(compositeResolver.getViewResolvers().size())
+				.as("Actual: " + compositeResolver.getViewResolvers())
+				.isEqualTo(1);
 
 		ViewResolver resolver = compositeResolver.getViewResolvers().get(0);
 		assertThat(resolver.getClass()).isEqualTo(ContentNegotiatingViewResolver.class);

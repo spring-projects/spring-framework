@@ -33,7 +33,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -91,7 +90,6 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.springframework.http.MediaType.APPLICATION_ATOM_XML;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 
@@ -268,34 +266,28 @@ public class WebMvcConfigurationSupportExtensionTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	public void contentNegotiation() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 
 		RequestMappingHandlerMapping mapping = this.config.requestMappingHandlerMapping(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcResourceUrlProvider());
+
+		request.setParameter("f", "json");
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
 		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_JSON));
 
-		request.setRequestURI("/foo.xml");
+		request.setParameter("f", "xml");
 		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_XML));
 
-		request.setRequestURI("/foo.rss");
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(MediaType.valueOf("application/rss+xml")));
-
-		request.setRequestURI("/foo.atom");
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_ATOM_XML));
-
-		request.setRequestURI("/foo");
-		request.setParameter("f", "json");
-		assertThat(manager.resolveMediaTypes(webRequest)).isEqualTo(Collections.singletonList(APPLICATION_JSON));
-
-		request.setRequestURI("/resources/foo.gif");
 		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) this.config.resourceHandlerMapping(
 				this.config.mvcContentNegotiationManager(), this.config.mvcConversionService(),
 				this.config.mvcResourceUrlProvider());
 		handlerMapping.setApplicationContext(this.context);
+
+		request = new MockHttpServletRequest("GET", "/resources/foo.gif");
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
+
 		assertThat(chain).isNotNull();
 		ResourceHttpRequestHandler handler = (ResourceHttpRequestHandler) chain.getHandler();
 		assertThat(handler).isNotNull();

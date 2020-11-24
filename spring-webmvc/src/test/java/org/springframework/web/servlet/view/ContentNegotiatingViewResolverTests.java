@@ -34,6 +34,7 @@ import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.accept.MappingMediaTypeFileExtensionResolver;
 import org.springframework.web.accept.ParameterContentNegotiationStrategy;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -85,9 +86,16 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Test
 	public void resolveViewNameWithPathExtension() throws Exception {
-		request.setRequestURI("/test.xls");
+		request.setRequestURI("/test");
+		request.setParameter("format", "xls");
+
+		String mediaType = "application/vnd.ms-excel";
+		ContentNegotiationManager manager = new ContentNegotiationManager(
+				new ParameterContentNegotiationStrategy(
+						Collections.singletonMap("xls", MediaType.parseMediaType(mediaType))));
 
 		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
 
@@ -98,7 +106,7 @@ public class ContentNegotiatingViewResolverTests {
 
 		given(viewResolverMock.resolveViewName(viewName, locale)).willReturn(null);
 		given(viewResolverMock.resolveViewName(viewName + ".xls", locale)).willReturn(viewMock);
-		given(viewMock.getContentType()).willReturn("application/vnd.ms-excel");
+		given(viewMock.getContentType()).willReturn(mediaType);
 
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertThat(result).as("Invalid view").isSameAs(viewMock);
@@ -307,8 +315,12 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameFilename() throws Exception {
 		request.setRequestURI("/test.html");
 
+		ContentNegotiationManager manager =
+				new ContentNegotiationManager(new PathExtensionContentNegotiationStrategy());
+
 		ViewResolver viewResolverMock1 = mock(ViewResolver.class, "viewResolver1");
 		ViewResolver viewResolverMock2 = mock(ViewResolver.class, "viewResolver2");
+		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		viewResolver.afterPropertiesSet();
@@ -336,7 +348,7 @@ public class ContentNegotiatingViewResolverTests {
 		request.setRequestURI("/test.json");
 
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
-		org.springframework.web.accept.PathExtensionContentNegotiationStrategy pathStrategy = new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(mapping);
+		PathExtensionContentNegotiationStrategy pathStrategy = new PathExtensionContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
 
 		ViewResolver viewResolverMock1 = mock(ViewResolver.class);

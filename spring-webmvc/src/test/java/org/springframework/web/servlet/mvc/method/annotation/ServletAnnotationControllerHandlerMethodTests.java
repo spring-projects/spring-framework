@@ -1742,6 +1742,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+			factoryBean.setFavorPathExtension(true);
 			factoryBean.afterPropertiesSet();
 
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
@@ -1773,6 +1774,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	void responseBodyAsHtmlWithSuffixPresent(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+			factoryBean.setFavorPathExtension(true);
 			factoryBean.afterPropertiesSet();
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
@@ -1833,14 +1835,22 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	void responseBodyAsTextWithCssExtension(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(TextRestController.class, usePathPatterns, wac -> {
 			ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+			factoryBean.setFavorParameter(true);
+			factoryBean.addMediaType("css", MediaType.parseMediaType("text/css"));
 			factoryBean.afterPropertiesSet();
+
+			RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+			mappingDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
+			wac.registerBeanDefinition("handlerMapping", mappingDef);
+
 			RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 			adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
 			wac.registerBeanDefinition("handlerAdapter", adapterDef);
 		});
 
 		byte[] content = "body".getBytes(StandardCharsets.ISO_8859_1);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a4.css");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a4");
+		request.addParameter("format", "css");
 		request.setContent(content);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -3826,7 +3836,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return body;
 		}
 
-		@RequestMapping(path = "/a4.css", method = RequestMethod.GET)
+		@RequestMapping(path = "/a4", method = RequestMethod.GET)
 		public String a4(@RequestBody String body) {
 			return body;
 		}
