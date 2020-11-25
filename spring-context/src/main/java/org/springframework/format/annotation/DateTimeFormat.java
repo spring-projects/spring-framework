@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,6 @@ public @interface DateTimeFormat {
 		/**
 		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSXXX},
 		 * e.g. "2000-10-31T01:30:00.000-05:00".
-		 * <p>This is the default if no annotation value is specified.
 		 */
 		DATE_TIME,
 
