@@ -69,9 +69,22 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * Constructor with the URI and headers for the request.
 	 * @param uri the URI for the request
 	 * @param contextPath the context path for the request
-	 * @param headers the headers for the request
+	 * @param headers the headers for the request (as {@link MultiValueMap})
+	 * @since 5.3
 	 */
 	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, MultiValueMap<String, String> headers) {
+		this.uri = uri;
+		this.path = RequestPath.parse(uri, contextPath);
+		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
+	}
+
+	/**
+	 * Constructor with the URI and headers for the request.
+	 * @param uri the URI for the request
+	 * @param contextPath the context path for the request
+	 * @param headers the headers for the request (as {@link HttpHeaders})
+	 */
+	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, HttpHeaders headers) {
 		this.uri = uri;
 		this.path = RequestPath.parse(uri, contextPath);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
