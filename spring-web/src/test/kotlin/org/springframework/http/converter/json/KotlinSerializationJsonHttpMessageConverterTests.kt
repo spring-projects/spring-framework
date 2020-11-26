@@ -24,6 +24,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.MockHttpInputMessage
 import org.springframework.http.MockHttpOutputMessage
 import org.springframework.http.converter.HttpMessageNotReadableException
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets
 import kotlin.reflect.javaType
 import kotlin.reflect.typeOf
@@ -34,6 +36,7 @@ import kotlin.reflect.typeOf
  * @author Andreas Ahlenstorf
  * @author Sebastien Deleuze
  */
+@Suppress("UsePropertyAccessSyntax")
 class KotlinSerializationJsonHttpMessageConverterTests {
 
 	private val converter = KotlinSerializationJsonHttpMessageConverter()
@@ -48,6 +51,11 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canRead(Map::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canRead(List::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canRead(Set::class.java, MediaType.APPLICATION_JSON)).isTrue()
+
+		assertThat(converter.canRead(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(typeTokenOf<List<SerializableBean>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(typeTokenOf<ArrayList<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canRead(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test
@@ -60,6 +68,11 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canWrite(Map::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_JSON)).isTrue()
+
+		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<List<SerializableBean>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<ArrayList<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test
@@ -296,4 +309,12 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 	)
 
 	data class NotSerializableBean(val string: String)
+
+	open class TypeBase<T>
+
+	inline fun <reified T> typeTokenOf(): Type {
+		val base = object : TypeBase<T>() {}
+		val superType = base::class.java.genericSuperclass!!
+		return (superType as ParameterizedType).actualTypeArguments.first()!!
+	}
 }

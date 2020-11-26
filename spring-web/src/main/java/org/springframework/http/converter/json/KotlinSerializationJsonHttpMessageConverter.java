@@ -89,6 +89,28 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	}
 
 	@Override
+	public boolean canRead(Type type, @Nullable Class<?> contextClass, @Nullable MediaType mediaType) {
+		try {
+			serializer(GenericTypeResolver.resolveType(type, contextClass));
+			return canRead(mediaType);
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
+		try {
+			serializer(GenericTypeResolver.resolveType(type, clazz));
+			return canWrite(mediaType);
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	@Override
 	public final Object read(Type type, @Nullable Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -151,6 +173,7 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type
 	 * using kotlinx.serialization. If no serializer can be found, an exception is thrown.
 	 * <p>Resolved serializers are cached and cached results are returned on successive calls.
+	 * TODO Avoid relying on throwing exception when https://github.com/Kotlin/kotlinx.serialization/pull/1164 is fixed
 	 * @param type the type to find a serializer for
 	 * @return a resolved serializer for the given type
 	 * @throws RuntimeException if no serializer supporting the given type can be found

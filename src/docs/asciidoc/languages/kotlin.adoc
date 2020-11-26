@@ -389,17 +389,13 @@ project for more details.
 === Kotlin multiplatform serialization
 
 As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
-supported in Spring MVC, Spring WebFlux and Spring Messaging. The builtin support currently only targets JSON format.
+supported in Spring MVC, Spring WebFlux and Spring Messaging (RSocket). The builtin support currently only targets JSON format.
 
-To enable it, follow https://github.com/Kotlin/kotlinx.serialization#setup[those instructions] and make sure neither
-Jackson, GSON or JSONB are in the classpath.
-
-NOTE: For a typical Spring Boot web application, that can be achieved by excluding `spring-boot-starter-json` dependency.
-
-In Spring MVC, if you need Jackson, GSON or JSONB for other purposes, you can keep them on the classpath and
-<<web#mvc-config-message-converters, configure message converters>> to remove `MappingJackson2HttpMessageConverter` and add
-`KotlinSerializationJsonHttpMessageConverter`.
-
+To enable it, follow https://github.com/Kotlin/kotlinx.serialization#setup[those instructions] to add the related dependency and plugin.
+With Spring MVC and WebFlux, both Kotlin serialization and Jackson will be configured by default if they are in the classpath since
+Kotlin serialization is designed to serialize only Kotlin classes annotated with `@Serializable`.
+With Spring Messaging (RSocket), make sure that neither Jackson, GSON or JSONB are in the classpath if you want automatic configuration,
+if Jackson is needed configure `KotlinSerializationJsonMessageConverter` manually.
 
 == Coroutines
 

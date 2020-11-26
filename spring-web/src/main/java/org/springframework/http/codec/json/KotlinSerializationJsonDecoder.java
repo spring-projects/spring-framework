@@ -69,10 +69,38 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 		this.json = json;
 	}
 
+	/**
+	 * Configure a limit on the number of bytes that can be buffered whenever
+	 * the input stream needs to be aggregated. This can be a result of
+	 * decoding to a single {@code DataBuffer},
+	 * {@link java.nio.ByteBuffer ByteBuffer}, {@code byte[]},
+	 * {@link org.springframework.core.io.Resource Resource}, {@code String}, etc.
+	 * It can also occur when splitting the input stream, e.g. delimited text,
+	 * in which case the limit applies to data buffered between delimiters.
+	 * <p>By default this is set to 256K.
+	 * @param byteCount the max number of bytes to buffer, or -1 for unlimited
+	 */
+	public void setMaxInMemorySize(int byteCount) {
+		this.stringDecoder.setMaxInMemorySize(byteCount);
+	}
+
+	/**
+	 * Return the {@link #setMaxInMemorySize configured} byte count limit.
+	 */
+	public int getMaxInMemorySize() {
+		return this.stringDecoder.getMaxInMemorySize();
+	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		return (super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass()));
+		try {
+			serializer(elementType.getType());
+			return (super.canDecode(elementType, mimeType) && !CharSequence.class.isAssignableFrom(elementType.toClass()));
+		}
+		catch (Exception ex) {
+			return false;
+		}
 	}
 
 	@Override
@@ -95,6 +123,7 @@ public class KotlinSerializationJsonDecoder extends AbstractDecoder<Object> {
 	 * Tries to find a serializer that can marshall or unmarshall instances of the given type
 	 * using kotlinx.serialization. If no serializer can be found, an exception is thrown.
 	 * <p>Resolved serializers are cached and cached results are returned on successive calls.
+	 * TODO Avoid relying on throwing exception when https://github.com/Kotlin/kotlinx.serialization/pull/1164 is fixed
 	 * @param type the type to find a serializer for
 	 * @return a resolved serializer for the given type
 	 * @throws RuntimeException if no serializer supporting the given type can be found

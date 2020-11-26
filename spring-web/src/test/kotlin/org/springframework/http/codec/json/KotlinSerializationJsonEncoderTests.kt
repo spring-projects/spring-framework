@@ -49,7 +49,11 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 				MediaType("application", "json", StandardCharsets.UTF_8))).isTrue()
 		Assertions.assertThat(encoder.canEncode(ResolvableType.forClass(Pojo::class.java),
 				MediaType("application", "json", StandardCharsets.US_ASCII))).isTrue()
-		Assertions.assertThat(encoder.canEncode(ResolvableType.NONE, null)).isTrue()
+
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(List::class.java, KotlinSerializationJsonDecoderTests.Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
+		Assertions.assertThat(encoder.canEncode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test

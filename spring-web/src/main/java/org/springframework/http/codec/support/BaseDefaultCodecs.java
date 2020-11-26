@@ -312,6 +312,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					((ProtobufDecoder) codec).setMaxMessageSize(size);
 				}
 			}
+			if (kotlinSerializationJsonPresent) {
+				if (codec instanceof KotlinSerializationJsonDecoder) {
+					((KotlinSerializationJsonDecoder) codec).setMaxInMemorySize(size);
+				}
+			}
 			if (jackson2Present) {
 				if (codec instanceof AbstractJackson2Decoder) {
 					((AbstractJackson2Decoder) codec).setMaxInMemorySize(size);
@@ -385,11 +390,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			return Collections.emptyList();
 		}
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		if (kotlinSerializationJsonPresent) {
+			addCodec(readers, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
+		}
 		if (jackson2Present) {
 			addCodec(readers, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
-		}
-		else if (kotlinSerializationJsonPresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
 		}
 		if (jackson2SmilePresent) {
 			addCodec(readers, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
@@ -484,11 +489,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 */
 	final List<HttpMessageWriter<?>> getBaseObjectWriters() {
 		List<HttpMessageWriter<?>> writers = new ArrayList<>();
+		if (kotlinSerializationJsonPresent) {
+			writers.add(new EncoderHttpMessageWriter<>(getKotlinSerializationJsonEncoder()));
+		}
 		if (jackson2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(getJackson2JsonEncoder()));
-		}
-		else if (kotlinSerializationJsonPresent) {
-			writers.add(new EncoderHttpMessageWriter<>(getKotlinSerializationJsonEncoder()));
 		}
 		if (jackson2SmilePresent) {
 			writers.add(new EncoderHttpMessageWriter<>(this.jackson2SmileEncoder != null ?
