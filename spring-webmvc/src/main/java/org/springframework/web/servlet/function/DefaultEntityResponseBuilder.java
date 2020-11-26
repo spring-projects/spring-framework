@@ -237,8 +237,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 	/**
 	 * Default {@link EntityResponse} implementation for synchronous bodies.
 	 */
-	private static class DefaultEntityResponse<T> extends DefaultServerResponseBuilder.AbstractServerResponse
-			implements EntityResponse<T> {
+	private static class DefaultEntityResponse<T> extends AbstractServerResponse implements EntityResponse<T> {
 
 		private final T entity;
 

@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +30,11 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -255,20 +254,13 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 	 * Wrap to silently ignore header changes HttpMessageConverter's that would
 	 * otherwise cause HttpHeaders to raise exceptions.
 	 */
-	private static class StreamingServletServerHttpResponse implements ServerHttpResponse {
-
-		private final ServerHttpResponse delegate;
+	private static class StreamingServletServerHttpResponse extends DelegatingServerHttpResponse {
 
 		private final HttpHeaders mutableHeaders = new HttpHeaders();
 
 		public StreamingServletServerHttpResponse(ServerHttpResponse delegate) {
-			this.delegate = delegate;
+			super(delegate);
 			this.mutableHeaders.putAll(delegate.getHeaders());
-		}
-
-		@Override
-		public void setStatusCode(HttpStatus status) {
-			this.delegate.setStatusCode(status);
 		}
 
 		@Override
@@ -276,20 +268,6 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 			return this.mutableHeaders;
 		}
 
-		@Override
-		public OutputStream getBody() throws IOException {
-			return this.delegate.getBody();
-		}
-
-		@Override
-		public void flush() throws IOException {
-			this.delegate.flush();
-		}
-
-		@Override
-		public void close() {
-			this.delegate.close();
-		}
 	}
 
 }
