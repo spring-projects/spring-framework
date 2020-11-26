@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.support;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +76,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			@SuppressWarnings("unchecked")
 			Map<String, List<String>> map = (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
 			if (map != null) {
+				// setHeader checks for equality but we need copy of native headers
+				setHeader(NATIVE_HEADERS, null);
 				setHeader(NATIVE_HEADERS, new LinkedMultiValueMap<>(map));
 			}
 		}
@@ -103,6 +106,8 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (isMutable()) {
 			Map<String, List<String>> map = getNativeHeaders();
 			if (map != null) {
+				// setHeader checks for equality but we need immutable wrapper
+				setHeader(NATIVE_HEADERS, null);
 				setHeader(NATIVE_HEADERS, Collections.unmodifiableMap(map));
 			}
 			super.setImmutable();
@@ -110,31 +115,34 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	}
 
 	@Override
-	public void setHeader(String name, @Nullable Object value) {
-		if (name.equalsIgnoreCase(NATIVE_HEADERS)) {
-			// Force removal since setHeader checks for equality
-			super.setHeader(NATIVE_HEADERS, null);
+	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
+		if (headersToCopy == null) {
+			return;
 		}
-		super.setHeader(name, value);
+
+		@SuppressWarnings("unchecked")
+		Map<String, List<String>> map = (Map<String, List<String>>) headersToCopy.get(NATIVE_HEADERS);
+		if (map != null && map != getNativeHeaders()) {
+			map.forEach(this::setNativeHeaderValues);
+		}
+
+		// setHeader checks for equality, native headers should be equal by now
+		super.copyHeaders(headersToCopy);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
-		if (headersToCopy != null) {
-			Map<String, List<String>> nativeHeaders = getNativeHeaders();
-			Map<String, List<String>> map = (Map<String, List<String>>) headersToCopy.get(NATIVE_HEADERS);
-			if (map != null) {
-				if (nativeHeaders != null) {
-					nativeHeaders.putAll(map);
-				}
-				else {
-					nativeHeaders = new LinkedMultiValueMap<>(map);
-				}
-			}
-			super.copyHeaders(headersToCopy);
-			setHeader(NATIVE_HEADERS, nativeHeaders);
+	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
+		if (headersToCopy == null) {
+			return;
 		}
+
+		@SuppressWarnings("unchecked")
+		Map<String, List<String>> map = (Map<String, List<String>>) headersToCopy.get(NATIVE_HEADERS);
+		if (map != null && getNativeHeaders() == null) {
+			map.forEach(this::setNativeHeaderValues);
+		}
+
+		super.copyHeadersIfAbsent(headersToCopy);
 	}
 
 	/**
@@ -198,6 +206,30 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		if (!ObjectUtils.nullSafeEquals(values, getHeader(name))) {
 			setModified(true);
 			map.put(name, values);
+		}
+	}
+
+	/**
+	 * Variant of {@link #addNativeHeader(String, String)} for all values.
+	 * @since 5.2.12
+	 */
+	public void setNativeHeaderValues(String name, @Nullable List<String> values) {
+		Assert.state(isMutable(), "Already immutable");
+		Map<String, List<String>> map = getNativeHeaders();
+		if (values == null) {
+			if (map != null && map.get(name) != null) {
+				setModified(true);
+				map.remove(name);
+			}
+			return;
+		}
+		if (map == null) {
+			map = new LinkedMultiValueMap<>(3);
+			setHeader(NATIVE_HEADERS, map);
+		}
+		if (!ObjectUtils.nullSafeEquals(values, getHeader(name))) {
+			setModified(true);
+			map.put(name, new ArrayList<>(values));
 		}
 	}
 

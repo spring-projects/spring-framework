@@ -378,13 +378,14 @@ public class MessageHeaderAccessor {
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
 	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
-		if (headersToCopy != null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeader(key, value);
-				}
-			});
+		if (headersToCopy == null || this.headers == headersToCopy) {
+			return;
 		}
+		headersToCopy.forEach((key, value) -> {
+			if (!isReadOnly(key)) {
+				setHeader(key, value);
+			}
+		});
 	}
 
 	/**
@@ -392,13 +393,14 @@ public class MessageHeaderAccessor {
 	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
 	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
-		if (headersToCopy != null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeaderIfAbsent(key, value);
-				}
-			});
+		if (headersToCopy == null || this.headers == headersToCopy) {
+			return;
 		}
+		headersToCopy.forEach((key, value) -> {
+			if (!isReadOnly(key)) {
+				setHeaderIfAbsent(key, value);
+			}
+		});
 	}
 
 	protected boolean isReadOnly(String headerName) {
