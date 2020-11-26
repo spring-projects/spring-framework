@@ -241,4 +241,14 @@ public class NativeMessageHeaderAccessorTests {
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}
 
+	@Test // gh-26155
+	void copySelf() {
+		NativeMessageHeaderAccessor accessor = new NativeMessageHeaderAccessor();
+		accessor.addNativeHeader("foo", "bar");
+		accessor.setHeader("otherHeader", "otherHeaderValue");
+		accessor.setLeaveMutable(true);
+
+		// Does not fail with ConcurrentModificationException
+		accessor.copyHeaders(accessor.getMessageHeaders());
+	}
 }
