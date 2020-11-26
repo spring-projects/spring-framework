@@ -129,6 +129,21 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		super.copyHeaders(headersToCopy);
 	}
 
+	@Override
+	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
+		if (headersToCopy == null) {
+			return;
+		}
+
+		@SuppressWarnings("unchecked")
+		Map<String, List<String>> map = (Map<String, List<String>>) headersToCopy.get(NATIVE_HEADERS);
+		if (map != null && getNativeHeaders() == null) {
+			map.forEach(this::setNativeHeaderValues);
+		}
+
+		super.copyHeadersIfAbsent(headersToCopy);
+	}
+
 	/**
 	 * Whether the native header map contains the give header name.
 	 * @param headerName the name of the header
