@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +104,9 @@ public class ConfigurationClassPostProcessorTests {
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
-		assertThat(Arrays.asList(beanFactory.getDependentBeans("foo")).contains("bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("foo"), "bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("config"), "foo")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("config"), "bar")).isTrue();
 	}
 
 	@Test
@@ -117,7 +118,9 @@ public class ConfigurationClassPostProcessorTests {
 		Foo foo = beanFactory.getBean("foo", Foo.class);
 		Bar bar = beanFactory.getBean("bar", Bar.class);
 		assertThat(bar.foo).isSameAs(foo);
-		assertThat(Arrays.asList(beanFactory.getDependentBeans("foo")).contains("bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("foo"), "bar")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("config"), "foo")).isTrue();
+		assertThat(ObjectUtils.containsElement(beanFactory.getDependentBeans("config"), "bar")).isTrue();
 	}
 
 	@Test
