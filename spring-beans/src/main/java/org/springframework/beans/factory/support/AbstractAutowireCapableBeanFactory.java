@@ -1370,10 +1370,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				throw new BeanCreationException(
 						mbd.getResourceDescription(), beanName, "Cannot apply property values to null instance");
 			}
-			else {
-				// Skip property population phase for null instance.
-				return;
-			}
+			
+			// Skip property population phase for null instance.
+			return;
 		}
 
 		// Give any InstantiationAwareBeanPostProcessors the opportunity to modify the
