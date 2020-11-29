@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -442,6 +443,35 @@ public class DefaultStompSessionTests {
 		assertThatExceptionOfType(MessageDeliveryException.class).isThrownBy(() ->
 				this.session.send("/topic/foo", "sample payload".getBytes(StandardCharsets.UTF_8)))
 			.withCause(exception);
+	}
+
+
+	@Test
+	public void sendWithPostProcessor() {
+		this.session.afterConnected(this.connection);
+		assertThat(this.session.isConnected()).isTrue();
+
+		String destination = "/topic/foo";
+		String payload = "sample payload";
+		this.session.send(destination, payload, message->{
+			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			accessor.getNativeHeaders().put("new header", Collections.singletonList("new value"));
+			return message;
+		});
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertThat(accessor.getCommand()).isEqualTo(StompCommand.SEND);
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertThat(stompHeaders.size()).as(stompHeaders.toString()).isEqualTo(3);
+
+		assertThat(stompHeaders.getDestination()).isEqualTo(destination);
+		assertThat(stompHeaders.getContentType()).isEqualTo(new MimeType("text", "plain", StandardCharsets.UTF_8));
+		assertThat(stompHeaders.getFirst("new header")).isEqualTo("new value");
+		// StompEncoder isn't involved
+		assertThat(stompHeaders.getContentLength()).isEqualTo(-1);
+		assertThat(new String(message.getPayload(), StandardCharsets.UTF_8)).isEqualTo(payload);
 	}
 
 	@Test

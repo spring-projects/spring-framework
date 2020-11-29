@@ -16,7 +16,10 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.util.function.Function;
+
 import org.springframework.lang.Nullable;
+import org.springframework.messaging.Message;
 
 /**
  * Represents a STOMP session with operations to send messages,
@@ -59,6 +62,16 @@ public interface StompSession {
 	Receiptable send(String destination, Object payload);
 
 	/**
+	 * An overloaded version of {@link #send(String, Object)}.
+	 * Can post-process or modify the created message.
+	 * @param destination   the destination to send a message to
+	 * @param payload       the message payload
+	 * @param postProcessor a postProcessor to post-process or modify the created message
+	 * @return a Receiptable for tracking receipts
+	 */
+	Receiptable send(String destination, Object payload, @Nullable Function<Message<byte[]>, Message<byte[]>> postProcessor);
+
+	/**
 	 * An overloaded version of {@link #send(String, Object)} with full
 	 * {@link StompHeaders} instead of just a destination. The headers must
 	 * contain a destination and may also have other headers such as
@@ -69,6 +82,16 @@ public interface StompSession {
 	 * @return a Receiptable for tracking receipts
 	 */
 	Receiptable send(StompHeaders headers, Object payload);
+
+	/**
+	 * An overloaded version of {@link #send(StompHeaders, Object)}.
+	 * Can post-process or modify the created message.
+	 * @param headers       the message headers
+	 * @param payload       the message payload
+	 * @param postProcessor a postProcessor to post-process or modify the created message
+	 * @return a Receiptable for tracking receipts
+	 */
+	Receiptable send(StompHeaders headers, Object payload, @Nullable Function<Message<byte[]>, Message<byte[]>> postProcessor);
 
 	/**
 	 * Subscribe to the given destination by sending a SUBSCRIBE frame and handle

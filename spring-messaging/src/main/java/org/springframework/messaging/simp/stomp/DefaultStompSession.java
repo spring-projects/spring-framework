@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 
@@ -223,13 +224,23 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public Receiptable send(String destination, Object payload) {
+		return send(destination, payload, null);
+	}
+
+	@Override
+	public Receiptable send(String destination, Object payload,  @Nullable Function<Message<byte[]>,Message<byte[]>> postProcessor) {
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination(destination);
-		return send(headers, payload);
+		return send(headers, payload, postProcessor);
 	}
 
 	@Override
 	public Receiptable send(StompHeaders headers, Object payload) {
+		return send(headers, payload, null);
+	}
+
+	@Override
+	public Receiptable send(StompHeaders headers, Object payload, @Nullable Function<Message<byte[]>, Message<byte[]>> postProcessor) {
 		Assert.hasText(headers.getDestination(), "Destination header is required");
 
 		String receiptId = checkOrAddReceipt(headers);
@@ -238,6 +249,10 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.SEND);
 		accessor.addNativeHeaders(headers);
 		Message<byte[]> message = createMessage(accessor, payload);
+
+		if (postProcessor != null) {
+			message = postProcessor.apply(message);
+		}
 		execute(message);
 
 		return receiptable;
