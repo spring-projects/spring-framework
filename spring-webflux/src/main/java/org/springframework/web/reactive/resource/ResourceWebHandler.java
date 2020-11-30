@@ -23,7 +23,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,6 +113,9 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 
 	@Nullable
 	private ResourceHttpMessageWriter resourceHttpMessageWriter;
+
+	@Nullable
+	private Map<String, MediaType> mediaTypes;
 
 	@Nullable
 	private ResourceLoader resourceLoader;
@@ -228,6 +234,30 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	@Nullable
 	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
 		return this.resourceHttpMessageWriter;
+	}
+
+	/**
+	 * Add mappings between file extensions extracted from the filename of static
+	 * {@link Resource}s and the media types to use for the response.
+	 * <p>Use of this method is typically not necessary since mappings can be
+	 * also determined via {@link MediaTypeFactory#getMediaType(Resource)}.
+	 * @param mediaTypes media type mappings
+	 * @since 5.3.2
+	 */
+	public void setMediaTypes(Map<String, MediaType> mediaTypes) {
+		if (this.mediaTypes == null) {
+			this.mediaTypes = new HashMap<>(mediaTypes.size());
+		}
+		mediaTypes.forEach((ext, type) ->
+				this.mediaTypes.put(ext.toLowerCase(Locale.ENGLISH), type));
+	}
+
+	/**
+	 * Return the {@link #setMediaTypes(Map) configured} media type mappings.
+	 * @since 5.3.2
+	 */
+	public Map<String, MediaType> getMediaTypes() {
+		return (this.mediaTypes != null ? this.mediaTypes : Collections.emptyMap());
 	}
 
 	/**
@@ -374,7 +404,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 						}
 
 						// Check the media type for the resource
-						MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(null);
+						MediaType mediaType = getMediaType(resource);
 						setHeaders(exchange, resource, mediaType);
 
 						// Content phase
@@ -533,6 +563,25 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 			return true;
 		}
 		return false;
+	}
+
+	@Nullable
+	private MediaType getMediaType(Resource resource) {
+		MediaType mediaType = null;
+		String filename = resource.getFilename();
+		if (!CollectionUtils.isEmpty(this.mediaTypes)) {
+			String ext = StringUtils.getFilenameExtension(filename);
+			if (ext != null) {
+				mediaType = this.mediaTypes.get(ext.toLowerCase(Locale.ENGLISH));
+			}
+		}
+		if (mediaType == null) {
+			List<MediaType> mediaTypes = MediaTypeFactory.getMediaTypes(filename);
+			if (!CollectionUtils.isEmpty(mediaTypes)) {
+				mediaType = mediaTypes.get(0);
+			}
+		}
+		return mediaType;
 	}
 
 	/**

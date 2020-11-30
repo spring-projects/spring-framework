@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.config;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +29,7 @@ import reactor.test.StepVerifier;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
@@ -97,6 +99,16 @@ public class ResourceHandlerRegistryTests {
 		this.registration.setCacheControl(CacheControl.noCache().cachePrivate());
 		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue())
 				.isEqualTo(CacheControl.noCache().cachePrivate().getHeaderValue());
+	}
+
+	@Test
+	public void mediaTypes() {
+		MediaType mediaType = MediaType.parseMediaType("foo/bar");
+		this.registration.setMediaTypes(Collections.singletonMap("bar", mediaType));
+		ResourceWebHandler requestHandler = this.registration.getRequestHandler();
+
+		assertThat(requestHandler.getMediaTypes()).size().isEqualTo(1);
+		assertThat(requestHandler.getMediaTypes()).containsEntry("bar", mediaType);
 	}
 
 	@Test

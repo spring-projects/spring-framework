@@ -214,6 +214,24 @@ public class ResourceWebHandlerTests {
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
 	}
 
+	@Test
+	public void getResourceWithRegisteredMediaType() throws Exception {
+		MediaType mediaType = new MediaType("foo", "bar");
+
+		ResourceWebHandler handler = new ResourceWebHandler();
+		handler.setLocations(Collections.singletonList(new ClassPathResource("test/", getClass())));
+		handler.setMediaTypes(Collections.singletonMap("bar", mediaType));
+		handler.afterPropertiesSet();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
+		setPathWithinHandlerMapping(exchange, "foo.bar");
+		handler.handle(exchange).block(TIMEOUT);
+
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(mediaType);
+		assertResponseBody(exchange, "foo bar foo bar foo bar");
+	}
+
 	@Test // SPR-14577
 	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
