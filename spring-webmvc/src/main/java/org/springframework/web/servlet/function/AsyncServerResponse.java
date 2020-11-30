@@ -16,161 +16,61 @@
 
 package org.springframework.web.servlet.function;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.function.Function;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Implementation of {@link ServerResponse} based on a {@link CompletableFuture}.
+ * Asynchronous subtype of {@link ServerResponse} that exposes the future
+ * response.
  *
  * @author Arjen Poutsma
- * @since 5.3
+ * @since 5.3.2
  * @see ServerResponse#async(Object)
  */
-final class AsyncServerResponse extends ErrorHandlingServerResponse {
+public interface AsyncServerResponse extends ServerResponse {
 
-	static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
-			"org.reactivestreams.Publisher", AsyncServerResponse.class.getClassLoader());
-
-
-	private final CompletableFuture<ServerResponse> futureResponse;
-
-	@Nullable
-	private final Duration timeout;
+	/**
+	 * Blocks indefinitely until the future response is obtained.
+	 */
+	ServerResponse block();
 
 
-	private AsyncServerResponse(CompletableFuture<ServerResponse> futureResponse, @Nullable Duration timeout) {
-		this.futureResponse = futureResponse;
-		this.timeout = timeout;
+	// Static creation methods
+
+	/**
+	 * Create a {@code AsyncServerResponse} with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @return the asynchronous response
+	 */
+	static AsyncServerResponse create(Object asyncResponse) {
+		return DefaultAsyncServerResponse.create(asyncResponse, null);
 	}
 
-	@Override
-	public HttpStatus statusCode() {
-		return delegate(ServerResponse::statusCode);
+	/**
+	 * Create a (built) response with the given asynchronous response.
+	 * Parameter {@code asyncResponse} can be a
+	 * {@link CompletableFuture CompletableFuture&lt;ServerResponse&gt;} or
+	 * {@link Publisher Publisher&lt;ServerResponse&gt;} (or any
+	 * asynchronous producer of a single {@code ServerResponse} that can be
+	 * adapted via the {@link ReactiveAdapterRegistry}).
+	 * @param asyncResponse a {@code CompletableFuture<ServerResponse>} or
+	 * {@code Publisher<ServerResponse>}
+	 * @param timeout maximum time period to wait for before timing out
+	 * @return the asynchronous response
+	 */
+	static AsyncServerResponse create(Object asyncResponse, Duration timeout) {
+		return DefaultAsyncServerResponse.create(asyncResponse, timeout);
 	}
-
-	@Override
-	public int rawStatusCode() {
-		return delegate(ServerResponse::rawStatusCode);
-	}
-
-	@Override
-	public HttpHeaders headers() {
-		return delegate(ServerResponse::headers);
-	}
-
-	@Override
-	public MultiValueMap<String, Cookie> cookies() {
-		return delegate(ServerResponse::cookies);
-	}
-
-	private <R> R delegate(Function<ServerResponse, R> function) {
-		ServerResponse response = this.futureResponse.getNow(null);
-		if (response != null) {
-			return function.apply(response);
-		}
-		else {
-			throw new IllegalStateException("Future ServerResponse has not yet completed");
-		}
-	}
-
-	@Nullable
-	@Override
-	public ModelAndView writeTo(HttpServletRequest request, HttpServletResponse response, Context context)
-			throws ServletException, IOException {
-
-		writeAsync(request, response, createDeferredResult());
-		return null;
-	}
-
-	static void writeAsync(HttpServletRequest request, HttpServletResponse response, DeferredResult<?> deferredResult)
-			throws ServletException, IOException {
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		try {
-			asyncManager.startDeferredResultProcessing(deferredResult);
-		}
-		catch (IOException | ServletException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new ServletException("Async processing failed", ex);
-		}
-
-	}
-
-	private DeferredResult<ServerResponse> createDeferredResult() {
-		DeferredResult<ServerResponse> result;
-		if (this.timeout != null) {
-			result = new DeferredResult<>(this.timeout.toMillis());
-		}
-		else {
-			result = new DeferredResult<>();
-		}
-		this.futureResponse.handle((value, ex) -> {
-			if (ex != null) {
-				if (ex instanceof CompletionException && ex.getCause() != null) {
-					ex = ex.getCause();
-				}
-				result.setErrorResult(ex);
-			}
-			else {
-				result.setResult(value);
-			}
-			return null;
-		});
-		return result;
-	}
-
-
-	@SuppressWarnings({"unchecked"})
-	public static ServerResponse create(Object o, @Nullable Duration timeout) {
-		Assert.notNull(o, "Argument to async must not be null");
-
-		if (o instanceof CompletableFuture) {
-			CompletableFuture<ServerResponse> futureResponse = (CompletableFuture<ServerResponse>) o;
-			return new AsyncServerResponse(futureResponse, timeout);
-		}
-		else if (reactiveStreamsPresent) {
-			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
-			ReactiveAdapter publisherAdapter = registry.getAdapter(o.getClass());
-			if (publisherAdapter != null) {
-				Publisher<ServerResponse> publisher = publisherAdapter.toPublisher(o);
-				ReactiveAdapter futureAdapter = registry.getAdapter(CompletableFuture.class);
-				if (futureAdapter != null) {
-					CompletableFuture<ServerResponse> futureResponse =
-							(CompletableFuture<ServerResponse>) futureAdapter.fromPublisher(publisher);
-					return new AsyncServerResponse(futureResponse, timeout);
-				}
-			}
-		}
-		throw new IllegalArgumentException("Asynchronous type not supported: " + o.getClass());
-	}
-
 
 }
+
