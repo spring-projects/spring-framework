@@ -49,8 +49,12 @@ public interface TargetSource extends TargetClassAware {
 	 * Will all calls to {@link #getTarget()} return the same object?
 	 * <p>In that case, there will be no need to invoke {@link #releaseTarget(Object)},
 	 * and the AOP framework can cache the return value of {@link #getTarget()}.
-	 * @return {@code true} if the target is immutable
+	 * @return {@code true} if the target is immutable（不可变）
 	 * @see #getTarget
+	 * {
+	 *     所有对getTarget()调用都会返回相同的对象吗？
+	 * 		在这种情况下，将不需要调用releaseTarget(Object) ，并且AOP框架可以缓存getTarget()的返回值。
+	 * }
 	 */
 	boolean isStatic();
 

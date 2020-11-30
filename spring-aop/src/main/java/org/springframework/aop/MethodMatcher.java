@@ -49,6 +49,9 @@ import java.lang.reflect.Method;
  * @since 11.11.2003
  * @see Pointcut
  * @see ClassFilter
+ * {
+ *     判断目标方法是否可以被增强
+ * }
  */
 public interface MethodMatcher {
 
@@ -61,6 +64,10 @@ public interface MethodMatcher {
 	 * @param method the candidate method
 	 * @param targetClass the target class
 	 * @return whether or not this method matches statically
+	 * {
+	 *
+	 * }
+	 *
 	 */
 	boolean matches(Method method, Class<?> targetClass);
 

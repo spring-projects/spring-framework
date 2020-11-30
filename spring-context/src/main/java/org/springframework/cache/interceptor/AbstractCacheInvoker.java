@@ -28,6 +28,9 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.interceptor.CacheErrorHandler
+ * {
+ *     调用缓存操作，并使用配置的 CacheErrorHandler 处理异常
+ * }
  */
 public abstract class AbstractCacheInvoker {
 

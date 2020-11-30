@@ -53,8 +53,29 @@ import org.aopalliance.aop.Advice;
  *
  * @author Rod Johnson
  * @see Joinpoint
+ * {
+ *       拦截器标记型接口。拦截器可以在运行时拦截事件的调用，比如方法调用，属性访问，构造函数调用，异常抛出。
+ *     这些事件都会用joinpoint实例来物化。
+ *     	这个接口并没有直接被使用，而是使用具体的子类来拦截特定的事件，例如：
+ *
+ *     	class DebuggingInterceptor implements MethodInterceptor, ConstructorInterceptor {
+ *
+ *      Object invoke(MethodInvocation i) throws Throwable {
+ *        debug(i.getMethod(), i.getThis(), i.getArgs());
+ *        return i.proceed();
+ *      }
+ *
+ *      Object construct(ConstructorInvocation i) throws Throwable {
+ *        debug(i.getConstructor(), i.getThis(), i.getArgs());
+ *        return i.proceed();
+ *      }
+ *
+ *      void debug(AccessibleObject ao, Object this, Object value) {
+ *        ...
+ *      }
+ *    }
+ * }
  */
-/** 通用的拦截器，before invoke after */
 public interface Interceptor extends Advice {
 
 }

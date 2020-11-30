@@ -25,7 +25,9 @@ import org.springframework.lang.Nullable;
  * Interface used by {@link CacheInterceptor}. Implementations know how to source
  * cache operation attributes, whether from configuration, metadata attributes at
  * source level, or elsewhere.
- *
+ * {
+ *     CacheOperation 操作来源,获取缓存操作属性
+ * }
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 3.1

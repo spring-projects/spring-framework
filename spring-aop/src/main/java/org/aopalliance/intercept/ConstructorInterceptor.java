@@ -20,7 +20,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Intercepts the construction of a new object.
- * 对构造器进行增强的拦截器，环绕增强
+ *
  * <p>The user should implement the {@link
  * #construct(ConstructorInvocation)} method to modify the original
  * behavior. E.g. the following class implements a singleton
@@ -42,6 +42,9 @@ import javax.annotation.Nonnull;
  * </pre>
  *
  * @author Rod Johnson
+ * {
+ *     对构造器进行增强的拦截器，环绕增强
+ * }
  */
 public interface ConstructorInterceptor extends Interceptor  {
 
@@ -55,6 +58,9 @@ public interface ConstructorInterceptor extends Interceptor  {
 	 * the interceptor
 	 * @throws Throwable if the interceptors or the target object
 	 * throws an exception
+	 * {
+	 *     此方法可以在构造新对象之前和之后执行额外的处理 -- 构造器环绕增强
+	 * }
 	 */
 	@Nonnull
 	Object construct(ConstructorInvocation invocation) throws Throwable;

@@ -68,6 +68,13 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 
+	/**
+	 * {
+	 *     支持两种场景：
+	 *     	场景一：继承自 ResponseStatusException 接口
+	 *     	场景二：在Exception上注释了 ResponseStatus 注解
+	 * }
+	 */
 	@Override
 	@Nullable
 	protected ModelAndView doResolveException(
@@ -77,14 +84,14 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			if (ex instanceof ResponseStatusException) {
 				return resolveResponseStatusException((ResponseStatusException) ex, request, response, handler);
 			}
-
+			// 获取异常类型上注释的ResponseStatus注解
 			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
 			if (status != null) {
 				return resolveResponseStatus(status, request, response, handler, ex);
 			}
 
 			if (ex.getCause() instanceof Exception) {
-				// 递归
+				// 递归parent
 				return doResolveException(request, response, handler, (Exception) ex.getCause());
 			}
 		}
@@ -132,7 +139,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView resolveResponseStatusException(ResponseStatusException ex,
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws Exception {
-
+		// 将 header 设置到 response中
 		ex.getResponseHeaders().forEach((name, values) ->
 				values.forEach(value -> response.addHeader(name, value)));
 
@@ -145,10 +152,13 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	 * {@link HttpServletResponse#sendError(int)} or
 	 * {@link HttpServletResponse#sendError(int, String)} if there is a reason
 	 * and then returns an empty ModelAndView.
-	 * @param statusCode the HTTP status code
-	 * @param reason the associated reason (may be {@code null} or empty)
-	 * @param response current HTTP response
+	 * @param statusCode the HTTP status code 状态码
+	 * @param reason the associated reason (may be {@code null} or empty) 错误原因
+	 * @param response current HTTP response http 响应
 	 * @since 5.0
+	 * {
+	 *     将异常写入到 response中
+	 * }
 	 */
 	protected ModelAndView applyStatusAndReason(int statusCode, @Nullable String reason, HttpServletResponse response)
 			throws IOException {
@@ -157,6 +167,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			response.sendError(statusCode);
 		}
 		else {
+			// 国际化支持
 			String resolvedReason = (this.messageSource != null ?
 					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
 					reason);

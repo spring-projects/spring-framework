@@ -32,6 +32,9 @@ import java.lang.annotation.Target;
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 4.1
+ * {
+ *     类级别的共享缓存配置
+ * }
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -25,15 +25,20 @@ package org.springframework.context.annotation;
  * @see org.springframework.scheduling.annotation.EnableAsync#mode()
  * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector#selectImports
  * @see org.springframework.transaction.annotation.EnableTransactionManagement#mode()
+ * {
+ *     增强模式
+ * }
  */
 public enum AdviceMode {
 
 	/**
+	 * JDK 动态代理
 	 * JDK proxy-based advice.
 	 */
 	PROXY,
 
 	/**
+	 * ASPECTJ 方法织入模式
 	 * AspectJ weaving-based advice.
 	 */
 	ASPECTJ

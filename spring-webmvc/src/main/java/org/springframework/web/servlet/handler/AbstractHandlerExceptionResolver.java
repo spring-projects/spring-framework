@@ -56,6 +56,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	@Nullable
 	private Set<?> mappedHandlers;
 
+	/** 异常处理器能够处理的 request handler 类型*/
 	@Nullable
 	private Class<?>[] mappedHandlerClasses;
 
@@ -137,7 +138,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
-		if (shouldApplyTo(request, handler)) {
+		if (shouldApplyTo(request, handler)) {// 是否适用该 request 和 handler
 			prepareResponse(ex, response); // HTTP {@code Cache-Control: no-store} header.
 			// 解析异常
 			ModelAndView result = doResolveException(request, response, handler, ex);
@@ -182,6 +183,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				}
 			}
 		}
+		// 如果 没有任何 mappedHandlers 则返回 true
 		return !hasHandlerMappings();
 	}
 

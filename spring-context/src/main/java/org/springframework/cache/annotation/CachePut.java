@@ -44,6 +44,9 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 3.1
  * @see CacheConfig
+ * {
+ *     直接写缓存，就是缓存中已经存在值也是直接写入
+ * }
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

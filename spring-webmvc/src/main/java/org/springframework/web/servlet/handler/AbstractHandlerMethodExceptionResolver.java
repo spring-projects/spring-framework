@@ -67,7 +67,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	}
 
 	/**
-	 * 异常解析的入口
+	 * 解析异常
 	 */
 	@Override
 	@Nullable

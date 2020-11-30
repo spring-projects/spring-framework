@@ -28,7 +28,9 @@ import org.springframework.util.Assert;
 
 /**
  * Base class for exceptions associated with specific HTTP response status codes.
- *
+ * {
+ *   特定的HTTP响应状态代码关联的异常
+ * }
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 5.0
@@ -36,6 +38,9 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class ResponseStatusException extends NestedRuntimeException {
 
+	/**
+	 * 异常对应的状态码，final
+	 */
 	private final int status;
 
 	@Nullable

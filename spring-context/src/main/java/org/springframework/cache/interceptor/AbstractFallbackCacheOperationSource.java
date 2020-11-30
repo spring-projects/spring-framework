@@ -70,6 +70,8 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * Cache of CacheOperations, keyed by method on a specific target class.
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
+	 *
+	 * 享元
 	 */
 	private final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<>(1024);
 
@@ -88,19 +90,22 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		if (method.getDeclaringClass() == Object.class) {
 			return null;
 		}
-
+		// 构建key（外部状态）
 		Object cacheKey = getCacheKey(method, targetClass);
+		// 缓存
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
 
 		if (cached != null) {
 			return (cached != NULL_CACHING_ATTRIBUTE ? cached : null);
 		}
 		else {
+			// 构建内部状态
 			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
 			if (cacheOps != null) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
+				// 放入享元池
 				this.attributeCache.put(cacheKey, cacheOps);
 			}
 			else {

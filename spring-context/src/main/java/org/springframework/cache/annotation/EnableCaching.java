@@ -165,6 +165,9 @@ import org.springframework.core.Ordered;
  * @see CachingConfigurationSelector
  * @see ProxyCachingConfiguration
  * @see org.springframework.cache.aspectj.AspectJCachingConfiguration
+ * {
+ * 		Enables Spring's  cache management capability
+ * }
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

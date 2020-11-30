@@ -39,6 +39,9 @@ import org.springframework.util.Assert;
  * infrastructure. This class may also serve as base class for a custom
  * {@code CacheOperationSource}.
  *
+ * {
+ *     读取注解，并且解析成 CacheOperation 缓存起来
+ * }
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Stephane Nicoll

@@ -27,6 +27,9 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @see MethodBeforeAdvice
  * @see ThrowsAdvice
+ * {
+ *     在被代理方法 return 后调用，可以读取返回值，但是改变不了。如果被代理方法抛出异常，不会调用该增强
+ * }
  */
 public interface AfterReturningAdvice extends AfterAdvice {
 

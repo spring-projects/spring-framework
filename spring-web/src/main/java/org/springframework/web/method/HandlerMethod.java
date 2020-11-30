@@ -53,7 +53,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * to obtain a {@code HandlerMethod} instance with a bean instance resolved
  * through the associated {@link BeanFactory}.
  * {
- *     将 bean信息 和 method 信息封装起来
+ *     将 bean信息 和 method 信息封装起来。主要是在 Spring web项目中描述对象的方法
  * }
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -106,6 +106,7 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
+		// 评估响应状态码
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
 	}

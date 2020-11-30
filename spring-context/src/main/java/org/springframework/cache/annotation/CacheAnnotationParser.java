@@ -27,7 +27,9 @@ import org.springframework.lang.Nullable;
  * {@link AnnotationCacheOperationSource} delegates to such parsers
  * for supporting specific annotation types such as Spring's own
  * {@link Cacheable}, {@link CachePut} and{@link CacheEvict}.
- *
+ * {
+ *     策略接口，由场景类自由选择算法实现，缺点：场景类需要知道所有的策略
+ * }
  * @author Costin Leau
  * @author Stephane Nicoll
  * @author Juergen Hoeller

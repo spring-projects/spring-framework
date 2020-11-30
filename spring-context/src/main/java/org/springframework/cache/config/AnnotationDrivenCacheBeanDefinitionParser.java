@@ -136,6 +136,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	/**
 	 * Configure the necessary infrastructure to support the Spring's caching annotations.
+	 * 支持Spring 的缓存注解
 	 */
 	private static class SpringCachingConfigurer {
 
@@ -202,6 +203,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	/**
 	 * Configure the necessary infrastructure to support the standard JSR-107 caching annotations.
+	 * 支持 JSR-107 缓存注解
 	 */
 	private static class JCacheCachingConfigurer {
 

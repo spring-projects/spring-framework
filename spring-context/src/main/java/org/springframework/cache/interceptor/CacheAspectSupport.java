@@ -72,7 +72,12 @@ import org.springframework.util.function.SupplierUtils;
  *
  * <p>Note: A cache aspect is serializable but does not perform any actual caching
  * after deserialization.
- *
+ * {
+ *     描述：缓存切面的基类，
+ *     功能：子类负责按正确的顺序调用相关的方法
+ *     设计模式：策略者模式
+ *     原理：CacheOperationSource 来源确认缓存操作，KeyGenerator 用来构建 key， CacheResolver 确定哪个缓存被使用
+ * }
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -348,7 +353,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 		}
-
+		// 调用原生方法
 		return invoker.invoke();
 	}
 

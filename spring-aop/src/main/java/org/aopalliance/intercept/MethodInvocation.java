@@ -23,13 +23,16 @@ import javax.annotation.Nonnull;
 /**
  * Description of an invocation to a method, given to an interceptor
  * upon method-call.
- * 描述了一个 method的调用
+ *
  *
  * <p>A method invocation is a joinpoint and can be intercepted by a
  * method interceptor.
  *
  * @author Rod Johnson
  * @see MethodInterceptor
+ * {
+ *     描述了一个 method的调用
+ * }
  */
 public interface MethodInvocation extends Invocation {
 

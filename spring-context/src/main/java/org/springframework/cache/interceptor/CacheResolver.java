@@ -27,6 +27,10 @@ import org.springframework.cache.Cache;
  *
  * @author Stephane Nicoll
  * @since 4.1
+ *
+ * {
+ *     确定被拦截的方法要使用哪一个缓存实例
+ * }
  */
 @FunctionalInterface
 public interface CacheResolver {

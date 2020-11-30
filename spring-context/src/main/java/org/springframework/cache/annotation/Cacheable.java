@@ -51,6 +51,9 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 3.1
  * @see CacheConfig
+ * {
+ *     先查缓存，看存不存在,存在直接返回，如果不存在就调用目标方法，将结果写缓存
+ * }
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

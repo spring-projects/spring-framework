@@ -26,6 +26,9 @@ import org.aopalliance.aop.Advice;
  *
  * @author Rod Johnson
  * @see AfterAdvice
+ * {
+ *     在被代理方法调用之前执行
+ * }
  */
 public interface BeforeAdvice extends Advice {
 

@@ -16,9 +16,8 @@
 
 package org.aopalliance.intercept;
 
-import java.lang.reflect.Constructor;
-
 import javax.annotation.Nonnull;
+import java.lang.reflect.Constructor;
 
 /**
  * Description of an invocation to a constructor, given to an
@@ -29,6 +28,10 @@ import javax.annotation.Nonnull;
  *
  * @author Rod Johnson
  * @see ConstructorInterceptor
+ * {
+ * 	构造函数调用的描述，提供给拦截器回调使用。
+ * 	构造函数是一个joinpoint，并且可以被ConstructorInterceptor拦截。
+ * }
  */
 public interface ConstructorInvocation extends Invocation {
 
@@ -36,6 +39,7 @@ public interface ConstructorInvocation extends Invocation {
 	 * Get the constructor being called.
 	 * <p>This method is a friendly implementation of the
 	 * {@link Joinpoint#getStaticPart()} method (same result).
+	 *
 	 * @return the constructor being called
 	 */
 	@Nonnull

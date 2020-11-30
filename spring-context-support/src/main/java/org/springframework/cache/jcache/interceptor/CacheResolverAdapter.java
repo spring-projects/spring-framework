@@ -32,6 +32,9 @@ import org.springframework.util.Assert;
  * JSR-107 {@link javax.cache.annotation.CacheResolver}.
  * <p>Used internally to invoke user-based JSR-107 cache resolvers.
  *
+ * {
+ *     适配到JSR-107的缓存解析器
+ * }
  * @author Stephane Nicoll
  * @since 4.1
  */

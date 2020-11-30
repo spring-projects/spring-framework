@@ -44,6 +44,12 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see #setUseDynamicLogger
  * @see #invokeUnderTrace(org.aopalliance.intercept.MethodInvocation, org.apache.commons.logging.Log)
+ *
+ * {
+ *     用于跟踪的基本MethodInterceptor实现。
+ * 	   默认情况下，日志消息被写入拦截器类的日志，而不是被拦截的类。 将useDynamicLogger bean属性设置为true会导致所有日志消息都被写入到针对目标类的Log中。
+ * 	   子类必须实现invokeUnderTrace方法，该方法仅在应跟踪特定的调用时才由此类调用。 子类应写入提供的Log实例
+ * }
  */
 @SuppressWarnings("serial")
 public abstract class AbstractTraceInterceptor implements MethodInterceptor, Serializable {
@@ -132,6 +138,7 @@ public abstract class AbstractTraceInterceptor implements MethodInterceptor, Ser
 			return invokeUnderTrace(invocation, logger);
 		}
 		else {
+			// 调用原方法
 			return invocation.proceed();
 		}
 	}

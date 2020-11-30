@@ -413,6 +413,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// 获取能够处理异常的方法
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
+			// 没有能够处理异常的方法，则什么都不处理
 			return null;
 		}
 
@@ -495,7 +496,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			// To be invoked through the proxy, even in case of an interface-based proxy.
 			handlerType = handlerMethod.getBeanType();
 			ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
-			if (resolver == null) {
+			if (resolver == null) { // 缓存中没有，则为该 handlerType 新建一个 ExceptionHandlerMethodResolver
 				// 自己类中没有注释了 @ExceptionHandler的方法，就会创建一个空的 ExceptionHandlerMethodResolver
 				resolver = new ExceptionHandlerMethodResolver(handlerType);
 				this.exceptionHandlerCache.put(handlerType, resolver);

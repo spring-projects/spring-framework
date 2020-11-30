@@ -39,7 +39,9 @@ import javax.annotation.Nullable;
  *   }
  * }
  * </pre>
- *
+ * {
+ *     方法拦截器
+ * }
  * @author Rod Johnson
  */
 @FunctionalInterface

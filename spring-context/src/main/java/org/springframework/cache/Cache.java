@@ -31,6 +31,13 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 3.1
+ * {
+ *     描述：缓存抽象，定义了通用的缓存操作
+ *     建议：具体实现类，最好能够提供 null values 实现
+ *     场景：
+ *     作用：
+ *     用法：
+ * }
  */
 public interface Cache {
 

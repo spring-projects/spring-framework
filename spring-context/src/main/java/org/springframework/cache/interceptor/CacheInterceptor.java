@@ -40,6 +40,12 @@ import org.springframework.util.Assert;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 3.1
+ * {
+ *     描述：使用通用的Spring缓存架构实现声明式缓存管理
+ *     线程安全：是
+ *	   原理：CacheAspectSupport 包含了Spring cache集成的底层api，CacheInterceptor只是按照正确的顺序调用其方法
+ * }
+ *
  */
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
@@ -49,6 +55,7 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 
+		// 构造缓存操作调用者
 		CacheOperationInvoker aopAllianceInvoker = () -> {
 			try {
 				return invocation.proceed();
@@ -61,6 +68,7 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 		Object target = invocation.getThis();
 		Assert.state(target != null, "Target must not be null");
 		try {
+			// 方法调用委派给 CacheAspectSupport
 			return execute(aopAllianceInvoker, target, method, invocation.getArguments());
 		}
 		catch (CacheOperationInvoker.ThrowableWrapper th) {

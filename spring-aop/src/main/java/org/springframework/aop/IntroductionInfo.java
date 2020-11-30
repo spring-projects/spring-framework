@@ -27,6 +27,10 @@ package org.springframework.aop;
  *
  * @author Rod Johnson
  * @since 1.1.1
+ * {
+ *     introduction（引入）是一种特殊的增强，它为类添加一些属性和方法，这样即使一个业务类原先没有实现某个接口，
+ *     通过AOP的引介功能也可以动态地为该业务类实现某个接口。
+ * }
  */
 public interface IntroductionInfo {
 

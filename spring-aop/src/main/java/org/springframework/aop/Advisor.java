@@ -32,6 +32,10 @@ import org.aopalliance.aop.Advice;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * {
+ *    基地，封装了spring aop中的切点和通知。 就是我们常用的 @Aspect 注解标记的类。
+ *    Spring用户不使用该接口，而是为了支持不同类型的advice而具有通用性。
+ * }
  */
 public interface Advisor {
 

@@ -20,7 +20,9 @@ import java.util.Set;
 
 /**
  * The base interface that all cache operations must implement.
- *
+ * {
+ *     缓存操作必须要实现的接口
+ * }
  * @author Stephane Nicoll
  * @since 4.1
  */

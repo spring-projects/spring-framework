@@ -45,6 +45,7 @@ public class ServerErrorException extends ResponseStatusException {
 	 * @since 5.0.5
 	 */
 	public ServerErrorException(String reason, @Nullable Throwable cause) {
+		// 初始化的时候 直接设置为 500
 		super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
 		this.handlerMethod = null;
 		this.parameter = null;

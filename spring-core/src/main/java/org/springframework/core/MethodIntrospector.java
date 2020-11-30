@@ -34,6 +34,10 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>Typically, but not necessarily, used for finding annotated handler methods.
  *
+ * {
+ *     一般用于查找添加了某个注解的方法
+ * }
+ *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 4.2.3

@@ -39,6 +39,9 @@ import org.springframework.cache.CacheManager;
  * <a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/integration.html#cache-annotations">declarative annotation-based caching</a>
  * section of the Spring reference documentation for more information.
  *
+ * {
+ *     基于Spring AOP的声明式注解缓存代理
+ * }
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 3.1

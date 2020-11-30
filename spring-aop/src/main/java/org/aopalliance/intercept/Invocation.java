@@ -25,6 +25,9 @@ import javax.annotation.Nonnull;
  * interceptor.
  *
  * @author Rod Johnson
+ * {
+ *     可以被拦截器拦截的 joinpoint
+ * }
  */
 public interface Invocation extends Joinpoint {
 

@@ -32,6 +32,9 @@ import java.lang.annotation.Target;
  * @author Costin Leau
  * @author Chris Beams
  * @since 3.1
+ * {
+ *     组合注解
+ * }
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

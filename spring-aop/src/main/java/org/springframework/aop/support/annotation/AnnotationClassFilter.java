@@ -30,6 +30,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  * @see AnnotationMatchingPointcut
+ * {
+ *     类上是否注释了注解
+ * }
+ *
  */
 public class AnnotationClassFilter implements ClassFilter {
 
