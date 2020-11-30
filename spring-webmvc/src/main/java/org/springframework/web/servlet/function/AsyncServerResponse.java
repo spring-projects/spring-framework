@@ -18,8 +18,7 @@ package org.springframework.web.servlet.function;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 import javax.servlet.ServletException;
@@ -50,19 +49,39 @@ import org.springframework.web.servlet.ModelAndView;
  * @since 5.3
  * @see ServerResponse#async(Object)
  */
-final class AsyncServerResponse extends ErrorHandlingServerResponse {
+public interface AsyncServerResponse extends ServerResponse {
+	/**
+	 * Block on AsyncServerResponse, and return a concrete ServerResponse
+	 */
+	ServerResponse get();
+
+}
+
+final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse implements AsyncServerResponse {
 
 	static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
-			"org.reactivestreams.Publisher", AsyncServerResponse.class.getClassLoader());
-
+			"org.reactivestreams.Publisher", DefaultAsyncServerResponse.class.getClassLoader());
 
 	private final CompletableFuture<ServerResponse> futureResponse;
+
+	@Override
+	public ServerResponse get() {
+		try {
+			if (timeout!=null) {
+				return this.futureResponse.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+			}else {
+				return this.futureResponse.get();
+			}
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			throw new IllegalStateException("Async execution failed", e);
+		}
+	}
 
 	@Nullable
 	private final Duration timeout;
 
 
-	private AsyncServerResponse(CompletableFuture<ServerResponse> futureResponse, @Nullable Duration timeout) {
+	private DefaultAsyncServerResponse(CompletableFuture<ServerResponse> futureResponse, @Nullable Duration timeout) {
 		this.futureResponse = futureResponse;
 		this.timeout = timeout;
 	}
@@ -154,7 +173,7 @@ final class AsyncServerResponse extends ErrorHandlingServerResponse {
 
 		if (o instanceof CompletableFuture) {
 			CompletableFuture<ServerResponse> futureResponse = (CompletableFuture<ServerResponse>) o;
-			return new AsyncServerResponse(futureResponse, timeout);
+			return new DefaultAsyncServerResponse(futureResponse, timeout);
 		}
 		else if (reactiveStreamsPresent) {
 			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
@@ -165,7 +184,7 @@ final class AsyncServerResponse extends ErrorHandlingServerResponse {
 				if (futureAdapter != null) {
 					CompletableFuture<ServerResponse> futureResponse =
 							(CompletableFuture<ServerResponse>) futureAdapter.fromPublisher(publisher);
-					return new AsyncServerResponse(futureResponse, timeout);
+					return new DefaultAsyncServerResponse(futureResponse, timeout);
 				}
 			}
 		}
