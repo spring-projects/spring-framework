@@ -1041,11 +1041,6 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public String pathVariable(String name) {
-			return this.request.pathVariable(name);
-		}
-
-		@Override
 		@SuppressWarnings("unchecked")
 		public Map<String, String> pathVariables() {
 			return (Map<String, String>) this.attributes.getOrDefault(
