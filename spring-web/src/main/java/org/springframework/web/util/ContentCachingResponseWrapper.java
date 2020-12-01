@@ -27,6 +27,7 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FastByteArrayOutputStream;
 
@@ -223,7 +224,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (this.content.size() > 0) {
 			HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
 			if ((complete || this.contentLength != null) && !rawResponse.isCommitted()) {
-				rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
+				if (rawResponse.getHeader(HttpHeaders.TRANSFER_ENCODING) == null) {
+					rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
+				}
 				this.contentLength = null;
 			}
 			this.content.writeTo(rawResponse.getOutputStream());
