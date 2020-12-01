@@ -547,37 +547,39 @@ depending on the response status:
 .Java
 ----
 	Mono<Object> entityMono = client.get()
-		   .uri("/persons/1")
-		   .accept(MediaType.APPLICATION_JSON)
-		   .exchangeToMono(response -> {
-			   if (response.statusCode().equals(HttpStatus.OK)) {
-				   return response.bodyToMono(Person.class);
-			   }
-			   else if (response.statusCode().is4xxClientError()) {
-				   return response.bodyToMono(ErrorContainer.class);
-			   }
-			   else {
-				   return Mono.error(response.createException());
-			   }
-		   });
+			.uri("/persons/1")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchangeToMono(response -> {
+				if (response.statusCode().equals(HttpStatus.OK)) {
+					return response.bodyToMono(Person.class);
+				}
+				else if (response.statusCode().is4xxClientError()) {
+					// Suppress error status code
+					return response.bodyToMono(ErrorContainer.class);
+				}
+				else {
+					// Turn to error
+					return response.createException().flatMap(Mono::error);
+				}
+			});
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    val entity = client.get()
-        .uri("/persons/1")
-        .accept(MediaType.APPLICATION_JSON)
-        .awaitExchange {
-            if (response.statusCode() == HttpStatus.OK) {
-                return response.awaitBody<Person>();
-            }
-            else if (response.statusCode().is4xxClientError) {
-                return response.awaitBody<ErrorContainer>();
-            }
-            else {
-                return response.createExceptionAndAwait();
-            }
-        }
+val entity = client.get()
+  .uri("/persons/1")
+  .accept(MediaType.APPLICATION_JSON)
+  .awaitExchange {
+		if (response.statusCode() == HttpStatus.OK) {
+			 return response.awaitBody<Person>()
+		}
+		else if (response.statusCode().is4xxClientError) {
+			 return response.awaitBody<ErrorContainer>()
+		}
+		else {
+			 throw response.createExceptionAndAwait()
+		}
+  }
 ----
 
 When using the above, after the returned `Mono` or `Flux` completes, the response body
