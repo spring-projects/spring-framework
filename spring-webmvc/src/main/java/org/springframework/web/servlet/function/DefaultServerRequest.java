@@ -270,6 +270,10 @@ class DefaultServerRequest implements ServerRequest {
 		return Optional.ofNullable(this.serverHttpRequest.getPrincipal());
 	}
 
+	@Override
+	public String toString() {
+		return String.format("HTTP %s %s", method(), path());
+	}
 
 	static Optional<ServerResponse> checkNotModified(
 			HttpServletRequest servletRequest, @Nullable Instant lastModified, @Nullable String etag) {
