@@ -501,7 +501,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		private final Set<GenericConverter> globalConverters = new LinkedHashSet<>();
 
-		private final Map<ConvertiblePair, ConvertersForPair> converters = new LinkedHashMap<>(36);
+		private final Map<ConvertiblePair, ConvertersForPair> converters = new LinkedHashMap<>(256);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
@@ -512,8 +512,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			}
 			else {
 				for (ConvertiblePair convertiblePair : convertibleTypes) {
-					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
-					convertersForPair.add(converter);
+					getMatchableConverters(convertiblePair).add(converter);
 				}
 			}
 		}
