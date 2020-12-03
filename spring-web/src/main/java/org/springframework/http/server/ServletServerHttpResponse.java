@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -152,12 +153,14 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		@Override
 		@Nullable
 		public String getFirst(String headerName) {
-			String value = servletResponse.getHeader(headerName);
-			if (value != null) {
-				return value;
+			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
+				// Content-Type is written as an override so check super first
+				String value = super.getFirst(headerName);
+				return (value != null ? value : servletResponse.getHeader(headerName));
 			}
 			else {
-				return super.getFirst(headerName);
+				String value = servletResponse.getHeader(headerName);
+				return (value != null ? value : super.getFirst(headerName));
 			}
 		}
 
@@ -165,7 +168,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		public List<String> get(Object key) {
 			Assert.isInstanceOf(String.class, key, "Key must be a String-based header name");
 
-			Collection<String> values1 = servletResponse.getHeaders((String) key);
+			String headerName = (String) key;
+			if (headerName.equalsIgnoreCase(CONTENT_TYPE)) {
+				// Content-Type is written as an override so don't merge
+				return Collections.singletonList(getFirst(headerName));
+			}
+
+			Collection<String> values1 = servletResponse.getHeaders(headerName);
 			if (headersWritten) {
 				return new ArrayList<>(values1);
 			}
