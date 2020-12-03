@@ -143,17 +143,27 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Find a {@link Method} to handle the given exception type. This can be
 	 * useful if an {@link Exception} instance is not available (e.g. for tools).
-	 * @param exceptionType the exception type
+	 * @param clazz the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
+	 * @throws IllegalArgumentException if the clazz parameter is not assignable to Throwable
 	 */
 	@Nullable
-	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
-		Method method = this.exceptionLookupCache.get(exceptionType);
+	public Method resolveMethodByExceptionType(Class<?> clazz) {
+		Method method = this.exceptionLookupCache.get(clazz);
 		if (method == null) {
-			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, method);
+			Class<? extends Throwable> castExceptionType = castToThrowableClass(clazz);
+			method = getMappedMethod(castExceptionType);
+			this.exceptionLookupCache.put(castExceptionType, method);
 		}
 		return method;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Class<? extends Throwable> castToThrowableClass(Class<?> clazz) {
+		if(Throwable.class.isAssignableFrom(clazz)) {
+			return (Class<? extends Throwable>)clazz;
+		}
+		throw new IllegalArgumentException("Given " + clazz + " is not assignable to " + Throwable.class);
 	}
 
 	/**

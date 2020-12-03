@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 /**
  * Test fixture for {@link ExceptionHandlerMethodResolver} tests.
@@ -88,6 +89,20 @@ public class ExceptionHandlerMethodResolverTests {
 		Exception exception = new Exception(new Exception(new Exception(bindException)));
 
 		assertThat(resolver.resolveMethod(exception).getName()).isEqualTo("handleSocketException");
+	}
+
+	@Test
+	public void resolveMethodExceptionType() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		assertThat(resolver.resolveMethodByExceptionType(IOException.class).getName()).isEqualTo("handleIOException");
+	}
+
+	@Test
+	public void resolveMethodNonExceptionType() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+		assertThatThrownBy(() -> resolver.resolveMethodByExceptionType(Object.class))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessage("Given class java.lang.Object is not assignable to class java.lang.Throwable");
 	}
 
 	@Test
