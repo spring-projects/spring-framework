@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -129,7 +130,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
 			Collection<?> input = (value instanceof Collection ? (Collection<?>) value : Arrays.asList((Object[]) value));
-			Set<Resource> merged = new HashSet<>(input.size());
+			Set<Resource> merged = new LinkedHashSet<>();
 			for (Object element : input) {
 				if (element instanceof String) {
 					// A location pattern: resolve it into a Resource array.
@@ -137,7 +138,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 					String pattern = resolvePath((String) element).trim();
 					try {
 						Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-						merged.addAll(Arrays.asList(resources));
+						Collections.addAll(merged, resources);
 					}
 					catch (IOException ex) {
 						// ignore - might be an unresolved placeholder or non-existing base directory
