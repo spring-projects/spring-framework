@@ -56,8 +56,13 @@ import org.springframework.web.util.UrlPathHelper;
  * <li>{@link HttpServletResponse#sendRedirect(String) sendRedirect(String)}.
  * </ul>
  *
- * <p>This filter can also be used in a {@link #setRemoveOnly removeOnly} mode
- * where "Forwarded" and "X-Forwarded-*" headers are eliminated, and not used.
+ * <p>There are security considerations for forwarded headers since an application
+ * cannot know if the headers were added by a proxy, as intended, or by a malicious
+ * client. This is why a proxy at the boundary of trust should be configured to
+ * remove untrusted Forwarded headers that come from the outside.
+ *
+ * <p>You can also configure the ForwardedHeaderFilter with {@link #setRemoveOnly removeOnly},
+ * in which case it removes but does not use the headers.
  *
  * @author Rossen Stoyanchev
  * @author Eddú Meléndez

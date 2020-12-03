@@ -36,14 +36,19 @@ import org.springframework.web.util.UriComponentsBuilder;
  * the request URI (i.e. {@link ServerHttpRequest#getURI()}) so it reflects
  * the client-originated protocol and address.
  *
- * <p>Alternatively if {@link #setRemoveOnly removeOnly} is set to "true",
- * then "Forwarded" and "X-Forwarded-*" headers are only removed, and not used.
- *
  * <p>An instance of this class is typically declared as a bean with the name
  * "forwardedHeaderTransformer" and detected by
  * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)}, or it
  * can also be registered directly via
  * {@link WebHttpHandlerBuilder#forwardedHeaderTransformer(ForwardedHeaderTransformer)}.
+ *
+ * <p>There are security considerations for forwarded headers since an application
+ * cannot know if the headers were added by a proxy, as intended, or by a malicious
+ * client. This is why a proxy at the boundary of trust should be configured to
+ * remove untrusted Forwarded headers that come from the outside.
+ *
+ * <p>You can also configure the ForwardedHeaderFilter with {@link #setRemoveOnly removeOnly},
+ * in which case it removes but does not use the headers.
  *
  * @author Rossen Stoyanchev
  * @since 5.1
