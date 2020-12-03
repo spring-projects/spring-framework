@@ -1669,8 +1669,4 @@ its behavior changes.
 | `spring.context.refresh`
 | Application context refresh phase.
 |
-
-| `spring.event.invoke-listener`
-| Invocation of event listeners, if done in the main thread.
-| `event` the current application event, `eventType` its type and `listener` the listener processing this event.
 |===

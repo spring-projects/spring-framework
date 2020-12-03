@@ -25,8 +25,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.metrics.ApplicationStartup;
-import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ErrorHandler;
 
@@ -56,9 +54,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Nullable
 	private ErrorHandler errorHandler;
-
-	@Nullable
-	private ApplicationStartup applicationStartup;
 
 
 	/**
@@ -127,22 +122,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		return this.errorHandler;
 	}
 
-	/**
-	 * Set the {@link ApplicationStartup} to track event listener invocations during startup.
-	 * @since 5.3
-	 */
-	public void setApplicationStartup(@Nullable ApplicationStartup applicationStartup) {
-		this.applicationStartup = applicationStartup;
-	}
-
-	/**
-	 * Return the current application startup for this multicaster.
-	 */
-	@Nullable
-	public ApplicationStartup getApplicationStartup() {
-		return this.applicationStartup;
-	}
-
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
 		multicastEvent(event, resolveDefaultEventType(event));
@@ -155,16 +134,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null) {
 				executor.execute(() -> invokeListener(listener, event));
-			}
-			else if (this.applicationStartup != null) {
-				StartupStep invocationStep = this.applicationStartup.start("spring.event.invoke-listener");
-				invokeListener(listener, event);
-				invocationStep.tag("event", event::toString);
-				if (eventType != null) {
-					invocationStep.tag("eventType", eventType::toString);
-				}
-				invocationStep.tag("listener", listener::toString);
-				invocationStep.end();
 			}
 			else {
 				invokeListener(listener, event);
