@@ -208,7 +208,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			return new CompletionStageEntityResponse(this.status, this.headers, this.cookies,
 					completionStage, this.entityType);
 		}
-		else if (AsyncServerResponse.reactiveStreamsPresent) {
+		else if (DefaultAsyncServerResponse.reactiveStreamsPresent) {
 			ReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(this.entity.getClass());
 			if (adapter != null) {
 				Publisher<T> publisher = adapter.toPublisher(this.entity);
@@ -362,7 +362,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				Context context) throws ServletException, IOException {
 
 			DeferredResult<?> deferredResult = createDeferredResult(servletRequest, servletResponse, context);
-			AsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
+			DefaultAsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
 			return null;
 		}
 
@@ -410,7 +410,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 				Context context) throws ServletException, IOException {
 
 			DeferredResult<?> deferredResult = new DeferredResult<>();
-			AsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
+			DefaultAsyncServerResponse.writeAsync(servletRequest, servletResponse, deferredResult);
 
 			entity().subscribe(new DeferredResultSubscriber(servletRequest, servletResponse, context, deferredResult));
 			return null;

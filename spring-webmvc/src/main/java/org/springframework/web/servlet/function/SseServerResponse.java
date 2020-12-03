@@ -89,7 +89,7 @@ final class SseServerResponse extends AbstractServerResponse {
 			result = new DeferredResult<>();
 		}
 
-		AsyncServerResponse.writeAsync(request, response, result);
+		DefaultAsyncServerResponse.writeAsync(request, response, result);
 		this.sseConsumer.accept(new DefaultSseBuilder(response, context, result));
 		return null;
 	}
