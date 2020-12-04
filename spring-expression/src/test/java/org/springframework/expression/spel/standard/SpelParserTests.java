@@ -117,37 +117,37 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.MISSING_CONSTRUCTOR_ARGS, 10));
+		.satisfies(parseExceptionRequirements(SpelMessage.MISSING_CONSTRUCTOR_ARGS, 10));
 
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3,");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
+		.satisfies(parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
 
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
+		.satisfies(parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
 
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
+		.satisfies(parseExceptionRequirements(SpelMessage.RUN_OUT_OF_ARGUMENTS, 10));
 
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("\"abc");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 0));
+		.satisfies(parseExceptionRequirements(SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 0));
 
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("'abc");
 		})
-		.satisfies(ex -> parseExceptionRequirements(SpelMessage.NON_TERMINATING_QUOTED_STRING, 0));
+		.satisfies(parseExceptionRequirements(SpelMessage.NON_TERMINATING_QUOTED_STRING, 0));
 
 	}
 
