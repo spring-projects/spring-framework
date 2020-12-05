@@ -18,6 +18,7 @@ package org.springframework.messaging.rsocket;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import io.rsocket.ConnectionSetupPayload;
@@ -39,7 +40,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
 import org.springframework.util.MimeType;
-
+import org.springframework.util.MimeTypeUtils;
 /**
  * A thin wrapper around a sending {@link RSocket} with a fluent API accepting
  * and returning higher level Objects for input and for output, along with
@@ -323,6 +324,13 @@ public interface RSocketRequester {
 		 * @throws IllegalArgumentException if not using composite metadata.
 		 */
 		RequestSpec metadata(Consumer<MetadataSpec<?>> configurer);
+
+		/**
+		 *  Hints for codec, Make sure hints value can be encode/decode with {@link MimeTypeUtils#ALL }.
+		 *  @param hints hints for local and remote encoders/decoders
+		 *  @since 5.3.2
+		 **/
+		RequestSpec hints(Map<String, Object> hints);
 
 		/**
 		 * Perform a {@link RSocket#metadataPush(Payload) metadataPush}.

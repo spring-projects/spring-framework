@@ -34,6 +34,8 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.NettyByteBufDecoder;
+import org.springframework.core.codec.NettyByteBufEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -63,10 +65,12 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 
 	private final MetadataExtractor metadataExtractor;
 
+	private final HintMetadataCodec hintMetadataCodec;
+
 
 	private DefaultRSocketStrategies(List<Encoder<?>> encoders, List<Decoder<?>> decoders,
-			RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry,
-			DataBufferFactory bufferFactory, MetadataExtractor metadataExtractor) {
+			RouteMatcher routeMatcher, ReactiveAdapterRegistry adapterRegistry, DataBufferFactory bufferFactory,
+			MetadataExtractor metadataExtractor,HintMetadataCodec hintMetadataCodec) {
 
 		this.encoders = Collections.unmodifiableList(encoders);
 		this.decoders = Collections.unmodifiableList(decoders);
@@ -74,6 +78,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		this.adapterRegistry = adapterRegistry;
 		this.bufferFactory = bufferFactory;
 		this.metadataExtractor = metadataExtractor;
+		this.hintMetadataCodec = hintMetadataCodec;
 	}
 
 
@@ -107,6 +112,10 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		return this.metadataExtractor;
 	}
 
+	@Override
+	public HintMetadataCodec hintMetadataCodec() {
+		return this.hintMetadataCodec;
+	}
 
 	/**
 	 * Default implementation of {@link RSocketStrategies.Builder}.
@@ -129,6 +138,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		@Nullable
 		private MetadataExtractor metadataExtractor;
 
+		private HintMetadataCodec hintMetadataCodec;
+
 		private final List<Consumer<MetadataExtractorRegistry>> metadataExtractors = new ArrayList<>();
 
 		DefaultRSocketStrategiesBuilder() {
@@ -136,6 +147,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			this.encoders.add(new ByteBufferEncoder());
 			this.encoders.add(new ByteArrayEncoder());
 			this.encoders.add(new DataBufferEncoder());
+			this.encoders.add(new NettyByteBufEncoder());
 
 			// Order of decoders may be significant for default data MimeType
 			// selection in RSocketRequester.Builder
@@ -143,6 +155,7 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			this.decoders.add(new ByteBufferDecoder());
 			this.decoders.add(new ByteArrayDecoder());
 			this.decoders.add(new DataBufferDecoder());
+			this.decoders.add(new NettyByteBufDecoder());
 		}
 
 		DefaultRSocketStrategiesBuilder(RSocketStrategies other) {
@@ -210,6 +223,12 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 		}
 
 		@Override
+		public Builder hintMetadataCodec(HintMetadataCodec hintMetadataCodec) {
+			this.hintMetadataCodec = hintMetadataCodec;
+			return this;
+		}
+
+		@Override
 		public RSocketStrategies build() {
 			RouteMatcher matcher = (this.routeMatcher != null ? this.routeMatcher : initRouteMatcher());
 
@@ -222,12 +241,15 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			MetadataExtractor extractor = (this.metadataExtractor != null ?
 					this.metadataExtractor : new DefaultMetadataExtractor(this.decoders));
 
+			HintMetadataCodec hintMetadataCodec = (this.hintMetadataCodec != null)?
+					this.hintMetadataCodec: new DefaultHintMetadataCodec(factory,extractor,this.encoders,this.decoders);
+
 			if (extractor instanceof MetadataExtractorRegistry) {
 				this.metadataExtractors.forEach(consumer -> consumer.accept((MetadataExtractorRegistry) extractor));
 			}
 
 			return new DefaultRSocketStrategies(
-					this.encoders, this.decoders, matcher, registry, factory, extractor);
+					this.encoders, this.decoders, matcher, registry, factory, extractor, hintMetadataCodec);
 		}
 
 		private RouteMatcher initRouteMatcher() {

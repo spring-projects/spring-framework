@@ -16,8 +16,13 @@
 
 package org.springframework.messaging.rsocket;
 
+import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -32,6 +37,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import org.springframework.messaging.handler.annotation.Headers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -117,7 +123,29 @@ public class RSocketClientToServerIntegrationTests {
 
 		assertThat(interceptor.getFireAndForgetCount())
 				.as("Fire and forget requests did not actually complete handling on the server side")
-				.isEqualTo(3);
+				.isGreaterThanOrEqualTo(3);
+	}
+
+	@Test
+	public void fireAndForgetWithHints() {
+		Map<String,Object> hints = new HashMap<>();
+		hints.put("a","a_value");
+		hints.put("b","b_value".getBytes());
+		hints.put("c", ByteBuffer.wrap("c_value".getBytes()));
+		Flux.range(1, 3)
+				.concatMap(i -> requester.route("hints").hints(hints).data("Hello " + i).send())
+				.blockLast();
+		Predicate<Map<String,Object>> predicate= headers->
+					hints.get("a").equals(headers.get("a"))
+					&&Arrays.equals((byte[]) hints.get("b"),(byte[])headers.get("b"))
+					&&hints.get("c").equals(headers.get("c"));
+		StepVerifier.create(context.getBean(ServerController.class).fireForgetHeaders.asFlux())
+				.expectNextMatches(predicate)
+				.expectNextMatches(predicate)
+				.expectNextMatches(predicate)
+				.thenAwait(Duration.ofMillis(50))
+				.thenCancel()
+				.verify(Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -228,10 +256,17 @@ public class RSocketClientToServerIntegrationTests {
 
 		final Sinks.Many<String> metadataPushPayloads = Sinks.many().replay().all();
 
+		final Sinks.Many<Map<String, Object>> fireForgetHeaders = Sinks.many().replay().all();
 
 		@MessageMapping("receive")
 		void receive(String payload) {
 			this.fireForgetPayloads.tryEmitNext(payload);
+		}
+
+		@MessageMapping("hints")
+		void receive(String payload, @Headers Map<String,Object> hints) {
+			this.fireForgetPayloads.tryEmitNext(payload);
+			this.fireForgetHeaders.tryEmitNext(hints);
 		}
 
 		@MessageMapping("echo")
@@ -310,6 +345,7 @@ public class RSocketClientToServerIntegrationTests {
 							registry.metadataToExtract(FOO_MIME_TYPE, String.class, "foo"))
 					.build();
 		}
+
 	}
 
 

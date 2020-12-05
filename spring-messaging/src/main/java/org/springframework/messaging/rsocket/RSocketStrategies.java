@@ -113,6 +113,11 @@ public interface RSocketStrategies {
 	MetadataExtractor metadataExtractor();
 
 	/**
+	 * Return codec hints codec.
+	 **/
+	HintMetadataCodec hintMetadataCodec();
+
+	/**
 	 * Return a builder to create a new {@link RSocketStrategies} instance
 	 * replicated from the current instance.
 	 */
@@ -224,6 +229,7 @@ public interface RSocketStrategies {
 		 */
 		Builder metadataExtractorRegistry(Consumer<MetadataExtractorRegistry> consumer);
 
+		Builder hintMetadataCodec(HintMetadataCodec hintMetadataCodec);
 		/**
 		 * Build the {@code RSocketStrategies} instance.
 		 */

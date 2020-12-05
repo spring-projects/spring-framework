@@ -21,14 +21,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.codec.ByteArrayDecoder;
-import org.springframework.core.codec.ByteArrayEncoder;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.codec.DataBufferDecoder;
-import org.springframework.core.codec.DataBufferEncoder;
-import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.codec.*;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.SimpleRouteMatcher;
 
@@ -49,23 +42,25 @@ class DefaultRSocketStrategiesTests {
 	void defaultSettings() {
 		RSocketStrategies strategies = RSocketStrategies.create();
 
-		assertThat(strategies.encoders()).hasSize(4).hasOnlyElementsOfTypes(
+		assertThat(strategies.encoders()).hasSize(5).hasOnlyElementsOfTypes(
 				CharSequenceEncoder.class,
 				ByteArrayEncoder.class,
 				ByteBufferEncoder.class,
-				DataBufferEncoder.class);
+				DataBufferEncoder.class,
+				NettyByteBufEncoder.class);
 
-		assertThat(strategies.decoders()).hasSize(4).hasOnlyElementsOfTypes(
+		assertThat(strategies.decoders()).hasSize(5).hasOnlyElementsOfTypes(
 				StringDecoder.class,
 				ByteArrayDecoder.class,
 				ByteBufferDecoder.class,
-				DataBufferDecoder.class);
+				DataBufferDecoder.class,
+				NettyByteBufDecoder.class);
 
 		assertThat(strategies.routeMatcher()).isNotNull();
 		assertThat(strategies.metadataExtractor()).isNotNull();
 		assertThat(strategies.reactiveAdapterRegistry()).isNotNull();
 
-		assertThat(((DefaultMetadataExtractor) strategies.metadataExtractor()).getDecoders()).hasSize(4);
+		assertThat(((DefaultMetadataExtractor) strategies.metadataExtractor()).getDecoders()).hasSize(5);
 	}
 
 	@Test

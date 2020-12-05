@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
@@ -226,13 +225,11 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 		isContentRequired = isContentRequired || (adapter != null && !adapter.supportsEmpty());
 		Consumer<Object> validator = getValidator(message, parameter);
 
-		Map<String, Object> hints = Collections.emptyMap();
-
 		for (Decoder<?> decoder : this.decoders) {
 			if (decoder.canDecode(elementType, mimeType)) {
 				if (adapter != null && adapter.isMultiValue()) {
 					Flux<?> flux = content
-							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
+							.map(buffer -> decoder.decode(buffer, elementType, mimeType, message.getHeaders()))
 							.onErrorResume(ex -> Flux.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						flux = flux.switchIfEmpty(Flux.error(() -> handleMissingBody(parameter, message)));
@@ -245,7 +242,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				else {
 					// Single-value (with or without reactive type wrapper)
 					Mono<?> mono = content.next()
-							.map(buffer -> decoder.decode(buffer, elementType, mimeType, hints))
+							.map(buffer -> decoder.decode(buffer, elementType, mimeType,  message.getHeaders()))
 							.onErrorResume(ex -> Mono.error(handleReadError(parameter, message, ex)));
 					if (isContentRequired) {
 						mono = mono.switchIfEmpty(Mono.error(() -> handleMissingBody(parameter, message)));

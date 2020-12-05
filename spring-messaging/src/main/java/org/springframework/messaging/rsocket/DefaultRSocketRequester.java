@@ -18,11 +18,14 @@ package org.springframework.messaging.rsocket;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.core.RSocketClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,8 +49,9 @@ import org.springframework.util.MimeType;
  * @since 5.2
  */
 final class DefaultRSocketRequester implements RSocketRequester {
-
+	private static final Log logger = LogFactory.getLog(DefaultRSocketRequester.class);
 	private static final Map<String, Object> EMPTY_HINTS = Collections.emptyMap();
+	public static final MimeType CODEC_HINTS_MIME = MimeType.valueOf("message/x.codec.hints.v0");
 
 	private final RSocketClient rsocketClient;
 
@@ -131,6 +135,9 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		@Nullable
 		private Flux<Payload> payloadFlux;
 
+		@Nullable
+		private Map<String, Object> hints;
+
 
 		public DefaultRequestSpec(String route, Object... vars) {
 			this.metadataEncoder.route(route, vars);
@@ -154,6 +161,25 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@Override
+		public RequestSpec hints(Map<String, Object> hints) {
+			Assert.isNull(this.hints, "'hints' only can be set once");
+			Assert.notNull(hints, "'hints' must not be null");
+			Assert.isTrue(hints.size() > 0 , "'hints' must not be empty");
+			if (logger.isDebugEnabled()){
+				logger.debug("Attach codec hint keys:" + hints.keySet() + ".");
+			}
+			this.hints = hints;
+			if (Objects.isNull(strategies.hintMetadataCodec())) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No hints metadata codec, hints only available on client side");
+				}
+				return this;
+			}
+			strategies.hintMetadataCodec().encodeHints(hints, e -> this.metadata(e, CODEC_HINTS_MIME));
+			return this;
+		}
+
+		@Override
 		public RequestSpec data(Object data) {
 			Assert.notNull(data, "'data' must not be null");
 			createPayload(data, ResolvableType.NONE);
@@ -169,6 +195,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			createPayload(adapter.toPublisher(producer), ResolvableType.forClass(elementClass));
 			return this;
 		}
+
 
 		@Nullable
 		private ReactiveAdapter getAdapter(Class<?> aClass) {
@@ -196,7 +223,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 			}
 			else {
 				ResolvableType type = ResolvableType.forInstance(input);
-				this.payloadMono = firstPayload(Mono.fromCallable(() -> encodeData(input, type, null)));
+				this.payloadMono = firstPayload(Mono.fromCallable(() -> encodeData(input, type, null, this.hints)));
 				this.payloadFlux = null;
 				return;
 			}
@@ -212,7 +239,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			if (adapter != null && !adapter.isMultiValue()) {
 				Mono<DataBuffer> data = Mono.from(publisher)
-						.map(value -> encodeData(value, elementType, encoder))
+						.map(value -> encodeData(value, elementType, encoder, this.hints))
 						.switchIfEmpty(emptyBufferMono);
 				this.payloadMono = firstPayload(data);
 				this.payloadFlux = null;
@@ -221,7 +248,7 @@ final class DefaultRSocketRequester implements RSocketRequester {
 
 			this.payloadMono = null;
 			this.payloadFlux = Flux.from(publisher)
-					.map(value -> encodeData(value, elementType, encoder))
+					.map(value -> encodeData(value, elementType, encoder, this.hints))
 					.switchIfEmpty(emptyBufferMono)
 					.switchOnFirst((signal, inner) -> {
 						DataBuffer data = signal.get();
@@ -237,13 +264,26 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder) {
+		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder,
+										Map<String, Object> hints) {
+			return encodeData(value,elementType,encoder,dataMimeType , hints);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder,
+		MimeType dataMimeType) {
+			return encodeData(value,elementType,encoder,dataMimeType, EMPTY_HINTS);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> DataBuffer encodeData(T value, ResolvableType elementType, @Nullable Encoder<?> encoder,
+										MimeType dataMimeType, Map<String,Object> hints) {
 			if (encoder == null) {
 				elementType = ResolvableType.forInstance(value);
 				encoder = strategies.encoder(elementType, dataMimeType);
 			}
 			return ((Encoder<T>) encoder).encodeValue(
-					value, bufferFactory(), elementType, dataMimeType, EMPTY_HINTS);
+					value, bufferFactory(), elementType, dataMimeType, hints);
 		}
 
 		/**
