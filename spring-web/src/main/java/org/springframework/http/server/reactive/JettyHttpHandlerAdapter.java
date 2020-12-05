@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ServletHttpHandlerAdapter} extension that uses Jetty APIs for writing
@@ -79,9 +80,9 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			super(createHeaders(request), request, asyncContext, servletPath, bufferFactory, bufferSize);
 		}
 
-		private static HttpHeaders createHeaders(HttpServletRequest request) {
+		private static MultiValueMap<String, String> createHeaders(HttpServletRequest request) {
 			HttpFields fields = ((Request) request).getMetaData().getFields();
-			return new HttpHeaders(new JettyHeadersAdapter(fields));
+			return new JettyHeadersAdapter(fields);
 		}
 	}
 

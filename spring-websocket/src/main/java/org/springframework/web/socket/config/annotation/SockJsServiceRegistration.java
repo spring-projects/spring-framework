@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,8 @@ public class SockJsServiceRegistration {
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
+
+	private final List<String> allowedOriginPatterns = new ArrayList<>();
 
 	@Nullable
 	private Boolean suppressCors;
@@ -233,6 +235,18 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
+	 * Configure allowed {@code Origin} pattern header values.
+	 * @since 5.3.2
+	 */
+	protected SockJsServiceRegistration setAllowedOriginPatterns(String... allowedOriginPatterns) {
+		this.allowedOriginPatterns.clear();
+		if (!ObjectUtils.isEmpty(allowedOriginPatterns)) {
+			this.allowedOriginPatterns.addAll(Arrays.asList(allowedOriginPatterns));
+		}
+		return this;
+	}
+
+	/**
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
@@ -284,6 +298,7 @@ public class SockJsServiceRegistration {
 			service.setSuppressCors(this.suppressCors);
 		}
 		service.setAllowedOrigins(this.allowedOrigins);
+		service.setAllowedOriginPatterns(this.allowedOriginPatterns);
 
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

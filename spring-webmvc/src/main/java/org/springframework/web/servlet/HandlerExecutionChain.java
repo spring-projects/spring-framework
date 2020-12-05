@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Handler execution chain, consisting of handler object and any handler interceptors.
@@ -43,11 +44,7 @@ public class HandlerExecutionChain {
 
 	private final Object handler;
 
-	@Nullable
-	private HandlerInterceptor[] interceptors;
-
-	@Nullable
-	private List<HandlerInterceptor> interceptorList;
+	private final List<HandlerInterceptor> interceptorList = new ArrayList<>();
 
 	private int interceptorIndex = -1;
 
@@ -67,17 +64,26 @@ public class HandlerExecutionChain {
 	 * (in the given order) before the handler itself executes
 	 */
 	public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
+		this(handler, (interceptors != null ? Arrays.asList(interceptors) : Collections.emptyList()));
+	}
+
+	/**
+	 * Create a new HandlerExecutionChain.
+	 * @param handler the handler object to execute
+	 * @param interceptorList the list of interceptors to apply
+	 * (in the given order) before the handler itself executes
+	 * @since 5.3
+	 */
+	public HandlerExecutionChain(Object handler, List<HandlerInterceptor> interceptorList) {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
-			this.interceptorList = new ArrayList<>();
-			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
-			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
+			this.interceptorList.addAll(originalChain.interceptorList);
 		}
 		else {
 			this.handler = handler;
-			this.interceptors = interceptors;
 		}
+		this.interceptorList.addAll(interceptorList);
 	}
 
 
@@ -88,30 +94,26 @@ public class HandlerExecutionChain {
 		return this.handler;
 	}
 
+	/**
+	 * Add the given interceptor to the end of this chain.
+	 */
 	public void addInterceptor(HandlerInterceptor interceptor) {
-		initInterceptorList().add(interceptor);
+		this.interceptorList.add(interceptor);
 	}
 
+	/**
+	 * Add the given interceptor at the specified index of this chain.
+	 * @since 5.2
+	 */
 	public void addInterceptor(int index, HandlerInterceptor interceptor) {
-		initInterceptorList().add(index, interceptor);
+		this.interceptorList.add(index, interceptor);
 	}
 
+	/**
+	 * Add the given interceptors to the end of this chain.
+	 */
 	public void addInterceptors(HandlerInterceptor... interceptors) {
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			CollectionUtils.mergeArrayIntoCollection(interceptors, initInterceptorList());
-		}
-	}
-
-	private List<HandlerInterceptor> initInterceptorList() {
-		if (this.interceptorList == null) {
-			this.interceptorList = new ArrayList<>();
-			if (this.interceptors != null) {
-				// An interceptor array specified through the constructor
-				CollectionUtils.mergeArrayIntoCollection(this.interceptors, this.interceptorList);
-			}
-		}
-		this.interceptors = null;
-		return this.interceptorList;
+		CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
 	}
 
 	/**
@@ -120,10 +122,17 @@ public class HandlerExecutionChain {
 	 */
 	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
-		if (this.interceptors == null && this.interceptorList != null) {
-			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[0]);
-		}
-		return this.interceptors;
+		return (!this.interceptorList.isEmpty() ? this.interceptorList.toArray(new HandlerInterceptor[0]) : null);
+	}
+
+	/**
+	 * Return the list of interceptors to apply (in the given order).
+	 * @return the list of HandlerInterceptors instances (potentially empty)
+	 * @since 5.3
+	 */
+	public List<HandlerInterceptor> getInterceptorList() {
+		return (!this.interceptorList.isEmpty() ? Collections.unmodifiableList(this.interceptorList) :
+				Collections.emptyList());
 	}
 
 
@@ -134,16 +143,13 @@ public class HandlerExecutionChain {
 	 * that this interceptor has already dealt with the response itself.
 	 */
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = 0; i < interceptors.length; i++) {
-				HandlerInterceptor interceptor = interceptors[i];
-				if (!interceptor.preHandle(request, response, this.handler)) {
-					triggerAfterCompletion(request, response, null);
-					return false;
-				}
-				this.interceptorIndex = i;
+		for (int i = 0; i < this.interceptorList.size(); i++) {
+			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			if (!interceptor.preHandle(request, response, this.handler)) {
+				triggerAfterCompletion(request, response, null);
+				return false;
 			}
+			this.interceptorIndex = i;
 		}
 		return true;
 	}
@@ -154,12 +160,9 @@ public class HandlerExecutionChain {
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
 			throws Exception {
 
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = interceptors.length - 1; i >= 0; i--) {
-				HandlerInterceptor interceptor = interceptors[i];
-				interceptor.postHandle(request, response, this.handler, mv);
-			}
+		for (int i = this.interceptorList.size() - 1; i >= 0; i--) {
+			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			interceptor.postHandle(request, response, this.handler, mv);
 		}
 	}
 
@@ -168,19 +171,14 @@ public class HandlerExecutionChain {
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
 	 */
-	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
-			throws Exception {
-
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = this.interceptorIndex; i >= 0; i--) {
-				HandlerInterceptor interceptor = interceptors[i];
-				try {
-					interceptor.afterCompletion(request, response, this.handler, ex);
-				}
-				catch (Throwable ex2) {
-					logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
-				}
+	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex) {
+		for (int i = this.interceptorIndex; i >= 0; i--) {
+			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			try {
+				interceptor.afterCompletion(request, response, this.handler, ex);
+			}
+			catch (Throwable ex2) {
+				logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
 			}
 		}
 	}
@@ -189,16 +187,16 @@ public class HandlerExecutionChain {
 	 * Apply afterConcurrentHandlerStarted callback on mapped AsyncHandlerInterceptors.
 	 */
 	void applyAfterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
-		HandlerInterceptor[] interceptors = getInterceptors();
-		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = interceptors.length - 1; i >= 0; i--) {
-				if (interceptors[i] instanceof AsyncHandlerInterceptor) {
-					try {
-						AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptors[i];
-						asyncInterceptor.afterConcurrentHandlingStarted(request, response, this.handler);
-					}
-					catch (Throwable ex) {
-						logger.error("Interceptor [" + interceptors[i] + "] failed in afterConcurrentHandlingStarted", ex);
+		for (int i = this.interceptorList.size() - 1; i >= 0; i--) {
+			HandlerInterceptor interceptor = this.interceptorList.get(i);
+			if (interceptor instanceof AsyncHandlerInterceptor) {
+				try {
+					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
+					asyncInterceptor.afterConcurrentHandlingStarted(request, response, this.handler);
+				}
+				catch (Throwable ex) {
+					if (logger.isErrorEnabled()) {
+						logger.error("Interceptor [" + interceptor + "] failed in afterConcurrentHandlingStarted", ex);
 					}
 				}
 			}
@@ -207,23 +205,11 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Delegates to the handler and interceptors' {@code toString()}.
+	 * Delegates to the handler's {@code toString()} implementation.
 	 */
 	@Override
 	public String toString() {
-		Object handler = getHandler();
-		StringBuilder sb = new StringBuilder();
-		sb.append("HandlerExecutionChain with [").append(handler).append("] and ");
-		if (this.interceptorList != null) {
-			sb.append(this.interceptorList.size());
-		}
-		else if (this.interceptors != null) {
-			sb.append(this.interceptors.length);
-		}
-		else {
-			sb.append(0);
-		}
-		return sb.append(" interceptors").toString();
+		return "HandlerExecutionChain with [" + getHandler() + "] and " + this.interceptorList.size() + " interceptors";
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ public class PropertyPathFactoryBeanTests {
 	public void testPropertyPathFactoryBeanWithSingletonResult() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONTEXT);
-		assertThat(xbf.getBean("propertyPath1")).isEqualTo(new Integer(12));
-		assertThat(xbf.getBean("propertyPath2")).isEqualTo(new Integer(11));
-		assertThat(xbf.getBean("tb.age")).isEqualTo(new Integer(10));
+		assertThat(xbf.getBean("propertyPath1")).isEqualTo(12);
+		assertThat(xbf.getBean("propertyPath2")).isEqualTo(11);
+		assertThat(xbf.getBean("tb.age")).isEqualTo(10);
 		assertThat(xbf.getType("otb.spouse")).isEqualTo(ITestBean.class);
 		Object result1 = xbf.getBean("otb.spouse");
 		Object result2 = xbf.getBean("otb.spouse");

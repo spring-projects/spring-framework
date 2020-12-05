@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,7 +49,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -79,10 +77,6 @@ import org.springframework.util.Assert;
  * @see MultipartHttpMessageReader
  */
 public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
-
-	// Static DataBufferFactory to copy from FileInputStream or wrap bytes[].
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	private int maxInMemorySize = 256 * 1024;
 
@@ -153,13 +147,22 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MultipartHttpMessageReader.MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		if (Part.class.equals(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getReadableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -336,7 +339,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final LimitedPartBodyStreamStorageFactory storageFactory;
 
-		private final AtomicInteger terminated = new AtomicInteger(0);
+		private final AtomicInteger terminated = new AtomicInteger();
 
 		FluxSinkAdapterListener(
 				FluxSink<Part> sink, MultipartContext context, LimitedPartBodyStreamStorageFactory factory) {
@@ -433,7 +436,8 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		@Override
 		public Flux<DataBuffer> content() {
-			return DataBufferUtils.readInputStream(getStorage()::getInputStream, bufferFactory, 4096);
+			return DataBufferUtils.readInputStream(
+					getStorage()::getInputStream, DefaultDataBufferFactory.sharedInstance, 4096);
 		}
 
 		protected StreamStorage getStorage() {
@@ -522,7 +526,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		@Override
 		public Flux<DataBuffer> content() {
 			byte[] bytes = this.content.getBytes(getCharset());
-			return Flux.just(bufferFactory.wrap(bytes));
+			return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 		}
 
 		private Charset getCharset() {

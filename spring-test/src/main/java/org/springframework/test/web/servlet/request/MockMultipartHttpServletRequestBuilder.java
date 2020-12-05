@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,16 +25,17 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.Part;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
+import org.springframework.mock.web.MockPart;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 /**
  * Default builder for {@link MockMultipartHttpServletRequest}.
@@ -120,7 +122,7 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 			if (parent instanceof MockMultipartHttpServletRequestBuilder) {
 				MockMultipartHttpServletRequestBuilder parentBuilder = (MockMultipartHttpServletRequestBuilder) parent;
 				this.files.addAll(parentBuilder.files);
-				parentBuilder.parts.keySet().stream().forEach(name ->
+				parentBuilder.parts.keySet().forEach(name ->
 						this.parts.putIfAbsent(name, parentBuilder.parts.get(name)));
 			}
 
@@ -138,18 +140,27 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 	 */
 	@Override
 	protected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {
-
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest(servletContext);
-		this.files.stream().forEach(request::addFile);
+		this.files.forEach(file -> request.addPart(toMockPart(file)));
 		this.parts.values().stream().flatMap(Collection::stream).forEach(request::addPart);
-
-		if (!this.parts.isEmpty()) {
-			new StandardMultipartHttpServletRequest(request)
-					.getMultiFileMap().values().stream().flatMap(Collection::stream)
-					.forEach(request::addFile);
-		}
-
 		return request;
+	}
+
+	private MockPart toMockPart(MockMultipartFile file) {
+		byte[] bytes = null;
+		if (!file.isEmpty()) {
+			try {
+				bytes = file.getBytes();
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Unexpected IOException", ex);
+			}
+		}
+		MockPart part = new MockPart(file.getName(), file.getOriginalFilename(), bytes);
+		if (file.getContentType() != null) {
+			part.getHeaders().set(HttpHeaders.CONTENT_TYPE, file.getContentType());
+		}
+		return part;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.dao.support;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -119,14 +120,11 @@ public class DataAccessUtilsTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")  // on JDK 9
 	public void withEquivalentIntegerInstanceTwice() {
-		Collection<Integer> col = new ArrayList<>(2);
-		col.add(new Integer(5));
-		col.add(new Integer(5));
+		Collection<Integer> col = Arrays.asList(Integer.valueOf(555), Integer.valueOf(555));
 
-		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
-				DataAccessUtils.uniqueResult(col))
+		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class)
+			.isThrownBy(() -> DataAccessUtils.uniqueResult(col))
 			.satisfies(sizeRequirements(1, 2));
 	}
 

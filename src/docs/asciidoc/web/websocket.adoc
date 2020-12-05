@@ -2103,7 +2103,7 @@ While a `ChannelInterceptor` is invoked once for each message sent to a channel,
 `ExecutorChannelInterceptor` provides hooks in the thread of each `MessageHandler`
 subscribed to messages from the channel.
 
-Note that, as with the `SesionDisconnectEvent` described earlier, a DISCONNECT message
+Note that, as with the `SessionDisconnectEvent` described earlier, a DISCONNECT message
 can be from the client or it can also be automatically generated when
 the WebSocket session is closed. In some cases, an interceptor may intercept this
 message more than once for each session. Components should be idempotent with regard to
@@ -2193,6 +2193,14 @@ To enable STOMP heartbeat, you can configure `WebSocketStompClient` with a `Task
 and optionally customize the heartbeat intervals (10 seconds for write inactivity,
 which causes a heartbeat to be sent, and 10 seconds for read inactivity, which
 closes the connection).
+
+`WebSocketStompClient` sends a heartbeat only in case of inactivity, i.e. when no
+other messages are sent. This can present a challenge when using an external broker
+since messages with a non-broker destination represent activity but aren't actually
+forwarded to the broker. In that case you can configure a `TaskScheduler`
+when initializing the <<websocket-stomp-handle-broker-relay>> which ensures a
+heartbeat is forwarded to the broker also when only messages with a non-broker
+destination are sent.
 
 NOTE: When you use `WebSocketStompClient` for performance tests to simulate thousands
 of clients from the same machine, consider turning off heartbeats, since each

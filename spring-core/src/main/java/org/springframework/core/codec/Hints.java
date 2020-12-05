@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.core.codec;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Constants and convenience methods for working with hints.
@@ -120,7 +120,7 @@ public abstract class Hints {
 			return hints2;
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints1.size() + hints2.size());
+			Map<String, Object> result = CollectionUtils.newHashMap(hints1.size() + hints2.size());
 			result.putAll(hints1);
 			result.putAll(hints2);
 			return result;
@@ -141,7 +141,7 @@ public abstract class Hints {
 			return Collections.singletonMap(hintName, hintValue);
 		}
 		else {
-			Map<String, Object> result = new HashMap<>(hints.size() + 1);
+			Map<String, Object> result = CollectionUtils.newHashMap(hints.size() + 1);
 			result.putAll(hints);
 			result.put(hintName, hintValue);
 			return result;

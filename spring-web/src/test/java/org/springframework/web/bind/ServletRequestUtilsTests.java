@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,28 @@ package org.springframework.web.bind;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.EnabledForTestGroups;
-import org.springframework.util.StopWatch;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 06.08.2003
  */
-public class ServletRequestUtilsTests {
+class ServletRequestUtilsTests {
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
 
 	@Test
-	public void testIntParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testIntParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
 
-		assertThat(ServletRequestUtils.getIntParameter(request, "param1")).isEqualTo(new Integer(5));
+		assertThat(ServletRequestUtils.getIntParameter(request, "param1")).isEqualTo(5);
 		assertThat(ServletRequestUtils.getIntParameter(request, "param1", 6)).isEqualTo(5);
 		assertThat(ServletRequestUtils.getRequiredIntParameter(request, "param1")).isEqualTo(5);
 
@@ -58,8 +57,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testIntParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testIntParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1", "2", "3"});
 
 		request.addParameter("param2", "1");
@@ -78,8 +76,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testLongParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testLongParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -102,8 +99,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testLongParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testLongParameters() throws ServletRequestBindingException {
 		request.setParameter("param", new String[] {"1", "2", "3"});
 
 		request.setParameter("param2", "0");
@@ -127,8 +123,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testFloatParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testFloatParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -151,8 +146,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testFloatParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testFloatParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
@@ -167,8 +161,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testDoubleParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testDoubleParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "5.5");
 		request.addParameter("param2", "e");
 		request.addParameter("paramEmpty", "");
@@ -191,8 +184,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testDoubleParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testDoubleParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
 
 		request.addParameter("param2", "1.5");
@@ -206,8 +198,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testBooleanParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testBooleanParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "true");
 		request.addParameter("param2", "e");
 		request.addParameter("param4", "yes");
@@ -235,8 +226,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testBooleanParameters() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testBooleanParameters() throws ServletRequestBindingException {
 		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
 
 		request.addParameter("param2", "false");
@@ -259,8 +249,7 @@ public class ServletRequestUtilsTests {
 	}
 
 	@Test
-	public void testStringParameter() throws ServletRequestBindingException {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+	void testStringParameter() throws ServletRequestBindingException {
 		request.addParameter("param1", "str");
 		request.addParameter("paramEmpty", "");
 
@@ -276,90 +265,6 @@ public class ServletRequestUtilsTests {
 
 		assertThat(ServletRequestUtils.getStringParameter(request, "paramEmpty")).isEmpty();
 		assertThat(ServletRequestUtils.getRequiredStringParameter(request, "paramEmpty")).isEmpty();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getIntParameter(request, "nonExistingParam", 0);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getLongParameter(request, "nonExistingParam", 0);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getDoubleParameter(request, "nonExistingParam", 0d);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getBooleanParameter(request, "nonExistingParam", false);
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		StopWatch sw = new StopWatch();
-		sw.start();
-		for (int i = 0; i < 1000000; i++) {
-			ServletRequestUtils.getStringParameter(request, "nonExistingParam", "defaultValue");
-		}
-		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
-		assertThat(sw.getTotalTimeMillis() < 250).as("getStringParameter took too long: " + sw.getTotalTimeMillis()).isTrue();
 	}
 
 }

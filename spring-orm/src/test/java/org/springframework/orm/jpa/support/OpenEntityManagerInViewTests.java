@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.orm.jpa.support;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.EntityManager;
@@ -25,9 +26,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,9 +73,11 @@ public class OpenEntityManagerInViewTests {
 
 	private ServletWebRequest webRequest;
 
+	private final TestTaskExecutor taskExecutor = new TestTaskExecutor();
+
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setUp() {
 		factory = mock(EntityManagerFactory.class);
 		manager = mock(EntityManager.class);
 
@@ -90,7 +90,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 		assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
@@ -98,7 +98,7 @@ public class OpenEntityManagerInViewTests {
 	}
 
 	@Test
-	public void testOpenEntityManagerInViewInterceptor() throws Exception {
+	public void testOpenEntityManagerInViewInterceptor() {
 		OpenEntityManagerInViewInterceptor interceptor = new OpenEntityManagerInViewInterceptor();
 		interceptor.setEntityManagerFactory(this.factory);
 
@@ -148,14 +148,12 @@ public class OpenEntityManagerInViewTests {
 
 		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
-		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.startCallableProcessing(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "anything";
-			}
-		});
+		asyncManager.startCallableProcessing((Callable<String>) () -> "anything");
+
+		this.taskExecutor.await();
+		assertThat(asyncManager.getConcurrentResult()).as("Concurrent result ").isEqualTo("anything");
 
 		interceptor.afterConcurrentHandlingStarted(this.webRequest);
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
@@ -207,14 +205,12 @@ public class OpenEntityManagerInViewTests {
 
 		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
-		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.startCallableProcessing(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "anything";
-			}
-		});
+		asyncManager.startCallableProcessing((Callable<String>) () -> "anything");
+
+		this.taskExecutor.await();
+		assertThat(asyncManager.getConcurrentResult()).as("Concurrent result ").isEqualTo("anything");
 
 		interceptor.afterConcurrentHandlingStarted(this.webRequest);
 		assertThat(TransactionSynchronizationManager.hasResource(this.factory)).isFalse();
@@ -249,19 +245,17 @@ public class OpenEntityManagerInViewTests {
 
 		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
-		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.startCallableProcessing(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "anything";
-			}
-		});
+		asyncManager.startCallableProcessing((Callable<String>) () -> "anything");
+
+		this.taskExecutor.await();
+		assertThat(asyncManager.getConcurrentResult()).as("Concurrent result ").isEqualTo("anything");
 
 		interceptor.afterConcurrentHandlingStarted(this.webRequest);
 		assertThat(TransactionSynchronizationManager.hasResource(this.factory)).isFalse();
 
-		// Async request timeout
+		// Async request error
 
 		given(this.manager.isOpen()).willReturn(true);
 
@@ -305,21 +299,14 @@ public class OpenEntityManagerInViewTests {
 		final OpenEntityManagerInViewFilter filter2 = new OpenEntityManagerInViewFilter();
 		filter2.init(filterConfig2);
 
-		final FilterChain filterChain = new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
-				assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
-				servletRequest.setAttribute("invoked", Boolean.TRUE);
-			}
+		final FilterChain filterChain = (servletRequest, servletResponse) -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
+			servletRequest.setAttribute("invoked", Boolean.TRUE);
 		};
 
-		final FilterChain filterChain2 = new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-				throws IOException, ServletException {
-				assertThat(TransactionSynchronizationManager.hasResource(factory2)).isTrue();
-				filter.doFilter(servletRequest, servletResponse, filterChain);
-			}
+		final FilterChain filterChain2 = (servletRequest, servletResponse) -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory2)).isTrue();
+			filter.doFilter(servletRequest, servletResponse, filterChain);
 		};
 
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
@@ -364,27 +351,20 @@ public class OpenEntityManagerInViewTests {
 		final OpenEntityManagerInViewFilter filter2 = new OpenEntityManagerInViewFilter();
 		filter2.init(filterConfig2);
 
-		final AtomicInteger count = new AtomicInteger(0);
+		final AtomicInteger count = new AtomicInteger();
 
-		final FilterChain filterChain = new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
-				assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
-				servletRequest.setAttribute("invoked", Boolean.TRUE);
-				count.incrementAndGet();
-			}
+		final FilterChain filterChain = (servletRequest, servletResponse) -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory)).isTrue();
+			servletRequest.setAttribute("invoked", Boolean.TRUE);
+			count.incrementAndGet();
 		};
 
-		final AtomicInteger count2 = new AtomicInteger(0);
+		final AtomicInteger count2 = new AtomicInteger();
 
-		final FilterChain filterChain2 = new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-				throws IOException, ServletException {
-				assertThat(TransactionSynchronizationManager.hasResource(factory2)).isTrue();
-				filter.doFilter(servletRequest, servletResponse, filterChain);
-				count2.incrementAndGet();
-			}
+		final FilterChain filterChain2 = (servletRequest, servletResponse) -> {
+			assertThat(TransactionSynchronizationManager.hasResource(factory2)).isTrue();
+			filter.doFilter(servletRequest, servletResponse, filterChain);
+			count2.incrementAndGet();
 		};
 
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
@@ -393,14 +373,12 @@ public class OpenEntityManagerInViewTests {
 		given(asyncWebRequest.isAsyncStarted()).willReturn(true);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
-		asyncManager.setTaskExecutor(new SyncTaskExecutor());
+		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.startCallableProcessing(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return "anything";
-			}
-		});
+		asyncManager.startCallableProcessing((Callable<String>) () -> "anything");
+
+		this.taskExecutor.await();
+		assertThat(asyncManager.getConcurrentResult()).as("Concurrent result ").isEqualTo("anything");
 
 		assertThat(TransactionSynchronizationManager.hasResource(factory)).isFalse();
 		assertThat(TransactionSynchronizationManager.hasResource(factory2)).isFalse();
@@ -434,12 +412,28 @@ public class OpenEntityManagerInViewTests {
 		wac.close();
 	}
 
+
 	@SuppressWarnings("serial")
-	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {
+	private static class TestTaskExecutor extends SimpleAsyncTaskExecutor {
+
+		private final CountDownLatch latch = new CountDownLatch(1);
 
 		@Override
 		public void execute(Runnable task, long startTimeout) {
-			task.run();
+			Runnable decoratedTask = () -> {
+				try {
+					task.run();
+				}
+				finally {
+					latch.countDown();
+				}
+			};
+			super.execute(decoratedTask, startTimeout);
+		}
+
+		void await() throws InterruptedException {
+			this.latch.await(5, TimeUnit.SECONDS);
 		}
 	}
+
 }

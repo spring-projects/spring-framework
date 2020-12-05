@@ -76,12 +76,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		implements HandlerMethodReturnValueHandler {
 
 	/* Extensions associated with the built-in message converters */
-	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<>(Arrays.asList(
+	private static final Set<String> SAFE_EXTENSIONS = new HashSet<>(Arrays.asList(
 			"txt", "text", "yml", "properties", "csv",
 			"json", "xml", "atom", "rss",
 			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
 
-	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<>(
+	private static final Set<String> SAFE_MEDIA_BASE_TYPES = new HashSet<>(
 			Arrays.asList("audio", "image", "video"));
 
 	private static final List<MediaType> ALL_APPLICATION_MEDIA_TYPES =
@@ -89,16 +89,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private static final Type RESOURCE_REGION_LIST_TYPE =
 			new ParameterizedTypeReference<List<ResourceRegion>>() { }.getType();
-
-
-	private static final UrlPathHelper decodingUrlPathHelper = new UrlPathHelper();
-
-	private static final UrlPathHelper rawUrlPathHelper = new UrlPathHelper();
-
-	static {
-		rawUrlPathHelper.setRemoveSemicolonContent(false);
-		rawUrlPathHelper.setUrlDecode(false);
-	}
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
@@ -133,7 +123,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
-		this.safeExtensions.addAll(WHITELISTED_EXTENSIONS);
+		this.safeExtensions.addAll(SAFE_EXTENSIONS);
 	}
 
 
@@ -406,8 +396,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Check if the path has a file extension and whether the extension is
-	 * either {@link #WHITELISTED_EXTENSIONS whitelisted} or explicitly
+	 * Check if the path has a file extension and whether the extension is either
+	 * on the list of {@link #SAFE_EXTENSIONS safe extensions} or explicitly
 	 * {@link ContentNegotiationManager#getAllFileExtensions() registered}.
 	 * If not, and the status is in the 2xx range, a 'Content-Disposition'
 	 * header with a safe attachment file name ("f.txt") is added to prevent
@@ -421,7 +411,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		try {
 			int status = response.getServletResponse().getStatus();
-			if (status < 200 || status > 299) {
+			if (status < 200 || (status > 299 && status < 400)) {
 				return;
 			}
 		}
@@ -430,7 +420,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		HttpServletRequest servletRequest = request.getServletRequest();
-		String requestUri = rawUrlPathHelper.getOriginatingRequestUri(servletRequest);
+		String requestUri = UrlPathHelper.rawPathInstance.getOriginatingRequestUri(servletRequest);
 
 		int index = requestUri.lastIndexOf('/') + 1;
 		String filename = requestUri.substring(index);
@@ -442,10 +432,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			filename = filename.substring(0, index);
 		}
 
-		filename = decodingUrlPathHelper.decodeRequestString(servletRequest, filename);
+		filename = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, filename);
 		String ext = StringUtils.getFilenameExtension(filename);
 
-		pathParams = decodingUrlPathHelper.decodeRequestString(servletRequest, pathParams);
+		pathParams = UrlPathHelper.defaultInstance.decodeRequestString(servletRequest, pathParams);
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
@@ -491,7 +481,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	private boolean safeMediaType(MediaType mediaType) {
-		return (WHITELISTED_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
+		return (SAFE_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
 				mediaType.getSubtype().endsWith("+xml"));
 	}
 

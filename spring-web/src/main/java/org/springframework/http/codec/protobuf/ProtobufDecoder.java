@@ -67,7 +67,7 @@ import org.springframework.util.MimeType;
  * {@code "application/x-protobuf"} and {@code "application/octet-stream"} with
  * the official {@code "com.google.protobuf:protobuf-java"} library.
  *
- * @author Sébastien Deleuze
+ * @author Sebastien Deleuze
  * @since 5.1
  * @see ProtobufEncoder
  */
@@ -268,7 +268,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		 *
 		 * @return {code true} when the message size is parsed successfully, {code false} when the message size is
 		 * truncated
-		 * @see <a href ="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
+		 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
 		 */
 		private boolean readMessageSize(DataBuffer input) {
 			if (this.offset == 0) {

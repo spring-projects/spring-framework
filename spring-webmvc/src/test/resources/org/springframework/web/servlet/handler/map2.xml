@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "https://www.springframework.org/dtd/spring-beans-2.0.dtd">
-
-<beans>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="defaultHandler"><ref bean="starController"/></property>
@@ -24,10 +24,19 @@
 		<property name="defaultHandler"><ref bean="starController"/></property>
 		<property name="rootHandler"><ref bean="mainController"/></property>
 		<property name="useTrailingSlashMatch" value="true"/>
-		<property name="mappings"><ref bean="propsForUrlMapping2"/></property>
+		<property name="mappings"><ref bean="mappings"/></property>
 	</bean>
 
-	<bean id="propsForUrlMapping2" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+	<bean id="urlMappingWithPathPatterns" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="defaultHandler"><ref bean="starController"/></property>
+		<property name="rootHandler"><ref bean="mainController"/></property>
+		<property name="patternParser" >
+			<bean class="org.springframework.web.util.pattern.PathPatternParser"/>
+		</property>
+		<property name="mappings"><ref bean="mappings"/></property>
+	</bean>
+
+	<bean id="mappings" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location"><value>/org/springframework/web/servlet/handler/map2.properties</value></property>
 	</bean>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,7 @@ import org.springframework.util.StringValueResolver;
  * both approaches.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  * @see #setAlwaysUseJndiLookup
  * @see #setResourceFactory
@@ -146,40 +147,23 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
 	@Nullable
-	private static Class<? extends Annotation> webServiceRefClass;
+	private static final Class<? extends Annotation> webServiceRefClass;
 
 	@Nullable
-	private static Class<? extends Annotation> ejbRefClass;
+	private static final Class<? extends Annotation> ejbClass;
 
-	private static Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
+	private static final Set<Class<? extends Annotation>> resourceAnnotationTypes = new LinkedHashSet<>(4);
 
 	static {
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
-					ClassUtils.forName("javax.xml.ws.WebServiceRef", CommonAnnotationBeanPostProcessor.class.getClassLoader());
-			webServiceRefClass = clazz;
-		}
-		catch (ClassNotFoundException ex) {
-			webServiceRefClass = null;
-		}
-
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> clazz = (Class<? extends Annotation>)
-					ClassUtils.forName("javax.ejb.EJB", CommonAnnotationBeanPostProcessor.class.getClassLoader());
-			ejbRefClass = clazz;
-		}
-		catch (ClassNotFoundException ex) {
-			ejbRefClass = null;
-		}
+		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
+		ejbClass = loadAnnotationType("javax.ejb.EJB");
 
 		resourceAnnotationTypes.add(Resource.class);
 		if (webServiceRefClass != null) {
 			resourceAnnotationTypes.add(webServiceRefClass);
 		}
-		if (ejbRefClass != null) {
-			resourceAnnotationTypes.add(ejbRefClass);
+		if (ejbClass != null) {
+			resourceAnnotationTypes.add(ejbClass);
 		}
 	}
 
@@ -386,7 +370,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					}
 					currElements.add(new WebServiceRefElement(field, field, null));
 				}
-				else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
+				else if (ejbClass != null && field.isAnnotationPresent(ejbClass)) {
 					if (Modifier.isStatic(field.getModifiers())) {
 						throw new IllegalStateException("@EJB annotation is not supported on static fields");
 					}
@@ -418,7 +402,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
 					}
-					else if (ejbRefClass != null && bridgedMethod.isAnnotationPresent(ejbRefClass)) {
+					else if (ejbClass != null && bridgedMethod.isAnnotationPresent(ejbClass)) {
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("@EJB annotation is not supported on static methods");
 						}
@@ -559,6 +543,19 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 
 		return resource;
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static Class<? extends Annotation> loadAnnotationType(String name) {
+		try {
+			return (Class<? extends Annotation>)
+					ClassUtils.forName(name, CommonAnnotationBeanPostProcessor.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			return null;
+		}
 	}
 
 

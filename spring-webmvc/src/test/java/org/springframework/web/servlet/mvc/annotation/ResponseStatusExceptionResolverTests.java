@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +29,11 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -128,6 +132,16 @@ public class ResponseStatusExceptionResolverTests {
 		assertResolved(mav, 400, "The reason");
 	}
 
+	@Test
+	void responseStatusExceptionWithHeaders() {
+		Exception ex = new MethodNotAllowedException(
+				HttpMethod.GET, Arrays.asList(HttpMethod.POST, HttpMethod.PUT));
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+
+		assertResolved(mav, 405, "Request method 'GET' not supported");
+		assertThat(response.getHeader(HttpHeaders.ALLOW)).isEqualTo("POST,PUT");
+	}
 
 	private void assertResolved(ModelAndView mav, int status, String reason) {
 		assertThat(mav != null && mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();

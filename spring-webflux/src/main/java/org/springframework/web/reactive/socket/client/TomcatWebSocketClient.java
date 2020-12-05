@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import org.apache.tomcat.websocket.WsWebSocketContainer;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
@@ -45,10 +45,10 @@ public class TomcatWebSocketClient extends StandardWebSocketClient {
 
 
 	@Override
-	protected StandardWebSocketSession createWebSocketSession(Session session,
-			HandshakeInfo info, MonoProcessor<Void> completion) {
+	protected StandardWebSocketSession createWebSocketSession(
+			Session session, HandshakeInfo info, Sinks.Empty<Void> completionSink) {
 
-			return new TomcatWebSocketSession(session, info, bufferFactory(), completion);
+		return new TomcatWebSocketSession(session, info, bufferFactory(), completionSink);
 	}
 
 }

@@ -29,6 +29,7 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
@@ -126,13 +127,13 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 					.flatMap(buffer -> {
 						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
-								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
+								.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
 					});
 		}
 
 		if (isStreamingMediaType(contentType)) {
 			return message.writeAndFlushWith(body.map(buffer ->
-					Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
+					Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release)));
 		}
 
 		return message.writeWith(body);

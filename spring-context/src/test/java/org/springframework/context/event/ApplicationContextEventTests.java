@@ -16,8 +16,8 @@
 
 package org.springframework.context.event;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -35,6 +36,8 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -374,6 +377,19 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		assertThat(MyNonSingletonListener.seenEvents.contains(event4)).isTrue();
 		MyNonSingletonListener.seenEvents.clear();
 
+		context.publishEvent(event1);
+		context.publishEvent(event2);
+		context.publishEvent(event3);
+		context.publishEvent(event4);
+		assertThat(MyNonSingletonListener.seenEvents.contains(event1)).isTrue();
+		assertThat(MyNonSingletonListener.seenEvents.contains(event2)).isTrue();
+		assertThat(MyNonSingletonListener.seenEvents.contains(event3)).isTrue();
+		assertThat(MyNonSingletonListener.seenEvents.contains(event4)).isTrue();
+		MyNonSingletonListener.seenEvents.clear();
+
+		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
+		assertThat(multicaster.retrieverCache.size()).isEqualTo(3);
+
 		context.close();
 	}
 
@@ -516,6 +532,36 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.close();
 	}
 
+	@Test
+	public void initMethodPublishesEvent() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("listener", new RootBeanDefinition(BeanThatListens.class));
+		context.registerBeanDefinition("messageSource", new RootBeanDefinition(StaticMessageSource.class));
+		context.registerBeanDefinition("initMethod", new RootBeanDefinition(EventPublishingInitMethod.class));
+		context.refresh();
+
+		context.publishEvent(new MyEvent(this));
+		BeanThatListens listener = context.getBean(BeanThatListens.class);
+		assertThat(listener.getEventCount()).isEqualTo(3);
+
+		context.close();
+	}
+
+	@Test
+	public void initMethodPublishesAsyncEvent() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("listener", new RootBeanDefinition(BeanThatListens.class));
+		context.registerBeanDefinition("messageSource", new RootBeanDefinition(StaticMessageSource.class));
+		context.registerBeanDefinition("initMethod", new RootBeanDefinition(AsyncEventPublishingInitMethod.class));
+		context.refresh();
+
+		context.publishEvent(new MyEvent(this));
+		BeanThatListens listener = context.getBean(BeanThatListens.class);
+		assertThat(listener.getEventCount()).isEqualTo(3);
+
+		context.close();
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class MyEvent extends ApplicationEvent {
@@ -537,7 +583,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final List<ApplicationEvent> seenEvents = new LinkedList<>();
+		public final List<ApplicationEvent> seenEvents = new ArrayList<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -649,6 +695,40 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
+		}
+	}
+
+
+	public static class EventPublishingInitMethod implements ApplicationEventPublisherAware, InitializingBean {
+
+		private ApplicationEventPublisher publisher;
+
+		@Override
+		public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+			this.publisher = applicationEventPublisher;
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			this.publisher.publishEvent(new MyEvent(this));
+		}
+	}
+
+
+	public static class AsyncEventPublishingInitMethod implements ApplicationEventPublisherAware, InitializingBean {
+
+		private ApplicationEventPublisher publisher;
+
+		@Override
+		public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+			this.publisher = applicationEventPublisher;
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			Thread thread = new Thread(() -> this.publisher.publishEvent(new MyEvent(this)));
+			thread.start();
+			thread.join();
 		}
 	}
 

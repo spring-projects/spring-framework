@@ -28,6 +28,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 
@@ -93,6 +94,14 @@ public interface ClientRequest {
 	 * Return the attributes of this request.
 	 */
 	Map<String, Object> attributes();
+
+	/**
+	 * Return consumer(s) configured to access to the {@link ClientHttpRequest}.
+	 * @since 5.3
+	 */
+	@Nullable
+	Consumer<ClientHttpRequest> httpRequest();
+
 
 	/**
 	 * Return a log message prefix to use to correlate messages for this request.
@@ -250,6 +259,18 @@ public interface ClientRequest {
 		 * @return this builder
 		 */
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Callback for access to the {@link ClientHttpRequest} that in turn
+		 * provides access to the native request of the underlying HTTP library.
+		 * This could be useful for setting advanced, per-request options that
+		 * exposed by the underlying library.
+		 * @param requestConsumer a consumer to access the
+		 * {@code ClientHttpRequest} with
+		 * @return this builder
+		 * @since 5.3
+		 */
+		Builder httpRequest(Consumer<ClientHttpRequest> requestConsumer);
 
 		/**
 		 * Build the request.

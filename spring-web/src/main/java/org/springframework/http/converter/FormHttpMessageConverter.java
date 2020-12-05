@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	static final MediaType MULTIPART_ALL = new MediaType("multipart", "*");
-
 	private static final MediaType DEFAULT_FORM_DATA_MEDIA_TYPE =
 			new MediaType(MediaType.APPLICATION_FORM_URLENCODED, DEFAULT_CHARSET);
 
@@ -234,6 +232,15 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	}
 
 	/**
+	 * Return the {@linkplain #setPartConverters configured converters} for MIME
+	 * parts.
+	 * @since 5.3
+	 */
+	public List<HttpMessageConverter<?>> getPartConverters() {
+		return Collections.unmodifiableList(this.partConverters);
+	}
+
+	/**
 	 * Add a message body converter. Such a converter is used to convert objects
 	 * to MIME parts.
 	 */
@@ -301,7 +308,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return true;
 		}
 		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
-			if (MULTIPART_ALL.includes(supportedMediaType)) {
+			if (supportedMediaType.getType().equalsIgnoreCase("multipart")) {
 				// We can't read multipart, so skip this supported media type.
 				continue;
 			}
@@ -369,7 +376,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private boolean isMultipart(MultiValueMap<String, ?> map, @Nullable MediaType contentType) {
 		if (contentType != null) {
-			return MULTIPART_ALL.includes(contentType);
+			return contentType.getType().equalsIgnoreCase("multipart");
 		}
 		for (List<?> values : map.values()) {
 			for (Object value : values) {
@@ -463,8 +470,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			contentType = MediaType.MULTIPART_FORM_DATA;
 		}
 
+		Map<String, String> parameters = new LinkedHashMap<>(contentType.getParameters().size() + 2);
+		parameters.putAll(contentType.getParameters());
+
 		byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
 			parameters.put("charset", this.charset.name());
 		}

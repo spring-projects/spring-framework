@@ -139,9 +139,9 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 		// 1 will make it throw a RuntimeException - SpEL will let this through
 		eContext.setVariable("bar", 1);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() ->
-				expr.getValue(eContext))
-			.satisfies(ex -> assertThat(ex).isNotInstanceOf(SpelEvaluationException.class));
+		assertThatExceptionOfType(Exception.class)
+			.isThrownBy(() -> expr.getValue(eContext))
+			.isNotInstanceOf(SpelEvaluationException.class);
 		// A problem occurred whilst attempting to construct an object of type
 		// 'org.springframework.expression.spel.ConstructorInvocationTests$Tester'
 		// using arguments '(java.lang.Integer)'

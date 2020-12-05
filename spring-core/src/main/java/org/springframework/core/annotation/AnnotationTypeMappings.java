@@ -30,7 +30,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * Provides {@link AnnotationTypeMapping} information for a single source
  * annotation type. Performs a recursive breadth first crawl of all
  * meta-annotations to ultimately provide a quick way to map the attributes of
- * root {@link Annotation}.
+ * a root {@link Annotation}.
  *
  * <p>Supports convention based merging of meta-annotations as well as implicit
  * and explicit {@link AliasFor @AliasFor} aliases. Also provides information
@@ -81,17 +81,15 @@ final class AnnotationTypeMappings {
 	}
 
 	private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source) {
-		Annotation[] metaAnnotations =
-				AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
+		Annotation[] metaAnnotations = AnnotationsScanner.getDeclaredAnnotations(source.getAnnotationType(), false);
 		for (Annotation metaAnnotation : metaAnnotations) {
 			if (!isMappable(source, metaAnnotation)) {
 				continue;
 			}
-			Annotation[] repeatedAnnotations = this.repeatableContainers
-					.findRepeatedAnnotations(metaAnnotation);
+			Annotation[] repeatedAnnotations = this.repeatableContainers.findRepeatedAnnotations(metaAnnotation);
 			if (repeatedAnnotations != null) {
 				for (Annotation repeatedAnnotation : repeatedAnnotations) {
-					if (!isMappable(source, metaAnnotation)) {
+					if (!isMappable(source, repeatedAnnotation)) {
 						continue;
 					}
 					addIfPossible(queue, source, repeatedAnnotation);
@@ -103,9 +101,7 @@ final class AnnotationTypeMappings {
 		}
 	}
 
-	private void addIfPossible(Deque<AnnotationTypeMapping> queue,
-			AnnotationTypeMapping source, Annotation ann) {
-
+	private void addIfPossible(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping source, Annotation ann) {
 		addIfPossible(queue, source, ann.annotationType(), ann);
 	}
 
@@ -183,21 +179,20 @@ final class AnnotationTypeMappings {
 	static AnnotationTypeMappings forAnnotationType(
 			Class<? extends Annotation> annotationType, AnnotationFilter annotationFilter) {
 
-		return forAnnotationType(annotationType,
-				RepeatableContainers.standardRepeatables(), annotationFilter);
+		return forAnnotationType(annotationType, RepeatableContainers.standardRepeatables(), annotationFilter);
 	}
 
 	/**
 	 * Create {@link AnnotationTypeMappings} for the specified annotation type.
 	 * @param annotationType the source annotation type
+	 * @param repeatableContainers the repeatable containers that may be used by
+	 * the meta-annotations
 	 * @param annotationFilter the annotation filter used to limit which
 	 * annotations are considered
 	 * @return type mappings for the annotation type
 	 */
-	static AnnotationTypeMappings forAnnotationType(
-			Class<? extends Annotation> annotationType,
-			RepeatableContainers repeatableContainers,
-			AnnotationFilter annotationFilter) {
+	static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType,
+			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
 		if (repeatableContainers == RepeatableContainers.standardRepeatables()) {
 			return standardRepeatablesCache.computeIfAbsent(annotationFilter,
@@ -207,8 +202,7 @@ final class AnnotationTypeMappings {
 			return noRepeatablesCache.computeIfAbsent(annotationFilter,
 					key -> new Cache(repeatableContainers, key)).get(annotationType);
 		}
-		return new AnnotationTypeMappings(repeatableContainers, annotationFilter,
-				annotationType);
+		return new AnnotationTypeMappings(repeatableContainers, annotationFilter, annotationType);
 	}
 
 	static void clearCache() {

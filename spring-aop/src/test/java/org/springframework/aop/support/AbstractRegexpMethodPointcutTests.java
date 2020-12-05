@@ -49,7 +49,7 @@ public abstract class AbstractRegexpMethodPointcutTests {
 
 	@Test
 	public void testSerializationWithNoPatternSupplied() throws Exception {
-		rpc = (AbstractRegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
+		rpc = SerializationTestUtils.serializeAndDeserialize(rpc);
 		noPatternSuppliedTests(rpc);
 	}
 
@@ -63,7 +63,7 @@ public abstract class AbstractRegexpMethodPointcutTests {
 	public void testExactMatch() throws Exception {
 		rpc.setPattern("java.lang.Object.hashCode");
 		exactMatchTests(rpc);
-		rpc = (AbstractRegexpMethodPointcut) SerializationTestUtils.serializeAndDeserialize(rpc);
+		rpc = SerializationTestUtils.serializeAndDeserialize(rpc);
 		exactMatchTests(rpc);
 	}
 

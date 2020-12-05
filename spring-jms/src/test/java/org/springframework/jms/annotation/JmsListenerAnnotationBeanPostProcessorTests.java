@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ import static org.mockito.Mockito.mock;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  */
-public class JmsListenerAnnotationBeanPostProcessorTests {
+class JmsListenerAnnotationBeanPostProcessorTests {
 
 	@Test
-	public void simpleMessageListener() throws Exception {
+	void simpleMessageListener() throws Exception {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				Config.class, SimpleMessageListenerTestBean.class);
 
@@ -81,11 +81,8 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void metaAnnotationIsDiscovered() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, MetaAnnotationTestBean.class);
-
-		try {
+	void metaAnnotationIsDiscovered() throws Exception {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, MetaAnnotationTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
 
@@ -97,16 +94,11 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			assertThat(methodEndpoint.getMostSpecificMethod()).isEqualTo(MetaAnnotationTestBean.class.getMethod("handleIt", String.class));
 			assertThat(((AbstractJmsListenerEndpoint) endpoint).getDestination()).isEqualTo("metaTestQueue");
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
-	public void sendToAnnotationFoundOnInterfaceProxy() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, InterfaceProxyTestBean.class);
-		try {
+	void sendToAnnotationFoundOnInterfaceProxy() throws Exception {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InterfaceProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
 
@@ -124,16 +116,11 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertThat(destination).as("SendTo annotation not found on proxy").isEqualTo("foobar");
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
-	public void sendToAnnotationFoundOnCglibProxy() throws Exception {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, ProxyConfig.class, ClassProxyTestBean.class);
-		try {
+	void sendToAnnotationFoundOnCglibProxy() throws Exception {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, ClassProxyTestBean.class)) {
 			JmsListenerContainerTestFactory factory = context.getBean(JmsListenerContainerTestFactory.class);
 			assertThat(factory.getListenerContainers().size()).as("one container should have been registered").isEqualTo(1);
 
@@ -151,14 +138,11 @@ public class JmsListenerAnnotationBeanPostProcessorTests {
 			Object destination = ReflectionUtils.invokeMethod(method, endpoint);
 			assertThat(destination).as("SendTo annotation not found on proxy").isEqualTo("foobar");
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
 	@SuppressWarnings("resource")
-	public void invalidProxy() {
+	void invalidProxy() {
 		assertThatExceptionOfType(BeanCreationException.class).isThrownBy(() ->
 				new AnnotationConfigApplicationContext(Config.class, ProxyConfig.class, InvalidProxyTestBean.class))
 			.withCauseInstanceOf(IllegalStateException.class)

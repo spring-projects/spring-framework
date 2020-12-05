@@ -118,16 +118,13 @@ public abstract class BeanDefinitionReaderUtils {
 					"'class' nor 'parent' nor 'factory-bean' - can't generate bean name");
 		}
 
-		String id = generatedBeanName;
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
-			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
+			return generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
-		else {
-			// Top-level bean: use plain class name with unique suffix if necessary.
-			return uniqueBeanName(generatedBeanName, registry);
-		}
-		return id;
+
+		// Top-level bean: use plain class name with unique suffix if necessary.
+		return uniqueBeanName(generatedBeanName, registry);
 	}
 
 	/**

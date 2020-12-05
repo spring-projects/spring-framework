@@ -67,7 +67,7 @@ The following example defines a class that has a dependency on the `Messenger` i
 
 The following example implements the `Messenger` interface in Groovy:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -92,7 +92,7 @@ container. Using the dynamic-language-backed beans with a plain `BeanFactory`
 implementation is supported, but you have to manage the plumbing of the Spring internals
 to do so.
 
-For more information on schema-based configuration, see <<appendix.adoc#xsd-configuration,
+For more information on schema-based configuration, see <<xsd-schemas-lang,
 XML Schema-based Configuration>>.
 ====
 
@@ -159,9 +159,8 @@ The steps involved in using dynamic-language-backed beans are as follows:
   element in the XML configuration (you can define such beans programmatically by
   using the Spring API, although you will have to consult the source code for
   directions on how to do this, as this chapter does not cover this type of advanced configuration).
-  Note that this is an iterative step. You need at least one bean
-  definition for each dynamic language source file (although multiple bean definitions can reference the same dynamic language source
-  file).
+  Note that this is an iterative step. You need at least one bean definition for each dynamic
+  language source file (although multiple bean definitions can reference the same source file).
 
 The first two steps (testing and writing your dynamic language source files) are beyond
 the scope of this chapter. See the language specification and reference manual
@@ -177,7 +176,7 @@ of your dynamic language source files.
 The final step in the list in the <<dynamic-language-beans-concepts, preceding section>>
 involves defining dynamic-language-backed bean definitions, one for each bean that you
 want to configure (this is no different from normal JavaBean configuration). However,
-instead of specifying the fully qualified classname of the class that is to be
+instead of specifying the fully qualified class name of the class that is to be
 instantiated and configured by the container, you can use the `<lang:language/>`
 element to define the dynamic language-backed bean.
 
@@ -283,7 +282,7 @@ surrounded by quotation marks. The following listing shows the changes that you
 (the developer) should make to the `Messenger.groovy` source file when the
 execution of the program is paused:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	package org.springframework.scripting
@@ -372,7 +371,7 @@ constructors and properties 100% clear, the following mixture of code and config
 does not work:
 
 .An approach that cannot work
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file 'Messenger.groovy'
@@ -463,7 +462,7 @@ The following bean definition uses the calculator defined in Groovy:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<-- from the file 'beans.xml' -->
+	<!-- from the file 'beans.xml' -->
 	<beans>
 		<lang:groovy id="calculator" script-source="classpath:calculator.groovy"/>
 	</beans>
@@ -481,9 +480,9 @@ Finally, the following small application exercises the preceding configuration:
 
 	public class Main {
 
-		public static void Main(String[] args) {
+		public static void main(String[] args) {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
-			Calculator calc = (Calculator) ctx.getBean("calculator");
+			Calculator calc = ctx.getBean("calculator", Calculator.class);
 			System.out.println(calc.add(2, 8));
 		}
 	}
@@ -578,9 +577,12 @@ If you do not use the Spring namespace support, you can still use the
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 ----
 
-NOTE: As of Spring Framework 4.3.3, you may also specify a Groovy `CompilationCustomizer`
-(such as an `ImportCustomizer`) or even a full Groovy `CompilerConfiguration` object
-in the same place as Spring's `GroovyObjectCustomizer`.
+NOTE: You may also specify a Groovy `CompilationCustomizer` (such as an `ImportCustomizer`)
+or even a full Groovy `CompilerConfiguration` object in the same place as Spring's
+`GroovyObjectCustomizer`. Furthermore, you may set a common `GroovyClassLoader` with custom
+configuration for your beans at the `ConfigurableApplicationContext.setClassLoader` level;
+this also leads to shared `GroovyClassLoader` usage and is therefore recommendable in case of
+a large number of scripted beans (avoiding an isolated `GroovyClassLoader` instance per bean).
 
 
 
@@ -594,7 +596,7 @@ description:
 
 ----
 BeanShell is a small, free, embeddable Java source interpreter with dynamic language
-features, written in Java. BeanShell dynamically executes standard Java syntax and
+features, written in Java. BeanShell dynamically runs standard Java syntax and
 extends it with common scripting conveniences such as loose types, commands, and method
 closures like those in Perl and JavaScript.
 ----
@@ -695,7 +697,7 @@ beans, you have to enable the "`refreshable beans`" functionality. See
 The following example shows an `org.springframework.web.servlet.mvc.Controller` implemented
 by using the Groovy dynamic language:
 
-[source,java,indent=0]
+[source,groovy,indent=0]
 [subs="verbatim,quotes"]
 ----
 	// from the file '/WEB-INF/groovy/FortuneController.groovy'
@@ -846,7 +848,7 @@ The `lang` elements in Spring XML configuration deal with exposing objects that 
 written in a dynamic language (such as Groovy or BeanShell) as beans in the Spring container.
 
 These elements (and the dynamic language support) are comprehensively covered in
-<<integration.adoc#dynamic-language, Dynamic Language Support>>. See that chapter
+<<dynamic-language, Dynamic Language Support>>. See that section
 for full details on this support and the `lang` elements.
 
 To use the elements in the `lang` schema, you need to have the following preamble at the

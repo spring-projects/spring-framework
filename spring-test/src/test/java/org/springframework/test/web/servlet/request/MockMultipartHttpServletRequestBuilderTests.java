@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,43 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.nio.charset.StandardCharsets;
+
+import javax.servlet.http.Part;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Unit tests for {@link MockMultipartHttpServletRequestBuilder}.
  * @author Rossen Stoyanchev
  */
 public class MockMultipartHttpServletRequestBuilderTests {
 
+	@Test // gh-26166
+	void addFilesAndParts() throws Exception {
+		MockHttpServletRequest mockRequest = new MockMultipartHttpServletRequestBuilder("/upload")
+				.file(new MockMultipartFile("file", "test.txt", "text/plain", "Test".getBytes(StandardCharsets.UTF_8)))
+				.part(new MockPart("data", "{\"node\":\"node\"}".getBytes(StandardCharsets.UTF_8)))
+				.buildRequest(new MockServletContext());
+
+		StandardMultipartHttpServletRequest parsedRequest = new StandardMultipartHttpServletRequest(mockRequest);
+
+		assertThat(parsedRequest.getParameterMap()).containsOnlyKeys("data");
+		assertThat(parsedRequest.getFileMap()).containsOnlyKeys("file");
+		assertThat(parsedRequest.getParts()).extracting(Part::getName).containsExactly("file", "data");
+	}
+
 	@Test
-	public void test() {
+	void mergeAndBuild() {
 		MockHttpServletRequestBuilder parent = new MockHttpServletRequestBuilder(HttpMethod.GET, "/");
 		parent.characterEncoding("UTF-8");
 		Object result = new MockMultipartHttpServletRequestBuilder("/fileUpload").merge(parent);

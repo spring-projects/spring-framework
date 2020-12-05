@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -52,7 +54,6 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
 import static org.springframework.http.MediaType.TEXT_XML;
-import static org.springframework.http.converter.FormHttpMessageConverter.MULTIPART_ALL;
 
 /**
  * Unit tests for {@link FormHttpMessageConverter} and
@@ -177,12 +178,15 @@ public class FormHttpMessageConverterTests {
 		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
 		parts.add("xml", entity);
 
+		Map<String, String> parameters = new LinkedHashMap<>(2);
+		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("foo", "bar");
+
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
+		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		// SPR-17030
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary");
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -278,7 +282,7 @@ public class FormHttpMessageConverterTests {
 	}
 
 	private void asssertCannotReadMultipart() {
-		assertCannotRead(MULTIPART_ALL);
+		assertCannotRead(new MediaType("multipart", "*"));
 		assertCannotRead(MULTIPART_FORM_DATA);
 		assertCannotRead(MULTIPART_MIXED);
 		assertCannotRead(MULTIPART_RELATED);

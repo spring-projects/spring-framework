@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 	}
 
 	/**
-	 * Sub-classes should override this to create  deep copy of
-	 * {@link BaseDefaultCodecs} which can can be client or server specific.
+	 * Sub-classes should override this to create a deep copy of
+	 * {@link BaseDefaultCodecs} which can be client or server specific.
 	 * @since 5.1.12
 	 */
 	protected abstract BaseDefaultCodecs cloneDefaultCodecs();
@@ -142,10 +142,10 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 		 * @since 5.1.12
 		 */
 		DefaultCustomCodecs(DefaultCustomCodecs other) {
-			other.typedReaders.putAll(this.typedReaders);
-			other.typedWriters.putAll(this.typedWriters);
-			other.objectReaders.putAll(this.objectReaders);
-			other.objectWriters.putAll(this.objectWriters);
+			this.typedReaders.putAll(other.typedReaders);
+			this.typedWriters.putAll(other.typedWriters);
+			this.objectReaders.putAll(other.objectReaders);
+			this.objectWriters.putAll(other.objectWriters);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
-@SuppressWarnings("deprecation")
 public class MediaType extends MimeType implements Serializable {
 
 	private static final long serialVersionUID = 2069937152339670231L;
@@ -218,15 +217,35 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String APPLICATION_RSS_XML_VALUE = "application/rss+xml";
 
 	/**
+	 * Public constant media type for {@code application/x-ndjson}.
+	 * @since 5.3
+	 */
+	public static final MediaType APPLICATION_NDJSON;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_NDJSON}.
+	 * @since 5.3
+	 */
+	public static final String APPLICATION_NDJSON_VALUE = "application/x-ndjson";
+
+	/**
 	 * Public constant media type for {@code application/stream+json}.
+	 * @deprecated as of 5.3, see notice on {@link #APPLICATION_STREAM_JSON_VALUE}.
 	 * @since 5.0
 	 */
+	@Deprecated
 	public static final MediaType APPLICATION_STREAM_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_STREAM_JSON}.
+	 * @deprecated as of 5.3 since it originates from the W3C Activity Streams
+	 * specification which has a more specific purpose and has been since
+	 * replaced with a different mime type. Use {@link #APPLICATION_NDJSON} as
+	 * a replacement or any other line-delimited JSON format (e.g. JSON Lines,
+	 * JSON Text Sequences).
 	 * @since 5.0
 	 */
+	@Deprecated
 	public static final String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
 
 	/**
@@ -302,6 +321,18 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
 
 	/**
+	 * Public constant media type for {@code multipart/related}.
+	 * @since 5.2.5
+	 */
+	public static final MediaType MULTIPART_RELATED;
+
+	/**
+	 * A String equivalent of {@link MediaType#MULTIPART_RELATED}.
+	 * @since 5.2.5
+	 */
+	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
+
+	/**
 	 * Public constant media type for {@code text/event-stream}.
 	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
@@ -367,6 +398,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
+		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
 		APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
 		APPLICATION_PDF = new MediaType("application", "pdf");
 		APPLICATION_PROBLEM_JSON = new MediaType("application", "problem+json");
@@ -381,6 +413,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = new MediaType("image", "png");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
 		MULTIPART_MIXED = new MediaType("multipart", "mixed");
+		MULTIPART_RELATED = new MediaType("multipart", "related");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");
@@ -466,11 +499,24 @@ public class MediaType extends MimeType implements Serializable {
 		super(type, subtype, parameters);
 	}
 
+	/**
+	 * Create a new {@code MediaType} for the given {@link MimeType}.
+	 * The type, subtype and parameters information is copied and {@code MediaType}-specific
+	 * checks on parameters are performed.
+	 * @param mimeType the MIME type
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @since 5.3
+	 */
+	public MediaType(MimeType mimeType) {
+		super(mimeType);
+		getParameters().forEach(this::checkParameters);
+	}
+
 
 	@Override
-	protected void checkParameters(String attribute, String value) {
-		super.checkParameters(attribute, value);
-		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
+	protected void checkParameters(String parameter, String value) {
+		super.checkParameters(parameter, value);
+		if (PARAM_QUALITY_FACTOR.equals(parameter)) {
 			value = unquote(value);
 			double d = Double.parseDouble(value);
 			Assert.isTrue(d >= 0D && d <= 1D,
@@ -574,7 +620,7 @@ public class MediaType extends MimeType implements Serializable {
 			throw new InvalidMediaTypeException(ex);
 		}
 		try {
-			return new MediaType(type.getType(), type.getSubtype(), type.getParameters());
+			return new MediaType(type);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new InvalidMediaTypeException(mediaType, ex.getMessage());
@@ -634,7 +680,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
 		List<MediaType> mediaTypes = new ArrayList<>(mimeTypes.size());
-		for(MimeType mimeType : mimeTypes) {
+		for (MimeType mimeType : mimeTypes) {
 			mediaTypes.add(MediaType.asMediaType(mimeType));
 		}
 		return mediaTypes;

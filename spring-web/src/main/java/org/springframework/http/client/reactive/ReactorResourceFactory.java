@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * and is expected typically to be declared as a Spring-managed bean.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.1
  */
 public class ReactorResourceFactory implements InitializingBean, DisposableBean {
@@ -47,8 +48,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Nullable
 	private Consumer<HttpResources> globalResourcesConsumer;
 
-	@SuppressWarnings("deprecation")
-	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.fixed("webflux", 500);
+	private Supplier<ConnectionProvider> connectionProviderSupplier = () -> ConnectionProvider.create("webflux", 500);
 
 	@Nullable
 	private ConnectionProvider connectionProvider;
@@ -97,8 +97,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 */
 	public void addGlobalResourcesConsumer(Consumer<HttpResources> consumer) {
 		this.useGlobalResources = true;
-		this.globalResourcesConsumer = this.globalResourcesConsumer != null ?
-				this.globalResourcesConsumer.andThen(consumer) : consumer;
+		this.globalResourcesConsumer = (this.globalResourcesConsumer != null ?
+				this.globalResourcesConsumer.andThen(consumer) : consumer);
 	}
 
 	/**
@@ -161,8 +161,8 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 
 	/**
 	 * Configure the amount of time we'll wait before shutting down resources.
-	 * If a task is submitted during the {@code quietPeriod}, it is guaranteed
-	 * to be accepted and the {@code quietPeriod} will start over.
+	 * If a task is submitted during the {@code shutdownQuietPeriod}, it is guaranteed
+	 * to be accepted and the {@code shutdownQuietPeriod} will start over.
 	 * <p>By default, this is set to
 	 * {@link LoopResources#DEFAULT_SHUTDOWN_QUIET_PERIOD} which is 2 seconds but
 	 * can also be overridden with the system property
@@ -189,7 +189,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	 * @see #setShutdownQuietPeriod(Duration)
 	 */
 	public void setShutdownTimeout(Duration shutdownTimeout) {
-		Assert.notNull(shutdownTimeout, "shutdownQuietPeriod should not be null");
+		Assert.notNull(shutdownTimeout, "shutdownTimeout should not be null");
 		this.shutdownTimeout = shutdownTimeout;
 	}
 
@@ -221,8 +221,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Override
 	public void destroy() {
 		if (this.useGlobalResources) {
-			HttpResources.disposeLoopsAndConnectionsLater(
-					this.shutdownQuietPeriod, this.shutdownTimeout).block();
+			HttpResources.disposeLoopsAndConnectionsLater(this.shutdownQuietPeriod, this.shutdownTimeout).block();
 		}
 		else {
 			try {

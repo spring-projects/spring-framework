@@ -25,6 +25,7 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +37,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
@@ -172,7 +172,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {
 				HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 				Assert.notNull(request, "Expected HttpServletRequest");
-				ShallowEtagHeaderFilter.disableContentCaching(request);
 			}
 		}
 	}
@@ -273,6 +272,8 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			this.returnValue = returnValue;
 			this.returnType = (returnValue instanceof ReactiveTypeHandler.CollectedValuesList ?
 					((ReactiveTypeHandler.CollectedValuesList) returnValue).getReturnType() :
+					KotlinDetector.isSuspendingFunction(super.getMethod()) ?
+					ResolvableType.forMethodParameter(getReturnType()) :
 					ResolvableType.forType(super.getGenericParameterType()).getGeneric());
 		}
 

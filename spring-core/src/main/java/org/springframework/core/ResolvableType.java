@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -464,15 +464,25 @@ public class ResolvableType implements Serializable {
 	 */
 	public ResolvableType getSuperType() {
 		Class<?> resolved = resolve();
-		if (resolved == null || resolved.getGenericSuperclass() == null) {
+		if (resolved == null) {
 			return NONE;
 		}
-		ResolvableType superType = this.superType;
-		if (superType == null) {
-			superType = forType(resolved.getGenericSuperclass(), this);
-			this.superType = superType;
+		try {
+			Type superclass = resolved.getGenericSuperclass();
+			if (superclass == null) {
+				return NONE;
+			}
+			ResolvableType superType = this.superType;
+			if (superType == null) {
+				superType = forType(superclass, this);
+				this.superType = superType;
+			}
+			return superType;
 		}
-		return superType;
+		catch (TypeNotPresentException ex) {
+			// Ignore non-present types in generic signature
+			return NONE;
+		}
 	}
 
 	/**
@@ -544,12 +554,17 @@ public class ResolvableType implements Serializable {
 		}
 		Class<?> resolved = resolve();
 		if (resolved != null) {
-			for (Type genericInterface : resolved.getGenericInterfaces()) {
-				if (genericInterface instanceof Class) {
-					if (forClass((Class<?>) genericInterface).hasGenerics()) {
-						return true;
+			try {
+				for (Type genericInterface : resolved.getGenericInterfaces()) {
+					if (genericInterface instanceof Class) {
+						if (forClass((Class<?>) genericInterface).hasGenerics()) {
+							return true;
+						}
 					}
 				}
+			}
+			catch (TypeNotPresentException ex) {
+				// Ignore non-present types in generic signature
 			}
 			return getSuperType().hasUnresolvableGenerics();
 		}

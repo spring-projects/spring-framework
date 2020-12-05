@@ -74,6 +74,22 @@ class KotlinBeanUtilsTests {
 		assertThat(baz.param2).isEqualTo(12)
 	}
 
+	@Test
+	@Suppress("UsePropertyAccessSyntax")
+	fun `Instantiate class with private constructor`() {
+		BeanUtils.instantiateClass(PrivateConstructor::class.java.getDeclaredConstructor())
+	}
+
+	@Test
+	fun `Instantiate class with protected constructor`() {
+		BeanUtils.instantiateClass(ProtectedConstructor::class.java.getDeclaredConstructor())
+	}
+
+	@Test
+	fun `Instantiate private class`() {
+		BeanUtils.instantiateClass(PrivateClass::class.java.getDeclaredConstructor())
+	}
+
 	class Foo(val param1: String, val param2: Int)
 
 	class Bar(val param1: String, val param2: Int = 12)
@@ -105,5 +121,11 @@ class KotlinBeanUtilsTests {
 
 		constructor(param1: String)
 	}
+
+	class PrivateConstructor private constructor()
+
+	open class ProtectedConstructor protected constructor()
+
+	private class PrivateClass
 
 }

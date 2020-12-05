@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import javax.servlet.ServletContext;
@@ -73,16 +74,18 @@ public abstract class ServletContextPropertyUtils {
 	 * @see SystemPropertyUtils#PLACEHOLDER_SUFFIX
 	 * @see SystemPropertyUtils#resolvePlaceholders(String, boolean)
 	 */
-	public static String resolvePlaceholders(String text, ServletContext servletContext,
-			boolean ignoreUnresolvablePlaceholders) {
+	public static String resolvePlaceholders(
+			String text, ServletContext servletContext, boolean ignoreUnresolvablePlaceholders) {
 
+		if (text.isEmpty()) {
+			return text;
+		}
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new ServletContextPlaceholderResolver(text, servletContext));
 	}
 
 
-	private static class ServletContextPlaceholderResolver
-			implements PropertyPlaceholderHelper.PlaceholderResolver {
+	private static class ServletContextPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
 
 		private final String text;
 

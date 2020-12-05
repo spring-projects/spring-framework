@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -392,7 +391,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someIntegerArray");
 		Integer[] array = new Integer[50];
 		for (int i = 0; i < array.length; i++) {
-			array[i] = new Integer(i);
+			array[i] = i;
 		}
 		this.tag.setItems(array);
 		int result = this.tag.doStartTag();
@@ -600,7 +599,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.bean.setSomeList(list);
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
-		errors.getPropertyAccessor().registerCustomEditor(List.class, new CustomCollectionEditor(LinkedList.class) {
+		errors.getPropertyAccessor().registerCustomEditor(List.class, new CustomCollectionEditor(ArrayList.class) {
 			@Override
 			public String getAsText() {
 				return getValue().toString();
@@ -1012,7 +1011,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.bean.setCountry("UK");
 		this.bean.setSex("M");
 		this.bean.setMyFloat(new Float("12.34"));
-		this.bean.setSomeIntegerArray(new Integer[]{new Integer(12), new Integer(34)});
+		this.bean.setSomeIntegerArray(new Integer[]{12, 34});
 		return this.bean;
 	}
 

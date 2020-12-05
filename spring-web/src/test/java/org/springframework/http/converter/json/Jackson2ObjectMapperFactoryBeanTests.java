@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,8 +212,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo(timestamp.toString());
 	}
 
-	@Test // SPR-12634
-	@SuppressWarnings("unchecked")
+	@Test  // SPR-12634
 	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
 		this.factory.setModulesToInstall(CustomIntegerModule.class);
 		this.factory.afterPropertiesSet();
@@ -221,10 +220,10 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8")).contains("customid");
+		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
 	}
 
-	@Test // SPR-12634
+	@Test  // SPR-12634
 	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
 		Map<Class<?>, JsonSerializer<?>> serializers = new HashMap<>();
 		serializers.put(Integer.class, new CustomIntegerSerializer());
@@ -235,7 +234,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo("1322903730000");
-		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8")).contains("customid");
+		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
 	}
 
 	@Test
@@ -262,7 +261,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		this.factory.setPropertyNamingStrategy(strategy);
 		this.factory.afterPropertiesSet();
 

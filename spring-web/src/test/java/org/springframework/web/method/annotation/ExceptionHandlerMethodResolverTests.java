@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,18 @@ public class ExceptionHandlerMethodResolverTests {
 		Exception exception = new Exception();
 		assertThat(resolver.resolveMethod(exception)).as("1st lookup").isNull();
 		assertThat(resolver.resolveMethod(exception)).as("2nd lookup from cache").isNull();
+	}
+
+	@Test
+	public void resolveMethodExceptionCause() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionController.class);
+
+		SocketException bindException = new BindException();
+		bindException.initCause(new FileNotFoundException());
+
+		Exception exception = new Exception(new Exception(new Exception(bindException)));
+
+		assertThat(resolver.resolveMethod(exception).getName()).isEqualTo("handleSocketException");
 	}
 
 	@Test

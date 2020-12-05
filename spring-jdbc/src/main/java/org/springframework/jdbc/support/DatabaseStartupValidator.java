@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.lang.Nullable;
  * Particularly appropriate for waiting on a slowly starting Oracle database.
  *
  * @author Juergen Hoeller
+ * @author Marten Deinum
  * @since 18.12.2003
  */
 public class DatabaseStartupValidator implements InitializingBean {
@@ -76,7 +77,9 @@ public class DatabaseStartupValidator implements InitializingBean {
 
 	/**
 	 * Set the SQL query string to use for validation.
+	 * @deprecated as of 5.3, in favor of the JDBC 4.0 connection validation
 	 */
+	@Deprecated
 	public void setValidationQuery(String validationQuery) {
 		this.validationQuery = validationQuery;
 	}
@@ -108,9 +111,6 @@ public class DatabaseStartupValidator implements InitializingBean {
 		if (this.dataSource == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");
 		}
-		if (this.validationQuery == null) {
-			throw new IllegalArgumentException("Property 'validationQuery' is required");
-		}
 
 		try {
 			boolean validated = false;
@@ -124,17 +124,27 @@ public class DatabaseStartupValidator implements InitializingBean {
 				try {
 					con = this.dataSource.getConnection();
 					if (con == null) {
-						throw new CannotGetJdbcConnectionException("Failed to execute validation query: " +
+						throw new CannotGetJdbcConnectionException("Failed to execute validation: " +
 								"DataSource returned null from getConnection(): " + this.dataSource);
 					}
-					stmt = con.createStatement();
-					stmt.execute(this.validationQuery);
-					validated = true;
+					if (this.validationQuery == null) {
+						validated = con.isValid(this.interval);
+					}
+					else {
+						stmt = con.createStatement();
+						stmt.execute(this.validationQuery);
+						validated = true;
+					}
 				}
 				catch (SQLException ex) {
 					latestEx = ex;
 					if (logger.isDebugEnabled()) {
-						logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+						if (this.validationQuery != null) {
+							logger.debug("Validation query [" + this.validationQuery + "] threw exception", ex);
+						}
+						else {
+							logger.debug("Validation check threw exception", ex);
+						}
 					}
 					if (logger.isInfoEnabled()) {
 						float rest = ((float) (deadLine - System.currentTimeMillis())) / 1000;

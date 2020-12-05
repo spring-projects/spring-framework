@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,8 +79,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 	}
 
 	@Test
@@ -159,8 +158,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 	}
 
 	@Test
@@ -191,23 +190,23 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 	}
 
 	@Test
 	public void testGenericSetConstructorWithAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerSingleton("integer1", new Integer(4));
-		bf.registerSingleton("integer2", new Integer(5));
+		bf.registerSingleton("integer1", 4);
+		bf.registerSingleton("integer2", 5);
 
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 	}
 
 	@Test
@@ -239,8 +238,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 		assertThat(gb.getResourceList().get(1)).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
@@ -248,8 +247,8 @@ public class BeanFactoryGenericsTests {
 	@Test
 	public void testGenericSetListConstructorWithAutowiring() throws Exception {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerSingleton("integer1", new Integer(4));
-		bf.registerSingleton("integer2", new Integer(5));
+		bf.registerSingleton("integer1", 4);
+		bf.registerSingleton("integer2", 5);
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
@@ -258,8 +257,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 		assertThat(gb.getResourceList().get(1)).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
@@ -296,10 +295,10 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 	}
 
 	@Test
@@ -316,8 +315,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 	}
 
@@ -343,8 +342,8 @@ public class BeanFactoryGenericsTests {
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
 		assertThat(gb.getShortMap().size()).isEqualTo(2);
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 	}
 
 	@Test
@@ -366,8 +365,8 @@ public class BeanFactoryGenericsTests {
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
 		assertThat(gb.getShortMap().size()).isEqualTo(2);
-		assertThat(gb.getShortMap().get(new Short("1"))).isEqualTo(new Integer(0));
-		assertThat(gb.getShortMap().get(new Short("2"))).isEqualTo(new Integer(3));
+		assertThat(gb.getShortMap().get(new Short("1"))).isEqualTo(0);
+		assertThat(gb.getShortMap().get(new Short("2"))).isEqualTo(3);
 	}
 
 	@Test
@@ -376,8 +375,8 @@ public class BeanFactoryGenericsTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
 
 		Map<Short, Integer> input = new HashMap<>();
-		input.put(new Short((short) 1), new Integer(0));
-		input.put(new Short((short) 2), new Integer(3));
+		input.put(new Short((short) 1), 0);
+		input.put(new Short((short) 2), 3);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(input);
 
@@ -386,8 +385,8 @@ public class BeanFactoryGenericsTests {
 
 		assertThat(gb.getShortMap()).isSameAs(gb.getPlainMap());
 		assertThat(gb.getShortMap().size()).isEqualTo(2);
-		assertThat(gb.getShortMap().get(new Short("1"))).isEqualTo(new Integer(0));
-		assertThat(gb.getShortMap().get(new Short("2"))).isEqualTo(new Integer(3));
+		assertThat(gb.getShortMap().get(new Short("1"))).isEqualTo(0);
+		assertThat(gb.getShortMap().get(new Short("2"))).isEqualTo(3);
 	}
 
 	@Test
@@ -403,8 +402,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getLongMap().get(new Long("4"))).isEqualTo("5");
-		assertThat(gb.getLongMap().get(new Long("6"))).isEqualTo("7");
+		assertThat(gb.getLongMap().get(4L)).isEqualTo("5");
+		assertThat(gb.getLongMap().get(6L)).isEqualTo("7");
 	}
 
 	@Test
@@ -420,7 +419,7 @@ public class BeanFactoryGenericsTests {
 
 		Map<String, AbstractCollection<?>> input = new HashMap<>();
 		HashSet<Integer> value1 = new HashSet<>();
-		value1.add(new Integer(1));
+		value1.add(1);
 		input.put("1", value1);
 		ArrayList<Boolean> value2 = new ArrayList<>();
 		value2.add(Boolean.TRUE);
@@ -431,9 +430,9 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		boolean condition1 = gb.getCollectionMap().get(new Integer(1)) instanceof HashSet;
+		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
 		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList;
+		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
 		assertThat(condition).isTrue();
 	}
 
@@ -452,8 +451,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 	}
 
 	@Test
@@ -474,8 +473,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
 		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 		assertThat(gb.getResourceList().get(1)).isEqualTo(new UrlResource("http://localhost:9090"));
 	}
@@ -498,10 +497,10 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getIntegerSet().contains(new Integer(4))).isTrue();
-		assertThat(gb.getIntegerSet().contains(new Integer(5))).isTrue();
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getIntegerSet().contains(4)).isTrue();
+		assertThat(gb.getIntegerSet().contains(5)).isTrue();
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 	}
 
 	@Test
@@ -519,8 +518,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 		assertThat(gb.getResourceList().get(0)).isEqualTo(new UrlResource("http://localhost:8080"));
 	}
 
@@ -544,8 +543,8 @@ public class BeanFactoryGenericsTests {
 
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
-		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(new Integer(5));
-		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(new Integer(7));
+		assertThat(gb.getShortMap().get(new Short("4"))).isEqualTo(5);
+		assertThat(gb.getShortMap().get(new Short("6"))).isEqualTo(7);
 	}
 
 	@Test
@@ -580,7 +579,7 @@ public class BeanFactoryGenericsTests {
 
 		Map<String, AbstractCollection<?>> input = new HashMap<>();
 		HashSet<Integer> value1 = new HashSet<>();
-		value1.add(new Integer(1));
+		value1.add(1);
 		input.put("1", value1);
 		ArrayList<Boolean> value2 = new ArrayList<>();
 		value2.add(Boolean.TRUE);
@@ -591,9 +590,9 @@ public class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		boolean condition1 = gb.getCollectionMap().get(new Integer(1)) instanceof HashSet;
+		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
 		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(new Integer(2)) instanceof ArrayList;
+		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
 		assertThat(condition).isTrue();
 	}
 
@@ -624,7 +623,7 @@ public class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		Map<?, ?> map = (Map<?, ?>) bf.getBean("map");
 		assertThat(map.size()).isEqualTo(1);
-		assertThat(map.keySet().iterator().next()).isEqualTo(new Integer(10));
+		assertThat(map.keySet().iterator().next()).isEqualTo(10);
 		assertThat(map.values().iterator().next()).isEqualTo(new URL("http://localhost:8080"));
 	}
 
@@ -634,9 +633,9 @@ public class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
-		assertThat(gb.getGenericProperty()).isEqualTo(new Integer(10));
-		assertThat(gb.getGenericListProperty().get(0)).isEqualTo(new Integer(20));
-		assertThat(gb.getGenericListProperty().get(1)).isEqualTo(new Integer(30));
+		assertThat(gb.getGenericProperty()).isEqualTo(10);
+		assertThat(gb.getGenericListProperty().get(0)).isEqualTo(20);
+		assertThat(gb.getGenericListProperty().get(1)).isEqualTo(30);
 	}
 
 	@Test
@@ -645,9 +644,9 @@ public class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
-		assertThat(gb.getGenericProperty().iterator().next()).isEqualTo(new Integer(10));
-		assertThat(gb.getGenericListProperty().get(0).iterator().next()).isEqualTo(new Integer(20));
-		assertThat(gb.getGenericListProperty().get(1).iterator().next()).isEqualTo(new Integer(30));
+		assertThat(gb.getGenericProperty().iterator().next()).isEqualTo(10);
+		assertThat(gb.getGenericListProperty().get(0).iterator().next()).isEqualTo(20);
+		assertThat(gb.getGenericListProperty().get(1).iterator().next()).isEqualTo(30);
 	}
 
 	@Test
@@ -960,7 +959,7 @@ public class BeanFactoryGenericsTests {
 
 
 	@SuppressWarnings("serial")
-	public static class NamedUrlList extends LinkedList<URL> {
+	public static class NamedUrlList extends ArrayList<URL> {
 	}
 
 

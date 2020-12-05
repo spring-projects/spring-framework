@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,11 @@ public class HandlerResultMatchers {
 		return result -> {
 			Object handler = result.getHandler();
 			assertNotNull("No handler", handler);
-			if (handler != null) {
-				Class<?> actual = handler.getClass();
-				if (HandlerMethod.class.isInstance(handler)) {
-					actual = ((HandlerMethod) handler).getBeanType();
-				}
-				assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
+			Class<?> actual = handler.getClass();
+			if (handler instanceof HandlerMethod) {
+				actual = ((HandlerMethod) handler).getBeanType();
 			}
+			assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 		};
 	}
 

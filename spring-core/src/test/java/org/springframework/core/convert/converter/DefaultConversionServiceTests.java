@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -51,13 +50,10 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Unit tests for {@link DefaultConversionService}.
@@ -387,7 +383,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertArrayToCollectionImpl() {
-		LinkedList<?> result = conversionService.convert(new String[] {"1", "2", "3"}, LinkedList.class);
+		ArrayList<?> result = conversionService.convert(new String[] {"1", "2", "3"}, ArrayList.class);
 		assertThat(result.get(0)).isEqualTo("1");
 		assertThat(result.get(1)).isEqualTo("2");
 		assertThat(result.get(2)).isEqualTo("3");
@@ -963,23 +959,6 @@ class DefaultConversionServiceTests {
 		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Object.class),
 				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
 		assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
-	}
-
-	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	void testPerformance1() {
-		StopWatch watch = new StopWatch("integer->string conversionPerformance");
-		watch.start("convert 4,000,000 with conversion service");
-		for (int i = 0; i < 4000000; i++) {
-			conversionService.convert(3, String.class);
-		}
-		watch.stop();
-		watch.start("convert 4,000,000 manually");
-		for (int i = 0; i < 4000000; i++) {
-			Integer.valueOf(3).toString();
-		}
-		watch.stop();
-		// System.out.println(watch.prettyPrint());
 	}
 
 

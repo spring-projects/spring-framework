@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,13 @@
  */
 package org.springframework.web.reactive.socket.adapter;
 
+import java.util.function.Consumer;
+
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -94,10 +97,23 @@ public class ReactorNettyWebSocketSession
 	}
 
 	@Override
+	public boolean isOpen() {
+		DisposedCallback callback = new DisposedCallback();
+		getDelegate().getInbound().withConnection(callback);
+		return callback.isDisposed();
+	}
+
+	@Override
 	public Mono<Void> close(CloseStatus status) {
+		// this will notify WebSocketInbound.receiveCloseStatus()
 		return getDelegate().getOutbound().sendClose(status.getCode(), status.getReason());
 	}
 
+	@Override
+	public Mono<CloseStatus> closeStatus() {
+		return getDelegate().getInbound().receiveCloseStatus()
+				.map(status -> CloseStatus.create(status.code(), status.reasonText()));
+	}
 
 	/**
 	 * Simple container for {@link NettyInbound} and {@link NettyOutbound}.
@@ -120,6 +136,21 @@ public class ReactorNettyWebSocketSession
 
 		public WebsocketOutbound getOutbound() {
 			return this.outbound;
+		}
+	}
+
+
+	private static class DisposedCallback implements Consumer<Connection> {
+
+		private boolean disposed;
+
+		public boolean isDisposed() {
+			return this.disposed;
+		}
+
+		@Override
+		public void accept(Connection connection) {
+			this.disposed = connection.isDisposed();
 		}
 	}
 

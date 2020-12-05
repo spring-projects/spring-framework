@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.lang.Nullable;
-import org.springframework.remoting.rmi.CodebaseAwareObjectInputStream;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
@@ -44,7 +43,9 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 1.1
  * @see #doExecuteRequest
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerRequestExecutor, BeanClassLoaderAware {
 
 	/**
@@ -166,12 +167,8 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see #doWriteRemoteInvocation
 	 */
 	protected void writeRemoteInvocation(RemoteInvocation invocation, OutputStream os) throws IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os));
-		try {
+		try (ObjectOutputStream oos = new ObjectOutputStream(decorateOutputStream(os))) {
 			doWriteRemoteInvocation(invocation, oos);
-		}
-		finally {
-			oos.close();
 		}
 	}
 
@@ -240,12 +237,8 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	protected RemoteInvocationResult readRemoteInvocationResult(InputStream is, @Nullable String codebaseUrl)
 			throws IOException, ClassNotFoundException {
 
-		ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl);
-		try {
+		try (ObjectInputStream ois = createObjectInputStream(decorateInputStream(is), codebaseUrl)) {
 			return doReadRemoteInvocationResult(ois);
-		}
-		finally {
-			ois.close();
 		}
 	}
 
@@ -272,7 +265,7 @@ public abstract class AbstractHttpInvokerRequestExecutor implements HttpInvokerR
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is, @Nullable String codebaseUrl) throws IOException {
-		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), codebaseUrl);
+		return new org.springframework.remoting.rmi.CodebaseAwareObjectInputStream(is, getBeanClassLoader(), codebaseUrl);
 	}
 
 	/**

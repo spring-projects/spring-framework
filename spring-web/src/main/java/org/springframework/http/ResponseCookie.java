@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,9 +185,28 @@ public final class ResponseCookie extends HttpCookie {
 	 * with a name-value pair and may also include attributes.
 	 * @param name the cookie name
 	 * @param value the cookie value
-	 * @return the created cookie instance
+	 * @return a builder to create the cookie with
 	 */
 	public static ResponseCookieBuilder from(final String name, final String value) {
+		return from(name, value, false);
+	}
+
+	/**
+	 * Factory method to obtain a builder for a server-defined cookie. Unlike
+	 * {@link #from(String, String)} this option assumes input from a remote
+	 * server, which can be handled more leniently, e.g. ignoring a empty domain
+	 * name with double quotes.
+	 * @param name the cookie name
+	 * @param value the cookie value
+	 * @return a builder to create the cookie with
+	 * @since 5.2.5
+	 */
+	public static ResponseCookieBuilder fromClientResponse(final String name, final String value) {
+		return from(name, value, true);
+	}
+
+
+	private static ResponseCookieBuilder from(final String name, final String value, boolean lenient) {
 
 		return new ResponseCookieBuilder() {
 
@@ -220,8 +239,21 @@ public final class ResponseCookie extends HttpCookie {
 
 			@Override
 			public ResponseCookieBuilder domain(String domain) {
-				this.domain = domain;
+				this.domain = initDomain(domain);
 				return this;
+			}
+
+			@Nullable
+			private String initDomain(String domain) {
+				if (lenient && StringUtils.hasLength(domain)) {
+					String str = domain.trim();
+					if (str.startsWith("\"") && str.endsWith("\"")) {
+						if (str.substring(1, str.length() - 1).trim().isEmpty()) {
+							return null;
+						}
+					}
+				}
+				return domain;
 			}
 
 			@Override
@@ -354,9 +386,8 @@ public final class ResponseCookie extends HttpCookie {
 				start = 1;
 				end--;
 			}
-			char[] chars = value.toCharArray();
 			for (int i = start; i < end; i++) {
-				char c = chars[i];
+				char c = value.charAt(i);
 				if (c < 0x21 || c == 0x22 || c == 0x2c || c == 0x3b || c == 0x5c || c == 0x7f) {
 					throw new IllegalArgumentException(
 							"RFC2616 cookie value cannot have '" + c + "'");

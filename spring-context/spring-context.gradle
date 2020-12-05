@@ -20,7 +20,7 @@ dependencies {
 	optional("javax.xml.ws:jaxws-api")
 	optional("org.aspectj:aspectjweaver")
 	optional("org.codehaus.groovy:groovy")
-	optional("org.beanshell:bsh")
+	optional("org.apache-extras.beanshell:bsh")
 	optional("joda-time:joda-time")
 	optional("org.hibernate:hibernate-validator:5.4.3.Final")
 	optional("org.jetbrains.kotlin:kotlin-reflect")

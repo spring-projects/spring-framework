@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,17 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.reactivestreams.Publisher
 import org.springframework.core.ParameterizedTypeReference
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.CompletableFuture
+import java.util.function.Function
 
 /**
  * Mock object based tests for [WebClient] Kotlin extensions
@@ -80,11 +84,35 @@ class WebClientExtensionsTests {
 	}
 
 	@Test
+	@Suppress("DEPRECATION")
 	fun awaitExchange() {
 		val response = mockk<ClientResponse>()
 		every { requestBodySpec.exchange() } returns Mono.just(response)
 		runBlocking {
 			assertThat(requestBodySpec.awaitExchange()).isEqualTo(response)
+		}
+	}
+
+	@Test
+	fun `awaitExchange with function parameter`() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToMono(any<Function<ClientResponse, Mono<Foo>>>()) } returns Mono.just(foo)
+		runBlocking {
+			assertThat(requestBodySpec.awaitExchange { foo }).isEqualTo(foo)
+		}
+	}
+
+	@Test
+	fun exchangeToFlow() {
+		val foo = mockk<Foo>()
+		every { requestBodySpec.exchangeToFlux(any<Function<ClientResponse, Flux<Foo>>>()) } returns Flux.just(foo, foo)
+		runBlocking {
+			assertThat(requestBodySpec.exchangeToFlow {
+				flow {
+					emit(foo)
+					emit(foo)
+				}
+			}.toList()).isEqualTo(listOf(foo, foo))
 		}
 	}
 
