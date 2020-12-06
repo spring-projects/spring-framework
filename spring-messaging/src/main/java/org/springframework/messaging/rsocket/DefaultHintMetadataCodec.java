@@ -19,7 +19,6 @@ package org.springframework.messaging.rsocket;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -85,12 +84,18 @@ public class DefaultHintMetadataCodec implements HintMetadataCodec {
 	@Override
 	public void encodeHints(Map<String, Object> hints, Consumer<ByteBuf> consumer) {
 		CompositeByteBuf composite = this.byteBufAllocator.compositeBuffer();
-		hints.forEach( (key, value) -> {
-			Assert.notNull(key, "'key' must not be null");
-			Assert.notNull(value, "'value' must not be null");
-			encodeHint(composite,key,value);
-		});
-		consumer.accept(composite);
+		try {
+			hints.forEach((key, value) -> {
+				Assert.notNull(key, "'key' must not be null");
+				Assert.notNull(value, "'value' must not be null");
+				encodeHint(composite, key, value);
+			});
+			consumer.accept(composite);
+		}
+		catch (Throwable ex){
+			composite.release();
+			throw ex;
+		}
 	}
 
 
@@ -118,9 +123,6 @@ public class DefaultHintMetadataCodec implements HintMetadataCodec {
 
 	private void decodeHint(String key, ResolvableType resolvableType , ByteBuf value, Map<String,Object> result){
 		Decoder<Object> decoder = this.decoder( resolvableType, MimeTypeUtils.ALL);
-		if (Objects.isNull(decoder) && logger.isDebugEnabled()) {
-			logger.debug("No decoder for hint,key:" + key + ",class resolvable type:" + resolvableType);
-		}
 		result.put(key, decoder.decode(this.nettyDataBufferFactory.wrap(value.retain()), resolvableType,
 				MimeTypeUtils.ALL, null));
 	}

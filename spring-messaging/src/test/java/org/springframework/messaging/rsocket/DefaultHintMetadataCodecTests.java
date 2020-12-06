@@ -1,11 +1,14 @@
 package org.springframework.messaging.rsocket;
 
+import io.netty.buffer.Unpooled;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.codec.*;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
+import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -59,6 +62,17 @@ public class DefaultHintMetadataCodecTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> defaultHintMetadataCodec.encodeHints(hints,e->{}))
 				.withMessage("'value' must not be null");
+	}
+
+	@Test
+	public void testHintsCodecWithOutEncoder(){
+		Map<String,Object> hints = new HashMap<>();
+		hints.put("a", Unpooled.wrappedBuffer(ByteBuffer.wrap("a_value".getBytes())));
+		DefaultHintMetadataCodec defaultHintMetadataCodec = new DefaultHintMetadataCodec(this.dataBufferFactory,
+				new DefaultMetadataExtractor(this.decoders),this.encoders.subList(0,4),this.decoders);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> defaultHintMetadataCodec.encodeHints(hints,e->{}))
+				.withMessage("No encoder for io.netty.buffer.UnpooledHeapByteBuf");
 	}
 
 }
