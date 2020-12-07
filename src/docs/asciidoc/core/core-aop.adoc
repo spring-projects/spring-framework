@@ -925,7 +925,6 @@ You can declare before advice in an aspect by using the `@Before` annotation:
 		public void doAccessCheck() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -941,7 +940,6 @@ You can declare before advice in an aspect by using the `@Before` annotation:
 		fun doAccessCheck() {
 			// ...
 		}
-
 	}
 ----
 
@@ -961,7 +959,6 @@ following example:
 		public void doAccessCheck() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -977,7 +974,6 @@ following example:
 		fun doAccessCheck() {
 			// ...
 		}
-
 	}
 ----
 
@@ -985,8 +981,8 @@ following example:
 [[aop-advice-after-returning]]
 ==== After Returning Advice
 
-After returning advice runs when a matched method execution returns normally. You can
-declare it by using the `@AfterReturning` annotation:
+After returning advice runs when a matched method execution returns normally.
+You can declare it by using the `@AfterReturning` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1001,7 +997,6 @@ declare it by using the `@AfterReturning` annotation:
 		public void doAccessCheck() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1017,16 +1012,16 @@ declare it by using the `@AfterReturning` annotation:
 		fun doAccessCheck() {
 			// ...
 		}
-
+	}
 ----
 
-NOTE: You can have multiple advice declarations (and other members
-as well), all inside the same aspect. We show only a single advice declaration in
-these examples to focus the effect of each one.
+NOTE: You can have multiple advice declarations (and other members as well),
+all inside the same aspect. We show only a single advice declaration in these
+examples to focus the effect of each one.
 
-Sometimes, you need access in the advice body to the actual value that was returned. You
-can use the form of `@AfterReturning` that binds the return value to get that access, as
-the following example shows:
+Sometimes, you need access in the advice body to the actual value that was returned.
+You can use the form of `@AfterReturning` that binds the return value to get that
+access, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1043,7 +1038,6 @@ the following example shows:
 		public void doAccessCheck(Object retVal) {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1061,15 +1055,14 @@ the following example shows:
 		fun doAccessCheck(retVal: Any) {
 			// ...
 		}
-
 	}
 ----
 
-The name used in the `returning` attribute must correspond to the name of a parameter in
-the advice method. When a method execution returns, the return value is passed to
+The name used in the `returning` attribute must correspond to the name of a parameter
+in the advice method. When a method execution returns, the return value is passed to
 the advice method as the corresponding argument value. A `returning` clause also
-restricts matching to only those method executions that return a value of the specified
-type (in this case, `Object`, which matches any return value).
+restricts matching to only those method executions that return a value of the
+specified type (in this case, `Object`, which matches any return value).
 
 Please note that it is not possible to return a totally different reference when
 using after returning advice.
@@ -1079,8 +1072,8 @@ using after returning advice.
 ==== After Throwing Advice
 
 After throwing advice runs when a matched method execution exits by throwing an
-exception. You can declare it by using the `@AfterThrowing` annotation, as the following
-example shows:
+exception. You can declare it by using the `@AfterThrowing` annotation, as the
+following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1095,7 +1088,6 @@ example shows:
 		public void doRecoveryActions() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1111,15 +1103,14 @@ example shows:
 		fun doRecoveryActions() {
 			// ...
 		}
-
 	}
 ----
 
-Often, you want the advice to run only when exceptions of a given type are thrown, and
-you also often need access to the thrown exception in the advice body. You can use the
-`throwing` attribute to both restrict matching (if desired -- use `Throwable` as the
-exception type otherwise) and bind the thrown exception to an advice parameter. The
-following example shows how to do so:
+Often, you want the advice to run only when exceptions of a given type are thrown,
+and you also often need access to the thrown exception in the advice body. You can
+use the `throwing` attribute to both restrict matching (if desired -- use `Throwable`
+as the exception type otherwise) and bind the thrown exception to an advice parameter.
+The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1136,7 +1127,6 @@ following example shows how to do so:
 		public void doRecoveryActions(DataAccessException ex) {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1154,15 +1144,22 @@ following example shows how to do so:
 		fun doRecoveryActions(ex: DataAccessException) {
 			// ...
 		}
-
 	}
 ----
 
 The name used in the `throwing` attribute must correspond to the name of a parameter in
 the advice method. When a method execution exits by throwing an exception, the exception
-is passed to the advice method as the corresponding argument value. A `throwing`
-clause also restricts matching to only those method executions that throw an exception
-of the specified type ( `DataAccessException`, in this case).
+is passed to the advice method as the corresponding argument value. A `throwing` clause
+also restricts matching to only those method executions that throw an exception of the
+specified type (`DataAccessException`, in this case).
+
+[NOTE]
+====
+Note that `@AfterThrowing` does not indicate a general exception handling callback.
+Specifically, an `@AfterThrowing` advice method is only supposed to receive exceptions
+from the join point (user-declared target method) itself but not from an accompanying
+`@After`/`@AfterReturning` method.
+====
 
 
 [[aop-advice-after-finally]]
@@ -1170,8 +1167,8 @@ of the specified type ( `DataAccessException`, in this case).
 
 After (finally) advice runs when a matched method execution exits. It is declared by
 using the `@After` annotation. After advice must be prepared to handle both normal and
-exception return conditions. It is typically used for releasing resources and similar purposes.
-The following example shows how to use after finally advice:
+exception return conditions. It is typically used for releasing resources and similar
+purposes. The following example shows how to use after finally advice:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1186,7 +1183,6 @@ The following example shows how to use after finally advice:
 		public void doReleaseLock() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1202,30 +1198,37 @@ The following example shows how to use after finally advice:
 		fun doReleaseLock() {
 			// ...
 		}
-
 	}
 ----
+
+[NOTE]
+====
+Note that `@After` advice in AspectJ is defined as "after finally advice", analogous
+to a finally block in a try-catch statement. It will be invoked for any outcome,
+normal return or exception thrown from the join point (user-declared target method),
+in contrast to `@AfterReturning` which only applies to successful normal returns.
+====
 
 
 [[aop-ataspectj-around-advice]]
 ==== Around Advice
 
-The last kind of advice is around advice. Around advice runs "`around`" a matched method's
-execution. It has the opportunity to do work both before and after the method runs
-and to determine when, how, and even if the method actually gets to run at all.
+The last kind of advice is around advice. Around advice runs "`around`" a matched
+method's execution. It has the opportunity to do work both before and after the method
+runs and to determine when, how, and even if the method actually gets to run at all.
 Around advice is often used if you need to share state before and after a method
-execution in a thread-safe manner (starting and stopping a timer, for example). Always
-use the least powerful form of advice that meets your requirements (that is, do not use
-around advice if before advice would do).
+execution in a thread-safe manner (starting and stopping a timer, for example).
+Always use the least powerful form of advice that meets your requirements (that is,
+do not use around advice if before advice would do).
 
 Around advice is declared by using the `@Around` annotation. The first parameter of the
 advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
-run. The `proceed` method can also pass in an `Object[]`. The values
-in the array are used as the arguments to the method execution when it proceeds.
+calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
+The `proceed` method can also pass in an `Object[]`. The values in the array are used
+as the arguments to the method execution when it proceeds.
 
-NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than the
-behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
+NOTE: The behavior of `proceed` when called with an `Object[]` is a little different than
+the behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
 advice written using the traditional AspectJ language, the number of arguments passed to
 `proceed` must match the number of arguments passed to the around advice (not the number
 of arguments taken by the underlying join point), and the value passed to proceed in a
@@ -1257,7 +1260,6 @@ The following example shows how to use around advice:
 			// stop stopwatch
 			return retVal;
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1277,34 +1279,31 @@ The following example shows how to use around advice:
 			// stop stopwatch
 			return retVal
 		}
-
 	}
 ----
 
-The value returned by the around advice is the return value seen by the caller of
-the method. For example, a simple caching aspect could return a value from a cache if it
+The value returned by the around advice is the return value seen by the caller of the
+method. For example, a simple caching aspect could return a value from a cache if it
 has one and invoke `proceed()` if it does not. Note that `proceed` may be invoked once,
-many times, or not at all within the body of the around advice. All of these are
-legal.
+many times, or not at all within the body of the around advice. All of these are legal.
 
 
 [[aop-ataspectj-advice-params]]
 ==== Advice Parameters
 
-Spring offers fully typed advice, meaning that you declare the parameters you need
-in the advice signature (as we saw earlier for the returning and throwing examples) rather
-than work with `Object[]` arrays all the time. We see how to make argument and other
-contextual values available to the advice body later in this section. First, we take a look at
-how to write generic advice that can find out about the method the advice is currently
-advising.
+Spring offers fully typed advice, meaning that you declare the parameters you need in the
+advice signature (as we saw earlier for the returning and throwing examples) rather than
+work with `Object[]` arrays all the time. We see how to make argument and other contextual
+values available to the advice body later in this section. First, we take a look at how to
+write generic advice that can find out about the method the advice is currently advising.
 
 [[aop-ataspectj-advice-params-the-joinpoint]]
 ===== Access to the Current `JoinPoint`
 
 Any advice method may declare, as its first parameter, a parameter of type
-`org.aspectj.lang.JoinPoint` (note that around advice is required to declare
-a first parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoint`. The
-`JoinPoint` interface provides a number of useful methods:
+`org.aspectj.lang.JoinPoint` (note that around advice is required to declare a first
+parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoint`.
+The `JoinPoint` interface provides a number of useful methods:
 
 * `getArgs()`: Returns the method arguments.
 * `getThis()`: Returns the proxy object.
@@ -1320,9 +1319,9 @@ See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lan
 We have already seen how to bind the returned value or exception value (using after
 returning and after throwing advice). To make argument values available to the advice
 body, you can use the binding form of `args`. If you use a parameter name in place of a
-type name in an args expression, the value of the corresponding argument is
-passed as the parameter value when the advice is invoked. An example should make this
-clearer. Suppose you want to advise the execution of DAO operations that take an `Account`
+type name in an args expression, the value of the corresponding argument is passed as
+the parameter value when the advice is invoked. An example should make this clearer.
+Suppose you want to advise the execution of DAO operations that take an `Account`
 object as the first parameter, and you need access to the account in the advice body.
 You could write the following:
 
@@ -1654,20 +1653,23 @@ the higher precedence.
 
 [NOTE]
 ====
+Each of the distinct advice types of a particular aspect is conceptually meant to apply
+to the join point directly. As a consequence, an `@AfterThrowing` advice method is not
+supposed to receive an exception from an accompanying `@After`/`@AfterReturning` method.
+
 As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
 need to run at the same join point are assigned precedence based on their advice type in
 the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
-`@AfterReturning`, `@AfterThrowing`. Note, however, that due to the implementation style
-in Spring's `AspectJAfterAdvice`, an `@After` advice method will effectively be invoked
-after any `@AfterReturning` or `@AfterThrowing` advice methods in the same aspect.
+`@AfterReturning`, `@AfterThrowing`. Note, however, that an `@After` advice method will
+effectively be invoked after any `@AfterReturning` or `@AfterThrowing` advice methods
+in the same aspect, following AspectJ's "after finally advice" semantics for `@After`.
 
 When two pieces of the same type of advice (for example, two `@After` advice methods)
 defined in the same `@Aspect` class both need to run at the same join point, the ordering
 is undefined (since there is no way to retrieve the source code declaration order through
 reflection for javac-compiled classes). Consider collapsing such advice methods into one
-advice method per join point in each `@Aspect` class or refactor the pieces of advice
-into separate `@Aspect` classes that you can order at the aspect level via `Ordered` or
-`@Order`.
+advice method per join point in each `@Aspect` class or refactor the pieces of advice into
+separate `@Aspect` classes that you can order at the aspect level via `Ordered` or `@Order`.
 ====
 
 
@@ -1678,11 +1680,11 @@ Introductions (known as inter-type declarations in AspectJ) enable an aspect to 
 that advised objects implement a given interface, and to provide an implementation of
 that interface on behalf of those objects.
 
-You can make an introduction by using the `@DeclareParents` annotation. This annotation is used
-to declare that matching types have a new parent (hence the name). For example, given an
-interface named `UsageTracked` and an implementation of that interface named `DefaultUsageTracked`,
-the following aspect declares that all implementors of service interfaces also implement
-the `UsageTracked` interface (to expose statistics via JMX for example):
+You can make an introduction by using the `@DeclareParents` annotation. This annotation
+is used to declare that matching types have a new parent (hence the name). For example,
+given an interface named `UsageTracked` and an implementation of that interface named
+`DefaultUsageTracked`, the following aspect declares that all implementors of service
+interfaces also implement the `UsageTracked` interface (e.g. for statistics via JMX):
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1764,7 +1766,6 @@ annotation. Consider the following example:
 		public void recordServiceUsage() {
 			// ...
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1779,7 +1780,6 @@ annotation. Consider the following example:
 		fun recordServiceUsage() {
 			// ...
 		}
-
 	}
 ----
 
@@ -1854,7 +1854,6 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 			} while(numAttempts <= this.maxRetries);
 			throw lockFailureException;
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2066,7 +2065,6 @@ as the following example shows:
 				expression="execution(* com.xyz.myapp.service.*.*(..))"/>
 
 			...
-
 		</aop:aspect>
 
 	</aop:config>
@@ -2088,7 +2086,6 @@ collects the `this` object as the join point context and passes it to the advice
 			<aop:before pointcut-ref="businessService" method="monitor"/>
 
 			...
-
 		</aop:aspect>
 
 	</aop:config>
@@ -2179,7 +2176,6 @@ a `pointcut` attribute, as follows:
 			method="doAccessCheck"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2209,7 +2205,6 @@ shows how to declare it:
 			method="doAccessCheck"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2227,7 +2222,6 @@ the return value should be passed, as the following example shows:
 			method="doAccessCheck"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2263,7 +2257,6 @@ as the following example shows:
 			method="doRecoveryActions"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2281,13 +2274,12 @@ which the exception should be passed as the following example shows:
 			method="doRecoveryActions"/>
 
 		...
-
 	</aop:aspect>
 ----
 
-The `doRecoveryActions` method must declare a parameter named `dataAccessEx`. The type of
-this parameter constrains matching in the same way as described for `@AfterThrowing`. For
-example, the method signature may be declared as follows:
+The `doRecoveryActions` method must declare a parameter named `dataAccessEx`.
+The type of this parameter constrains matching in the same way as described for
+`@AfterThrowing`. For example, the method signature may be declared as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -2304,8 +2296,8 @@ example, the method signature may be declared as follows:
 [[aop-schema-advice-after-finally]]
 ==== After (Finally) Advice
 
-After (finally) advice runs no matter how a matched method execution exits. You can declare it
-by using the `after` element, as the following example shows:
+After (finally) advice runs no matter how a matched method execution exits.
+You can declare it by using the `after` element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2316,7 +2308,6 @@ by using the `after` element, as the following example shows:
 			method="doReleaseLock"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2327,17 +2318,17 @@ by using the `after` element, as the following example shows:
 The last kind of advice is around advice. Around advice runs "around" a matched method
 execution. It has the opportunity to do work both before and after the method runs
 and to determine when, how, and even if the method actually gets to run at all.
-Around advice is often used to share state before and after a method
-execution in a thread-safe manner (starting and stopping a timer, for example). Always
-use the least powerful form of advice that meets your requirements. Do not use around
-advice if before advice can do the job.
+Around advice is often used to share state before and after a method execution in a
+thread-safe manner (starting and stopping a timer, for example). Always use the least
+powerful form of advice that meets your requirements. Do not use around advice if
+before advice can do the job.
 
-You can declare around advice by using the `aop:around` element. The first parameter of the
-advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
-calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to
-run. The `proceed` method may also be called with an `Object[]`. The values
-in the array are used as the arguments to the method execution when it proceeds. See
-<<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
+You can declare around advice by using the `aop:around` element. The first parameter of
+the advice method must be of type `ProceedingJoinPoint`. Within the body of the advice,
+calling `proceed()` on the `ProceedingJoinPoint` causes the underlying method to run.
+The `proceed` method may also be called with an `Object[]`. The values in the array
+are used as the arguments to the method execution when it proceeds.
+See <<aop-ataspectj-around-advice>> for notes on calling `proceed` with an `Object[]`.
 The following example shows how to declare around advice in XML:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -2349,7 +2340,6 @@ The following example shows how to declare around advice in XML:
 			method="doBasicProfiling"/>
 
 		...
-
 	</aop:aspect>
 ----
 
@@ -2763,7 +2753,6 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 			} while(numAttempts <= this.maxRetries);
 			throw lockFailureException;
 		}
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
