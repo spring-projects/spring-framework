@@ -139,7 +139,7 @@ configure(allprojects) { project ->
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.2.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.3.Final') {
 				entry 'undertow-core'
 				entry('undertow-websockets-jsr') {
 					exclude group: "org.jboss.spec.javax.websocket", name: "jboss-websocket-api_1.1_spec"
@@ -161,7 +161,7 @@ configure(allprojects) { project ->
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency 'org.apache.httpcomponents.client5:httpclient5:5.0.3'
-			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.2'
+			dependency 'org.apache.httpcomponents.core5:httpcore5-reactive:5.0.3'
 			dependency "org.eclipse.jetty:jetty-reactive-httpclient:1.1.4"
 
 			dependency "org.jruby:jruby:9.2.13.0"
