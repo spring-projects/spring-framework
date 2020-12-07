@@ -37,17 +37,17 @@ anchors:
 
 resource_types:
 - name: artifactory-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: springio/artifactory-resource
     tag: 0.0.12
 - name: github-status-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: dpb587/github-status-resource
     tag: master
 - name: slack-notification
-  type: docker-image
+  type: registry-image
   source:
     repository: cfcommunity/slack-notification-resource
     tag: latest
