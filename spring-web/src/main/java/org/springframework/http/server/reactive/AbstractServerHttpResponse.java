@@ -211,9 +211,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		// We must resolve value first however, for a chance to handle potential error.
 		if (body instanceof Mono) {
 			return ((Mono<? extends DataBuffer>) body)
-					.flatMap(buffer -> doCommit(() ->
-							writeWithInternal(Mono.fromCallable(() -> buffer)
-									.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release))))
+					.flatMap(buffer ->
+							doCommit(() -> {
+								try {
+									return writeWithInternal(Mono.fromCallable(() -> buffer)
+											.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+								}
+								catch (Throwable ex) {
+									return Mono.error(ex);
+								}
+							}).doOnError(ex -> DataBufferUtils.release(buffer)))
 					.doOnError(t -> getHeaders().clearContentHeaders());
 		}
 		else {
