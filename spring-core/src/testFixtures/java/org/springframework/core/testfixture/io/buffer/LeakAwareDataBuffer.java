@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.testfixture.io.buffer;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DataBufferWrapper;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
@@ -67,19 +68,19 @@ class LeakAwareDataBuffer extends DataBufferWrapper implements PooledDataBuffer 
 
 	@Override
 	public PooledDataBuffer retain() {
-		DataBuffer delegate = dataBuffer();
-		if (delegate instanceof PooledDataBuffer) {
-			((PooledDataBuffer) delegate).retain();
-		}
+		DataBufferUtils.retain(dataBuffer());
+		return this;
+	}
+
+	@Override
+	public PooledDataBuffer touch(Object hint) {
+		DataBufferUtils.touch(dataBuffer(), hint);
 		return this;
 	}
 
 	@Override
 	public boolean release() {
-		DataBuffer delegate = dataBuffer();
-		if (delegate instanceof PooledDataBuffer) {
-			((PooledDataBuffer) delegate).release();
-		}
+		DataBufferUtils.release(dataBuffer());
 		return isAllocated();
 	}
 
