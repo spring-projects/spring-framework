@@ -21,6 +21,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
@@ -774,7 +775,10 @@ public class UrlPathHelper {
 	private static class Servlet4Delegate {
 
 		public static boolean skipServletPathDetermination(HttpServletRequest request) {
-			HttpServletMapping mapping = request.getHttpServletMapping();
+			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
+			if (mapping == null) {
+				mapping = request.getHttpServletMapping();
+			}
 			MappingMatch match = mapping.getMappingMatch();
 			return (match != null && (!match.equals(MappingMatch.PATH) || mapping.getPattern().equals("/*")));
 		}
