@@ -427,14 +427,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
 			}
 		}
-		if (configBeanDefs.isEmpty()) {
+		if (configBeanDefs.isEmpty() || IN_NATIVE_IMAGE) {
 			// nothing to enhance -> return immediately
 			enhanceConfigClasses.end();
 			return;
-		}
-		if (IN_NATIVE_IMAGE) {
-			throw new BeanDefinitionStoreException("@Configuration classes need to be marked as " +
-					"proxyBeanMethods=false. Found: " + configBeanDefs.keySet());
 		}
 
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
