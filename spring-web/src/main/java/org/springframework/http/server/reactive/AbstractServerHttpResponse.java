@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,9 +180,29 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		// Write as Mono if possible as an optimization hint to Reactor Netty
 		// ChannelSendOperator not necessary for Mono
 		if (body instanceof Mono) {
-			return ((Mono<? extends DataBuffer>) body).flatMap(buffer ->
-					doCommit(() -> writeWithInternal(Mono.just(buffer)))
-							.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+			return ((Mono<? extends DataBuffer>) body)
+					.flatMap(buffer -> {
+						AtomicReference<Boolean> subscribed = new AtomicReference<>(false);
+						return doCommit(
+								() -> {
+									try {
+										return writeWithInternal(Mono.fromCallable(() -> buffer)
+												.doOnSubscribe(s -> subscribed.set(true))
+												.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+									}
+									catch (Throwable ex) {
+										return Mono.error(ex);
+									}
+								})
+								.doOnError(ex -> DataBufferUtils.release(buffer))
+								.doOnCancel(() -> {
+									if (!subscribed.get()) {
+										DataBufferUtils.release(buffer);
+									}
+								});
+					})
+					.doOnError(t -> removeContentLength())
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 		return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
 				.doOnError(t -> removeContentLength());
