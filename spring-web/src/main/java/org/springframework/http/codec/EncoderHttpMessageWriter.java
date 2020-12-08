@@ -128,7 +128,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
 								.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
-					});
+					})
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 
 		if (isStreamingMediaType(contentType)) {
