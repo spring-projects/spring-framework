@@ -311,7 +311,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		JsonEncoding encoding = getJsonEncoding(contentType);
 
 		OutputStream outputStream = StreamUtils.nonClosing(outputMessage.getBody());
-		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputStream, encoding)) {
+		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputStream, encoding);
+		try {
 			writePrefix(generator, object);
 
 			Object value = object;
@@ -346,6 +347,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 			writeSuffix(generator, object);
 			generator.flush();
+			generator.close();
 		}
 		catch (InvalidDefinitionException ex) {
 			throw new HttpMessageConversionException("Type definition error: " + ex.getType(), ex);

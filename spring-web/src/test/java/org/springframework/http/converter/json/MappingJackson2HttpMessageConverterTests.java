@@ -16,11 +16,13 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,13 +137,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	public void write() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		MyBean body = new MyBean();
-		body.setString("Foo");
-		body.setNumber(42);
-		body.setFraction(42F);
-		body.setArray(new String[] {"Foo", "Bar"});
-		body.setBool(true);
-		body.setBytes(new byte[] {0x1, 0x2});
+		MyBean body = createSampleBean();
 		converter.write(body, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result.contains("\"string\":\"Foo\"")).isTrue();
@@ -157,13 +153,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test
 	public void writeWithBaseType() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		MyBean body = new MyBean();
-		body.setString("Foo");
-		body.setNumber(42);
-		body.setFraction(42F);
-		body.setArray(new String[] {"Foo", "Bar"});
-		body.setBool(true);
-		body.setBytes(new byte[] {0x1, 0x2});
+		MyBean body = createSampleBean();
 		converter.write(body, MyBase.class, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result.contains("\"string\":\"Foo\"")).isTrue();
@@ -192,6 +182,16 @@ public class MappingJackson2HttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		assertThatExceptionOfType(HttpMessageNotReadableException.class).isThrownBy(() ->
 				converter.read(MyBean.class, inputMessage));
+	}
+
+	@Test // See gh-26246
+	public void writeInvalidJson() throws IOException {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		MyBean bean = createSampleBean();
+		List<Object> body = Arrays.asList(bean, new ByteArrayOutputStream());
+		assertThatExceptionOfType(HttpMessageConversionException.class)
+				.isThrownBy(() -> converter.write(body, null, outputMessage));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8)).isEmpty();
 	}
 
 	@Test
@@ -490,6 +490,17 @@ public class MappingJackson2HttpMessageConverterTests {
 		String result = outputMessage.getBodyAsString(charset);
 		assertThat(result).isEqualTo("{\"foo\":\"bar\"}");
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(contentType);
+	}
+
+	private MyBean createSampleBean() {
+		MyBean body = new MyBean();
+		body.setString("Foo");
+		body.setNumber(42);
+		body.setFraction(42F);
+		body.setArray(new String[] {"Foo", "Bar"});
+		body.setBool(true);
+		body.setBytes(new byte[] {0x1, 0x2});
+		return body;
 	}
 
 
