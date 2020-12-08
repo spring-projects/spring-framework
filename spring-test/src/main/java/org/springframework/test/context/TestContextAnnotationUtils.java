@@ -79,6 +79,22 @@ public abstract class TestContextAnnotationUtils {
 
 
 	/**
+	 * Determine if an annotation of the specified {@code annotationType} is
+	 * present or meta-present on the supplied {@link Class} according to the
+	 * search algorithm used in {@link #findMergedAnnotation(Class, Class)}.
+	 * <p>If this method returns {@code true}, then {@code findMergedAnnotation(...)}
+	 * will return a non-null value.
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * @return {@code true} if a matching annotation is present
+	 * @since 5.3.3
+	 * @see #findMergedAnnotation(Class, Class)
+	 */
+	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationType) {
+		return (findMergedAnnotation(clazz, annotationType) != null);
+	}
+
+	/**
 	 * Find the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied class, merge that
 	 * annotation's attributes with <em>matching</em> attributes from annotations

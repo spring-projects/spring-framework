@@ -179,7 +179,7 @@ abstract class BootstrapUtils {
 	}
 
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
-		boolean webApp = (TestContextAnnotationUtils.findMergedAnnotation(testClass, webAppConfigurationClass) != null);
+		boolean webApp = TestContextAnnotationUtils.hasAnnotation(testClass, webAppConfigurationClass);
 		String bootstrapperClassName = (webApp ? DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME :
 				DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME);
 		return ClassUtils.forName(bootstrapperClassName, BootstrapUtils.class.getClassLoader());
