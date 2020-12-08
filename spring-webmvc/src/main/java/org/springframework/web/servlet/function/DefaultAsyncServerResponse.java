@@ -40,11 +40,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.ModelAndView;
@@ -56,16 +53,6 @@ import org.springframework.web.servlet.ModelAndView;
  * @since 5.3.2
  */
 final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse implements AsyncServerResponse {
-
-	private static final DeferredResultProcessingInterceptor CLEAR_PATTERN_ATTRIBUTE_INTERCEPTOR =
-			new DeferredResultProcessingInterceptor() {
-				@Override
-				public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult,
-						Object concurrentResult) {
-					request.removeAttribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE,
-							RequestAttributes.SCOPE_REQUEST);
-				}
-			};
 
 	static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DefaultAsyncServerResponse.class.getClassLoader());
@@ -141,7 +128,6 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerDeferredResultInterceptors(CLEAR_PATTERN_ATTRIBUTE_INTERCEPTOR);
 		try {
 			asyncManager.startDeferredResultProcessing(deferredResult);
 		}
