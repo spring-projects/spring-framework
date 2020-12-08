@@ -213,17 +213,27 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return ((Mono<? extends DataBuffer>) body)
 					.flatMap(buffer -> {
 						touchDataBuffer(buffer);
-						return doCommit(() -> {
-							try {
-								return writeWithInternal(Mono.fromCallable(() -> buffer)
-										.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
-							}
-							catch (Throwable ex) {
-								return Mono.error(ex);
-							}
-						}).doOnError(ex -> DataBufferUtils.release(buffer));
+						AtomicReference<Boolean> subscribed = new AtomicReference<>(false);
+						return doCommit(
+								() -> {
+									try {
+										return writeWithInternal(Mono.fromCallable(() -> buffer)
+												.doOnSubscribe(s -> subscribed.set(true))
+												.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+									}
+									catch (Throwable ex) {
+										return Mono.error(ex);
+									}
+								})
+								.doOnError(ex -> DataBufferUtils.release(buffer))
+								.doOnCancel(() -> {
+									if (!subscribed.get()) {
+										DataBufferUtils.release(buffer);
+									}
+								});
 					})
-					.doOnError(t -> getHeaders().clearContentHeaders());
+					.doOnError(t -> getHeaders().clearContentHeaders())
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 		else {
 			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
