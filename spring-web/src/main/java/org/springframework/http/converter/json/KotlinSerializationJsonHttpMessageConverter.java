@@ -100,9 +100,9 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 	}
 
 	@Override
-	public boolean canWrite(@Nullable Type type, @Nullable Class<?> clazz, @Nullable MediaType mediaType) {
+	public boolean canWrite(@Nullable Type type, Class<?> clazz, @Nullable MediaType mediaType) {
 		try {
-			serializer(GenericTypeResolver.resolveType(type, clazz));
+			serializer(type != null ? GenericTypeResolver.resolveType(type, clazz) : clazz);
 			return canWrite(mediaType);
 		}
 		catch (Exception ex) {

@@ -69,10 +69,10 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(converter.canWrite(List::class.java, MediaType.APPLICATION_JSON)).isTrue()
 		assertThat(converter.canWrite(Set::class.java, MediaType.APPLICATION_JSON)).isTrue()
 
-		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(converter.canWrite(typeTokenOf<List<SerializableBean>>(), null, MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(converter.canWrite(typeTokenOf<ArrayList<Int>>(), null, MediaType.APPLICATION_JSON)).isTrue()
-		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), null, MediaType.APPLICATION_PDF)).isFalse()
+		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<List<SerializableBean>>(), List::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<ArrayList<Int>>(), List::class.java, MediaType.APPLICATION_JSON)).isTrue()
+		assertThat(converter.canWrite(typeTokenOf<List<Int>>(), List::class.java, MediaType.APPLICATION_PDF)).isFalse()
 	}
 
 	@Test
@@ -297,6 +297,7 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		assertThat(result).isEqualTo("\"H\u00e9llo W\u00f6rld\"")
 	}
 
+
 	@Serializable
 	@Suppress("ArrayInDataClass")
 	data class SerializableBean(
@@ -317,4 +318,5 @@ class KotlinSerializationJsonHttpMessageConverterTests {
 		val superType = base::class.java.genericSuperclass!!
 		return (superType as ParameterizedType).actualTypeArguments.first()!!
 	}
+
 }

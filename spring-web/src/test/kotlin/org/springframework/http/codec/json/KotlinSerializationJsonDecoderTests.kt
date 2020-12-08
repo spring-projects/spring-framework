@@ -97,6 +97,7 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		}
 	}
 
+
 	@Serializable
 	data class Pojo(val foo: String, val bar: String)
 

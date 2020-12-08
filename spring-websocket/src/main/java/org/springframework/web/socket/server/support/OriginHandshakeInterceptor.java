@@ -19,7 +19,7 @@ package org.springframework.web.socket.server.support;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +31,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
@@ -84,9 +85,9 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 	 * @since 4.1.5
 	 */
 	public Collection<String> getAllowedOrigins() {
-		return (this.corsConfiguration.getAllowedOrigins() != null ?
-				Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOrigins())) :
-				Collections.emptyList());
+		List<String> allowedOrigins = this.corsConfiguration.getAllowedOrigins();
+		return (CollectionUtils.isEmpty(allowedOrigins) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOrigins)));
 	}
 
 	/**
@@ -104,14 +105,13 @@ public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
 	/**
 	 * Return the allowed {@code Origin} pattern header values.
-	 *
 	 * @since 5.3.2
 	 * @see CorsConfiguration#getAllowedOriginPatterns()
 	 */
 	public Collection<String> getAllowedOriginPatterns() {
-		return (this.corsConfiguration.getAllowedOriginPatterns() != null ?
-				Collections.unmodifiableSet(new HashSet<>(this.corsConfiguration.getAllowedOriginPatterns())) :
-				Collections.emptyList());
+		List<String> allowedOriginPatterns = this.corsConfiguration.getAllowedOriginPatterns();
+		return (CollectionUtils.isEmpty(allowedOriginPatterns) ? Collections.emptySet() :
+				Collections.unmodifiableSet(new LinkedHashSet<>(allowedOriginPatterns)));
 	}
 
 

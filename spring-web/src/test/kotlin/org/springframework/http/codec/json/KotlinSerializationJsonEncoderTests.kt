@@ -93,6 +93,7 @@ class KotlinSerializationJsonEncoderTests : AbstractEncoderTests<KotlinSerializa
 		Assertions.assertThat(encoder.canEncode(sseType, MediaType.APPLICATION_JSON)).isFalse()
 	}
 
+
 	@Serializable
 	data class Pojo(val foo: String, val bar: String)
 
