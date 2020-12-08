@@ -211,16 +211,18 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		// We must resolve value first however, for a chance to handle potential error.
 		if (body instanceof Mono) {
 			return ((Mono<? extends DataBuffer>) body)
-					.flatMap(buffer ->
-							doCommit(() -> {
-								try {
-									return writeWithInternal(Mono.fromCallable(() -> buffer)
-											.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
-								}
-								catch (Throwable ex) {
-									return Mono.error(ex);
-								}
-							}).doOnError(ex -> DataBufferUtils.release(buffer)))
+					.flatMap(buffer -> {
+						touchDataBuffer(buffer);
+						return doCommit(() -> {
+							try {
+								return writeWithInternal(Mono.fromCallable(() -> buffer)
+										.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+							}
+							catch (Throwable ex) {
+								return Mono.error(ex);
+							}
+						}).doOnError(ex -> DataBufferUtils.release(buffer));
+					})
 					.doOnError(t -> getHeaders().clearContentHeaders());
 		}
 		else {
@@ -322,5 +324,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
+
+	/**
+	 * Allow sub-classes to associate a hint with the data buffer if it is a
+	 * pooled buffer and supports leak tracking.
+	 * @param buffer the buffer to attach a hint to
+	 * @since 5.3.2
+	 */
+	protected void touchDataBuffer(DataBuffer buffer) {
+	}
 
 }

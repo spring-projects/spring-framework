@@ -223,6 +223,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			byte[] bytes = byteBuilder.toByteArray();
 			DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
 			buffer.write(bytes);
+			Hints.touchDataBuffer(buffer, hints, logger);
 
 			return buffer;
 		}
@@ -267,6 +268,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 		DataBuffer buffer = bufferFactory.allocateBuffer(length + separator.length);
 		buffer.write(bytes, offset, length);
 		buffer.write(separator);
+		Hints.touchDataBuffer(buffer, hints, logger);
 
 		return buffer;
 	}
