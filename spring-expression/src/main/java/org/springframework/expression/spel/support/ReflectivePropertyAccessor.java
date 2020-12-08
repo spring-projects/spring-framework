@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A powerful {@link PropertyAccessor} that uses reflection to access properties
- * for reading and possibly also for writing.
+ * for reading and possibly also for writing on a target instance.
  *
  * <p>A property can be referenced through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
@@ -98,8 +98,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Create a new property accessor for reading and possibly writing.
-	 * @param allowWrite whether to also allow for write operations
+	 * Create a new property accessor for reading and possibly also writing.
+	 * @param allowWrite whether to allow write operations on a target instance
 	 * @since 4.3.15
 	 * @see #canWrite
 	 */
@@ -623,8 +623,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public String toString() {
-			return "CacheKey [clazz=" + this.clazz.getName() + ", property=" + this.property + ", " +
-					this.property + ", targetIsClass=" + this.targetIsClass + "]";
+			return "PropertyCacheKey [clazz=" + this.clazz.getName() + ", property=" + this.property +
+					", targetIsClass=" + this.targetIsClass + "]";
 		}
 
 		@Override
