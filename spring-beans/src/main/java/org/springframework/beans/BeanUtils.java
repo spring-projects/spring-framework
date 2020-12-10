@@ -506,6 +506,7 @@ public abstract class BeanUtils {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.contains(targetType)) {
 			return null;
 		}
+
 		ClassLoader cl = targetType.getClassLoader();
 		if (cl == null) {
 			try {
@@ -522,28 +523,34 @@ public abstract class BeanUtils {
 				return null;
 			}
 		}
+
 		String targetTypeName = targetType.getName();
 		String editorName = targetTypeName + "Editor";
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
-			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Editor class [" + editorName +
-							"] does not implement [java.beans.PropertyEditor] interface");
+			if (editorClass != null) {
+				if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
+					if (logger.isInfoEnabled()) {
+						logger.info("Editor class [" + editorName +
+								"] does not implement [java.beans.PropertyEditor] interface");
+					}
+					unknownEditorTypes.add(targetType);
+					return null;
 				}
-				unknownEditorTypes.add(targetType);
-				return null;
+				return (PropertyEditor) instantiateClass(editorClass);
 			}
-			return (PropertyEditor) instantiateClass(editorClass);
+			// Misbehaving ClassLoader returned null instead of ClassNotFoundException
+			// - fall back to unknown editor type registration below
 		}
 		catch (ClassNotFoundException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No property editor [" + editorName + "] found for type " +
-						targetTypeName + " according to 'Editor' suffix convention");
-			}
-			unknownEditorTypes.add(targetType);
-			return null;
+			// Ignore - fall back to unknown editor type registration below
 		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("No property editor [" + editorName + "] found for type " +
+					targetTypeName + " according to 'Editor' suffix convention");
+		}
+		unknownEditorTypes.add(targetType);
+		return null;
 	}
 
 	/**
