@@ -1,4 +1,4 @@
-FROM ubuntu:bionic-20200713
+FROM ubuntu:focal-20201106
 
 ADD setup.sh /setup.sh
 ADD get-jdk-url.sh /get-jdk-url.sh
