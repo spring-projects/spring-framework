@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -213,7 +214,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return ((Mono<? extends DataBuffer>) body)
 					.flatMap(buffer -> {
 						touchDataBuffer(buffer);
-						AtomicReference<Boolean> subscribed = new AtomicReference<>(false);
+						AtomicBoolean subscribed = new AtomicBoolean();
 						return doCommit(
 								() -> {
 									try {
