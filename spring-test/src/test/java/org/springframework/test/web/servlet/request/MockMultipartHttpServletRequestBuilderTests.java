@@ -16,19 +16,19 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.nio.charset.StandardCharsets;
-
 import javax.servlet.http.Part;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.MockPart;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -38,17 +38,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MockMultipartHttpServletRequestBuilderTests {
 
 	@Test // gh-26166
-	void addFilesAndParts() throws Exception {
-		MockHttpServletRequest mockRequest = new MockMultipartHttpServletRequestBuilder("/upload")
-				.file(new MockMultipartFile("file", "test.txt", "text/plain", "Test".getBytes(StandardCharsets.UTF_8)))
-				.part(new MockPart("data", "{\"node\":\"node\"}".getBytes(StandardCharsets.UTF_8)))
-				.buildRequest(new MockServletContext());
+	void addFileAndParts() throws Exception {
+		MockMultipartHttpServletRequest mockRequest =
+				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+						.file(new MockMultipartFile("file", "test.txt", "text/plain", "Test".getBytes(UTF_8)))
+						.part(new MockPart("name", "value".getBytes(UTF_8)))
+						.buildRequest(new MockServletContext());
 
-		StandardMultipartHttpServletRequest parsedRequest = new StandardMultipartHttpServletRequest(mockRequest);
+		assertThat(mockRequest.getFileMap()).containsOnlyKeys("file");
+		assertThat(mockRequest.getParameterMap()).containsOnlyKeys("name");
+		assertThat(mockRequest.getParts()).extracting(Part::getName).containsExactly("name");
+	}
 
-		assertThat(parsedRequest.getParameterMap()).containsOnlyKeys("data");
-		assertThat(parsedRequest.getFileMap()).containsOnlyKeys("file");
-		assertThat(parsedRequest.getParts()).extracting(Part::getName).containsExactly("file", "data");
+	@Test // gh-26261
+	void addFileWithoutFilename() throws Exception {
+		MockPart jsonPart = new MockPart("data", "{\"node\":\"node\"}".getBytes(UTF_8));
+		jsonPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+		MockMultipartHttpServletRequest mockRequest =
+				(MockMultipartHttpServletRequest) new MockMultipartHttpServletRequestBuilder("/upload")
+						.file(new MockMultipartFile("file", "Test".getBytes(UTF_8)))
+						.part(jsonPart)
+						.buildRequest(new MockServletContext());
+
+		assertThat(mockRequest.getFileMap()).containsOnlyKeys("file");
+		assertThat(mockRequest.getParameterMap()).isEmpty();
+		assertThat(mockRequest.getParts()).extracting(Part::getName).containsExactly("data");
 	}
 
 	@Test
