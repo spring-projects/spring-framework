@@ -94,6 +94,14 @@ class HeadersAdaptersTests {
 		assertThat(headers.get("TestHeader").size()).isEqualTo(1);
 	}
 
+	@ParameterizedHeadersTest
+	void nullValuesShouldNotFail(String displayName, MultiValueMap<String, String> headers) {
+		headers.add("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
+		headers.set("TestHeader", null);
+		assertThat(headers.getFirst("TestHeader")).isNull();
+	}
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
