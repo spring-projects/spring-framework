@@ -27,6 +27,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
 import org.springframework.web.util.UriComponents.UriTemplateVariables;
@@ -252,7 +254,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				builder.schemeSpecificPart(ssp);
 			}
 			else {
-				if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
+				if (!Objects.equals(scheme, ResourceUtils.URL_PROTOCOL_FILE) && StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
 					throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
 				}
 				builder.userInfo(userInfo);

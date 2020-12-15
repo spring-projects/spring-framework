@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -1204,6 +1205,15 @@ class UriComponentsBuilderTests {
 	void verifyDoubleSlashReplacedWithSingleOne() {
 		String path = UriComponentsBuilder.fromPath("/home/").path("/path").build().getPath();
 		assertThat(path).isEqualTo("/home/path");
+	}
+
+	@Test  // gh-26258
+	public void verifyFileUri() {
+		UriTemplateHandler uriTemplateHandler = new DefaultUriBuilderFactory();
+		File file = new File("/any/file/path");
+		URI uri = uriTemplateHandler.expand(file.toURI().toString());
+
+		assertThat(uri).isEqualTo(file.toURI());
 	}
 
 }
