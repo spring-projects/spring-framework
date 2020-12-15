@@ -1334,9 +1334,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
-			Stream<Object> stream = matchingBeans.keySet().stream()
-					.map(name -> descriptor.resolveCandidate(name, type, this))
-					.filter(bean -> !(bean instanceof NullBean));
+
+			Stream<Object> stream = matchingBeans.values().stream().filter(bean -> !(bean instanceof NullBean));
+
 			if (((StreamDependencyDescriptor) descriptor).isOrdered()) {
 				stream = stream.sorted(adaptOrderComparator(matchingBeans));
 			}
