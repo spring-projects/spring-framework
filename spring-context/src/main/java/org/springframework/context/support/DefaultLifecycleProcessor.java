@@ -151,8 +151,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				).add(beanName, bean);
 			}
 		});
-		if (!phases.isEmpty()) {
-			phases.values().forEach(LifecycleGroup::start);
+		try {
+			if (!phases.isEmpty()) {
+				phases.values().forEach(LifecycleGroup::start);
+			}
+		} catch (Throwable e) {
+			phases.values().forEach(LifecycleGroup::stop);
+			throw e;
 		}
 	}
 
