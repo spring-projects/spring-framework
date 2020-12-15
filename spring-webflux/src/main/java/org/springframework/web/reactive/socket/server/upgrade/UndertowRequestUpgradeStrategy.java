@@ -37,6 +37,7 @@ import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.UndertowWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -67,10 +68,18 @@ public class UndertowRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
-				.then(Mono.fromCallable(() -> {
-					DefaultCallback callback = new DefaultCallback(handshakeInfo, handler, bufferFactory);
-					new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
-					return null;
+				.then(Mono.deferContextual(contextView -> {
+					DefaultCallback callback = new DefaultCallback(
+							handshakeInfo,
+							ContextWebSocketHandler.decorate(handler, contextView),
+							bufferFactory);
+					try {
+						new WebSocketProtocolHandshakeHandler(handshakes, callback).handleRequest(httpExchange);
+					}
+					catch (Exception ex) {
+						return Mono.error(ex);
+					}
+					return Mono.empty();
 				}));
 	}
 

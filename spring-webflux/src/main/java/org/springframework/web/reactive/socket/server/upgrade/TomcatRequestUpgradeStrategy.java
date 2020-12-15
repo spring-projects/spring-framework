@@ -38,6 +38,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -137,20 +138,26 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory bufferFactory = response.bufferFactory();
 
-		Endpoint endpoint = new StandardWebSocketHandlerAdapter(
-				handler, session -> new TomcatWebSocketSession(session, handshakeInfo, bufferFactory));
-
-		String requestURI = servletRequest.getRequestURI();
-		DefaultServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);
-		config.setSubprotocols(subProtocol != null ?
-				Collections.singletonList(subProtocol) : Collections.emptyList());
-
 		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
-				.then(Mono.fromCallable(() -> {
+				.then(Mono.deferContextual(contextView -> {
+					Endpoint endpoint = new StandardWebSocketHandlerAdapter(
+							ContextWebSocketHandler.decorate(handler, contextView),
+							session -> new TomcatWebSocketSession(session, handshakeInfo, bufferFactory));
+
+					String requestURI = servletRequest.getRequestURI();
+					DefaultServerEndpointConfig config = new DefaultServerEndpointConfig(requestURI, endpoint);
+					config.setSubprotocols(subProtocol != null ?
+							Collections.singletonList(subProtocol) : Collections.emptyList());
+
 					WsServerContainer container = getContainer(servletRequest);
-					container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
-					return null;
+					try {
+						container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
+					}
+					catch (Exception ex) {
+						return Mono.error(ex);
+					}
+					return Mono.empty();
 				}));
 	}
 

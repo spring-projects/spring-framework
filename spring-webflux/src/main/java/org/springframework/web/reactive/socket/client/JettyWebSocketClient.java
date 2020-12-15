@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.client;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +34,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 
@@ -137,18 +139,23 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders headers, WebSocketHandler handler) {
 		Sinks.Empty<Void> completionSink = Sinks.empty();
-		return Mono.fromCallable(
-				() -> {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Connecting to " + url);
-					}
-					Object jettyHandler = createHandler(url, handler, completionSink);
-					ClientUpgradeRequest request = new ClientUpgradeRequest();
-					request.setSubProtocols(handler.getSubProtocols());
-					UpgradeListener upgradeListener = new DefaultUpgradeListener(headers);
-					return this.jettyClient.connect(jettyHandler, url, request, upgradeListener);
-				})
-				.then(completionSink.asMono());
+		return Mono.deferContextual(contextView -> {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Connecting to " + url);
+			}
+			Object jettyHandler = createHandler(
+					url, ContextWebSocketHandler.decorate(handler, contextView), completionSink);
+			ClientUpgradeRequest request = new ClientUpgradeRequest();
+			request.setSubProtocols(handler.getSubProtocols());
+			UpgradeListener upgradeListener = new DefaultUpgradeListener(headers);
+			try {
+				this.jettyClient.connect(jettyHandler, url, request, upgradeListener);
+				return completionSink.asMono();
+			}
+			catch (IOException ex) {
+				return Mono.error(ex);
+			}
+		});
 	}
 
 	private Object createHandler(URI url, WebSocketHandler handler, Sinks.Empty<Void> completion) {
