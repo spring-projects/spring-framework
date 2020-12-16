@@ -219,39 +219,41 @@ public class InitDestroyAnnotationBeanPostProcessor
 		List<LifecycleElement> initMethods = new ArrayList<>();
 		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
-
+		int currentInit = 0 ;
+		int currentDestroy= 0 ;
+		
 		do {
-			final List<LifecycleElement> currInitMethods = new ArrayList<>();
-			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
 				Order order = method.getAnnotation(Order.class);
 				
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
+					element.setInit(currentInit);
 					if(order != null ){
 						element.setOrder(order.value());
 					}
-					currInitMethods.add(element);
+					initMethods.add(element);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
+				
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
+					element.setDestroy(currentDestroy);
 					if(order != null ){
 						element.setOrder(order.value());
 					}
-					currDestroyMethods.add(element);
+					destroyMethods.add(element);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
 			});
-
-			initMethods.addAll(0, currInitMethods);
-			destroyMethods.addAll(currDestroyMethods);
 			targetClass = targetClass.getSuperclass();
+			currentInit++;
+			currentDestroy--;
 		}
 		while (targetClass != null && targetClass != Object.class);
 
@@ -336,7 +338,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 				return ;
 			}
 			// order 
-			initMethodsToIterate = initMethodsToIterate.stream().sorted(Comparator.comparing(LifecycleElement::getOrder)).collect(Collectors.toList());
+			initMethodsToIterate = initMethodsToIterate.stream()
+					.sorted(Comparator.comparing(LifecycleElement::getInit).reversed().thenComparing(LifecycleElement::getOrder))
+					.collect(Collectors.toList());
 			for (LifecycleElement element : initMethodsToIterate) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Invoking init method on bean '" + beanName + "': " + element.getMethod());
@@ -354,7 +358,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 			
 			// order 
-			destroyMethodsToUse = destroyMethodsToUse.stream().sorted(Comparator.comparing(LifecycleElement::getOrder)).collect(Collectors.toList());
+			destroyMethodsToUse = destroyMethodsToUse.stream()
+					.sorted(Comparator.comparing(LifecycleElement::getDestroy).reversed().thenComparing(LifecycleElement::getOrder))
+					.collect(Collectors.toList());
 			for (LifecycleElement element : destroyMethodsToUse) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Invoking destroy method on bean '" + beanName + "': " + element.getMethod());
@@ -380,6 +386,10 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		private int order;
 		
+		private int init;
+		
+		private int destroy;
+		
 		private final Method method;
 
 		private final String identifier;
@@ -391,6 +401,21 @@ public class InitDestroyAnnotationBeanPostProcessor
 			this.method = method;
 			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
 					ClassUtils.getQualifiedMethodName(method) : method.getName());
+		}
+		public int getInit() {
+			return init;
+		}
+
+		public void setInit(int init) {
+			this.init = init;
+		}
+
+		public int getDestroy() {
+			return destroy;
+		}
+
+		public void setDestroy(int destroy) {
+			this.destroy = destroy;
 		}
 		
 		public int getOrder() {
@@ -429,6 +454,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		public int hashCode() {
 			return this.identifier.hashCode();
 		}
+
 	}
 
 }
