@@ -225,10 +225,11 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				Order order = method.getAnnotation(Order.class);
+				
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
-					if(method.isAnnotationPresent(Order.class)){
-						Order order = method.getAnnotation(Order.class);
+					if(order != null ){
 						element.setOrder(order.value());
 					}
 					currInitMethods.add(element);
@@ -237,7 +238,11 @@ public class InitDestroyAnnotationBeanPostProcessor
 					}
 				}
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					currDestroyMethods.add(new LifecycleElement(method));
+					LifecycleElement element = new LifecycleElement(method);
+					if(order != null ){
+						element.setOrder(order.value());
+					}
+					currDestroyMethods.add(element);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + clazz.getName() + "]: " + method);
 					}
