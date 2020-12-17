@@ -1689,7 +1689,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 */
 	@Nullable
 	protected String determineHighestPriorityCandidate(Map<String, Object> candidates, Class<?> requiredType) {
-		String highestPriorityBeanName = null;
+		List<String> highestPriorityBeanNames = new LinkedList<>();
 		Integer highestPriority = null;
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
@@ -1697,25 +1697,31 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (beanInstance != null) {
 				Integer candidatePriority = getPriority(beanInstance);
 				if (candidatePriority != null) {
-					if (highestPriorityBeanName != null) {
+					if (!highestPriorityBeanNames.isEmpty()) {
 						if (candidatePriority.equals(highestPriority)) {
-							throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
-									"Multiple beans found with the same priority ('" + highestPriority +
-									"') among candidates: " + candidates.keySet());
-						}
-						else if (candidatePriority < highestPriority) {
-							highestPriorityBeanName = candidateBeanName;
+							highestPriorityBeanNames.add(candidateBeanName);
+						} else if (candidatePriority < highestPriority) {
+							highestPriorityBeanNames.clear();
+							highestPriorityBeanNames.add(candidateBeanName);
 							highestPriority = candidatePriority;
 						}
-					}
-					else {
-						highestPriorityBeanName = candidateBeanName;
+					} else {
+						highestPriorityBeanNames.add(candidateBeanName);
 						highestPriority = candidatePriority;
 					}
 				}
 			}
 		}
-		return highestPriorityBeanName;
+		if (highestPriority == null || highestPriorityBeanNames.isEmpty()) {
+			return null;
+		}
+		if (highestPriorityBeanNames.size() > 1) {
+
+			throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+					"Multiple beans found with the same highest priority ('" + highestPriority +
+							"') among candidates: " + highestPriorityBeanNames);
+		}
+		return highestPriorityBeanNames.get(0);
 	}
 
 	/**
