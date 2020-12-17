@@ -123,7 +123,7 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		Request request = this.httpClient.newRequest(uri).method(method.toString());
 
 		return requestCallback.apply(new JettyClientHttpRequest(request, this.bufferFactory))
-				.then(Mono.fromDirect(ReactiveRequest.newBuilder(request).build()
+				.then(Mono.fromDirect(ReactiveRequest.newBuilder(request).abortOnCancel(true).build()
 						.response((reactiveResponse, chunkPublisher) -> {
 							Flux<DataBuffer> content = Flux.from(chunkPublisher).map(this::toDataBuffer);
 							return Mono.just(new JettyClientHttpResponse(reactiveResponse, content));
