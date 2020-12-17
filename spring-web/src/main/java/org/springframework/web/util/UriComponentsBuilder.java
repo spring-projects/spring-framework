@@ -252,8 +252,8 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 				builder.schemeSpecificPart(ssp);
 			}
 			else {
-				if (StringUtils.hasLength(scheme) && !StringUtils.hasLength(host)) {
-					throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
+				if (StringUtils.hasLength(scheme) && scheme.startsWith("http") && !StringUtils.hasLength(host)) {
+					throw new IllegalArgumentException("[" + uri + "] is not a valid HTTP URL");
 				}
 				builder.userInfo(userInfo);
 				builder.host(host);
