@@ -219,8 +219,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		List<LifecycleElement> initMethods = new ArrayList<>();
 		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
-		int currentInit = 0 ;
-		int currentDestroy= 0 ;
+		int priority = 0 ;
 		
 		do {
 
@@ -228,8 +227,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				Order order = method.getAnnotation(Order.class);
 				
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
-					LifecycleElement element = new LifecycleElement(method);
-					element.setInit(currentInit);
+					LifecycleElement element = new LifecycleElement(method,priority);
 					if(order != null ){
 						element.setOrder(order.value());
 					}
@@ -240,8 +238,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 				
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					LifecycleElement element = new LifecycleElement(method);
-					element.setDestroy(currentDestroy);
+					LifecycleElement element = new LifecycleElement(method,priority);
 					if(order != null ){
 						element.setOrder(order.value());
 					}
@@ -252,8 +249,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 			});
 			targetClass = targetClass.getSuperclass();
-			currentInit++;
-			currentDestroy--;
+			priority++;
 		}
 		while (targetClass != null && targetClass != Object.class);
 
@@ -337,9 +333,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 			if (initMethodsToIterate.isEmpty()) {
 				return ;
 			}
-			// order 
+			// Ensure superclass precedence 
 			initMethodsToIterate = initMethodsToIterate.stream()
-					.sorted(Comparator.comparing(LifecycleElement::getInit).reversed().thenComparing(LifecycleElement::getOrder))
+					.sorted(Comparator.comparing(LifecycleElement::getPriority).reversed().thenComparing(LifecycleElement::getOrder))
 					.collect(Collectors.toList());
 			for (LifecycleElement element : initMethodsToIterate) {
 				if (logger.isTraceEnabled()) {
@@ -357,9 +353,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 				return ;
 			}
 			
-			// order 
+			// Ensure subclass precedence 
 			destroyMethodsToUse = destroyMethodsToUse.stream()
-					.sorted(Comparator.comparing(LifecycleElement::getDestroy).reversed().thenComparing(LifecycleElement::getOrder))
+					.sorted(Comparator.comparing(LifecycleElement::getPriority).thenComparing(LifecycleElement::getOrder))
 					.collect(Collectors.toList());
 			for (LifecycleElement element : destroyMethodsToUse) {
 				if (logger.isTraceEnabled()) {
@@ -386,36 +382,24 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		private int order;
 		
-		private int init;
+		private int priority;
 		
-		private int destroy;
 		
 		private final Method method;
 
 		private final String identifier;
 
-		public LifecycleElement(Method method) {
+		public LifecycleElement(Method method,int priority) {
 			if (method.getParameterCount() != 0) {
 				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
 			}
+			this.priority=priority;
 			this.method = method;
 			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
 					ClassUtils.getQualifiedMethodName(method) : method.getName());
 		}
-		public int getInit() {
-			return init;
-		}
-
-		public void setInit(int init) {
-			this.init = init;
-		}
-
-		public int getDestroy() {
-			return destroy;
-		}
-
-		public void setDestroy(int destroy) {
-			this.destroy = destroy;
+		public int getPriority() {
+			return priority;
 		}
 		
 		public int getOrder() {
