@@ -219,7 +219,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		List<LifecycleElement> initMethods = new ArrayList<>();
 		List<LifecycleElement> destroyMethods = new ArrayList<>();
 		Class<?> targetClass = clazz;
-		int priority = 0 ;
+		AtomicInteger priority = new AtomicInteger(0);
 		
 		do {
 
@@ -227,7 +227,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				Order order = method.getAnnotation(Order.class);
 				
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
-					LifecycleElement element = new LifecycleElement(method,priority);
+					LifecycleElement element = new LifecycleElement(method,priority.intValue());
 					if(order != null ){
 						element.setOrder(order.value());
 					}
@@ -238,7 +238,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 				
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					LifecycleElement element = new LifecycleElement(method,priority);
+					LifecycleElement element = new LifecycleElement(method,priority.intValue());
 					if(order != null ){
 						element.setOrder(order.value());
 					}
@@ -249,7 +249,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 			});
 			targetClass = targetClass.getSuperclass();
-			priority++;
+			priority.getAndIncrement();
 		}
 		while (targetClass != null && targetClass != Object.class);
 
