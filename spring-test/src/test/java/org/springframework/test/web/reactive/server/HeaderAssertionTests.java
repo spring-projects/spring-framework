@@ -23,8 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -241,10 +240,9 @@ class HeaderAssertionTests {
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		response.getHeaders().putAll(responseHeaders);
 
-		MonoProcessor<byte[]> emptyContent = MonoProcessor.fromSink(Sinks.one());
-		emptyContent.onComplete();
+		ExchangeResult result = new ExchangeResult(
+				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

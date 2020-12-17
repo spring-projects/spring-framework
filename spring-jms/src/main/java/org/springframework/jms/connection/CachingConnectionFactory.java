@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,7 +95,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 	private volatile boolean active = true;
 
-	private final ConcurrentMap<Integer, LinkedList<Session>> cachedSessions = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Integer, Deque<Session>> cachedSessions = new ConcurrentHashMap<>();
 
 
 	/**
@@ -186,7 +187,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		this.active = false;
 
 		synchronized (this.cachedSessions) {
-			for (LinkedList<Session> sessionList : this.cachedSessions.values()) {
+			for (Deque<Session> sessionList : this.cachedSessions.values()) {
 				synchronized (sessionList) {
 					for (Session session : sessionList) {
 						try {
@@ -216,7 +217,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			return null;
 		}
 
-		LinkedList<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new LinkedList<>());
+		Deque<Session> sessionList = this.cachedSessions.computeIfAbsent(mode, k -> new ArrayDeque<>());
 		Session session = null;
 		synchronized (sessionList) {
 			if (!sessionList.isEmpty()) {
@@ -247,7 +248,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @param sessionList the List of cached Sessions that the given Session belongs to
 	 * @return the wrapped Session
 	 */
-	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
+	protected Session getCachedSessionProxy(Session target, Deque<Session> sessionList) {
 		List<Class<?>> classes = new ArrayList<>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
@@ -268,7 +269,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private final Session target;
 
-		private final LinkedList<Session> sessionList;
+		private final Deque<Session> sessionList;
 
 		private final Map<DestinationCacheKey, MessageProducer> cachedProducers = new HashMap<>();
 
@@ -276,7 +277,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 
 		private boolean transactionOpen = false;
 
-		public CachedSessionInvocationHandler(Session target, LinkedList<Session> sessionList) {
+		public CachedSessionInvocationHandler(Session target, Deque<Session> sessionList) {
 			this.target = target;
 			this.sessionList = sessionList;
 		}

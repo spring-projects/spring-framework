@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Arrays;
+
+import org.springframework.core.style.ToStringCreator;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.Assert;
 
@@ -74,6 +78,57 @@ class MergedTestPropertySources {
 	 */
 	String[] getProperties() {
 		return this.properties;
+	}
+
+	/**
+	 * Determine if the supplied object is equal to this {@code MergedTestPropertySources}
+	 * instance by comparing both object's {@linkplain #getLocations() locations}
+	 * and {@linkplain #getProperties() properties}.
+	 * @since 5.3
+	 */
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || other.getClass() != getClass()) {
+			return false;
+		}
+
+		MergedTestPropertySources that = (MergedTestPropertySources) other;
+		if (!Arrays.equals(this.locations, that.locations)) {
+			return false;
+		}
+		if (!Arrays.equals(this.properties, that.properties)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Generate a unique hash code for all properties of this
+	 * {@code MergedTestPropertySources} instance.
+	 * @since 5.3
+	 */
+	@Override
+	public int hashCode() {
+		int result = Arrays.hashCode(this.locations);
+		result = 31 * result + Arrays.hashCode(this.properties);
+		return result;
+	}
+
+	/**
+	 * Provide a String representation of this {@code MergedTestPropertySources}
+	 * instance.
+	 * @since 5.3
+	 */
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+				.append("locations", Arrays.toString(this.locations))
+				.append("properties", Arrays.toString(this.properties))
+				.toString();
 	}
 
 }

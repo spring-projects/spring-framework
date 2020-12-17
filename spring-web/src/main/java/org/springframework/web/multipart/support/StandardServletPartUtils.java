@@ -16,7 +16,7 @@
 
 package org.springframework.web.multipart.support;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +65,7 @@ public abstract class StandardServletPartUtils {
 	 */
 	public static List<Part> getParts(HttpServletRequest request, String name) throws MultipartException {
 		try {
-			List<Part> parts = new LinkedList<>();
+			List<Part> parts = new ArrayList<>(1);
 			for (Part part : request.getParts()) {
 				if (part.getName().equals(name)) {
 					parts.add(part);

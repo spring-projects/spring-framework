@@ -61,7 +61,7 @@ public class ReactorResourceFactoryTests {
 	@Test
 	void globalResourcesWithConsumer() throws Exception {
 
-		AtomicBoolean invoked = new AtomicBoolean(false);
+		AtomicBoolean invoked = new AtomicBoolean();
 
 		this.resourceFactory.addGlobalResourcesConsumer(httpResources -> invoked.set(true));
 		this.resourceFactory.afterPropertiesSet();

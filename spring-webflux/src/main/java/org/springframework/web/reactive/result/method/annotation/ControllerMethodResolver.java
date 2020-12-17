@@ -189,9 +189,6 @@ class ControllerMethodResolver {
 		result.add(new RequestAttributeMethodArgumentResolver(beanFactory, adapterRegistry));
 
 		// Type-based...
-		if (KotlinDetector.isKotlinPresent()) {
-			result.add(new ContinuationHandlerMethodArgumentResolver());
-		}
 		if (!readers.isEmpty()) {
 			result.add(new HttpEntityMethodArgumentResolver(readers, adapterRegistry));
 		}
@@ -205,6 +202,9 @@ class ControllerMethodResolver {
 			result.add(new SessionStatusMethodArgumentResolver());
 		}
 		result.add(new WebSessionMethodArgumentResolver(adapterRegistry));
+		if (KotlinDetector.isKotlinPresent()) {
+			result.add(new ContinuationHandlerMethodArgumentResolver());
+		}
 
 		// Custom...
 		result.addAll(customResolvers.getCustomResolvers());

@@ -129,10 +129,10 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageReaderArgu
 		if (requestPart != null) {
 			name = requestPart.name();
 		}
-		if (StringUtils.isEmpty(name)) {
+		if (!StringUtils.hasLength(name)) {
 			name = methodParam.getParameterName();
 		}
-		if (StringUtils.isEmpty(name)) {
+		if (!StringUtils.hasLength(name)) {
 			throw new IllegalArgumentException("Request part name for argument type [" +
 					methodParam.getNestedParameterType().getName() +
 					"] not specified, and parameter name information not found in class file either.");

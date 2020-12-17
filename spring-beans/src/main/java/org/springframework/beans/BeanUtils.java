@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.ConstructorProperties;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Constructor;
@@ -43,12 +44,15 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -72,6 +76,9 @@ import org.springframework.util.StringUtils;
 public abstract class BeanUtils {
 
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
+
+	private static final ParameterNameDiscoverer parameterNameDiscoverer =
+			new DefaultParameterNameDiscoverer();
 
 	private static final Set<Class<?>> unknownEditorTypes =
 			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
@@ -217,6 +224,35 @@ public abstract class BeanUtils {
 		catch (InvocationTargetException ex) {
 			throw new BeanInstantiationException(ctor, "Constructor threw exception", ex.getTargetException());
 		}
+	}
+
+	/**
+	 * Return a resolvable constructor for the provided class, either a primary constructor
+	 * or single public constructor or simply a default constructor. Callers have to be
+	 * prepared to resolve arguments for the returned constructor's parameters, if any.
+	 * @param clazz the class to check
+	 * @since 5.3
+	 * @see #findPrimaryConstructor
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Constructor<T> getResolvableConstructor(Class<T> clazz) {
+		Constructor<T> ctor = findPrimaryConstructor(clazz);
+		if (ctor == null) {
+			Constructor<?>[] ctors = clazz.getConstructors();
+			if (ctors.length == 1) {
+				ctor = (Constructor<T>) ctors[0];
+			}
+			else {
+				try {
+					ctor = clazz.getDeclaredConstructor();
+				}
+				catch (NoSuchMethodException ex) {
+					throw new IllegalStateException("No primary or single public constructor found for " +
+							clazz + " - and no default constructor found either");
+				}
+			}
+		}
+		return ctor;
 	}
 
 	/**
@@ -442,8 +478,7 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
 	public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) throws BeansException {
-		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-		return cr.getPropertyDescriptors();
+		return CachedIntrospectionResults.forClass(clazz).getPropertyDescriptors();
 	}
 
 	/**
@@ -454,11 +489,8 @@ public abstract class BeanUtils {
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	@Nullable
-	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
-			throws BeansException {
-
-		CachedIntrospectionResults cr = CachedIntrospectionResults.forClass(clazz);
-		return cr.getPropertyDescriptor(propertyName);
+	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName) throws BeansException {
+		return CachedIntrospectionResults.forClass(clazz).getPropertyDescriptor(propertyName);
 	}
 
 	/**
@@ -511,6 +543,7 @@ public abstract class BeanUtils {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.contains(targetType)) {
 			return null;
 		}
+
 		ClassLoader cl = targetType.getClassLoader();
 		if (cl == null) {
 			try {
@@ -527,28 +560,34 @@ public abstract class BeanUtils {
 				return null;
 			}
 		}
+
 		String targetTypeName = targetType.getName();
 		String editorName = targetTypeName + "Editor";
 		try {
 			Class<?> editorClass = cl.loadClass(editorName);
-			if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Editor class [" + editorName +
-							"] does not implement [java.beans.PropertyEditor] interface");
+			if (editorClass != null) {
+				if (!PropertyEditor.class.isAssignableFrom(editorClass)) {
+					if (logger.isInfoEnabled()) {
+						logger.info("Editor class [" + editorName +
+								"] does not implement [java.beans.PropertyEditor] interface");
+					}
+					unknownEditorTypes.add(targetType);
+					return null;
 				}
-				unknownEditorTypes.add(targetType);
-				return null;
+				return (PropertyEditor) instantiateClass(editorClass);
 			}
-			return (PropertyEditor) instantiateClass(editorClass);
+			// Misbehaving ClassLoader returned null instead of ClassNotFoundException
+			// - fall back to unknown editor type registration below
 		}
 		catch (ClassNotFoundException ex) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("No property editor [" + editorName + "] found for type " +
-						targetTypeName + " according to 'Editor' suffix convention");
-			}
-			unknownEditorTypes.add(targetType);
-			return null;
+			// Ignore - fall back to unknown editor type registration below
 		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("No property editor [" + editorName + "] found for type " +
+					targetTypeName + " according to 'Editor' suffix convention");
+		}
+		unknownEditorTypes.add(targetType);
+		return null;
 	}
 
 	/**
@@ -585,6 +624,26 @@ public abstract class BeanUtils {
 			Assert.state(writeMethod != null, "No write method available");
 			return new MethodParameter(writeMethod, 0);
 		}
+	}
+
+	/**
+	 * Determine required parameter names for the given constructor,
+	 * considering the JavaBeans {@link ConstructorProperties} annotation
+	 * as well as Spring's {@link DefaultParameterNameDiscoverer}.
+	 * @param ctor the constructor to find parameter names for
+	 * @return the parameter names (matching the constructor's parameter count)
+	 * @throws IllegalStateException if the parameter names are not resolvable
+	 * @since 5.3
+	 * @see ConstructorProperties
+	 * @see DefaultParameterNameDiscoverer
+	 */
+	public static String[] getParameterNames(Constructor<?> ctor) {
+		ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
+		String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
+		Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+		Assert.state(paramNames.length == ctor.getParameterCount(),
+				() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
+		return paramNames;
 	}
 
 	/**
@@ -792,7 +851,7 @@ public abstract class BeanUtils {
 			}
 
 			List<KParameter> parameters = kotlinConstructor.getParameters();
-			Map<KParameter, Object> argParameters = new HashMap<>(parameters.size());
+			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
 			Assert.isTrue(args.length <= parameters.size(),
 					"Number of provided arguments should be less of equals than number of constructor parameters");
 			for (int i = 0 ; i < args.length ; i++) {

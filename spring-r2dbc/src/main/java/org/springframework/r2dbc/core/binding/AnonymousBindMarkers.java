@@ -34,8 +34,8 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  */
 class AnonymousBindMarkers implements BindMarkers {
 
-	private static final AtomicIntegerFieldUpdater<AnonymousBindMarkers> COUNTER_INCREMENTER = AtomicIntegerFieldUpdater
-			.newUpdater(AnonymousBindMarkers.class, "counter");
+	private static final AtomicIntegerFieldUpdater<AnonymousBindMarkers> COUNTER_INCREMENTER =
+			AtomicIntegerFieldUpdater.newUpdater(AnonymousBindMarkers.class, "counter");
 
 
 	private final String placeholder;

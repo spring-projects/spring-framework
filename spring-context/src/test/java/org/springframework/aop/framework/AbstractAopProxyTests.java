@@ -22,9 +22,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.MarshalException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,12 +69,9 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.Person;
 import org.springframework.beans.testfixture.beans.SerializablePerson;
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.core.testfixture.EnabledForTestGroups;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.core.testfixture.TimeStamped;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -155,36 +152,6 @@ public abstract class AbstractAopProxyTests {
 		assertThat(tb.getName()).isNull();
 		tb.setName(name);
 		assertThat(tb.getName()).isEqualTo(name);
-	}
-
-	/**
-	 * This is primarily a test for the efficiency of our
-	 * usage of CGLIB. If we create too many classes with
-	 * CGLIB this will be slow or will run out of memory.
-	 */
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	public void testManyProxies() {
-		int howMany = 10000;
-		StopWatch sw = new StopWatch();
-		sw.start("Create " + howMany + " proxies");
-		testManyProxies(howMany);
-		sw.stop();
-		assertThat(sw.getTotalTimeMillis() < 5000).as("Proxy creation was too slow").isTrue();
-	}
-
-	private void testManyProxies(int howMany) {
-		int age1 = 33;
-		TestBean target1 = new TestBean();
-		target1.setAge(age1);
-		ProxyFactory pf1 = new ProxyFactory(target1);
-		pf1.addAdvice(new NopInterceptor());
-		pf1.addAdvice(new NopInterceptor());
-		ITestBean[] proxies = new ITestBean[howMany];
-		for (int i = 0; i < howMany; i++) {
-			proxies[i] = (ITestBean) createAopProxy(pf1).getProxy();
-			assertThat(proxies[i].getAge()).isEqualTo(age1);
-		}
 	}
 
 	@Test
@@ -1128,7 +1095,7 @@ public abstract class AbstractAopProxyTests {
 		};
 
 		class NameSaver implements MethodInterceptor {
-			private List<Object> names = new LinkedList<>();
+			private List<Object> names = new ArrayList<>();
 
 			@Override
 			public Object invoke(MethodInvocation mi) throws Throwable {

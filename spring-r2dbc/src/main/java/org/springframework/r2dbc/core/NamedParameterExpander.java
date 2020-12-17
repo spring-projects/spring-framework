@@ -16,14 +16,10 @@
 
 package org.springframework.r2dbc.core;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
+import org.springframework.util.ConcurrentLruCache;
 
 
 /**
@@ -40,6 +36,7 @@ import org.springframework.r2dbc.core.binding.BindMarkersFactory;
  * <p><b>NOTE: An instance of this class is thread-safe once configured.</b>
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  */
 class NamedParameterExpander {
 
@@ -48,68 +45,19 @@ class NamedParameterExpander {
 	 */
 	public static final int DEFAULT_CACHE_LIMIT = 256;
 
+	/** Cache of original SQL String to ParsedSql representation. */
+	private final ConcurrentLruCache<String, ParsedSql> parsedSqlCache =
+			new ConcurrentLruCache<>(DEFAULT_CACHE_LIMIT, NamedParameterUtils::parseSqlStatement);
 
-	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
-
-	private final Log logger = LogFactory.getLog(getClass());
-
-	/**
-	 * Cache of original SQL String to ParsedSql representation.
-	 */
-	@SuppressWarnings("serial")
-	private final Map<String, ParsedSql> parsedSqlCache = new LinkedHashMap<String, ParsedSql>(
-			DEFAULT_CACHE_LIMIT, 0.75f, true) {
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<String, ParsedSql> eldest) {
-			return size() > getCacheLimit();
-		}
-	};
-
-
-	/**
-	 * Create a new enabled instance of {@link NamedParameterExpander}.
-	 */
-	public NamedParameterExpander() {}
-
-
-	/**
-	 * Specify the maximum number of entries for the SQL cache. Default is 256.
-	 */
-	public void setCacheLimit(int cacheLimit) {
-		this.cacheLimit = cacheLimit;
-	}
-
-	/**
-	 * Return the maximum number of entries for the SQL cache.
-	 */
-	public int getCacheLimit() {
-		return this.cacheLimit;
-	}
 
 	/**
 	 * Obtain a parsed representation of the given SQL statement.
-	 * <p>
-	 * The default implementation uses an LRU cache with an upper limit of 256 entries.
-	 *
+	 * <p>The default implementation uses an LRU cache with an upper limit of 256 entries.
 	 * @param sql the original SQL statement
 	 * @return a representation of the parsed SQL statement
 	 */
 	private ParsedSql getParsedSql(String sql) {
-
-		if (getCacheLimit() <= 0) {
-			return NamedParameterUtils.parseSqlStatement(sql);
-		}
-
-		synchronized (this.parsedSqlCache) {
-
-			ParsedSql parsedSql = this.parsedSqlCache.get(sql);
-			if (parsedSql == null) {
-
-				parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-				this.parsedSqlCache.put(sql, parsedSql);
-			}
-			return parsedSql;
-		}
+		return this.parsedSqlCache.get(sql);
 	}
 
 	/**
@@ -119,11 +67,9 @@ class NamedParameterExpander {
 	 * lists may contain an array of objects, and in that case the placeholders
 	 * will be grouped and enclosed with parentheses. This allows for the use of
 	 * "expression lists" in the SQL statement like:
-	 *
 	 * <pre class="code">
 	 * select id, name, state from table where (name, age) in (('John', 35), ('Ann', 50))
 	 * </pre>
-	 *
 	 * <p>The parameter values passed in are used to determine the number of
 	 * placeholders to be used for a select list. Select lists should be limited
 	 * to 100 or fewer elements. A larger number of elements is not guaranteed to be
@@ -134,26 +80,17 @@ class NamedParameterExpander {
 	 * @return the expanded sql that accepts bind parameters and allows for execution
 	 * without further translation wrapped as {@link PreparedOperation}.
 	 */
-	public PreparedOperation<String> expand(String sql, BindMarkersFactory bindMarkersFactory,
-			BindParameterSource paramSource) {
+	public PreparedOperation<String> expand(
+			String sql, BindMarkersFactory bindMarkersFactory, BindParameterSource paramSource) {
 
 		ParsedSql parsedSql = getParsedSql(sql);
-
-		PreparedOperation<String> expanded = NamedParameterUtils.substituteNamedParameters(parsedSql, bindMarkersFactory,
-				paramSource);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Expanding SQL statement [%s] to [%s]", sql, expanded.toQuery()));
-		}
-
-		return expanded;
+		return NamedParameterUtils.substituteNamedParameters(parsedSql, bindMarkersFactory, paramSource);
 	}
 
 	/**
-	 * Parse the SQL statement and locate any placeholders or named parameters. Named parameters are returned as result of
-	 * this method invocation.
-	 *
-	 * @return the parameter names.
+	 * Parse the SQL statement and locate any placeholders or named parameters.
+	 * Named parameters are returned as result of this method invocation.
+	 * @return the parameter names
 	 */
 	public List<String> getParameterNames(String sql) {
 		return getParsedSql(sql).getParameterNames();

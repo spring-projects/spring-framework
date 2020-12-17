@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,19 @@ public abstract class OrderUtils {
 	 */
 	@Nullable
 	public static Integer getOrder(Class<?> type) {
-		return getOrderFromAnnotations(type, MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY));
+		return getOrder((AnnotatedElement) type);
+	}
+
+	/**
+	 * Return the order declared on the specified {@code element}.
+	 * <p>Takes care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * @param element the annotated element (e.g. type or method)
+	 * @return the order value, or {@code null} if none can be found
+	 * @since 5.3
+	 */
+	@Nullable
+	public static Integer getOrder(AnnotatedElement element) {
+		return getOrderFromAnnotations(element, MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY));
 	}
 
 	/**

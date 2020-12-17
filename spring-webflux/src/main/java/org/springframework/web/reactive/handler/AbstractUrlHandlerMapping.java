@@ -126,11 +126,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		PathPattern pattern = matches.get(0);
 		PathContainer pathWithinMapping = pattern.extractPathWithinPattern(lookupPath);
-		return handleMatch(this.handlerMap.get(pattern), pattern, pathWithinMapping, exchange);
+		PathPattern.PathMatchInfo matchInfo = pattern.matchAndExtract(lookupPath);
+		Assert.notNull(matchInfo, "Expected a match");
+
+		return handleMatch(this.handlerMap.get(pattern), pattern, pathWithinMapping, matchInfo, exchange);
 	}
 
 	private Object handleMatch(Object handler, PathPattern bestMatch, PathContainer pathWithinMapping,
-			ServerWebExchange exchange) {
+			PathPattern.PathMatchInfo matchInfo, ServerWebExchange exchange) {
 
 		// Bean name or resolved handler?
 		if (handler instanceof String) {
@@ -143,6 +146,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestMatch);
 		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
+		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, matchInfo.getUriVariables());
 
 		return handler;
 	}

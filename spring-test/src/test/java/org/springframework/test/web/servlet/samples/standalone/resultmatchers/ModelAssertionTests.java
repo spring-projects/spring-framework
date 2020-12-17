@@ -49,7 +49,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  *
  * @author Rossen Stoyanchev
  */
-class ModelAssertionTests {
+public class ModelAssertionTests {
 
 	private MockMvc mockMvc;
 

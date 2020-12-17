@@ -20,8 +20,6 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -91,9 +89,7 @@ class ErrorsMethodArgumentResolverTests {
 	@Test
 	void resolveWithMono() {
 		BindingResult bindingResult = createBindingResult(new Foo(), "foo");
-		MonoProcessor<BindingResult> monoProcessor = MonoProcessor.fromSink(Sinks.one());
-		monoProcessor.onNext(bindingResult);
-		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", monoProcessor);
+		this.bindingContext.getModel().asMap().put(BindingResult.MODEL_KEY_PREFIX + "foo", Mono.just(bindingResult));
 
 		MethodParameter parameter = this.testMethod.arg(Errors.class);
 		Object actual = this.resolver.resolveArgument(parameter, this.bindingContext, this.exchange)

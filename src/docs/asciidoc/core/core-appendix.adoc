@@ -666,7 +666,8 @@ integrate such parsers into the Spring IoC container.
 To facilitate authoring configuration files that use a schema-aware XML editor,
 Spring's extensible XML configuration mechanism is based on XML Schema. If you are not
 familiar with Spring's current XML configuration extensions that come with the standard
-Spring distribution, you should first read the appendix entitled <<appendix.adoc#xsd-configuration>>.
+Spring distribution, you should first read the previous section on <<xsd-schemas>>.
+
 
 To create new XML configuration extensions:
 
@@ -1668,8 +1669,4 @@ its behavior changes.
 | `spring.context.refresh`
 | Application context refresh phase.
 |
-
-| `spring.event.invoke-listener`
-| Invocation of event listeners, if done in the main thread.
-| `event` the current application event, `eventType` its type and `listener` the listener processing this event.
 |===

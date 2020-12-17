@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec.multipart;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -146,15 +145,6 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		return this.formWriter;
 	}
 
-	/**
-	 * Set the character set to use for part headers such as
-	 * "Content-Disposition" (and its filename parameter).
-	 * <p>By default this is set to "UTF-8".
-	 */
-	public void setCharset(Charset charset) {
-		Assert.notNull(charset, "Charset must not be null");
-		this.charset = charset;
-	}
 
 
 	@Override
@@ -208,6 +198,10 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 				.concatMap(entry -> encodePartValues(boundary, entry.getKey(), entry.getValue(), bufferFactory))
 				.concatWith(generateLastLine(boundary, bufferFactory))
 				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+
+		if (logger.isDebugEnabled()) {
+			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+		}
 
 		return outputMessage.writeWith(body);
 	}

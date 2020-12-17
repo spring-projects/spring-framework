@@ -229,6 +229,7 @@ public class BindException extends Exception implements BindingResult {
 	}
 
 	@Override
+	@Nullable
 	public Object getTarget() {
 		return this.bindingResult.getTarget();
 	}

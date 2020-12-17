@@ -113,9 +113,18 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @param status the status code
 	 */
 	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, HttpStatus status) {
-		super(body, headers);
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.status = status;
+		this(body, headers, (Object) status);
+	}
+
+	/**
+	 * Create a new {@code HttpEntity} with the given body, headers, and status code.
+	 * @param body the entity body
+	 * @param headers the entity headers
+	 * @param rawStatus the status code value
+	 * @since 5.3.2
+	 */
+	public ResponseEntity(@Nullable T body, @Nullable MultiValueMap<String, String> headers, int rawStatus) {
+		this(body, headers, (Object) rawStatus);
 	}
 
 	/**

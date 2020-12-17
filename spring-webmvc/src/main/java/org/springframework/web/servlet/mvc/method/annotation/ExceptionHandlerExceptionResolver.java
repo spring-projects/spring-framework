@@ -342,6 +342,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			resolvers.addAll(getCustomArgumentResolvers());
 		}
 
+		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
+
 		return resolvers;
 	}
 

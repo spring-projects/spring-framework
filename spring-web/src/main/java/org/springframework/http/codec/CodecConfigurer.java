@@ -177,6 +177,22 @@ public interface CodecConfigurer {
 		void jaxb2Encoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default Kotlin Serialization JSON {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.json.KotlinSerializationJsonDecoder
+		 */
+		void kotlinSerializationJsonDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization JSON {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.json.KotlinSerializationJsonEncoder
+		 */
+		void kotlinSerializationJsonEncoder(Encoder<?> encoder);
+
+		/**
 		 * Configure a limit on the number of bytes that can be buffered whenever
 		 * the input stream needs to be aggregated. This can be a result of
 		 * decoding to a single {@code DataBuffer},

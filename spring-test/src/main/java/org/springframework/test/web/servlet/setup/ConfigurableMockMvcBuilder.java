@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.setup;
 
 import javax.servlet.Filter;
 
+import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvcBuilder;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultHandler;
@@ -37,7 +38,7 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * <pre class="code">
 	 * mockMvcBuilder.addFilters(springSecurityFilterChain);
 	 * </pre>
-	 * <p>is the equivalent of the following web.xml configuration:
+	 * <p>It is the equivalent of the following web.xml configuration:
 	 * <pre class="code">
 	 * &lt;filter-mapping&gt;
 	 *     &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
@@ -52,9 +53,9 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	/**
 	 * Add a filter mapped to a specific set of patterns. For example:
 	 * <pre class="code">
-	 * mockMvcBuilder.addFilters(myResourceFilter, "/resources/*");
+	 * mockMvcBuilder.addFilter(myResourceFilter, "/resources/*");
 	 * </pre>
-	 * <p>is the equivalent of:
+	 * <p>It is the equivalent of:
 	 * <pre class="code">
 	 * &lt;filter-mapping&gt;
 	 *     &lt;filter-name&gt;myResourceFilter&lt;/filter-name&gt;
@@ -104,6 +105,13 @@ public interface ConfigurableMockMvcBuilder<B extends ConfigurableMockMvcBuilder
 	 * dispatchOptionsRequest} which allows processing of HTTP OPTIONS requests.
 	 */
 	<T extends B> T dispatchOptions(boolean dispatchOptions);
+
+	/**
+	 * A more advanced variant of {@link #dispatchOptions(boolean)} that allows
+	 * customizing any {@link org.springframework.web.servlet.DispatcherServlet}
+	 * property.
+	 */
+	<T extends B> T addDispatcherServletCustomizer(DispatcherServletCustomizer customizer);
 
 	/**
 	 * Add a {@code MockMvcConfigurer} that automates MockMvc setup and

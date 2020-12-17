@@ -22,14 +22,15 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * Index-based bind marker. This implementation creates indexed bind
  * markers using a numeric index and an optional prefix for bind markers
  * to be represented within the query string.
+ *
  * @author Mark Paluch
  * @author Jens Schauder
  * @since 5.3
  */
 class IndexedBindMarkers implements BindMarkers {
 
-	private static final AtomicIntegerFieldUpdater<IndexedBindMarkers> COUNTER_INCREMENTER = AtomicIntegerFieldUpdater
-			.newUpdater(IndexedBindMarkers.class, "counter");
+	private static final AtomicIntegerFieldUpdater<IndexedBindMarkers> COUNTER_INCREMENTER =
+			AtomicIntegerFieldUpdater.newUpdater(IndexedBindMarkers.class, "counter");
 
 
 	private final int offset;
@@ -59,6 +60,7 @@ class IndexedBindMarkers implements BindMarkers {
 		return new IndexedBindMarker(this.prefix + "" + (index + this.offset), index);
 	}
 
+
 	/**
 	 * A single indexed bind marker.
 	 * @author Mark Paluch
@@ -69,12 +71,10 @@ class IndexedBindMarkers implements BindMarkers {
 
 		private final int index;
 
-
 		IndexedBindMarker(String placeholder, int index) {
 			this.placeholder = placeholder;
 			this.index = index;
 		}
-
 
 		@Override
 		public String getPlaceholder() {
@@ -94,7 +94,6 @@ class IndexedBindMarkers implements BindMarkers {
 		public int getIndex() {
 			return this.index;
 		}
-
 	}
 
 }

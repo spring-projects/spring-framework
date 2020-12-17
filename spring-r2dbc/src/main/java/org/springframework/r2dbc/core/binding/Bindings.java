@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
@@ -31,6 +30,7 @@ import io.r2dbc.spi.Statement;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Value object representing value and {@code null} bindings
@@ -55,12 +55,12 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	}
 
 	/**
-	 * Create {@link Bindings} from a {@link Map}.
-	 * @param bindings must not be {@code null}
+	 * Create {@link Bindings} from the given collection.
+	 * @param bindings a collection of {@link Binding} objects
 	 */
 	public Bindings(Collection<Binding> bindings) {
-		Assert.notNull(bindings, "Bindings must not be null");
-		Map<BindMarker, Binding> mapping = new LinkedHashMap<>(bindings.size());
+		Assert.notNull(bindings, "Collection must not be null");
+		Map<BindMarker, Binding> mapping = CollectionUtils.newLinkedHashMap(bindings.size());
 		bindings.forEach(binding -> mapping.put(binding.getBindMarker(), binding));
 		this.bindings = mapping;
 	}
@@ -75,10 +75,10 @@ public class Bindings implements Iterable<Bindings.Binding> {
 	}
 
 	/**
-	 * Merge this bindings with an other {@link Bindings} object and create a new merged
-	 * {@link Bindings} object.
+	 * Merge this bindings with an other {@link Bindings} object and
+	 * create a new merged {@link Bindings} object.
 	 * @param other the object to merge with
-	 * @return a new, merged {@link Bindings} object
+	 * @return a newly merged {@link Bindings} object
 	 */
 	public Bindings and(Bindings other) {
 		return merge(this, other);
@@ -116,25 +116,23 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 
 	/**
-	 * Create a new, empty {@link Bindings} object.
-	 * @return a new, empty {@link Bindings} object.
+	 * Return an empty {@link Bindings} object.
 	 */
 	public static Bindings empty() {
 		return EMPTY;
 	}
 
 	/**
-	 * Merge this bindings with an other {@link Bindings} object and create a new merged
-	 * {@link Bindings} object.
+	 * Merge this bindings with an other {@link Bindings} object and
+	 * create a new merged {@link Bindings} object.
 	 * @param left the left object to merge with
 	 * @param right the right object to merge with
-	 * @return a new, merged {@link Bindings} object
+	 * @return a newly merged {@link Bindings} object
 	 */
 	public static Bindings merge(Bindings left, Bindings right) {
 		Assert.notNull(left, "Left side Bindings must not be null");
 		Assert.notNull(right, "Right side Bindings must not be null");
-		List<Binding> result = new ArrayList<>(
-				left.getBindings().size() + right.getBindings().size());
+		List<Binding> result = new ArrayList<>(left.getBindings().size() + right.getBindings().size());
 		result.addAll(left.getBindings().values());
 		result.addAll(right.getBindings().values());
 		return new Bindings(result);
@@ -154,7 +152,6 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		/**
 		 * Return the associated {@link BindMarker}.
-		 * @return the associated {@link BindMarker}.
 		 */
 		public BindMarker getBindMarker() {
 			return this.marker;
@@ -162,8 +159,8 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		/**
 		 * Return whether the binding has a value associated with it.
-		 * @return {@code true} if there is a value present, otherwise {@code false}
-		 * for a {@code NULL} binding.
+		 * @return {@code true} if there is a value present,
+		 * otherwise {@code false} for a {@code NULL} binding
 		 */
 		public abstract boolean hasValue();
 
@@ -177,8 +174,8 @@ public class Bindings implements Iterable<Bindings.Binding> {
 
 		/**
 		 * Return the binding value.
-		 * @return value of this binding. Can be {@code null}
-		 * if this is a {@code NULL} binding.
+		 * @return the value of this binding
+		 * (can be {@code null} if this is a {@code NULL} binding)
 		 */
 		@Nullable
 		public abstract Object getValue();

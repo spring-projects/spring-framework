@@ -40,30 +40,23 @@ class MapBindParameterSource implements BindParameterSource {
 	 * Create a new empty {@link MapBindParameterSource}.
 	 */
 	MapBindParameterSource() {
-		this(new LinkedHashMap<>());
+		this.values = new LinkedHashMap<>();
 	}
 
 	/**
-	 * Creates a new {@link MapBindParameterSource} given {@link Map} of
-	 * {@link Parameter}.
-	 *
-	 * @param values the parameter mapping.
+	 * Creates a new {@link MapBindParameterSource} given {@link Map} of {@link Parameter}.
+	 * @param values the parameter mapping
 	 */
 	MapBindParameterSource(Map<String, Parameter> values) {
-
 		Assert.notNull(values, "Values must not be null");
-
 		this.values = values;
 	}
 
 
 	/**
-	 * Add a key-value pair to the {@link MapBindParameterSource}. The value must not be
-	 * {@code null}.
-	 *
-	 * @param paramName must not be {@code null}.
-	 * @param value must not be {@code null}.
-	 * @return {@code this} {@link MapBindParameterSource}
+	 * Add a key-value pair to the {@link MapBindParameterSource}.
+	 * @param paramName the name of the parameter
+	 * @param value the parameter value to add (must not be {@code null})
 	 */
 	MapBindParameterSource addValue(String paramName, Object value) {
 		Assert.notNull(paramName, "Parameter name must not be null");
@@ -91,8 +84,7 @@ class MapBindParameterSource implements BindParameterSource {
 	@Override
 	public Object getValue(String paramName) throws IllegalArgumentException {
 		if (!hasValue(paramName)) {
-			throw new IllegalArgumentException(
-					"No value registered for key '" + paramName + "'");
+			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");
 		}
 		return this.values.get(paramName).getValue();
 	}

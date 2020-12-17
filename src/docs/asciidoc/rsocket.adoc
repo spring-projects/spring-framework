@@ -601,7 +601,7 @@ Then start an RSocket server through the Java RSocket API and plug the
 
 	val server = RSocketServer.create(handler.responder())
 			.bind(TcpServerTransport.create("localhost", 7000))
-			.awaitFirst()
+			.awaitSingle()
 ----
 
 `RSocketMessageHandler` supports

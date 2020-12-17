@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -34,6 +36,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -59,7 +62,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	private final NettyDataBufferFactory bufferFactory;
 
 	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
-	private final AtomicInteger state = new AtomicInteger(0);
+	private final AtomicInteger state = new AtomicInteger();
 
 	private final String logPrefix;
 
@@ -129,17 +132,29 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		this.response.cookies().values().stream().flatMap(Collection::stream)
-				.forEach(c ->
-
-					result.add(c.name(), ResponseCookie.fromClientResponse(c.name(), c.value())
-							.domain(c.domain())
-							.path(c.path())
-							.maxAge(c.maxAge())
-							.secure(c.isSecure())
-							.httpOnly(c.isHttpOnly())
-							.build()));
+		this.response.cookies().values().stream()
+				.flatMap(Collection::stream)
+				.forEach(cookie -> result.add(cookie.name(),
+						ResponseCookie.fromClientResponse(cookie.name(), cookie.value())
+								.domain(cookie.domain())
+								.path(cookie.path())
+								.maxAge(cookie.maxAge())
+								.secure(cookie.isSecure())
+								.httpOnly(cookie.isHttpOnly())
+								.sameSite(getSameSite(cookie))
+								.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
+	@Nullable
+	private static String getSameSite(Cookie cookie) {
+		if (cookie instanceof DefaultCookie) {
+			DefaultCookie defaultCookie = (DefaultCookie) cookie;
+			if (defaultCookie.sameSite() != null) {
+				return defaultCookie.sameSite().name();
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -104,6 +104,9 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo+bar");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo+bar");
+
+		request.setRequestURI("/home/" + "/path");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/home/path");
 	}
 
 	@Test
@@ -111,6 +114,9 @@ public class UrlPathHelperTests {
 		helper.setRemoveSemicolonContent(true);
 		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R");
 		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar");
+
+		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R/baz;test");
+		assertThat(helper.getRequestUri(request)).isEqualTo("/foo/bar/baz");
 
 		// SPR-13455
 		request.setRequestURI("/foo/;test/1");
@@ -122,18 +128,19 @@ public class UrlPathHelperTests {
 	public void getRequestKeepSemicolonContent() {
 		helper.setRemoveSemicolonContent(false);
 
-		request.setRequestURI("/foo;a=b;c=d");
-		assertThat(helper.getRequestUri(request)).isEqualTo("/foo;a=b;c=d");
+		testKeepSemicolonContent("/foo;a=b;c=d", "/foo;a=b;c=d");
+		testKeepSemicolonContent("/test;jsessionid=1234", "/test");
+		testKeepSemicolonContent("/test;JSESSIONID=1234", "/test");
+		testKeepSemicolonContent("/test;jsessionid=1234;a=b", "/test;a=b");
+		testKeepSemicolonContent("/test;a=b;jsessionid=1234;c=d", "/test;a=b;c=d");
+		testKeepSemicolonContent("/test;jsessionid=1234/anotherTest", "/test/anotherTest");
+		testKeepSemicolonContent("/test;jsessionid=;a=b", "/test;a=b");
+		testKeepSemicolonContent("/somethingLongerThan12;jsessionid=1234", "/somethingLongerThan12");
+	}
 
-		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
-		assertThat(helper.getRequestUri(request)).as("jsessionid should always be removed").isEqualTo("/foo");
-
-		request.setRequestURI("/foo;a=b;jsessionid=c0o7fszeb1;c=d");
-		assertThat(helper.getRequestUri(request)).as("jsessionid should always be removed").isEqualTo("/foo;a=b;c=d");
-
-		// SPR-10398
-		request.setRequestURI("/foo;a=b;JSESSIONID=c0o7fszeb1;c=d");
-		assertThat(helper.getRequestUri(request)).as("JSESSIONID should always be removed").isEqualTo("/foo;a=b;c=d");
+	private void testKeepSemicolonContent(String requestUri, String expectedPath) {
+		request.setRequestURI(requestUri);
+		assertThat(helper.getRequestUri(request)).isEqualTo(expectedPath);
 	}
 
 	@Test

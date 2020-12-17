@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.beans.ConstructorProperties;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -24,13 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
@@ -68,8 +64,6 @@ import org.springframework.web.server.ServerWebExchange;
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
-
-	private static final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final boolean useDefaultResolution;
 
@@ -116,20 +110,23 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
 
+		// unsafe(): we're intercepting, already serialized Publisher signals
+		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
+
 		Map<String, Object> model = context.getModel().asMap();
-		MonoProcessor<BindingResult> bindingResultMono = MonoProcessor.fromSink(Sinks.one());
-		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultMono);
+		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
 			return bindRequestParameters(binder, exchange)
-					.doOnError(bindingResultMono::onError)
+					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
-						BindingResult errors = binder.getBindingResult();
-						model.put(BindingResult.MODEL_KEY_PREFIX + name, errors);
+						BindingResult bindingResult = binder.getBindingResult();
+						model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResult);
 						model.put(name, value);
-						bindingResultMono.onNext(errors);
+						// Ignore result: serialized and buffered (should never fail)
+						bindingResultSink.tryEmitValue(bindingResult);
 					})
 					.then(Mono.fromCallable(() -> {
 						BindingResult errors = binder.getBindingResult();
@@ -206,21 +203,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	private Mono<?> createAttribute(
 			String attributeName, Class<?> clazz, BindingContext context, ServerWebExchange exchange) {
 
-		Constructor<?> ctor = BeanUtils.findPrimaryConstructor(clazz);
-		if (ctor == null) {
-			Constructor<?>[] ctors = clazz.getConstructors();
-			if (ctors.length == 1) {
-				ctor = ctors[0];
-			}
-			else {
-				try {
-					ctor = clazz.getDeclaredConstructor();
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException("No primary or default constructor found for " + clazz, ex);
-				}
-			}
-		}
+		Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
 		return constructAttribute(ctor, attributeName, context, exchange);
 	}
 
@@ -235,12 +218,8 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		// A single data class constructor -> resolve constructor arguments from request parameters.
 		WebExchangeDataBinder binder = context.createDataBinder(exchange, null, attributeName);
 		return getValuesToBind(binder, exchange).map(bindValues -> {
-			ConstructorProperties cp = ctor.getAnnotation(ConstructorProperties.class);
-			String[] paramNames = (cp != null ? cp.value() : parameterNameDiscoverer.getParameterNames(ctor));
-			Assert.state(paramNames != null, () -> "Cannot resolve parameter names for constructor " + ctor);
+			String[] paramNames = BeanUtils.getParameterNames(ctor);
 			Class<?>[] paramTypes = ctor.getParameterTypes();
-			Assert.state(paramNames.length == paramTypes.length,
-					() -> "Invalid number of parameter names: " + paramNames.length + " for constructor " + ctor);
 			Object[] args = new Object[paramTypes.length];
 			String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
 			String fieldMarkerPrefix = binder.getFieldMarkerPrefix();

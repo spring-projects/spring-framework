@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 					Mono<Resource> input = Mono.just(resource);
 					DataBufferFactory factory = message.bufferFactory();
 					Flux<DataBuffer> body = this.encoder.encode(input, factory, type, resourceMediaType, hints);
+					if (logger.isDebugEnabled()) {
+						body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+					}
 					return message.writeWith(body);
 				});
 	}

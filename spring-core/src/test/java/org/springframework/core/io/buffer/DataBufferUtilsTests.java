@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
@@ -834,6 +836,22 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.verifyError(DataBufferLimitException.class);
 	}
 
+	@Test // gh-26060
+	void joinWithLimitDoesNotOverRelease() {
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+		byte[] bytes = "foo-bar-baz".getBytes(StandardCharsets.UTF_8);
+
+		NettyDataBuffer buffer = bufferFactory.allocateBuffer(bytes.length);
+		buffer.getNativeBuffer().retain(); // should be at 2 now
+		buffer.write(bytes);
+
+		Mono<DataBuffer> result = DataBufferUtils.join(Flux.just(buffer), 8);
+
+		StepVerifier.create(result).verifyError(DataBufferLimitException.class);
+		assertThat(buffer.getNativeBuffer().refCnt()).isEqualTo(1);
+		buffer.release();
+	}
+
 	@ParameterizedDataBufferAllocatingTest
 	void joinErrors(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
@@ -886,18 +904,38 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void matcher2(String displayName, DataBufferFactory bufferFactory) {
 		super.bufferFactory = bufferFactory;
 
-		DataBuffer foo = stringBuffer("fooobar");
+		DataBuffer foo = stringBuffer("foooobar");
 
 		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
 		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
-		int result = matcher.match(foo);
-		assertThat(result).isEqualTo(2);
-		foo.readPosition(2);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(3);
-		foo.readPosition(3);
-		result = matcher.match(foo);
-		assertThat(result).isEqualTo(-1);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
+
+		release(foo);
+	}
+
+	@ParameterizedDataBufferAllocatingTest
+	void matcher3(String displayName, DataBufferFactory bufferFactory) {
+		super.bufferFactory = bufferFactory;
+
+		DataBuffer foo = stringBuffer("foooobar");
+
+		byte[] delims = "oo".getBytes(StandardCharsets.UTF_8);
+		DataBufferUtils.Matcher matcher = DataBufferUtils.matcher(delims);
+		int endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(2);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(4);
+		foo.readPosition(endIndex + 1);
+		endIndex = matcher.match(foo);
+		assertThat(endIndex).isEqualTo(-1);
 
 		release(foo);
 	}

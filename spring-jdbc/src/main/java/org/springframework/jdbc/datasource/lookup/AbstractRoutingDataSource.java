@@ -19,7 +19,6 @@ package org.springframework.jdbc.datasource.lookup;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Abstract {@link javax.sql.DataSource} implementation that routes {@link #getConnection()}
@@ -119,7 +119,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
-		this.resolvedDataSources = new HashMap<>(this.targetDataSources.size());
+		this.resolvedDataSources = CollectionUtils.newHashMap(this.targetDataSources.size());
 		this.targetDataSources.forEach((key, value) -> {
 			Object lookupKey = resolveSpecifiedLookupKey(key);
 			DataSource dataSource = resolveSpecifiedDataSource(value);

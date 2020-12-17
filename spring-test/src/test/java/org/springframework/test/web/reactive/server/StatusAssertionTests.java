@@ -20,8 +20,7 @@ import java.net.URI;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -157,10 +156,9 @@ class StatusAssertionTests {
 		MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("/"));
 		MockClientHttpResponse response = new MockClientHttpResponse(status);
 
-		MonoProcessor<byte[]> emptyContent = MonoProcessor.fromSink(Sinks.one());
-		emptyContent.onComplete();
+		ExchangeResult result = new ExchangeResult(
+				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

@@ -190,7 +190,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(contentType.isCompatibleWith(mediaType)).isTrue();
 		assertThat(contentType.getParameter("type")).isEqualTo("foo");
 		assertThat(contentType.getParameter("boundary")).isNotEmpty();
-		assertThat(contentType.getParameter("charset")).isEqualTo("UTF-8");
+		assertThat(contentType.getParameter("charset")).isNull();
 
 		MultiValueMap<String, Part> requestParts = parse(this.response, hints);
 		assertThat(requestParts.size()).isEqualTo(2);
@@ -209,7 +209,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	public void singleSubscriberWithResource() throws IOException {
 		Sinks.Many<Resource> sink = Sinks.many().unicast().onBackpressureBuffer();
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
-		sink.emitNext(logo);
+		sink.tryEmitNext(logo);
 
 		MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
 		bodyBuilder.asyncPart("logo", sink.asFlux(), Resource.class);

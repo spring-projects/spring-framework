@@ -85,13 +85,19 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 			return this.httpRequest.getUri();
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Invalid URI syntax.", ex);
+			throw new IllegalArgumentException("Invalid URI syntax: " + ex.getMessage());
 		}
 	}
 
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getNativeRequest() {
+		return (T) this.httpRequest;
 	}
 
 	@Override

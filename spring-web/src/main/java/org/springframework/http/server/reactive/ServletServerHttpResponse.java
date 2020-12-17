@@ -359,10 +359,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 			if (ready && remaining > 0) {
 				// In case of IOException, onError handling should call discardData(DataBuffer)..
 				int written = writeToOutputStream(dataBuffer);
-				if (logger.isTraceEnabled()) {
-					logger.trace(getLogPrefix() + "Wrote " + written + " of " + remaining + " bytes");
-				}
-				else if (rsWriteLogger.isTraceEnabled()) {
+				if (rsWriteLogger.isTraceEnabled()) {
 					rsWriteLogger.trace(getLogPrefix() + "Wrote " + written + " of " + remaining + " bytes");
 				}
 				if (written == remaining) {

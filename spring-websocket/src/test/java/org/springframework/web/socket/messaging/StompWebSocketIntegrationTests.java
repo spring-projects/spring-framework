@@ -31,6 +31,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -59,6 +60,7 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.c
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
@@ -331,13 +333,13 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel() {
+		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 	}

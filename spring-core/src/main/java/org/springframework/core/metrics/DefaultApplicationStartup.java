@@ -57,7 +57,7 @@ class DefaultApplicationStartup implements ApplicationStartup {
 		}
 
 		@Override
-		public Tags tags() {
+		public Tags getTags() {
 			return this.TAGS;
 		}
 

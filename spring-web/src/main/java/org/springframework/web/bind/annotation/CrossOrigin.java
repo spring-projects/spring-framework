@@ -114,6 +114,8 @@ public @interface CrossOrigin {
 	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma},
 	 * <p>Exposed headers are listed in the {@code Access-Control-Expose-Headers}
 	 * response header of actual CORS requests.
+	 * <p>The special value {@code "*"} allows all headers to be exposed for
+	 * non-credentialed requests.
 	 * <p>By default no headers are listed as exposed.
 	 */
 	String[] exposedHeaders() default {};

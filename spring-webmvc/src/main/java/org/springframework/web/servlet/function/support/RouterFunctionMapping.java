@@ -189,12 +189,17 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 	protected Object getHandlerInternal(HttpServletRequest servletRequest) throws Exception {
 		if (this.routerFunction != null) {
 			ServerRequest request = ServerRequest.create(servletRequest, this.messageConverters);
-			servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
+			setAttributes(servletRequest, request);
 			return this.routerFunction.route(request).orElse(null);
 		}
 		else {
 			return null;
 		}
+	}
+
+	private void setAttributes(HttpServletRequest servletRequest, ServerRequest request) {
+		servletRequest.removeAttribute(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
+		servletRequest.setAttribute(RouterFunctions.REQUEST_ATTRIBUTE, request);
 	}
 
 }

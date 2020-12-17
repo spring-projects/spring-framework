@@ -43,10 +43,12 @@ import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriBuilder;
 
 /**
@@ -92,14 +94,24 @@ public interface ServerRequest {
 	 * Get the request path.
 	 */
 	default String path() {
-		return uri().getRawPath();
+		return requestPath().pathWithinApplication().value();
 	}
 
 	/**
 	 * Get the request path as a {@code PathContainer}.
+	 * @deprecated as of 5.3, in favor on {@link #requestPath()}
 	 */
+	@Deprecated
 	default PathContainer pathContainer() {
-		return PathContainer.parsePath(path());
+		return requestPath();
+	}
+
+	/**
+	 * Get the request path as a {@code PathContainer}.
+	 * @since 5.3
+	 */
+	default RequestPath requestPath() {
+		return ServletRequestPathUtils.getParsedRequestPath(servletRequest());
 	}
 
 	/**
@@ -540,6 +552,32 @@ public interface ServerRequest {
 		 * @return this builder
 		 */
 		Builder attributes(Consumer<Map<String, Object>> attributesConsumer);
+
+		/**
+		 * Add a parameter with the given name and value.
+		 * @param name the parameter name
+		 * @param values the parameter value(s)
+		 * @return this builder
+		 */
+		Builder param(String name, String... values);
+
+		/**
+		 * Manipulate this request's parameters with the given consumer.
+		 * <p>The map provided to the consumer is "live", so that the consumer can be used to
+		 * {@linkplain MultiValueMap#set(Object, Object) overwrite} existing cookies,
+		 * {@linkplain MultiValueMap#remove(Object) remove} cookies, or use any of the other
+		 * {@link MultiValueMap} methods.
+		 * @param paramsConsumer a function that consumes the parameters map
+		 * @return this builder
+		 */
+		Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer);
+
+		/**
+		 * Set the remote address of the request.
+		 * @param remoteAddress the remote address
+		 * @return this builder
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
 		 * Build the request.

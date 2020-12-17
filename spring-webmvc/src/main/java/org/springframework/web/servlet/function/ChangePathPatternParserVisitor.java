@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.function;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -57,6 +58,10 @@ class ChangePathPatternParserVisitor implements RouterFunctions.Visitor {
 
 	@Override
 	public void resources(Function<ServerRequest, Optional<Resource>> lookupFunction) {
+	}
+
+	@Override
+	public void attributes(Map<String, Object> attributes) {
 	}
 
 	@Override

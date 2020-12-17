@@ -231,7 +231,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@MessageMapping("receive")
 		void receive(String payload) {
-			this.fireForgetPayloads.emitNext(payload);
+			this.fireForgetPayloads.tryEmitNext(payload);
 		}
 
 		@MessageMapping("echo")
@@ -273,7 +273,7 @@ public class RSocketClientToServerIntegrationTests {
 
 		@ConnectMapping("foo-updates")
 		public void handleMetadata(@Header("foo") String foo) {
-			this.metadataPushPayloads.emitNext(foo);
+			this.metadataPushPayloads.tryEmitNext(foo);
 		}
 
 		@MessageExceptionHandler
@@ -317,9 +317,9 @@ public class RSocketClientToServerIntegrationTests {
 
 		private RSocket delegate;
 
-		private final AtomicInteger fireAndForgetCount = new AtomicInteger(0);
+		private final AtomicInteger fireAndForgetCount = new AtomicInteger();
 
-		private final AtomicInteger metadataPushCount = new AtomicInteger(0);
+		private final AtomicInteger metadataPushCount = new AtomicInteger();
 
 
 		public int getFireAndForgetCount() {

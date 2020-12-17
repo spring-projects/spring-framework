@@ -16,11 +16,19 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -33,15 +41,22 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.junit.platform.commons.annotation.Testable;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
@@ -64,10 +79,29 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		ParameterResolver {
 
 	/**
-	 * {@link Namespace} in which {@code TestContextManagers} are stored,
-	 * keyed by test class.
+	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
+	 * by test class.
 	 */
-	private static final Namespace NAMESPACE = Namespace.create(SpringExtension.class);
+	private static final Namespace TEST_CONTEXT_MANAGER_NAMESPACE = Namespace.create(SpringExtension.class);
+
+	/**
+	 * {@link Namespace} in which {@code @Autowired} validation error messages
+	 * are stored, keyed by test class.
+	 */
+	private static final Namespace AUTOWIRED_VALIDATION_NAMESPACE = Namespace.create(SpringExtension.class.getName() +
+			"#autowired.validation");
+
+	private static final String NO_AUTOWIRED_VIOLATIONS_DETECTED = "NO AUTOWIRED VIOLATIONS DETECTED";
+
+	// Note that @Test, @TestFactory, @TestTemplate, @RepeatedTest, and @ParameterizedTest
+	// are all meta-annotated with @Testable.
+	private static final List<Class<? extends Annotation>> JUPITER_ANNOTATION_TYPES =
+			Arrays.asList(BeforeAll.class, AfterAll.class, BeforeEach.class, AfterEach.class, Testable.class);
+
+	private static final MethodFilter autowiredTestOrLifecycleMethodFilter =
+			ReflectionUtils.USER_DECLARED_METHODS
+				.and(method -> !Modifier.isPrivate(method.getModifiers()))
+				.and(SpringExtension::isAutowiredTestOrLifecycleMethod);
 
 
 	/**
@@ -93,10 +127,40 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 
 	/**
 	 * Delegates to {@link TestContextManager#prepareTestInstance}.
+	 * <p>As of Spring Framework 5.3.2, this method also validates that test
+	 * methods and test lifecycle methods are not annotated with
+	 * {@link Autowired @Autowired}.
 	 */
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
+		validateAutowiredConfig(context);
 		getTestContextManager(context).prepareTestInstance(testInstance);
+	}
+
+	/**
+	 * Validate that test methods and test lifecycle methods in the supplied
+	 * test class are not annotated with {@link Autowired @Autowired}.
+	 * @since 5.3.2
+	 */
+	private void validateAutowiredConfig(ExtensionContext context) {
+		// We save the result in the ExtensionContext.Store so that we don't
+		// re-validate all methods for the same test class multiple times.
+		Store store = context.getStore(AUTOWIRED_VALIDATION_NAMESPACE);
+		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(),
+			testClass -> {
+				Method[] methodsWithErrors =
+						ReflectionUtils.getUniqueDeclaredMethods(testClass, autowiredTestOrLifecycleMethodFilter);
+				return (methodsWithErrors.length == 0 ? NO_AUTOWIRED_VIOLATIONS_DETECTED :
+						String.format(
+							"Test methods and test lifecycle methods must not be annotated with @Autowired. " +
+							"You should instead annotate individual method parameters with @Autowired, " +
+							"@Qualifier, or @Value. Offending methods in test class %s: %s",
+							testClass.getName(), Arrays.toString(methodsWithErrors)));
+			}, String.class);
+
+		if (errorMessage != NO_AUTOWIRED_VIOLATIONS_DETECTED) {
+			throw new IllegalStateException(errorMessage);
+		}
 	}
 
 	/**
@@ -219,7 +283,21 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	private static Store getStore(ExtensionContext context) {
-		return context.getRoot().getStore(NAMESPACE);
+		return context.getRoot().getStore(TEST_CONTEXT_MANAGER_NAMESPACE);
+	}
+
+	private static boolean isAutowiredTestOrLifecycleMethod(Method method) {
+		MergedAnnotations mergedAnnotations =
+				MergedAnnotations.from(method, SearchStrategy.DIRECT, RepeatableContainers.none());
+		if (!mergedAnnotations.isPresent(Autowired.class)) {
+			return false;
+		}
+		for (Class<? extends Annotation> annotationType : JUPITER_ANNOTATION_TYPES) {
+			if (mergedAnnotations.isPresent(annotationType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

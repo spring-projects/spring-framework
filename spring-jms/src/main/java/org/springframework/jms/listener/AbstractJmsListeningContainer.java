@@ -16,8 +16,8 @@
 
 package org.springframework.jms.listener;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -83,7 +83,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private volatile boolean running;
 
-	private final List<Object> pausedTasks = new LinkedList<>();
+	private final List<Object> pausedTasks = new ArrayList<>();
 
 	protected final Object lifecycleMonitor = new Object();
 

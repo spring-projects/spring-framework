@@ -99,7 +99,8 @@ public class CorsRegistration {
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
 	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}, that an
 	 * actual response might have and can be exposed.
-	 * <p>Note that {@code "*"} is not supported on this property.
+	 * <p>The special value {@code "*"} allows all headers to be exposed for
+	 * non-credentialed requests.
 	 * <p>By default this is not set.
 	 */
 	public CorsRegistration exposedHeaders(String... headers) {
@@ -132,6 +133,18 @@ public class CorsRegistration {
 	 */
 	public CorsRegistration maxAge(long maxAge) {
 		this.config.setMaxAge(maxAge);
+		return this;
+	}
+
+	/**
+	 * Apply the given {@code CorsConfiguration} to the one being configured via
+	 * {@link CorsConfiguration#combine(CorsConfiguration)} which in turn has been
+	 * initialized with {@link CorsConfiguration#applyPermitDefaultValues()}.
+	 * @param other the configuration to apply
+	 * @since 5.3
+	 */
+	public CorsRegistration combine(CorsConfiguration other) {
+		this.config.combine(other);
 		return this;
 	}
 

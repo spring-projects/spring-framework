@@ -56,7 +56,6 @@ public class MapConnectionFactoryLookup implements ConnectionFactoryLookup {
 
 	/**
 	 * Create a new instance of the {@link MapConnectionFactoryLookup} class.
-	 *
 	 * @param connectionFactoryName the name under which the supplied {@link ConnectionFactory} is to be added
 	 * @param connectionFactory the {@link ConnectionFactory} to be added
 	 */
@@ -86,9 +85,8 @@ public class MapConnectionFactoryLookup implements ConnectionFactoryLookup {
 	}
 
 	/**
-	 * Add the supplied {@link ConnectionFactory} to the map of {@link ConnectionFactory ConnectionFactorys} maintained by
-	 * this object.
-	 *
+	 * Add the supplied {@link ConnectionFactory} to the map of
+	 * {@link ConnectionFactory ConnectionFactory} instances maintained by this object.
 	 * @param connectionFactoryName the name under which the supplied {@link ConnectionFactory} is to be added
 	 * @param connectionFactory the {@link ConnectionFactory} to be so added
 	 */
@@ -101,6 +99,7 @@ public class MapConnectionFactoryLookup implements ConnectionFactoryLookup {
 	@Override
 	public ConnectionFactory getConnectionFactory(String connectionFactoryName)
 			throws ConnectionFactoryLookupFailureException {
+
 		Assert.notNull(connectionFactoryName, "ConnectionFactory name must not be null");
 		return this.connectionFactories.computeIfAbsent(connectionFactoryName, key -> {
 			throw new ConnectionFactoryLookupFailureException(

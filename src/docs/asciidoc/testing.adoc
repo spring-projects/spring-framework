@@ -545,10 +545,12 @@ The following example uses both a location and a loader:
 
 
 NOTE: `@ContextConfiguration` provides support for inheriting resource locations or
-configuration classes as well as context initializers that are declared by superclasses.
+configuration classes as well as context initializers that are declared by superclasses
+or enclosing classes.
 
-See <<testcontext-ctx-management>> and the `@ContextConfiguration` javadocs for further
-details.
+See <<testcontext-ctx-management>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the `@ContextConfiguration`
+javadocs for further details.
 
 [[spring-testing-annotation-webappconfiguration]]
 ===== `@WebAppConfiguration`
@@ -742,12 +744,13 @@ be active:
 
 
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
-declared by superclasses by default. You can also resolve active bean definition profiles
-programmatically by implementing a custom
+declared by superclasses and enclosing classes by default. You can also resolve active
+bean definition profiles programmatically by implementing a custom
 <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver, `ActiveProfilesResolver`>>
 and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
-See <<testcontext-ctx-management-env-profiles>> and the
+See <<testcontext-ctx-management-env-profiles>>,
+<<testcontext-junit-jupiter-nested-test-configuration>>, and the
 {api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
 examples and further details.
 
@@ -1125,9 +1128,11 @@ The following example shows how to register two `TestExecutionListener` implemen
 <1> Register two `TestExecutionListener` implementations.
 
 
-By default, `@TestExecutionListeners` supports inherited listeners. See the
-{api-spring-framework}/test/context/TestExecutionListeners.html[javadoc]
-for an example and further details.
+By default, `@TestExecutionListeners` provides support for inheriting listeners from
+superclasses or enclosing classes. See
+<<testcontext-junit-jupiter-nested-test-configuration>> and the 
+{api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
+javadoc] for an example and further details.
 
 [[spring-testing-annotation-commit]]
 ===== `@Commit`
@@ -1670,13 +1675,14 @@ how to use the `@Repeat` annotation:
 [[integration-testing-annotations-junit-jupiter]]
 ==== Spring JUnit Jupiter Testing Annotations
 
-The following annotations are supported only when used in conjunction with the
+The following annotations are supported when used in conjunction with the
 <<testcontext-junit-jupiter-extension, `SpringExtension`>> and JUnit Jupiter
 (that is, the programming model in JUnit 5):
 
 * <<integration-testing-annotations-junit-jupiter-springjunitconfig>>
 * <<integration-testing-annotations-junit-jupiter-springjunitwebconfig>>
 * <<integration-testing-annotations-testconstructor>>
+* <<integration-testing-annotations-nestedtestconfiguration>>
 * <<integration-testing-annotations-junit-jupiter-enabledif>>
 * <<integration-testing-annotations-junit-jupiter-disabledif>>
 
@@ -1841,6 +1847,55 @@ often automatically registered for you – for example, when using annotations s
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` or various test-related annotations from
 Spring Boot Test.
 
+[[integration-testing-annotations-nestedtestconfiguration]]
+===== `@NestedTestConfiguration`
+
+`@NestedTestConfiguration` is a type-level annotation that is used to configure how
+Spring test configuration annotations are processed within enclosing class hierarchies
+for inner test classes.
+
+If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
+super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+configuration inheritance mode_ will be used. See the tip below for details on how to
+change the default mode.
+
+.Changing the default enclosing configuration inheritance mode
+[TIP]
+=====
+The default _enclosing configuration inheritance mode_ is `INHERIT`, but it can be
+changed by setting the `spring.test.enclosing.configuration` JVM system property to
+`OVERRIDE`. Alternatively, the default mode may be set via the `SpringProperties`
+mechanism.
+=====
+
+The <<testcontext-framework>> honors `@NestedTestConfiguration` semantics for the
+following annotations.
+
+* <<spring-testing-annotation-bootstrapwith>>
+* <<spring-testing-annotation-contextconfiguration>>
+* <<spring-testing-annotation-webappconfiguration>>
+* <<spring-testing-annotation-contexthierarchy>>
+* <<spring-testing-annotation-activeprofiles>>
+* <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dynamicpropertysource>>
+* <<spring-testing-annotation-dirtiescontext>>
+* <<spring-testing-annotation-testexecutionlisteners>>
+* <<testcontext-tx,`@Transactional`>>
+* <<spring-testing-annotation-commit>>
+* <<spring-testing-annotation-rollback>>
+* <<spring-testing-annotation-sql>>
+* <<spring-testing-annotation-sqlconfig>>
+* <<spring-testing-annotation-sqlmergemode>>
+* <<integration-testing-annotations-testconstructor>>
+
+NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction
+with `@Nested` test classes in JUnit Jupiter; however, there may be other testing
+frameworks with support for Spring and nested test classes that make use of this
+annotation.
+
+See <<testcontext-junit-jupiter-nested-test-configuration>> for an example and further
+details.
+
 [[integration-testing-annotations-junit-jupiter-enabledif]]
 ===== `@EnabledIf`
 
@@ -1970,6 +2025,7 @@ You can use each of the following as a meta-annotation in conjunction with the
 * `@SpringJUnitConfig` _(only supported on JUnit Jupiter)_
 * `@SpringJUnitWebConfig` _(only supported on JUnit Jupiter)_
 * `@TestConstructor` _(only supported on JUnit Jupiter)_
+* `@NestedTestConfiguration` _(only supported on JUnit Jupiter)_
 * `@EnabledIf` _(only supported on JUnit Jupiter)_
 * `@DisabledIf` _(only supported on JUnit Jupiter)_
 
@@ -3142,6 +3198,9 @@ is set to `false`, the resource locations or component classes and the context
 initializers, respectively, for the test class shadow and effectively replace the
 configuration defined by superclasses.
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 In the next example, which uses XML resource locations, the `ApplicationContext` for
 `ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.
 Beans defined in `extended-config.xml` can, therefore, override (that is, replace) those
@@ -3612,6 +3671,9 @@ automatically inherit the `@ActiveProfiles` configuration from the base class. I
 following example, the declaration of `@ActiveProfiles` (as well as other annotations)
 has been moved to an abstract superclass, `AbstractIntegrationTest`:
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -3947,6 +4009,9 @@ If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySour
 set to `false`, the locations or inlined properties, respectively, for the test class
 shadow and effectively replace the configuration defined by superclasses.
 
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 `base.properties` file as a test property source. In contrast, the `ApplicationContext`
 for `ExtendedTest` is loaded by using the `base.properties` and `extended.properties`
@@ -4029,11 +4094,14 @@ integration tests that need to add properties with dynamic values to the set of
 `PropertySources` in the `Environment` for the `ApplicationContext` loaded for the
 integration test.
 
-NOTE: The `@DynamicPropertySource` annotation and its supporting infrastructure were
+[NOTE]
+====
+The `@DynamicPropertySource` annotation and its supporting infrastructure were
 originally designed to allow properties from
 https://www.testcontainers.org/[Testcontainers] based tests to be exposed easily to
 Spring integration tests. However, this feature may also be used with any form of
 external resource whose lifecycle is maintained outside the test's `ApplicationContext`.
+====
 
 In contrast to the <<testcontext-ctx-management-property-sources,`@TestPropertySource`>>
 annotation that is applied at the class level, `@DynamicPropertySource` must be applied
@@ -4047,6 +4115,15 @@ available to components within the test's `ApplicationContext` via the `redis.ho
 `redis.port` properties. These properties can be accessed via Spring's `Environment`
 abstraction or injected directly into Spring-managed components – for example, via
 `@Value("${redis.host}")` and `@Value("${redis.port}")`, respectively.
+
+[TIP]
+====
+If you use `@DynamicPropertySource` in a base class and discover that tests in subclasses
+fail because the dynamic properties change between subclasses, you may need to annotate
+your base class with <<spring-testing-annotation-dirtiescontext, `@DirtiesContext`>> to
+ensure that each subclass gets its own `ApplicationContext` with the correct dynamic
+properties.
+====
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -4394,10 +4471,10 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext>>). This instructs Spring
-to remove the context from the cache and rebuild the application context before running
-the next test that requires the same application context. Note that support for the
-`@DirtiesContext` annotation is provided by the
+`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext, Spring Testing
+Annotations>>). This instructs Spring to remove the context from the cache and rebuild
+the application context before running the next test that requires the same application
+context. Note that support for the `@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 
@@ -5056,7 +5133,7 @@ hierarchy runs within a transaction. Test methods that are not annotated with
 that `@Transactional` is not supported on test lifecycle methods — for example, methods
 annotated with JUnit Jupiter's `@BeforeAll`, `@BeforeEach`, etc. Furthermore, tests that
 are annotated with `@Transactional` but have the `propagation` attribute set to
-`NOT_SUPPORTED` are not run within a transaction.
+`NOT_SUPPORTED` or `NEVER` are not run within a transaction.
 
 [[testcontext-tx-attribute-support]]
 .`@Transactional` attribute support
@@ -5065,7 +5142,7 @@ are annotated with `@Transactional` but have the `propagation` attribute set to
 
 |`value` and `transactionManager` |yes
 
-|`propagation` |only `Propagation.NOT_SUPPORTED` is supported
+|`propagation` |only `Propagation.NOT_SUPPORTED` and `Propagation.NEVER` are supported
 
 |`isolation` |no
 
@@ -6449,6 +6526,95 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 Note that the use of `@RepeatedTest` from JUnit Jupiter lets the test method gain access
 to the `RepetitionInfo`.
 
+[[testcontext-junit-jupiter-nested-test-configuration]]
+===== `@Nested` test class configuration
+
+The _Spring TestContext Framework_ has supported the use of test-related annotations on
+`@Nested` test classes in JUnit Jupiter since Spring Framework 5.0; however, until Spring
+Framework 5.3 class-level test configuration annotations were not _inherited_ from
+enclosing classes like they are from superclasses.
+
+Spring Framework 5.3 introduces first-class support for inheriting test class
+configuration from enclosing classes, and such configuration will be inherited by
+default. To change from the default `INHERIT` mode to `OVERRIDE` mode, you may annotate
+an individual `@Nested` test class with
+`@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)`. An explicit
+`@NestedTestConfiguration` declaration will apply to the annotated test class as well as
+any of its subclasses and nested classes. Thus, you may annotate a top-level test class
+with `@NestedTestConfiguration`, and that will apply to all of its nested test classes
+recursively.
+
+In order to allow development teams to change the default to `OVERRIDE` – for example,
+for compatibility with Spring Framework 5.0 through 5.2 – the default mode can be changed
+globally via a JVM system property or a `spring.properties` file in the root of the
+classpath. See the <<integration-testing-annotations-nestedtestconfiguration, "Changing
+the default enclosing configuration inheritance mode">> note for details.
+
+Although the following "Hello World" example is very simplistic, it shows how to declare
+common configuration on a top-level class that is inherited by its `@Nested` test
+classes. In this particular example, only the `TestConfig` configuration class is
+inherited. Each nested test class provides its own set of active profiles, resulting in a
+distinct `ApplicationContext` for each nested test class (see
+<<testcontext-ctx-management-caching>> for details). Consult the list of
+<<integration-testing-annotations-nestedtestconfiguration, supported annotations>> to see
+which annotations can be inherited in `@Nested` test classes.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@SpringJUnitConfig(TestConfig.class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		class EnglishGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World");
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		class GermanGreetings {
+
+			@Test
+			void hello(@Autowired GreetingService service) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt");
+			}
+		}
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@SpringJUnitConfig(TestConfig::class)
+	class GreetingServiceTests {
+
+		@Nested
+		@ActiveProfiles("lang_en")
+		inner class EnglishGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hello World")
+			}
+		}
+
+		@Nested
+		@ActiveProfiles("lang_de")
+		inner class GermanGreetings {
+
+			@Test
+			fun hello(@Autowired service:GreetingService) {
+				assertThat(service.greetWorld()).isEqualTo("Hallo Welt")
+			}
+		}
+	}
+----
+
 [[testcontext-support-classes-testng]]
 ===== TestNG Support Classes
 
@@ -6488,139 +6654,112 @@ of `AbstractTestNGSpringContextTests` for an example of how to instrument your t
 
 
 
+include::testing/testing-webtestclient.adoc[leveloffset=+2]
+
+
+
 [[spring-mvc-test-framework]]
-=== Spring MVC Test Framework
+=== MockMvc
 
-The Spring MVC Test framework provides first class support for testing Spring MVC code
-with a fluent API that you can use with JUnit, TestNG, or any other testing framework. It
-is built on the {api-spring-framework}/mock/web/package-summary.html[Servlet API mock objects]
-from the `spring-test` module and, hence, does not use a running Servlet container. It
-uses the `DispatcherServlet` to provide full Spring MVC runtime behavior and provides
-support for loading actual Spring configuration with the TestContext framework in
-addition to a standalone mode, in which you can manually instantiate controllers and test
-them one at a time.
+The Spring MVC Test framework, also known as MockMvc, provides support for testing Spring
+MVC applications. It performs full Spring MVC request handling but via mock request and
+response objects instead of a running server.
 
-Spring MVC Test also provides client-side support for testing code that uses the
-`RestTemplate`. Client-side tests mock the server responses and also do not use a running
-server.
-
-TIP: Spring Boot provides an option to write full, end-to-end integration tests that
-include a running server. If this is your goal, see the
-{doc-spring-boot}/html/spring-boot-features.html#boot-features-testing[Spring Boot Reference Guide].
-For more information on the differences between out-of-container and end-to-end
-integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
+MockMvc can be used on its own to perform requests and verify responses. It can also be
+used through the <<webtestclient>> where MockMvc is plugged in as the server to handle
+requests with. The advantage of `WebTestClient` is the option to work with higher level
+objects instead of raw data as well as the ability to switch to full, end-to-end HTTP
+tests against a live server and use the same test API.
 
 
 [[spring-mvc-test-server]]
-==== Server-Side Tests
+==== Overview
 
-You can write a plain unit test for a Spring MVC controller by using JUnit or TestNG. To
-do so, instantiate the controller, inject it with mocked or stubbed dependencies, and
-call its methods (passing `MockHttpServletRequest`, `MockHttpServletResponse`, and
-others, as necessary). However, when writing such a unit test, much remains untested: for
-example, request mappings, data binding, type conversion, validation, and much more.
-Furthermore, other controller methods such as `@InitBinder`, `@ModelAttribute`, and
-`@ExceptionHandler` may also be invoked as part of the request processing lifecycle.
+You can write plain unit tests for Spring MVC by instantiating a controller, injecting it
+with dependencies, and calling its methods. However such tests do not verify request
+mappings, data binding, message conversion, type conversion, validation, and nor
+do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
+`@ExceptionHandler` methods.
 
-The goal of Spring MVC Test is to provide an effective way to test controllers by
-performing requests and generating responses through the actual `DispatcherServlet`.
+The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
+testing for Spring MVC controllers without a running server. It does that by invoking
+the `DispacherServlet` and passing
+<<mock-objects-servlet, "`mock`" implementations of the Servlet API>> from the
+`spring-test` module which replicates the full Spring MVC request handling without
+a running server.
 
-Spring MVC Test builds on the familiar <<mock-objects-servlet, "`mock`" implementations of
-the Servlet API>> available in the `spring-test` module. This allows performing requests
-and generating responses without the need for running in a Servlet container. For the
-most part, everything should work as it does at runtime with a few notable exceptions, as
-explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. The following JUnit
-Jupiter-based example uses Spring MVC Test:
+MockMvc is a server side test framework that lets you verify most of the functionality
+of a Spring MVC application using lightweight and targeted tests. You can use it on
+its own to perform requests and to verify responses, or you can also use it through
+the <<webtestclient>> API with MockMvc plugged in as the server to handle requests
+with.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-	import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
-	class ExampleTests {
-
-		MockMvc mockMvc;
-
-		@BeforeEach
-		void setup(WebApplicationContext wac) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-		}
-
-		@Test
-		void getAccount() throws Exception {
-			this.mockMvc.perform(get("/accounts/1")
-					.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType("application/json"))
-				.andExpect(jsonPath("$.name").value("Lee"));
-		}
-	}
-----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	import org.springframework.test.web.servlet.get
-
-	@SpringJUnitWebConfig(locations = ["test-servlet-context.xml"])
-	class ExampleTests {
-
-		lateinit var mockMvc: MockMvc
-
-		@BeforeEach
-		fun setup(wac: WebApplicationContext) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
-		}
-
-		@Test
-		fun getAccount() {
-			mockMvc.get("/accounts/1") {
-				accept = MediaType.APPLICATION_JSON
-			}.andExpect {
-				status { isOk }
-				content { contentType(MediaType.APPLICATION_JSON) }
-				jsonPath("$.name") { value("Lee") }
-			}
-		}
-	}
-----
-
-NOTE: A dedicated <<languages.adoc#mockmvc-dsl, MockMvc DSL>> is available in Kotlin
-
-The preceding test relies on the `WebApplicationContext` support of the TestContext
-framework to load Spring configuration from an XML configuration file located in the same
-package as the test class, but Java-based and Groovy-based configuration are also
-supported. See these
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/context[sample tests].
-
-The `MockMvc` instance is used to perform a `GET` request to `/accounts/1` and verify
-that the resulting response has status 200, the content type is `application/json`, and
-the response body has a JSON property called `name` with the value `Lee`. The `jsonPath`
-syntax is supported through the Jayway https://github.com/jayway/JsonPath[JsonPath
-project]. Many other options for verifying the result of the performed request are
-discussed later in this document.
 
 [[spring-mvc-test-server-static-imports]]
 ===== Static Imports
 
-The fluent API in the example from the <<spring-mvc-test-server, preceding section>>
-requires a few static imports, such as `MockMvcRequestBuilders.{asterisk}`,
-`MockMvcResultMatchers.{asterisk}`, and `MockMvcBuilders.{asterisk}`. An easy way to find
-these classes is to search for types that match `MockMvc*`. If you use Eclipse or the
-https://spring.io/tools[Spring Tools for Eclipse], be sure to add them as "`favorite static members`" in
-the Eclipse preferences under Java -> Editor -> Content Assist -> Favorites. Doing so
-lets you use content assist after typing the first character of the static method name.
-Other IDEs (such as IntelliJ) may not require any additional configuration. Check the
-support for code completion on static members.
+When using MockMvc directly to perform requests, you'll need static imports for:
+
+- `MockMvcBuilders.{asterisk}`
+- `MockMvcRequestBuilders.{asterisk}`
+- `MockMvcResultMatchers.{asterisk}`
+- `MockMvcResultHandlers.{asterisk}`
+
+An easy way to remember that is search for `MockMvc*`. If using Eclipse be sure to also
+add the above as "`favorite static members`" in the Eclipse preferences.
+
+When using MockMvc through the <<webtestclient>> you do not need static imports.
+The `WebTestClient` provides a fluent API without static imports.
+
 
 [[spring-mvc-test-server-setup-options]]
 ===== Setup Choices
 
-You have two main options for creating an instance of `MockMvc`. The first is to load
-Spring MVC configuration through the TestContext framework, which loads the Spring
-configuration and injects a `WebApplicationContext` into the test to use to build a
-`MockMvc` instance. The following example shows how to do so:
+MockMvc can be setup in one of two ways. One is to point directly to the controllers you
+want to test and programmatically configure Spring MVC infrastructure. The second is to
+point to Spring configuration with Spring MVC and controller infrastructure in it.
+
+To set up MockMvc for testing a specific controller, use the following:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	class MyWebTests {
+
+		MockMvc mockMvc;
+
+		@BeforeEach
+		void setup() {
+			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
+		}
+
+		// ...
+
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	class MyWebTests {
+
+		lateinit var mockMvc : MockMvc
+
+		@BeforeEach
+		fun setup() {
+			mockMvc = MockMvcBuilders.standaloneSetup(AccountController()).build()
+		}
+
+		// ...
+
+	}
+----
+
+Or you can also use this setup when testing through the
+<<webtestclient-controller-config, WebTestClient>> which delegates to the same builder
+as shown above.
+
+To set up MockMvc through Spring configuration, use the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6658,44 +6797,11 @@ configuration and injects a `WebApplicationContext` into the test to use to buil
 	}
 ----
 
-Your second option is to manually create a controller instance without loading Spring
-configuration. Instead, basic default configuration, roughly comparable to that of the
-MVC JavaConfig or the MVC namespace, is automatically created. You can customize it to a
-degree. The following example shows how to do so:
+Or you can also use this setup when testing through the
+<<webtestclient-context-config, WebTestClient>> which delegates to the same builder
+as shown above.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
-----
-	class MyWebTests {
 
-		MockMvc mockMvc;
-
-		@BeforeEach
-		void setup() {
-			this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
-		}
-
-		// ...
-
-	}
-----
-
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
-----
-	class MyWebTests {
-
-		lateinit var mockMvc : MockMvc
-
-		@BeforeEach
-		fun setup() {
-			mockMvc = MockMvcBuilders.standaloneSetup(AccountController()).build()
-		}
-
-		// ...
-
-	}
-----
 
 Which setup option should you use?
 
@@ -6826,7 +6932,11 @@ for a list of all MockMvc builder features or use the IDE to explore the availab
 [[spring-mvc-test-server-performing-requests]]
 ===== Performing Requests
 
-You can perform requests that use any HTTP method, as the following example shows:
+This section shows how to use MockMvc on its own to perform requests and verify responses.
+If using MockMvc through the `WebTestClient` please see the corresponding section on
+<<webtestclient-tests>> instead.
+
+To perform requests that use any HTTP method, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7137,6 +7247,11 @@ resulting links by using XPath expressions:
 [[spring-mvc-test-async-requests]]
 ===== Async Requests
 
+This section shows how to use MockMvc on its own to test asynchronous request handling.
+If using MockMvc through the <<webtestclient>>, there is nothing special to do to make
+asynchronous requests work as the `WebTestClient` automatically does what is described
+in this section.
+
 Servlet 3.0 asynchronous requests,
 <<web.adoc#mvc-ann-async,supported in Spring MVC>>, work by exiting the Servlet container
 thread and allowing the application to compute the response asynchronously, after which
@@ -7200,10 +7315,8 @@ or reactive type such as Reactor `Mono`:
 ===== Streaming Responses
 
 There are no options built into Spring MVC Test for container-less testing of streaming
-responses. Applications that make use of
-<<web.adoc#mvc-ann-async-http-streaming,Spring MVC streaming>> options can use the
-<<testing.adoc#webtestclient-stream,WebTestClient>> to perform end-to-end, integration
-tests against a running server. This is also supported in Spring Boot where you can
+responses. However you can test streaming requests through the <<WebTestClient>>.
+This is also supported in Spring Boot where you can
 {doc-spring-boot}/html/spring-boot-features.html#boot-features-testing-spring-boot-applications-testing-with-running-server[test a running server]
 with `WebTestClient`. One extra advantage is the ability to use the `StepVerifier` from
 project Reactor that allows declaring expectations on a stream of data.
@@ -7231,9 +7344,9 @@ last filter delegates to the `DispatcherServlet`.
 
 
 [[spring-mvc-test-vs-end-to-end-integration-tests]]
-===== Spring MVC Test vs End-to-End Tests
+===== MockMvc vs End-to-End Tests
 
-Spring MVC Test is built on Servlet API mock implementations from the
+MockMVc is built on Servlet API mock implementations from the
 `spring-test` module and does not rely on a running container. Therefore, there are
 some differences when compared to full end-to-end integration tests with an actual
 client and a live server running.
@@ -7280,11 +7393,10 @@ of testing even within the same project.
 ===== Further Examples
 
 The framework's own tests include
-https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[many
-sample tests] intended to show how to use Spring MVC Test. You can browse these examples
-for further ideas. Also, the
-https://github.com/spring-projects/spring-mvc-showcase[`spring-mvc-showcase`] project has
-full test coverage based on Spring MVC Test.
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples[
+many sample tests] intended to show how to use MockMvc on its own or through the
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/client[
+WebTestClient]. Browse these examples for further ideas.
 
 
 [[spring-mvc-test-server-htmlunit]]
@@ -8359,7 +8471,7 @@ http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 
 [[spring-mvc-test-client]]
-==== Client-Side REST Tests
+=== Testing Client Applications
 
 You can use client-side tests to test code that internally uses the `RestTemplate`. The
 idea is to declare expected requests and to provide "`stub`" responses so that you can
@@ -8478,7 +8590,7 @@ logic but without running a server. The following example shows how to do so:
 ----
 
 [[spring-mvc-test-client-static-imports]]
-===== Static Imports
+==== Static Imports
 
 As with server-side tests, the fluent API for client-side tests requires a few static
 imports. Those are easy to find by searching for `MockRest*`. Eclipse users should add
@@ -8489,14 +8601,11 @@ the static method name. Other IDEs (such IntelliJ) may not require any additiona
 configuration. Check for the support for code completion on static members.
 
 [[spring-mvc-test-client-resources]]
-===== Further Examples of Client-side REST Tests
+==== Further Examples of Client-side REST Tests
 
 Spring MVC Test's own tests include
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/client/samples[example
 tests] of client-side REST tests.
-
-include::testing-webtestclient.adoc[leveloffset=+2]
-
 
 
 [[testing-resources]]

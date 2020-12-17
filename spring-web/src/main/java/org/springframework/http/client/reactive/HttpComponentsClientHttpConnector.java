@@ -90,12 +90,14 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 		this.client.start();
 	}
 
+
 	/**
-	 * Set the buffer factory to be used.
+	 * Set the buffer factory to use.
 	 */
 	public void setBufferFactory(DataBufferFactory bufferFactory) {
 		this.dataBufferFactory = bufferFactory;
 	}
+
 
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
@@ -143,8 +145,8 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		@Override
 		public void completed(Message<HttpResponse, Publisher<ByteBuffer>> result) {
-			HttpComponentsClientHttpResponse response = new HttpComponentsClientHttpResponse(this.dataBufferFactory,
-					result, this.context);
+			HttpComponentsClientHttpResponse response =
+					new HttpComponentsClientHttpResponse(this.dataBufferFactory, result, this.context);
 			this.sink.success(response);
 		}
 

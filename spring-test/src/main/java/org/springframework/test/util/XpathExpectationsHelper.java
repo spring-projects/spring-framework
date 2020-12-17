@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public class XpathExpectationsHelper {
 	 * given Hamcrest matcher.
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
-	public void assertNodeCount(byte[] content, @Nullable String encoding, Matcher<Integer> matcher)
+	public void assertNodeCount(byte[] content, @Nullable String encoding, Matcher<? super Integer> matcher)
 			throws Exception {
 
 		NodeList nodeList = evaluateXpath(content, encoding, NodeList.class);

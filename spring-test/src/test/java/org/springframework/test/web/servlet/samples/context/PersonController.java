@@ -29,7 +29,7 @@ public class PersonController {
 	private final PersonDao personDao;
 
 
-	PersonController(PersonDao personDao) {
+	public PersonController(PersonDao personDao) {
 		this.personDao = personDao;
 	}
 

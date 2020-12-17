@@ -51,6 +51,7 @@ import org.springframework.r2dbc.connection.ConnectionFactoryUtils;
 import org.springframework.r2dbc.core.binding.BindMarkersFactory;
 import org.springframework.r2dbc.core.binding.BindTarget;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -103,17 +104,14 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action)
-			throws DataAccessException {
+	public <T> Mono<T> inConnection(Function<Connection, Mono<T>> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
 
 		return Mono.usingWhen(connectionMono, connectionCloseHolder -> {
-
 			// Create close-suppressing Connection proxy
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
-
 					try {
 						return action.apply(connectionToUse);
 					}
@@ -128,18 +126,14 @@ class DefaultDatabaseClient implements DatabaseClient {
 	}
 
 	@Override
-	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action)
-			throws DataAccessException {
+	public <T> Flux<T> inConnectionMany(Function<Connection, Flux<T>> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Mono<ConnectionCloseHolder> connectionMono = getConnection().map(
 				connection -> new ConnectionCloseHolder(connection, this::closeConnection));
 
 		return Flux.usingWhen(connectionMono, connectionCloseHolder -> {
-
-			// Create close-suppressing Connection proxy, also preparing returned
-			// Statements.
+			// Create close-suppressing Connection proxy, also preparing returned Statements.
 			Connection connectionToUse = createConnectionProxy(connectionCloseHolder.connection);
-
 					try {
 						return action.apply(connectionToUse);
 					}
@@ -236,7 +230,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 			this.byIndex = Collections.emptyMap();
 			this.byName = Collections.emptyMap();
 			this.sqlSupplier = sqlSupplier;
-			this.filterFunction = StatementFilterFunctions.empty();
+			this.filterFunction = StatementFilterFunction.EMPTY_FILTER;
 		}
 
 		DefaultGenericExecuteSpec(Map<Integer, Parameter> byIndex, Map<String, Parameter> byName,
@@ -255,7 +249,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value at index %d must not be null. Use bindNull(…) instead.", index));
 
 			Map<Integer, Parameter> byIndex = new LinkedHashMap<>(this.byIndex);
-
 			if (value instanceof Parameter) {
 				byIndex.put(index, (Parameter) value);
 			}
@@ -285,7 +278,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 					"Value for parameter %s must not be null. Use bindNull(…) instead.", name));
 
 			Map<String, Parameter> byName = new LinkedHashMap<>(this.byName);
-
 			if (value instanceof Parameter) {
 				byName.put(name, (Parameter) value);
 			}
@@ -310,7 +302,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 		@Override
 		public DefaultGenericExecuteSpec filter(StatementFilterFunction filter) {
 			Assert.notNull(filter, "Statement FilterFunction must not be null");
-			return new DefaultGenericExecuteSpec(this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
+			return new DefaultGenericExecuteSpec(
+					this.byIndex, this.byName, this.sqlSupplier, this.filterFunction.andThen(filter));
 		}
 
 		@Override
@@ -393,7 +386,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		private MapBindParameterSource retrieveParameters(String sql, List<String> parameterNames,
 				Map<String, Parameter> remainderByName, Map<Integer, Parameter> remainderByIndex) {
 
-			Map<String, Parameter> namedBindings = new LinkedHashMap<>(parameterNames.size());
+			Map<String, Parameter> namedBindings = CollectionUtils.newLinkedHashMap(parameterNames.size());
 			for (String parameterName : parameterNames) {
 				Parameter parameter = getParameter(remainderByName, remainderByIndex, parameterNames, parameterName);
 				if (parameter == null) {
@@ -459,7 +452,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Assert.state(StringUtils.hasText(sql), "SQL returned by SQL supplier must not be empty!");
 			return sql;
 		}
-
 	}
 
 

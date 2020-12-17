@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 public abstract class ServletRequestPathUtils {
 
 	/** Name of Servlet request attribute that holds the parsed {@link RequestPath}. */
-	public static final String PATH_ATTRIBUTE = ServletRequestPathUtils.class.getName() + ".path";
+	public static final String PATH_ATTRIBUTE = ServletRequestPathUtils.class.getName() + ".PATH";
 
 
 	/**

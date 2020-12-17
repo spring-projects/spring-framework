@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletContext;
@@ -39,6 +40,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.socket.HandshakeInfo;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.adapter.ContextWebSocketHandler;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdapter;
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
@@ -152,9 +154,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory factory = response.bufferFactory();
 
-		JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
-				handler, session -> new JettyWebSocketSession(session, handshakeInfo, factory));
-
 		startLazily(servletRequest);
 
 		Assert.state(this.factory != null, "No WebSocketServerFactory available");
@@ -163,15 +162,22 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 		// Trigger WebFlux preCommit actions and upgrade
 		return exchange.getResponse().setComplete()
-				.then(Mono.fromCallable(() -> {
+				.then(Mono.deferContextual(contextView -> {
+					JettyWebSocketHandlerAdapter adapter = new JettyWebSocketHandlerAdapter(
+							ContextWebSocketHandler.decorate(handler, contextView),
+							session -> new JettyWebSocketSession(session, handshakeInfo, factory));
+
 					try {
 						adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
 						this.factory.acceptWebSocket(servletRequest, servletResponse);
 					}
+					catch (IOException ex) {
+						return Mono.error(ex);
+					}
 					finally {
 						adapterHolder.remove();
 					}
-					return null;
+					return Mono.empty();
 				}));
 	}
 

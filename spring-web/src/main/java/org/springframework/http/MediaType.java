@@ -514,9 +514,9 @@ public class MediaType extends MimeType implements Serializable {
 
 
 	@Override
-	protected void checkParameters(String attribute, String value) {
-		super.checkParameters(attribute, value);
-		if (PARAM_QUALITY_FACTOR.equals(attribute)) {
+	protected void checkParameters(String parameter, String value) {
+		super.checkParameters(parameter, value);
+		if (PARAM_QUALITY_FACTOR.equals(parameter)) {
 			value = unquote(value);
 			double d = Double.parseDouble(value);
 			Assert.isTrue(d >= 0D && d <= 1D,

@@ -30,7 +30,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -196,7 +195,7 @@ public class JdbcTemplateTests {
 		String[] results = {"rod", "gary", " portia"};
 
 		class StringHandler implements RowCallbackHandler {
-			private List<String> list = new LinkedList<>();
+			private List<String> list = new ArrayList<>();
 			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				this.list.add(rs.getString(1));

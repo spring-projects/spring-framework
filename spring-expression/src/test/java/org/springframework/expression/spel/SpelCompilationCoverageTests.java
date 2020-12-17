@@ -4180,6 +4180,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(tc)).isEqualTo("value4");
 		assertCanCompile(expression);
 		assertThat(expression.getValue(tc)).isEqualTo("value4");
+
+		// record-style accessor
+		expression = parser.parseExpression("strawberry");
+		assertCantCompile(expression);
+		assertThat(expression.getValue(tc)).isEqualTo("value5");
+		assertCanCompile(expression);
+		assertThat(expression.getValue(tc)).isEqualTo("value5");
 	}
 
 	@Test
@@ -4553,23 +4560,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		Object v = expression.getValue(ctx,holder);
 		assertThat(v).isEqualTo("abc");
 
-		//	// time it interpreted
-		//	long stime = System.currentTimeMillis();
-		//	for (int i = 0; i < 100000; i++) {
-		//		v = expression.getValue(ctx,holder);
-		//	}
-		//	System.out.println((System.currentTimeMillis() - stime));
-
 		assertCanCompile(expression);
 		v = expression.getValue(ctx,holder);
 		assertThat(v).isEqualTo("abc");
-
-		//	// time it compiled
-		//	stime = System.currentTimeMillis();
-		//	for (int i = 0; i < 100000; i++) {
-		//		v = expression.getValue(ctx,holder);
-		//	}
-		//	System.out.println((System.currentTimeMillis() - stime));
 	}
 
 	@Test
@@ -4985,13 +4978,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(fast.compileExpression()).isTrue();
 		r.setValue2(null);
 		// try the numbers 0,1,2,null
-		for (int i=0;i<4;i++) {
-			r.setValue(i<3?i:null);
+		for (int i = 0; i < 4; i++) {
+			r.setValue(i < 3 ? i : null);
 			boolean slowResult = (Boolean)slow.getValue(ctx);
 			boolean fastResult = (Boolean)fast.getValue(ctx);
-			// System.out.println("Trying "+expressionText+" with value="+r.getValue()+" result is "+slowResult);
-			assertThat(fastResult).as(" Differing results: expression="+expressionText+
-						" value="+r.getValue()+" slow="+slowResult+" fast="+fastResult).isEqualTo(slowResult);
+			assertThat(fastResult).as("Differing results: expression=" + expressionText +
+						" value=" + r.getValue() + " slow=" + slowResult + " fast="+fastResult).isEqualTo(slowResult);
 		}
 	}
 
@@ -5002,13 +4994,12 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(fast.compileExpression()).isTrue();
 		Reg r = (Reg)ctx.getRootObject().getValue();
 		// try the numbers 0,1,2,null
-		for (int i=0;i<4;i++) {
-			r.setValue(i<3?i:null);
+		for (int i = 0; i < 4; i++) {
+			r.setValue(i < 3 ? i : null);
 			boolean slowResult = (Boolean)slow.getValue(ctx);
 			boolean fastResult = (Boolean)fast.getValue(ctx);
-			// System.out.println("Trying "+expressionText+" with value="+r.getValue()+" result is "+slowResult);
-			assertThat(fastResult).as(" Differing results: expression="+expressionText+
-						" value="+r.getValue()+" slow="+slowResult+" fast="+fastResult).isEqualTo(slowResult);
+			assertThat(fastResult).as("Differing results: expression=" + expressionText +
+					" value=" + r.getValue() + " slow=" + slowResult + " fast="+fastResult).isEqualTo(slowResult);
 		}
 	}
 
@@ -5159,7 +5150,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThatExceptionOfType(Exception.class).isThrownBy(expression::getValue);
 	}
 
-	private void assertIsCompiled(Expression expression) {
+	public static void assertIsCompiled(Expression expression) {
 		try {
 			Field field = SpelExpression.class.getDeclaredField("compiledAst");
 			field.setAccessible(true);
@@ -5839,7 +5830,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public String orange = "value1";
 		public static String apple = "value2";
-
 		public long peach = 34L;
 
 		public String getBanana() {
@@ -5848,6 +5838,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public static String getPlum() {
 			return "value4";
+		}
+
+		public String strawberry() {
+			return "value5";
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -198,6 +199,17 @@ public class DefaultTestContext implements TestContext {
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T computeAttribute(String name, Function<String, T> computeFunction) {
+		Assert.notNull(name, "Name must not be null");
+		Assert.notNull(computeFunction, "Compute function must not be null");
+		Object value = this.attributes.computeIfAbsent(name, computeFunction);
+		Assert.state(value != null,
+				() -> String.format("Compute function must not return null for attribute named '%s'", name));
+		return (T) value;
 	}
 
 	@Override

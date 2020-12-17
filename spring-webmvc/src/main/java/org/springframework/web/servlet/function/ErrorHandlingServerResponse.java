@@ -1,0 +1,95 @@
+/*
+ * Copyright 2002-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.web.servlet.function;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.web.servlet.ModelAndView;
+
+/**
+ * Base class for {@link ServerResponse} implementations with error handling.
+ *
+ * @author Arjen Poutsma
+ * @since 5.3
+ */
+abstract class ErrorHandlingServerResponse implements ServerResponse {
+
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	private final List<ErrorHandler<?>> errorHandlers = new ArrayList<>();
+
+
+	protected final <T extends ServerResponse> void addErrorHandler(Predicate<Throwable> predicate,
+			BiFunction<Throwable, ServerRequest, T> errorHandler) {
+
+		Assert.notNull(predicate, "Predicate must not be null");
+		Assert.notNull(errorHandler, "ErrorHandler must not be null");
+		this.errorHandlers.add(new ErrorHandler<>(predicate, errorHandler));
+	}
+
+	@Nullable
+	protected ModelAndView handleError(Throwable t, HttpServletRequest servletRequest,
+			HttpServletResponse servletResponse, Context context) throws ServletException, IOException {
+
+		for (ErrorHandler<?> errorHandler : this.errorHandlers) {
+			if (errorHandler.test(t)) {
+				ServerRequest serverRequest = (ServerRequest)
+						servletRequest.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
+				ServerResponse serverResponse = errorHandler.handle(t, serverRequest);
+				return serverResponse.writeTo(servletRequest, servletResponse, context);
+			}
+		}
+		throw new ServletException(t);
+	}
+
+
+	private static class ErrorHandler<T extends ServerResponse> {
+
+		private final Predicate<Throwable> predicate;
+
+		private final BiFunction<Throwable, ServerRequest, T> responseProvider;
+
+		public ErrorHandler(Predicate<Throwable> predicate, BiFunction<Throwable, ServerRequest, T> responseProvider) {
+			Assert.notNull(predicate, "Predicate must not be null");
+			Assert.notNull(responseProvider, "ResponseProvider must not be null");
+			this.predicate = predicate;
+			this.responseProvider = responseProvider;
+		}
+
+		public boolean test(Throwable t) {
+			return this.predicate.test(t);
+		}
+
+		public T handle(Throwable t, ServerRequest serverRequest) {
+			return this.responseProvider.apply(t, serverRequest);
+		}
+	}
+
+}

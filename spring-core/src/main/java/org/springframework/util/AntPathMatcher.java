@@ -16,9 +16,9 @@
 
 package org.springframework.util;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -644,7 +644,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?}|[^/{}]|\\\\[{}])+?)}");
 
-		private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
+		private static final String DEFAULT_VARIABLE_PATTERN = "((?s).*)";
 
 		private final String rawPattern;
 
@@ -655,7 +655,7 @@ public class AntPathMatcher implements PathMatcher {
 		@Nullable
 		private final Pattern pattern;
 
-		private final List<String> variableNames = new LinkedList<>();
+		private final List<String> variableNames = new ArrayList<>();
 
 		public AntPathStringMatcher(String pattern) {
 			this(pattern, true);

@@ -563,7 +563,7 @@ files named `services.xml` and `daos.xml` (which are on the classpath) can be in
 	val ctx = ClassPathXmlApplicationContext(arrayOf("services.xml", "daos.xml"), MessengerService::class.java)
 ----
 
-See the {api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`ClassPathXmlApplicationContext`]
+See the {api-spring-framework}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
 javadoc for details on the various constructors.
 
 

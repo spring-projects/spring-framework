@@ -48,9 +48,9 @@ import org.springframework.lang.Nullable;
  * EntityManager. Developed and tested against Hibernate 5.3 and 5.4;
  * backwards-compatible with Hibernate 5.2 at runtime on a best-effort basis.
  *
- * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
- * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
- * Also supports the detection of annotated packages (through
+ * <p>Exposes Hibernate's persistence provider and Hibernate's Session as extended
+ * EntityManager interface, and adapts {@link AbstractJpaVendorAdapter}'s common
+ * configuration settings. Also supports the detection of annotated packages (through
  * {@link org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo#getManagedPackages()}),
  * e.g. containing Hibernate {@link org.hibernate.annotations.FilterDef} annotations,
  * along with Spring-driven entity scanning which requires no {@code persistence.xml}
@@ -82,8 +82,8 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	public HibernateJpaVendorAdapter() {
 		this.persistenceProvider = new SpringHibernateJpaPersistenceProvider();
-		this.entityManagerFactoryInterface = SessionFactory.class;
-		this.entityManagerInterface = Session.class;
+		this.entityManagerFactoryInterface = SessionFactory.class;  // as of Spring 5.3
+		this.entityManagerInterface = Session.class;  // as of Spring 5.3
 	}
 
 

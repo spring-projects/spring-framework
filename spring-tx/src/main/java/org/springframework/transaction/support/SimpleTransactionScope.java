@@ -50,7 +50,14 @@ public class SimpleTransactionScope implements Scope {
 			TransactionSynchronizationManager.registerSynchronization(new CleanupSynchronization(scopedObjects));
 			TransactionSynchronizationManager.bindResource(this, scopedObjects);
 		}
-		return scopedObjects.scopedInstances.computeIfAbsent(name, k -> objectFactory.getObject());
+		// NOTE: Do NOT modify the following to use Map::computeIfAbsent. For details,
+		// see https://github.com/spring-projects/spring-framework/issues/25801.
+		Object scopedObject = scopedObjects.scopedInstances.get(name);
+		if (scopedObject == null) {
+			scopedObject = objectFactory.getObject();
+			scopedObjects.scopedInstances.put(name, scopedObject);
+		}
+		return scopedObject;
 	}
 
 	@Override

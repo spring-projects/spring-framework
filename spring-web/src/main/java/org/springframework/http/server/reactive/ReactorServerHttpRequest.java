@@ -48,7 +48,7 @@ import org.springframework.util.MultiValueMap;
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private static final AtomicLong logPrefixIndex = new AtomicLong(0);
+	private static final AtomicLong logPrefixIndex = new AtomicLong();
 
 
 	private final HttpServerRequest request;

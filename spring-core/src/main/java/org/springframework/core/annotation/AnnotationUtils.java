@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -35,6 +34,7 @@ import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.Mirr
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -905,7 +905,7 @@ public abstract class AnnotationUtils {
 		if (!methods.hasDefaultValueMethod()) {
 			return Collections.emptyMap();
 		}
-		Map<String, DefaultValueHolder> result = new LinkedHashMap<>(methods.size());
+		Map<String, DefaultValueHolder> result = CollectionUtils.newLinkedHashMap(methods.size());
 		if (!methods.hasNestedAnnotation()) {
 			// Use simpler method if there are no nested annotations
 			for (int i = 0; i < methods.size(); i++) {

@@ -18,7 +18,6 @@ package org.springframework.web.socket;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -154,7 +153,7 @@ public class WebSocketExtension {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<>(parts.length - 1);
+			parameters = CollectionUtils.newLinkedHashMap(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');

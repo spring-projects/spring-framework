@@ -46,16 +46,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
 		@Override
-		public void onStartup(ServletContext servletCxt) {
+		public void onStartup(ServletContext servletContext) {
 
 			// Load Spring web application configuration
-			AnnotationConfigWebApplicationContext ac = new AnnotationConfigWebApplicationContext();
-			ac.register(AppConfig.class);
-			ac.refresh();
+			AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+			context.register(AppConfig.class);
 
 			// Create and register the DispatcherServlet
-			DispatcherServlet servlet = new DispatcherServlet(ac);
-			ServletRegistration.Dynamic registration = servletCxt.addServlet("app", servlet);
+			DispatcherServlet servlet = new DispatcherServlet(context);
+			ServletRegistration.Dynamic registration = servletContext.addServlet("app", servlet);
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/app/*");
 		}
@@ -66,16 +65,15 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 ----
 	class MyWebApplicationInitializer : WebApplicationInitializer {
 
-		override fun onStartup(servletCxt: ServletContext) {
+		override fun onStartup(servletContext: ServletContext) {
 
 			// Load Spring web application configuration
-			val ac = AnnotationConfigWebApplicationContext()
-			ac.register(AppConfig::class.java)
-			ac.refresh()
+			val context = AnnotationConfigWebApplicationContext()
+			context.register(AppConfig::class.java)
 
 			// Create and register the DispatcherServlet
-			val servlet = DispatcherServlet(ac)
-			val registration = servletCxt.addServlet("app", servlet)
+			val servlet = DispatcherServlet(context)
+			val registration = servletContext.addServlet("app", servlet)
 			registration.setLoadOnStartup(1)
 			registration.addMapping("/app/*")
 		}
@@ -2085,7 +2083,7 @@ and others) and is equivalent to `required=false`.
 
 | `UriComponentsBuilder`
 | For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal  part of the servlet mapping. See <<mvc-uri-building>>.
+  the literal part of the servlet mapping. See <<mvc-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute, in contrast to model attributes stored in the session
@@ -2217,6 +2215,13 @@ By default, simple types (`int`, `long`, `Date`, and others) are supported. You 
 type conversion through a `WebDataBinder` (see <<mvc-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService`.
 See <<core.adoc#format, Spring Field Formatting>>.
+
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
+
 
 
 [[mvc-ann-matrix-variables]]
@@ -3381,6 +3386,39 @@ which allow rendering only a subset of all fields in an `Object`. To use it with
 NOTE: `@JsonView` allows an array of view classes, but you can specify only one per
 controller method. If you need to activate multiple views, you can use a composite interface.
 
+If you want to do the above programmatically, instead of declaring an `@JsonView` annotation,
+wrap the return value with `MappingJacksonValue` and use it to supply the serialization view:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@RestController
+	public class UserController {
+
+		@GetMapping("/user")
+		public MappingJacksonValue getUser() {
+			User user = new User("eric", "7!jd#h23");
+			MappingJacksonValue value = new MappingJacksonValue(user);
+			value.setSerializationView(User.WithoutPasswordView.class);
+			return value;
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@RestController
+	class UserController {
+
+		@GetMapping("/user")
+		fun getUser(): MappingJacksonValue {
+			val value = MappingJacksonValue(User("eric", "7!jd#h23"))
+			value.serializationView = User.WithoutPasswordView::class.java
+			return value
+		}
+	}
+----
+
 For controllers that rely on view resolution, you can add the serialization view class
 to the model, as the following example shows:
 
@@ -3527,7 +3565,7 @@ initialize instances of `WebDataBinder`, and those, in turn, can:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<mvc-config-conversion,MVC config>> to register `Converter` and `Formatter`
 types in a globally shared `FormattingConversionService`.
@@ -5588,8 +5626,8 @@ In the next example, given a request that starts with `/resources`, the relative
 used to find and serve static resources relative to `/public` under the web application
 root or on the classpath under `/static`. The resources are served with a one-year future
 expiration to ensure maximum use of the browser cache and a reduction in HTTP requests
-made by the browser. The `Last-Modified` header is also evaluated and, if present, a `304`
-status code is returned.
+made by the browser. The `Last-Modified` information is deduced from `Resource#lastModified`
+so that HTTP conditional requests are supported with `"Last-Modified"` headers.
 
 The following listing shows how to do so with Java configuration:
 
@@ -5604,7 +5642,7 @@ The following listing shows how to do so with Java configuration:
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)));
 		}
 	}
 ----
@@ -5618,7 +5656,7 @@ The following listing shows how to do so with Java configuration:
 		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
 			registry.addResourceHandler("/resources/**")
 					.addResourceLocations("/public", "classpath:/static/")
-					.setCachePeriod(31556926)
+					.setCacheControl(CacheControl.maxAge(Duration.ofDays(365)))
 		}
 	}
 ----
@@ -5959,5 +5997,5 @@ For more details, see the
 https://github.com/spring-projects/spring-framework/wiki/HTTP-2-support[HTTP/2 wiki page].
 
 The Servlet API does expose one construct related to HTTP/2. You can use the
-`javax.servlet.http.PushBuilder` proactively push resources to clients, and it
+`javax.servlet.http.PushBuilder` to proactively push resources to clients, and it
 is supported as a <<mvc-ann-arguments, method argument>> to `@RequestMapping` methods.

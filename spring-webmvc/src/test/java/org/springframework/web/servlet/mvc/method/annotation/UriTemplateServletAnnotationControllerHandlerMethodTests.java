@@ -72,6 +72,30 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		assertThat(response.getContentAsString()).isEqualTo("test-42-7");
 	}
 
+	@PathPatternsParameterizedTest // gh-25864
+	void literalMappingWithPathParams(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(MultipleUriTemplateController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/data");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("test");
+
+		if (!usePathPatterns) {
+			request = new MockHttpServletRequest("GET", "/data;foo=bar");
+			response = new MockHttpServletResponse();
+			getServlet().service(request, response);
+			assertThat(response.getStatus()).isEqualTo(404);
+		}
+
+		request = new MockHttpServletRequest("GET", "/data;jsessionid=123");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertThat(response.getStatus()).isEqualTo(200);
+		assertThat(response.getContentAsString()).isEqualTo("test");
+	}
+
 	@PathPatternsParameterizedTest
 	void multiple(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(MultipleUriTemplateController.class, usePathPatterns);
@@ -379,6 +403,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			writer.write("test-" + hotel + "-q" + qHotel + "-" + booking + "-" + other + "-q" + qOther);
 		}
 
+		@RequestMapping("/data")
+		void handleWithLiteralMapping(Writer writer) throws IOException {
+			writer.write("test");
+		}
 	}
 
 	@Controller

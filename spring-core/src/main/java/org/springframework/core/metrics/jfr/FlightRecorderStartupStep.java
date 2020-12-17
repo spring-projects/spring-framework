@@ -77,7 +77,7 @@ class FlightRecorderStartupStep implements StartupStep {
 	}
 
 	@Override
-	public Tags tags() {
+	public Tags getTags() {
 		return this.tags;
 	}
 

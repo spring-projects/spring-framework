@@ -18,14 +18,15 @@ package org.springframework.util;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -90,9 +91,10 @@ public abstract class StringUtils {
 	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
 	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
-	 * @see #hasLength(String)
-	 * @see #hasText(String)
+	 * @deprecated as of 5.3, in favor of {@link #hasLength(String)} and
+	 * {@link #hasText(String)} (or {@link ObjectUtils#isEmpty(Object)})
 	 */
+	@Deprecated
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
 	}
@@ -270,11 +272,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(0))) {
-			sb.deleteCharAt(0);
+		int beginIdx = 0;
+		while (beginIdx < str.length() && Character.isWhitespace(str.charAt(beginIdx))) {
+			beginIdx++;
 		}
-		return sb.toString();
+		return str.substring(beginIdx);
 	}
 
 	/**
@@ -288,11 +290,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && Character.isWhitespace(sb.charAt(sb.length() - 1))) {
-			sb.deleteCharAt(sb.length() - 1);
+		int endIdx = str.length() - 1;
+		while (endIdx >= 0 && Character.isWhitespace(str.charAt(endIdx))) {
+			endIdx--;
 		}
-		return sb.toString();
+		return str.substring(0, endIdx + 1);
 	}
 
 	/**
@@ -306,11 +308,11 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && sb.charAt(0) == leadingCharacter) {
-			sb.deleteCharAt(0);
+		int beginIdx = 0;
+		while (beginIdx < str.length() && leadingCharacter == str.charAt(beginIdx)) {
+			beginIdx++;
 		}
-		return sb.toString();
+		return str.substring(beginIdx);
 	}
 
 	/**
@@ -324,11 +326,21 @@ public abstract class StringUtils {
 			return str;
 		}
 
-		StringBuilder sb = new StringBuilder(str);
-		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == trailingCharacter) {
-			sb.deleteCharAt(sb.length() - 1);
+		int endIdx = str.length() - 1;
+		while (endIdx >= 0 && trailingCharacter == str.charAt(endIdx)) {
+			endIdx--;
 		}
-		return sb.toString();
+		return str.substring(0, endIdx + 1);
+	}
+
+	/**
+	 * Test if the given {@code String} matches the given single character.
+	 * @param str the {@code String} to check
+	 * @param singleCharacter the character to compare to
+	 * @since 5.2.9
+	 */
+	public static boolean matchesCharacter(@Nullable String str, char singleCharacter) {
+		return (str != null && str.length() == 1 && str.charAt(0) == singleCharacter);
 	}
 
 	/**
@@ -683,7 +695,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		LinkedList<String> pathElements = new LinkedList<>();
+		Deque<String> pathElements = new ArrayDeque<>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -702,7 +714,7 @@ public abstract class StringUtils {
 				}
 				else {
 					// Normal path element found.
-					pathElements.add(0, element);
+					pathElements.addFirst(element);
 				}
 			}
 		}
@@ -713,11 +725,11 @@ public abstract class StringUtils {
 		}
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
-			pathElements.add(0, TOP_PATH);
+			pathElements.addFirst(TOP_PATH);
 		}
 		// If nothing else left, at least explicitly point to current path.
-		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
-			pathElements.add(0, CURRENT_PATH);
+		if (pathElements.size() == 1 && pathElements.getLast().isEmpty() && !prefix.endsWith(FOLDER_SEPARATOR)) {
+			pathElements.addFirst(CURRENT_PATH);
 		}
 
 		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);

@@ -381,6 +381,19 @@ NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>
 from the `jee` namespace. For more information see
 <<integration.adoc#xsd-schemas-jee, The JEE Schema>>.
 
+NOTE: If you use JTA, your transaction manager definition should look the same, regardless
+of what data access technology you use, be it JDBC, Hibernate JPA, or any other supported
+technology. This is due to the fact that JTA transactions are global transactions, which
+can enlist any transactional resource.
+
+In all Spring transaction setups, application code does not need to change. You can change
+how transactions are managed merely by changing configuration, even if that change means
+moving from local to global transactions or vice versa.
+
+
+[[transaction-strategies-hibernate]]
+==== Hibernate Transaction Setup
+
 You can also easily use Hibernate local transactions, as shown in the following examples.
 In this case, you need to define a Hibernate `LocalSessionFactoryBean`, which your
 application code can use to obtain Hibernate `Session` instances.
@@ -420,21 +433,52 @@ example declares `sessionFactory` and `txManager` beans:
 
 If you use Hibernate and Java EE container-managed JTA transactions, you should use the
 same `JtaTransactionManager` as in the previous JTA example for JDBC, as the following
-example shows:
+example shows. Also, it is recommended to make Hibernate aware of JTA through its
+transaction coordinator and possibly also its connection release mode configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=${hibernate.dialect}
+				hibernate.transaction.coordinator_class=jta
+				hibernate.connection.handling_mode=DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT
+			</value>
+		</property>
+	</bean>
+
 	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
 
-NOTE: If you use JTA, your transaction manager definition should look the same, regardless
-of what data access technology you use, be it JDBC, Hibernate JPA, or any other supported
-technology. This is due to the fact that JTA transactions are global transactions, which
-can enlist any transactional resource.
+Or alternatively, you may pass the `JtaTransactionManager` into your `LocalSessionFactoryBean`
+for enforcing the same defaults:
 
-In all these cases, application code does not need to change. You can change how
-transactions are managed merely by changing configuration, even if that change means
-moving from local to global transactions or vice versa.
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=${hibernate.dialect}
+			</value>
+		</property>
+		<property name="jtaTransactionManager" ref="txManager"/>
+	</bean>
+
+	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+----
 
 
 
@@ -522,7 +566,7 @@ abstractions mentioned earlier.
 
 
 [[transaction-declarative]]
-=== Declarative transaction management
+=== Declarative Transaction Management
 
 NOTE: Most Spring Framework users choose declarative transaction management. This option has
 the least impact on application code and, hence, is most consistent with the ideals of a
@@ -593,7 +637,7 @@ around method invocations.
 
 NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
 
-Spring Frameworks's `TransactionInterceptor` provides transaction management for
+Spring Framework's `TransactionInterceptor` provides transaction management for
 imperative and reactive programming models. The interceptor detects the desired flavor of
 transaction management by inspecting the method return type. Methods returning a reactive
 type such as `Publisher` or Kotlin `Flow` (or a subtype of those) qualify for reactive
@@ -603,6 +647,18 @@ imperative transaction management.
 Transaction management flavors impact which transaction manager is required. Imperative
 transactions require a `PlatformTransactionManager`, while reactive transactions use
 `ReactiveTransactionManager` implementations.
+
+[NOTE]
+====
+`@Transactional` commonly works with thread-bound transactions managed by
+`PlatformTransactionManager`, exposing a transaction to all data access operations within
+the current execution thread. Note: This does _not_ propagate to newly started threads
+within the method.
+
+A reactive transaction managed by `ReactiveTransactionManager` uses the Reactor context
+instead of thread-local attributes. As a consequence, all participating data access
+operations need to execute within the same Reactor context in the same reactive pipeline.
+====
 
 The following image shows a conceptual view of calling a method on a transactional proxy:
 
@@ -2622,8 +2678,8 @@ number of transactional operations. For example, if you have a web application t
 requires transactions only for certain update operations, you may not want to set up
 transactional proxies by using Spring or any other technology. In this case, using the
 `TransactionTemplate` may be a good approach. Being able to set the transaction name
-explicitly is also something that can be done only by using the programmatic approach to
-transaction management.
+explicitly is also something that can be done only by using the programmatic approach
+to transaction management.
 
 On the other hand, if your application has numerous transactional operations,
 declarative transaction management is usually worthwhile. It keeps transaction
@@ -2636,14 +2692,14 @@ management is greatly reduced.
 [[transaction-event]]
 === Transaction-bound Events
 
-As of Spring 4.2, the listener of an event can be bound to a phase of the transaction. The
-typical example is to handle the event when the transaction has completed successfully. Doing so
-lets events be used with more flexibility when the outcome of the current transaction
-actually matters to the listener.
+As of Spring 4.2, the listener of an event can be bound to a phase of the transaction.
+The typical example is to handle the event when the transaction has completed successfully.
+Doing so lets events be used with more flexibility when the outcome of the current
+transaction actually matters to the listener.
 
-You can register a regular event listener by using the `@EventListener` annotation. If you need
-to bind it to the transaction, use `@TransactionalEventListener`. When you do so, the listener
-is bound to the commit phase of the transaction by default.
+You can register a regular event listener by using the `@EventListener` annotation.
+If you need to bind it to the transaction, use `@TransactionalEventListener`.
+When you do so, the listener is bound to the commit phase of the transaction by default.
 
 The next example shows this concept. Assume that a component publishes an order-created
 event and that we want to define a listener that should only handle that event once the
@@ -2675,14 +2731,22 @@ example sets up such an event listener:
 	}
 ----
 
-The `@TransactionalEventListener` annotation exposes a `phase` attribute  that lets you customize
-the phase of the transaction to which the listener should be bound. The valid phases are `BEFORE_COMMIT`,
-`AFTER_COMMIT` (default), `AFTER_ROLLBACK`, and `AFTER_COMPLETION` that aggregates the transaction
-completion (be it a commit or a rollback).
+The `@TransactionalEventListener` annotation exposes a `phase` attribute that lets you
+customize the phase of the transaction to which the listener should be bound.
+The valid phases are `BEFORE_COMMIT`, `AFTER_COMMIT` (default), `AFTER_ROLLBACK`, as well as
+`AFTER_COMPLETION` which aggregates the transaction completion (be it a commit or a rollback).
 
-If no transaction is running, the listener is not invoked at all, since we cannot honor the required
-semantics. You can, however, override that behavior by setting the `fallbackExecution` attribute
-of the annotation to `true`.
+If no transaction is running, the listener is not invoked at all, since we cannot honor the
+required semantics. You can, however, override that behavior by setting the `fallbackExecution`
+attribute of the annotation to `true`.
+
+[NOTE]
+====
+`@TransactionalEventListener` only works with thread-bound transactions managed by
+`PlatformTransactionManager`. A reactive transaction managed by `ReactiveTransactionManager`
+uses the Reactor context instead of thread-local attributes, so from the perspective of
+an event listener, there is no compatible active transaction that it can participate in.
+====
 
 
 
@@ -2792,30 +2856,29 @@ specific to each technology.
 
 Spring provides a convenient translation from technology-specific exceptions, such as
 `SQLException` to its own exception class hierarchy, which has `DataAccessException` as
-the root exception. These exceptions wrap the original exception so that there is never any
-risk that you might lose any information about what might have gone wrong.
+the root exception. These exceptions wrap the original exception so that there is never
+any risk that you might lose any information about what might have gone wrong.
 
 In addition to JDBC exceptions, Spring can also wrap JPA- and Hibernate-specific exceptions,
-converting them to a set of focused runtime exceptions.
-This lets you handle most non-recoverable persistence exceptions
-in only the appropriate layers, without having annoying boilerplate
-catch-and-throw blocks and exception declarations in your DAOs. (You can still trap
-and handle exceptions anywhere you need to though.) As mentioned above, JDBC
-exceptions (including database-specific dialects) are also converted to the same
+converting them to a set of focused runtime exceptions. This lets you handle most
+non-recoverable persistence exceptions in only the appropriate layers, without having
+annoying boilerplate catch-and-throw blocks and exception declarations in your DAOs.
+(You can still trap and handle exceptions anywhere you need to though.) As mentioned above,
+JDBC exceptions (including database-specific dialects) are also converted to the same
 hierarchy, meaning that you can perform some operations with JDBC within a consistent
 programming model.
 
-The preceding discussion holds true for the various template classes in Spring's support for various ORM
-frameworks. If you use the interceptor-based classes, the application must care
-about handling `HibernateExceptions` and `PersistenceExceptions` itself, preferably by
-delegating to the `convertHibernateAccessException(..)` or
-`convertJpaAccessException()` methods, respectively, of `SessionFactoryUtils`. These methods convert the exceptions
+The preceding discussion holds true for the various template classes in Spring's support
+for various ORM frameworks. If you use the interceptor-based classes, the application must
+care about handling `HibernateExceptions` and `PersistenceExceptions` itself, preferably by
+delegating to the `convertHibernateAccessException(..)` or `convertJpaAccessException(..)`
+methods, respectively, of `SessionFactoryUtils`. These methods convert the exceptions
 to exceptions that are compatible with the exceptions in the `org.springframework.dao`
-exception hierarchy. As `PersistenceExceptions` are unchecked, they can  get
-thrown, too (sacrificing generic DAO abstraction in terms of exceptions, though).
+exception hierarchy. As `PersistenceExceptions` are unchecked, they can get thrown, too
+(sacrificing generic DAO abstraction in terms of exceptions, though).
 
-The following image shows the exception hierarchy that Spring provides. (Note that the
-class hierarchy detailed in the image shows only a subset of the entire
+The following image shows the exception hierarchy that Spring provides.
+(Note that the class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
 image::images/DataAccessException.png[]
@@ -3110,8 +3173,8 @@ hierarchy defined in the `org.springframework.dao` package. (See <<dao-exception
 
 When you use the `JdbcTemplate` for your code, you need only to implement callback
 interfaces, giving them a clearly defined contract. Given a `Connection` provided by the
-`JdbcTemplate` class, the `PreparedStatementCreator`
-callback interface creates a prepared statement, providing SQL and any necessary parameters. The same is true for the
+`JdbcTemplate` class, the `PreparedStatementCreator` callback interface creates a prepared
+statement, providing SQL and any necessary parameters. The same is true for the
 `CallableStatementCreator` interface, which creates callable statements. The
 `RowCallbackHandler` interface extracts values from each row of a `ResultSet`.
 
@@ -4180,14 +4243,14 @@ interface that wraps a single `Connection` that is not closed after each use.
 This is not multi-threading capable.
 
 If any client code calls `close` on the assumption of a pooled connection (as when using
-persistence tools), you should set the `suppressClose` property to `true`. This setting returns a
-close-suppressing proxy that wraps the physical connection. Note that you can no longer
-cast this to a native Oracle `Connection` or a similar object.
+persistence tools), you should set the `suppressClose` property to `true`. This setting
+returns a close-suppressing proxy that wraps the physical connection. Note that you can
+no longer cast this to a native Oracle `Connection` or a similar object.
 
-`SingleConnectionDataSource` is primarily a test class. For example, it enables easy testing of code outside an
-application server, in conjunction with a simple JNDI environment. In contrast to
-`DriverManagerDataSource`, it reuses the same connection all the time, avoiding
-excessive creation of physical connections.
+`SingleConnectionDataSource` is primarily a test class. It typically enables easy testing
+of code outside an application server, in conjunction with a simple JNDI environment.
+In contrast to `DriverManagerDataSource`, it reuses the same connection all the time,
+avoiding excessive creation of physical connections.
 
 
 
@@ -4452,7 +4515,7 @@ While this usually works well, there is a potential for issues (for example, wit
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
 (as a JVM system property or in a `spring.properties` file in the root of your classpath)
-if you encounter a performance issue -- for example, as reported on Oracle 12c (SPR-16139).
+if you encounter a performance issue (as reported on Oracle 12c, JBoss and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,
 either through a 'BatchPreparedStatementSetter' (as shown earlier), through an explicit type
@@ -6565,7 +6628,7 @@ including error handling. It includes the following topics:
 * <<r2dbc-DatabaseClient-examples-statement>>
 * <<r2dbc-DatabaseClient-examples-query>>
 * <<r2dbc-DatabaseClient-examples-update>>
-* <<r2dbc-DatbaseClient-filter>>
+* <<r2dbc-DatabaseClient-filter>>
 * <<r2dbc-auto-generated-keys>>
 
 [[r2dbc-DatabaseClient]]
@@ -6697,7 +6760,7 @@ The following query gets the `id` and `name` columns from a table:
 .Kotlin
 ----
 	val first = client.sql("SELECT id, name FROM person")
-	        .fetch().awaitFirst()
+	        .fetch().awaitSingle()
 ----
 
 The following query uses a bind variable:
@@ -6714,7 +6777,7 @@ The following query uses a bind variable:
 ----
 	val first = client.sql("SELECT id, name FROM person WHERE WHERE first_name = :fn")
 	        .bind("fn", "Joe")
-	        .fetch().awaitFirst()
+	        .fetch().awaitSingle()
 ----
 
 You might have noticed the use of `fetch()` in the example above. `fetch()` is a
@@ -6724,7 +6787,7 @@ Calling `first()` returns the first row from the result and discards remaining r
 You can consume data with the following operators:
 
 * `first()` return the first row of the entire result. Its Kotlin Coroutine variant
-is named `awaitFirst()` for non-nullable return values and `awaitFirstOrNull()`
+is named `awaitSingle()` for non-nullable return values and `awaitSingleOrNull()`
 if the value is optional.
 * `one()` returns exactly one result and fails if the result contains more rows.
 Using Kotlin Coroutines, `awaitOne()` for exactly one value or `awaitOneOrNull()`
@@ -6753,7 +6816,7 @@ The following example extracts the `id` column and emits its value:
 .Kotlin
 ----
 	val names = client.sql("SELECT name FROM person")
-	        .map{ it.get("id", String.class) }
+	        .map{ row: Row -> row.get("id", String.class) }
 	        .flow()
 ----
 
@@ -6897,7 +6960,15 @@ The following example shows a simpler variant using `IN` predicates:
 	    .bind("tuples", arrayOf(35, 50))
 ----
 
-[[r2dbc-DatbaseClient-filter]]
+NOTE: R2DBC itself does not support Collection-like values. Nevertheless,
+expanding a given `List` in the example above works for named parameters
+in Spring's R2DBC support, e.g. for use in `IN` clauses as shown above.
+However, inserting or updating array-typed columns (e.g. in Postgres)
+requires an array type that is supported by the underlying R2DBC driver:
+typically a Java array, e.g. `String[]` to update a `text[]` column.
+Do not pass `Collection<String>` or the like as an array parameter.
+
+[[r2dbc-DatabaseClient-filter]]
 ===== Statement Filters
 
 Sometimes it you need to fine-tune options on the actual `Statement`
@@ -7359,17 +7430,17 @@ exception hierarchies.
 [[orm-hibernate]]
 === Hibernate
 
-We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring
-environment, using it to demonstrate the approach that Spring takes towards integrating
-OR mappers. This section covers many issues in detail and shows different variations
-of DAO implementations and transaction demarcation. Most of these patterns can be
-directly translated to all other supported ORM tools. The later sections in this
-chapter then cover the other ORM technologies and show brief examples.
+We start with a coverage of https://hibernate.org/[Hibernate 5] in a Spring environment,
+using it to demonstrate the approach that Spring takes towards integrating OR mappers.
+This section covers many issues in detail and shows different variations of DAO
+implementations and transaction demarcation. Most of these patterns can be directly
+translated to all other supported ORM tools. The later sections in this chapter then
+cover the other ORM technologies and show brief examples.
 
-NOTE: As of Spring Framework 5.0, Spring requires Hibernate ORM 4.3 or later for JPA support
-and even Hibernate ORM 5.0+ for programming against the native Hibernate Session API.
-Note that the Hibernate team does not maintain any versions prior to 5.1 anymore and
-is likely to focus on 5.3+ exclusively soon.
+NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
+`HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
+Is is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
+For use with `HibernateJpaVendorAdapter`, Hibernate Search needs to be upgraded to 5.11.6.
 
 
 [[orm-session-factory-setup]]
@@ -7792,12 +7863,12 @@ conjunction with EJBs.
 ==== Spurious Application Server Warnings with Hibernate
 
 In some JTA environments with very strict `XADataSource` implementations (currently
-only some WebLogic Server and WebSphere versions), when Hibernate is configured without
-regard to the JTA `PlatformTransactionManager` object for that environment,
-spurious warning or exceptions can show up in the application server log.
-These warnings or exceptions indicate that the connection being accessed is no longer
-valid or JDBC access is no longer valid, possibly because the transaction is no longer
-active. As an example, here is an actual exception from WebLogic:
+some WebLogic Server and WebSphere versions), when Hibernate is configured without
+regard to the JTA transaction manager for that environment, spurious warnings or
+exceptions can show up in the application server log. These warnings or exceptions
+indicate that the connection being accessed is no longer valid or JDBC access is no
+longer valid, possibly because the transaction is no longer active. As an example,
+here is an actual exception from WebLogic:
 
 [literal]
 [subs="verbatim,quotes"]
@@ -7806,28 +7877,26 @@ java.sql.SQLException: The transaction is no longer active - status: 'Committed'
 further JDBC access is allowed within this transaction.
 ----
 
-You can resolve this warning by making Hibernate aware of the JTA
-`PlatformTransactionManager` instance, to which it synchronizes (along with Spring).
-You have two options for doing this:
+Another common problem is a connection leak after JTA transactions, with Hibernate
+sessions (and potentially underlying JDBC connections) not getting closed properly.
 
-* If, in your application context, you already directly obtain the JTA
-  `PlatformTransactionManager` object (presumably from JNDI through
-  `JndiObjectFactoryBean` or `<jee:jndi-lookup>`) and feed it, for example, to
-  Spring's `JtaTransactionManager`, the easiest way is to specify a reference to
-  the bean that defines this JTA `PlatformTransactionManager` instance as the value of the
-  `jtaTransactionManager` property for `LocalSessionFactoryBean.` Spring then makes the
-  object available to Hibernate.
-* More likely, you do not already have the JTA `PlatformTransactionManager` instance,
-  because Spring's `JtaTransactionManager` can find it itself. Thus, you need to
-  configure Hibernate to look up JTA `PlatformTransactionManager` directly. You do this
-  by configuring an application server-specific `TransactionManagerLookup` class in the
-  Hibernate configuration, as described in the Hibernate manual.
+You can resolve such issues by making Hibernate aware of the JTA transaction manager,
+to which it synchronizes (along with Spring). You have two options for doing this:
+
+* Pass your Spring `JtaTransactionManager` bean to your Hibernate setup. The easiest
+  way is a bean reference into the `jtaTransactionManager` property for your
+  `LocalSessionFactoryBean` bean (see <<transaction-strategies-hibernate>>).
+  Spring then makes the corresponding JTA strategies available to Hibernate.
+* You may also configure Hibernate's JTA-related properties explicitly, in particular
+  "hibernate.transaction.coordinator_class", "hibernate.connection.handling_mode"
+  and potentially "hibernate.transaction.jta.platform" in your "hibernateProperties"
+  on `LocalSessionFactoryBean` (see Hibernate's manual for details on those properties).
 
 The remainder of this section describes the sequence of events that occur with and
 without Hibernate's awareness of the JTA `PlatformTransactionManager`.
 
-When Hibernate is not configured with any awareness of the JTA
-`PlatformTransactionManager`, the following events occur when a JTA transaction commits:
+When Hibernate is not configured with any awareness of the JTA transaction manager,
+the following events occur when a JTA transaction commits:
 
 * The JTA transaction commits.
 * Spring's `JtaTransactionManager` is synchronized to the JTA transaction, so it is
@@ -7840,16 +7909,16 @@ When Hibernate is not configured with any awareness of the JTA
   error, as the application server no longer considers the `Connection` to be usable,
   because the transaction has already been committed.
 
-When Hibernate is configured with awareness of the JTA `PlatformTransactionManager`, the
-following events occur when a JTA transaction commits:
+When Hibernate is configured with awareness of the JTA transaction manager,
+the following events occur when a JTA transaction commits:
 
 * The JTA transaction is ready to commit.
 * Spring's `JtaTransactionManager` is synchronized to the JTA transaction, so the
   transaction is called back through a `beforeCompletion` callback by the JTA
   transaction manager.
 * Spring is aware that Hibernate itself is synchronized to the JTA transaction and
-  behaves differently than in the previous scenario. Assuming the Hibernate `Session`
-  needs to be closed at all, Spring closes it now.
+  behaves differently than in the previous scenario. In particular, it aligns with
+  Hibernate's transactional resource management.
 * The JTA transaction commits.
 * Hibernate is synchronized to the JTA transaction, so the transaction is called back
   through an `afterCompletion` callback by the JTA transaction manager and can
@@ -7880,13 +7949,13 @@ that is used by the application to obtain an entity manager.
 [[orm-jpa-setup-lemfb]]
 ===== Using `LocalEntityManagerFactoryBean`
 
-You can use this option only in simple deployment environments such as stand-alone applications
-and integration tests.
+You can use this option only in simple deployment environments such as stand-alone
+applications and integration tests.
 
 The `LocalEntityManagerFactoryBean` creates an `EntityManagerFactory` suitable for
-simple deployment environments where the application uses only JPA for data access. The
-factory bean uses the JPA `PersistenceProvider` auto-detection mechanism (according to
-JPA's Java SE bootstrapping) and, in most cases, requires you to specify only the
+simple deployment environments where the application uses only JPA for data access.
+The factory bean uses the JPA `PersistenceProvider` auto-detection mechanism (according
+to JPA's Java SE bootstrapping) and, in most cases, requires you to specify only the
 persistence unit name. The following XML example configures such a bean:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -7947,10 +8016,10 @@ You can use this option for full JPA capabilities in a Spring-based application 
 This includes web containers such as Tomcat, stand-alone applications, and
 integration tests with sophisticated persistence requirements.
 
-NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative is
-to go with Hibernate 5.2 or 5.3 and set up a native Hibernate `LocalSessionFactoryBean`
-instead of a plain JPA `LocalContainerEntityManagerFactoryBean`, letting it interact
-with JPA access code as well as native Hibernate access code.
+NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative
+is to set up a native Hibernate `LocalSessionFactoryBean` instead of a plain JPA
+`LocalContainerEntityManagerFactoryBean`, letting it interact with JPA access code
+as well as native Hibernate access code.
 See <<orm-jpa-hibernate, Native Hibernate setup for JPA interaction>> for details.
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
@@ -8320,10 +8389,9 @@ Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
 See the <<orm-jpa-dialect, next section>> for details on the `JpaDialect` mechanism.
 
 NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
-of interacting with JPA access code as of Spring Framework 5.1 and Hibernate 5.2/5.3,
-adapting to several Hibernate specifics and providing JDBC interaction.
-This makes particular sense in combination with `LocalSessionFactoryBean` setup.
-See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
+of interacting with JPA access code, adapting to several Hibernate specifics and providing
+JDBC interaction. This makes particular sense in combination with `LocalSessionFactoryBean`
+setup. See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
 
 
 [[orm-jpa-dialect]]
@@ -8370,7 +8438,7 @@ steps:
 your transaction coordinator. This is usually straightforward in a Java EE environment,
 exposing a different kind of `DataSource` through JNDI. See your application server
 documentation for details. Analogously, a standalone transaction coordinator usually
-comes with special XA-integrated `DataSource` implementations. Again, check its documentation.
+comes with special XA-integrated `DataSource` variants. Again, check its documentation.
 
 * The JPA `EntityManagerFactory` setup needs to be configured for JTA. This is
 provider-specific, typically through special properties to be specified as `jpaProperties`
@@ -8379,11 +8447,11 @@ are even version-specific. See your Hibernate documentation for details.
 
 * Spring's `HibernateJpaVendorAdapter` enforces certain Spring-oriented defaults, such
 as the connection release mode, `on-close`, which matches Hibernate's own default in
-Hibernate 5.0 but not any more in 5.1/5.2. For a JTA setup, either do not declare
-`HibernateJpaVendorAdapter` to begin with or turn off its `prepareConnection` flag.
-Alternatively, set Hibernate 5.2's `hibernate.connection.handling_mode` property to
+Hibernate 5.0 but not any more in Hibernate 5.1+. For a JTA setup, make sure to declare
+your persistence unit transaction type as "JTA". Alternatively, set Hibernate 5.2's
+`hibernate.connection.handling_mode` property to
 `DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT` to restore Hibernate's own default.
-See <<orm-hibernate-invalid-jdbc-access-error>> for a related note about WebLogic.
+See <<orm-hibernate-invalid-jdbc-access-error>> for related notes.
 
 * Alternatively, consider obtaining the `EntityManagerFactory` from your application
 server itself (that is, through a JNDI lookup instead of a locally declared
@@ -8395,9 +8463,8 @@ less portable) but is set up for the server's JTA environment.
 [[orm-jpa-hibernate]]
 ==== Native Hibernate Setup and Native Hibernate Transactions for JPA Interaction
 
-As of Spring Framework 5.1 and Hibernate 5.2/5.3, a native `LocalSessionFactoryBean`
-setup in combination with `HibernateTransactionManager` allows for interaction with
-`@PersistenceContext` and other JPA access code. A Hibernate
+A native `LocalSessionFactoryBean` setup in combination with `HibernateTransactionManager`
+allows for interaction with `@PersistenceContext` and other JPA access code. A Hibernate
 `SessionFactory` natively implements JPA's `EntityManagerFactory` interface now
 and a Hibernate `Session` handle natively is a JPA `EntityManager`.
 Spring's JPA support facilities automatically detect native Hibernate sessions.
@@ -8754,8 +8821,8 @@ can do so by using the following `applicationContext.xml`:
 ----
 
 This application context uses XStream, but we could have used any of the other marshaller
-instances described later in this chapter. Note that, by default, XStream does not require any further
-configuration, so the bean definition is rather simple. Also note that the
+instances described later in this chapter. Note that, by default, XStream does not require
+any further configuration, so the bean definition is rather simple. Also note that the
 `XStreamMarshaller` implements both `Marshaller` and `Unmarshaller`, so we can refer to the
 `xstreamMarshaller` bean in both the `marshaller` and `unmarshaller` property of the
 application.
@@ -8773,8 +8840,8 @@ This sample application produces the following `settings.xml` file:
 [[oxm-schema-based-config]]
 === XML Configuration Namespace
 
-You can configure marshallers more concisely by using tags from the OXM namespace. To
-make these tags available, you must first reference the appropriate schema in the
+You can configure marshallers more concisely by using tags from the OXM namespace.
+To make these tags available, you must first reference the appropriate schema in the
 preamble of the XML configuration file. The following example shows how to do so:
 
 [source,xml,indent=0]
@@ -9017,9 +9084,9 @@ vulnerabilities do not get invoked.
 
 NOTE: Note that XStream is an XML serialization library, not a data binding library.
 Therefore, it has limited namespace support. As a result, it is rather unsuitable for usage
-within Web services.
+within Web Services.
 
 
 
 
-include::data-access-appendix.adoc[leveloffset=+1]
+include::data-access/data-access-appendix.adoc[leveloffset=+1]

@@ -125,7 +125,7 @@ For more on that, see <<web-reactive.adoc#webflux-reactive-libraries, Reactive L
 
 
 [[webflux-fn-request]]
-=== `ServerRequest`
+=== ServerRequest
 
 `ServerRequest` provides access to the HTTP method, URI, headers, and query parameters,
 while access to the body is provided through the `body` methods.
@@ -172,7 +172,7 @@ Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 [source,kotlin,role="secondary"]
 .Kotlin
 ----
-	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitFirst()
+	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
 ----
 
@@ -218,7 +218,7 @@ val parts = request.body(BodyExtractors.toParts()).asFlow()
 
 
 [[webflux-fn-response]]
-=== `ServerResponse`
+=== ServerResponse
 
 `ServerResponse` provides access to the HTTP response and, since it is immutable, you can use
 a `build` method to create it. You can use the builder to set the response status, to add response
@@ -587,7 +587,7 @@ improved in the following way by using nested routes:
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
 		.GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-		.GET("", accept(APPLICATION_JSON), handler::listPeople)
+		.GET(accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson))
 	.build();
 ----
@@ -599,7 +599,7 @@ RouterFunction<ServerResponse> route = route()
 	val route = coRouter {
 		"/person".nest {
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
-			GET("", accept(APPLICATION_JSON), handler::listPeople)
+			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST("/person", handler::createPerson)
 		}
 	}
@@ -617,7 +617,7 @@ We can further improve by using the `nest` method together with `accept`:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.build();
 ----
@@ -628,7 +628,7 @@ We can further improve by using the `nest` method together with `accept`:
 		"/person".nest {
 			accept(APPLICATION_JSON).nest {
 				GET("/{id}", handler::getPerson)
-				GET("", handler::listPeople)
+				GET(handler::listPeople)
 				POST("/person", handler::createPerson)
 			}
 		}
@@ -760,7 +760,7 @@ For instance, consider the following example:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople)
+				.GET(handler::listPeople)
 				.before(request -> ServerRequest.from(request) // <1>
 					.header("X-RequestHeader", "Value")
 					.build()))
@@ -812,7 +812,7 @@ The following example shows how to do so:
 		.path("/person", b1 -> b1
 			.nest(accept(APPLICATION_JSON), b2 -> b2
 				.GET("/{id}", handler::getPerson)
-				.GET("", handler::listPeople))
+				.GET(handler::listPeople))
 			.POST("/person", handler::createPerson))
 		.filter((request, next) -> {
 			if (securityManager.allowAccessTo(request.path())) {

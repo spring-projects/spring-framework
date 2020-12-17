@@ -433,7 +433,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Match the provided in parameter values with registered parameters and
 	 * parameters defined via meta-data processing.
-	 * @param parameterSource the parameter vakues provided as a {@link SqlParameterSource}
+	 * @param parameterSource the parameter values provided as a {@link SqlParameterSource}
 	 * @return a Map with parameter names and values
 	 */
 	protected Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {

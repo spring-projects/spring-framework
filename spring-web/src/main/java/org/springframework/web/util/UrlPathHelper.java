@@ -18,11 +18,12 @@ package org.springframework.web.util;
 
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.MappingMatch;
 
@@ -32,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -58,11 +60,10 @@ public class UrlPathHelper {
 	 * {@link #getLookupPathForRequest resolved} lookupPath.
 	 * @since 5.3
 	 */
-	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".path";
+	public static final String PATH_ATTRIBUTE = UrlPathHelper.class.getName() + ".PATH";
 
-	private static boolean isServlet4Present =
-			ClassUtils.isPresent("javax.servlet.http.HttpServletMapping",
-					UrlPathHelper.class.getClassLoader());
+	private static final boolean servlet4Present =
+			ClassUtils.hasMethod(HttpServletRequest.class, "getHttpServletMapping");
 
 	/**
 	 * Special WebSphere request attribute, indicating the original request URI.
@@ -85,6 +86,8 @@ public class UrlPathHelper {
 
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
+	private boolean readOnly = false;
+
 
 	/**
 	 * Whether URL lookups should always use the full path within the current
@@ -96,6 +99,7 @@ public class UrlPathHelper {
 	 * <p>By default this is set to "false".
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		checkReadOnly();
 		this.alwaysUseFullPath = alwaysUseFullPath;
 	}
 
@@ -118,6 +122,7 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
 	public void setUrlDecode(boolean urlDecode) {
+		checkReadOnly();
 		this.urlDecode = urlDecode;
 	}
 
@@ -134,6 +139,7 @@ public class UrlPathHelper {
 	 * <p>Default is "true".
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		checkReadOnly();
 		this.removeSemicolonContent = removeSemicolonContent;
 	}
 
@@ -141,6 +147,7 @@ public class UrlPathHelper {
 	 * Whether configured to remove ";" (semicolon) content from the request URI.
 	 */
 	public boolean shouldRemoveSemicolonContent() {
+		checkReadOnly();
 		return this.removeSemicolonContent;
 	}
 
@@ -158,6 +165,7 @@ public class UrlPathHelper {
 	 * @see WebUtils#DEFAULT_CHARACTER_ENCODING
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
+		checkReadOnly();
 		this.defaultEncoding = defaultEncoding;
 	}
 
@@ -166,6 +174,17 @@ public class UrlPathHelper {
 	 */
 	protected String getDefaultEncoding() {
 		return this.defaultEncoding;
+	}
+
+	/**
+	 * Switch to read-only mode where further configuration changes are not allowed.
+	 */
+	private void setReadOnly() {
+		this.readOnly = true;
+	}
+
+	private void checkReadOnly() {
+		Assert.isTrue(!this.readOnly, "This instance cannot be modified");
 	}
 
 
@@ -227,28 +246,44 @@ public class UrlPathHelper {
 	 * @see #getPathWithinApplication
 	 */
 	public String getLookupPathForRequest(HttpServletRequest request) {
+		String pathWithinApp = getPathWithinApplication(request);
 		// Always use full path within current servlet context?
 		if (this.alwaysUseFullPath || skipServletPathDetermination(request)) {
-			return getPathWithinApplication(request);
+			return pathWithinApp;
 		}
 		// Else, use path within current servlet mapping if applicable
-		String rest = getPathWithinServletMapping(request);
-		if (!"".equals(rest)) {
+		String rest = getPathWithinServletMapping(request, pathWithinApp);
+		if (StringUtils.hasLength(rest)) {
 			return rest;
 		}
 		else {
-			return getPathWithinApplication(request);
+			return pathWithinApp;
 		}
 	}
 
+	/**
+	 * Check whether servlet path determination can be skipped for the given request.
+	 * @param request current HTTP request
+	 * @return {@code true} if the request mapping has not been achieved using a path
+	 * or if the servlet has been mapped to root; {@code false} otherwise
+	 */
 	private boolean skipServletPathDetermination(HttpServletRequest request) {
-		if (isServlet4Present) {
-			if (request.getHttpServletMapping().getMappingMatch() != null) {
-				return !request.getHttpServletMapping().getMappingMatch().equals(MappingMatch.PATH) ||
-						request.getHttpServletMapping().getPattern().equals("/*");
-			}
+		if (servlet4Present) {
+			return Servlet4Delegate.skipServletPathDetermination(request);
 		}
 		return false;
+	}
+
+	/**
+	 * Return the path within the servlet mapping for the given request,
+	 * i.e. the part of the request's URL beyond the part that called the servlet,
+	 * or "" if the whole URL has been used to identify the servlet.
+	 * @param request current HTTP request
+	 * @return the path within the servlet mapping, or ""
+	 * @see #getPathWithinServletMapping(HttpServletRequest, String)
+	 */
+	public String getPathWithinServletMapping(HttpServletRequest request) {
+		return getPathWithinServletMapping(request, getPathWithinApplication(request));
 	}
 
 	/**
@@ -262,11 +297,12 @@ public class UrlPathHelper {
 	 * <p>E.g.: servlet mapping = "/test"; request URI = "/test" -> "".
 	 * <p>E.g.: servlet mapping = "/*.test"; request URI = "/a.test" -> "".
 	 * @param request current HTTP request
+	 * @param pathWithinApp a precomputed path within the application
 	 * @return the path within the servlet mapping, or ""
+	 * @since 5.2.9
 	 * @see #getLookupPathForRequest
 	 */
-	public String getPathWithinServletMapping(HttpServletRequest request) {
-		String pathWithinApp = getPathWithinApplication(request);
+	protected String getPathWithinServletMapping(HttpServletRequest request, String pathWithinApp) {
 		String servletPath = getServletPath(request);
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
 		String path;
@@ -369,18 +405,17 @@ public class UrlPathHelper {
 	 * <li>replace all "//" by "/"</li>
 	 * </ul>
 	 */
-	private String getSanitizedPath(final String path) {
-		String sanitized = path;
-		while (true) {
-			int index = sanitized.indexOf("//");
-			if (index < 0) {
-				break;
+	private static String getSanitizedPath(final String path) {
+		int index = path.indexOf("//");
+		if (index >= 0) {
+			StringBuilder sanitized = new StringBuilder(path);
+			while (index != -1) {
+				sanitized.deleteCharAt(index);
+				index = sanitized.indexOf("//", index);
 			}
-			else {
-				sanitized = sanitized.substring(0, index) + sanitized.substring(index + 1);
-			}
+			return sanitized.toString();
 		}
-		return sanitized;
+		return path;
 	}
 
 	/**
@@ -415,7 +450,7 @@ public class UrlPathHelper {
 		if (contextPath == null) {
 			contextPath = request.getContextPath();
 		}
-		if ("/".equals(contextPath)) {
+		if (StringUtils.matchesCharacter(contextPath, '/')) {
 			// Invalid case, but happens for includes on Jetty: silently adapt it.
 			contextPath = "";
 		}
@@ -580,25 +615,37 @@ public class UrlPathHelper {
 				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
 	}
 
-	private String removeSemicolonContentInternal(String requestUri) {
+	private static String removeSemicolonContentInternal(String requestUri) {
 		int semicolonIndex = requestUri.indexOf(';');
-		while (semicolonIndex != -1) {
-			int slashIndex = requestUri.indexOf('/', semicolonIndex);
-			String start = requestUri.substring(0, semicolonIndex);
-			requestUri = (slashIndex != -1) ? start + requestUri.substring(slashIndex) : start;
-			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
+		if (semicolonIndex == -1) {
+			return requestUri;
 		}
-		return requestUri;
+		StringBuilder sb = new StringBuilder(requestUri);
+		while (semicolonIndex != -1) {
+			int slashIndex = sb.indexOf("/", semicolonIndex + 1);
+			if (slashIndex == -1) {
+				return sb.substring(0, semicolonIndex);
+			}
+			sb.delete(semicolonIndex, slashIndex);
+			semicolonIndex = sb.indexOf(";", semicolonIndex);
+		}
+		return sb.toString();
 	}
 
 	private String removeJsessionid(String requestUri) {
-		int startIndex = requestUri.toLowerCase().indexOf(";jsessionid=");
-		if (startIndex != -1) {
-			int endIndex = requestUri.indexOf(';', startIndex + 12);
-			String start = requestUri.substring(0, startIndex);
-			requestUri = (endIndex != -1) ? start + requestUri.substring(endIndex) : start;
+		String key = ";jsessionid=";
+		int index = requestUri.toLowerCase().indexOf(key);
+		if (index == -1) {
+			return requestUri;
 		}
-		return requestUri;
+		String start = requestUri.substring(0, index);
+		for (int i = index + key.length(); i < requestUri.length(); i++) {
+			char c = requestUri.charAt(i);
+			if (c == ';' || c == '/') {
+				return start + requestUri.substring(i);
+			}
+		}
+		return start;
 	}
 
 	/**
@@ -615,7 +662,7 @@ public class UrlPathHelper {
 			return vars;
 		}
 		else {
-			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
+			Map<String, String> decodedVars = CollectionUtils.newLinkedHashMap(vars.size());
 			vars.forEach((key, value) -> decodedVars.put(key, decodeInternal(request, value)));
 			return decodedVars;
 		}
@@ -681,7 +728,7 @@ public class UrlPathHelper {
 
 
 	/**
-	 * Shared, read-only instance of {@code UrlPathHelper}. Uses default settings:
+	 * Shared, read-only instance with defaults. The following apply:
 	 * <ul>
 	 * <li>{@code alwaysUseFullPath=false}
 	 * <li>{@code urlDecode=true}
@@ -689,27 +736,52 @@ public class UrlPathHelper {
 	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
 	 * </ul>
 	 */
-	public static final UrlPathHelper defaultInstance = new UrlPathHelper() {
+	public static final UrlPathHelper defaultInstance = new UrlPathHelper();
+
+	static {
+		defaultInstance.setReadOnly();
+	}
+
+
+	/**
+	 * Shared, read-only instance for the full, encoded path. The following apply:
+	 * <ul>
+	 * <li>{@code alwaysUseFullPath=true}
+	 * <li>{@code urlDecode=false}
+	 * <li>{@code removeSemicolon=false}
+	 * <li>{@code defaultEncoding=}{@link WebUtils#DEFAULT_CHARACTER_ENCODING}
+	 * </ul>
+	 */
+	public static final UrlPathHelper rawPathInstance = new UrlPathHelper() {
 
 		@Override
-		public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setUrlDecode(boolean urlDecode) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setDefaultEncoding(String defaultEncoding) {
-			throw new UnsupportedOperationException();
+		public String removeSemicolonContent(String requestUri) {
+			return requestUri;
 		}
 	};
+
+	static {
+		rawPathInstance.setAlwaysUseFullPath(true);
+		rawPathInstance.setUrlDecode(false);
+		rawPathInstance.setRemoveSemicolonContent(false);
+		rawPathInstance.setReadOnly();
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Servlet 4 {@link HttpServletMapping}
+	 * and {@link MappingMatch} at runtime.
+	 */
+	private static class Servlet4Delegate {
+
+		public static boolean skipServletPathDetermination(HttpServletRequest request) {
+			HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
+			if (mapping == null) {
+				mapping = request.getHttpServletMapping();
+			}
+			MappingMatch match = mapping.getMappingMatch();
+			return (match != null && (!match.equals(MappingMatch.PATH) || mapping.getPattern().equals("/*")));
+		}
+	}
 
 }

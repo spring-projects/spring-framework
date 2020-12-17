@@ -25,8 +25,8 @@ import kotlinx.coroutines.Deferred;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,16 +45,16 @@ class ReactiveAdapterRegistryTests {
 	void getAdapterForReactiveSubType() {
 
 		ReactiveAdapter adapter1 = getAdapter(Flux.class);
-		ReactiveAdapter adapter2 = getAdapter(FluxProcessor.class);
+		ReactiveAdapter adapter2 = getAdapter(ExtendedFlux.class);
 
 		assertThat(adapter2).isSameAs(adapter1);
 
 		this.registry.registerReactiveType(
-				ReactiveTypeDescriptor.multiValue(FluxProcessor.class, FluxProcessor::empty),
-				o -> (FluxProcessor<?, ?>) o,
-				FluxProcessor::from);
+				ReactiveTypeDescriptor.multiValue(ExtendedFlux.class, ExtendedFlux::empty),
+				o -> (ExtendedFlux<?>) o,
+				ExtendedFlux::from);
 
-		ReactiveAdapter adapter3 = getAdapter(FluxProcessor.class);
+		ReactiveAdapter adapter3 = getAdapter(ExtendedFlux.class);
 
 		assertThat(adapter3).isNotNull();
 		assertThat(adapter3).isNotSameAs(adapter1);
@@ -361,6 +361,15 @@ class ReactiveAdapterRegistryTests {
 		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
 		assertThat(adapter).isNotNull();
 		return adapter;
+	}
+
+
+	private static class ExtendedFlux<T> extends Flux<T> {
+
+		@Override
+		public void subscribe(CoreSubscriber<? super T> actual) {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }

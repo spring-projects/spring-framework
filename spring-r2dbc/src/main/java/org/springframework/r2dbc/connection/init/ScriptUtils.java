@@ -107,8 +107,6 @@ public abstract class ScriptUtils {
 
 	private static final Log logger = LogFactory.getLog(ScriptUtils.class);
 
-	// utility constructor
-	private ScriptUtils() {}
 
 	/**
 	 * Split an SQL script into separate statements delimited by the provided
@@ -335,14 +333,11 @@ public abstract class ScriptUtils {
 
 		return DataBufferUtils.join(DataBufferUtils.read(resource.getResource(), dataBufferFactory, 8192))
 				.handle((it, sink) -> {
-
 					try (InputStream is = it.asInputStream()) {
-
-						InputStreamReader in = resource.getCharset() != null ? new InputStreamReader(is, resource.getCharset())
-								: new InputStreamReader(is);
+						InputStreamReader in = (resource.getCharset() != null ?
+								new InputStreamReader(is, resource.getCharset()) : new InputStreamReader(is));
 						LineNumberReader lnr = new LineNumberReader(in);
 						String script = readScript(lnr, commentPrefixes, separator, blockCommentEndDelimiter);
-
 						sink.next(script);
 						sink.complete();
 					}
@@ -548,9 +543,9 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#releaseConnection
 	 */
 	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource,
-			DataBufferFactory dataBufferFactory, boolean continueOnError, boolean ignoreFailedDrops, String commentPrefix,
-			@Nullable String separator, String blockCommentStartDelimiter, String blockCommentEndDelimiter)
-			throws ScriptException {
+			DataBufferFactory dataBufferFactory, boolean continueOnError, boolean ignoreFailedDrops,
+			String commentPrefix, @Nullable String separator, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter) throws ScriptException {
 
 		return executeSqlScript(connection, resource, dataBufferFactory, continueOnError,
 				ignoreFailedDrops, new String[] { commentPrefix }, separator,
@@ -587,10 +582,10 @@ public abstract class ScriptUtils {
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#getConnection
 	 * @see org.springframework.r2dbc.connection.ConnectionFactoryUtils#releaseConnection
 	 */
-	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource, DataBufferFactory dataBufferFactory,
-			boolean continueOnError,
-			boolean ignoreFailedDrops, String[] commentPrefixes, @Nullable String separator,
-			String blockCommentStartDelimiter, String blockCommentEndDelimiter) throws ScriptException {
+	public static Mono<Void> executeSqlScript(Connection connection, EncodedResource resource,
+			DataBufferFactory dataBufferFactory, boolean continueOnError, boolean ignoreFailedDrops,
+			String[] commentPrefixes, @Nullable String separator, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter) throws ScriptException {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL script from " + resource);
@@ -622,17 +617,15 @@ public abstract class ScriptUtils {
 		});
 
 		if (logger.isDebugEnabled()) {
-
 			executeScript = executeScript.doOnComplete(() -> {
-
 				long elapsedTime = System.currentTimeMillis() - startTime;
 				logger.debug("Executed SQL script from " + resource + " in " + elapsedTime + " ms.");
 			});
 		}
 
 		return executeScript.onErrorMap(ex -> !(ex instanceof ScriptException),
-				ex -> new UncategorizedScriptException("Failed to execute database script from resource [" + resource + "]",
-						ex))
+				ex -> new UncategorizedScriptException(
+						"Failed to execute database script from resource [" + resource + "]", ex))
 				.then();
 	}
 
@@ -644,22 +637,21 @@ public abstract class ScriptUtils {
 				.collect(Collectors.summingLong(count -> count));
 
 		if (logger.isDebugEnabled()) {
-			execution = execution.doOnNext(rowsAffected -> logger.debug(rowsAffected + " returned as update count for SQL: " + statement));
+			execution = execution.doOnNext(rowsAffected ->
+					logger.debug(rowsAffected + " returned as update count for SQL: " + statement));
 		}
 
 		return execution.onErrorResume(ex -> {
-
 			boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 			if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(ScriptStatementFailedException.buildErrorMessage(statement, statementNumber.get(), resource),
-							ex);
+					logger.debug(ScriptStatementFailedException.buildErrorMessage(
+							statement, statementNumber.get(), resource), ex);
 				}
 			}
 			else {
 				return Mono.error(new ScriptStatementFailedException(statement, statementNumber.get(), resource, ex));
 			}
-
 			return Mono.empty();
 		}).then();
 	}

@@ -803,22 +803,30 @@ expressions:
 .Java
 ----
 	// evals to 1856
-	int year = (Integer) parser.parseExpression("Birthdate.Year + 1900").getValue(context);
+	int year = (Integer) parser.parseExpression("birthdate.year + 1900").getValue(context);
 
-	String city = (String) parser.parseExpression("placeOfBirth.City").getValue(context);
+	String city = (String) parser.parseExpression("placeOfBirth.city").getValue(context);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	// evals to 1856
-	val year = parser.parseExpression("Birthdate.Year + 1900").getValue(context) as Int
+	val year = parser.parseExpression("birthdate.year + 1900").getValue(context) as Int
 
-	val city = parser.parseExpression("placeOfBirth.City").getValue(context) as String
+	val city = parser.parseExpression("placeOfBirth.city").getValue(context) as String
 ----
 
-Case insensitivity is allowed for the first letter of property names. The contents of
-arrays and lists are obtained by using square bracket notation, as the following example
-shows:
+[NOTE]
+====
+Case insensitivity is allowed for the first letter of property names. Thus, the
+expressions in the above example may be written as `Birthdate.Year + 1900` and
+`PlaceOfBirth.City`, respectively. In addition, properties may optionally be accessed via
+method invocations -- for example, `getPlaceOfBirth().getCity()` instead of
+`placeOfBirth.city`.
+====
+
+The contents of arrays and lists are obtained by using square bracket notation, as the
+following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -835,12 +843,12 @@ shows:
 	// Members List
 
 	// evaluates to "Nikola Tesla"
-	String name = parser.parseExpression("Members[0].Name").getValue(
+	String name = parser.parseExpression("members[0].name").getValue(
 			context, ieee, String.class);
 
 	// List and Array navigation
 	// evaluates to "Wireless communication"
-	String invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
+	String invention = parser.parseExpression("members[0].inventions[6]").getValue(
 			context, ieee, String.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -858,17 +866,17 @@ shows:
 	// Members List
 
 	// evaluates to "Nikola Tesla"
-	val name = parser.parseExpression("Members[0].Name").getValue(
+	val name = parser.parseExpression("members[0].name").getValue(
 			context, ieee, String::class.java)
 
 	// List and Array navigation
 	// evaluates to "Wireless communication"
-	val invention = parser.parseExpression("Members[0].Inventions[6]").getValue(
+	val invention = parser.parseExpression("members[0].inventions[6]").getValue(
 			context, ieee, String::class.java)
 ----
 
 The contents of maps are obtained by specifying the literal key value within the
-brackets. In the following example, because keys for the `Officers` map are strings, we can specify
+brackets. In the following example, because keys for the `officers` map are strings, we can specify
 string literals:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -876,15 +884,15 @@ string literals:
 ----
 	// Officer's Dictionary
 
-	Inventor pupin = parser.parseExpression("Officers['president']").getValue(
+	Inventor pupin = parser.parseExpression("officers['president']").getValue(
 			societyContext, Inventor.class);
 
 	// evaluates to "Idvor"
-	String city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	String city = parser.parseExpression("officers['president'].placeOfBirth.city").getValue(
 			societyContext, String.class);
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("officers['advisors'][0].placeOfBirth.country").setValue(
 			societyContext, "Croatia");
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -892,15 +900,15 @@ string literals:
 ----
 	// Officer's Dictionary
 
-	val pupin = parser.parseExpression("Officers['president']").getValue(
+	val pupin = parser.parseExpression("officers['president']").getValue(
 			societyContext, Inventor::class.java)
 
 	// evaluates to "Idvor"
-	val city = parser.parseExpression("Officers['president'].PlaceOfBirth.City").getValue(
+	val city = parser.parseExpression("officers['president'].placeOfBirth.city").getValue(
 			societyContext, String::class.java)
 
 	// setting values
-	parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
+	parser.parseExpression("officers['advisors'][0].placeOfBirth.country").setValue(
 			societyContext, "Croatia")
 ----
 
@@ -1296,11 +1304,11 @@ following listing shows both ways to use the assignment operator:
 	Inventor inventor = new Inventor();
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 
-	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic");
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic");
 
 	// alternatively
 	String aleks = parser.parseExpression(
-			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -1308,11 +1316,11 @@ following listing shows both ways to use the assignment operator:
 	val inventor = Inventor()
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
 
-	parser.parseExpression("Name").setValue(context, inventor, "Aleksandar Seovic")
+	parser.parseExpression("name").setValue(context, inventor, "Aleksandar Seovic")
 
 	// alternatively
 	val aleks = parser.parseExpression(
-			"Name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
+			"name = 'Aleksandar Seovic'").getValue(context, inventor, String::class.java)
 ----
 
 
@@ -1413,7 +1421,7 @@ The following example shows how to use variables.
 	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
 	context.setVariable("newName", "Mike Tesla");
 
-	parser.parseExpression("Name = #newName").getValue(context, tesla);
+	parser.parseExpression("name = #newName").getValue(context, tesla);
 	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1424,7 +1432,7 @@ The following example shows how to use variables.
 	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
 	context.setVariable("newName", "Mike Tesla")
 
-	parser.parseExpression("Name = #newName").getValue(context, tesla)
+	parser.parseExpression("name = #newName").getValue(context, tesla)
 	println(tesla.name)  // "Mike Tesla"
 ----
 
@@ -1633,7 +1641,7 @@ realistic example follows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	parser.parseExpression("Name").setValue(societyContext, "IEEE");
+	parser.parseExpression("name").setValue(societyContext, "IEEE");
 	societyContext.setVariable("queryName", "Nikola Tesla");
 
 	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
@@ -1646,7 +1654,7 @@ realistic example follows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	parser.parseExpression("Name").setValue(societyContext, "IEEE")
+	parser.parseExpression("name").setValue(societyContext, "IEEE")
 	societyContext.setVariable("queryName", "Nikola Tesla")
 
 	expression = "isMember(#queryName)? #queryName + ' is a member of the ' " + "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'"
@@ -1704,11 +1712,11 @@ The following listing shows a more complex example:
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
-	String name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
+	String name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Nikola Tesla
 
 	tesla.setName(null);
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String.class);
+	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Elvis Presley
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1718,11 +1726,11 @@ The following listing shows a more complex example:
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
 
 	val tesla = Inventor("Nikola Tesla", "Serbian")
-	var name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
+	var name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Nikola Tesla
 
 	tesla.setName(null)
-	name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
+	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Elvis Presley
 ----
 
@@ -1759,11 +1767,11 @@ example shows how to use the safe navigation operator:
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 	tesla.setPlaceOfBirth(new PlaceOfBirth("Smiljan"));
 
-	String city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
+	String city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
 	System.out.println(city);  // Smiljan
 
 	tesla.setPlaceOfBirth(null);
-	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String.class);
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
 	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -1775,11 +1783,11 @@ example shows how to use the safe navigation operator:
 	val tesla = Inventor("Nikola Tesla", "Serbian")
 	tesla.setPlaceOfBirth(PlaceOfBirth("Smiljan"))
 
-	var city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String::class.java)
+	var city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
 	println(city)  // Smiljan
 
 	tesla.setPlaceOfBirth(null)
-	city = parser.parseExpression("PlaceOfBirth?.City").getValue(context, tesla, String::class.java)
+	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
 	println(city)  // null - does not throw NullPointerException!!!
 ----
 
@@ -1799,13 +1807,13 @@ selection lets us easily get a list of Serbian inventors, as the following examp
 .Java
 ----
 	List<Inventor> list = (List<Inventor>) parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext);
+			"members.?[nationality == 'Serbian']").getValue(societyContext);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	val list = parser.parseExpression(
-			"Members.?[Nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
+			"members.?[nationality == 'Serbian']").getValue(societyContext) as List<Inventor>
 ----
 
 Selection is possible upon both lists and maps. For a list, the selection
@@ -1849,13 +1857,13 @@ every entry in the inventor list. The following example uses projection to do so
 .Java
 ----
 	// returns ['Smiljan', 'Idvor' ]
-	List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]");
+	List placesOfBirth = (List)parser.parseExpression("members.![placeOfBirth.city]");
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	// returns ['Smiljan', 'Idvor' ]
-	val placesOfBirth = parser.parseExpression("Members.![placeOfBirth.city]") as List<*>
+	val placesOfBirth = parser.parseExpression("members.![placeOfBirth.city]") as List<*>
 ----
 
 You can also use a map to drive projection and, in this case, the projection expression is

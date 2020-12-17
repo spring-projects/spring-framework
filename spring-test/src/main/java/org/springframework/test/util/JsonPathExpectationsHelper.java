@@ -69,7 +69,7 @@ public class JsonPathExpectationsHelper {
 	 * @param matcher the matcher with which to assert the result
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> void assertValue(String content, Matcher<T> matcher) {
+	public <T> void assertValue(String content, Matcher<? super T> matcher) {
 		T value = (T) evaluateJsonPath(content);
 		MatcherAssert.assertThat("JSON path \"" + this.expression + "\"", value, matcher);
 	}
@@ -84,7 +84,7 @@ public class JsonPathExpectationsHelper {
 	 * @since 4.3.3
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> void assertValue(String content, Matcher<T> matcher, Class<T> targetType) {
+	public <T> void assertValue(String content, Matcher<? super T> matcher, Class<T> targetType) {
 		T value = (T) evaluateJsonPath(content, targetType);
 		MatcherAssert.assertThat("JSON path \"" + this.expression + "\"", value, matcher);
 	}

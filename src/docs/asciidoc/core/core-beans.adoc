@@ -4424,7 +4424,8 @@ which these `BeanFactoryPostProcessor` instances run by setting the `order` prop
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface, too. See the javadoc of the
-{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`] and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
 
 [NOTE]
 ====
@@ -11063,13 +11064,13 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 .Kotlin
 ----
 	// create a startup step and start recording
-	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
+	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan")
 	// add tagging information to the current step
-	scanPackages.tag("packages", () -> Arrays.toString(basePackages));
+	scanPackages.tag("packages", () -> Arrays.toString(basePackages))
 	// perform the actual phase we're instrumenting
-	this.scanner.scan(basePackages);
+	this.scanner.scan(basePackages)
 	// end the current step
-	scanPackages.end();
+	scanPackages.end()
 ----
 
 The application context is already instrumented with multiple steps.

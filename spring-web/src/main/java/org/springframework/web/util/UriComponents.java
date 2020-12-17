@@ -278,7 +278,8 @@ public abstract class UriComponents implements Serializable {
 		int level = 0;
 		int lastCharIndex = 0;
 		char[] chars = new char[source.length()];
-		for (char c : source.toCharArray()) {
+		for (int i = 0; i < source.length(); i++) {
+			char c = source.charAt(i);
 			if (c == '{') {
 				level++;
 			}

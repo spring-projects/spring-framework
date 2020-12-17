@@ -185,7 +185,7 @@ public class DefaultRSocketRequesterTests {
 
 	@Test
 	public void retrieveMonoVoid() {
-		AtomicBoolean consumed = new AtomicBoolean(false);
+		AtomicBoolean consumed = new AtomicBoolean();
 		Mono<Payload> mono = Mono.delay(MILLIS_10).thenReturn(toPayload("bodyA")).doOnSuccess(p -> consumed.set(true));
 		this.rsocket.setPayloadMonoToReturn(mono);
 		this.requester.route("").data("").retrieveMono(Void.class).block(Duration.ofSeconds(5));
@@ -215,7 +215,7 @@ public class DefaultRSocketRequesterTests {
 
 	@Test
 	public void retrieveFluxVoid() {
-		AtomicBoolean consumed = new AtomicBoolean(false);
+		AtomicBoolean consumed = new AtomicBoolean();
 		Flux<Payload> flux = Flux.just("bodyA", "bodyB")
 				.delayElements(MILLIS_10).map(this::toPayload).doOnComplete(() -> consumed.set(true));
 		this.rsocket.setPayloadFluxToReturn(flux);

@@ -63,9 +63,8 @@ public class BeanFactoryUtilsTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	public void setup() {
 		// Interesting hierarchical factory to test counts.
-		// Slow to read so we cache it.
 
 		DefaultListableBeanFactory grandParent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(grandParent).loadBeanDefinitions(ROOT_CONTEXT);
@@ -93,7 +92,7 @@ public class BeanFactoryUtilsTests {
 	 * Check that override doesn't count as two separate beans.
 	 */
 	@Test
-	public void testHierarchicalCountBeansWithOverride() throws Exception {
+	public void testHierarchicalCountBeansWithOverride() {
 		// Leaf count
 		assertThat(this.listableBeanFactory.getBeanDefinitionCount() == 1).isTrue();
 		// Count minus duplicate
@@ -101,14 +100,14 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalNamesWithNoMatch() throws Exception {
+	public void testHierarchicalNamesWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
 		assertThat(names.size()).isEqualTo(0);
 	}
 
 	@Test
-	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
+	public void testHierarchicalNamesWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertThat(names.size()).isEqualTo(1);
@@ -118,7 +117,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testGetBeanNamesForTypeWithOverride() throws Exception {
+	public void testGetBeanNamesForTypeWithOverride() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
@@ -236,7 +235,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalResolutionWithOverride() throws Exception {
+	public void testHierarchicalResolutionWithOverride() {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
@@ -276,14 +275,14 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testHierarchicalNamesForAnnotationWithNoMatch() throws Exception {
+	public void testHierarchicalNamesForAnnotationWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
 		assertThat(names.size()).isEqualTo(0);
 	}
 
 	@Test
-	public void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() throws Exception {
+	public void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
 		assertThat(names.size()).isEqualTo(1);
@@ -293,7 +292,7 @@ public class BeanFactoryUtilsTests {
 	}
 
 	@Test
-	public void testGetBeanNamesForAnnotationWithOverride() throws Exception {
+	public void testGetBeanNamesForAnnotationWithOverride() {
 		AnnotatedBean annotatedBean = new AnnotatedBean();
 		this.listableBeanFactory.registerSingleton("anotherAnnotatedBean", annotatedBean);
 		List<String> names = Arrays.asList(
@@ -433,6 +432,7 @@ public class BeanFactoryUtilsTests {
 		String basePackage() default "";
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@ControllerAdvice
 	@interface RestControllerAdvice {
@@ -444,18 +444,23 @@ public class BeanFactoryUtilsTests {
 		String basePackage() default "";
 	}
 
+
 	@ControllerAdvice("com.example")
 	static class ControllerAdviceClass {
 	}
+
 
 	@RestControllerAdvice("com.example")
 	static class RestControllerAdviceClass {
 	}
 
+
 	static class TestBeanSmartFactoryBean implements SmartFactoryBean<TestBean> {
 
 		private final TestBean testBean = new TestBean("enigma", 42);
+
 		private final boolean singleton;
+
 		private final boolean prototype;
 
 		TestBeanSmartFactoryBean(boolean singleton, boolean prototype) {
@@ -478,7 +483,7 @@ public class BeanFactoryUtilsTests {
 			return TestBean.class;
 		}
 
-		public TestBean getObject() throws Exception {
+		public TestBean getObject() {
 			// We don't really care if the actual instance is a singleton or prototype
 			// for the tests that use this factory.
 			return this.testBean;

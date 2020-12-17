@@ -418,9 +418,12 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					String message = ex.getMessage();
 					String causeString = cause.toString();
 					if (!message.endsWith(causeString)) {
-						throw new PersistenceException(message + "; nested exception is " + causeString, cause);
+						ex = new PersistenceException(message + "; nested exception is " + causeString, cause);
 					}
 				}
+			}
+			if (logger.isErrorEnabled()) {
+				logger.error("Failed to initialize JPA EntityManagerFactory: " + ex.getMessage());
 			}
 			throw ex;
 		}

@@ -43,6 +43,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -57,6 +58,7 @@ import org.springframework.web.reactive.socket.server.upgrade.JettyRequestUpgrad
 import org.springframework.web.reactive.socket.server.upgrade.ReactorNettyRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.TomcatRequestUpgradeStrategy;
 import org.springframework.web.reactive.socket.server.upgrade.UndertowRequestUpgradeStrategy;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.JettyHttpServer;
@@ -164,6 +166,11 @@ abstract class AbstractWebSocketIntegrationTests {
 
 	@Configuration
 	static class DispatcherConfig {
+
+		@Bean
+		public WebFilter contextFilter() {
+			return new ServerWebExchangeContextFilter();
+		}
 
 		@Bean
 		public DispatcherHandler webHandler() {

@@ -108,7 +108,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private String parameterName = "format";
 
-	private boolean favorPathExtension = true;
+	private boolean favorPathExtension = false;
 
 	private Map<String, MediaType> mediaTypes = new HashMap<>();
 

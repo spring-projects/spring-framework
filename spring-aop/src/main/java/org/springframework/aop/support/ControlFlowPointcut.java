@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	@Nullable
 	private final String methodName;
 
-	private final AtomicInteger evaluations = new AtomicInteger(0);
+	private final AtomicInteger evaluations = new AtomicInteger();
 
 
 	/**

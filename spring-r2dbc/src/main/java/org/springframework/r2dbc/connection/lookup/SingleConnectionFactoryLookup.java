@@ -46,6 +46,7 @@ public class SingleConnectionFactoryLookup implements ConnectionFactoryLookup {
 	@Override
 	public ConnectionFactory getConnectionFactory(String connectionFactoryName)
 			throws ConnectionFactoryLookupFailureException {
+
 		return this.connectionFactory;
 	}
 
