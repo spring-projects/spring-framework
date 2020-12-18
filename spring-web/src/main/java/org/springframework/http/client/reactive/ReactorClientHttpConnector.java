@@ -28,6 +28,7 @@ import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
@@ -35,6 +36,7 @@ import org.springframework.util.Assert;
  *
  * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Timothy R. Weiand
  * @since 5.0
  * @see reactor.netty.http.client.HttpClient
  */
@@ -110,6 +112,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 					responseRef.set(new ReactorClientHttpResponse(response, connection));
 					return Mono.just((ClientHttpResponse) responseRef.get());
 				})
+				.filter(clientHttpResponse -> HttpStatus.CONTINUE.value() != clientHttpResponse.getRawStatusCode())
 				.next()
 				.doOnCancel(() -> {
 					ReactorClientHttpResponse response = responseRef.get();
