@@ -8183,8 +8183,8 @@ assertions use the https://joel-costigliola.github.io/assertj/[AssertJ] assertio
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	assertThat(viewMessagePage.message.isEqualTo(expectedMessage)
-	assertThat(viewMessagePage.success.isEqualTo("Successfully created a new message")
+	assertThat(viewMessagePage.message).isEqualTo(expectedMessage)
+	assertThat(viewMessagePage.success).isEqualTo("Successfully created a new message")
 ----
 
 We can see that our `ViewMessagePage` lets us interact with our custom domain model. For
