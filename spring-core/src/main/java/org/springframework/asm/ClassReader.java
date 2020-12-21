@@ -100,8 +100,10 @@ public class ClassReader {
   @Deprecated
   // DontCheck(MemberName): can't be renamed (for backward binary compatibility).
   public final byte[] b;
+
   /** The offset in bytes of the ClassFile's access_flags field. */
   public final int header;
+
   /**
    * A byte array containing the JVMS ClassFile structure to be parsed. <i>The content of this array
    * must not be modified. This field is intended for {@link Attribute} sub classes, and is normally
@@ -112,6 +114,7 @@ public class ClassReader {
    * ClassFile element offsets within this byte array.
    */
   final byte[] classFileBuffer;
+
   /**
    * The offset in bytes, in {@link #classFileBuffer}, of each cp_info entry of the ClassFile's
    * constant_pool array, <i>plus one</i>. In other words, the offset of constant pool entry i is
@@ -119,16 +122,19 @@ public class ClassReader {
    * 1].
    */
   private final int[] cpInfoOffsets;
+
   /**
    * The String objects corresponding to the CONSTANT_Utf8 constant pool items. This cache avoids
    * multiple parsing of a given CONSTANT_Utf8 constant pool item.
    */
   private final String[] constantUtf8Values;
+
   /**
    * The ConstantDynamic objects corresponding to the CONSTANT_Dynamic constant pool items. This
    * cache avoids multiple parsing of a given CONSTANT_Dynamic constant pool item.
    */
   private final ConstantDynamic[] constantDynamicValues;
+
   /**
    * The start offsets in {@link #classFileBuffer} of each element of the bootstrap_methods array
    * (in the BootstrapMethods attribute).
@@ -137,6 +143,7 @@ public class ClassReader {
    *     4.7.23</a>
    */
   private final int[] bootstrapMethodOffsets;
+
   /**
    * A conservative estimate of the maximum length of the strings contained in the constant pool of
    * the class.
@@ -184,7 +191,7 @@ public class ClassReader {
     this.b = classFileBuffer;
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V16) {
+    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V17) {
       throw new IllegalArgumentException(
           "Unsupported class file major version " + readShort(classFileOffset + 6));
     }
@@ -499,6 +506,9 @@ public class ClassReader {
       } else if (Constants.SYNTHETIC.equals(attributeName)) {
         accessFlags |= Opcodes.ACC_SYNTHETIC;
       } else if (Constants.SOURCE_DEBUG_EXTENSION.equals(attributeName)) {
+        if (attributeLength > classFileBuffer.length - currentAttributeOffset) {
+          throw new IllegalArgumentException();
+        }
         sourceDebugExtension =
             readUtf(currentAttributeOffset, attributeLength, new char[attributeLength]);
       } else if (Constants.RUNTIME_INVISIBLE_ANNOTATIONS.equals(attributeName)) {
@@ -1509,6 +1519,9 @@ public class ClassReader {
     final int maxLocals = readUnsignedShort(currentOffset + 2);
     final int codeLength = readInt(currentOffset + 4);
     currentOffset += 8;
+    if (codeLength > classFileBuffer.length - currentOffset) {
+      throw new IllegalArgumentException();
+    }
 
     // Read the bytecode 'code' array to create a label for each referenced instruction.
     final int bytecodeStartOffset = currentOffset;
@@ -2965,7 +2978,7 @@ public class ClassReader {
       // Parse the array_value array.
       while (numElementValuePairs-- > 0) {
         currentOffset =
-            readElementValue(annotationVisitor, currentOffset, /* elementName = */ null, charBuffer);
+            readElementValue(annotationVisitor, currentOffset, /* elementName= */ null, charBuffer);
       }
     }
     if (annotationVisitor != null) {
