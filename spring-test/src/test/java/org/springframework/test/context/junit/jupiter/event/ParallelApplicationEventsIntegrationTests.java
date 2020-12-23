@@ -74,9 +74,10 @@ class ParallelApplicationEventsIntegrationTests {
 
 		assertThat(payloads).hasSize(10);
 		assertThat(testNames).hasSize(10);
-		// There are probably 10 different thread names, but we really just want
-		// to assert that at least a few different threads were used.
-		assertThat(threadNames).hasSizeGreaterThanOrEqualTo(4);
+		// There are probably 10 different thread names on a developer's machine,
+		// but we really just want to assert that at least two different threads
+		// were used, since the CI server seems to have fewer threads available.
+		assertThat(threadNames).hasSizeGreaterThanOrEqualTo(2);
 	}
 
 
