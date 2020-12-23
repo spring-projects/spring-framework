@@ -667,7 +667,9 @@ public abstract class StringUtils {
 		if (!hasLength(path)) {
 			return path;
 		}
-		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+
+		String normalizedPath = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
 		if (pathToUse.indexOf('.') == -1) {
@@ -722,7 +724,7 @@ public abstract class StringUtils {
 
 		// All path elements stayed the same - shortcut
 		if (pathArray.length == pathElements.size()) {
-			return prefix + pathToUse;
+			return normalizedPath;
 		}
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
