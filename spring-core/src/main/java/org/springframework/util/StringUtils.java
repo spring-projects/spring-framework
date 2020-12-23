@@ -667,7 +667,9 @@ public abstract class StringUtils {
 		if (!hasLength(path)) {
 			return path;
 		}
-		String pathToUse = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+
+		String normalizedPath = replace(path, WINDOWS_FOLDER_SEPARATOR, FOLDER_SEPARATOR);
+		String pathToUse = normalizedPath;
 
 		// Shortcut if there is no work to do
 		if (pathToUse.indexOf('.') == -1) {
@@ -695,7 +697,8 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		Deque<String> pathElements = new ArrayDeque<>();
+		// we never require more elements than pathArray and in the common case the same number
+		Deque<String> pathElements = new ArrayDeque<>(pathArray.length);
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -721,7 +724,7 @@ public abstract class StringUtils {
 
 		// All path elements stayed the same - shortcut
 		if (pathArray.length == pathElements.size()) {
-			return prefix + pathToUse;
+			return normalizedPath;
 		}
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
@@ -732,7 +735,40 @@ public abstract class StringUtils {
 			pathElements.addFirst(CURRENT_PATH);
 		}
 
-		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
+		final String joined = joinStrings(pathElements, FOLDER_SEPARATOR);
+		// avoid string concatenation with empty prefix
+		return prefix.isEmpty() ? joined : prefix + joined;
+	}
+
+	/**
+	 * Convert a {@link Collection Collection&lt;String&gt;} to a delimited {@code String} (e.g. CSV).
+	 * <p>This is an optimized variant of {@link #collectionToDelimitedString(Collection, String)}, which does not
+	 * require dynamic resizing of the StringBuilder's backing array.
+	 * @param coll the {@code Collection Collection&lt;String&gt;} to convert (potentially {@code null} or empty)
+	 * @param delim the delimiter to use (typically a ",")
+	 * @return the delimited {@code String}
+	 */
+	private static String joinStrings(@Nullable Collection<String> coll, String delim) {
+
+		if (CollectionUtils.isEmpty(coll)) {
+			return "";
+		}
+
+		// precompute total length of resulting string
+		int totalLength = (coll.size() - 1) * delim.length();
+		for (String str : coll) {
+			totalLength += str.length();
+		}
+
+		StringBuilder sb = new StringBuilder(totalLength);
+		Iterator<?> it = coll.iterator();
+		while (it.hasNext()) {
+			sb.append(it.next());
+			if (it.hasNext()) {
+				sb.append(delim);
+			}
+		}
+		return sb.toString();
 	}
 
 	/**
