@@ -25,18 +25,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
+ * Unit tests for {@link BitsCronField}.
+ *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class BitsCronFieldTests {
+class BitsCronFieldTests {
 
 	@Test
 	void parse() {
 		assertThat(BitsCronField.parseSeconds("42")).has(clearRange(0, 41)).has(set(42)).has(clearRange(43, 59));
-		assertThat(BitsCronField.parseMinutes("1,2,5,9")).has(clear(0)).has(set(1, 2)).has(clearRange(3,4)).has(set(5)).has(clearRange(6,8)).has(set(9)).has(clearRange(10,59));
 		assertThat(BitsCronField.parseSeconds("0-4,8-12")).has(setRange(0, 4)).has(clearRange(5,7)).has(setRange(8, 12)).has(clearRange(13,59));
-		assertThat(BitsCronField.parseHours("0-23/2")).has(set(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22)).has(clear(1,3,5,7,9,11,13,15,17,19,21,23));
-		assertThat(BitsCronField.parseDaysOfWeek("0")).has(clearRange(0, 6)).has(set(7, 7));
 		assertThat(BitsCronField.parseSeconds("57/2")).has(clearRange(0, 56)).has(set(57)).has(clear(58)).has(set(59));
+
+		assertThat(BitsCronField.parseMinutes("30")).has(set(30)).has(clearRange(1, 29)).has(clearRange(31, 59));
+
+		assertThat(BitsCronField.parseHours("23")).has(set(23)).has(clearRange(0, 23));
+		assertThat(BitsCronField.parseHours("0-23/2")).has(set(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22)).has(clear(1,3,5,7,9,11,13,15,17,19,21,23));
+
+		assertThat(BitsCronField.parseDaysOfMonth("1")).has(set(1)).has(clearRange(2, 31));
+
+		assertThat(BitsCronField.parseMonth("1")).has(set(1)).has(clearRange(2, 12));
+
+		assertThat(BitsCronField.parseDaysOfWeek("0")).has(set(7, 7)).has(clearRange(0, 6));
+	}
+
+	@Test
+	void parseLists() {
+		assertThat(BitsCronField.parseSeconds("15,30")).has(set(15, 30)).has(clearRange(1, 15)).has(clearRange(31, 59));
+		assertThat(BitsCronField.parseMinutes("1,2,5,9")).has(set(1, 2, 5, 9)).has(clear(0)).has(clearRange(3, 4)).has(clearRange(6, 8)).has(clearRange(10, 59));
+		assertThat(BitsCronField.parseHours("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 23));
+		assertThat(BitsCronField.parseDaysOfMonth("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 31));
+		assertThat(BitsCronField.parseMonth("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 12));
+		assertThat(BitsCronField.parseDaysOfWeek("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 7));
 	}
 
 	@Test
