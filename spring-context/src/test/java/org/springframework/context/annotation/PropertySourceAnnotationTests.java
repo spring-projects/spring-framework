@@ -18,8 +18,10 @@ package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Properties;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -87,8 +90,8 @@ class PropertySourceAnnotationTests {
 	}
 
 	/**
-	 * Tests the LIFO behavior of @PropertySource annotaitons.
-	 * The last one registered should 'win'.
+	 * Tests the LIFO behavior of @PropertySource annotations.
+	 * <p>The last one registered should 'win'.
 	 */
 	@Test
 	void orderingIsLifo() {
@@ -189,6 +192,42 @@ class PropertySourceAnnotationTests {
 	}
 
 	@Test
+	void withRepeatedPropertySources() {
+		try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithRepeatedPropertySourceAnnotations.class)) {
+			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
+			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+			// p2 should 'win' as it was registered last
+			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		}
+	}
+
+	@Test
+	void withRepeatedPropertySourcesOnComposedAnnotation() {
+		Class<?> configClass = ConfigWithRepeatedPropertySourceAnnotationsOnComposedAnnotation.class;
+		String key = "custom.config.package";
+
+		System.clearProperty(key);
+		try (ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(configClass)) {
+			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
+			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+			// p2 should 'win' as it was registered last
+			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p2TestBean");
+		}
+
+		System.setProperty(key, "org/springframework/context/annotation");
+		try (ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(configClass)) {
+			assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
+			assertThat(ctx.getEnvironment().containsProperty("from.p2")).isTrue();
+			assertThat(ctx.getEnvironment().containsProperty("from.p3")).isTrue();
+			// p3 should 'win' as it was registered last
+			assertThat(ctx.getEnvironment().getProperty("testbean.name")).isEqualTo("p3TestBean");
+		}
+		finally {
+			System.clearProperty(key);
+		}
+	}
+
+	@Test
 	void withNamedPropertySources() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithNamedPropertySources.class);
 		assertThat(ctx.getEnvironment().containsProperty("from.p1")).isTrue();
@@ -246,6 +285,7 @@ class PropertySourceAnnotationTests {
 		assertThat(ctxWithoutName.getEnvironment().getProperty("testbean.name")).isEqualTo("myTestBean");
 
 	}
+
 
 	@Configuration
 	@PropertySource("classpath:${unresolvable}/p1.properties")
@@ -412,9 +452,30 @@ class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySources({
 		@PropertySource("classpath:org/springframework/context/annotation/p1.properties"),
-		@PropertySource("classpath:${base.package}/p2.properties"),
+		@PropertySource("classpath:${base.package}/p2.properties")
 	})
 	static class ConfigWithPropertySources {
+	}
+
+
+	@Configuration
+	@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
+	@PropertySource(value = "classpath:${base.package}/p2.properties", ignoreResourceNotFound = true)
+	static class ConfigWithRepeatedPropertySourceAnnotations {
+	}
+
+
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Configuration
+	@PropertySource("classpath:org/springframework/context/annotation/p1.properties")
+	@PropertySource(value = "classpath:${base.package}/p2.properties", ignoreResourceNotFound = true)
+	@PropertySource(value = "classpath:${custom.config.package:bogus/config}/p3.properties", ignoreResourceNotFound = true)
+	@interface ComposedConfiguration {
+	}
+
+	@ComposedConfiguration
+	static class ConfigWithRepeatedPropertySourceAnnotationsOnComposedAnnotation {
 	}
 
 
