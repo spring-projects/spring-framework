@@ -108,7 +108,9 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
-			this.exceptionLookupCache.put(exceptionType, method);
+			if (method != null) {
+				this.exceptionLookupCache.put(exceptionType, method);
+			}
 		}
 		return method;
 	}
