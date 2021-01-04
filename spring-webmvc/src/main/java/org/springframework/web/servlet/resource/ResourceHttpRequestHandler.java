@@ -759,14 +759,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	protected void setHeaders(HttpServletResponse response, Resource resource, @Nullable MediaType mediaType)
 			throws IOException {
 
-		long length = resource.contentLength();
-		if (length > Integer.MAX_VALUE) {
-			response.setContentLengthLong(length);
-		}
-		else {
-			response.setContentLength((int) length);
-		}
-
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
