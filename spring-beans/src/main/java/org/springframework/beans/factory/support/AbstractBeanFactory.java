@@ -368,7 +368,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					});
 					//获取给定Bean的实例对象
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
-				}
+				} 
 				//如果是原型模式
 				else if (mbd.isPrototype()) {
 					// It's a prototype -> create a new instance.
