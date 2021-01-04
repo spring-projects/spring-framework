@@ -100,7 +100,7 @@ public class ReactorNettyWebSocketSession
 	public boolean isOpen() {
 		DisposedCallback callback = new DisposedCallback();
 		getDelegate().getInbound().withConnection(callback);
-		return callback.isDisposed();
+		return !callback.isDisposed();
 	}
 
 	@Override
