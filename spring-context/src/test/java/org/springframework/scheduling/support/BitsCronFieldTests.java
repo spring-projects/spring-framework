@@ -58,6 +58,14 @@ class BitsCronFieldTests {
 		assertThat(BitsCronField.parseDaysOfMonth("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 31));
 		assertThat(BitsCronField.parseMonth("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 12));
 		assertThat(BitsCronField.parseDaysOfWeek("1,2,3")).has(set(1, 2, 3)).has(clearRange(4, 7));
+
+		assertThat(BitsCronField.parseMinutes("5,10-30/2"))
+				.has(clearRange(0, 5))
+				.has(set(5))
+				.has(clearRange(6,10))
+				.has(set(10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30))
+				.has(clear(11, 13, 15, 17, 19, 21, 23, 25, 27, 29))
+				.has(clearRange(31, 60));
 	}
 
 	@Test

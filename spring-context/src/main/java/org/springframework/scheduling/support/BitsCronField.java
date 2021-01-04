@@ -130,8 +130,8 @@ final class BitsCronField extends CronField {
 					result.setBits(range);
 				}
 				else {
-					String rangeStr = value.substring(0, slashPos);
-					String deltaStr = value.substring(slashPos + 1);
+					String rangeStr = field.substring(0, slashPos);
+					String deltaStr = field.substring(slashPos + 1);
 					ValueRange range = parseRange(rangeStr, type);
 					if (rangeStr.indexOf('-') == -1) {
 						range = ValueRange.of(range.getMinimum(), type.range().getMaximum());
