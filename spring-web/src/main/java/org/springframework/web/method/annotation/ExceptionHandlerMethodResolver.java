@@ -131,11 +131,10 @@ public class ExceptionHandlerMethodResolver {
 	@Nullable
 	public Method resolveMethodByThrowable(Throwable exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
-		if (method == null) {
-			Throwable cause = exception.getCause();
-			if (cause != null) {
-				method = resolveMethodByThrowable(cause);
-			}
+		Throwable cause = exception.getCause();
+		while (method == null && cause != null) {
+			method = resolveMethodByExceptionType(cause.getClass());
+			cause = cause.getCause();
 		}
 		return method;
 	}
