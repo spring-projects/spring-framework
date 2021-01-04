@@ -123,8 +123,8 @@ configure(allprojects) { project ->
 			dependency "net.sf.ehcache:ehcache:2.10.6"
 			dependency "org.ehcache:jcache:1.0.1"
 			dependency "org.ehcache:ehcache:3.4.0"
-			dependency "org.hibernate:hibernate-core:5.4.26.Final"
-			dependency "org.hibernate:hibernate-validator:6.1.7.Final"
+			dependency "org.hibernate:hibernate-core:5.4.27.Final"
+			dependency "org.hibernate:hibernate-validator:6.2.0.Final"
 			dependency "org.webjars:webjars-locator-core:0.46"
 			dependency "org.webjars:underscorejs:1.8.3"
 
