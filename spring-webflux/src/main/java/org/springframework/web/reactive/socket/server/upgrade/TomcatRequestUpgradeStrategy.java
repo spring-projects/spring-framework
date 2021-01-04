@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import org.apache.tomcat.websocket.server.WsServerContainer;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.http.server.reactive.AbstractServerHttpRequest;
-import org.springframework.http.server.reactive.AbstractServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -132,8 +130,8 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		HttpServletRequest servletRequest = getNativeRequest(request);
-		HttpServletResponse servletResponse = getNativeResponse(response);
+		HttpServletRequest servletRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+		HttpServletResponse servletResponse = ServerHttpResponseDecorator.getNativeResponse(response);
 
 		HandshakeInfo handshakeInfo = handshakeInfoFactory.get();
 		DataBufferFactory bufferFactory = response.bufferFactory();
@@ -159,32 +157,6 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 					}
 					return Mono.empty();
 				}));
-	}
-
-	private static HttpServletRequest getNativeRequest(ServerHttpRequest request) {
-		if (request instanceof AbstractServerHttpRequest) {
-			return ((AbstractServerHttpRequest) request).getNativeRequest();
-		}
-		else if (request instanceof ServerHttpRequestDecorator) {
-			return getNativeRequest(((ServerHttpRequestDecorator) request).getDelegate());
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Couldn't find HttpServletRequest in " + request.getClass().getName());
-		}
-	}
-
-	private static HttpServletResponse getNativeResponse(ServerHttpResponse response) {
-		if (response instanceof AbstractServerHttpResponse) {
-			return ((AbstractServerHttpResponse) response).getNativeResponse();
-		}
-		else if (response instanceof ServerHttpResponseDecorator) {
-			return getNativeResponse(((ServerHttpResponseDecorator) response).getDelegate());
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Couldn't find HttpServletResponse in " + response.getClass().getName());
-		}
 	}
 
 	private WsServerContainer getContainer(HttpServletRequest request) {

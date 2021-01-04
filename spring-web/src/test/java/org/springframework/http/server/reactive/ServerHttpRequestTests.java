@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Collections;
 import javax.servlet.AsyncContext;
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.jupiter.api.Test;
 
@@ -187,6 +188,15 @@ public class ServerHttpRequestTests {
 		assertThatThrownBy(() -> request.mutate().contextPath("/fail").build())
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessage("Invalid contextPath '/fail': must match the start of requestPath: '/context/path'");
+	}
+
+	@Test // gh-26304
+	public void mutateDoesNotPreventAccessToNativeRequest() throws Exception {
+		ServerHttpRequest request = createRequest("/path");
+		request = request.mutate().header("key", "value").build();
+
+		Object nativeRequest = ServerHttpRequestDecorator.getNativeRequest(request);
+		assertThat(nativeRequest).isInstanceOf(HttpServletRequest.class);
 	}
 
 	private ServerHttpRequest createRequest(String uriString) throws Exception {
