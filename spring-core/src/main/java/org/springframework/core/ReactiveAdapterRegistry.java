@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,28 @@ public class ReactiveAdapterRegistry {
 	@Nullable
 	private static volatile ReactiveAdapterRegistry sharedInstance;
 
-	private final boolean reactorPresent;
+	private static final boolean reactorPresent;
+
+	private static final boolean rxjava1Present;
+
+	private static final boolean rxjava2Present;
+
+	private static final boolean rxjava3Present;
+
+	private static final boolean flowPublisherPresent;
+
+	private static final boolean kotlinCoroutinesPresent;
+
+	static {
+		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
+		reactorPresent = ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader);
+		rxjava1Present = ClassUtils.isPresent("rx.Observable", classLoader) &&
+				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader);
+		rxjava2Present = ClassUtils.isPresent("io.reactivex.Flowable", classLoader);
+		rxjava3Present = ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader);
+		flowPublisherPresent = ClassUtils.isPresent("java.util.concurrent.Flow.Publisher", classLoader);
+		kotlinCoroutinesPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader);
+	}
 
 	private final List<ReactiveAdapter> adapters = new ArrayList<>();
 
@@ -70,41 +91,34 @@ public class ReactiveAdapterRegistry {
 	 * @see #getSharedInstance()
 	 */
 	public ReactiveAdapterRegistry() {
-		ClassLoader classLoader = ReactiveAdapterRegistry.class.getClassLoader();
-
 		// Reactor
-		boolean reactorRegistered = false;
-		if (ClassUtils.isPresent("reactor.core.publisher.Flux", classLoader)) {
+		if (reactorPresent) {
 			new ReactorRegistrar().registerAdapters(this);
-			reactorRegistered = true;
 		}
-		this.reactorPresent = reactorRegistered;
 
 		// RxJava1 (deprecated)
-		if (ClassUtils.isPresent("rx.Observable", classLoader) &&
-				ClassUtils.isPresent("rx.RxReactiveStreams", classLoader)) {
+		if (rxjava1Present) {
 			new RxJava1Registrar().registerAdapters(this);
 		}
 
 		// RxJava2
-		if (ClassUtils.isPresent("io.reactivex.Flowable", classLoader)) {
+		if (rxjava2Present) {
 			new RxJava2Registrar().registerAdapters(this);
 		}
-
 		// RxJava3
-		if (ClassUtils.isPresent("io.reactivex.rxjava3.core.Flowable", classLoader)) {
+		if (rxjava3Present) {
 			new RxJava3Registrar().registerAdapters(this);
 		}
 
 		// Java 9+ Flow.Publisher
-		if (ClassUtils.isPresent("java.util.concurrent.Flow.Publisher", classLoader)) {
+		if (flowPublisherPresent) {
 			new ReactorJdkFlowAdapterRegistrar().registerAdapter(this);
 		}
 		// If not present, do nothing for the time being...
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
 
-		// Coroutines
-		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
+		// Kotlin Coroutines
+		if (reactorPresent && kotlinCoroutinesPresent) {
 			new CoroutinesRegistrar().registerAdapters(this);
 		}
 	}
@@ -125,7 +139,7 @@ public class ReactiveAdapterRegistry {
 	public void registerReactiveType(ReactiveTypeDescriptor descriptor,
 			Function<Object, Publisher<?>> toAdapter, Function<Publisher<?>, Object> fromAdapter) {
 
-		if (this.reactorPresent) {
+		if (reactorPresent) {
 			this.adapters.add(new ReactorAdapter(descriptor, toAdapter, fromAdapter));
 		}
 		else {
