@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of {@link CodecConfigurer.DefaultCodecs} that serves
@@ -147,7 +148,38 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private boolean registerDefaults = true;
 
 
+	// The default reader and writer instances to use
+
+	private final List<HttpMessageReader<?>> typedReaders = new ArrayList<>();
+
+	private final List<HttpMessageReader<?>> objectReaders = new ArrayList<>();
+
+	private final List<HttpMessageWriter<?>> typedWriters = new ArrayList<>();
+
+	private final List<HttpMessageWriter<?>> objectWriters = new ArrayList<>();
+
+
 	BaseDefaultCodecs() {
+		initReaders();
+		initWriters();
+	}
+
+	/**
+	 * Reset and initialize typed readers and object readers.
+	 * @since 5.3.3
+	 */
+	protected void initReaders() {
+		initTypedReaders();
+		initObjectReaders();
+	}
+
+	/**
+	 * Reset and initialize typed writers and object writers.
+	 * @since 5.3.3
+	 */
+	protected void initWriters() {
+		initTypedWriters();
+		initObjectWriters();
 	}
 
 	/**
@@ -167,61 +199,78 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.maxInMemorySize = other.maxInMemorySize;
 		this.enableLoggingRequestDetails = other.enableLoggingRequestDetails;
 		this.registerDefaults = other.registerDefaults;
+		this.typedReaders.addAll(other.typedReaders);
+		this.objectReaders.addAll(other.objectReaders);
+		this.typedWriters.addAll(other.typedWriters);
+		this.objectWriters.addAll(other.objectWriters);
 	}
 
 	@Override
 	public void jackson2JsonDecoder(Decoder<?> decoder) {
 		this.jackson2JsonDecoder = decoder;
+		initObjectReaders();
 	}
 
 	@Override
 	public void jackson2JsonEncoder(Encoder<?> encoder) {
 		this.jackson2JsonEncoder = encoder;
+		initObjectWriters();
 	}
 
 	@Override
 	public void protobufDecoder(Decoder<?> decoder) {
 		this.protobufDecoder = decoder;
+		initTypedReaders();
 	}
 
 	@Override
 	public void jackson2SmileDecoder(Decoder<?> decoder) {
 		this.jackson2SmileDecoder = decoder;
+		initObjectReaders();
 	}
 
 	@Override
 	public void jackson2SmileEncoder(Encoder<?> encoder) {
 		this.jackson2SmileEncoder = encoder;
+		initObjectWriters();
 	}
 
 	@Override
 	public void protobufEncoder(Encoder<?> encoder) {
 		this.protobufEncoder = encoder;
+		initTypedWriters();
 	}
 
 	@Override
 	public void jaxb2Decoder(Decoder<?> decoder) {
 		this.jaxb2Decoder = decoder;
+		initObjectReaders();
 	}
 
 	@Override
 	public void jaxb2Encoder(Encoder<?> encoder) {
 		this.jaxb2Encoder = encoder;
+		initObjectWriters();
 	}
 
 	@Override
 	public void kotlinSerializationJsonDecoder(Decoder<?> decoder) {
 		this.kotlinSerializationJsonDecoder = decoder;
+		initObjectReaders();
 	}
 
 	@Override
 	public void kotlinSerializationJsonEncoder(Encoder<?> encoder) {
 		this.kotlinSerializationJsonEncoder = encoder;
+		initObjectWriters();
 	}
 
 	@Override
 	public void maxInMemorySize(int byteCount) {
-		this.maxInMemorySize = byteCount;
+		if (!ObjectUtils.nullSafeEquals(this.maxInMemorySize, byteCount)) {
+			this.maxInMemorySize = byteCount;
+			initReaders();
+		}
 	}
 
 	@Override
@@ -232,7 +281,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 	@Override
 	public void enableLoggingRequestDetails(boolean enable) {
-		this.enableLoggingRequestDetails = enable;
+		if (!ObjectUtils.nullSafeEquals(this.enableLoggingRequestDetails, enable)) {
+			this.enableLoggingRequestDetails = enable;
+			initReaders();
+			initWriters();
+		}
 	}
 
 	@Override
@@ -245,7 +298,11 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * Delegate method used from {@link BaseCodecConfigurer#registerDefaults}.
 	 */
 	void registerDefaults(boolean registerDefaults) {
-		this.registerDefaults = registerDefaults;
+		if (this.registerDefaults != registerDefaults) {
+			this.registerDefaults = registerDefaults;
+			initReaders();
+			initWriters();
+		}
 	}
 
 
@@ -253,28 +310,34 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * Return readers that support specific types.
 	 */
 	final List<HttpMessageReader<?>> getTypedReaders() {
+		return this.typedReaders;
+	}
+
+	/**
+	 * Reset and initialize typed readers.
+	 * @since 5.3.3
+	 */
+	protected void initTypedReaders() {
+		this.typedReaders.clear();
 		if (!this.registerDefaults) {
-			return Collections.emptyList();
+			return;
 		}
-		List<HttpMessageReader<?>> readers = new ArrayList<>();
-		addCodec(readers, new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
-		addCodec(readers, new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
-		addCodec(readers, new DecoderHttpMessageReader<>(new DataBufferDecoder()));
+		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteArrayDecoder()));
+		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new DataBufferDecoder()));
 		if (nettyByteBufPresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
+			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(new NettyByteBufDecoder()));
 		}
-		addCodec(readers, new ResourceHttpMessageReader(new ResourceDecoder()));
-		addCodec(readers, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
+		addCodec(this.typedReaders, new ResourceHttpMessageReader(new ResourceDecoder()));
+		addCodec(this.typedReaders, new DecoderHttpMessageReader<>(StringDecoder.textPlainOnly()));
 		if (protobufPresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
+			addCodec(this.typedReaders, new DecoderHttpMessageReader<>(this.protobufDecoder != null ?
 					(ProtobufDecoder) this.protobufDecoder : new ProtobufDecoder()));
 		}
-		addCodec(readers, new FormHttpMessageReader());
+		addCodec(this.typedReaders, new FormHttpMessageReader());
 
 		// client vs server..
-		extendTypedReaders(readers);
-
-		return readers;
+		extendTypedReaders(this.typedReaders);
 	}
 
 	/**
@@ -293,7 +356,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 */
 	@SuppressWarnings("rawtypes")
 	private void initCodec(@Nullable Object codec) {
-
 		if (codec instanceof DecoderHttpMessageReader) {
 			codec = ((DecoderHttpMessageReader) codec).getDecoder();
 		}
@@ -386,29 +448,35 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * Return Object readers (JSON, XML, SSE).
 	 */
 	final List<HttpMessageReader<?>> getObjectReaders() {
+		return this.objectReaders;
+	}
+
+	/**
+	 * Reset and initialize object readers.
+	 * @since 5.3.3
+	 */
+	protected void initObjectReaders() {
+		this.objectReaders.clear();
 		if (!this.registerDefaults) {
-			return Collections.emptyList();
+			return;
 		}
-		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		if (kotlinSerializationJsonPresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getKotlinSerializationJsonDecoder()));
 		}
 		if (jackson2Present) {
-			addCodec(readers, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(getJackson2JsonDecoder()));
 		}
 		if (jackson2SmilePresent) {
-			addCodec(readers, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jackson2SmileDecoder != null ?
 					(Jackson2SmileDecoder) this.jackson2SmileDecoder : new Jackson2SmileDecoder()));
 		}
 		if (jaxb2Present && !shouldIgnoreXml) {
-			addCodec(readers, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
+			addCodec(this.objectReaders, new DecoderHttpMessageReader<>(this.jaxb2Decoder != null ?
 					(Jaxb2XmlDecoder) this.jaxb2Decoder : new Jaxb2XmlDecoder()));
 		}
 
 		// client vs server..
-		extendObjectReaders(readers);
-
-		return readers;
+		extendObjectReaders(this.objectReaders);
 	}
 
 	/**
@@ -434,12 +502,20 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 */
 	@SuppressWarnings({"rawtypes" })
 	final List<HttpMessageWriter<?>> getTypedWriters() {
+		return this.typedWriters;
+	}
+
+	/**
+	 * Reset and initialize typed writers.
+	 * @since 5.3.3
+	 */
+	protected void initTypedWriters() {
+		this.typedWriters.clear();
 		if (!this.registerDefaults) {
-			return Collections.emptyList();
+			return;
 		}
-		List<HttpMessageWriter<?>> writers = getBaseTypedWriters();
-		extendTypedWriters(writers);
-		return writers;
+		this.typedWriters.addAll(getBaseTypedWriters());
+		extendTypedWriters(this.typedWriters);
 	}
 
 	/**
@@ -476,12 +552,20 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * Return Object writers (JSON, XML, SSE).
 	 */
 	final List<HttpMessageWriter<?>> getObjectWriters() {
+		return this.objectWriters;
+	}
+
+	/**
+	 * Reset and initialize object writers.
+	 * @since 5.3.3
+	 */
+	protected void initObjectWriters() {
+		this.objectWriters.clear();
 		if (!this.registerDefaults) {
-			return Collections.emptyList();
+			return;
 		}
-		List<HttpMessageWriter<?>> writers = getBaseObjectWriters();
-		extendObjectWriters(writers);
-		return writers;
+		this.objectWriters.addAll(getBaseObjectWriters());
+		extendObjectWriters(this.objectWriters);
 	}
 
 	/**
