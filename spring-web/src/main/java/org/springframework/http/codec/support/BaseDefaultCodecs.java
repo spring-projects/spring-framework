@@ -218,12 +218,6 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
-	public void protobufDecoder(Decoder<?> decoder) {
-		this.protobufDecoder = decoder;
-		initTypedReaders();
-	}
-
-	@Override
 	public void jackson2SmileDecoder(Decoder<?> decoder) {
 		this.jackson2SmileDecoder = decoder;
 		initObjectReaders();
@@ -233,6 +227,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	public void jackson2SmileEncoder(Encoder<?> encoder) {
 		this.jackson2SmileEncoder = encoder;
 		initObjectWriters();
+	}
+
+	@Override
+	public void protobufDecoder(Decoder<?> decoder) {
+		this.protobufDecoder = decoder;
+		initTypedReaders();
 	}
 
 	@Override

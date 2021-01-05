@@ -81,7 +81,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
-	private ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();
+	@Nullable
+	private ServerCodecConfigurer codecConfigurer;
 
 	private LocaleContextResolver localeContextResolver = new AcceptHeaderLocaleContextResolver();
 
@@ -143,6 +144,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Return the configured {@link ServerCodecConfigurer}.
 	 */
 	public ServerCodecConfigurer getCodecConfigurer() {
+		if (this.codecConfigurer == null) {
+			setCodecConfigurer(ServerCodecConfigurer.create());
+		}
 		return this.codecConfigurer;
 	}
 
