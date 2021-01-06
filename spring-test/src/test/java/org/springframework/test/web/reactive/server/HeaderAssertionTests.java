@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ class HeaderAssertionTests {
 		// Wrong pattern
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertions.valueMatches("Content-Type", ".*ISO-8859-1.*"))
-				.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
+				.satisfies(ex -> assertThat(ex).hasMessage("Response header " +
 						"'Content-Type'=[application/json;charset=UTF-8] does not match " +
 						"[.*ISO-8859-1.*]"));
 	}
@@ -117,13 +117,13 @@ class HeaderAssertionTests {
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertions.valuesMatch("foo", ".*", "val.*5"))
-				.satisfies(ex -> assertThat(ex.getCause()).hasMessage(
+				.satisfies(ex -> assertThat(ex).hasMessage(
 						"Response header 'foo' has fewer or more values [value1, value2, value3] " +
 								"than number of patterns to match with [.*, val.*5]"));
 
 		assertThatExceptionOfType(AssertionError.class)
 				.isThrownBy(() -> assertions.valuesMatch("foo", ".*", "val.*5", ".*"))
-				.satisfies(ex -> assertThat(ex.getCause()).hasMessage(
+				.satisfies(ex -> assertThat(ex).hasMessage(
 						"Response header 'foo'[1]='value2' does not match 'val.*5'"));
 	}
 
@@ -158,7 +158,7 @@ class HeaderAssertionTests {
 		// Header should not exist
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.exists("Framework"))
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header 'Framework' does not exist"));
+			.satisfies(ex -> assertThat(ex).hasMessage("Response header 'Framework' does not exist"));
 	}
 
 	@Test
@@ -173,7 +173,7 @@ class HeaderAssertionTests {
 		// Existing header
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.doesNotExist("Content-Type"))
-			.satisfies(ex -> assertThat(ex.getCause()).hasMessage("Response header " +
+			.satisfies(ex -> assertThat(ex).hasMessage("Response header " +
 					"'Content-Type' exists with value=[application/json;charset=UTF-8]"));
 	}
 
@@ -189,7 +189,6 @@ class HeaderAssertionTests {
 		// MediaTypes not compatible
 		assertThatExceptionOfType(AssertionError.class)
 			.isThrownBy(() -> assertions.contentTypeCompatibleWith(MediaType.TEXT_XML))
-			.havingCause()
 			.withMessage("Response header 'Content-Type'=[application/xml] is not compatible with [text/xml]");
 	}
 
