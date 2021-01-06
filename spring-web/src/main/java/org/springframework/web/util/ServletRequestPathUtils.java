@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -69,6 +70,22 @@ public abstract class ServletRequestPathUtils {
 		RequestPath path = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);
 		Assert.notNull(path, "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return path;
+	}
+
+	/**
+	 * Set the cached, parsed {@code RequestPath} to the given value.
+	 * @param requestPath the value to set to, or if {@code null} the cache
+	 * value is cleared.
+	 * @param request the current request
+	 * @since 5.3.3
+	 */
+	public static void setParsedRequestPath(@Nullable RequestPath requestPath, ServletRequest request) {
+		if (requestPath != null) {
+			request.setAttribute(PATH_ATTRIBUTE, requestPath);
+		}
+		else {
+			request.removeAttribute(PATH_ATTRIBUTE);
+		}
 	}
 
 	/**

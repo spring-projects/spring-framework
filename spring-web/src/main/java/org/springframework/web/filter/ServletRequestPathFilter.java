@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.server.RequestPath;
 import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
@@ -48,12 +49,13 @@ public class ServletRequestPathFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
+		RequestPath previousRequestPath = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
 		ServletRequestPathUtils.parseAndCache((HttpServletRequest) request);
 		try {
 			chain.doFilter(request, response);
 		}
 		finally {
-			ServletRequestPathUtils.clearParsedRequestPath(request);
+			ServletRequestPathUtils.setParsedRequestPath(previousRequestPath, request);
 		}
 	}
 
