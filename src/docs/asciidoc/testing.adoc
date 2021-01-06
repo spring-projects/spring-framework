@@ -7045,6 +7045,8 @@ To perform requests that use any HTTP method, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	// static import of MockMvcRequestBuilders.*
+
 	mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
 ----
 
@@ -7176,6 +7178,8 @@ performing a request, as the following example shows:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
 	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
 ----
 
@@ -7369,6 +7373,8 @@ or reactive type such as Reactor `Mono`:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
 	@Test
 	void test() throws Exception {
         MvcResult mvcResult = this.mockMvc.perform(get("/path"))
