@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Sam Brannen
  */
 class StringUtilsTests {
 
@@ -272,28 +273,28 @@ class StringUtilsTests {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
-		assertThat(res.equals("Able was  ere  saw Elba")).as("Result has no Is [" + res + "]").isTrue();
+		assertThat(res).as("Result has no 'I'").isEqualTo("Able was  ere  saw Elba");
 
 		res = StringUtils.deleteAny(inString, "AeEba!");
-		assertThat(res.equals("l ws I r I sw l")).as("Result has no Is [" + res + "]").isTrue();
+		assertThat(res).as("Result has no 'AeEba!'").isEqualTo("l ws I r I sw l");
 
-		String mismatch = StringUtils.deleteAny(inString, "#@$#$^");
-		assertThat(mismatch.equals(inString)).as("Result is unchanged").isTrue();
-
-		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
-		assertThat(whitespace.contains("\n")).as("Has CR").isTrue();
-		assertThat(whitespace.contains("\t")).as("Has tab").isTrue();
-		assertThat(whitespace.contains(" ")).as("Has  sp").isTrue();
-		String cleaned = StringUtils.deleteAny(whitespace, "\n\t ");
-		boolean condition2 = !cleaned.contains("\n");
-		assertThat(condition2).as("Has no CR").isTrue();
-		boolean condition1 = !cleaned.contains("\t");
-		assertThat(condition1).as("Has no tab").isTrue();
-		boolean condition = !cleaned.contains(" ");
-		assertThat(condition).as("Has no sp").isTrue();
-		assertThat(cleaned.length() > 10).as("Still has chars").isTrue();
+		res = StringUtils.deleteAny(inString, "#@$#$^");
+		assertThat(res).as("Result is unchanged").isEqualTo(inString);
 	}
 
+	@Test
+	void deleteAnyWhitespace() {
+		String whitespace = "This is\n\n\n    \t   a messagy string with whitespace\n";
+		assertThat(whitespace).as("Has CR").contains("\n");
+		assertThat(whitespace).as("Has tab").contains("\t");
+		assertThat(whitespace).as("Has space").contains(" ");
+
+		String cleaned = StringUtils.deleteAny(whitespace, "\n\t ");
+		assertThat(cleaned).as("Has no CR").doesNotContain("\n");
+		assertThat(cleaned).as("Has no tab").doesNotContain("\t");
+		assertThat(cleaned).as("Has no space").doesNotContain(" ");
+		assertThat(cleaned.length()).as("Still has chars").isGreaterThan(10);
+	}
 
 	@Test
 	void quote() {
@@ -306,7 +307,7 @@ class StringUtilsTests {
 	void quoteIfString() {
 		assertThat(StringUtils.quoteIfString("myString")).isEqualTo("'myString'");
 		assertThat(StringUtils.quoteIfString("")).isEqualTo("''");
-		assertThat(StringUtils.quoteIfString(5)).isEqualTo(Integer.valueOf(5));
+		assertThat(StringUtils.quoteIfString(5)).isEqualTo(5);
 		assertThat(StringUtils.quoteIfString(null)).isNull();
 	}
 
@@ -498,7 +499,7 @@ class StringUtilsTests {
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
 		assertThat(sa.length).isEqualTo(4);
-		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("") && sa[3].equals("c")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
@@ -539,7 +540,7 @@ class StringUtilsTests {
 	}
 
 	@Test
-	void delimitedListToStringArrayWithEmptyString() {
+	void delimitedListToStringArrayWithEmptyDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
 		assertThat(sa.length).isEqualTo(3);
 		assertThat(sa[0]).isEqualTo("a");
@@ -601,7 +602,7 @@ class StringUtilsTests {
 		// Could read these from files
 		String[] sa = StringUtils.commaDelimitedListToStringArray("a,,b");
 		assertThat(sa.length).as("a,,b produces array length 3").isEqualTo(3);
-		assertThat(sa[0].equals("a") && sa[1].equals("") && sa[2].equals("b")).as("components are correct").isTrue();
+		assertThat(sa[0].equals("a") && sa[1].isEmpty() && sa[2].equals("b")).as("components are correct").isTrue();
 
 		sa = new String[] {"", "", "a", ""};
 		doTestCommaDelimitedListToStringArrayLegalMatch(sa);

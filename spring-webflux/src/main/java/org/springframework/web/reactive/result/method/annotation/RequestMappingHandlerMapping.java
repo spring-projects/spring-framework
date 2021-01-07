@@ -146,6 +146,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
+	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
@@ -314,6 +315,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 		for (String origin : annotation.origins()) {
 			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
+		}
+		for (String patterns : annotation.originPatterns()) {
+			config.addAllowedOriginPattern(resolveCorsAnnotationValue(patterns));
 		}
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());

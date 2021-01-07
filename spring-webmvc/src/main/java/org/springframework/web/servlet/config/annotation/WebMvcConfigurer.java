@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 /**
@@ -47,15 +48,11 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public interface WebMvcConfigurer {
 
 	/**
-	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
-	 * suffix registration, path matcher and path helper.
-	 * Configured path matcher and path helper instances are shared for:
-	 * <ul>
-	 * <li>RequestMappings</li>
-	 * <li>ViewControllerMappings</li>
-	 * <li>ResourcesMappings</li>
-	 * </ul>
+	 * Help with configuring {@link HandlerMapping} path matching options such as
+	 * whether to use parsed {@code PathPatterns} or String pattern matching
+	 * with {@code PathMatcher}, whether to match trailing slashes, and more.
 	 * @since 4.0.3
+	 * @see PathMatchConfigurer
 	 */
 	default void configurePathMatch(PathMatchConfigurer configurer) {
 	}
@@ -101,6 +98,7 @@ public interface WebMvcConfigurer {
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.
+	 * @see ResourceHandlerRegistry
 	 */
 	default void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
@@ -118,6 +116,7 @@ public interface WebMvcConfigurer {
 	 * cases where there is no need for custom controller logic -- e.g. render a
 	 * home page, perform simple site URL redirects, return a 404 status with
 	 * HTML content, a 204 with no content, and more.
+	 * @see ViewControllerRegistry
 	 */
 	default void addViewControllers(ViewControllerRegistry registry) {
 	}

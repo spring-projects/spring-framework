@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class XpathResultMatchers {
 	 * Evaluate the XPath and assert the number of nodes found with the given
 	 * Hamcrest {@link Matcher}.
 	 */
-	public ResultMatcher nodeCount(Matcher<Integer> matcher) {
+	public ResultMatcher nodeCount(Matcher<? super Integer> matcher) {
 		return result -> {
 			MockHttpServletResponse response = result.getResponse();
 			this.xpathHelper.assertNodeCount(response.getContentAsByteArray(), getDefinedEncoding(response), matcher);

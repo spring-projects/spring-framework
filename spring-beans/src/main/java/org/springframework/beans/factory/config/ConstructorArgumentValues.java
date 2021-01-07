@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,10 +164,10 @@ public class ConstructorArgumentValues {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = this.indexedArgumentValues.get(index);
 		if (valueHolder != null &&
-				(valueHolder.getType() == null ||
-						(requiredType != null && ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
-				(valueHolder.getName() == null || "".equals(requiredName) ||
-						(requiredName != null && requiredName.equals(valueHolder.getName())))) {
+				(valueHolder.getType() == null || (requiredType != null &&
+						ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) &&
+				(valueHolder.getName() == null || (requiredName != null &&
+						(requiredName.isEmpty() || requiredName.equals(valueHolder.getName()))))) {
 			return valueHolder;
 		}
 		return null;
@@ -277,17 +277,19 @@ public class ConstructorArgumentValues {
 	 * @return the ValueHolder for the argument, or {@code null} if none found
 	 */
 	@Nullable
-	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName, @Nullable Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getGenericArgumentValue(@Nullable Class<?> requiredType, @Nullable String requiredName,
+			@Nullable Set<ValueHolder> usedValueHolders) {
+
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
 			}
-			if (valueHolder.getName() != null && !"".equals(requiredName) &&
-					(requiredName == null || !valueHolder.getName().equals(requiredName))) {
+			if (valueHolder.getName() != null && (requiredName == null ||
+					(!requiredName.isEmpty() && !requiredName.equals(valueHolder.getName())))) {
 				continue;
 			}
-			if (valueHolder.getType() != null &&
-					(requiredType == null || !ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) {
+			if (valueHolder.getType() != null && (requiredType == null ||
+					!ClassUtils.matchesTypeName(requiredType, valueHolder.getType()))) {
 				continue;
 			}
 			if (requiredType != null && valueHolder.getType() == null && valueHolder.getName() == null &&

@@ -17,8 +17,10 @@
 package org.springframework.context.annotation;
 
 import java.beans.Introspector;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -70,6 +72,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
 
+	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
+
 
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
@@ -96,16 +100,22 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		String beanName = null;
 		for (String type : types) {
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(amd, type);
-			if (attributes != null && isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
-				Object value = attributes.get("value");
-				if (value instanceof String) {
-					String strVal = (String) value;
-					if (StringUtils.hasLength(strVal)) {
-						if (beanName != null && !strVal.equals(beanName)) {
-							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-									"component names: '" + beanName + "' versus '" + strVal + "'");
+			if (attributes != null) {
+				Set<String> metaTypes = this.metaAnnotationTypesCache.computeIfAbsent(type, key -> {
+					Set<String> result = amd.getMetaAnnotationTypes(key);
+					return (result.isEmpty() ? Collections.emptySet() : result);
+				});
+				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
+					Object value = attributes.get("value");
+					if (value instanceof String) {
+						String strVal = (String) value;
+						if (StringUtils.hasLength(strVal)) {
+							if (beanName != null && !strVal.equals(beanName)) {
+								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+										"component names: '" + beanName + "' versus '" + strVal + "'");
+							}
+							beanName = strVal;
 						}
-						beanName = strVal;
 					}
 				}
 			}

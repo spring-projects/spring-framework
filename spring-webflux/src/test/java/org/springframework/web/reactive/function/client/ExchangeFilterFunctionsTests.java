@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,10 +197,9 @@ public class ExchangeFilterFunctionsTests {
 
 	@Test
 	public void limitResponseSize() {
-		DefaultDataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-		DataBuffer b1 = dataBuffer("foo", bufferFactory);
-		DataBuffer b2 = dataBuffer("bar", bufferFactory);
-		DataBuffer b3 = dataBuffer("baz", bufferFactory);
+		DataBuffer b1 = dataBuffer("foo");
+		DataBuffer b2 = dataBuffer("bar");
+		DataBuffer b3 = dataBuffer("baz");
 
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
 		ClientResponse response = ClientResponse.create(HttpStatus.OK).body(Flux.just(b1, b2, b3)).build();
@@ -222,8 +221,8 @@ public class ExchangeFilterFunctionsTests {
 		return value;
 	}
 
-	private DataBuffer dataBuffer(String foo, DefaultDataBufferFactory bufferFactory) {
-		return bufferFactory.wrap(foo.getBytes(StandardCharsets.UTF_8));
+	private DataBuffer dataBuffer(String foo) {
+		return DefaultDataBufferFactory.sharedInstance.wrap(foo.getBytes(StandardCharsets.UTF_8));
 	}
 
 

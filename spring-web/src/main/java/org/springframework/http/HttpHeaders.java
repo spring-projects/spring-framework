@@ -385,7 +385,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * An empty {@code HttpHeaders} instance (immutable).
 	 * @since 5.0
 	 */
-	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
+	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
@@ -860,8 +860,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
 		Assert.notNull(name, "Name must not be null");
-		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
-		if (filename != null) {
+		ContentDisposition.Builder disposition = ContentDisposition.formData().name(name);
+		if (StringUtils.hasText(filename)) {
 			disposition.filename(filename);
 		}
 		setContentDisposition(disposition.build());
@@ -888,7 +888,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public ContentDisposition getContentDisposition() {
 		String contentDisposition = getFirst(CONTENT_DISPOSITION);
-		if (contentDisposition != null) {
+		if (StringUtils.hasText(contentDisposition)) {
 			return ContentDisposition.parse(contentDisposition);
 		}
 		return ContentDisposition.empty();
@@ -906,11 +906,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the first {@link Locale} of the content languages,
-	 * as specified by the {@literal Content-Language} header.
-	 * <p>Returns {@code null} when the content language is unknown.
-	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
-	 * to get multiple content languages.</p>
+	 * Get the first {@link Locale} of the content languages, as specified by the
+	 * {@code Content-Language} header.
+	 * <p>Use {@link #getValuesAsList(String)} if you need to get multiple content
+	 * languages.
+	 * @return the first {@code Locale} of the content languages, or {@code null}
+	 * if unknown
 	 * @since 5.0
 	 */
 	@Nullable
@@ -1140,6 +1141,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	public List<String> getIfMatch() {
@@ -1199,6 +1201,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-None-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 */
 	public List<String> getIfNoneMatch() {
 		return getETagValuesAsList(IF_NONE_MATCH);
@@ -1542,6 +1545,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Retrieve a combined result from the field values of the ETag header.
 	 * @param headerName the header name
 	 * @return the combined result
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	protected List<String> getETagValuesAsList(String headerName) {
@@ -1744,8 +1748,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (!(other instanceof HttpHeaders)) {
 			return false;
 		}
-		HttpHeaders otherHeaders = (HttpHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return unwrap(this).equals(unwrap((HttpHeaders) other));
+	}
+
+	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
+		while (headers.headers instanceof HttpHeaders) {
+			headers = (HttpHeaders) headers.headers;
+		}
+		return headers.headers;
 	}
 
 	@Override
@@ -1760,20 +1770,34 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Return an {@code HttpHeaders} object that can only be read, not written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 * (in case it happens to be a read-only {@code HttpHeaders} instance already)
+	 * @since 5.3
 	 */
-	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
-		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers instanceof ReadOnlyHttpHeaders) {
-			return headers;
-		}
-		else {
-			return new ReadOnlyHttpHeaders(headers);
-		}
+	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
+		return (headers instanceof HttpHeaders ?
+				readOnlyHttpHeaders((HttpHeaders) headers) : new ReadOnlyHttpHeaders(headers));
 	}
 
 	/**
-	 * Return an {@code HttpHeaders} object that can be read and written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		Assert.notNull(headers, "HttpHeaders must not be null");
+		return (headers instanceof ReadOnlyHttpHeaders ? headers : new ReadOnlyHttpHeaders(headers.headers));
+	}
+
+	/**
+	 * Remove any read-only wrapper that may have been previously applied around
+	 * the given headers via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * @param headers the headers to expose
+	 * @return a writable variant of the headers, or the original headers as-is
 	 * @since 5.1.1
 	 */
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
@@ -1781,12 +1805,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (headers == EMPTY) {
 			return new HttpHeaders();
 		}
-		else if (headers instanceof ReadOnlyHttpHeaders) {
-			return new HttpHeaders(headers.headers);
-		}
-		else {
-			return headers;
-		}
+		return (headers instanceof ReadOnlyHttpHeaders ? new HttpHeaders(headers.headers) : headers);
 	}
 
 	/**

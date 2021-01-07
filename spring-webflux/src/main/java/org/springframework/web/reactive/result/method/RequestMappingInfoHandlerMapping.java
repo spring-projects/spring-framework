@@ -71,6 +71,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 
+	@Override
+	protected Set<String> getDirectPaths(RequestMappingInfo info) {
+		return info.getDirectPaths();
+	}
+
 	/**
 	 * Check if the given RequestMappingInfo matches the current request and
 	 * return a (potentially new) instance with conditions that match the

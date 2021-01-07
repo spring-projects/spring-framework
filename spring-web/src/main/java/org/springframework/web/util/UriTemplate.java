@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -28,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Representation of a URI template that can be expanded with URI variables via
@@ -154,7 +154,7 @@ public class UriTemplate implements Serializable {
 	 */
 	public Map<String, String> match(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Map<String, String> result = new LinkedHashMap<>(this.variableNames.size());
+		Map<String, String> result = CollectionUtils.newLinkedHashMap(this.variableNames.size());
 		Matcher matcher = this.matchPattern.matcher(uri);
 		if (matcher.find()) {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -225,7 +225,7 @@ public class UriTemplate implements Serializable {
 								throw new IllegalArgumentException(
 										"No custom regular expression specified after ':' in \"" + variable + "\"");
 							}
-							String regex = variable.substring(idx + 1, variable.length());
+							String regex = variable.substring(idx + 1);
 							pattern.append('(');
 							pattern.append(regex);
 							pattern.append(')');

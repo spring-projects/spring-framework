@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Stephane Nicoll
  */
-public class HttpInvokerFactoryBeanIntegrationTests {
+class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testLoadedConfigClass() {
+	void testLoadedConfigClass() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
 		MyBean myBean = context.getBean("myBean", MyBean.class);
 		assertThat(myBean.myService).isSameAs(context.getBean("myService"));
@@ -52,7 +52,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void testNonLoadedConfigClass() {
+	void testNonLoadedConfigClass() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
 		context.refresh();
@@ -64,7 +64,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void withConfigurationClassWithPlainFactoryBean() {
+	void withConfigurationClassWithPlainFactoryBean() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(ConfigWithPlainFactoryBean.class);
 		context.refresh();
@@ -75,9 +75,9 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	}
 
 
-	public interface MyService {
+	interface MyService {
 
-		public void handle();
+		void handle();
 
 		@Async
 		public void handleAsync();
@@ -85,25 +85,26 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 
 
 	@Component("myBean")
-	public static class MyBean {
+	static class MyBean {
 
 		@Autowired
-		public MyService myService;
+		MyService myService;
 	}
 
 
 	@Configuration
 	@ComponentScan
 	@Lazy
-	public static class InvokerAutowiringConfig {
+	static class InvokerAutowiringConfig {
 
 		@Bean
-		public AsyncAnnotationBeanPostProcessor aabpp() {
+		AsyncAnnotationBeanPostProcessor aabpp() {
 			return new AsyncAnnotationBeanPostProcessor();
 		}
 
 		@Bean
-		public HttpInvokerProxyFactoryBean myService() {
+		@SuppressWarnings("deprecation")
+		HttpInvokerProxyFactoryBean myService() {
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/dummy");
 			factory.setServiceInterface(MyService.class);
@@ -112,7 +113,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		}
 
 		@Bean
-		public FactoryBean<String> myOtherService() {
+		FactoryBean<String> myOtherService() {
 			throw new IllegalStateException("Don't ever call me");
 		}
 	}
@@ -125,12 +126,13 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		Environment env;
 
 		@Bean
-		public MyBean myBean() {
+		MyBean myBean() {
 			return new MyBean();
 		}
 
 		@Bean
-		public HttpInvokerProxyFactoryBean myService() {
+		@SuppressWarnings("deprecation")
+		HttpInvokerProxyFactoryBean myService() {
 			String name = env.getProperty("testbean.name");
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/" + name);

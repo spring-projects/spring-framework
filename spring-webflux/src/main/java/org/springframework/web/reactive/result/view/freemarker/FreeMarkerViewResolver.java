@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view.freemarker;
 
+import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 
 /**
@@ -55,6 +56,11 @@ public class FreeMarkerViewResolver extends UrlBasedViewResolver {
 	@Override
 	protected Class<?> requiredViewClass() {
 		return FreeMarkerView.class;
+	}
+
+	@Override
+	protected AbstractUrlBasedView instantiateView() {
+		return (getViewClass() == FreeMarkerView.class ? new FreeMarkerView() : super.instantiateView());
 	}
 
 }

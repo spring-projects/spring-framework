@@ -1523,7 +1523,7 @@ public class BeanDefinitionParserDelegate {
 	 * Determine whether the given URI indicates the default namespace.
 	 */
 	public boolean isDefaultNamespace(@Nullable String namespaceUri) {
-		return (!StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri));
+		return !StringUtils.hasLength(namespaceUri) || BEANS_NAMESPACE_URI.equals(namespaceUri);
 	}
 
 	/**
@@ -1534,7 +1534,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	private boolean isDefaultValue(String value) {
-		return (DEFAULT_VALUE.equals(value) || "".equals(value));
+		return !StringUtils.hasLength(value) || DEFAULT_VALUE.equals(value);
 	}
 
 	private boolean isCandidateElement(Node node) {

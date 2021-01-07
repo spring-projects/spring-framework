@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,13 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartFile;
 import org.springframework.web.testfixture.servlet.MockMultipartHttpServletRequest;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class RequestPartServletServerHttpRequestTests {
 
@@ -133,6 +135,18 @@ public class RequestPartServletServerHttpRequestTests {
 		mockRequest.setParameter("part", new String(bytes, StandardCharsets.ISO_8859_1));
 		mockRequest.setCharacterEncoding("iso-8859-1");
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertThat(result).isEqualTo(bytes);
+	}
+
+	@Test  // gh-25829
+	public void getBodyViaRequestPart() throws Exception {
+		byte[] bytes = "content".getBytes("UTF-8");
+		MockPart mockPart = new MockPart("part", bytes);
+		mockPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		this.mockRequest.addPart(mockPart);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
+
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertThat(result).isEqualTo(bytes);
 	}

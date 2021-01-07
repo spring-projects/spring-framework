@@ -18,9 +18,9 @@ package org.springframework.context.annotation;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -93,9 +93,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
-	private final List<TypeFilter> includeFilters = new LinkedList<>();
+	private final List<TypeFilter> includeFilters = new ArrayList<>();
 
-	private final List<TypeFilter> excludeFilters = new LinkedList<>();
+	private final List<TypeFilter> excludeFilters = new ArrayList<>();
 
 	@Nullable
 	private Environment environment;
@@ -386,6 +386,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(type);
 				if (isCandidateComponent(metadataReader)) {
 					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+					sbd.setSource(metadataReader.getResource());
 					if (isCandidateComponent(sbd)) {
 						if (debugEnabled) {
 							logger.debug("Using candidate component class from index: " + type);
@@ -428,7 +429,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
-							sbd.setResource(resource);
 							sbd.setSource(resource);
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {

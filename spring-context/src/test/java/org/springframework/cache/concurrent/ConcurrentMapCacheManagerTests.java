@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,18 +33,15 @@ public class ConcurrentMapCacheManagerTests {
 	public void testDynamicMode() {
 		CacheManager cm = new ConcurrentMapCacheManager();
 		Cache cache1 = cm.getCache("c1");
-		boolean condition2 = cache1 instanceof ConcurrentMapCache;
-		assertThat(condition2).isTrue();
+		assertThat(cache1 instanceof ConcurrentMapCache).isTrue();
 		Cache cache1again = cm.getCache("c1");
 		assertThat(cache1).isSameAs(cache1again);
 		Cache cache2 = cm.getCache("c2");
-		boolean condition1 = cache2 instanceof ConcurrentMapCache;
-		assertThat(condition1).isTrue();
+		assertThat(cache2 instanceof ConcurrentMapCache).isTrue();
 		Cache cache2again = cm.getCache("c2");
 		assertThat(cache2).isSameAs(cache2again);
 		Cache cache3 = cm.getCache("c3");
-		boolean condition = cache3 instanceof ConcurrentMapCache;
-		assertThat(condition).isTrue();
+		assertThat(cache3 instanceof ConcurrentMapCache).isTrue();
 		Cache cache3again = cm.getCache("c3");
 		assertThat(cache3).isSameAs(cache3again);
 
@@ -74,13 +71,11 @@ public class ConcurrentMapCacheManagerTests {
 	public void testStaticMode() {
 		ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager("c1", "c2");
 		Cache cache1 = cm.getCache("c1");
-		boolean condition3 = cache1 instanceof ConcurrentMapCache;
-		assertThat(condition3).isTrue();
+		assertThat(cache1 instanceof ConcurrentMapCache).isTrue();
 		Cache cache1again = cm.getCache("c1");
 		assertThat(cache1).isSameAs(cache1again);
 		Cache cache2 = cm.getCache("c2");
-		boolean condition2 = cache2 instanceof ConcurrentMapCache;
-		assertThat(condition2).isTrue();
+		assertThat(cache2 instanceof ConcurrentMapCache).isTrue();
 		Cache cache2again = cm.getCache("c2");
 		assertThat(cache2).isSameAs(cache2again);
 		Cache cache3 = cm.getCache("c3");
@@ -97,12 +92,10 @@ public class ConcurrentMapCacheManagerTests {
 
 		cm.setAllowNullValues(false);
 		Cache cache1x = cm.getCache("c1");
-		boolean condition1 = cache1x instanceof ConcurrentMapCache;
-		assertThat(condition1).isTrue();
+		assertThat(cache1x instanceof ConcurrentMapCache).isTrue();
 		assertThat(cache1x != cache1).isTrue();
 		Cache cache2x = cm.getCache("c2");
-		boolean condition = cache2x instanceof ConcurrentMapCache;
-		assertThat(condition).isTrue();
+		assertThat(cache2x instanceof ConcurrentMapCache).isTrue();
 		assertThat(cache2x != cache2).isTrue();
 		Cache cache3x = cm.getCache("c3");
 		assertThat(cache3x).isNull();
@@ -126,16 +119,14 @@ public class ConcurrentMapCacheManagerTests {
 		ConcurrentMapCacheManager cm = new ConcurrentMapCacheManager("c1", "c2");
 		assertThat(cm.isStoreByValue()).isFalse();
 		Cache cache1 = cm.getCache("c1");
-		boolean condition1 = cache1 instanceof ConcurrentMapCache;
-		assertThat(condition1).isTrue();
-		assertThat(((ConcurrentMapCache)cache1).isStoreByValue()).isFalse();
+		assertThat(cache1 instanceof ConcurrentMapCache).isTrue();
+		assertThat(((ConcurrentMapCache) cache1).isStoreByValue()).isFalse();
 		cache1.put("key", "value");
 
 		cm.setStoreByValue(true);
 		assertThat(cm.isStoreByValue()).isTrue();
 		Cache cache1x = cm.getCache("c1");
-		boolean condition = cache1x instanceof ConcurrentMapCache;
-		assertThat(condition).isTrue();
+		assertThat(cache1x instanceof ConcurrentMapCache).isTrue();
 		assertThat(cache1x != cache1).isTrue();
 		assertThat(cache1x.get("key")).isNull();
 	}

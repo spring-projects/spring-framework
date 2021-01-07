@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class JsonPathAssertions {
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher)}.
 	 * @since 5.1
 	 */
-	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher) {
+	public <T> WebTestClient.BodyContentSpec value(Matcher<? super T> matcher) {
 		this.pathHelper.assertValue(this.content, matcher);
 		return this.bodySpec;
 	}
@@ -150,7 +150,7 @@ public class JsonPathAssertions {
 	 * Delegates to {@link JsonPathExpectationsHelper#assertValue(String, Matcher, Class)}.
 	 * @since 5.1
 	 */
-	public <T> WebTestClient.BodyContentSpec value(Matcher<T> matcher, Class<T> targetType) {
+	public <T> WebTestClient.BodyContentSpec value(Matcher<? super T> matcher, Class<T> targetType) {
 		this.pathHelper.assertValue(this.content, matcher, targetType);
 		return this.bodySpec;
 	}

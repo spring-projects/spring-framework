@@ -245,10 +245,10 @@ public final class ResponseCookie extends HttpCookie {
 
 			@Nullable
 			private String initDomain(String domain) {
-				if (lenient && !StringUtils.isEmpty(domain)) {
-					String s = domain.trim();
-					if (s.startsWith("\"") && s.endsWith("\"")) {
-						if (s.substring(1, s.length() - 1).trim().isEmpty()) {
+				if (lenient && StringUtils.hasLength(domain)) {
+					String str = domain.trim();
+					if (str.startsWith("\"") && str.endsWith("\"")) {
+						if (str.substring(1, str.length() - 1).trim().isEmpty()) {
 							return null;
 						}
 					}
@@ -386,9 +386,8 @@ public final class ResponseCookie extends HttpCookie {
 				start = 1;
 				end--;
 			}
-			char[] chars = value.toCharArray();
 			for (int i = start; i < end; i++) {
-				char c = chars[i];
+				char c = value.charAt(i);
 				if (c < 0x21 || c == 0x22 || c == 0x2c || c == 0x3b || c == 0x5c || c == 0x7f) {
 					throw new IllegalArgumentException(
 							"RFC2616 cookie value cannot have '" + c + "'");

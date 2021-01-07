@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  *
  * @author Rossen Stoyanchev
  */
-class RequestAttributeAssertionTests {
+public class RequestAttributeAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).build();
 

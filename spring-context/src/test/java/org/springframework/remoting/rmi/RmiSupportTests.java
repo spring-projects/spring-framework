@@ -293,8 +293,8 @@ public class RmiSupportTests {
 		assertThat(condition1).isFalse();
 		assertThatExceptionOfType(springExceptionClass).isThrownBy(() ->
 				proxy.setName(rmiExceptionClass.getName()));
-		boolean isRemoteConnectFaiure = RemoteConnectFailureException.class.isAssignableFrom(springExceptionClass);
-		assertThat(factory.counter).isEqualTo(isRemoteConnectFaiure ? 2 : 1);
+		boolean isRemoteConnectFailure = RemoteConnectFailureException.class.isAssignableFrom(springExceptionClass);
+		assertThat(factory.counter).isEqualTo(isRemoteConnectFailure ? 2 : 1);
 	}
 
 	@Test

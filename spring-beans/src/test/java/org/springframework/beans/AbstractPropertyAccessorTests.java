@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -35,11 +34,9 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
@@ -52,17 +49,13 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.within;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
 
 /**
  * Shared tests for property accessors.
@@ -961,60 +954,6 @@ public abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
-	public void setPrimitiveArrayPropertyLargeMatching() {
-		Assume.notLogging(LogFactory.getLog(AbstractPropertyAccessorTests.class));
-
-		PrimitiveArrayBean target = new PrimitiveArrayBean();
-		AbstractPropertyAccessor accessor = createAccessor(target);
-		int[] input = new int[1024];
-		StopWatch sw = new StopWatch();
-		sw.start("array1");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(target.getArray().length).isEqualTo(1024);
-		assertThat(target.getArray()[0]).isEqualTo(0);
-		long time1 = sw.getLastTaskTimeMillis();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(String.class, new StringTrimmerEditor(false));
-		sw.start("array2");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 125).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, "array.somePath", new CustomNumberEditor(Integer.class, false));
-		sw.start("array3");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, "array[0].somePath", new CustomNumberEditor(Integer.class, false));
-		sw.start("array3");
-		for (int i = 0; i < 1000; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(sw.getLastTaskTimeMillis() < 100).as("Took too long").isTrue();
-
-		accessor.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class, false));
-		sw.start("array4");
-		for (int i = 0; i < 100; i++) {
-			accessor.setPropertyValue("array", input);
-		}
-		sw.stop();
-		assertThat(target.getArray().length).isEqualTo(1024);
-		assertThat(target.getArray()[0]).isEqualTo(0);
-		assertThat(sw.getLastTaskTimeMillis() > time1).as("Took too long").isTrue();
-	}
-
-	@Test
 	public void setPrimitiveArrayPropertyLargeMatchingWithSpecificEditor() {
 		PrimitiveArrayBean target = new PrimitiveArrayBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
@@ -1072,7 +1011,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setGenericArrayProperty() {
 		SkipReaderStub target = new SkipReaderStub();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> values = new LinkedList<>();
+		List<String> values = new ArrayList<>();
 		values.add("1");
 		values.add("2");
 		values.add("3");
@@ -1113,7 +1052,7 @@ public abstract class AbstractPropertyAccessorTests {
 		SortedSet<String> sortedSet = new TreeSet<>();
 		sortedSet.add("sortedSet1");
 		accessor.setPropertyValue("sortedSet", sortedSet);
-		List<String> list = new LinkedList<>();
+		List<String> list = new ArrayList<>();
 		list.add("list1");
 		accessor.setPropertyValue("list", list);
 		assertThat(target.getCollection()).isSameAs(coll);
@@ -1130,7 +1069,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<String> coll = new ArrayList<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll);
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set);
 		List<String> sortedSet = new ArrayList<>();
@@ -1157,7 +1096,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<String> coll = new HashSet<>();
 		coll.add("coll1");
 		accessor.setPropertyValue("collection", coll.toArray());
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", set.toArray());
 		List<String> sortedSet = new ArrayList<>();
@@ -1184,7 +1123,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", new int[] {0});
-		List<Integer> set = new LinkedList<>();
+		List<Integer> set = new ArrayList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", new int[] {1});
 		List<Integer> sortedSet = new ArrayList<>();
@@ -1211,7 +1150,7 @@ public abstract class AbstractPropertyAccessorTests {
 		Collection<Integer> coll = new HashSet<>();
 		coll.add(0);
 		accessor.setPropertyValue("collection", 0);
-		List<Integer> set = new LinkedList<>();
+		List<Integer> set = new ArrayList<>();
 		set.add(1);
 		accessor.setPropertyValue("set", 1);
 		List<Integer> sortedSet = new ArrayList<>();
@@ -1235,7 +1174,7 @@ public abstract class AbstractPropertyAccessorTests {
 	public void setCollectionPropertyWithStringValue() {
 		IndexedTestBean target = new IndexedTestBean();
 		AbstractPropertyAccessor accessor = createAccessor(target);
-		List<String> set = new LinkedList<>();
+		List<String> set = new ArrayList<>();
 		set.add("set1");
 		accessor.setPropertyValue("set", "set1");
 		List<String> sortedSet = new ArrayList<>();

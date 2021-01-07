@@ -791,7 +791,8 @@ final class HierarchicalUriComponents extends UriComponents {
 			clear(this.currentLiteral);
 			clear(this.currentVariable);
 			clear(this.output);
-			for (char c : source.toCharArray()) {
+			for (int i = 0; i < source.length(); i++) {
+				char c = source.charAt(i);
 				if (c == '{') {
 					level++;
 					if (level == 1) {

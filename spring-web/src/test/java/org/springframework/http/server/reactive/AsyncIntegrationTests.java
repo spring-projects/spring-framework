@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -41,8 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final Scheduler asyncGroup = Schedulers.parallel();
-
-	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
 	@Override
@@ -68,7 +65,8 @@ class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			return response.writeWith(Flux.just("h", "e", "l", "l", "o")
 										.delayElements(Duration.ofMillis(100))
 										.publishOn(asyncGroup)
-					.collect(dataBufferFactory::allocateBuffer, (buffer, str) -> buffer.write(str.getBytes())));
+					.collect(DefaultDataBufferFactory.sharedInstance::allocateBuffer,
+							(buffer, str) -> buffer.write(str.getBytes())));
 		}
 	}
 

@@ -212,8 +212,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8")).isEqualTo(timestamp.toString());
 	}
 
-	@Test // SPR-12634
-	@SuppressWarnings("unchecked")
+	@Test  // SPR-12634
 	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
 		this.factory.setModulesToInstall(CustomIntegerModule.class);
 		this.factory.afterPropertiesSet();
@@ -224,7 +223,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(4), "UTF-8")).contains("customid");
 	}
 
-	@Test // SPR-12634
+	@Test  // SPR-12634
 	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
 		Map<Class<?>, JsonSerializer<?>> serializers = new HashMap<>();
 		serializers.put(Integer.class, new CustomIntegerSerializer());
@@ -262,7 +261,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void propertyNamingStrategy() {
-		PropertyNamingStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
+		PropertyNamingStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
 		this.factory.setPropertyNamingStrategy(strategy);
 		this.factory.afterPropertiesSet();
 

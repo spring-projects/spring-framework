@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ class SimpAnnotationMethodMessageHandlerKotlinTests {
         messageHandler.registerHandler(testController)
         messageHandler.handleMessage(message)
         assertThat(testController.exception).isNotNull()
-		assertThat(testController.exception).isInstanceOf(IllegalArgumentException::class.java)
+		assertThat(testController.exception).isInstanceOf(NullPointerException::class.java)
     }
 
     private fun createMessage(destination: String, headers: Map<String, String?>): Message<ByteArray> {

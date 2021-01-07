@@ -35,11 +35,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link org.springframework.http.RequestEntity}.
  *
  * @author Arjen Poutsma
+ * @author Parviz Rozikov
  */
-public class RequestEntityTests {
+class RequestEntityTests {
 
 	@Test
-	public void normal() throws URISyntaxException {
+	void normal() throws URISyntaxException {
 		String headerName = "My-Custom-Header";
 		String headerValue = "HeaderValue";
 		URI url = new URI("https://example.com");
@@ -57,7 +58,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void uriVariablesExpansion() throws URISyntaxException {
+	void uriVariablesExpansion() throws URISyntaxException {
 		URI uri = UriComponentsBuilder.fromUriString("https://example.com/{foo}").buildAndExpand("bar").toUri();
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
@@ -80,7 +81,20 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void get() {
+	void uriExpansion() {
+		RequestEntity<Void> entity =
+				RequestEntity.get("https://www.{host}.com/{path}", "example", "foo/bar").build();
+
+		assertThat(entity).isInstanceOf(RequestEntity.UriTemplateRequestEntity.class);
+		RequestEntity.UriTemplateRequestEntity<Void> ext = (RequestEntity.UriTemplateRequestEntity<Void>) entity;
+
+		assertThat(ext.getUriTemplate()).isEqualTo("https://www.{host}.com/{path}");
+		assertThat(ext.getVars()).containsExactly("example", "foo/bar");
+	}
+
+
+	@Test
+	void get() {
 		RequestEntity<Void> requestEntity = RequestEntity.get(URI.create("https://example.com")).accept(
 				MediaType.IMAGE_GIF, MediaType.IMAGE_JPEG, MediaType.IMAGE_PNG).build();
 
@@ -92,7 +106,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void headers() throws URISyntaxException {
+	void headers() throws URISyntaxException {
 		MediaType accept = MediaType.TEXT_PLAIN;
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
@@ -125,7 +139,7 @@ public class RequestEntityTests {
 	}
 
 	@Test
-	public void methods() throws URISyntaxException {
+	void methods() throws URISyntaxException {
 		URI url = new URI("https://example.com");
 
 		RequestEntity<?> entity = RequestEntity.get(url).build();
@@ -152,7 +166,7 @@ public class RequestEntityTests {
 	}
 
 	@Test  // SPR-13154
-	public void types() throws URISyntaxException {
+	void types() throws URISyntaxException {
 		URI url = new URI("https://example.com");
 		List<String> body = Arrays.asList("foo", "bar");
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};

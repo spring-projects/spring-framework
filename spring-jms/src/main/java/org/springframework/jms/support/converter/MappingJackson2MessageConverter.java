@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Mark Pollack
  * @author Dave Syer
@@ -275,7 +275,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	protected TextMessage mapToTextMessage(Object object, Session session, ObjectWriter objectWriter)
 			throws JMSException, IOException {
 
-		StringWriter writer = new StringWriter();
+		StringWriter writer = new StringWriter(1024);
 		objectWriter.writeValue(writer, object);
 		return session.createTextMessage(writer.toString());
 	}
@@ -457,11 +457,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 		}
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
-			return this.objectMapper.getTypeFactory().constructType(mappedClass);
+			return this.objectMapper.constructType(mappedClass);
 		}
 		try {
 			Class<?> typeClass = ClassUtils.forName(typeId, this.beanClassLoader);
-			return this.objectMapper.getTypeFactory().constructType(typeClass);
+			return this.objectMapper.constructType(typeClass);
 		}
 		catch (Throwable ex) {
 			throw new MessageConversionException("Failed to resolve type id [" + typeId + "]", ex);

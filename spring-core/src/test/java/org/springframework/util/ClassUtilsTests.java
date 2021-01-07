@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -364,17 +363,17 @@ class ClassUtilsTests {
 
 	@Test
 	void classNamesToString() {
-		List<Class<?>> ifcs = new LinkedList<>();
+		List<Class<?>> ifcs = new ArrayList<>();
 		ifcs.add(Serializable.class);
 		ifcs.add(Runnable.class);
 		assertThat(ifcs.toString()).isEqualTo("[interface java.io.Serializable, interface java.lang.Runnable]");
 		assertThat(ClassUtils.classNamesToString(ifcs)).isEqualTo("[java.io.Serializable, java.lang.Runnable]");
 
-		List<Class<?>> classes = new LinkedList<>();
-		classes.add(LinkedList.class);
+		List<Class<?>> classes = new ArrayList<>();
+		classes.add(ArrayList.class);
 		classes.add(Integer.class);
-		assertThat(classes.toString()).isEqualTo("[class java.util.LinkedList, class java.lang.Integer]");
-		assertThat(ClassUtils.classNamesToString(classes)).isEqualTo("[java.util.LinkedList, java.lang.Integer]");
+		assertThat(classes.toString()).isEqualTo("[class java.util.ArrayList, class java.lang.Integer]");
+		assertThat(ClassUtils.classNamesToString(classes)).isEqualTo("[java.util.ArrayList, java.lang.Integer]");
 
 		assertThat(Collections.singletonList(List.class).toString()).isEqualTo("[interface java.util.List]");
 		assertThat(ClassUtils.classNamesToString(List.class)).isEqualTo("[java.util.List]");

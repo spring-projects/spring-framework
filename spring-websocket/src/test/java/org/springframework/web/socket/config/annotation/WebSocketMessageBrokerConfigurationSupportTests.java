@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -67,6 +68,7 @@ import static org.mockito.Mockito.mock;
  * Test fixture for {@link WebSocketMessageBrokerConfigurationSupport}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class WebSocketMessageBrokerConfigurationSupportTests {
 
@@ -251,24 +253,25 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel() {
+		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.clientInboundChannel().getInterceptors());
+			channel.setInterceptors(super.clientInboundChannel(clientInboundChannelExecutor).getInterceptors());
 			return channel;
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.clientOutboundChannel().getInterceptors());
+			channel.setInterceptors(super.clientOutboundChannel(clientOutboundChannelExecutor).getInterceptors());
 			return channel;
 		}
 
 		@Override
-		public AbstractSubscribableChannel brokerChannel() {
+		public AbstractSubscribableChannel brokerChannel(AbstractSubscribableChannel clientInboundChannel,
+				AbstractSubscribableChannel clientOutboundChannel, TaskExecutor brokerChannelExecutor) {
 			TestChannel channel = new TestChannel();
-			channel.setInterceptors(super.brokerChannel().getInterceptors());
+			channel.setInterceptors(super.brokerChannel(clientInboundChannel, clientOutboundChannel, brokerChannelExecutor).getInterceptors());
 			return channel;
 		}
 	}

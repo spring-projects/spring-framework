@@ -172,7 +172,7 @@ public interface WebTestClient {
 	// Static factory methods
 
 	/**
-	 * Use this server setup to test one `@Controller` at a time.
+	 * Use this server setup to test one {@code @Controller} at a time.
 	 * This option loads the default configuration of
 	 * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}.
 	 * There are builder methods to customize the Java config. The resulting
@@ -229,8 +229,8 @@ public interface WebTestClient {
 	}
 
 	/**
-	 * This server setup option allows you to connect to a running server via
-	 * Reactor Netty.
+	 * This server setup option allows you to connect to a live server through
+	 * a Reactor Netty client connector.
 	 * <p><pre class="code">
 	 * WebTestClient client = WebTestClient.bindToServer()
 	 *         .baseUrl("http://localhost:8080")
@@ -244,11 +244,6 @@ public interface WebTestClient {
 
 	/**
 	 * A variant of {@link #bindToServer()} with a pre-configured connector.
-	 * <p><pre class="code">
-	 * WebTestClient client = WebTestClient.bindToServer()
-	 *         .baseUrl("http://localhost:8080")
-	 *         .build();
-	 * </pre>
 	 * @return chained API to customize client config
 	 * @since 5.0.2
 	 */
@@ -770,6 +765,12 @@ public interface WebTestClient {
 		HeaderAssertions expectHeader();
 
 		/**
+		 * Assertions on the cookies of the response.
+		 * @since 5.3
+		 */
+		CookieAssertions expectCookie();
+
+		/**
 		 * Consume and decode the response body to a single object of type
 		 * {@code <B>} and then apply assertions.
 		 * @param bodyType the expected body type
@@ -802,18 +803,13 @@ public interface WebTestClient {
 		BodyContentSpec expectBody();
 
 		/**
-		 * Exit the chained API and consume the response body externally. This
-		 * is useful for testing infinite streams (e.g. SSE) where you need to
-		 * to assert decoded objects as they come and then cancel at some point
-		 * when test objectives are met. Consider using {@code StepVerifier}
-		 * from {@literal "reactor-test"} to assert the {@code Flux<T>} stream
-		 * of decoded objects.
+		 * Exit the chained flow in order to consume the response body
+		 * externally, e.g. via {@link reactor.test.StepVerifier}.
 		 *
-		 * <p><strong>Note:</strong> Do not use this option for cases where there
-		 * is no content (e.g. 204, 4xx) or you're not interested in the content.
-		 * For such cases you can use {@code expectBody().isEmpty()} or
-		 * {@code expectBody(Void.class)} which ensures that resources are
-		 * released regardless of whether the response has content or not.
+		 * <p>Note that when {@code Void.class} is passed in, the response body
+		 * is consumed and released. If no content is expected, then consider
+		 * using {@code .expectBody().isEmpty()} instead which asserts that
+		 * there is no content.
 		 */
 		<T> FluxExchangeResult<T> returnResult(Class<T> elementClass);
 
@@ -842,14 +838,14 @@ public interface WebTestClient {
 		 * Assert the extracted body with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S> T value(Matcher<B> matcher);
+		<T extends S> T value(Matcher<? super B> matcher);
 
 		/**
 		 * Transform the extracted the body with a function, e.g. extracting a
 		 * property, and assert the mapped value with a {@link Matcher}.
 		 * @since 5.1
 		 */
-		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher);
+		<T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher);
 
 		/**
 		 * Assert the extracted body with a {@link Consumer}.

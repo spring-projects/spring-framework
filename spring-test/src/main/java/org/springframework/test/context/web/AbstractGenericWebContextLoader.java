@@ -181,7 +181,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 
 		// If the WebApplicationContext has no parent or the parent is not a WebApplicationContext,
 		// set the current context as the root WebApplicationContext:
-		if (parent == null || (!(parent instanceof WebApplicationContext))) {
+		if (!(parent instanceof WebApplicationContext)) {
 			String resourceBasePath = webMergedConfig.getResourceBasePath();
 			ResourceLoader resourceLoader = (resourceBasePath.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX) ?
 					new DefaultResourceLoader() : new FileSystemResourceLoader());

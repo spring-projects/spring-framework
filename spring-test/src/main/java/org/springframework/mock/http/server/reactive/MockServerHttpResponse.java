@@ -25,7 +25,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -57,17 +57,17 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 
 	public MockServerHttpResponse() {
-		this(new DefaultDataBufferFactory());
+		this(DefaultDataBufferFactory.sharedInstance);
 	}
 
 	public MockServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
 		this.writeHandler = body -> {
-			// Avoid .then() which causes data buffers to be released
-			MonoProcessor<Void> completion = MonoProcessor.create();
-			this.body = body.doOnComplete(completion::onComplete).doOnError(completion::onError).cache();
-			this.body.subscribe();
-			return completion;
+			// Avoid .then() that causes data buffers to be discarded and released
+			Sinks.Empty<Void> completion = Sinks.unsafe().empty();
+			this.body = body.cache();
+			this.body.subscribe(aVoid -> {}, completion::tryEmitError, completion::tryEmitEmpty); // Signals are serialized
+			return completion.asMono();
 		};
 	}
 

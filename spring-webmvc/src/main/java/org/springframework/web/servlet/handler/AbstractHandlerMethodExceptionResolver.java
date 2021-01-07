@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,22 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 			handler = handlerMethod.getBean();
 			return super.shouldApplyTo(request, handler);
 		}
+		else if (hasGlobalExceptionHandlers() && hasHandlerMappings()) {
+			return super.shouldApplyTo(request, handler);
+		}
 		else {
 			return false;
 		}
+	}
+
+	/**
+	 * Whether this resolver has global exception handlers, e.g. not declared in
+	 * the same class as the {@code HandlerMethod} that raised the exception and
+	 * therefore can apply to any handler.
+	 * @since 5.3
+	 */
+	protected boolean hasGlobalExceptionHandlers() {
+		return false;
 	}
 
 	@Override
@@ -58,7 +71,8 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	protected final ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
-		return doResolveHandlerMethodException(request, response, (HandlerMethod) handler, ex);
+		HandlerMethod handlerMethod = (handler instanceof HandlerMethod ? (HandlerMethod) handler : null);
+		return doResolveHandlerMethodException(request, response, handlerMethod, ex);
 	}
 
 	/**

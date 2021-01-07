@@ -17,6 +17,7 @@
 package org.springframework.test.web.client.match;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,6 +116,19 @@ public class ContentRequestMatchersTests {
 		map.add("name 2", "value B");
 		map.add("name 3", null);
 		MockRestRequestMatchers.content().formData(map).match(this.request);
+	}
+
+	@Test
+	public void testFormDataContains() throws Exception {
+		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
+		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
+
+		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
+		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
+
+		MockRestRequestMatchers.content()
+				.formDataContains(Collections.singletonMap("name 1", "value 1"))
+				.match(this.request);
 	}
 
 	@Test

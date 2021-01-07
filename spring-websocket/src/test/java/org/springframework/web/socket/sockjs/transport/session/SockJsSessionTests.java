@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
@@ -118,10 +117,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(session, new TextMessage(msg2));
 
 		session.delegateConnectionEstablished();
-
-		assertThatExceptionOfType(SockJsMessageDeliveryException.class)
-				.isThrownBy(() -> session.delegateMessages(msg1, msg2, msg3))
-				.satisfies(ex -> assertThat(ex.getUndeliveredMessages()).containsExactly(msg3));
+		session.delegateMessages(msg1, msg2, msg3);
 
 		verify(this.webSocketHandler).afterConnectionEstablished(session);
 		verify(this.webSocketHandler).handleMessage(session, new TextMessage(msg1));

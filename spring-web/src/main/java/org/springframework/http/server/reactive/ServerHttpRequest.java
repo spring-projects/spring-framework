@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,19 +65,19 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 	MultiValueMap<String, HttpCookie> getCookies();
 
 	/**
-	 * Return the remote address where this request is connected to, if available.
+	 * Return the local address the request was accepted on, if available.
+	 * @since 5.2.3
 	 */
 	@Nullable
-	default InetSocketAddress getRemoteAddress() {
+	default InetSocketAddress getLocalAddress() {
 		return null;
 	}
 
 	/**
-	 * Return the local address the request was accepted on, if available.
-	 * 5.2.3
+	 * Return the remote address where this request is connected to, if available.
 	 */
 	@Nullable
-	default InetSocketAddress getLocalAddress() {
+	default InetSocketAddress getRemoteAddress() {
 		return null;
 	}
 
@@ -174,6 +174,12 @@ public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage
 		 * @since 5.0.7
 		 */
 		Builder sslInfo(SslInfo sslInfo);
+
+		/**
+		 * Set the address of the remote client.
+		 * @since 5.3
+		 */
+		Builder remoteAddress(InetSocketAddress remoteAddress);
 
 		/**
 		 * Build a {@link ServerHttpRequest} decorator with the mutated properties.

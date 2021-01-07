@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,15 @@ import java.lang.annotation.Annotation;
 /**
  * Callback interface that can be used to filter specific annotation types.
  *
+ * <p>Note that the {@link MergedAnnotations} model (which this interface has been
+ * designed for) always ignores lang annotations according to the {@link #PLAIN}
+ * filter (for efficiency reasons). Any additional filters and even custom filter
+ * implementations apply within this boundary and may only narrow further from here.
+ *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 5.2
+ * @see MergedAnnotations
  */
 @FunctionalInterface
 public interface AnnotationFilter {
@@ -31,6 +38,7 @@ public interface AnnotationFilter {
 	 * {@link AnnotationFilter} that matches annotations in the
 	 * {@code java.lang} and {@code org.springframework.lang} packages
 	 * and their subpackages.
+	 * <p>This is the default filter in the {@link MergedAnnotations} model.
 	 */
 	AnnotationFilter PLAIN = packages("java.lang", "org.springframework.lang");
 
@@ -66,7 +74,12 @@ public interface AnnotationFilter {
 	/**
 	 * {@link AnnotationFilter} that never matches and can be used when no
 	 * filtering is needed (allowing for any annotation types to be present).
+	 * @deprecated as of 5.2.6 since the {@link MergedAnnotations} model
+	 * always ignores lang annotations according to the {@link #PLAIN} filter
+	 * (for efficiency reasons)
+	 * @see #PLAIN
 	 */
+	@Deprecated
 	AnnotationFilter NONE = new AnnotationFilter() {
 		@Override
 		public boolean matches(Annotation annotation) {

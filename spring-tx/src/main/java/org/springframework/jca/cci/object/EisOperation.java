@@ -20,7 +20,6 @@ import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.InteractionSpec;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jca.cci.core.CciTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -35,10 +34,14 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see #setConnectionFactory
  * @see #setInteractionSpec
+ * @deprecated as of 5.3, in favor of specific data access APIs
+ * (or native CCI usage if there is no alternative)
  */
+@Deprecated
 public abstract class EisOperation implements InitializingBean {
 
-	private CciTemplate cciTemplate = new CciTemplate();
+	private org.springframework.jca.cci.core.CciTemplate cciTemplate =
+			new org.springframework.jca.cci.core.CciTemplate();
 
 	@Nullable
 	private InteractionSpec interactionSpec;
@@ -49,7 +52,7 @@ public abstract class EisOperation implements InitializingBean {
 	 * Alternatively, specify a CCI ConnectionFactory.
 	 * @see #setConnectionFactory
 	 */
-	public void setCciTemplate(CciTemplate cciTemplate) {
+	public void setCciTemplate(org.springframework.jca.cci.core.CciTemplate cciTemplate) {
 		Assert.notNull(cciTemplate, "CciTemplate must not be null");
 		this.cciTemplate = cciTemplate;
 	}
@@ -57,7 +60,7 @@ public abstract class EisOperation implements InitializingBean {
 	/**
 	 * Return the CciTemplate used by this operation.
 	 */
-	public CciTemplate getCciTemplate() {
+	public org.springframework.jca.cci.core.CciTemplate getCciTemplate() {
 		return this.cciTemplate;
 	}
 

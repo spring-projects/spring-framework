@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,8 +144,10 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	/**
 	 * Set the view class that should be used to create views.
-	 * @param viewClass class that is assignable to the required view class
-	 * (by default, AbstractUrlBasedView)
+	 * @param viewClass a class that is assignable to the required view class
+	 * (by default: AbstractUrlBasedView)
+	 * @see #requiredViewClass()
+	 * @see #instantiateView()
 	 * @see AbstractUrlBasedView
 	 */
 	public void setViewClass(@Nullable Class<?> viewClass) {
@@ -158,19 +160,11 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 
 	/**
 	 * Return the view class to be used to create views.
+	 * @see #setViewClass
 	 */
 	@Nullable
 	protected Class<?> getViewClass() {
 		return this.viewClass;
-	}
-
-	/**
-	 * Return the required type of view for this resolver.
-	 * This implementation returns AbstractUrlBasedView.
-	 * @see AbstractUrlBasedView
-	 */
-	protected Class<?> requiredViewClass() {
-		return AbstractUrlBasedView.class;
 	}
 
 	/**
@@ -511,6 +505,29 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
+	 * Return the required type of view for this resolver.
+	 * This implementation returns {@link AbstractUrlBasedView}.
+	 * @see #instantiateView()
+	 * @see AbstractUrlBasedView
+	 */
+	protected Class<?> requiredViewClass() {
+		return AbstractUrlBasedView.class;
+	}
+
+	/**
+	 * Instantiate the specified view class.
+	 * <p>The default implementation uses reflection to instantiate the class.
+	 * @return a new instance of the view class
+	 * @since 5.3
+	 * @see #setViewClass
+	 */
+	protected AbstractUrlBasedView instantiateView() {
+		Class<?> viewClass = getViewClass();
+		Assert.state(viewClass != null, "No view class");
+		return (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
+	}
+
+	/**
 	 * Delegates to {@code buildView} for creating a new instance of the
 	 * specified view class. Applies the following Spring lifecycle methods
 	 * (as supported by the generic Spring bean factory):
@@ -547,10 +564,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * @see #loadView(String, java.util.Locale)
 	 */
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-		Class<?> viewClass = getViewClass();
-		Assert.state(viewClass != null, "No view class");
-
-		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(viewClass);
+		AbstractUrlBasedView view = instantiateView();
 		view.setUrl(getPrefix() + viewName + getSuffix());
 		view.setAttributesMap(getAttributesMap());
 

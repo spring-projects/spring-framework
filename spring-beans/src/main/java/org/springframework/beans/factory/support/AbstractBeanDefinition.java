@@ -945,16 +945,20 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured init method is the default.
-	 * <p>The default value is {@code false}.
+	 * Specify whether or not the configured initializer method is the default.
+	 * <p>The default value is {@code true} for a locally specified init method
+	 * but switched to {@code false} for a shared setting in a defaults section
+	 * (e.g. {@code bean init-method} versus {@code beans default-init-method}
+	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setInitMethodName
+	 * @see #applyDefaults
 	 */
 	public void setEnforceInitMethod(boolean enforceInitMethod) {
 		this.enforceInitMethod = enforceInitMethod;
 	}
 
 	/**
-	 * Indicate whether the configured init method is the default.
+	 * Indicate whether the configured initializer method is the default.
 	 * @see #getInitMethodName()
 	 */
 	public boolean isEnforceInitMethod() {
@@ -981,8 +985,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured destroy method is the default.
-	 * <p>The default value is {@code false}.
+	 * <p>The default value is {@code true} for a locally specified destroy method
+	 * but switched to {@code false} for a shared setting in a defaults section
+	 * (e.g. {@code bean destroy-method} versus {@code beans default-destroy-method}
+	 * level in XML) which might not apply to all contained bean definitions.
 	 * @see #setDestroyMethodName
+	 * @see #applyDefaults
 	 */
 	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {
 		this.enforceDestroyMethod = enforceDestroyMethod;
@@ -990,7 +998,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Indicate whether the configured destroy method is the default.
-	 * @see #getDestroyMethodName
+	 * @see #getDestroyMethodName()
 	 */
 	public boolean isEnforceDestroyMethod() {
 		return this.enforceDestroyMethod;

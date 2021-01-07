@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
+ * @see AbstractBeanDefinition#applyDefaults
  */
 public class BeanDefinitionDefaults {
 
@@ -46,6 +47,7 @@ public class BeanDefinitionDefaults {
 	 * Set whether beans should be lazily initialized by default.
 	 * <p>If {@code false}, the bean will get instantiated on startup by bean
 	 * factories that perform eager initialization of singletons.
+	 * @see AbstractBeanDefinition#setLazyInit
 	 */
 	public void setLazyInit(boolean lazyInit) {
 		this.lazyInit = lazyInit;
@@ -78,6 +80,7 @@ public class BeanDefinitionDefaults {
 	 * (however, there may still be explicit annotation-driven autowiring).
 	 * @param autowireMode the autowire mode to set.
 	 * Must be one of the constants defined in {@link AbstractBeanDefinition}.
+	 * @see AbstractBeanDefinition#setAutowireMode
 	 */
 	public void setAutowireMode(int autowireMode) {
 		this.autowireMode = autowireMode;
@@ -94,6 +97,7 @@ public class BeanDefinitionDefaults {
 	 * Set the dependency check code.
 	 * @param dependencyCheck the code to set.
 	 * Must be one of the constants defined in {@link AbstractBeanDefinition}.
+	 * @see AbstractBeanDefinition#setDependencyCheck
 	 */
 	public void setDependencyCheck(int dependencyCheck) {
 		this.dependencyCheck = dependencyCheck;
@@ -108,6 +112,10 @@ public class BeanDefinitionDefaults {
 
 	/**
 	 * Set the name of the default initializer method.
+	 * <p>Note that this method is not enforced on all affected bean definitions
+	 * but rather taken as an optional callback, to be invoked if actually present.
+	 * @see AbstractBeanDefinition#setInitMethodName
+	 * @see AbstractBeanDefinition#setEnforceInitMethod
 	 */
 	public void setInitMethodName(@Nullable String initMethodName) {
 		this.initMethodName = (StringUtils.hasText(initMethodName) ? initMethodName : null);
@@ -123,6 +131,10 @@ public class BeanDefinitionDefaults {
 
 	/**
 	 * Set the name of the default destroy method.
+	 * <p>Note that this method is not enforced on all affected bean definitions
+	 * but rather taken as an optional callback, to be invoked if actually present.
+	 * @see AbstractBeanDefinition#setDestroyMethodName
+	 * @see AbstractBeanDefinition#setEnforceDestroyMethod
 	 */
 	public void setDestroyMethodName(@Nullable String destroyMethodName) {
 		this.destroyMethodName = (StringUtils.hasText(destroyMethodName) ? destroyMethodName : null);

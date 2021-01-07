@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -48,11 +48,19 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<WebSocketChannel> {
 
 	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info, DataBufferFactory factory) {
-		this(channel, info, factory, null);
+		this(channel, info, factory, (Sinks.Empty<Void>) null);
 	}
 
 	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info,
-			DataBufferFactory factory, @Nullable MonoProcessor<Void> completionMono) {
+			DataBufferFactory factory, @Nullable Sinks.Empty<Void> completionSink) {
+
+		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionSink);
+		suspendReceiving();
+	}
+
+	@Deprecated
+	public UndertowWebSocketSession(WebSocketChannel channel, HandshakeInfo info,
+			DataBufferFactory factory, @Nullable reactor.core.publisher.MonoProcessor<Void> completionMono) {
 
 		super(channel, ObjectUtils.getIdentityHexString(channel), info, factory, completionMono);
 		suspendReceiving();
@@ -98,6 +106,11 @@ public class UndertowWebSocketSession extends AbstractListenerWebSocketSession<W
 			throw new IllegalArgumentException("Unexpected message type: " + message.getType());
 		}
 		return true;
+	}
+
+	@Override
+	public boolean isOpen() {
+		return getDelegate().isOpen();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,12 +47,17 @@ import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Default implementation of {@link WebTestClient}.
@@ -61,30 +67,42 @@ import org.springframework.web.util.UriBuilder;
  */
 class DefaultWebTestClient implements WebTestClient {
 
-	private final WebClient webClient;
-
 	private final WiretapConnector wiretapConnector;
 
-	private final Duration timeout;
+	private final ExchangeFunction exchangeFunction;
+
+	private final UriBuilderFactory uriBuilderFactory;
+
+	@Nullable
+	private final HttpHeaders defaultHeaders;
+
+	@Nullable
+	private final MultiValueMap<String, String> defaultCookies;
+
+	private final Duration responseTimeout;
 
 	private final DefaultWebTestClientBuilder builder;
 
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(WebClient.Builder clientBuilder, ClientHttpConnector connector,
-			@Nullable Duration timeout, DefaultWebTestClientBuilder webTestClientBuilder) {
+	DefaultWebTestClient(ClientHttpConnector connector,
+			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
+			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
+			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
-		Assert.notNull(clientBuilder, "WebClient.Builder is required");
 		this.wiretapConnector = new WiretapConnector(connector);
-		this.webClient = clientBuilder.clientConnector(this.wiretapConnector).build();
-		this.timeout = (timeout != null ? timeout : Duration.ofSeconds(5));
-		this.builder = webTestClientBuilder;
+		this.exchangeFunction = exchangeFactory.apply(this.wiretapConnector);
+		this.uriBuilderFactory = uriBuilderFactory;
+		this.defaultHeaders = headers;
+		this.defaultCookies = cookies;
+		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
+		this.builder = clientBuilder;
 	}
 
 
-	private Duration getTimeout() {
-		return this.timeout;
+	private Duration getResponseTimeout() {
+		return this.responseTimeout;
 	}
 
 
@@ -124,12 +142,12 @@ class DefaultWebTestClient implements WebTestClient {
 	}
 
 	@Override
-	public RequestBodyUriSpec method(HttpMethod method) {
-		return methodInternal(method);
+	public RequestBodyUriSpec method(HttpMethod httpMethod) {
+		return methodInternal(httpMethod);
 	}
 
-	private RequestBodyUriSpec methodInternal(HttpMethod method) {
-		return new DefaultRequestBodyUriSpec(this.webClient.method(method));
+	private RequestBodyUriSpec methodInternal(HttpMethod httpMethod) {
+		return new DefaultRequestBodyUriSpec(httpMethod);
 	}
 
 	@Override
@@ -145,154 +163,179 @@ class DefaultWebTestClient implements WebTestClient {
 
 	private class DefaultRequestBodyUriSpec implements RequestBodyUriSpec {
 
-		private final WebClient.RequestBodyUriSpec bodySpec;
+		private final HttpMethod httpMethod;
+
+		@Nullable
+		private URI uri;
+
+		private final HttpHeaders headers;
+
+		@Nullable
+		private MultiValueMap<String, String> cookies;
+
+		@Nullable
+		private BodyInserter<?, ? super ClientHttpRequest> inserter;
+
+		private final Map<String, Object> attributes = new LinkedHashMap<>(4);
+
+		@Nullable
+		private Consumer<ClientHttpRequest> httpRequestConsumer;
 
 		@Nullable
 		private String uriTemplate;
 
 		private final String requestId;
 
-		DefaultRequestBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
-			this.bodySpec = spec;
+		DefaultRequestBodyUriSpec(HttpMethod httpMethod) {
+			this.httpMethod = httpMethod;
 			this.requestId = String.valueOf(requestIndex.incrementAndGet());
-			this.bodySpec.header(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
+			this.headers = new HttpHeaders();
+			this.headers.add(WebTestClient.WEBTESTCLIENT_REQUEST_ID, this.requestId);
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Object... uriVariables) {
-			this.bodySpec.uri(uriTemplate, uriVariables);
 			this.uriTemplate = uriTemplate;
-			return this;
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(String uriTemplate, Map<String, ?> uriVariables) {
-			this.bodySpec.uri(uriTemplate, uriVariables);
 			this.uriTemplate = uriTemplate;
-			return this;
+			return uri(uriBuilderFactory.expand(uriTemplate, uriVariables));
 		}
 
 		@Override
 		public RequestBodySpec uri(Function<UriBuilder, URI> uriFunction) {
-			this.bodySpec.uri(uriFunction);
 			this.uriTemplate = null;
-			return this;
+			return uri(uriFunction.apply(uriBuilderFactory.builder()));
 		}
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
-			this.bodySpec.uri(uri);
-			this.uriTemplate = null;
+			this.uri = uri;
 			return this;
+		}
+
+		private HttpHeaders getHeaders() {
+			return this.headers;
+		}
+
+		private MultiValueMap<String, String> getCookies() {
+			if (this.cookies == null) {
+				this.cookies = new LinkedMultiValueMap<>(3);
+			}
+			return this.cookies;
 		}
 
 		@Override
 		public RequestBodySpec header(String headerName, String... headerValues) {
-			this.bodySpec.header(headerName, headerValues);
+			for (String headerValue : headerValues) {
+				getHeaders().add(headerName, headerValue);
+			}
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec headers(Consumer<HttpHeaders> headersConsumer) {
-			this.bodySpec.headers(headersConsumer);
+			headersConsumer.accept(getHeaders());
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec attribute(String name, Object value) {
-			this.bodySpec.attribute(name, value);
+			this.attributes.put(name, value);
 			return this;
 		}
 
 		@Override
-		public RequestBodySpec attributes(
-				Consumer<Map<String, Object>> attributesConsumer) {
-			this.bodySpec.attributes(attributesConsumer);
+		public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {
+			attributesConsumer.accept(this.attributes);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec accept(MediaType... acceptableMediaTypes) {
-			this.bodySpec.accept(acceptableMediaTypes);
+			getHeaders().setAccept(Arrays.asList(acceptableMediaTypes));
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec acceptCharset(Charset... acceptableCharsets) {
-			this.bodySpec.acceptCharset(acceptableCharsets);
+			getHeaders().setAcceptCharset(Arrays.asList(acceptableCharsets));
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec contentType(MediaType contentType) {
-			this.bodySpec.contentType(contentType);
+			getHeaders().setContentType(contentType);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec contentLength(long contentLength) {
-			this.bodySpec.contentLength(contentLength);
+			getHeaders().setContentLength(contentLength);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec cookie(String name, String value) {
-			this.bodySpec.cookie(name, value);
+			getCookies().add(name, value);
 			return this;
 		}
 
 		@Override
-		public RequestBodySpec cookies(
-				Consumer<MultiValueMap<String, String>> cookiesConsumer) {
-			this.bodySpec.cookies(cookiesConsumer);
+		public RequestBodySpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
+			cookiesConsumer.accept(getCookies());
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec ifModifiedSince(ZonedDateTime ifModifiedSince) {
-			this.bodySpec.ifModifiedSince(ifModifiedSince);
+			getHeaders().setIfModifiedSince(ifModifiedSince);
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec ifNoneMatch(String... ifNoneMatches) {
-			this.bodySpec.ifNoneMatch(ifNoneMatches);
+			getHeaders().setIfNoneMatch(Arrays.asList(ifNoneMatches));
 			return this;
 		}
 
 		@Override
 		public RequestHeadersSpec<?> bodyValue(Object body) {
-			this.bodySpec.bodyValue(body);
+			this.inserter = BodyInserters.fromValue(body);
 			return this;
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, Class<T> elementClass) {
-			this.bodySpec.body(publisher, elementClass);
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(
+				P publisher, ParameterizedTypeReference<T> elementTypeRef) {
+			this.inserter = BodyInserters.fromPublisher(publisher, elementTypeRef);
 			return this;
 		}
 
 		@Override
-		public <T, S extends Publisher<T>> RequestHeadersSpec<?> body(S publisher, ParameterizedTypeReference<T> elementTypeRef) {
-			this.bodySpec.body(publisher, elementTypeRef);
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, Class<T> elementClass) {
+			this.inserter = BodyInserters.fromPublisher(publisher, elementClass);
 			return this;
 		}
 
 		@Override
 		public RequestHeadersSpec<?> body(Object producer, Class<?> elementClass) {
-			this.bodySpec.body(producer, elementClass);
+			this.inserter = BodyInserters.fromProducer(producer, elementClass);
 			return this;
 		}
 
 		@Override
 		public RequestHeadersSpec<?> body(Object producer, ParameterizedTypeReference<?> elementTypeRef) {
-			this.bodySpec.body(producer, elementTypeRef);
+			this.inserter = BodyInserters.fromProducer(producer, elementTypeRef);
 			return this;
 		}
 
 		@Override
 		public RequestHeadersSpec<?> body(BodyInserter<?, ? super ClientHttpRequest> inserter) {
-			this.bodySpec.body(inserter);
+			this.inserter = inserter;
 			return this;
 		}
 
@@ -304,10 +347,57 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public ResponseSpec exchange() {
-			ClientResponse clientResponse = this.bodySpec.exchange().block(getTimeout());
-			Assert.state(clientResponse != null, "No ClientResponse");
-			WiretapConnector.Info info = wiretapConnector.claimRequest(this.requestId);
-			return new DefaultResponseSpec(info, clientResponse, this.uriTemplate, getTimeout());
+			ClientRequest request = (this.inserter != null ?
+					initRequestBuilder().body(this.inserter).build() :
+					initRequestBuilder().build());
+
+			ClientResponse response = exchangeFunction.exchange(request).block(getResponseTimeout());
+			Assert.state(response != null, "No ClientResponse");
+
+			ExchangeResult result = wiretapConnector.getExchangeResult(
+					this.requestId, this.uriTemplate, getResponseTimeout());
+
+			return new DefaultResponseSpec(result, response, getResponseTimeout());
+		}
+
+		private ClientRequest.Builder initRequestBuilder() {
+			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
+					.headers(headers -> headers.addAll(initHeaders()))
+					.cookies(cookies -> cookies.addAll(initCookies()))
+					.attributes(attributes -> attributes.putAll(this.attributes));
+			if (this.httpRequestConsumer != null) {
+				builder.httpRequest(this.httpRequestConsumer);
+			}
+			return builder;
+		}
+
+		private URI initUri() {
+			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
+		}
+
+		private HttpHeaders initHeaders() {
+			if (CollectionUtils.isEmpty(defaultHeaders)) {
+				return this.headers;
+			}
+			HttpHeaders result = new HttpHeaders();
+			result.putAll(defaultHeaders);
+			result.putAll(this.headers);
+			return result;
+		}
+
+		private MultiValueMap<String, String> initCookies() {
+			if (CollectionUtils.isEmpty(this.cookies)) {
+				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
+			}
+			else if (CollectionUtils.isEmpty(defaultCookies)) {
+				return this.cookies;
+			}
+			else {
+				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+				result.putAll(defaultCookies);
+				result.putAll(this.cookies);
+				return result;
+			}
 		}
 	}
 
@@ -321,10 +411,8 @@ class DefaultWebTestClient implements WebTestClient {
 		private final Duration timeout;
 
 
-		DefaultResponseSpec(WiretapConnector.Info wiretapInfo, ClientResponse response,
-				@Nullable String uriTemplate, Duration timeout) {
-
-			this.exchangeResult = wiretapInfo.createExchangeResult(timeout, uriTemplate);
+		DefaultResponseSpec(ExchangeResult exchangeResult, ClientResponse response, Duration timeout) {
+			this.exchangeResult = exchangeResult;
 			this.response = response;
 			this.timeout = timeout;
 		}
@@ -337,6 +425,11 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public HeaderAssertions expectHeader() {
 			return new HeaderAssertions(this.exchangeResult, this);
+		}
+
+		@Override
+		public CookieAssertions expectCookie() {
+			return new CookieAssertions(this.exchangeResult, this);
 		}
 
 		@Override
@@ -380,7 +473,14 @@ class DefaultWebTestClient implements WebTestClient {
 
 		@Override
 		public <T> FluxExchangeResult<T> returnResult(Class<T> elementClass) {
-			Flux<T> body = this.response.bodyToFlux(elementClass);
+			Flux<T> body;
+			if (elementClass.equals(Void.class)) {
+				this.response.releaseBody().block();
+				body = Flux.empty();
+			}
+			else {
+				body = this.response.bodyToFlux(elementClass);
+			}
 			return new FluxExchangeResult<>(this.exchangeResult, body);
 		}
 
@@ -412,13 +512,13 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public <T extends S> T value(Matcher<B> matcher) {
+		public <T extends S> T value(Matcher<? super B> matcher) {
 			this.result.assertWithDiagnostics(() -> MatcherAssert.assertThat(this.result.getResponseBody(), matcher));
 			return self();
 		}
 
 		@Override
-		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<R> matcher) {
+		public <T extends S, R> T value(Function<B, R> bodyMapper, Matcher<? super R> matcher) {
 			this.result.assertWithDiagnostics(() -> {
 				B body = this.result.getResponseBody();
 				MatcherAssert.assertThat(bodyMapper.apply(body), matcher);

@@ -53,7 +53,9 @@ import org.springframework.util.CommonsLogWriter;
  * @since 2.5.1
  * @see #invoke(java.io.InputStream, java.io.OutputStream)
  * @see HessianServiceExporter
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class HessianExporter extends RemoteExporter implements InitializingBean {
 
 	/**

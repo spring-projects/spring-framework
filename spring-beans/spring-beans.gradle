@@ -25,11 +25,16 @@ sourceSets {
 compileGroovy {
 	sourceCompatibility = 1.8
 	targetCompatibility = 1.8
+	options.compilerArgs += "-Werror"
 }
 
 // This module also builds Kotlin code and the compileKotlin task naturally depends on
 // compileJava. We need to redefine dependencies to break task cycles.
-def deps = compileGroovy.taskDependencies.immutableValues + compileGroovy.taskDependencies.mutableValues
-compileGroovy.dependsOn = deps - "compileJava"
-compileKotlin.dependsOn(compileGroovy)
-compileKotlin.classpath += files(compileGroovy.destinationDir)
+tasks.named('compileGroovy') {
+	// Groovy only needs the declared dependencies (and not the result of Java compilation)
+	classpath = sourceSets.main.compileClasspath
+}
+tasks.named('compileKotlin') {
+	// Kotlin also depends on the result of Groovy compilation
+	classpath += files(sourceSets.main.groovy.classesDirectory)
+}

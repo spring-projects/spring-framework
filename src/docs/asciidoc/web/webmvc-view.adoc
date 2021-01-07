@@ -2,16 +2,15 @@
 = View Technologies
 [.small]#<<web-reactive.adoc#webflux-view, WebFlux>>#
 
-The use of view technologies in Spring MVC is pluggable, whether you decide to use
-Thymeleaf, Groovy Markup Templates, JSPs, or other technologies, is primarily a matter
-of a configuration change. This chapter covers view technologies integrated with
-Spring MVC. We assume you are already familiar with <<mvc-viewresolver>>.
+The use of view technologies in Spring MVC is pluggable. Whether you decide to use
+Thymeleaf, Groovy Markup Templates, JSPs, or other technologies is primarily a matter of
+a configuration change. This chapter covers view technologies integrated with Spring MVC.
+We assume you are already familiar with <<mvc-viewresolver>>.
 
-WARNING: The views of a Spring MVC application live within the internal trust boundaries of that
-application.
-Views have access to all the beans of your application context.
-As such, it is not recommended to use Spring MVC's template support in applications where the
-templates are editable by external sources, since this can have security implications.
+WARNING: The views of a Spring MVC application live within the internal trust boundaries
+of that application. Views have access to all the beans of your application context. As
+such, it is not recommended to use Spring MVC's template support in applications where
+the templates are editable by external sources, since this can have security implications.
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
@@ -21,7 +20,7 @@ Thymeleaf is a modern server-side Java template engine that emphasizes natural H
 templates that can be previewed in a browser by double-clicking, which is very helpful
 for independent work on UI templates (for example, by a designer) without the need for
 a running server. If you want to replace JSPs, Thymeleaf offers one of the most
-extensive set of features to make such a transition easier. Thymeleaf is actively
+extensive sets of features to make such a transition easier. Thymeleaf is actively
 developed and maintained. For a more complete introduction, see the
 https://www.thymeleaf.org/[Thymeleaf] project home page.
 
@@ -325,7 +324,7 @@ The `showErrors` macro takes a separator parameter (the characters that are used
 separate multiple errors on a given field) and also accepts a second parameter -- this
 time, a class name or style attribute. Note that FreeMarker can specify default
 values for the attributes parameter. The following example shows how to use the `formInput`
-and `showWErrors` macros:
+and `showErrors` macros:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -840,31 +839,11 @@ The Spring Framework has a built-in integration for using Spring MVC with JSP an
 [[mvc-view-jsp-resolver]]
 === View Resolvers
 
-When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
-`ResourceBundleViewResolver` bean.
+When developing with JSPs, you typically declare an `InternalResourceViewResolver` bean.
 
-`ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver`, you can mix
-different types of views by using only one resolver, as the following example shows:
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<!-- the ResourceBundleViewResolver -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-		<property name="basename" value="views"/>
-	</bean>
-
-	# And a sample properties file is used (views.properties in WEB-INF/classes):
-	welcome.(class)=org.springframework.web.servlet.view.JstlView
-	welcome.url=/WEB-INF/jsp/welcome.jsp
-
-	productList.(class)=org.springframework.web.servlet.view.JstlView
-	productList.url=/WEB-INF/jsp/productlist.jsp
-----
-
-`InternalResourceViewResolver` can also be used for JSPs. As a best practice, we strongly
-encourage placing your JSP files in a directory under the `'WEB-INF'` directory so there
-can be no direct access by clients.
+`InternalResourceViewResolver` can be used for dispatching to any Servlet resource but in
+particular for JSPs. As a best practice, we strongly encourage placing your JSP files in
+a directory under the `'WEB-INF'` directory so there can be no direct access by clients.
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -926,8 +905,7 @@ called `spring-form.tld`.
 To use the tags from this library, add the following directive to the top of your JSP
 page:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 ----
@@ -1714,13 +1692,12 @@ The following example `ApplicationContext` configuration shows how to do so:
 	</bean>
 ----
 
-The preceding example defines five files that contain definitions. The files are all located in
-the `WEB-INF/defs` directory. At initialization of the `WebApplicationContext`, the
-files are loaded, and the definitions factory are initialized. After that has
+The preceding example defines five files that contain definitions. The files are all
+located in the `WEB-INF/defs` directory. At initialization of the `WebApplicationContext`,
+the files are loaded, and the definitions factory are initialized. After that has
 been done, the Tiles included in the definition files can be used as views within your
 Spring web application. To be able to use the views, you have to have a `ViewResolver`
-as with any other view technology used with Spring. You can use either of two
-implementations, the `UrlBasedViewResolver` and the `ResourceBundleViewResolver`.
+as with any other view technology in Spring : typically a convenient `TilesViewResolver`.
 
 You can specify locale-specific Tiles definitions by adding an underscore and then
 the locale, as the following example shows:
@@ -1757,41 +1734,6 @@ resolve. The following bean defines a `UrlBasedViewResolver`:
 		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView"/>
 	</bean>
 ----
-
-
-[[mvc-view-tiles-resource]]
-==== `ResourceBundleViewResolver`
-
-The `ResourceBundleViewResolver` has to be provided with a property file that contains
-view names and view classes that the resolver can use. The following example shows a bean
-definition for a `ResourceBundleViewResolver` and the corresponding view names and view
-classes (taken from the Pet Clinic sample):
-
-[source,xml,indent=0,subs="verbatim,quotes"]
-----
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-		<property name="basename" value="views"/>
-	</bean>
-----
-
-[literal,subs="verbatim,quotes"]
-----
-	...
-	welcomeView.(class)=org.springframework.web.servlet.view.tiles3.TilesView
-	welcomeView.url=welcome (this is the name of a Tiles definition)
-
-	vetsView.(class)=org.springframework.web.servlet.view.tiles3.TilesView
-	vetsView.url=vetsView (again, this is the name of a Tiles definition)
-
-	findOwnersForm.(class)=org.springframework.web.servlet.view.JstlView
-	findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
-	...
-----
-
-When you use the `ResourceBundleViewResolver`, you can easily mix
-different view technologies.
-
-Note that the `TilesView` class supports JSTL (the JSP Standard Tag Library).
 
 
 [[mvc-view-tiles-preparer]]

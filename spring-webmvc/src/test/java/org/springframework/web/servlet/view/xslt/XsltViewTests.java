@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,9 +185,9 @@ public class XsltViewTests {
 	}
 
 	private void assertRowElement(Element elem, String id, String name, String price) {
-		Element idElem = (Element) elem.elements().get(0);
-		Element nameElem = (Element) elem.elements().get(1);
-		Element priceElem = (Element) elem.elements().get(2);
+		Element idElem = elem.elements().get(0);
+		Element nameElem = elem.elements().get(1);
+		Element priceElem = elem.elements().get(2);
 
 		assertThat(idElem.getText()).as("ID incorrect.").isEqualTo(id);
 		assertThat(nameElem.getText()).as("Name incorrect.").isEqualTo(name);

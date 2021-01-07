@@ -10,8 +10,347 @@
 :docinfo1:
 
 This part of the reference documentation covers the Spring Framework's integration with
-a number of Java EE (and related) technologies.
+a number technologies.
 
+
+[[rest-client-access]]
+== REST Endpoints
+
+The Spring Framework provides two choices for making calls to REST endpoints:
+
+* <<rest-resttemplate>>: The original Spring REST client with a synchronous, template
+method API.
+* <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
+that supports both synchronous and asynchronous as well as streaming scenarios.
+
+NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
+changes and bugs to be accepted going forward. Please, consider using the
+<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
+supports sync, async, and streaming scenarios.
+
+
+[[rest-resttemplate]]
+=== `RestTemplate`
+
+The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
+easy to invoke REST endpoints in a single line. It exposes the following groups of
+overloaded methods:
+
+[[rest-overview-of-resttemplate-methods-tbl]]
+.RestTemplate methods
+[cols="1,3"]
+|===
+| Method group | Description
+
+| `getForObject`
+| Retrieves a representation via GET.
+
+| `getForEntity`
+| Retrieves a `ResponseEntity` (that is, status, headers, and body) by using GET.
+
+| `headForHeaders`
+| Retrieves all headers for a resource by using HEAD.
+
+| `postForLocation`
+| Creates a new resource by using POST and returns the `Location` header from the response.
+
+| `postForObject`
+| Creates a new resource by using POST and returns the representation from the response.
+
+| `postForEntity`
+| Creates a new resource by using POST and returns the representation from the response.
+
+| `put`
+| Creates or updates a resource by using PUT.
+
+| `patchForObject`
+| Updates a resource by using PATCH and returns the representation from the response.
+Note that the JDK `HttpURLConnection` does not support the `PATCH`, but Apache
+HttpComponents and others do.
+
+| `delete`
+| Deletes the resources at the specified URI by using DELETE.
+
+| `optionsForAllow`
+| Retrieves allowed HTTP methods for a resource by using ALLOW.
+
+| `exchange`
+| More generalized (and less opinionated) version of the preceding methods that provides extra
+flexibility when needed. It accepts a `RequestEntity` (including HTTP method, URL, headers,
+and body as input) and returns a `ResponseEntity`.
+
+These methods allow the use of `ParameterizedTypeReference` instead of `Class` to specify
+a response type with generics.
+
+| `execute`
+| The most generalized way to perform a request, with full control over request
+preparation and response extraction through callback interfaces.
+
+|===
+
+[[rest-resttemplate-create]]
+==== Initialization
+
+The default constructor uses `java.net.HttpURLConnection` to perform requests. You can
+switch to a different HTTP library with an implementation of `ClientHttpRequestFactory`.
+There is built-in support for the following:
+
+* Apache HttpComponents
+* Netty
+* OkHttp
+
+For example, to switch to Apache HttpComponents, you can use the following:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+----
+
+Each `ClientHttpRequestFactory` exposes configuration options specific to the underlying
+HTTP client library -- for example, for credentials, connection pooling, and other details.
+
+TIP: Note that the `java.net` implementation for HTTP requests can raise an exception when
+accessing the status of a response that represents an error (such as 401). If this is an
+issue, switch to another HTTP client library.
+
+[[rest-resttemplate-uri]]
+===== URIs
+
+Many of the `RestTemplate` methods accept a URI template and URI template variables,
+either as a `String` variable argument, or as `Map<String,String>`.
+
+The following example uses a `String` variable argument:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	String result = restTemplate.getForObject(
+			"https://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
+----
+
+The following example uses a `Map<String, String>`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	Map<String, String> vars = Collections.singletonMap("hotel", "42");
+
+	String result = restTemplate.getForObject(
+			"https://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
+----
+
+Keep in mind URI templates are automatically encoded, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	restTemplate.getForObject("https://example.com/hotel list", String.class);
+
+	// Results in request to "https://example.com/hotel%20list"
+----
+
+You can use the `uriTemplateHandler` property of `RestTemplate` to customize how URIs
+are encoded. Alternatively, you can prepare a `java.net.URI` and pass it into one of
+the `RestTemplate` methods that accepts a `URI`.
+
+For more details on working with and encoding URIs, see <<web.adoc#mvc-uri-building, URI Links>>.
+
+[[rest-template-headers]]
+===== Headers
+
+You can use the `exchange()` methods to specify request headers, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	String uriTemplate = "https://example.com/hotels/{hotel}";
+	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
+
+	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
+			.header(("MyRequestHeader", "MyValue")
+			.build();
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
+
+	String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
+	String body = response.getBody();
+----
+
+You can obtain response headers through many `RestTemplate` method variants that return
+`ResponseEntity`.
+
+[[rest-template-body]]
+==== Body
+
+Objects passed into and returned from `RestTemplate` methods are converted to and from raw
+content with the help of an `HttpMessageConverter`.
+
+On a POST, an input object is serialized to the request body, as the following example shows:
+
+----
+URI location = template.postForLocation("https://example.com/people", person);
+----
+
+You need not explicitly set the Content-Type header of the request. In most cases,
+you can find a compatible message converter based on the source `Object` type, and the chosen
+message converter sets the content type accordingly. If necessary, you can use the
+`exchange` methods to explicitly provide the `Content-Type` request header, and that, in
+turn, influences what message converter is selected.
+
+On a GET, the body of the response is deserialized to an output `Object`, as the following example shows:
+
+----
+Person person = restTemplate.getForObject("https://example.com/people/{id}", Person.class, 42);
+----
+
+The `Accept` header of the request does not need to be explicitly set. In most cases,
+a compatible message converter can be found based on the expected response type, which
+then helps to populate the `Accept` header. If necessary, you can use the `exchange`
+methods to provide the `Accept` header explicitly.
+
+By default, `RestTemplate` registers all built-in
+<<rest-message-conversion, message converters>>, depending on classpath checks that help
+to determine what optional conversion libraries are present. You can also set the message
+converters to use explicitly.
+
+[[rest-message-conversion]]
+==== Message Conversion
+[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
+
+The `spring-web` module contains the `HttpMessageConverter` contract for reading and
+writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
+`HttpMessageConverter` instances are used on the client side (for example, in the `RestTemplate`) and
+on the server side (for example, in Spring MVC REST controllers).
+
+Concrete implementations for the main media (MIME) types are provided in the framework
+and are, by default, registered with the `RestTemplate` on the client side and with
+`RequestMethodHandlerAdapter` on the server side (see
+<<web.adoc#mvc-config-message-converters, Configuring Message Converters>>).
+
+The implementations of `HttpMessageConverter` are described in the following sections.
+For all converters, a default media type is used, but you can override it by setting the
+`supportedMediaTypes` bean property. The following table describes each implementation:
+
+[[rest-message-converters-tbl]]
+.HttpMessageConverter Implementations
+[cols="1,3"]
+|===
+| MessageConverter | Description
+
+| `StringHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write `String` instances from the HTTP
+request and response. By default, this converter supports all text media types
+(`text/{asterisk}`) and writes with a `Content-Type` of `text/plain`.
+
+| `FormHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write form data from the HTTP
+request and response. By default, this converter reads and writes the
+`application/x-www-form-urlencoded` media type. Form data is read from and written into a
+`MultiValueMap<String, String>`. The converter can also write (but not read) multipart
+data read from a `MultiValueMap<String, Object>`. By default, `multipart/form-data` is
+supported. As of Spring Framework 5.2, additional multipart subtypes can be supported for
+writing form data. Consult the javadoc for `FormHttpMessageConverter` for further details.
+
+| `ByteArrayHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write byte arrays from the
+HTTP request and response. By default, this converter supports all media types (`{asterisk}/{asterisk}`)
+and writes with a `Content-Type` of `application/octet-stream`. You can override this
+by setting the `supportedMediaTypes` property and overriding `getContentType(byte[])`.
+
+| `MarshallingHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML by using Spring's
+`Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
+This converter requires a `Marshaller` and `Unmarshaller` before it can be used. You can inject these
+through constructor or bean properties. By default, this converter supports
+`text/xml` and `application/xml`.
+
+| `MappingJackson2HttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write JSON by using Jackson's
+`ObjectMapper`. You can customize JSON mapping as needed through the use of Jackson's
+provided annotations. When you need further control (for cases where custom JSON
+serializers/deserializers need to be provided for specific types), you can inject a custom `ObjectMapper`
+through the `ObjectMapper` property. By default, this
+converter supports `application/json`.
+
+| `MappingJackson2XmlHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write XML by using
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
+`XmlMapper`. You can customize XML mapping as needed through the use of JAXB
+or Jackson's provided annotations. When you need further control (for cases where custom XML
+serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper`
+through the `ObjectMapper` property. By default, this
+converter supports `application/xml`.
+
+| `SourceHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write
+`javax.xml.transform.Source` from the HTTP request and response. Only `DOMSource`,
+`SAXSource`, and `StreamSource` are supported. By default, this converter supports
+`text/xml` and `application/xml`.
+
+| `BufferedImageHttpMessageConverter`
+| An `HttpMessageConverter` implementation that can read and write
+`java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
+and writes the media type supported by the Java I/O API.
+
+|===
+
+[[rest-template-jsonview]]
+==== Jackson JSON Views
+
+You can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View]
+to serialize only a subset of the object properties, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
+	value.setSerializationView(User.WithoutPasswordView.class);
+
+	RequestEntity<MappingJacksonValue> requestEntity =
+		RequestEntity.post(new URI("https://example.com/user")).body(value);
+
+	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
+----
+
+[[rest-template-multipart]]
+===== Multipart
+
+To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
+may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
+part content with headers. For example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+
+	parts.add("fieldPart", "fieldValue");
+	parts.add("filePart", new FileSystemResource("...logo.png"));
+	parts.add("jsonPart", new Person("Jason"));
+
+	HttpHeaders headers = new HttpHeaders();
+	headers.setContentType(MediaType.APPLICATION_XML);
+	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
+----
+
+In most cases, you do not have to specify the `Content-Type` for each part. The content
+type is determined automatically based on the `HttpMessageConverter` chosen to serialize
+it or, in the case of a `Resource` based on the file extension. If necessary, you can
+explicitly provide the `MediaType` with an `HttpEntity` wrapper.
+
+Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	MultiValueMap<String, Object> parts = ...;
+	template.postForObject("https://example.com/upload", parts, Void.class);
+----
+
+If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set
+to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMap` has
+`String` values the `Content-Type` is defaulted to `application/x-www-form-urlencoded`.
+If necessary the `Content-Type` may also be set explicitly.
+
+
+[[rest-async-resttemplate]]
+=== Using `AsyncRestTemplate` (Deprecated)
+
+The `AsyncRestTemplate` is deprecated. For all use cases where you might consider using
+`AsyncRestTemplate`, use the <<web-reactive.adoc#webflux-client, WebClient>> instead.
 
 
 
@@ -22,6 +361,16 @@ Spring provides support for remoting with various technologies.
 The remoting support eases the development of remote-enabled services, implemented
 via Java interfaces and objects as input and output. Currently, Spring supports the
 following remoting technologies:
+
+* <<remoting-web-services>>: Spring provides remoting support for web services through JAX-WS.
+* <<remoting-amqp>>: Remoting via AMQP as the underlying protocol is supported by the
+  separate Spring AMQP project.
+
+WARNING: As of Spring Framework 5.3, support for several remoting technologies is now deprecated
+for security reasons and broader industry support. Supporting infrastructure will be removed
+from Spring Framework for its next major release.
+
+The following remoting technologies are now deprecated and will not be replaced:
 
 * <<remoting-rmi,Remote Method Invocation (RMI)>>: Through the use of  `RmiProxyFactoryBean` and
   `RmiServiceExporter`, Spring supports both traditional RMI (with `java.rmi.Remote`
@@ -34,18 +383,14 @@ following remoting technologies:
 * <<remoting-caucho-protocols-hessian>>: By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter`, you can transparently expose your services through the
   lightweight binary HTTP-based protocol provided by Caucho.
-* <<remoting-web-services>>: Spring provides remoting support for web services through JAX-WS.
 * <<remoting-jms>>: Remoting via JMS as the underlying protocol is supported through the
   `JmsInvokerServiceExporter` and `JmsInvokerProxyFactoryBean` classes in the
    `spring-jms` module.
-* <<remoting-amqp>>: Remoting via AMQP as the underlying protocol is supported by the
-  separate Spring AMQP project.
 
 While discussing the remoting capabilities of Spring, we use the following domain
 model and corresponding services:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class Account implements Serializable{
 
@@ -61,8 +406,7 @@ model and corresponding services:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface AccountService {
 
@@ -72,8 +416,7 @@ model and corresponding services:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// the implementation doing nothing at the moment
 	public class AccountServiceImpl implements AccountService {
@@ -94,373 +437,73 @@ the protocol.
 
 
 
-[[remoting-rmi]]
-=== RMI
 
-By using Spring's support for RMI, you can transparently expose your services through the
-RMI infrastructure. After having this set up, you basically have a configuration similar
-to remote EJBs, except for the fact that there is no standard support for security
-context propagation or remote transaction propagation. Spring does provide hooks for
-such additional invocation context when you use the RMI invoker, so you can, for example,
-plug in security frameworks or custom security credentials.
+[[remoting-amqp]]
+=== AMQP
+Remoting via AMQP as the underlying protocol is supported in the Spring AMQP project.
+For further details please visit the {doc-spring-amqp}/html/#remoting[Spring Remoting]
+section of the Spring AMQP reference.
 
-
-[[remoting-rmi-server]]
-==== Exporting the Service by Using `RmiServiceExporter`
-
-Using the `RmiServiceExporter`, we can expose the interface of our AccountService object
-as RMI object. The interface can be accessed by using `RmiProxyFactoryBean`, or via
-plain RMI in case of a traditional RMI service. The `RmiServiceExporter` explicitly
-supports the exposing of any non-RMI services via RMI invokers.
-
-We first have to set up our service in the Spring container.
-The following example shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="accountService" class="example.AccountServiceImpl">
-		<!-- any additional properties, maybe a DAO? -->
-	</bean>
-----
-
-Next, we have to expose our service by using `RmiServiceExporter`.
-The following example shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
-		<!-- does not necessarily have to be the same name as the bean to be exported -->
-		<property name="serviceName" value="AccountService"/>
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-		<!-- defaults to 1099 -->
-		<property name="registryPort" value="1199"/>
-	</bean>
-----
-
-In the preceding example, we override the port for the RMI registry. Often, your application
-server also maintains an RMI registry, and it is wise to not interfere with that one.
-Furthermore, the service name is used to bind the service. So, in the preceding example, the
-service is bound at `'rmi://HOST:1199/AccountService'`. We use this URL later on to link in
-the service at the client side.
-
-NOTE: The `servicePort` property has been omitted (it defaults to 0). This means that an
-anonymous port is used to communicate with the service.
-
-
-[[remoting-rmi-client]]
-==== Linking in the Service at the Client
-
-Our client is a simple object that uses the `AccountService` to manage accounts,
-as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class SimpleObject {
-
-		private AccountService accountService;
-
-		public void setAccountService(AccountService accountService) {
-			this.accountService = accountService;
-		}
-
-		// additional methods using the accountService
-	}
-----
-
-To link in the service on the client, we create a separate Spring container,
-to contain the following simple object and the service linking configuration bits:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="example.SimpleObject">
-		<property name="accountService" ref="accountService"/>
-	</bean>
-
-	<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
-		<property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-That is all we need to do to support the remote account service on the client. Spring
-transparently creates an invoker and remotely enables the account service through the
-`RmiServiceExporter`. At the client, we link it in by using the `RmiProxyFactoryBean`.
-
-
-
-[[remoting-caucho-protocols]]
-=== Using Hessian to Remotely Call Services through HTTP
-
-Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho,
-and you can find more information about Hessian itself at https://www.caucho.com/[].
-
-
-[[remoting-caucho-protocols-hessian]]
-==== Hessian
-
-Hessian communicates through HTTP and does so by using a custom servlet. By using Spring's
-`DispatcherServlet` principles (see <<webmvc.adoc#mvc-servlet>>), we can wire up such a
-servlet to expose your services. First, we have to create a new servlet in our application,
-as shown in the following excerpt from `web.xml`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>remoting</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>remoting</servlet-name>
-		<url-pattern>/remoting/*</url-pattern>
-	</servlet-mapping>
-----
-
-If you are familiar with Spring's `DispatcherServlet` principles, you probably
-know that now you have to create a Spring container configuration resource named
-`remoting-servlet.xml` (after the name of your servlet) in the `WEB-INF` directory.
-The application context is used in the next section.
-
-Alternatively, consider the use of Spring's simpler `HttpRequestHandlerServlet`. Doing so
-lets you embed the remote exporter definitions in your root application context (by
-default, in `WEB-INF/applicationContext.xml`), with individual servlet definitions
-pointing to specific exporter beans. In this case, each servlet name needs to match the bean name of
-its target exporter.
-
-
-[[remoting-caucho-protocols-hessian-server]]
-==== Exposing Your Beans by Using `HessianServiceExporter`
-
-In the newly created application context called `remoting-servlet.xml`, we create a
-`HessianServiceExporter` to export our services, as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="accountService" class="example.AccountServiceImpl">
-		<!-- any additional properties, maybe a DAO? -->
-	</bean>
-
-	<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-Now we are ready to link in the service at the client. No explicit handler mapping is
-specified (to map request URLs onto services), so we use `BeanNameUrlHandlerMapping`
-used. Hence, the service is exported at the URL indicated through its bean name
-within the containing `DispatcherServlet` instance's mapping (as defined earlier):
-`https://HOST:8080/remoting/AccountService`.
-
-Alternatively, you can create a `HessianServiceExporter` in your root application context (for example,
-in `WEB-INF/applicationContext.xml`), as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-In the latter case, you should define a corresponding servlet for this exporter in `web.xml`,
-with the same end result: The exporter gets mapped to the request path at
-`/remoting/AccountService`. Note that the servlet name needs to match the bean name of
-the target exporter. The following example shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>accountExporter</servlet-name>
-		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>accountExporter</servlet-name>
-		<url-pattern>/remoting/AccountService</url-pattern>
-	</servlet-mapping>
-----
-
-
-[[remoting-caucho-protocols-hessian-client]]
-==== Linking in the Service on the Client
-
-By using the `HessianProxyFactoryBean`, we can link in the service at the client. The same
-principles apply as with the RMI example. We create a separate bean factory or
-application context and mention the following beans where the `SimpleObject` is by using
-the `AccountService` to manage accounts, as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="example.SimpleObject">
-		<property name="accountService" ref="accountService"/>
-	</bean>
-
-	<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-
-[[remoting-caucho-protocols-security]]
-==== Applying HTTP Basic Authentication to a Service Exposed through Hessian
-
-One of the advantages of Hessian is that we can easily apply HTTP basic authentication,
-because both protocols are HTTP-based. Your normal HTTP server security mechanism can
-be applied through using the `web.xml` security features, for example. Usually,
-you need not use per-user security credentials here. Rather, you can use shared credentials that you define
-at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`), as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
-		<property name="interceptors" ref="authorizationInterceptor"/>
-	</bean>
-
-	<bean id="authorizationInterceptor"
-			class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
-		<property name="authorizedRoles" value="administrator,operator"/>
-	</bean>
-----
-
-In the preceding example, we explicitly mention the `BeanNameUrlHandlerMapping` and set
-an interceptor, to let only administrators and operators call the beans mentioned in
-this application context.
-
-NOTE: The preceding example does not show a flexible kind of security infrastructure. For
-more options as far as security is concerned, have a look at the Spring Security project
-at https://projects.spring.io/spring-security/.
-
-
-
-[[remoting-httpinvoker]]
-=== Spring HTTP Invoker
-
-As opposed to Hessian, Spring HTTP invokers are both lightweight protocols that use their own slim
-serialization mechanisms and use the standard Java serialization
-mechanism to expose services through HTTP. This has a huge advantage if your arguments
-and return types are complex types that cannot be serialized by using the serialization
-mechanisms Hessian uses (see the next section for more considerations when
-you choose a remoting technology).
-
-Under the hood, Spring uses either the standard facilities provided by the JDK or
-Apache `HttpComponents` to perform HTTP calls. If you need more
-advanced and easier-to-use functionality, use the latter. See
-https://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
-for more information.
-
-[WARNING]
+[[remoting-autodection-remote-interfaces]]
+[NOTE]
 ====
-Be aware of vulnerabilities due to unsafe Java deserialization:
-Manipulated input streams can lead to unwanted code execution on the server
-during the deserialization step. As a consequence, do not expose HTTP invoker
-endpoints to untrusted clients. Rather, expose them only between your own services.
-In general, we strongly recommend using any other message format (such as JSON) instead.
+Auto-detection is not implemented for remote interfaces
 
-If you are concerned about security vulnerabilities due to Java serialization,
-consider the general-purpose serialization filter mechanism at the core JVM level,
-originally developed for JDK 9 but backported to JDK 8, 7 and 6 in the meantime. See
-https://blogs.oracle.com/java-platform-group/entry/incoming_filter_serialization_data_a
-and https://openjdk.java.net/jeps/290.
+The main reason why auto-detection of implemented interfaces does not occur for remote
+interfaces is to avoid opening too many doors to remote callers. The target object might
+implement internal callback interfaces, such as `InitializingBean` or `DisposableBean`
+which one would not want to expose to callers.
+
+Offering a proxy with all interfaces implemented by the target usually does not matter
+in the local case. However, when you export a remote service, you should expose a specific
+service interface, with specific operations intended for remote usage. Besides internal
+callback interfaces, the target might implement multiple business interfaces, with only
+one of them intended for remote exposure. For these reasons, we require such a
+service interface to be specified.
+
+This is a trade-off between configuration convenience and the risk of accidental
+exposure of internal methods. Always specifying a service interface is not too much
+effort and puts you on the safe side regarding controlled exposure of specific methods.
 ====
 
 
-[[remoting-httpinvoker-server]]
-==== Exposing the Service Object
 
-Setting up the HTTP invoker infrastructure for a service object closely resembles the
-way you would do the same by using Hessian. As Hessian support provides
-`HessianServiceExporter`, Spring's HttpInvoker support provides
-`org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
+[[remoting-considerations]]
+=== Considerations when Choosing a Technology
 
-To expose the `AccountService` (mentioned earlier) within a Spring Web MVC
-`DispatcherServlet`, the following configuration needs to be in place in the
-dispatcher's application context, as the following example shows:
+Each and every technology presented here has its drawbacks. When choosing a technology,
+you should carefully consider your needs, the services you expose, and the objects you
+send over the wire.
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
+When using RMI, you cannot access the objects through the HTTP protocol,
+unless you tunnel the RMI traffic. RMI is a fairly heavy-weight protocol, in that it
+supports full-object serialization, which is important when you use a complex data model
+that needs serialization over the wire. However, RMI-JRMP is tied to Java clients. It is
+a Java-to-Java remoting solution.
 
-Such an exporter definition is exposed through the `DispatcherServlet` instance's standard
-mapping facilities, as explained in <<remoting-caucho-protocols, the section on Hessian>>.
+Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also rely on
+Java serialization. It shares the basic infrastructure with RMI invokers but uses
+HTTP as transport. Note that HTTP invokers are not limited only to Java-to-Java remoting
+but also to Spring on both the client and the server side. (The latter also applies to
+Spring's RMI invoker for non-RMI interfaces.)
 
-Alternatively, you can create an `HttpInvokerServiceExporter` in your root application context
-(for example, in `'WEB-INF/applicationContext.xml'`), as the following example shows:
+Hessian might provide significant value when operating in a heterogeneous environment,
+because they explicitly allow for non-Java clients. However, non-Java support is still
+limited. Known issues include the serialization of Hibernate objects in combination with
+lazily-initialized collections. If you have such a data model, consider using RMI or
+HTTP invokers instead of Hessian.
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
-		<property name="service" ref="accountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
+JMS can be useful for providing clusters of services and letting the JMS broker take
+care of load balancing, discovery, and auto-failover. By default, Java serialization is
+used for JMS remoting, but the JMS provider could use a different mechanism for
+the wire formatting, such as XStream to let servers be implemented in other
+technologies.
 
-In addition, you can define a corresponding servlet for this exporter in `web.xml`, with the
-servlet name matching the bean name of the target exporter, as the following example shows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<servlet>
-		<servlet-name>accountExporter</servlet-name>
-		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>accountExporter</servlet-name>
-		<url-pattern>/remoting/AccountService</url-pattern>
-	</servlet-mapping>
-----
-
-
-[[remoting-httpinvoker-client]]
-==== Linking in the Service at the Client
-
-Again, linking in the service from the client much resembles the way you would do it
-when you use Hessian. By using a proxy, Spring can translate your calls to
-HTTP POST requests to the URL that points to the exported service. The following example
-shows how to configure this arrangement:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
-		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
-		<property name="serviceInterface" value="example.AccountService"/>
-	</bean>
-----
-
-As mentioned earlier, you can choose what HTTP client you want to use. By default, the
-`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
-`HttpComponents` client by setting the `httpInvokerRequestExecutor` property.
-The following example shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="httpInvokerRequestExecutor">
-		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
-	</property>
-----
+Last but not least, EJB has an advantage over RMI, in that it supports standard
+role-based authentication and authorization and remote transaction propagation. It is
+possible to get RMI invokers or HTTP invokers to support security context propagation as
+well, although this is not provided by core Spring. Spring offers only appropriate hooks
+for plugging in third-party or custom solutions.
 
 
 
@@ -549,8 +592,7 @@ the Spring application context. This means that you can apply Spring functionali
 injection through `@Autowired` works as well. The following example shows how to
 define these beans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.remoting.jaxws.SimpleJaxWsServiceExporter">
 		<property name="baseAddress" value="http://localhost:8080/"/>
@@ -568,8 +610,7 @@ since the endpoint in this example is a fully Spring-managed bean. This means th
 the endpoint implementation can be as follows (without any superclass declared --
 and Spring's `@Autowired` configuration annotation is still honored):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@WebService(serviceName="AccountService")
 	public class AccountServiceEndpoint {
@@ -622,8 +663,7 @@ version that can return a proxy that implements our business service interface.
 In the following example, we use `JaxWsPortProxyFactoryBean` to create a proxy for the
 `AccountService` endpoint (again):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="accountWebService" class="org.springframework.remoting.jaxws.JaxWsPortProxyFactoryBean">
 		<property name="serviceInterface" value="example.AccountService"/> <1>
@@ -645,8 +685,7 @@ Accessing the web service is easy, as we have a bean factory for it that exposes
 an interface called `AccountService`. The following example shows how we can wire this
 up in Spring:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="client" class="example.AccountClientImpl">
 		...
@@ -657,8 +696,7 @@ up in Spring:
 From the client code, we can access the web service as if it were a normal class,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class AccountClientImpl {
 
@@ -682,8 +720,372 @@ accordingly first. Check the JAX-WS documentation for details on those requireme
 
 
 
+
+[[remoting-rmi]]
+=== RMI (Deprecated)
+
+WARNING: As of Spring Framework 5.3, RMI support is deprecated and will not be replaced.
+
+By using Spring's support for RMI, you can transparently expose your services through the
+RMI infrastructure. After having this set up, you basically have a configuration similar
+to remote EJBs, except for the fact that there is no standard support for security
+context propagation or remote transaction propagation. Spring does provide hooks for
+such additional invocation context when you use the RMI invoker, so you can, for example,
+plug in security frameworks or custom security credentials.
+
+
+[[remoting-rmi-server]]
+==== Exporting the Service by Using `RmiServiceExporter`
+
+Using the `RmiServiceExporter`, we can expose the interface of our AccountService object
+as RMI object. The interface can be accessed by using `RmiProxyFactoryBean`, or via
+plain RMI in case of a traditional RMI service. The `RmiServiceExporter` explicitly
+supports the exposing of any non-RMI services via RMI invokers.
+
+We first have to set up our service in the Spring container.
+The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="accountService" class="example.AccountServiceImpl">
+		<!-- any additional properties, maybe a DAO? -->
+	</bean>
+----
+
+Next, we have to expose our service by using `RmiServiceExporter`.
+The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<!-- does not necessarily have to be the same name as the bean to be exported -->
+		<property name="serviceName" value="AccountService"/>
+		<property name="service" ref="accountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+		<!-- defaults to 1099 -->
+		<property name="registryPort" value="1199"/>
+	</bean>
+----
+
+In the preceding example, we override the port for the RMI registry. Often, your application
+server also maintains an RMI registry, and it is wise to not interfere with that one.
+Furthermore, the service name is used to bind the service. So, in the preceding example, the
+service is bound at `'rmi://HOST:1199/AccountService'`. We use this URL later on to link in
+the service at the client side.
+
+NOTE: The `servicePort` property has been omitted (it defaults to 0). This means that an
+anonymous port is used to communicate with the service.
+
+
+[[remoting-rmi-client]]
+==== Linking in the Service at the Client
+
+Our client is a simple object that uses the `AccountService` to manage accounts,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class SimpleObject {
+
+		private AccountService accountService;
+
+		public void setAccountService(AccountService accountService) {
+			this.accountService = accountService;
+		}
+
+		// additional methods using the accountService
+	}
+----
+
+To link in the service on the client, we create a separate Spring container,
+to contain the following simple object and the service linking configuration bits:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="example.SimpleObject">
+		<property name="accountService" ref="accountService"/>
+	</bean>
+
+	<bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+		<property name="serviceUrl" value="rmi://HOST:1199/AccountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+That is all we need to do to support the remote account service on the client. Spring
+transparently creates an invoker and remotely enables the account service through the
+`RmiServiceExporter`. At the client, we link it in by using the `RmiProxyFactoryBean`.
+
+
+
+[[remoting-caucho-protocols]]
+=== Using Hessian to Remotely Call Services through HTTP (Deprecated)
+
+WARNING: As of Spring Framework 5.3, Hessian support is deprecated and will not be replaced.
+
+Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho,
+and you can find more information about Hessian itself at https://www.caucho.com/[].
+
+
+[[remoting-caucho-protocols-hessian]]
+==== Hessian
+
+Hessian communicates through HTTP and does so by using a custom servlet. By using Spring's
+`DispatcherServlet` principles (see <<webmvc.adoc#mvc-servlet>>), we can wire up such a
+servlet to expose your services. First, we have to create a new servlet in our application,
+as shown in the following excerpt from `web.xml`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<servlet>
+		<servlet-name>remoting</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>remoting</servlet-name>
+		<url-pattern>/remoting/*</url-pattern>
+	</servlet-mapping>
+----
+
+If you are familiar with Spring's `DispatcherServlet` principles, you probably
+know that now you have to create a Spring container configuration resource named
+`remoting-servlet.xml` (after the name of your servlet) in the `WEB-INF` directory.
+The application context is used in the next section.
+
+Alternatively, consider the use of Spring's simpler `HttpRequestHandlerServlet`. Doing so
+lets you embed the remote exporter definitions in your root application context (by
+default, in `WEB-INF/applicationContext.xml`), with individual servlet definitions
+pointing to specific exporter beans. In this case, each servlet name needs to match the bean name of
+its target exporter.
+
+
+[[remoting-caucho-protocols-hessian-server]]
+==== Exposing Your Beans by Using `HessianServiceExporter`
+
+In the newly created application context called `remoting-servlet.xml`, we create a
+`HessianServiceExporter` to export our services, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="accountService" class="example.AccountServiceImpl">
+		<!-- any additional properties, maybe a DAO? -->
+	</bean>
+
+	<bean name="/AccountService" class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="service" ref="accountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+Now we are ready to link in the service at the client. No explicit handler mapping is
+specified (to map request URLs onto services), so we use `BeanNameUrlHandlerMapping`
+used. Hence, the service is exported at the URL indicated through its bean name
+within the containing `DispatcherServlet` instance's mapping (as defined earlier):
+`https://HOST:8080/remoting/AccountService`.
+
+Alternatively, you can create a `HessianServiceExporter` in your root application context (for example,
+in `WEB-INF/applicationContext.xml`), as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean name="accountExporter" class="org.springframework.remoting.caucho.HessianServiceExporter">
+		<property name="service" ref="accountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+In the latter case, you should define a corresponding servlet for this exporter in `web.xml`,
+with the same end result: The exporter gets mapped to the request path at
+`/remoting/AccountService`. Note that the servlet name needs to match the bean name of
+the target exporter. The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<servlet>
+		<servlet-name>accountExporter</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>accountExporter</servlet-name>
+		<url-pattern>/remoting/AccountService</url-pattern>
+	</servlet-mapping>
+----
+
+
+[[remoting-caucho-protocols-hessian-client]]
+==== Linking in the Service on the Client
+
+By using the `HessianProxyFactoryBean`, we can link in the service at the client. The same
+principles apply as with the RMI example. We create a separate bean factory or
+application context and mention the following beans where the `SimpleObject` is by using
+the `AccountService` to manage accounts, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="example.SimpleObject">
+		<property name="accountService" ref="accountService"/>
+	</bean>
+
+	<bean id="accountService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+
+[[remoting-caucho-protocols-security]]
+==== Applying HTTP Basic Authentication to a Service Exposed through Hessian
+
+One of the advantages of Hessian is that we can easily apply HTTP basic authentication,
+because both protocols are HTTP-based. Your normal HTTP server security mechanism can
+be applied through using the `web.xml` security features, for example. Usually,
+you need not use per-user security credentials here. Rather, you can use shared credentials that you define
+at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`), as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+		<property name="interceptors" ref="authorizationInterceptor"/>
+	</bean>
+
+	<bean id="authorizationInterceptor"
+			class="org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor">
+		<property name="authorizedRoles" value="administrator,operator"/>
+	</bean>
+----
+
+In the preceding example, we explicitly mention the `BeanNameUrlHandlerMapping` and set
+an interceptor, to let only administrators and operators call the beans mentioned in
+this application context.
+
+NOTE: The preceding example does not show a flexible kind of security infrastructure. For
+more options as far as security is concerned, have a look at the Spring Security project
+at https://projects.spring.io/spring-security/.
+
+
+
+[[remoting-httpinvoker]]
+=== Spring HTTP Invoker (Deprecated)
+
+WARNING: As of Spring Framework 5.3, HTTP Invoker support is deprecated and will not be replaced.
+
+As opposed to Hessian, Spring HTTP invokers are both lightweight protocols that use their own slim
+serialization mechanisms and use the standard Java serialization
+mechanism to expose services through HTTP. This has a huge advantage if your arguments
+and return types are complex types that cannot be serialized by using the serialization
+mechanisms Hessian uses (see the next section for more considerations when
+you choose a remoting technology).
+
+Under the hood, Spring uses either the standard facilities provided by the JDK or
+Apache `HttpComponents` to perform HTTP calls. If you need more
+advanced and easier-to-use functionality, use the latter. See
+https://hc.apache.org/httpcomponents-client-ga/[hc.apache.org/httpcomponents-client-ga/]
+for more information.
+
+[CAUTION]
+====
+Be aware of vulnerabilities due to unsafe Java deserialization:
+Manipulated input streams can lead to unwanted code execution on the server
+during the deserialization step. As a consequence, do not expose HTTP invoker
+endpoints to untrusted clients. Rather, expose them only between your own services.
+In general, we strongly recommend using any other message format (such as JSON) instead.
+
+If you are concerned about security vulnerabilities due to Java serialization,
+consider the general-purpose serialization filter mechanism at the core JVM level,
+originally developed for JDK 9 but backported to JDK 8, 7 and 6 in the meantime. See
+https://blogs.oracle.com/java-platform-group/entry/incoming_filter_serialization_data_a
+and https://openjdk.java.net/jeps/290.
+====
+
+
+[[remoting-httpinvoker-server]]
+==== Exposing the Service Object
+
+Setting up the HTTP invoker infrastructure for a service object closely resembles the
+way you would do the same by using Hessian. As Hessian support provides
+`HessianServiceExporter`, Spring's HttpInvoker support provides
+`org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
+
+To expose the `AccountService` (mentioned earlier) within a Spring Web MVC
+`DispatcherServlet`, the following configuration needs to be in place in the
+dispatcher's application context, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+		<property name="service" ref="accountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+Such an exporter definition is exposed through the `DispatcherServlet` instance's standard
+mapping facilities, as explained in <<remoting-caucho-protocols, the section on Hessian>>.
+
+Alternatively, you can create an `HttpInvokerServiceExporter` in your root application context
+(for example, in `'WEB-INF/applicationContext.xml'`), as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean name="accountExporter" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter">
+		<property name="service" ref="accountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+In addition, you can define a corresponding servlet for this exporter in `web.xml`, with the
+servlet name matching the bean name of the target exporter, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<servlet>
+		<servlet-name>accountExporter</servlet-name>
+		<servlet-class>org.springframework.web.context.support.HttpRequestHandlerServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>accountExporter</servlet-name>
+		<url-pattern>/remoting/AccountService</url-pattern>
+	</servlet-mapping>
+----
+
+
+[[remoting-httpinvoker-client]]
+==== Linking in the Service at the Client
+
+Again, linking in the service from the client much resembles the way you would do it
+when you use Hessian. By using a proxy, Spring can translate your calls to
+HTTP POST requests to the URL that points to the exported service. The following example
+shows how to configure this arrangement:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+		<property name="serviceUrl" value="https://remotehost:8080/remoting/AccountService"/>
+		<property name="serviceInterface" value="example.AccountService"/>
+	</bean>
+----
+
+As mentioned earlier, you can choose what HTTP client you want to use. By default, the
+`HttpInvokerProxy` uses the JDK's HTTP functionality, but you can also use the Apache
+`HttpComponents` client by setting the `httpInvokerRequestExecutor` property.
+The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<property name="httpInvokerRequestExecutor">
+		<bean class="org.springframework.remoting.httpinvoker.HttpComponentsHttpInvokerRequestExecutor"/>
+	</property>
+----
+
+
+
 [[remoting-jms]]
-=== JMS
+=== JMS (Deprecated)
+
+WARNING: As of Spring Framework 5.3, JMS remoting support is deprecated and will not be replaced.
 
 You can also expose services transparently by using JMS as the underlying communication
 protocol. The JMS remoting support in the Spring Framework is pretty basic. It sends
@@ -694,8 +1096,7 @@ See <<jms>> for information on Spring's rich support for JMS-based messaging.
 
 The following interface is used on both the server and the client sides:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -707,8 +1108,7 @@ The following interface is used on both the server and the client sides:
 
 The following simple implementation of the preceding interface is used on the server-side:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -723,8 +1123,7 @@ The following simple implementation of the preceding interface is used on the se
 The following configuration file contains the JMS-infrastructure beans that are shared
 on both the client and the server:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -750,8 +1149,7 @@ on both the client and the server:
 On the server, you need to expose the service object that uses the
 `JmsInvokerServiceExporter`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -777,8 +1175,7 @@ On the server, you need to expose the service object that uses the
 	</beans>
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -802,8 +1199,7 @@ interface (`CheckingAccountService`).
 The following example defines beans that you can inject into other client-side objects
 (and the proxy takes care of forwarding the call to the server-side object via JMS):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -821,8 +1217,7 @@ The following example defines beans that you can inject into other client-side o
 	</beans>
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.foo;
 
@@ -838,424 +1233,6 @@ The following example defines beans that you can inject into other client-side o
 		}
 	}
 ----
-
-
-
-[[remoting-amqp]]
-=== AMQP
-Remoting via AMQP as the underlying protocol is supported in the Spring AMQP project.
-For further details please visit the {doc-spring-amqp}/html/#remoting[Spring Remoting]
-section of the Spring AMQP reference.
-
-[[remoting-autodection-remote-interfaces]]
-[NOTE]
-====
-Auto-detection is not implemented for remote interfaces
-
-The main reason why auto-detection of implemented interfaces does not occur for remote
-interfaces is to avoid opening too many doors to remote callers. The target object might
-implement internal callback interfaces, such as `InitializingBean` or `DisposableBean`
-which one would not want to expose to callers.
-
-Offering a proxy with all interfaces implemented by the target usually does not matter
-in the local case. However, when you export a remote service, you should expose a specific
-service interface, with specific operations intended for remote usage. Besides internal
-callback interfaces, the target might implement multiple business interfaces, with only
-one of them intended for remote exposure. For these reasons, we require such a
-service interface to be specified.
-
-This is a trade-off between configuration convenience and the risk of accidental
-exposure of internal methods. Always specifying a service interface is not too much
-effort and puts you on the safe side regarding controlled exposure of specific methods.
-====
-
-
-
-[[remoting-considerations]]
-=== Considerations when Choosing a Technology
-
-Each and every technology presented here has its drawbacks. When choosing a technology,
-you should carefully consider your needs, the services you expose, and the objects you
-send over the wire.
-
-When using RMI, you cannot access the objects through the HTTP protocol,
-unless you tunnel the RMI traffic. RMI is a fairly heavy-weight protocol, in that it
-supports full-object serialization, which is important when you use a complex data model
-that needs serialization over the wire. However, RMI-JRMP is tied to Java clients. It is
-a Java-to-Java remoting solution.
-
-Spring's HTTP invoker is a good choice if you need HTTP-based remoting but also rely on
-Java serialization. It shares the basic infrastructure with RMI invokers but uses
-HTTP as transport. Note that HTTP invokers are not limited only to Java-to-Java remoting
-but also to Spring on both the client and the server side. (The latter also applies to
-Spring's RMI invoker for non-RMI interfaces.)
-
-Hessian might provide significant value when operating in a heterogeneous environment,
-because they explicitly allow for non-Java clients. However, non-Java support is still
-limited. Known issues include the serialization of Hibernate objects in combination with
-lazily-initialized collections. If you have such a data model, consider using RMI or
-HTTP invokers instead of Hessian.
-
-JMS can be useful for providing clusters of services and letting the JMS broker take
-care of load balancing, discovery, and auto-failover. By default, Java serialization is
-used for JMS remoting, but the JMS provider could use a different mechanism for
-the wire formatting, such as XStream to let servers be implemented in other
-technologies.
-
-Last but not least, EJB has an advantage over RMI, in that it supports standard
-role-based authentication and authorization and remote transaction propagation. It is
-possible to get RMI invokers or HTTP invokers to support security context propagation as
-well, although this is not provided by core Spring. Spring offers only appropriate hooks
-for plugging in third-party or custom solutions.
-
-
-
-[[rest-client-access]]
-=== REST Endpoints
-
-The Spring Framework provides two choices for making calls to REST endpoints:
-
-* <<rest-resttemplate>>: The original Spring REST client with a synchronous, template
-method API.
-* <<web-reactive.adoc#webflux-client, WebClient>>: a non-blocking, reactive alternative
-that supports both synchronous and asynchronous as well as streaming scenarios.
-
-NOTE: As of 5.0 the `RestTemplate` is in maintenance mode, with only minor requests for
-changes and bugs to be accepted going forward. Please, consider using the
-<<web-reactive.adoc#webflux-client, WebClient>> which offers a more modern API and
-supports sync, async, and streaming scenarios.
-
-
-[[rest-resttemplate]]
-==== `RestTemplate`
-
-The `RestTemplate` provides a higher level API over HTTP client libraries. It makes it
-easy to invoke REST endpoints in a single line. It exposes the following groups of
-overloaded methods:
-
-[[rest-overview-of-resttemplate-methods-tbl]]
-.RestTemplate methods
-[cols="1,3"]
-|===
-| Method group | Description
-
-| `getForObject`
-| Retrieves a representation via GET.
-
-| `getForEntity`
-| Retrieves a `ResponseEntity` (that is, status, headers, and body) by using GET.
-
-| `headForHeaders`
-| Retrieves all headers for a resource by using HEAD.
-
-| `postForLocation`
-| Creates a new resource by using POST and returns the `Location` header from the response.
-
-| `postForObject`
-| Creates a new resource by using POST and returns the representation from the response.
-
-| `postForEntity`
-| Creates a new resource by using POST and returns the representation from the response.
-
-| `put`
-| Creates or updates a resource by using PUT.
-
-| `patchForObject`
-| Updates a resource by using PATCH and returns the representation from the response.
-Note that the JDK `HttpURLConnection` does not support the `PATCH`, but Apache
-HttpComponents and others do.
-
-| `delete`
-| Deletes the resources at the specified URI by using DELETE.
-
-| `optionsForAllow`
-| Retrieves allowed HTTP methods for a resource by using ALLOW.
-
-| `exchange`
-| More generalized (and less opinionated) version of the preceding methods that provides extra
-flexibility when needed. It accepts a `RequestEntity` (including HTTP method, URL, headers,
-and body as input) and returns a `ResponseEntity`.
-
-These methods allow the use of `ParameterizedTypeReference` instead of `Class` to specify
-a response type with generics.
-
-| `execute`
-| The most generalized way to perform a request, with full control over request
-preparation and response extraction through callback interfaces.
-
-|===
-
-[[rest-resttemplate-create]]
-===== Initialization
-
-The default constructor uses `java.net.HttpURLConnection` to perform requests. You can
-switch to a different HTTP library with an implementation of `ClientHttpRequestFactory`.
-There is built-in support for the following:
-
-* Apache HttpComponents
-* Netty
-* OkHttp
-
-For example, to switch to Apache HttpComponents, you can use the following:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-----
-
-Each `ClientHttpRequestFactory` exposes configuration options specific to the underlying
-HTTP client library -- for example, for credentials, connection pooling, and other details.
-
-TIP: Note that the `java.net` implementation for HTTP requests can raise an exception when
-accessing the status of a response that represents an error (such as 401). If this is an
-issue, switch to another HTTP client library.
-
-[[rest-resttemplate-uri]]
-===== URIs
-
-Many of the `RestTemplate` methods accept a URI template and URI template variables,
-either as a `String` variable argument, or as `Map<String,String>`.
-
-The following example uses a `String` variable argument:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	String result = restTemplate.getForObject(
-			"https://example.com/hotels/{hotel}/bookings/{booking}", String.class, "42", "21");
-----
-
-The following example uses a `Map<String, String>`:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	Map<String, String> vars = Collections.singletonMap("hotel", "42");
-
-	String result = restTemplate.getForObject(
-			"https://example.com/hotels/{hotel}/rooms/{hotel}", String.class, vars);
-----
-
-Keep in mind URI templates are automatically encoded, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	restTemplate.getForObject("https://example.com/hotel list", String.class);
-
-	// Results in request to "https://example.com/hotel%20list"
-----
-
-You can use the `uriTemplateHandler` property of `RestTemplate` to customize how URIs
-are encoded. Alternatively, you can prepare a `java.net.URI` and pass it into one of
-the `RestTemplate` methods that accepts a `URI`.
-
-For more details on working with and encoding URIs, see <<web.adoc#mvc-uri-building, URI Links>>.
-
-[[rest-template-headers]]
-===== Headers
-
-You can use the `exchange()` methods to specify request headers, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	String uriTemplate = "https://example.com/hotels/{hotel}";
-	URI uri = UriComponentsBuilder.fromUriString(uriTemplate).build(42);
-
-	RequestEntity<Void> requestEntity = RequestEntity.get(uri)
-			.header(("MyRequestHeader", "MyValue")
-			.build();
-
-	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
-
-	String responseHeader = response.getHeaders().getFirst("MyResponseHeader");
-	String body = response.getBody();
-----
-
-You can obtain response headers through many `RestTemplate` method variants that return
-`ResponseEntity`.
-
-[[rest-template-body]]
-===== Body
-
-Objects passed into and returned from `RestTemplate` methods are converted to and from raw
-content with the help of an `HttpMessageConverter`.
-
-On a POST, an input object is serialized to the request body, as the following example shows:
-
-----
-URI location = template.postForLocation("https://example.com/people", person);
-----
-
-You need not explicitly set the Content-Type header of the request. In most cases,
-you can find a compatible message converter based on the source `Object` type, and the chosen
-message converter sets the content type accordingly. If necessary, you can use the
-`exchange` methods to explicitly provide the `Content-Type` request header, and that, in
-turn, influences what message converter is selected.
-
-On a GET, the body of the response is deserialized to an output `Object`, as the following example shows:
-
-----
-Person person = restTemplate.getForObject("https://example.com/people/{id}", Person.class, 42);
-----
-
-The `Accept` header of the request does not need to be explicitly set. In most cases,
-a compatible message converter can be found based on the expected response type, which
-then helps to populate the `Accept` header. If necessary, you can use the `exchange`
-methods to provide the `Accept` header explicitly.
-
-By default, `RestTemplate` registers all built-in
-<<rest-message-conversion, message converters>>, depending on classpath checks that help
-to determine what optional conversion libraries are present. You can also set the message
-converters to use explicitly.
-
-[[rest-message-conversion]]
-===== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
-
-The `spring-web` module contains the `HttpMessageConverter` contract for reading and
-writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
-`HttpMessageConverter` instances are used on the client side (for example, in the `RestTemplate`) and
-on the server side (for example, in Spring MVC REST controllers).
-
-Concrete implementations for the main media (MIME) types are provided in the framework
-and are, by default, registered with the `RestTemplate` on the client side and with
-`RequestMethodHandlerAdapter` on the server side (see
-<<web.adoc#mvc-config-message-converters, Configuring Message Converters>>).
-
-The implementations of `HttpMessageConverter` are described in the following sections.
-For all converters, a default media type is used, but you can override it by setting the
-`supportedMediaTypes` bean property. The following table describes each implementation:
-
-[[rest-message-converters-tbl]]
-.HttpMessageConverter Implementations
-[cols="1,3"]
-|===
-| MessageConverter | Description
-
-| `StringHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write `String` instances from the HTTP
-request and response. By default, this converter supports all text media types
-(`text/{asterisk}`) and writes with a `Content-Type` of `text/plain`.
-
-| `FormHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write form data from the HTTP
-request and response. By default, this converter reads and writes the
-`application/x-www-form-urlencoded` media type. Form data is read from and written into a
-`MultiValueMap<String, String>`. The converter can also write (but not read) multipart
-data read from a `MultiValueMap<String, Object>`. By default, `multipart/form-data` is
-supported. As of Spring Framework 5.2, additional multipart subtypes can be supported for
-writing form data. Consult the javadoc for `FormHttpMessageConverter` for further details.
-
-| `ByteArrayHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write byte arrays from the
-HTTP request and response. By default, this converter supports all media types (`{asterisk}/{asterisk}`)
-and writes with a `Content-Type` of `application/octet-stream`. You can override this
-by setting the `supportedMediaTypes` property and overriding `getContentType(byte[])`.
-
-| `MarshallingHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write XML by using Spring's
-`Marshaller` and `Unmarshaller` abstractions from the `org.springframework.oxm` package.
-This converter requires a `Marshaller` and `Unmarshaller` before it can be used. You can inject these
-through constructor or bean properties. By default, this converter supports
-`text/xml` and `application/xml`.
-
-| `MappingJackson2HttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write JSON by using Jackson's
-`ObjectMapper`. You can customize JSON mapping as needed through the use of Jackson's
-provided annotations. When you need further control (for cases where custom JSON
-serializers/deserializers need to be provided for specific types), you can inject a custom `ObjectMapper`
-through the `ObjectMapper` property. By default, this
-converter supports `application/json`.
-
-| `MappingJackson2XmlHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write XML by using
-https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML] extension's
-`XmlMapper`. You can customize XML mapping as needed through the use of JAXB
-or Jackson's provided annotations. When you need further control (for cases where custom XML
-serializers/deserializers need to be provided for specific types), you can inject a custom `XmlMapper`
-through the `ObjectMapper` property. By default, this
-converter supports `application/xml`.
-
-| `SourceHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write
-`javax.xml.transform.Source` from the HTTP request and response. Only `DOMSource`,
-`SAXSource`, and `StreamSource` are supported. By default, this converter supports
-`text/xml` and `application/xml`.
-
-| `BufferedImageHttpMessageConverter`
-| An `HttpMessageConverter` implementation that can read and write
-`java.awt.image.BufferedImage` from the HTTP request and response. This converter reads
-and writes the media type supported by the Java I/O API.
-
-|===
-
-[[rest-template-jsonview]]
-===== Jackson JSON Views
-
-You can specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON View]
-to serialize only a subset of the object properties, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
-	value.setSerializationView(User.WithoutPasswordView.class);
-
-	RequestEntity<MappingJacksonValue> requestEntity =
-		RequestEntity.post(new URI("https://example.com/user")).body(value);
-
-	ResponseEntity<String> response = template.exchange(requestEntity, String.class);
-----
-
-[[rest-template-multipart]]
-===== Multipart
-
-To send multipart data, you need to provide a `MultiValueMap<String, Object>` whose values
-may be an `Object` for part content, a `Resource` for a file part, or an `HttpEntity` for
-part content with headers. For example:
-
-[source,java,intent=0]
-[subs="verbatim,quotes"]
-----
-	MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
-
-	parts.add("fieldPart", "fieldValue");
-	parts.add("filePart", new FileSystemResource("...logo.png"));
-	parts.add("jsonPart", new Person("Jason"));
-
-	HttpHeaders headers = new HttpHeaders();
-	headers.setContentType(MediaType.APPLICATION_XML);
-	parts.add("xmlPart", new HttpEntity<>(myBean, headers));
-----
-
-In most cases, you do not have to specify the `Content-Type` for each part. The content
-type is determined automatically based on the `HttpMessageConverter` chosen to serialize
-it or, in the case of a `Resource` based on the file extension. If necessary, you can
-explicitly provide the `MediaType` with an `HttpEntity` wrapper.
-
-Once the `MultiValueMap` is ready, you can pass it to the `RestTemplate`, as show below:
-
-[source,java,intent=0]
-[subs="verbatim,quotes"]
-----
-	MultiValueMap<String, Object> parts = ...;
-	template.postForObject("https://example.com/upload", parts, Void.class);
-----
-
-If the `MultiValueMap` contains at least one non-`String` value, the `Content-Type` is set
-to `multipart/form-data` by the `FormHttpMessageConverter`. If the `MultiValueMap` has
-`String` values the `Content-Type` is defaulted to `application/x-www-form-urlencoded`.
-If necessary the `Content-Type` may also be set explicitly.
-
-
-[[rest-async-resttemplate]]
-==== Using `AsyncRestTemplate` (Deprecated)
-
-The `AsyncRestTemplate` is deprecated. For all use cases where you might consider using
-`AsyncRestTemplate`, use the <<web-reactive.adoc#webflux-client, WebClient>> instead.
 
 
 
@@ -1324,8 +1301,7 @@ practice and use the EJB Business Methods Interface pattern, so that the EJB's l
 interface extends a non-EJB-specific business methods interface. We call this
 business methods interface `MyComponent`. The following example shows such an interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MyComponent {
 		...
@@ -1343,8 +1319,7 @@ controller to the EJB implementation is to expose a setter method of type `MyCom
 on the controller. This saves the reference as an instance variable in the
 controller. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	private MyComponent myComponent;
 
@@ -1359,8 +1334,7 @@ Now, assuming we obtain our controller object out of a Spring container, we can
 which is the EJB proxy object. We configure the proxy and set the
 `myComponent` property of the controller with the following configuration entry:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myComponent"
 			class="org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean">
@@ -1387,8 +1361,7 @@ Alternatively (and preferably in case of many such proxy definitions), consider 
 the `<jee:local-slsb>` configuration element in Spring's "`jee`" namespace.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jee:local-slsb id="myComponent" jndi-name="ejb/myBean"
 			business-interface="com.mycom.MyComponent"/>
@@ -1834,8 +1807,7 @@ that takes no destination argument uses the default destination.
 The following example uses the `MessageCreator` callback to create a text message from the
 supplied `Session` object:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.jms.ConnectionFactory;
 	import javax.jms.JMSException;
@@ -1910,8 +1882,7 @@ gives you access to the message after it has been converted but before it is sen
 following example shows how to modify a message header and a property after a
 `java.util.Map` is converted to a message:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public void sendWithConversion() {
 		Map map = new HashMap();
@@ -1954,7 +1925,7 @@ MapMessage={
 While the send operations cover many common usage scenarios, you might sometimes
 want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
 `SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
-`MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` execute
+`MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
 these callback methods.
 
 
@@ -1992,8 +1963,7 @@ on multiple threads, it is important to ensure that your implementation is threa
 
 The following example shows a simple implementation of an MDP:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.jms.JMSException;
 	import javax.jms.Message;
@@ -2024,8 +1994,7 @@ container.
 The following example shows how to define and configure one of the message listener
 containers that ships with Spring (in this case, `DefaultMessageListenerContainer`):
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
 	<bean id="messageListener" class="jmsexample.ExampleListener"/>
@@ -2051,8 +2020,7 @@ a similar contract to the JMS `MessageListener` interface but also gives the mes
 method access to the JMS `Session` from which the `Message` was received.
 The following listing shows the definition of the `SessionAwareMessageListener` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jms.listener;
 
@@ -2087,8 +2055,7 @@ messaging support. In a nutshell, it lets you expose almost any class as an MDP
 
 Consider the following interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface MessageDelegate {
 
@@ -2110,8 +2077,7 @@ receive and handle.
 
 Now consider the following implementation of the `MessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultMessageDelegate implements MessageDelegate {
 		// implementation elided for clarity...
@@ -2122,8 +2088,7 @@ In particular, note how the preceding implementation of the `MessageDelegate` in
 `DefaultMessageDelegate` class) has no JMS dependencies at all. It truly is a
 POJO that we can make into an MDP through the following configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- this is the Message Driven POJO (MDP) -->
 	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
@@ -2148,8 +2113,7 @@ also how the `receive(..)` method is strongly typed to receive and respond only 
 `TextMessage` messages.
 The following listing shows the definition of the `TextMessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TextMessageDelegate {
 
@@ -2159,8 +2123,7 @@ The following listing shows the definition of the `TextMessageDelegate` interfac
 
 The following listing shows a class that implements the `TextMessageDelegate` interface:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultTextMessageDelegate implements TextMessageDelegate {
 		// implementation elided for clarity...
@@ -2169,8 +2132,7 @@ The following listing shows a class that implements the `TextMessageDelegate` in
 
 The configuration of the attendant `MessageListenerAdapter` would then be as follows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
 		<constructor-arg>
@@ -2190,8 +2152,7 @@ swallowed). Another of the capabilities of the `MessageListenerAdapter` class is
 ability to automatically send back a response `Message` if a handler method returns a
 non-void value. Consider the following interface and class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface ResponsiveTextMessageDelegate {
 
@@ -2200,8 +2161,7 @@ non-void value. Consider the following interface and class:
 	}
 ----
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class DefaultResponsiveTextMessageDelegate implements ResponsiveTextMessageDelegate {
 		// implementation elided for clarity...
@@ -2236,8 +2196,7 @@ has committed but message processing failed to commit.
 
 Consider the following bean definition:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
@@ -2261,8 +2220,7 @@ semantics, at the expense of XA transaction log overhead).
 
 The following bean definition creates a transaction manager:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
 ----
@@ -2270,8 +2228,7 @@ The following bean definition creates a transaction manager:
 Then we need to add it to our earlier container configuration. The container
 takes care of the rest. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="connectionFactory" ref="connectionFactory"/>
@@ -2293,8 +2250,7 @@ automatically determine the `ActivationSpec` class name from the provider's
 `ResourceAdapter` class name. Therefore, it is typically possible to provide
 Spring's generic `JmsActivationSpecConfig`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
 		<property name="resourceAdapter" ref="resourceAdapter"/>
@@ -2311,8 +2267,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 `ActivationSpec` object. The `ActivationSpec` object may also come from a JNDI lookup
 (using `<jee:jndi-lookup>`). The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.jms.listener.endpoint.JmsMessageEndpointManager">
 		<property name="resourceAdapter" ref="resourceAdapter"/>
@@ -2329,8 +2284,7 @@ Alternatively, you can set up a `JmsMessageEndpointManager` with a given
 Using Spring's `ResourceAdapterFactoryBean`, you can configure the target `ResourceAdapter`
 locally, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="resourceAdapter" class="org.springframework.jca.support.ResourceAdapterFactoryBean">
 		<property name="resourceAdapter">
@@ -2361,7 +2315,7 @@ for more details.
 
 Spring also provides a generic JCA message endpoint manager that is not tied to JMS:
 `org.springframework.jca.endpoint.GenericMessageEndpointManager`. This component allows
-for using any message listener type (such as a CCI `MessageListener`) and any
+for using any message listener type (such as a JMS `MessageListener`) and any
 provider-specific `ActivationSpec` object. See your JCA provider's documentation to
 find out about the actual capabilities of your connector, and see the
 {api-spring-framework}/jca/endpoint/GenericMessageEndpointManager.html[`GenericMessageEndpointManager`]
@@ -2382,8 +2336,7 @@ The easiest way to receive a message asynchronously is to use the annotated list
 endpoint infrastructure. In a nutshell, it lets you expose a method of a managed
 bean as a JMS listener endpoint. The following example shows how to use it:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyService {
@@ -2415,8 +2368,7 @@ declarations to it.
 To enable support for `@JmsListener` annotations, you can add `@EnableJms` to one of
 your `@Configuration` classes, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2449,8 +2401,7 @@ for details and examples.
 If you prefer <<jms-namespace, XML configuration>>, you can use the `<jms:annotation-driven>`
 element, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:annotation-driven/>
 
@@ -2472,8 +2423,7 @@ the container for that model. The infrastructure lets you programmatically confi
 in addition to the ones that are detected by the `JmsListener` annotation.
 The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2507,8 +2457,7 @@ So far, we have been injecting a simple `String` in our endpoint, but it can act
 have a very flexible method signature. In the following example, we rewrite it to inject the `Order` with
 a custom header:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Component
 	public class MyService {
@@ -2542,8 +2491,7 @@ The ability to inject Spring's `Message` abstraction is particularly useful to b
 from all the information stored in the transport-specific message without relying on
 transport-specific API. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	public void processOrder(Message<Order> order) { ... }
@@ -2556,8 +2504,7 @@ support there as well.
 For instance, if we want to make sure our `Order` is valid before processing it, we can
 annotate the payload with `@Valid` and configure the necessary validator, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2591,8 +2538,7 @@ messaging abstraction.
 Assuming that our `processOrder` method should now return an `OrderStatus`, we can write it
 to automatically send a response, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
@@ -2608,8 +2554,7 @@ annotation at the class level to share a default reply destination.
 If you need to set additional headers in a transport-independent manner, you can return a
 `Message` instead, with a method similar to the following:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	@SendTo("status")
@@ -2626,8 +2571,7 @@ If you need to compute the response destination at runtime, you can encapsulate 
 in a `JmsResponse` instance that also provides the destination to use at runtime. We can rewrite the previous
 example as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@JmsListener(destination = "myDestination")
 	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
@@ -2644,8 +2588,7 @@ Finally, if you need to specify some QoS values for the response such as the pri
 the time to live, you can configure the `JmsListenerContainerFactory` accordingly,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableJms
@@ -2672,8 +2615,7 @@ as the following example shows:
 Spring provides an XML namespace for simplifying JMS configuration. To use the JMS
 namespace elements, you need to reference the JMS schema, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -2696,8 +2638,7 @@ annotation-driven listener endpoints>>. `<listener-container/>` and `<jca-listen
 define shared listener container configuration and can contain `<listener/>` child elements.
 The following example shows a basic configuration for two listeners:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:listener-container>
 
@@ -2765,8 +2706,7 @@ You can automatically expose such settings as a `JmsListenerContainerFactory` by
 specifying the `id` of the bean to expose through the `factory-id` attribute,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:listener-container connection-factory="myConnectionFactory"
 			task-executor="myTaskExecutor"
@@ -2893,8 +2833,7 @@ also provides a discussion of transaction choices and message redelivery scenari
 Configuring a JCA-based listener container with the `jms` schema support is very similar,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<jms:jca-listener-container resource-adapter="myResourceAdapter"
 			destination-resolver="myDestinationResolver"
@@ -3006,8 +2945,7 @@ The core class in Spring's JMX framework is the `MBeanExporter`. This class is
 responsible for taking your Spring beans and registering them with a JMX `MBeanServer`.
 For example, consider the following class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -3047,8 +2985,7 @@ To expose the properties and methods of this bean as attributes and operations o
 MBean, you can configure an instance of the `MBeanExporter` class in your
 configuration file and pass in the bean, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<!-- this bean must not be lazily initialized if the exporting is to happen -->
@@ -3101,8 +3038,7 @@ You can also ensure that a specific `MBeanServer` is used by setting the value o
 `MBeanExporter` instance's `server` property to the `MBeanServer` value returned by an
 `MBeanServerFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3145,8 +3081,7 @@ used. However, when multiple instances exist, the exporter might pick the wrong 
 In such cases, you should use the `MBeanServer` `agentId` to indicate which instance to
 be used, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
@@ -3167,8 +3102,7 @@ For platforms or cases where the existing `MBeanServer` has a dynamic (or unknow
 <<core.adoc#beans-factory-class-static-factory-method, factory-method>>,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -3202,8 +3136,7 @@ registered as-is with the `MBeanServer` without further intervention from Spring
 to be automatically detected by the `MBeanExporter` by setting the `autodetect`
 property to `true`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="autodetect" value="true"/>
@@ -3265,8 +3198,7 @@ values.
 The following example shows how to change from the default registration
 behavior to the `REPLACE_EXISTING` behavior:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3340,8 +3272,7 @@ an operation or an attribute.
 The following example shows the annotated version of the `JmxTestBean` class that we
 used in <<jmx-exporting-mbeanserver>>:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -3419,8 +3350,7 @@ contain only one operation (`add(int, int)`) when you use the `MetadataMBeanInfo
 The following configuration shows how you can configure the `MBeanExporter` to use the
 `MetadataMBeanInfoAssembler`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 		<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -3557,8 +3487,7 @@ the `MetadataMBeanInfoAssembler`, which votes to include any bean that is marked
 with the `ManagedResource` attribute. The default approach in this case is to use the
 bean name as the `ObjectName`, which results in a configuration similar to the following:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3606,8 +3535,7 @@ and removing the need for your beans to implement the MBean interfaces.
 Consider the following interface, which is used to define a management interface for the
 `JmxTestBean` class that we showed earlier:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface IJmxTestBean {
 
@@ -3630,8 +3558,7 @@ This interface defines the methods and properties that are exposed as operations
 attributes on the JMX MBean. The following code shows how to configure Spring JMX to use
 this interface as the definition for the management interface:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3684,8 +3611,7 @@ management interface.
 that are exposed to JMX as attributes and operations. The following code shows a sample
 configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
 		<property name="beans">
@@ -3737,8 +3663,7 @@ that corresponds to the bean key. If no entry is found or if the `Properties` in
 
 The following code shows a sample configuration for the `KeyNamingStrategy`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3788,8 +3713,7 @@ the `ObjectName`.
 attribute on each bean to create the `ObjectName`. The following code shows the
 configuration for the `MetadataNamingStrategy`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -3823,8 +3747,7 @@ format: _[fully-qualified-package-name]:type=[short-classname],name=[bean-name]_
 example, the generated `ObjectName` for the following bean would be
 `com.example:type=MyClass,name=myBean`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="myBean" class="com.example.MyClass"/>
 ----
@@ -3842,8 +3765,7 @@ always enabled as well). In fact, rather than defining an `MBeanExporter` bean, 
 simpler syntax is supported by the `@EnableMBeanExport` `@Configuration` annotation,
 as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableMBeanExport
@@ -3855,8 +3777,7 @@ as the following example shows:
 If you prefer XML-based configuration, the `<context:mbean-export/>` element serves the
 same purpose and is shown in the following listing:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:mbean-export/>
 ----
@@ -3867,8 +3788,7 @@ value for the generated MBean `ObjectName` domains. This is used in place of the
 fully qualified package name as described in the previous section on
 <<jmx-naming-metadata, MetadataNamingStrategy>>, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@EnableMBeanExport(server="myMBeanServer", defaultDomain="myDomain")
 	@Configuration
@@ -3879,8 +3799,7 @@ fully qualified package name as described in the previous section on
 
 The following example shows the XML equivalent of the preceding annotation-based example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>
 ----
@@ -3908,8 +3827,7 @@ connectors.
 To have Spring JMX create, start, and expose a JSR-160 `JMXConnectorServer`, you can use the
 following configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/>
 ----
@@ -3925,8 +3843,7 @@ To specify another URL and register the `JMXConnectorServer` itself with the
 `MBeanServer`, you can use the `serviceUrl` and `ObjectName` properties, respectively,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector"
 			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
@@ -3941,8 +3858,7 @@ with the `MBeanServer` under that `ObjectName`. The following example shows the 
 parameters that you can pass to the `ConnectorServerFactoryBean` when creating a
 `JMXConnector`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector"
 			class="org.springframework.jmx.support.ConnectorServerFactoryBean">
@@ -3965,8 +3881,7 @@ use Spring to export remote services for you through RMI, Spring has already
 constructed an RMI registry. If not, you can easily start a registry by using the following
 snippet of configuration:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
 		<property name="port" value="1099"/>
@@ -3980,8 +3895,7 @@ snippet of configuration:
 To create an `MBeanServerConnection` to a remote JSR-160-enabled `MBeanServer`, you can use the
 `MBeanServerConnectionFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
 		<property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi"/>
@@ -3999,8 +3913,7 @@ other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J
 can take advantage of protocols such as SOAP or Hessian over simple HTTP or SSL and others,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
 		<property name="objectName" value="connector:name=burlap"/>
@@ -4021,8 +3934,7 @@ local or remote `MBeanServer`. These proxies provide you with a standard Java in
 through which you can interact with your MBeans. The following code shows how to configure a
 proxy for an MBean running in a local `MBeanServer`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
 		<property name="objectName" value="bean:name=testBean"/>
@@ -4041,8 +3953,7 @@ The `MBeanProxyFactoryBean` can create a proxy to any MBean that is accessible t
 you can override this and provide an `MBeanServerConnection` that points to a remote
 `MBeanServer` to cater for proxies that point to remote MBeans:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="clientConnector"
 			class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
@@ -4080,8 +3991,7 @@ example, consider the scenario where one would like to be informed (through a
 `Notification`) each and every time an attribute of a target MBean changes. The following
 example writes notifications to the console:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package com.example;
 
@@ -4108,8 +4018,7 @@ example writes notifications to the console:
 The following example adds `ConsoleLoggingNotificationListener` (defined in the preceding
 example) to `notificationListenerMappings`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4145,8 +4054,7 @@ it deems appropriate in response to the `Notification`.
 You can also use straight bean names as the link between exported beans and listeners,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4178,8 +4086,7 @@ that the enclosing `MBeanExporter` exports, you can use the special wildcard (`{
 as the key for an entry in the `notificationListenerMappings` property
 map, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<property name="notificationListenerMappings">
 		<map>
@@ -4203,8 +4110,7 @@ object that can be used in advanced JMX notification scenarios.
 The configuration when using `NotificationListenerBean` instances is not wildly
 different to what was presented previously, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4243,8 +4149,7 @@ we want to be given a handback object every time a `Notification` is raised and 
 we also want to filter out extraneous `Notifications` by supplying a
 `NotificationFilter`. The following example accomplishes these goals:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans>
 
@@ -4336,8 +4241,7 @@ published, and invoke the `sendNotification(Notification)` on the
 In the following example, exported instances of the `JmxTestBean` publish a
 `NotificationEvent` every time the `add(int, int)` operation is invoked:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	package org.springframework.jmx;
 
@@ -4396,1150 +4300,6 @@ homepage] at Oracle.
 
 
 
-[[cci]]
-== JCA CCI
-
-Java EE provides a specification to standardize access to enterprise information systems
-(EIS): the JCA (Java EE Connector Architecture). This specification is divided into
-two different parts:
-
-* SPI (Service Provider Interfaces) that the connector provider must implement. These
-  interfaces constitute a resource adapter that can be deployed on a Java EE
-  application server. In such a scenario, the server manages connection pooling,
-  transactions, and security (managed mode). The application server is also responsible
-  for managing the configuration, which is held outside the client application. A
-  connector can be used without an application server as well. In this case, the
-  application must configure it directly (non-managed mode).
-* CCI (Common Client Interface) that an application can use to interact with the
-  connector and, thus, communicate with an EIS. An API for local transaction demarcation
-  is provided as well.
-
-The aim of the Spring CCI support is to provide classes to access a CCI connector in
-typical Spring style, using the Spring Framework's general resource and transaction
-management facilities.
-
-NOTE: The client side of connectors does not always use CCI. Some connectors expose their own
-APIs, providing a JCA resource adapter to use the system contracts of a Java EE container
-(connection pooling, global transactions, and security). Spring does not offer special
-support for such connector-specific APIs.
-
-
-
-[[cci-config]]
-=== Configuring CCI
-
-This section covers how to configure a Common Client Interface (CCI). It includes the
-following topics:
-
-* <<cci-config-connector>>
-* <<cci-config-connectionfactory>>
-* <<cci-config-cci-connections>>
-* <<cci-config-single-connection>>
-
-
-[[cci-config-connector]]
-==== Connector Configuration
-
-The base resource to use JCA CCI is the `ConnectionFactory` interface. The connector
-you use must provide an implementation of this interface.
-
-To use your connector, you can deploy it on your application server and fetch the
-`ConnectionFactory` from the server's JNDI environment (managed mode). The connector
-must be packaged as a RAR file (resource adapter archive) and contain a `ra.xml` file to
-describe its deployment characteristics. The actual name of the resource is specified
-when you deploy it. To access it within Spring, you can use Spring's
-`JndiObjectFactoryBean` or `<jee:jndi-lookup>` to fetch the factory by its JNDI name.
-
-Another way to use a connector is to embed it in your application (non-managed mode) and
-not use an application server to deploy and configure it. Spring offers the
-possibility to configure a connector as a bean, through a `FactoryBean` implementation called
-(`LocalConnectionFactoryBean`). In this manner, you only need the connector library in
-the classpath (no RAR file and no `ra.xml` descriptor needed). The library must be
-extracted from the connector's RAR file, if necessary.
-
-Once you have access to your `ConnectionFactory` instance, you can inject it into
-your components. These components can either be coded against the plain CCI API or
-use Spring's support classes for CCI access (e.g. `CciTemplate`).
-
-NOTE: When you use a connector in non-managed mode, you cannot use global transactions, because
-the resource is never enlisted or delisted in the current global transaction of the
-current thread. The resource is not aware of any global Java EE transactions that
-might be running.
-
-
-[[cci-config-connectionfactory]]
-==== `ConnectionFactory` Configuration in Spring
-
-To make connections to the EIS, you need to obtain a `ConnectionFactory` from
-the application server (if you are in a managed mode) or directly from Spring (if you are
-in a non-managed mode).
-
-In managed mode, you can access a `ConnectionFactory` from JNDI. Its properties are
-configured in the application server. The following example shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<jee:jndi-lookup id="eciConnectionFactory" jndi-name="eis/cicseci"/>
-----
-
-In non-managed mode, you must configure the `ConnectionFactory` you want to use in the
-configuration of Spring as a JavaBean. The `LocalConnectionFactoryBean` class offers
-this setup style, passing in the `ManagedConnectionFactory` implementation of your
-connector, exposing the application-level CCI `ConnectionFactory`. The following example
-shows how to do so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="eciManagedConnectionFactory" class="com.ibm.connector2.cics.ECIManagedConnectionFactory">
-		<property name="serverName" value="TXSERIES"/>
-		<property name="connectionURL" value="tcp://localhost/"/>
-		<property name="portNumber" value="2006"/>
-	</bean>
-
-	<bean id="eciConnectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="eciManagedConnectionFactory"/>
-	</bean>
-----
-
-NOTE: You cannot directly instantiate a specific `ConnectionFactory`. You need to go through
-the corresponding implementation of the `ManagedConnectionFactory` interface for your
-connector. This interface is part of the JCA SPI specification.
-
-
-[[cci-config-cci-connections]]
-==== Configuring CCI Connections
-
-JCA CCI lets you configure the connections to the EIS by using the
-`ConnectionSpec` implementation of your connector. To configure its properties,
-you need to wrap the target connection factory with a dedicated adapter,
-`ConnectionSpecConnectionFactoryAdapter`. You can configure the dedicated `ConnectionSpec`
-with the `connectionSpec` property (as an inner bean).
-
-This property is not mandatory, because the CCI `ConnectionFactory` interface defines two
-different methods to obtain a CCI connection. You can often configure some of the `ConnectionSpec` properties
-in the application server (in managed mode) or on the
-corresponding local `ManagedConnectionFactory` implementation. The following listing
-shows the relevant parts of the `ConnectionFactory` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface ConnectionFactory implements Serializable, Referenceable {
-		...
-		Connection getConnection() throws ResourceException;
-		Connection getConnection(ConnectionSpec connectionSpec) throws ResourceException;
-		...
-	}
-----
-
-Spring provides a `ConnectionSpecConnectionFactoryAdapter` that lets you specify a
-`ConnectionSpec` instance to use for all operations on a given factory. If the adapter's
-`connectionSpec` property is specified, the adapter uses the `getConnection` variant
-with the `ConnectionSpec` argument. Otherwise, the adapter uses the variant without that argument.
-The following example shows how to configure a `ConnectionSpecConnectionFactoryAdapter`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="managedConnectionFactory"
-			class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory">
-		<property name="connectionURL" value="jdbc:hsqldb:hsql://localhost:9001"/>
-		<property name="driverName" value="org.hsqldb.jdbcDriver"/>
-	</bean>
-
-	<bean id="targetConnectionFactory"
-			class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="managedConnectionFactory"/>
-	</bean>
-
-	<bean id="connectionFactory"
-			class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
-		<property name="targetConnectionFactory" ref="targetConnectionFactory"/>
-		<property name="connectionSpec">
-			<bean class="com.sun.connector.cciblackbox.CciConnectionSpec">
-				<property name="user" value="sa"/>
-				<property name="password" value=""/>
-			</bean>
-		</property>
-	</bean>
-----
-
-
-[[cci-config-single-connection]]
-==== Using a Single CCI Connection
-
-If you want to use a single CCI connection, Spring provides a further
-`ConnectionFactory` adapter to manage this. The `SingleConnectionFactory` adapter class
-lazily opens a single connection and closes it when this bean is destroyed at
-application shutdown. This class exposes special `Connection` proxies that behave
-accordingly, all sharing the same underlying physical connection. The following example
-shows how to use the `SingleConnectionFactory` adapter class:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="eciManagedConnectionFactory"
-			class="com.ibm.connector2.cics.ECIManagedConnectionFactory">
-		<property name="serverName" value="TEST"/>
-		<property name="connectionURL" value="tcp://localhost/"/>
-		<property name="portNumber" value="2006"/>
-	</bean>
-
-	<bean id="targetEciConnectionFactory"
-			class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="eciManagedConnectionFactory"/>
-	</bean>
-
-	<bean id="eciConnectionFactory"
-			class="org.springframework.jca.cci.connection.SingleConnectionFactory">
-		<property name="targetConnectionFactory" ref="targetEciConnectionFactory"/>
-	</bean>
-----
-
-NOTE: This `ConnectionFactory` adapter cannot directly be configured with a `ConnectionSpec`.
-You can use an intermediary `ConnectionSpecConnectionFactoryAdapter` that the
-`SingleConnectionFactory` talks to if you require a single connection for a specific
-`ConnectionSpec`.
-
-
-
-[[cci-using]]
-=== Using Spring's CCI Access Support
-
-This section describes how to use Spring's support for CCI to achieve various purposes.
-It includes the following topics:
-
-* <<cci-record-creator>>
-* <<cci-using-template>>
-* <<cci-using-dao>>
-* <<automatic-output-generation>>
-* <<template-summary>>
-* <<cci-straight>>
-* <<cci-template-example>>
-
-
-[[cci-record-creator]]
-==== Record Conversion
-
-One of the aims of Spring's JCA CCI support is to provide convenient facilities for
-manipulating CCI records. You can specify the strategy to create records and extract
-data from records, for use with Spring's `CciTemplate`. The interfaces described in
-this section configure the strategy to use input and output records if you do not want
-to work with records directly in your application.
-
-To create an input `Record`, you can use a dedicated implementation of the `RecordCreator`
-interface. The following listing shows the `RecordCreator` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface RecordCreator {
-
-		Record createRecord(RecordFactory recordFactory) throws ResourceException, DataAccessException;
-
-	}
-----
-
-The `createRecord(..)` method receives a `RecordFactory` instance as a
-parameter, which corresponds to the `RecordFactory` of the `ConnectionFactory` used.
-You can use this reference to create `IndexedRecord` or `MappedRecord` instances. The
-following sample shows how to use the `RecordCreator` interface and indexed or mapped
-records:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyRecordCreator implements RecordCreator {
-
-		public Record createRecord(RecordFactory recordFactory) throws ResourceException {
-			IndexedRecord input = recordFactory.createIndexedRecord("input");
-			input.add(new Integer(id));
-			return input;
-		}
-
-	}
-----
-
-You can use an output `Record` to receive data back from the EIS. Hence, you can pass a specific
-implementation of the `RecordExtractor` interface to Spring's
-`CciTemplate` to extract data from the output `Record`. The following listing shows the
-`RecordExtractor` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface RecordExtractor {
-
-		Object extractData(Record record) throws ResourceException, SQLException, DataAccessException;
-
-	}
-----
-
-The following example shows how to use the `RecordExtractor` interface:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyRecordExtractor implements RecordExtractor {
-
-		public Object extractData(Record record) throws ResourceException {
-			CommAreaRecord commAreaRecord = (CommAreaRecord) record;
-			String str = new String(commAreaRecord.toByteArray());
-			String field1 = string.substring(0,6);
-			String field2 = string.substring(6,1);
-			return new OutputObject(Long.parseLong(field1), field2);
-		}
-
-	}
-----
-
-
-[[cci-using-template]]
-==== Using `CciTemplate`
-
-The `CciTemplate` is the central class of the core CCI support package (
-`org.springframework.jca.cci.core`). It simplifies the use of CCI, since it handles the
-creation and release of resources. This helps to avoid common errors, such as forgetting to
-always close the connection. It cares for the lifecycle of connection and interaction
-objects, letting application code focus on generating input records from application
-data and extracting application data from output records.
-
-The JCA CCI specification defines two distinct methods to call operations on an EIS. The
-CCI `Interaction` interface provides two execute method signatures, as the following
-listing shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface javax.resource.cci.Interaction {
-
-		...
-
-		boolean execute(InteractionSpec spec, Record input, Record output) throws ResourceException;
-
-		Record execute(InteractionSpec spec, Record input) throws ResourceException;
-
-		...
-
-	}
-----
-
-Depending on the template method called, `CciTemplate` knows which `execute` method
-to call on the interaction. In any case, a correctly initialized `InteractionSpec`
-instance is mandatory.
-
-You can use `CciTemplate.execute(..)` in two ways:
-
-* With direct `Record` arguments. In this case, you need to pass in the CCI input
-  record, and the returned object is the corresponding CCI output record.
-* With application objects, by using record mapping. In this case, you need to provide
-  corresponding `RecordCreator` and `RecordExtractor` instances.
-
-With the first approach, the following methods (which directly correspond to those on the
-`Interaction` interface) of the template are used:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class CciTemplate implements CciOperations {
-
-		public Record execute(InteractionSpec spec, Record inputRecord)
-				throws DataAccessException { ... }
-
-		public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord)
-				throws DataAccessException { ... }
-
-	}
-----
-
-With the second approach, we need to specify the record creation and record
-extraction strategies as arguments. The interfaces used are those describe in the
-<<cci-record-creator, previous section on record conversion>>. The following
-listing shows the corresponding `CciTemplate` methods:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class CciTemplate implements CciOperations {
-
-		public Record execute(InteractionSpec spec,
-				RecordCreator inputCreator) throws DataAccessException {
-			// ...
-		}
-
-		public Object execute(InteractionSpec spec, Record inputRecord,
-				RecordExtractor outputExtractor) throws DataAccessException {
-			// ...
-		}
-
-		public Object execute(InteractionSpec spec, RecordCreator creator,
-				RecordExtractor extractor) throws DataAccessException {
-			// ...
-		}
-
-	}
-----
-
-Unless the `outputRecordCreator` property is set on the template (see the following
-section), every method calls the corresponding `execute` method of the CCI
-`Interaction` with two parameters: `InteractionSpec` and an input `Record`. It receives an
-output `Record` as its return value.
-
-`CciTemplate` also provides methods to create `IndexRecord` and `MappedRecord` outside of a
-`RecordCreator` implementation, through its `createIndexRecord(..)` and
-`createMappedRecord(..)` methods. You can use this within DAO implementations to create
-`Record` instances to pass into corresponding `CciTemplate.execute(..)` methods.
-The following listing shows the `CciTemplate` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class CciTemplate implements CciOperations {
-
-		public IndexedRecord createIndexedRecord(String name) throws DataAccessException { ... }
-
-		public MappedRecord createMappedRecord(String name) throws DataAccessException { ... }
-
-	}
-----
-
-
-[[cci-using-dao]]
-==== Using DAO Support
-
-Spring's CCI support provides an abstract class for DAOs, supporting injection of a
-`ConnectionFactory` or a `CciTemplate` instance. The name of the class is
-`CciDaoSupport`. It provides simple `setConnectionFactory` and `setCciTemplate` methods.
-Internally, this class creates a `CciTemplate` instance for a passed-in
-`ConnectionFactory`, exposing it to concrete data access implementations in subclasses.
-The following example shows how to use `CciDaoSupport`:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public abstract class CciDaoSupport {
-
-		public void setConnectionFactory(ConnectionFactory connectionFactory) {
-			// ...
-		}
-
-		public ConnectionFactory getConnectionFactory() {
-			// ...
-		}
-
-		public void setCciTemplate(CciTemplate cciTemplate) {
-			// ...
-		}
-
-		public CciTemplate getCciTemplate() {
-			// ...
-		}
-
-	}
-----
-
-
-[[automatic-output-generation]]
-==== Automatic Output Record Generation
-
-If the connector you use supports only the `Interaction.execute(..)` method with input and
-output records as parameters (that is, it requires the desired output record to be passed
-in instead of returning an appropriate output record), you can set the `outputRecordCreator`
-property of the `CciTemplate` to automatically generate an output record to be filled by
-the JCA connector when the response is received. This record is then returned to the caller
-of the template.
-
-This property holds an implementation of the <<cci-record-creator, `RecordCreator` interface>>,
-to be used for that purpose. You must directly specify the `outputRecordCreator` property on
-the `CciTemplate`. The following example shows how to do so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	cciTemplate.setOutputRecordCreator(new EciOutputRecordCreator());
-----
-
-Alternatively (and we recommend this approach), in the Spring configuration, if the
-`CciTemplate` is configured as a dedicated bean instance, you can define beans in the
-following fashion:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="eciOutputRecordCreator" class="eci.EciOutputRecordCreator"/>
-
-	<bean id="cciTemplate" class="org.springframework.jca.cci.core.CciTemplate">
-		<property name="connectionFactory" ref="eciConnectionFactory"/>
-		<property name="outputRecordCreator" ref="eciOutputRecordCreator"/>
-	</bean>
-----
-
-NOTE: As the `CciTemplate` class is thread-safe, it is usually configured as a shared
-instance.
-
-
-[[template-summary]]
-==== `CciTemplate` `Interaction` Summary
-
-The following table summarizes the mechanisms of the `CciTemplate` class and the
-corresponding methods called on the CCI `Interaction` interface:
-
-[[cci-interaction-execute-methods]]
-.Usage of Interaction execute methods
-[cols="3,1,3"]
-|===
-| `CciTemplate` method signature | `CciTemplate` `outputRecordCreator` property | `execute` method called on the CCI Interaction
-
-| `Record execute(InteractionSpec, Record)`
-| Not set
-| `Record execute(InteractionSpec, Record)`
-
-| `Record execute(InteractionSpec, Record)`
-| Set
-| `boolean execute(InteractionSpec, Record, Record)`
-
-| void execute(InteractionSpec, Record, Record)
-| Not set
-| void execute(InteractionSpec, Record, Record)
-
-| `void execute(InteractionSpec, Record, Record)`
-| Set
-| `void execute(InteractionSpec, Record, Record)`
-
-| `Record execute(InteractionSpec, RecordCreator)`
-| Not set
-| `Record execute(InteractionSpec, Record)`
-
-| `Record execute(InteractionSpec, RecordCreator)`
-| Set
-| `void execute(InteractionSpec, Record, Record)`
-
-| `Record execute(InteractionSpec, Record, RecordExtractor)`
-| Not set
-| `Record execute(InteractionSpec, Record)`
-
-| `Record execute(InteractionSpec, Record, RecordExtractor)`
-| Set
-| `void execute(InteractionSpec, Record, Record)`
-
-| `Record execute(InteractionSpec, RecordCreator, RecordExtractor)`
-| Not set
-| `Record execute(InteractionSpec, Record)`
-
-| `Record execute(InteractionSpec, RecordCreator, RecordExtractor)`
-| Set
-| `void execute(InteractionSpec, Record, Record)`
-|===
-
-
-[[cci-straight]]
-==== Using a CCI Connection and an Interaction Directly
-
-`CciTemplate` also lets you work directly with CCI connections and
-interactions, in the same manner as `JdbcTemplate` and `JmsTemplate`. This is useful
-when you want to perform multiple operations on a CCI connection or interaction, for
-example.
-
-The `ConnectionCallback` interface provides a CCI `Connection` as an argument (to
-perform custom operations on it) plus the CCI `ConnectionFactory` with which the `Connection`
-was created. The latter can be useful (for example, to get an associated
-`RecordFactory` instance and create indexed/mapped records).
-The following listing shows the `ConnectionCallback` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface ConnectionCallback {
-
-		Object doInConnection(Connection connection, ConnectionFactory connectionFactory)
-				throws ResourceException, SQLException, DataAccessException;
-
-	}
-----
-
-The `InteractionCallback` interface provides the CCI `Interaction` (to perform
-custom operations on it) plus the corresponding CCI `ConnectionFactory`.
-The following listing shows the `InteractionCallback` interface definition:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public interface InteractionCallback {
-
-		Object doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
-			throws ResourceException, SQLException, DataAccessException;
-
-	}
-----
-
-NOTE: `InteractionSpec` objects can either be shared across multiple template calls or be newly
-created inside every callback method. This is completely up to the DAO implementation.
-
-
-[[cci-template-example]]
-==== Example of `CciTemplate` Usage
-
-In this section, we show the usage of the `CciTemplate` to access a CICS with
-ECI mode, with the IBM CICS ECI connector.
-
-First, we must do some initializations on the CCI `InteractionSpec` to specify which
-CICS program to access and how to interact with it, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	ECIInteractionSpec interactionSpec = new ECIInteractionSpec();
-	interactionSpec.setFunctionName("MYPROG");
-	interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);
-----
-
-Then the program can use CCI through Spring's template and specify mappings between custom
-objects and CCI `Records`, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyDaoImpl extends CciDaoSupport implements MyDao {
-
-		public OutputObject getData(InputObject input) {
-			ECIInteractionSpec interactionSpec = ...;
-
-		OutputObject output = (ObjectOutput) getCciTemplate().execute(interactionSpec,
-			new RecordCreator() {
-				public Record createRecord(RecordFactory recordFactory) throws ResourceException {
-					return new CommAreaRecord(input.toString().getBytes());
-				}
-			},
-			new RecordExtractor() {
-				public Object extractData(Record record) throws ResourceException {
-					CommAreaRecord commAreaRecord = (CommAreaRecord)record;
-					String str = new String(commAreaRecord.toByteArray());
-					String field1 = string.substring(0,6);
-					String field2 = string.substring(6,1);
-					return new OutputObject(Long.parseLong(field1), field2);
-				}
-			});
-
-			return output;
-		}
-	}
-----
-
-As discussed previously, you can use callbacks to work directly on CCI connections or
-interactions. The following example shows how to do so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyDaoImpl extends CciDaoSupport implements MyDao {
-
-		public OutputObject getData(InputObject input) {
-			ObjectOutput output = (ObjectOutput) getCciTemplate().execute(
-				new ConnectionCallback() {
-					public Object doInConnection(Connection connection,
-							ConnectionFactory factory) throws ResourceException {
-
-						// do something...
-
-					}
-				});
-			}
-			return output;
-		}
-
-	}
-----
-
-NOTE: With a `ConnectionCallback`, the `Connection` used is managed and closed by the
-`CciTemplate`, but the callback implementation must manage any interactions created on the
-connection.
-
-For a more specific callback, you can implement an `InteractionCallback`. If you do so, the passed-in
-`Interaction` is managed and closed by the `CciTemplate`. The following example shows how to do so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyDaoImpl extends CciDaoSupport implements MyDao {
-
-		public String getData(String input) {
-			ECIInteractionSpec interactionSpec = ...;
-			String output = (String) getCciTemplate().execute(interactionSpec,
-				new InteractionCallback() {
-					public Object doInInteraction(Interaction interaction,
-							ConnectionFactory factory) throws ResourceException {
-						Record input = new CommAreaRecord(inputString.getBytes());
-						Record output = new CommAreaRecord();
-						interaction.execute(holder.getInteractionSpec(), input, output);
-						return new String(output.toByteArray());
-					}
-				});
-			return output;
-		}
-
-	}
-----
-
-For the preceding examples, the corresponding configuration of the involved Spring beans
-could resemble the following example in non-managed mode:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="managedConnectionFactory" class="com.ibm.connector2.cics.ECIManagedConnectionFactory">
-		<property name="serverName" value="TXSERIES"/>
-		<property name="connectionURL" value="local:"/>
-		<property name="userName" value="CICSUSER"/>
-		<property name="password" value="CICS"/>
-	</bean>
-
-	<bean id="connectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="managedConnectionFactory"/>
-	</bean>
-
-	<bean id="component" class="mypackage.MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-In managed mode (that is, in a Java EE environment), the configuration could resemble
-the following example:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<jee:jndi-lookup id="connectionFactory" jndi-name="eis/cicseci"/>
-
-	<bean id="component" class="MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-
-
-[[cci-object]]
-=== Modeling CCI Access as Operation Objects
-
-The `org.springframework.jca.cci.object` package contains support classes that let you
-access the EIS in a different style: through reusable operation objects, analogous to
-Spring's JDBC operation objects (see the <<data-access.adoc#jdbc, JDBC section of the
-Data Access chapter>>). This usually encapsulates the CCI API. An application-level
-input object is passed to the operation object, so it can construct the input record and
-then convert the received record data to an application-level output object and return it.
-
-NOTE: This approach is internally based on the `CciTemplate` class and the `RecordCreator`
-or `RecordExtractor` interfaces, reusing the machinery of Spring's core CCI support.
-
-
-[[cci-object-mapping-record]]
-==== Using `MappingRecordOperation`
-
-`MappingRecordOperation` essentially performs the same work as `CciTemplate` but
-represents a specific, pre-configured operation as an object. It provides two template
-methods to specify how to convert an input object to an input record and how to convert
-an output record to an output object (record mapping):
-
-* `createInputRecord(..)`: to specify how to convert an input object to an input `Record`
-* `extractOutputData(..)`: to specify how to extract an output object from an output `Record`
-
-The following listing shows the signatures of these methods:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public abstract class MappingRecordOperation extends EisOperation {
-
-		...
-
-		protected abstract Record createInputRecord(RecordFactory recordFactory,
-				Object inputObject) throws ResourceException, DataAccessException {
-			// ...
-		}
-
-		protected abstract Object extractOutputData(Record outputRecord)
-				throws ResourceException, SQLException, DataAccessException {
-			// ...
-		}
-
-		...
-
-	}
-----
-
-Thereafter, ito execute an EIS operation, you need to use a single `execute`
-method, passing in an application-level input object and receiving an application-level
-output object as the result. The following example shows how to do so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public abstract class MappingRecordOperation extends EisOperation {
-
-		...
-
-		public Object execute(Object inputObject) throws DataAccessException {
-		}
-
-		...
-	}
-----
-
-Contrary to the `CciTemplate` class, this `execute(..)` method does not
-have an `InteractionSpec` as an argument. Instead, the `InteractionSpec` is global to the
-operation. You must use the following constructor to instantiate an operation object
-with a specific `InteractionSpec`. The following example shows how to do so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	InteractionSpec spec = ...;
-	MyMappingRecordOperation eisOperation = new MyMappingRecordOperation(getConnectionFactory(), spec);
-	...
-----
-
-
-[[cci-object-mapping-comm-area]]
-==== Using `MappingCommAreaOperation`
-
-Some connectors use records based on a COMMAREA, which represents an array of bytes
-that contain parameters to send to the EIS and the data returned by it. Spring provides a
-special operation class for working directly on COMMAREA rather than on records. The
-`MappingCommAreaOperation` class extends the `MappingRecordOperation` class to provide
-this special COMMAREA support. It implicitly uses the `CommAreaRecord` class as the input
-and output record type and provides two new methods to convert an input object into an
-input COMMAREA and convert the output COMMAREA into an output object. The following
-listing shows the relevant method signatures:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public abstract class MappingCommAreaOperation extends MappingRecordOperation {
-
-		...
-
-		protected abstract byte[] objectToBytes(Object inObject)
-				throws IOException, DataAccessException;
-
-		protected abstract Object bytesToObject(byte[] bytes)
-			throws IOException, DataAccessException;
-
-		...
-
-	}
-----
-
-
-[[cci-automatic-record-gen]]
-==== Automatic Output Record Generation
-
-As every `MappingRecordOperation` subclass is based on CciTemplate internally, the same
-way to automatically generate output records as with `CciTemplate` is available.
-Every operation object provides a corresponding `setOutputRecordCreator(..)` method.
-For further information, see <<automatic-output-generation>>.
-
-
-[[cci-object-summary]]
-==== Summary
-
-The operation object approach uses records in the same manner as the `CciTemplate` class.
-
-[[cci-interaction-methods]]
-.Usage of Interaction execute methods
-[cols="3,1,3"]
-|===
-| `MappingRecordOperation` method signature | `MappingRecordOperation` `outputRecordCreator` property | `execute` method called on the CCI Interaction
-
-| `Object execute(Object)`
-| Not set
-| `Record execute(InteractionSpec, Record)`
-
-| `Object execute(Object)`
-| Set
-| `boolean execute(InteractionSpec, Record, Record)`
-|===
-
-
-[[cci-objects-mappring-record-example]]
-==== Example of `MappingRecordOperation` Usage
-
-In this section, we show how to use `MappingRecordOperation` to access a
-database with the Blackbox CCI connector.
-
-NOTE: The original version of this connector is provided by the Java EE SDK (version 1.3),
-which is available from Oracle.
-
-First, you must do some initializations on the CCI `InteractionSpec` to specify which
-SQL request to execute. In the following example, we directly define the way to convert the
-parameters of the request to a CCI record and the way to convert the CCI result record
-to an instance of the `Person` class:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class PersonMappingOperation extends MappingRecordOperation {
-
-		public PersonMappingOperation(ConnectionFactory connectionFactory) {
-			setConnectionFactory(connectionFactory);
-			CciInteractionSpec interactionSpec = new CciConnectionSpec();
-			interactionSpec.setSql("select * from person where person_id=?");
-			setInteractionSpec(interactionSpec);
-		}
-
-		protected Record createInputRecord(RecordFactory recordFactory,
-				Object inputObject) throws ResourceException {
-			Integer id = (Integer) inputObject;
-			IndexedRecord input = recordFactory.createIndexedRecord("input");
-			input.add(new Integer(id));
-			return input;
-		}
-
-		protected Object extractOutputData(Record outputRecord)
-				throws ResourceException, SQLException {
-			ResultSet rs = (ResultSet) outputRecord;
-			Person person = null;
-			if (rs.next()) {
-				Person person = new Person();
-				person.setId(rs.getInt("person_id"));
-				person.setLastName(rs.getString("person_last_name"));
-				person.setFirstName(rs.getString("person_first_name"));
-			}
-			return person;
-		}
-	}
-----
-
-Then the application can execute the operation object, with the person identifier as an
-argument. Note that you could set up the operation object as a shared instance, as it is
-thread-safe. The following executes the operation object with the person identifier as an
-argument:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyDaoImpl extends CciDaoSupport implements MyDao {
-
-		public Person getPerson(int id) {
-			PersonMappingOperation query = new PersonMappingOperation(getConnectionFactory());
-			Person person = (Person) query.execute(new Integer(id));
-			return person;
-		}
-	}
-----
-
-The corresponding configuration of Spring beans could be as follows in non-managed mode:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="managedConnectionFactory"
-			class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory">
-		<property name="connectionURL" value="jdbc:hsqldb:hsql://localhost:9001"/>
-		<property name="driverName" value="org.hsqldb.jdbcDriver"/>
-	</bean>
-
-	<bean id="targetConnectionFactory"
-			class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="managedConnectionFactory"/>
-	</bean>
-
-	<bean id="connectionFactory"
-			class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
-		<property name="targetConnectionFactory" ref="targetConnectionFactory"/>
-		<property name="connectionSpec">
-			<bean class="com.sun.connector.cciblackbox.CciConnectionSpec">
-				<property name="user" value="sa"/>
-				<property name="password" value=""/>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="component" class="MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-In managed mode (that is, in a Java EE environment), the configuration could be as
-follows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<jee:jndi-lookup id="targetConnectionFactory" jndi-name="eis/blackbox"/>
-
-	<bean id="connectionFactory"
-			class="org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter">
-		<property name="targetConnectionFactory" ref="targetConnectionFactory"/>
-		<property name="connectionSpec">
-			<bean class="com.sun.connector.cciblackbox.CciConnectionSpec">
-				<property name="user" value="sa"/>
-				<property name="password" value=""/>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="component" class="MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-
-[[cci-objects-mapping-comm-area-example]]
-==== Example of `MappingCommAreaOperation` Usage
-
-In this section, we show how to use the usage of the `MappingCommAreaOperation` to access a
-CICS with ECI mode with the IBM CICS ECI connector.
-
-First, we need to initialize the CCI `InteractionSpec` to specify which CICS program
-to access and how to interact with it, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public abstract class EciMappingOperation extends MappingCommAreaOperation {
-
-		public EciMappingOperation(ConnectionFactory connectionFactory, String programName) {
-			setConnectionFactory(connectionFactory);
-			ECIInteractionSpec interactionSpec = new ECIInteractionSpec(),
-			interactionSpec.setFunctionName(programName);
-			interactionSpec.setInteractionVerb(ECIInteractionSpec.SYNC_SEND_RECEIVE);
-			interactionSpec.setCommareaLength(30);
-			setInteractionSpec(interactionSpec);
-			setOutputRecordCreator(new EciOutputRecordCreator());
-		}
-
-		private static class EciOutputRecordCreator implements RecordCreator {
-			public Record createRecord(RecordFactory recordFactory) throws ResourceException {
-				return new CommAreaRecord();
-			}
-		}
-
-	}
-----
-
-We can then subclass the abstract `EciMappingOperation` class to specify mappings
-between custom objects and `Records`, as the following example shows:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyDaoImpl extends CciDaoSupport implements MyDao {
-
-		public OutputObject getData(Integer id) {
-			EciMappingOperation query = new EciMappingOperation(getConnectionFactory(), "MYPROG") {
-
-				protected abstract byte[] objectToBytes(Object inObject) throws IOException {
-					Integer id = (Integer) inObject;
-					return String.valueOf(id);
-				}
-
-				protected abstract Object bytesToObject(byte[] bytes) throws IOException;
-					String str = new String(bytes);
-					String field1 = str.substring(0,6);
-					String field2 = str.substring(6,1);
-					String field3 = str.substring(7,1);
-					return new OutputObject(field1, field2, field3);
-				}
-			});
-
-			return (OutputObject) query.execute(new Integer(id));
-		}
-
-	}
-----
-
-The corresponding configuration of Spring beans could be as follows in non-managed mode:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="managedConnectionFactory" class="com.ibm.connector2.cics.ECIManagedConnectionFactory">
-		<property name="serverName" value="TXSERIES"/>
-		<property name="connectionURL" value="local:"/>
-		<property name="userName" value="CICSUSER"/>
-		<property name="password" value="CICS"/>
-	</bean>
-
-	<bean id="connectionFactory" class="org.springframework.jca.support.LocalConnectionFactoryBean">
-		<property name="managedConnectionFactory" ref="managedConnectionFactory"/>
-	</bean>
-
-	<bean id="component" class="MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-In managed mode (that is, in a Java EE environment), the configuration could be as
-follows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<jee:jndi-lookup id="connectionFactory" jndi-name="eis/cicseci"/>
-
-	<bean id="component" class="MyDaoImpl">
-		<property name="connectionFactory" ref="connectionFactory"/>
-	</bean>
-----
-
-
-
-[[cci-tx]]
-=== Transactions
-
-JCA specifies several levels of transaction support for resource adapters. The kind of
-transactions that your resource adapter supports is specified in its `ra.xml` file.
-There are essentially three options: none (for example, with the CICS EPI connector), local
-transactions (for example, with a CICS ECI connector), and global transactions (for example,
-with an IMS connector). The following example configures the global option:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<connector>
-		<resourceadapter>
-			<!-- <transaction-support>NoTransaction</transaction-support> -->
-			<!-- <transaction-support>LocalTransaction</transaction-support> -->
-			<transaction-support>XATransaction</transaction-support>
-		<resourceadapter>
-	<connector>
-----
-
-For global transactions, you can use Spring's generic transaction infrastructure to
-demarcate transactions, with `JtaTransactionManager` as the backend (delegating to the Java
-EE server's distributed transaction coordinator underneath).
-
-For local transactions on a single CCI `ConnectionFactory`, Spring provides a specific
-transaction-management strategy for CCI, analogous to the `DataSourceTransactionManager`
-for JDBC. The CCI API defines a local transaction object and corresponding local
-transaction demarcation methods. Spring's `CciLocalTransactionManager` executes such
-local CCI transactions in a fashion that is fully compliant with Spring's generic
-`PlatformTransactionManager` abstraction. The following example configures a `CciLocalTransactionManager`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<jee:jndi-lookup id="eciConnectionFactory" jndi-name="eis/cicseci"/>
-
-	<bean id="eciTransactionManager"
-			class="org.springframework.jca.cci.connection.CciLocalTransactionManager">
-		<property name="connectionFactory" ref="eciConnectionFactory"/>
-	</bean>
-----
-
-You can use both transaction strategies with any of Spring's transaction demarcation
-facilities, be it declarative or programmatic. This is a consequence of Spring's generic
-`PlatformTransactionManager` abstraction, which decouples transaction demarcation from
-the actual execution strategy. You can switch between `JtaTransactionManager` and
-`CciLocalTransactionManager` as needed, keeping your transaction demarcation as-is.
-
-For more information on Spring's transaction facilities, see
-<<data-access.adoc#transaction, Transaction Management>>.
-
-
-
-
 [[mail]]
 == Email
 
@@ -5550,10 +4310,11 @@ This section describes how to send email with the Spring Framework.
 The following JAR needs to be on the classpath of your application in order to use
 the Spring Framework's email library:
 
-* The https://javaee.github.io/javamail/[JavaMail] library
+* The https://eclipse-ee4j.github.io/mail/[JavaMail / Jakarta Mail 1.6] library
 
 This library is freely available on the web -- for example, in Maven Central as
-`com.sun.mail:javax.mail`.
+`com.sun.mail:jakarta.mail`. Please make sure to use the latest 1.6.x version
+rather than Jakarta Mail 2.0 (which comes with a different package namespace).
 ****
 
 The Spring Framework provides a helpful utility library for sending email that shields
@@ -5581,8 +4342,7 @@ JavaMail features, such as MIME message support to the `MailSender` interface
 
 Assume that we have a business interface called `OrderManager`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface OrderManager {
 
@@ -5601,8 +4361,7 @@ order number needs to be generated and sent to a customer who placed the relevan
 The following example shows how to use `MailSender` and `SimpleMailMessage` to send an
 email when someone places an order:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.mail.MailException;
 	import org.springframework.mail.MailSender;
@@ -5649,8 +4408,7 @@ email when someone places an order:
 
 The following example shows the bean definitions for the preceding code:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="mail.mycompany.example"/>
@@ -5676,8 +4434,7 @@ This section describes another implementation of `OrderManager` that uses the `M
 callback interface. In the following example, the `mailSender` property is of type
 `JavaMailSender` so that we are able to use the JavaMail `MimeMessage` class:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import javax.mail.Message;
 	import javax.mail.MessagingException;
@@ -5725,8 +4482,8 @@ callback interface. In the following example, the `mailSender` property is of ty
 ----
 
 NOTE: The mail code is a crosscutting concern and could well be a candidate for
-refactoring into a <<core.adoc#aop, custom Spring AOP aspect>>, which then could
-be executed at appropriate joinpoints on the `OrderManager` target.
+refactoring into a <<core.adoc#aop, custom Spring AOP aspect>>, which could then
+be run at appropriate joinpoints on the `OrderManager` target.
 
 The Spring Framework's mail support ships with the standard JavaMail implementation.
 See the relevant javadoc for more information.
@@ -5741,8 +4498,7 @@ A class that comes in pretty handy when dealing with JavaMail messages is
 having to use the verbose JavaMail API. Using the `MimeMessageHelper`, it is
 pretty easy to create a `MimeMessage`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	// of course you would use DI in any real-world cases
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
@@ -5770,8 +4526,7 @@ that you do not want displayed as an attachment.
 The following example shows you how to use the `MimeMessageHelper` to send an email
 with a single JPEG image attachment:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
 	sender.setHost("mail.host.com");
@@ -5797,8 +4552,7 @@ with a single JPEG image attachment:
 The following example shows you how to use the `MimeMessageHelper` to send an email
 with an inline image:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	JavaMailSenderImpl sender = new JavaMailSenderImpl();
 	sender.setHost("mail.host.com");
@@ -5900,7 +4654,7 @@ In all likelihood, you should never need to implement your own.
 The variants that Spring provides are as follows:
 
 * `SyncTaskExecutor`:
-  This implementation does not execute invocations asynchronously. Instead, each
+  This implementation does not run invocations asynchronously. Instead, each
   invocation takes place in the calling thread. It is primarily used in situations
   where multi-threading is not necessary, such as in simple test cases.
 * `SimpleAsyncTaskExecutor`:
@@ -5936,8 +4690,7 @@ Spring's `TaskExecutor` implementations are used as simple JavaBeans. In the fol
 we define a bean that uses the `ThreadPoolTaskExecutor` to asynchronously print
 out a set of messages:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	import org.springframework.core.task.TaskExecutor;
 
@@ -5972,12 +4725,11 @@ out a set of messages:
 
 As you can see, rather than retrieving a thread from the pool and executing it yourself,
 you add your `Runnable` to the queue. Then the `TaskExecutor` uses its internal rules to
-decide when the task gets executed.
+decide when the task gets run.
 
 To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
 		<property name="corePoolSize" value="5"/>
@@ -5999,8 +4751,7 @@ In addition to the `TaskExecutor` abstraction, Spring 3.0 introduced a `TaskSche
 with a variety of methods for scheduling tasks to run at some point in the future.
 The following listing shows the `TaskScheduler` interface definition:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TaskScheduler {
 
@@ -6045,8 +4796,7 @@ If these determinations do take into account the outcome of the preceding execut
 that information is available within a `TriggerContext`. The `Trigger` interface itself
 is quite simple, as the following listing shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface Trigger {
 
@@ -6059,8 +4809,7 @@ the relevant data and is open for extension in the future, if necessary. The
 `TriggerContext` is an interface (a `SimpleTriggerContext` implementation is used by
 default). The following listing shows the available methods for `Trigger` implementations.
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TriggerContext {
 
@@ -6077,8 +4826,9 @@ default). The following listing shows the available methods for `Trigger` implem
 ==== `Trigger` Implementations
 
 Spring provides two implementations of the `Trigger` interface. The most interesting one
-is the `CronTrigger`. It enables the scheduling of tasks based on cron expressions. For
-example, the following task is scheduled to run 15 minutes past each hour but only
+is the `CronTrigger`. It enables the scheduling of tasks based on
+<<scheduling-cron-expression,cron expressions>>.
+For example, the following task is scheduled to run 15 minutes past each hour but only
 during the 9-to-5 "`business hours`" on weekdays:
 
 [source,java,indent=0]
@@ -6134,8 +4884,7 @@ execution.
 To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling` and
 `@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableAsync
@@ -6155,8 +4904,7 @@ javadoc for full details.
 If you prefer XML configuration, you can use the `<task:annotation-driven>` element,
 as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
 	<task:executor id="myExecutor" pool-size="5"/>
@@ -6181,12 +4929,11 @@ example, the following method is invoked every five seconds with a fixed delay,
 meaning that the period is measured from the completion time of each preceding
 invocation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(fixedDelay=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
@@ -6194,12 +4941,11 @@ If you need a fixed-rate execution, you can change the property name specified w
 the annotation. The following method is invoked every five seconds (measured between the
 successive start times of each invocation):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(fixedRate=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
@@ -6207,24 +4953,24 @@ For fixed-delay and fixed-rate tasks, you can specify an initial delay by indica
 number of milliseconds to wait before the first execution of the method, as the following
 `fixedRate` example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Scheduled(initialDelay=1000, fixedRate=5000)
 	public void doSomething() {
-		// something that should execute periodically
+		// something that should run periodically
 	}
 ----
 
-If simple periodic scheduling is not expressive enough, you can provide a cron expression.
-For example, the following executes only on weekdays:
+If simple periodic scheduling is not expressive enough, you can provide a
+<<scheduling-cron-expression,cron expression>>.
+The following example runs only on weekdays:
 
 [source,java,indent=0]
 [subs="verbatim"]
 ----
 	@Scheduled(cron="*/5 * * * * MON-FRI")
 	public void doSomething() {
-		// something that should execute on weekdays only
+		// something that should run on weekdays only
 	}
 ----
 
@@ -6258,12 +5004,11 @@ invocation, while the actual execution of the method occurs in a task that has b
 submitted to a Spring `TaskExecutor`. In the simplest case, you can apply the annotation
 to a method that returns `void`, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	void doSomething() {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -6272,12 +5017,11 @@ arguments, because they are invoked in the "`normal`" way by callers at runtime 
 than from a scheduled task being managed by the container. For example, the following code is
 a legitimate application of the `@Async` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	void doSomething(String s) {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -6287,12 +5031,11 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 `get()` on that `Future`. The following example shows how to use `@Async` on a method
 that returns a value:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async
 	Future<String> returnSomething(int i) {
-		// this will be executed asynchronously
+		// this will be run asynchronously
 	}
 ----
 
@@ -6306,8 +5049,7 @@ You can not use `@Async` in conjunction with lifecycle callbacks such as
 a separate initializing Spring bean that then invokes the `@Async` annotated method on the
 target, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class SampleBeanImpl implements SampleBean {
 
@@ -6350,12 +5092,11 @@ implementation, if any. However, you can use the `value` attribute of the `@Asyn
 annotation when you need to indicate that an executor other than the default should be
 used when executing a given method. The following example shows how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Async("otherExecutor")
 	void doSomething(String s) {
-		// this will be executed asynchronously by "otherExecutor"
+		// this will be run asynchronously by "otherExecutor"
 	}
 ----
 
@@ -6374,8 +5115,7 @@ however, the exception is uncaught and cannot be transmitted. You can provide an
 `AsyncUncaughtExceptionHandler` to handle such exceptions. The following example shows
 how to do so:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
 
@@ -6405,8 +5145,7 @@ scheduled with a trigger.
 The following element creates a `ThreadPoolTaskScheduler` instance with the
 specified thread pool size:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:scheduler id="scheduler" pool-size="10"/>
 ----
@@ -6422,8 +5161,7 @@ There are no other configuration options for the scheduler.
 
 The following creates a `ThreadPoolTaskExecutor` instance:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor id="executor" pool-size="10"/>
 ----
@@ -6439,8 +5177,7 @@ max sizes are the same). However, the `executor` element's `pool-size` attribute
 accepts a range in the form of `min-max`. The following example sets a minimum value of
 `5` and a maximum value of `25`:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithPoolSizeRange"
@@ -6488,8 +5225,7 @@ element.
 The following example shows an `executor` element with a number of attributes to specify
 various behaviors:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithCallerRunsPolicy"
@@ -6499,14 +5235,13 @@ various behaviors:
 ----
 
 Finally, the `keep-alive` setting determines the time limit (in seconds) for which threads
-may remain idle before being terminated. If there are more than the core number of threads
+may remain idle before being stopped. If there are more than the core number of threads
 currently in the pool, after waiting this amount of time without processing a task, excess
-threads get terminated. A time value of zero causes excess threads to terminate
+threads get stopped. A time value of zero causes excess threads to stop
 immediately after executing a task without remaining follow-up work in the task queue.
 The following example sets the `keep-alive` value to two minutes:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:executor
 			id="executorWithKeepAlive"
@@ -6525,8 +5260,7 @@ for configuring message-driven POJOs. Basically, a `ref` attribute can point to 
 Spring-managed object, and the `method` attribute provides the name of a method to be
 invoked on that object. The following listing shows a simple example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<task:scheduled-tasks scheduler="myScheduler">
 		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000"/>
@@ -6539,10 +5273,11 @@ The scheduler is referenced by the outer element, and each individual
 task includes the configuration of its trigger metadata. In the preceding example, that
 metadata defines a periodic trigger with a fixed delay indicating the number of
 milliseconds to wait after each task execution has completed. Another option is
-`fixed-rate`, indicating how often the method should be executed regardless of how long
+`fixed-rate`, indicating how often the method should be run regardless of how long
 any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate` tasks, you can specify an
 'initial-delay' parameter, indicating the number of milliseconds to wait
-before the first execution of the method. For more control, you can instead provide a `cron` attribute.
+before the first execution of the method. For more control, you can instead provide a `cron` attribute
+to provide a <<scheduling-cron-expression,cron expression>>.
 The following example shows these other options:
 
 [source,xml,indent=0]
@@ -6557,6 +5292,93 @@ The following example shows these other options:
 	<task:scheduler id="myScheduler" pool-size="10"/>
 ----
 
+
+
+[[scheduling-cron-expression]]
+=== Cron Expressions
+
+All Spring cron expressions have to conform to the same format, whether you are using them in
+<<scheduling-annotation-support-scheduled,`@Scheduled` annotations>>,
+<<scheduling-task-namespace-scheduled-tasks,`task:scheduled-tasks` elements>>,
+or someplace else.
+A well-formed cron expression, such as `* * * * * *`, consists of six space-separated time and date
+fields, each with its own range of valid values:
+
+
+....
+ ┌───────────── second (0-59)
+ │ ┌───────────── minute (0 - 59)
+ │ │ ┌───────────── hour (0 - 23)
+ │ │ │ ┌───────────── day of the month (1 - 31)
+ │ │ │ │ ┌───────────── month (1 - 12) (or JAN-DEC)
+ │ │ │ │ │ ┌───────────── day of the week (0 - 7)
+ │ │ │ │ │ │          (0 or 7 is Sunday, or MON-SUN)
+ │ │ │ │ │ │
+ * * * * * *
+....
+
+There are some rules that apply:
+
+* A field may be an asterisk (`*`), which always stands for "`first-last`".
+For the day-of-the-month or day-of-the-week fields, a question mark (`?`) may be used instead of an
+asterisk.
+* Commas (`,`) are used to separate items of a list.
+* Two numbers separated with a hyphen (`-`) express a range of numbers.
+The specified range is inclusive.
+* Following a range (or `*`) with `/` specifies the interval of the number's value through the range.
+* English names can also be used for the day-of-month and day-of-week fields.
+Use the first three letters of the particular day or month (case does not matter).
+* The day-of-month and day-of-week fields can contain a `L` character, which has a different meaning
+** In the day-of-month field, `L` stands for _the last day of the month_.
+If followed by a negative offset (that is, `L-n`), it means _``n``th-to-last day of the month_.
+** In the day-of-week field, `L` stands for _the last day of the week_.
+If prefixed by a number or three-letter name (`dL` or `DDDL`), it means _the last day of week (`d`
+or `DDD`) in the month_.
+* The day-of-month field can be `nW`, which stands for _the nearest weekday to day of the month ``n``_.
+If `n` falls on Saturday, this yields the Friday before it.
+If `n` falls on Sunday, this yields the Monday after, which also happens if `n` is `1` and falls on
+a Saturday (that is: `1W` stands for _the first weekday of the month_).
+* If the day-of-month field is `LW`, it means _the last weekday of the month_.
+* The day-of-week field can be `d#n` (or `DDD#n`), which stands for _the ``n``th day of week `d`
+(or ``DDD``) in the month_.
+
+Here are some examples:
+
+|===
+| Cron Expression       | Meaning
+
+|`0 0 * * * *`          | top of every hour of every day
+|`*/10 * * * * *`       | every ten seconds
+| `0 0 8-10 * * *`      | 8, 9 and 10 o'clock of every day
+| `0 0 6,19 * * *`      | 6:00 AM and 7:00 PM every day
+| `0 0/30 8-10 * * *`   | 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day
+| `0 0 9-17 * * MON-FRI`| on the hour nine-to-five weekdays
+| `0 0 0 25 DEC ?`       | every Christmas Day at midnight
+| `0 0 0 L * *`         | last day of the month at midnight
+| `0 0 0 L-3 * *`       | third-to-last day of the month at midnight
+| `0 0 0 * * 5L`        | last Friday of the month at midnight
+| `0 0 0 * * THUL`      | last Thursday of the month at midnight
+| `0 0 0 1W * *`        | first weekday of the month at midnight
+| `0 0 0 LW * *`        | last weekday of the month at midnight
+| `0 0 0 ? * 5#2`       | the second Friday in the month at midnight
+| `0 0 0 ? * MON#1`     | the first Monday in the month at midnight
+|===
+
+==== Macros
+
+Expressions such as `0 0 * * * *` are hard for humans to parse and are, therefore, hard to fix in case of bugs.
+To improve readability, Spring supports the following macros, which represent commonly used sequences.
+You can use these macros instead of the six-digit value, thus: `@Scheduled(cron = "@hourly")`.
+
+|===
+|Macro                          | Meaning
+
+| `@yearly` (or `@annually`)    | once a year (`0 0 0 1 1 *`)
+| `@monthly`                    | once a month (`0 0 0 1 * *`)
+| `@weekly`                     | once a week (`0 0 0 * * 0`)
+| `@daily` (or `@midnight`)     | once a day (`0 0 0 * * *`), or
+| `@hourly`                     | once an hour, (`0 0 * * * *`)
+|===
 
 
 [[scheduling-quartz]]
@@ -6575,8 +5397,7 @@ Quartz `JobDetail` objects contain all the information needed to run a job. Spri
 `JobDetailFactoryBean`, which provides bean-style properties for XML configuration purposes.
 Consider the following example:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
 		<property name="jobClass" value="example.ExampleJob"/>
@@ -6632,8 +5453,7 @@ of the `JobDetailFactoryBean` (`exampleJob` in the preceding example above).
 Often you merely need to invoke a method on a specific object. By using the
 `MethodInvokingJobDetailFactoryBean`, you can do exactly this, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="exampleBusinessObject"/>
@@ -6644,8 +5464,7 @@ Often you merely need to invoke a method on a specific object. By using the
 The preceding example results in the `doIt` method being called on the
 `exampleBusinessObject` method, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public class ExampleBusinessObject {
 
@@ -6657,8 +5476,7 @@ The preceding example results in the `doIt` method being called on the
 	}
 ----
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>
 ----
@@ -6675,8 +5493,7 @@ job does not start before the first one has finished. To make jobs resulting fro
 `MethodInvokingJobDetailFactoryBean` be non-concurrent, set the `concurrent` flag to
 `false`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="exampleBusinessObject"/>
@@ -6727,8 +5544,7 @@ The preceding example sets up two triggers, one running every 50 seconds with a 
 seconds and one running every morning at 6 AM. To finalize everything, we need to set up the
 `SchedulerFactoryBean`, as the following example shows:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
@@ -6786,17 +5602,17 @@ https://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_an
 At its core, the cache abstraction applies caching to Java methods, thus reducing the
 number of executions based on the information available in the cache. That is, each time
 a targeted method is invoked, the abstraction applies a caching behavior that checks
-whether the method has been already executed for the given arguments. If it has been
-executed, the cached result is returned without having to execute the actual method.
-If the method has not been executed, then it is executed, and the result is cached and
+whether the method has been already invoked for the given arguments. If it has been
+invoked, the cached result is returned without having to invoke the actual method.
+If the method has not been invoked, then it is invoked, and the result is cached and
 returned to the user so that, the next time the method is invoked, the cached result is
-returned. This way, expensive methods (whether CPU- or IO-bound) can be executed only
+returned. This way, expensive methods (whether CPU- or IO-bound) can be invoked only
 once for a given set of parameters and the result reused without having to actually
-execute the method again. The caching logic is applied transparently without any
+invoke the method again. The caching logic is applied transparently without any
 interference to the invoker.
 
 IMPORTANT: This approach works only for methods that are guaranteed to return the same
-output (result) for a given input (or arguments) no matter how many times it is executed.
+output (result) for a given input (or arguments) no matter how many times it is invoked.
 
 The caching abstraction provides other cache-related operations, such as the ability
 to update the content of the cache or to remove one or all entries. These are useful if
@@ -6854,12 +5670,11 @@ For caching declaration, Spring's caching abstraction provides a set of Java ann
 As the name implies, you can use `@Cacheable` to demarcate methods that are cacheable --
 that is, methods for which the result is stored in the cache so that, on subsequent
 invocations (with the same arguments), the value in the cache is returned without
-having to actually execute the method. In its simplest form, the annotation declaration
+having to actually invoke the method. In its simplest form, the annotation declaration
 requires the name of the cache associated with the annotated method, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable("books")
 	public Book findBook(ISBN isbn) {...}
@@ -6867,18 +5682,17 @@ example shows:
 
 In the preceding snippet, the `findBook` method is associated with the cache named `books`.
 Each time the method is called, the cache is checked to see whether the invocation has
-already been executed and does not have to be repeated. While in most cases, only one
+already been run and does not have to be repeated. While in most cases, only one
 cache is declared, the annotation lets multiple names be specified so that more than one
-cache is being used. In this case, each of the caches is checked before executing the
+cache is being used. In this case, each of the caches is checked before invoking the
 method -- if at least one cache is hit, the associated value is returned.
 
 NOTE: All the other caches that do not contain the value are also updated, even though
-the cached method was not actually executed.
+the cached method was not actually invoked.
 
 The following example uses `@Cacheable` on the `findBook` method:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable({"books", "isbns"})
 	public Book findBook(ISBN isbn) {...}
@@ -6923,8 +5737,7 @@ that cannot be readily mapped on top of the cache structure. This tends to becom
 when the target method has multiple arguments out of which only some are suitable for
 caching (while the rest are used only by the method logic). Consider the following example:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable("books")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6946,8 +5759,7 @@ work for some methods, it rarely works for all methods.
 The following examples use various SpEL declarations (if you are not familiar with SpEL,
 do yourself a favor and read <<core.adoc#expressions, Spring Expression Language>>):
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6967,8 +5779,7 @@ to be shared, you can define a custom `keyGenerator` on the operation. To do so,
 specify the name of the `KeyGenerator` bean implementation to use, as the following
 example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", keyGenerator="myKeyGenerator")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -6996,8 +5807,7 @@ single `CacheManager` and have no complex cache resolution requirements.
 For applications that work with several cache managers, you can set the
 `cacheManager` to use for each operation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", cacheManager="anotherCacheManager") <1>
 	public Book findBook(ISBN isbn) {...}
@@ -7011,8 +5821,7 @@ requested for every cache operation, letting the implementation actually resolve
 the caches to use based on runtime arguments. The following example shows how to
 specify a `CacheResolver`:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheResolver="runtimeCacheResolver") <1>
 	public Book findBook(ISBN isbn) {...}
@@ -7045,8 +5854,7 @@ cache provider to lock the cache entry while the value is being computed. As a r
 only one thread is busy computing the value, while the others are blocked until the entry
 is updated in the cache. The following example shows how to use the `sync` attribute:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="foos", sync=true) <1>
 	public Foo executeExpensiveOperation(String id) {...}
@@ -7061,16 +5869,15 @@ documentation of your cache provider for more details.
 [[cache-annotations-cacheable-condition]]
 ===== Conditional Caching
 
-Sometimes, a method might not be suitable for caching all the time (for example, it
-might depend on the given arguments). The cache annotations support such functionality
-through the `condition` parameter, which takes a `SpEL` expression that is evaluated to
-either `true` or `false`. If `true`, the method is cached. If not, it behaves as if the
-method is not cached (that is, the method is executed every time no matter what values are in the cache
-or what arguments are used). For example, the following method is cached only
-if the argument `name` has a length shorter than 32:
+Sometimes, a method might not be suitable for caching all the time (for example, it might
+depend on the given arguments). The cache annotations support such use cases through the
+`condition` parameter, which takes a `SpEL` expression that is evaluated to either `true`
+or `false`. If `true`, the method is cached. If not, it behaves as if the method is not
+cached (that is, the method is invoked every time no matter what values are in the cache
+or what arguments are used). For example, the following method is cached only if the
+argument `name` has a length shorter than 32:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32") <1>
 	public Book findBook(String name)
@@ -7080,11 +5887,10 @@ if the argument `name` has a length shorter than 32:
 
 In addition to the `condition` parameter, you can use the `unless` parameter to veto the
 adding of a value to the cache. Unlike `condition`, `unless` expressions are evaluated
-after the method has been called. To expand on the previous example, perhaps we
-only want to cache paperback books, as the following example does:
+after the method has been invoked. To expand on the previous example, perhaps we only
+want to cache paperback books, as the following example does:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32", unless="#result.hardback") <1>
 	public Book findBook(String name)
@@ -7096,8 +5902,7 @@ The cache abstraction supports `java.util.Optional`, using its content as the ca
 only if it is present. `#result` always refers to the business entity and never a
 supported wrapper, so the previous example can be rewritten as follows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="book", condition="#name.length() < 32", unless="#result?.hardback")
 	public Optional<Book> findBook(String name)
@@ -7146,7 +5951,7 @@ available to the context so that you can use them for key and conditional comput
 
 | `caches`
 | Root object
-| Collection of caches against which the current method is executed
+| Collection of caches against which the current method is run
 | `#root.caches[0].name`
 
 | Argument name
@@ -7170,13 +5975,12 @@ available to the context so that you can use them for key and conditional comput
 ==== The `@CachePut` Annotation
 
 When the cache needs to be updated without interfering with the method execution,
-you can use the `@CachePut` annotation. That is, the method is always executed and its
+you can use the `@CachePut` annotation. That is, the method is always invoked and its
 result is placed into the cache (according to the `@CachePut` options). It supports
 the same options as `@Cacheable` and should be used for cache population rather than
 method flow optimization. The following example uses the `@CachePut` annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CachePut(cacheNames="book", key="#isbn")
 	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
@@ -7184,8 +5988,8 @@ method flow optimization. The following example uses the `@CachePut` annotation:
 
 IMPORTANT: Using `@CachePut` and `@Cacheable` annotations on the same method is generally
 strongly discouraged because they have different behaviors. While the latter causes the
-method execution to be skipped by using the cache, the former forces the execution in
-order to execute a cache update. This leads to unexpected behavior and, with the exception
+method invocation to be skipped by using the cache, the former forces the invocation in
+order to run a cache update. This leads to unexpected behavior and, with the exception
 of specific corner-cases (such as annotations having conditions that exclude them from each
 other), such declarations should be avoided. Note also that such conditions should not rely
 on the result object (that is, the `#result` variable), as these are validated up-front to
@@ -7206,8 +6010,7 @@ condition to be specified, and features an extra parameter
 rather than just an entry eviction (based on the key). The following example evicts
 all entries from the `books` cache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheEvict(cacheNames="books", allEntries=true) <1>
 	public void loadBooks(InputStream batch)
@@ -7222,17 +6025,18 @@ Note that the framework ignores any key specified in this scenario as it does no
 (the entire cache is evicted, not only one entry).
 
 You can also indicate whether the eviction should occur after (the default) or before
-the method executes by using the `beforeInvocation` attribute. The former provides the
+the method is invoked by using the `beforeInvocation` attribute. The former provides the
 same semantics as the rest of the annotations: Once the method completes successfully,
-an action (in this case, eviction) on the cache is executed. If the method does not
-execute (as it might be cached) or an exception is thrown, the eviction does not occur.
+an action (in this case, eviction) on the cache is run. If the method does not
+run (as it might be cached) or an exception is thrown, the eviction does not occur.
 The latter (`beforeInvocation=true`) causes the eviction to always occur before the
 method is invoked. This is useful in cases where the eviction does not need to be tied
 to the method outcome.
 
-Note that `void` methods can be used with `@CacheEvict` - as the methods act as a trigger,
-the return values are ignored (as they do not interact with the cache). This is not the case
-with `@Cacheable` which adds or updates data into the cache and, thus, requires a result.
+Note that `void` methods can be used with `@CacheEvict` - as the methods act as a
+trigger, the return values are ignored (as they do not interact with the cache). This is
+not the case with `@Cacheable` which adds data to the cache or updates data in the cache
+and, thus, requires a result.
 
 
 [[cache-annotations-caching]]
@@ -7244,8 +6048,7 @@ expression is different between different caches. `@Caching` lets multiple neste
 `@Cacheable`, `@CachePut`, and `@CacheEvict` annotations be used on the same method.
 The following example uses two `@CacheEvict` annotations:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames="secondary", key="#p0") })
 	public Book importBooks(String deposit, Date date)
@@ -7262,8 +6065,7 @@ instance, specifying the name of the cache to use for every cache operation of t
 class can be replaced by a single class-level definition. This is where `@CacheConfig`
 comes into play. The following examples uses `@CacheConfig` to set the name of the cache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheConfig("books") <1>
 	public class BookRepositoryImpl implements BookRepository {
@@ -7299,8 +6101,7 @@ your code).
 To enable caching annotations add the annotation `@EnableCaching` to one of your
 `@Configuration` classes:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Configuration
 	@EnableCaching
@@ -7310,8 +6111,7 @@ To enable caching annotations add the annotation `@EnableCaching` to one of your
 
 Alternatively, for XML configuration you can use the `cache:annotation-driven` element:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -7458,8 +6258,7 @@ use `@Cacheable`, `@CachePut`, `@CacheEvict`, and `@CacheConfig` as
 can annotate other annotations). In the following example, we replace a common
 `@Cacheable` declaration with our own custom annotation:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
@@ -7471,8 +6270,7 @@ can annotate other annotations). In the following example, we replace a common
 In the preceding example, we have defined our own `SlowService` annotation,
 which itself is annotated with `@Cacheable`. Now we can replace the following code:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -7481,8 +6279,7 @@ which itself is annotated with `@Cacheable`. Now we can replace the following co
 The following example shows the custom annotation with which we can replace the
 preceding code:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@SlowService
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -7556,8 +6353,7 @@ of `@CacheResult#cacheName()` for more information.
 `CacheResolver` instances are retrieved by a `CacheResolverFactory`. It is possible
 to customize the factory for each cache operation, as the following example shows:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheNames="books", cacheResolverFactory=MyCacheResolverFactory.class) <1>
 	public Book findBook(ISBN isbn)
@@ -7576,8 +6372,7 @@ similar to Spring's <<cache-annotations-cacheable-key, custom key generation
 declaration>>. For instance, the following are identical operations, one using
 Spring's abstraction and the other using JCache:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
@@ -7597,8 +6392,7 @@ retrieved with such a parameter). The following caches the exception so that fur
 calls with the same, invalid, ISBN throw the cached exception directly instead of
 invoking the method again:
 
-[source,java,indent=0]
-[subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes"]
 ----
 	@CacheResult(cacheName="books", exceptionCacheName="failures"
 				cachedExceptions = InvalidIsbnNotFoundException.class)
@@ -7692,8 +6486,7 @@ The JDK-based `Cache` implementation resides under
 `org.springframework.cache.concurrent` package. It lets you use `ConcurrentHashMap`
 as a backing `Cache` store. The following example shows how to configure two caches:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<!-- simple cache manager -->
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
@@ -7725,8 +6518,7 @@ The Ehcache 2.x implementation is located in the `org.springframework.cache.ehca
 package. Again, to use it, you need to declare the appropriate `CacheManager`.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
@@ -7750,8 +6542,7 @@ of Caffeine.
 
 The following example configures a `CacheManager` that creates the cache on demand:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
@@ -7760,8 +6551,7 @@ The following example configures a `CacheManager` that creates the cache on dema
 You can also provide the caches to use explicitly. In that case, only those
 are made available by the manager. The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
 		<property name="caches">
@@ -7797,8 +6587,7 @@ implementation is located in the `org.springframework.cache.jcache` package.
 Again, to use it, you need to declare the appropriate `CacheManager`.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager"
 			class="org.springframework.cache.jcache.JCacheCacheManager"
@@ -7817,11 +6606,10 @@ declarations without having an actual backing cache configured. As this is an in
 configuration, an exception is thrown at runtime, since the caching infrastructure
 is unable to find a suitable store. In situations like this, rather than removing the
 cache declarations (which can prove tedious), you can wire in a simple dummy cache that
-performs no caching -- that is, it forces the cached methods to be executed every time.
+performs no caching -- that is, it forces the cached methods to be invoked every time.
 The following example shows how to do so:
 
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
+[source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
 		<property name="cacheManagers">
@@ -7839,7 +6627,7 @@ through the `fallbackToNoOpCache` flag, adds a no-op cache for all the definitio
 handled by the configured cache managers. That is, every cache definition not found in
 either `jdkCache` or `gemfireCache` (configured earlier in the example) is handled by
 the no-op cache, which does not store any information, causing the target method to be
-executed every time.
+invoked every time.
 
 
 
@@ -7872,4 +6660,4 @@ directly through the backing cache (when configuring it) or through its native A
 
 
 
-include::integration-appendix.adoc[leveloffset=+1]
+include::integration/integration-appendix.adoc[leveloffset=+1]

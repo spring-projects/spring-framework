@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 
 	@Override
 	public Object resolveArgumentValue(MethodParameter parameter, Message<?> message) {
-
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
@@ -108,6 +107,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 
 		if (parameter != nestedParameter || !ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
 			arg = this.conversionService.convert(arg, TypeDescriptor.forObject(arg), new TypeDescriptor(parameter));
+			// Check for null value after conversion of incoming argument value
+			if (arg == null && namedValueInfo.defaultValue == null &&
+					namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValue(namedValueInfo.name, nestedParameter, message);
+			}
 		}
 
 		return arg;
@@ -144,10 +148,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements SyncHa
 		if (info.name.isEmpty()) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				Class<?> type = parameter.getParameterType();
 				throw new IllegalArgumentException(
-						"Name for argument of type [" + type.getName() + "] not specified, " +
-								"and parameter name information not found in class file either.");
+						"Name for argument of type [" + parameter.getNestedParameterType().getName() +
+						"] not specified, and parameter name information not found in class file either.");
 			}
 		}
 		return new NamedValueInfo(name, info.required,

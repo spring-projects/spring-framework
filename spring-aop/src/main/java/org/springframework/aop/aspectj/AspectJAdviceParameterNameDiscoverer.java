@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -470,22 +470,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	@Nullable
 	private String maybeExtractVariableName(@Nullable String candidateToken) {
-		if (!StringUtils.hasLength(candidateToken)) {
-			return null;
-		}
-		if (Character.isJavaIdentifierStart(candidateToken.charAt(0)) &&
-				Character.isLowerCase(candidateToken.charAt(0))) {
-			char[] tokenChars = candidateToken.toCharArray();
-			for (char tokenChar : tokenChars) {
-				if (!Character.isJavaIdentifierPart(tokenChar)) {
-					return null;
-				}
-			}
+		if (AspectJProxyUtils.isVariableName(candidateToken)) {
 			return candidateToken;
 		}
-		else {
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -648,7 +636,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				}
 
 				if (tokens[currentIndex].endsWith(")")) {
-					sb.append(tokens[currentIndex].substring(0, tokens[currentIndex].length() - 1));
+					sb.append(tokens[currentIndex], 0, tokens[currentIndex].length() - 1);
 					return new PointcutBody(numTokensConsumed, sb.toString().trim());
 				}
 

@@ -101,7 +101,7 @@ operations on the output, but you need to adapt the output for use with another 
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
 of RxJava or another reactive library. See <<webflux-reactive-libraries>> for more details.
 
-NOTE: In addition to Reactive APIs, WebFlux can also be used with 
+NOTE: In addition to Reactive APIs, WebFlux can also be used with
 <<languages.adoc#coroutines, Coroutines>> APIs in Kotlin which provides a more imperative style of programming.
 The following Kotlin code samples will be provided with Coroutines APIs.
 
@@ -218,7 +218,7 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally
 do not make applications run faster. They can, in some cases, (for example, if using the
-`WebClient` to execute remote calls in parallel). On the whole, it requires more work to do
+`WebClient` to run remote calls in parallel). On the whole, it requires more work to do
 things the non-blocking way and that can slightly increase the required processing time.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small,
@@ -312,8 +312,9 @@ request handling, on top of which concrete programming models such as annotated
 controllers and functional endpoints are built.
 * For the client side, there is a basic `ClientHttpConnector` contract to perform HTTP
 requests with non-blocking I/O and Reactive Streams back pressure, along with adapters for
-https://github.com/reactor/reactor-netty[Reactor Netty] and for the reactive
-https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient].
+https://github.com/reactor/reactor-netty[Reactor Netty], reactive
+https://github.com/jetty-project/jetty-reactive-httpclient[Jetty HttpClient]
+and https://hc.apache.org/[Apache HttpComponents].
 The higher level <<web-reactive.adoc#webflux-client, WebClient>> used in applications
 builds on this basic contract.
 * For client and server, <<webflux-codecs, codecs>> for serialization and
@@ -611,10 +612,12 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 The `DefaultServerWebExchange` uses the configured
 `HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data` content
-into a `MultiValueMap`. At present,
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is the only
-third-party library supported and the only library we know for non-blocking parsing of
-multipart requests. It is enabled through the `ServerCodecConfigurer` bean
+into a `MultiValueMap`.
+By default, this is the `DefaultPartHttpMessageReader`, which does not have any third-party
+dependencies.
+Alternatively, the `SynchronossPartHttpMessageReader` can be used, which is based on the
+https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] library.
+Both are configured through the `ServerCodecConfigurer` bean
 (see the <<webflux-web-handler-api, Web Handler API>>).
 
 To parse multipart data in streaming fashion, you can use the `Flux<Part>` returned from an
@@ -754,9 +757,9 @@ into ``TokenBuffer``'s each representing a JSON object.
 * When decoding to a single-value publisher (e.g. `Mono`), there is one `TokenBuffer`.
 * When decoding to a multi-value publisher (e.g. `Flux`), each `TokenBuffer` is passed to
 the `ObjectMapper` as soon as enough bytes are received for a fully formed object. The
-input content can be a JSON array, or
-https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] if the content-type is
-`application/stream+json`.
+input content can be a JSON array, or any
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format such as NDJSON,
+JSON Lines, or JSON Text Sequences.
 
 The `Jackson2Encoder` works as follows:
 
@@ -765,9 +768,10 @@ The `Jackson2Encoder` works as follows:
 * For a multi-value publisher with `application/json`, by default collect the values with
 `Flux#collectToList()` and then serialize the resulting collection.
 * For a multi-value publisher with a streaming media type such as
-`application/stream+json` or `application/stream+x-jackson-smile`, encode, write, and
+`application/x-ndjson` or `application/stream+x-jackson-smile`, encode, write, and
 flush each value individually using a
-https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format.
+https://en.wikipedia.org/wiki/JSON_streaming[line-delimited JSON] format. Other
+streaming media types may be registered with the encoder.
 * For SSE the `Jackson2Encoder` is invoked per event and the output is flushed to ensure
 delivery without delay.
 
@@ -802,9 +806,11 @@ consistently for access to the cached form data versus reading from the raw requ
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
 encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
 another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`. At present
-https://github.com/synchronoss/nio-multipart[Synchronoss NIO Multipart] is used for the
-actual parsing.
+collects the parts into a `MultiValueMap`.
+By default, the `DefaultPartHttpMessageReader` is used, but this can be changed through the
+`ServerCodecConfigurer`.
+For more information about the `DefaultPartHttpMessageReader`, refer to to the
+{api-spring-framework}/http/codec/multipart/DefaultPartHttpMessageReader.html[javadoc of `DefaultPartHttpMessageReader`].
 
 On the server side where multipart form content may need to be accessed from multiple
 places, `ServerWebExchange` provides a dedicated `getMultipartData()` method that parses
@@ -851,7 +857,7 @@ To configure all three in WebFlux, you'll need to supply a pre-configured instan
 [.small]#<<web.adoc#mvc-ann-async-http-streaming, Web MVC>>#
 
 When streaming to the HTTP response (for example, `text/event-stream`,
-`application/stream+json`), it is important to send data periodically, in order to
+`application/x-ndjson`), it is important to send data periodically, in order to
 reliably detect a disconnected client sooner rather than later. Such a send could be a
 comment-only, empty SSE event or any other "no-op" data that would effectively serve as
 a heartbeat.
@@ -893,7 +899,7 @@ not meet the stated goals, please let us know.
 [[webflux-logging-id]]
 ==== Log Id
 
-In WebFlux, a single request can be executed over multiple threads and the thread ID
+In WebFlux, a single request can be run over multiple threads and the thread ID
 is not useful for correlating log messages that belong to a specific request. This is why
 WebFlux log messages are prefixed with a request-specific ID by default.
 
@@ -962,6 +968,17 @@ The following example shows how to do so for client-side requests:
 			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
 			.build()
 ----
+
+
+[[webflux-logging-appenders]]
+==== Appenders
+
+Logging libraries such as SLF4J and Log4J 2 provide asynchronous loggers that avoid
+blocking. While those have their own drawbacks such as potentially dropping messages
+that could not be queued for logging, they are the best available options currently
+for use in a reactive, non-blocking application.
+
+
 
 [[webflux-codecs-custom]]
 ==== Custom codecs
@@ -1104,7 +1121,7 @@ many extra convenient options.
 `DispatcherHandler` processes requests as follows:
 
 * Each `HandlerMapping` is asked to find a matching handler, and the first match is used.
-* If a handler is found, it is executed through an appropriate `HandlerAdapter`, which
+* If a handler is found, it is run through an appropriate `HandlerAdapter`, which
 exposes the return value from the execution as `HandlerResult`.
 * The `HandlerResult` is given to an appropriate `HandlerResultHandler` to complete
 processing by writing to the response directly or by using a view to render.
@@ -1402,12 +1419,41 @@ The following example uses type and method level mappings:
 
 You can map requests by using glob patterns and wildcards:
 
-* `?` matches one character
-* `*` matches zero or more characters within a path segment
-* `**` match zero or more path segments
+[cols="2,3,5"]
+|===
+|Pattern |Description |Example
 
-You can also declare URI variables and access their values with `@PathVariable`,
-as the following example shows:
+| `+?+`
+| Matches one character
+| `+"/pages/t?st.html"+` matches `+"/pages/test.html"+` and `+"/pages/t3st.html"+`
+
+| `+*+`
+| Matches zero or more characters within a path segment
+| `+"/resources/*.png"+` matches `+"/resources/file.png"+`
+
+`+"/projects/*/versions"+` matches `+"/projects/spring/versions"+` but does not match `+"/projects/spring/boot/versions"+`
+
+| `+**+`
+| Matches zero or more path segments until the end of the path
+| `+"/resources/**"+` matches `+"/resources/file.png"+` and `+"/resources/images/file.png"+`
+
+`+"/resources/**/file.png"+` is invalid as `+**+` is only allowed at the end of the path.
+
+| `+{name}+`
+| Matches a path segment and captures it as a variable named "name"
+| `+"/projects/{project}/versions"+` matches `+"/projects/spring/versions"+` and captures `+project=spring+`
+
+| `+{name:[a-z]+}+`
+| Matches the regexp `+"[a-z]+"+` as a path variable named "name"
+| `+"/projects/{project:[a-z]+}/versions"+` matches `+"/projects/spring/versions"+` but not `+"/projects/spring1/versions"+`
+
+| `+{*path}+`
+| Matches zero or more path segments until the end of the path and captures it as a variable named "path"
+| `+"/resources/{*file}"+` matches `+"/resources/images/file.png"+` and captures `+file=images/file.png+`
+
+|===
+
+Captured URI variables can be accessed with `@PathVariable`, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1470,8 +1516,8 @@ URI variables can be named explicitly (for example, `@PathVariable("customId")`)
 leave that detail out if the names are the same and you compile your code with debugging
 information or with the `-parameters` compiler flag on Java 8.
 
-The syntax `{*varName}` declares a URI variable that matches zero or more remaining
-path segments. For example `/resources/{*path}` matches all files `/resources/` and the
+The syntax `{*varName}` declares a URI variable that matches zero or more remaining path
+segments. For example `/resources/{*path}` matches all files under `/resources/`, and the
 `"path"` variable captures the complete relative path.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has the
@@ -1857,8 +1903,8 @@ and others) and is equivalent to `required=false`.
   See <<webflux-ann-sessionattributes>> for more details.
 
 | `UriComponentsBuilder`
-| For preparing a URL relative to the current request's host, port, scheme, and path.
-  See <<webflux-uri-building>>.
+| For preparing a URL relative to the current request's host, port, scheme, and
+  context path. See <<webflux-uri-building>>.
 
 | `@SessionAttribute`
 | For access to any session attribute -- in contrast to model attributes stored in the session
@@ -1962,6 +2008,12 @@ For such cases, type conversion is automatically applied based on the configured
 By default, simple types (such as `int`, `long`, `Date`, and others) are supported. Type conversion
 can be customized through a `WebDataBinder` (see <<webflux-ann-initbinder>>) or by registering
 `Formatters` with the `FormattingConversionService` (see <<core.adoc#format, Spring Field Formatting>>).
+
+A practical issue in type conversion is the treatment of an empty String source value.
+Such a value is treated as missing if it becomes `null` as a result of type conversion.
+This can be the case for `Long`, `UUID`, and other target types. If you want to allow `null`
+to be injected, either use the `required` flag on the argument annotation, or declare the
+argument as `@Nullable`.
 
 
 [[webflux-ann-matrix-variables]]
@@ -3178,7 +3230,7 @@ initialize instances of `WebDataBinder`. Those, in turn, are used to:
 headers, cookies, and others) to the target type of controller method arguments.
 * Format model object values as `String` values when rendering HTML forms.
 
-`@InitBinder` methods can register controller-specific `java.bean.PropertyEditor` or
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
 <<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.
@@ -3993,7 +4045,7 @@ underlying FreeMarker view technology):
 	@Configuration
 	@EnableWebFlux
 	class WebConfig : WebFluxConfigurer {
-		
+
 		override fun configureViewResolvers(registry: ViewResolverRegistry) {
 			registry.freeMarker()
 		}
@@ -4255,6 +4307,53 @@ Spring WebFlux also does not support suffix pattern matching, unlike in Spring M
 are also <<web.adoc#mvc-ann-requestmapping-suffix-pattern-match, recommend>> moving away from
 reliance on it.
 ====
+
+
+
+[[webflux-config-websocket-service]]
+=== WebSocketService
+
+The WebFlux Java config declares of a `WebSocketHandlerAdapter` bean which provides
+support for the invocation of WebSocket handlers. That means all that remains to do in
+order to handle a WebSocket handshake request is to map a `WebSocketHandler` to a URL
+via `SimpleUrlHandlerMapping`.
+
+In some cases it may be necessary to create the `WebSocketHandlerAdapter` bean with a
+provided `WebSocketService` service which allows configuring WebSocket server properties.
+For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public WebSocketService getWebSocketService() {
+			TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
+			strategy.setMaxSessionIdleTimeout(0L);
+			return new HandshakeWebSocketService(strategy);
+		}
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		@Override
+		fun webSocketService(): WebSocketService {
+			val strategy = TomcatRequestUpgradeStrategy().apply {
+				setMaxSessionIdleTimeout(0L)
+			}
+			return HandshakeWebSocketService(strategy)
+		}
+	}
+----
+
 
 
 

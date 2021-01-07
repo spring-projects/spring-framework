@@ -60,6 +60,10 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 					String[] allowedOrigins = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-origins"), ",");
 					config.setAllowedOrigins(Arrays.asList(allowedOrigins));
 				}
+				if (mapping.hasAttribute("allowed-origin-patterns")) {
+					String[] patterns = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-origin-patterns"), ",");
+					config.setAllowedOriginPatterns(Arrays.asList(patterns));
+				}
 				if (mapping.hasAttribute("allowed-methods")) {
 					String[] allowedMethods = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-methods"), ",");
 					config.setAllowedMethods(Arrays.asList(allowedMethods));
@@ -78,7 +82,9 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 				if (mapping.hasAttribute("max-age")) {
 					config.setMaxAge(Long.parseLong(mapping.getAttribute("max-age")));
 				}
-				corsConfigurations.put(mapping.getAttribute("path"), config.applyPermitDefaultValues());
+				config.applyPermitDefaultValues();
+				config.validateAllowCredentials();
+				corsConfigurations.put(mapping.getAttribute("path"), config);
 			}
 		}
 

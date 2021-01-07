@@ -23,7 +23,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 
 /**
- * Generic callback interface used by {@link RestTemplate}'s retrieval methods
+ * Generic callback interface used by {@link RestTemplate}'s retrieval methods.
  * Implementations of this interface perform the actual work of extracting data
  * from a {@link ClientHttpResponse}, but don't need to worry about exception
  * handling or closing resources.

@@ -18,11 +18,14 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -50,8 +53,13 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 
 	private final AttributeMethods attributes;
 
+	private final Map<String, Object> valueCache = new ConcurrentHashMap<>(8);
+
 	@Nullable
 	private volatile Integer hashCode;
+
+	@Nullable
+	private volatile String string;
 
 
 	private SynthesizedMergedAnnotationInvocationHandler(MergedAnnotation<A> annotation, Class<A> type) {
@@ -73,7 +81,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 			return annotationHashCode();
 		}
 		if (ReflectionUtils.isToStringMethod(method)) {
-			return this.annotation.toString();
+			return annotationToString();
 		}
 		if (isAnnotationTypeMethod(method)) {
 			return this.type;
@@ -166,12 +174,92 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		return value.hashCode();
 	}
 
+	private String annotationToString() {
+		String string = this.string;
+		if (string == null) {
+			StringBuilder builder = new StringBuilder("@").append(this.type.getName()).append("(");
+			for (int i = 0; i < this.attributes.size(); i++) {
+				Method attribute = this.attributes.get(i);
+				if (i > 0) {
+					builder.append(", ");
+				}
+				builder.append(attribute.getName());
+				builder.append("=");
+				builder.append(toString(getAttributeValue(attribute)));
+			}
+			builder.append(")");
+			string = builder.toString();
+			this.string = string;
+		}
+		return string;
+	}
+
+	private String toString(Object value) {
+		if (value instanceof Class) {
+			return ((Class<?>) value).getName();
+		}
+		if (value.getClass().isArray()) {
+			StringBuilder builder = new StringBuilder("[");
+			for (int i = 0; i < Array.getLength(value); i++) {
+				if (i > 0) {
+					builder.append(", ");
+				}
+				builder.append(toString(Array.get(value, i)));
+			}
+			builder.append("]");
+			return builder.toString();
+		}
+		return String.valueOf(value);
+	}
+
 	private Object getAttributeValue(Method method) {
-		String name = method.getName();
-		Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
-		return this.annotation.getValue(name, type).orElseThrow(
-				() -> new NoSuchElementException("No value found for attribute named '" + name +
-						"' in merged annotation " + this.annotation.getType().getName()));
+		Object value = this.valueCache.computeIfAbsent(method.getName(), attributeName -> {
+			Class<?> type = ClassUtils.resolvePrimitiveIfNecessary(method.getReturnType());
+			return this.annotation.getValue(attributeName, type).orElseThrow(
+					() -> new NoSuchElementException("No value found for attribute named '" + attributeName +
+							"' in merged annotation " + this.annotation.getType().getName()));
+		});
+
+		// Clone non-empty arrays so that users cannot alter the contents of values in our cache.
+		if (value.getClass().isArray() && Array.getLength(value) > 0) {
+			value = cloneArray(value);
+		}
+
+		return value;
+	}
+
+	/**
+	 * Clone the provided array, ensuring that the original component type is retained.
+	 * @param array the array to clone
+	 */
+	private Object cloneArray(Object array) {
+		if (array instanceof boolean[]) {
+			return ((boolean[]) array).clone();
+		}
+		if (array instanceof byte[]) {
+			return ((byte[]) array).clone();
+		}
+		if (array instanceof char[]) {
+			return ((char[]) array).clone();
+		}
+		if (array instanceof double[]) {
+			return ((double[]) array).clone();
+		}
+		if (array instanceof float[]) {
+			return ((float[]) array).clone();
+		}
+		if (array instanceof int[]) {
+			return ((int[]) array).clone();
+		}
+		if (array instanceof long[]) {
+			return ((long[]) array).clone();
+		}
+		if (array instanceof short[]) {
+			return ((short[]) array).clone();
+		}
+
+		// else
+		return ((Object[]) array).clone();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -182,6 +270,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 				new Class<?>[] {type, SynthesizedAnnotation.class} : new Class<?>[] {type};
 		return (A) Proxy.newProxyInstance(classLoader, interfaces, handler);
 	}
+
 
 	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
 		if (classLoader == interfaceClass.getClassLoader()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.remoting.RemoteAccessException
  * @see java.rmi.RemoteException
  * @see java.rmi.Remote
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 public class JndiRmiClientInterceptor extends JndiObjectLocator implements MethodInterceptor, InitializingBean {
 
 	private Class<?> serviceInterface;
@@ -268,6 +270,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see java.rmi.NoSuchObjectException
 	 */
 	@Override
+	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Object stub;
 		try {

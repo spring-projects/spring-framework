@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletException;
@@ -37,6 +39,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +48,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -54,14 +58,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Default {@link ServerRequest.Builder} implementation.
+ *
  * @author Arjen Poutsma
  * @since 5.2
  */
 class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
-	private final List<HttpMessageConverter<?>> messageConverters;
+	private final HttpServletRequest servletRequest;
 
-	private HttpServletRequest servletRequest;
+	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private String methodName;
 
@@ -73,18 +78,25 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
+	private final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+	@Nullable
+	private InetSocketAddress remoteAddress;
+
 	private byte[] body = new byte[0];
 
 
 	public DefaultServerRequestBuilder(ServerRequest other) {
 		Assert.notNull(other, "ServerRequest must not be null");
-		this.messageConverters = other.messageConverters();
 		this.servletRequest = other.servletRequest();
+		this.messageConverters = new ArrayList<>(other.messageConverters());
 		this.methodName = other.methodName();
 		this.uri = other.uri();
 		headers(headers -> headers.addAll(other.headers().asHttpHeaders()));
 		cookies(cookies -> cookies.addAll(other.cookies()));
 		attributes(attributes -> attributes.putAll(other.attributes()));
+		params(params -> params.addAll(other.params()));
+		this.remoteAddress = other.remoteAddress().orElse(null);
 	}
 
 	@Override
@@ -154,11 +166,30 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 	}
 
 	@Override
-	public ServerRequest build() {
+	public ServerRequest.Builder param(String name, String... values) {
+		for (String value : values) {
+			this.params.add(name, value);
+		}
+		return this;
+	}
 
-		return new BuiltServerRequest(this.servletRequest,
-				this.methodName, this.uri, this.headers, this.cookies, this.attributes, this.body,
-				this.messageConverters);
+	@Override
+	public ServerRequest.Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer) {
+		paramsConsumer.accept(this.params);
+		return this;
+	}
+
+	@Override
+	public ServerRequest.Builder remoteAddress(InetSocketAddress remoteAddress) {
+		this.remoteAddress = remoteAddress;
+		return this;
+	}
+
+
+	@Override
+	public ServerRequest build() {
+		return new BuiltServerRequest(this.servletRequest, this.methodName, this.uri, this.headers, this.cookies,
+				this.attributes, this.params, this.remoteAddress, this.body, this.messageConverters);
 	}
 
 
@@ -172,7 +203,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final HttpServletRequest servletRequest;
 
-		private MultiValueMap<String, Cookie> cookies;
+		private final MultiValueMap<String, Cookie> cookies;
 
 		private final Map<String, Object> attributes;
 
@@ -180,16 +211,24 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final List<HttpMessageConverter<?>> messageConverters;
 
+		private final MultiValueMap<String, String> params;
+
+		@Nullable
+		private final InetSocketAddress remoteAddress;
+
 		public BuiltServerRequest(HttpServletRequest servletRequest, String methodName, URI uri,
 				HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
-				Map<String, Object> attributes, byte[] body,
-				List<HttpMessageConverter<?>> messageConverters) {
+				Map<String, Object> attributes, MultiValueMap<String, String> params,
+				@Nullable InetSocketAddress remoteAddress, byte[] body, List<HttpMessageConverter<?>> messageConverters) {
+
 			this.servletRequest = servletRequest;
 			this.methodName = methodName;
 			this.uri = uri;
-			this.headers = headers;
-			this.cookies = cookies;
-			this.attributes = attributes;
+			this.headers = new HttpHeaders(headers);
+			this.cookies = new LinkedMultiValueMap<>(cookies);
+			this.attributes = new LinkedHashMap<>(attributes);
+			this.params = new LinkedMultiValueMap<>(params);
+			this.remoteAddress = remoteAddress;
 			this.body = body;
 			this.messageConverters = messageConverters;
 		}
@@ -197,6 +236,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		@Override
 		public String methodName() {
 			return this.methodName;
+		}
+
+		@Override
+		public MultiValueMap<String, Part> multipartData() throws IOException, ServletException {
+			return servletRequest().getParts().stream()
+					.collect(Collectors.groupingBy(Part::getName,
+							LinkedMultiValueMap::new,
+							Collectors.toList()));
 		}
 
 		@Override
@@ -221,7 +268,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		@Override
 		public Optional<InetSocketAddress> remoteAddress() {
-			return Optional.empty();
+			return Optional.ofNullable(this.remoteAddress);
 		}
 
 		@Override
@@ -241,9 +288,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> T bodyInternal(Type bodyType, Class<?> bodyClass)
-				throws ServletException, IOException {
-
+		private <T> T bodyInternal(Type bodyType, Class<?> bodyClass) throws ServletException, IOException {
 			HttpInputMessage inputMessage = new BuiltInputMessage();
 			MediaType contentType = headers().contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
@@ -272,7 +317,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		@Override
 		public MultiValueMap<String, String> params() {
-			return new LinkedMultiValueMap<>();
+			return this.params;
 		}
 
 		@Override
@@ -302,6 +347,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 		public HttpServletRequest servletRequest() {
 			return this.servletRequest;
 		}
+
 
 		private class BuiltInputMessage implements HttpInputMessage {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -652,7 +652,7 @@ public class JmsMessagingTemplateTests {
 						new StubTextMessage((String) invocation.getArguments()[0]));
 		javax.jms.Message message = creator.createMessage(mock);
 		verify(mock).createTextMessage(any());
-		return TextMessage.class.cast(message);
+		return (TextMessage) message;
 	}
 
 }

@@ -42,10 +42,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.beans.testfixture.beans.INestedTestBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
-import org.springframework.beans.testfixture.beans.NestedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -53,10 +50,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.testfixture.Assume;
-import org.springframework.core.testfixture.EnabledForTestGroups;
-import org.springframework.core.testfixture.TestGroup;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StopWatch;
 
@@ -110,72 +103,6 @@ public class AspectJAutoProxyCreatorTests {
 
 		ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian");
 		doTestAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
-		Assume.notLogging(factoryLog);
-
-		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
-
-		StopWatch sw = new StopWatch();
-		sw.start("Prototype Creation");
-		for (int i = 0; i < 10000; i++) {
-			ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian2");
-			if (i < 10) {
-				doTestAspectsAndAdvisorAreApplied(ac, shouldBeWeaved);
-			}
-		}
-		sw.stop();
-
-		// What's a reasonable expectation for _any_ server or developer machine load?
-		// 9 seconds?
-		assertStopWatchTimeLimit(sw, 9000);
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
-		Assume.notLogging(factoryLog);
-
-		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
-
-		StopWatch sw = new StopWatch();
-		sw.start("Prototype Creation");
-		for (int i = 0; i < 100000; i++) {
-			INestedTestBean shouldNotBeWeaved = (INestedTestBean) ac.getBean("i21");
-			if (i < 10) {
-				assertThat(AopUtils.isAopProxy(shouldNotBeWeaved)).isFalse();
-			}
-		}
-		sw.stop();
-
-		// What's a reasonable expectation for _any_ server or developer machine load?
-		// 3 seconds?
-		assertStopWatchTimeLimit(sw, 6000);
-	}
-
-	@Test
-	@EnabledForTestGroups(TestGroup.PERFORMANCE)
-	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
-		Assume.notLogging(factoryLog);
-
-		GenericApplicationContext ac = new GenericApplicationContext();
-
-		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(new ClassPathResource(qName("aspectsPlusAdvisor.xml"),
-				getClass()));
-		for (int i = 0; i < 10000; i++) {
-			ac.registerBeanDefinition("singleton" + i, new RootBeanDefinition(NestedTestBean.class));
-		}
-		StopWatch sw = new StopWatch();
-		sw.start("Singleton Creation");
-		ac.refresh();
-		sw.stop();
-
-		// What's a reasonable expectation for _any_ server or developer machine load?
-		// 8 seconds?
-		assertStopWatchTimeLimit(sw, 8000);
 	}
 
 	@Test

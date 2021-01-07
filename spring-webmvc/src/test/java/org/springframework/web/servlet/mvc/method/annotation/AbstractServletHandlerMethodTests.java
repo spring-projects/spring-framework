@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 
 import org.junit.jupiter.api.AfterEach;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.lang.Nullable;
@@ -29,6 +30,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public abstract class AbstractServletHandlerMethodTests {
 
+	@Nullable
 	private DispatcherServlet servlet;
 
 
@@ -57,48 +60,53 @@ public abstract class AbstractServletHandlerMethodTests {
 		this.servlet = null;
 	}
 
+
 	/**
 	 * Initialize a DispatcherServlet instance registering zero or more controller classes.
 	 */
-	protected WebApplicationContext initServletWithControllers(final Class<?>... controllerClasses)
-			throws ServletException {
+	protected WebApplicationContext initDispatcherServlet(
+			Class<?> controllerClass, boolean usePathPatterns) throws ServletException {
 
-		return initServlet(null, controllerClasses);
+		return initDispatcherServlet(controllerClass, usePathPatterns, null);
 	}
 
-	/**
-	 * Initialize a DispatcherServlet instance registering zero or more controller classes
-	 * and also providing additional bean definitions through a callback.
-	 */
 	@SuppressWarnings("serial")
-	protected WebApplicationContext initServlet(
-			final ApplicationContextInitializer<GenericWebApplicationContext> initializer,
-			final Class<?>... controllerClasses) throws ServletException {
+	WebApplicationContext initDispatcherServlet(
+			@Nullable Class<?> controllerClass, boolean usePathPatterns,
+			@Nullable ApplicationContextInitializer<GenericWebApplicationContext> initializer)
+			throws ServletException {
 
 		final GenericWebApplicationContext wac = new GenericWebApplicationContext();
 
 		servlet = new DispatcherServlet() {
+
 			@Override
 			protected WebApplicationContext createWebApplicationContext(@Nullable WebApplicationContext parent) {
-				for (Class<?> clazz : controllerClasses) {
-					wac.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
-				}
 
-				RootBeanDefinition mappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-				mappingDef.getPropertyValues().add("removeSemicolonContent", "false");
-				wac.registerBeanDefinition("handlerMapping", mappingDef);
-				wac.registerBeanDefinition("handlerAdapter",
-						new RootBeanDefinition(RequestMappingHandlerAdapter.class));
-				wac.registerBeanDefinition("requestMappingResolver",
-						new RootBeanDefinition(ExceptionHandlerExceptionResolver.class));
-				wac.registerBeanDefinition("responseStatusResolver",
-						new RootBeanDefinition(ResponseStatusExceptionResolver.class));
-				wac.registerBeanDefinition("defaultResolver",
-						new RootBeanDefinition(DefaultHandlerExceptionResolver.class));
+				if (controllerClass != null) {
+					wac.registerBeanDefinition(
+							controllerClass.getSimpleName(), new RootBeanDefinition(controllerClass));
+				}
 
 				if (initializer != null) {
 					initializer.initialize(wac);
 				}
+
+				if (!wac.containsBeanDefinition("handlerMapping")) {
+					BeanDefinition def = register("handlerMapping", RequestMappingHandlerMapping.class, wac);
+					def.getPropertyValues().add("removeSemicolonContent", "false");
+				}
+
+				BeanDefinition mappingDef = wac.getBeanDefinition("handlerMapping");
+				if (usePathPatterns && !mappingDef.hasAttribute("patternParser")) {
+					BeanDefinition parserDef = register("parser", PathPatternParser.class, wac);
+					mappingDef.getPropertyValues().add("patternParser", parserDef);
+				}
+
+				register("handlerAdapter", RequestMappingHandlerAdapter.class, wac);
+				register("requestMappingResolver", ExceptionHandlerExceptionResolver.class, wac);
+				register("responseStatusResolver", ResponseStatusExceptionResolver.class, wac);
+				register("defaultResolver", DefaultHandlerExceptionResolver.class, wac);
 
 				wac.refresh();
 				return wac;
@@ -108,6 +116,15 @@ public abstract class AbstractServletHandlerMethodTests {
 		servlet.init(new MockServletConfig());
 
 		return wac;
+	}
+
+	private BeanDefinition register(String beanName, Class<?> beanType, GenericWebApplicationContext wac) {
+		if (wac.containsBeanDefinition(beanName)) {
+			return wac.getBeanDefinition(beanName);
+		}
+		RootBeanDefinition beanDef = new RootBeanDefinition(beanType);
+		wac.registerBeanDefinition(beanName, beanDef);
+		return beanDef;
 	}
 
 }

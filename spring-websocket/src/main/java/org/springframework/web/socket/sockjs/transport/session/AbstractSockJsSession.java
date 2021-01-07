@@ -380,20 +380,29 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
 		for (int i = 0; i < messages.length; i++) {
 			try {
-				if (!isClosed()) {
-					this.handler.handleMessage(this, new TextMessage(messages[i]));
+				if (isClosed()) {
+					logUndeliveredMessages(i, messages);
+					return;
 				}
-				else {
-					List<String> undelivered = getUndelivered(messages, i);
-					if (undelivered.isEmpty()) {
-						return;
-					}
-					throw new SockJsMessageDeliveryException(this.id, undelivered, "Session closed");
-				}
+				this.handler.handleMessage(this, new TextMessage(messages[i]));
 			}
 			catch (Exception ex) {
+				if (isClosed()) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Failed to handle message '" + messages[i] + "'", ex);
+					}
+					logUndeliveredMessages(i, messages);
+					return;
+				}
 				throw new SockJsMessageDeliveryException(this.id, getUndelivered(messages, i), ex);
 			}
+		}
+	}
+
+	private void logUndeliveredMessages(int index, String[] messages) {
+		List<String> undelivered = getUndelivered(messages, index);
+		if (logger.isTraceEnabled() && !undelivered.isEmpty()) {
+			logger.trace("Dropped inbound message(s) due to closed session: " + undelivered);
 		}
 	}
 

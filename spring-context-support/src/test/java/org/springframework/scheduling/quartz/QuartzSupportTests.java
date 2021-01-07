@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
@@ -96,7 +96,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithTaskExecutor() throws Exception {
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
@@ -137,7 +137,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithQuartzJobBean() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -170,7 +170,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithSpringBeanJobFactory() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -205,7 +205,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -241,7 +241,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
@@ -275,7 +275,7 @@ public class QuartzSupportTests {
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
@@ -295,40 +295,31 @@ public class QuartzSupportTests {
 
 	@Test  // SPR-772
 	public void multipleSchedulers() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml");
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulers.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 			assertThat(scheduler2).isNotSameAs(scheduler1);
 			assertThat(scheduler1.getSchedulerName()).isEqualTo("quartz1");
 			assertThat(scheduler2.getSchedulerName()).isEqualTo("quartz2");
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
 	@Test  // SPR-16884
 	public void multipleSchedulersWithQuartzProperties() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml");
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleSchedulersWithQuartzProperties.xml")) {
 			Scheduler scheduler1 = (Scheduler) ctx.getBean("scheduler1");
 			Scheduler scheduler2 = (Scheduler) ctx.getBean("scheduler2");
 			assertThat(scheduler2).isNotSameAs(scheduler1);
 			assertThat(scheduler1.getSchedulerName()).isEqualTo("quartz1");
 			assertThat(scheduler2.getSchedulerName()).isEqualTo("quartz2");
 		}
-		finally {
-			ctx.close();
-		}
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void twoAnonymousMethodInvokingJobDetailFactoryBeans() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("multipleAnonymousMethodInvokingJobDetailFB.xml")) {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
@@ -336,18 +327,14 @@ public class QuartzSupportTests {
 			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
 			assertThat(importService.getImportCount()).as("doImport not called on importService").isEqualTo(2);
 			assertThat(importService.getExportCount()).as("doExport called on importService").isEqualTo(0);
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
 	@Test
-	@EnabledForTestGroups(PERFORMANCE)
+	@EnabledForTestGroups(LONG_RUNNING)
 	public void schedulerAccessorBean() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml");
 		Thread.sleep(3000);
-		try {
+		try (ClassPathXmlApplicationContext ctx = context("schedulerAccessorBean.xml")) {
 			QuartzTestBean exportService = (QuartzTestBean) ctx.getBean("exportService");
 			QuartzTestBean importService = (QuartzTestBean) ctx.getBean("importService");
 
@@ -355,9 +342,6 @@ public class QuartzSupportTests {
 			assertThat(exportService.getExportCount()).as("doExport not called on exportService").isEqualTo(2);
 			assertThat(importService.getImportCount()).as("doImport not called on importService").isEqualTo(2);
 			assertThat(importService.getExportCount()).as("doExport called on importService").isEqualTo(0);
-		}
-		finally {
-			ctx.close();
 		}
 	}
 
@@ -387,9 +371,9 @@ public class QuartzSupportTests {
 
 	@Test
 	public void schedulerRepositoryExposure() throws Exception {
-		ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml");
-		assertThat(ctx.getBean("scheduler")).isSameAs(SchedulerRepository.getInstance().lookup("myScheduler"));
-		ctx.close();
+		try (ClassPathXmlApplicationContext ctx = context("schedulerRepositoryExposure.xml")) {
+			assertThat(ctx.getBean("scheduler")).isSameAs(SchedulerRepository.getInstance().lookup("myScheduler"));
+		}
 	}
 
 	/**
@@ -401,19 +385,15 @@ public class QuartzSupportTests {
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
-		ClassPathXmlApplicationContext ctx = context("databasePersistence.xml");
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
-		assertThat(jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty()).as("No triggers were persisted").isFalse();
+		try (ClassPathXmlApplicationContext ctx = context("databasePersistence.xml")) {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
+			assertThat(jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").isEmpty()).as("No triggers were persisted").isFalse();
 
-		/*
-		Thread.sleep(3000);
-		try {
-			assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
+			/*
+				Thread.sleep(3000);
+				assertTrue("DummyJob should have been executed at least once.", DummyJob.count > 0);
+			 */
 		}
-		finally {
-			ctx.close();
-		}
-		*/
 	}
 
 	private ClassPathXmlApplicationContext context(String path) {

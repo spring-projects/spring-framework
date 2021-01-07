@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,11 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.NoOpRunnable;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
+class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	private final ThreadPoolExecutor concurrentExecutor =
 			new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
@@ -40,15 +41,14 @@ public class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorT
 
 	@Override
 	protected AsyncListenableTaskExecutor buildExecutor() {
-		concurrentExecutor.setThreadFactory(new CustomizableThreadFactory(THREAD_NAME_PREFIX));
+		concurrentExecutor.setThreadFactory(new CustomizableThreadFactory(this.threadNamePrefix));
 		return new ConcurrentTaskExecutor(concurrentExecutor);
 	}
 
 	@Override
 	@AfterEach
-	public void shutdownExecutor() {
-		List<Runnable> remainingTasks = concurrentExecutor.shutdownNow();
-		for (Runnable task : remainingTasks) {
+	void shutdownExecutor() {
+		for (Runnable task : concurrentExecutor.shutdownNow()) {
 			if (task instanceof RunnableFuture) {
 				((RunnableFuture<?>) task).cancel(true);
 			}
@@ -57,25 +57,22 @@ public class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorT
 
 
 	@Test
-	public void zeroArgCtorResultsInDefaultTaskExecutorBeingUsed() {
+	void zeroArgCtorResultsInDefaultTaskExecutorBeingUsed() {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
-		// must not throw a NullPointerException
-		executor.execute(new NoOpRunnable());
+		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
 	}
 
 	@Test
-	public void passingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() {
+	void passingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor(null);
-		// must not throw a NullPointerException
-		executor.execute(new NoOpRunnable());
+		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
 	}
 
 	@Test
-	public void passingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() {
+	void passingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		executor.setConcurrentExecutor(null);
-		// must not throw a NullPointerException
-		executor.execute(new NoOpRunnable());
+		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
 	}
 
 }

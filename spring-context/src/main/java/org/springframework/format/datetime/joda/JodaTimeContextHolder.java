@@ -31,7 +31,9 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.context.i18n.LocaleContextHolder
+ * @deprecated as of 5.3, in favor of standard JSR-310 support
  */
+@Deprecated
 public final class JodaTimeContextHolder {
 
 	private static final ThreadLocal<JodaTimeContext> jodaTimeContextHolder =

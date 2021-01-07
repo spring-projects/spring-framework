@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
  */
 class PathResourceLookupFunction implements Function<ServerRequest, Optional<Resource>> {
 
-	private static final PathPatternParser PATTERN_PARSER = new PathPatternParser();
-
 	private final PathPattern pattern;
 
 	private final Resource location;
@@ -50,14 +48,14 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 	public PathResourceLookupFunction(String pattern, Resource location) {
 		Assert.hasLength(pattern, "'pattern' must not be empty");
 		Assert.notNull(location, "'location' must not be null");
-		this.pattern = PATTERN_PARSER.parse(pattern);
+		this.pattern = PathPatternParser.defaultInstance.parse(pattern);
 		this.location = location;
 	}
 
 
 	@Override
 	public Optional<Resource> apply(ServerRequest request) {
-		PathContainer pathContainer = request.pathContainer();
+		PathContainer pathContainer = request.requestPath().pathWithinApplication();
 		if (!this.pattern.matches(pathContainer)) {
 			return Optional.empty();
 		}
@@ -112,10 +110,7 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 				return true;
 			}
 		}
-		if (path.contains("..") && StringUtils.cleanPath(path).contains("../")) {
-				return true;
-			}
-		return false;
+		return path.contains("..") && StringUtils.cleanPath(path).contains("../");
 	}
 
 	private boolean isResourceUnderLocation(Resource resource) throws IOException {
@@ -146,10 +141,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Optional<Res
 		if (!resourcePath.startsWith(locationPath)) {
 			return false;
 		}
-		if (resourcePath.contains("%") && StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../")) {
-			return false;
-		}
-		return true;
+		return !resourcePath.contains("%") ||
+				!StringUtils.uriDecode(resourcePath, StandardCharsets.UTF_8).contains("../");
 	}
 
 
