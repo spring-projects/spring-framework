@@ -78,6 +78,12 @@ final class QuartzCronField extends CronField {
 		this.rollForwardType = rollForwardType;
 	}
 
+	/**
+	 * Returns whether the given value is a Quartz day-of-month field.
+	 */
+	public static boolean isQuartzDaysOfMonthField(String value) {
+		return value.contains("L") || value.contains("W");
+	}
 
 	/**
 	 * Parse the given value into a days of months {@code QuartzCronField}, the fourth entry of a cron expression.
@@ -123,6 +129,13 @@ final class QuartzCronField extends CronField {
 			}
 		}
 		throw new IllegalArgumentException("No 'L' or 'W' found in '" + value + "'");
+	}
+
+	/**
+	 * Returns whether the given value is a Quartz day-of-week field.
+	 */
+	public static boolean isQuartzDaysOfWeekField(String value) {
+		return value.contains("L") || value.contains("#");
 	}
 
 	/**

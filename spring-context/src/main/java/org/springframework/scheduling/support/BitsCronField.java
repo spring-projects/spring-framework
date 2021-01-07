@@ -19,14 +19,13 @@ package org.springframework.scheduling.support;
 import java.time.DateTimeException;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
-import java.util.BitSet;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Efficient {@link BitSet}-based extension of {@link CronField}.
+ * Efficient bitwise-operator extension of {@link CronField}.
  * Created using the {@code parse*} methods.
  *
  * @author Arjen Poutsma
