@@ -55,13 +55,13 @@ public interface MultipartFile extends InputStreamSource {
 	 * but it typically will not with any other than Opera.
 	 * <p><strong>Note:</strong> Please keep in mind this filename is supplied
 	 * by the client and should not be used blindly. In addition to not using
-	 * the directory portion, the file name could also contain characters * such
+	 * the directory portion, the file name could also contain characters such
 	 * as ".." and others that can be used maliciously.
 	 * @return the original filename, or the empty String if no file has been chosen
 	 * in the multipart form, or {@code null} if not defined or not available
 	 * @see org.apache.commons.fileupload.FileItem#getName()
 	 * @see org.springframework.web.multipart.commons.CommonsMultipartFile#setPreserveFilename
-	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 3.4</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
 	 * @see <a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">Unrestricted File Upload</a>
 	 */
 	@Nullable
