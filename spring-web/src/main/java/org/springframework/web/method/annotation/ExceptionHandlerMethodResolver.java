@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,18 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
 			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
+
+	private static final Method NO_MATCHING_EXCEPTION_HANDLER_METHOD;
+
+	static {
+		try {
+			NO_MATCHING_EXCEPTION_HANDLER_METHOD =
+					ExceptionHandlerMethodResolver.class.getDeclaredMethod("noMatchingExceptionHandler");
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Expected method not found: " + ex);
+		}
+	}
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
@@ -153,13 +165,12 @@ public class ExceptionHandlerMethodResolver {
 			method = getMappedMethod(exceptionType);
 			this.exceptionLookupCache.put(exceptionType, method);
 		}
-		return method;
+		return (method != NO_MATCHING_EXCEPTION_HANDLER_METHOD ? method : null);
 	}
 
 	/**
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
-	@Nullable
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
@@ -172,8 +183,14 @@ public class ExceptionHandlerMethodResolver {
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {
-			return null;
+			return NO_MATCHING_EXCEPTION_HANDLER_METHOD;
 		}
+	}
+
+	/**
+	 * For the NO_MATCHING_EXCEPTION_HANDLER_METHOD constant.
+ 	 */
+	private void noMatchingExceptionHandler() {
 	}
 
 }

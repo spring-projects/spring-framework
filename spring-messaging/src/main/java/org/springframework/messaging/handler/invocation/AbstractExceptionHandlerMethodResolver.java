@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,19 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @since 4.0
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
+
+	private static final Method NO_MATCHING_EXCEPTION_HANDLER_METHOD;
+
+	static {
+		try {
+			NO_MATCHING_EXCEPTION_HANDLER_METHOD =
+					AbstractExceptionHandlerMethodResolver.class.getDeclaredMethod("noMatchingExceptionHandler");
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Expected method not found: " + ex);
+		}
+	}
+
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
@@ -110,7 +123,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 			method = getMappedMethod(exceptionType);
 			this.exceptionLookupCache.put(exceptionType, method);
 		}
-		return method;
+		return (method != NO_MATCHING_EXCEPTION_HANDLER_METHOD ? method : null);
 	}
 
 	/**
@@ -129,8 +142,14 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {
-			return null;
+			return NO_MATCHING_EXCEPTION_HANDLER_METHOD;
 		}
+	}
+
+	/**
+	 * For the NO_MATCHING_EXCEPTION_HANDLER_METHOD constant.
+	 */
+	private void noMatchingExceptionHandler() {
 	}
 
 }
