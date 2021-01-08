@@ -376,6 +376,31 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));
 	}
 
+	// Added ParameterizedTypeReference on GetForEntity
+	@Override
+	public <T> ResponseEntity<T> getForEntity(URI uri, ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
+		Type type = responseType.getType();
+		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));
+	}
+
+	@Override
+	public <T> ResponseEntity<T> getForEntity(String url, ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+		Type type = responseType.getType();
+		RequestCallback requestCallback = cceptHeaderRequestCallback(responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
+		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor, uriVariables));
+	}
+
+	@Override
+	public <T> ResponseEntity<T> getForEntity(URI url, ParameterizedTypeReference<T> responseType) throws RestClientException {
+
+		Type type = responseType.getType();
+		RequestCallback requestCallback = httpEntityCallback(requestEntity, type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
+		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));
+	}
 
 	// HEAD
 
@@ -482,6 +507,34 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return nonNull(execute(url, HttpMethod.POST, requestCallback, responseExtractor));
+	}
+
+	// Added ParameterizedTypeReference on PostForEntity
+	@Override
+	public <T> ResponseEntity<T> postForEntity(URI uri, @Nullable Object request,
+											   ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
+		Type type = responseType.getType();
+		RequestCallback requestCallback = httpEntityCallback(request, type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return nonNull(execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables));
+	}
+
+	@Override
+	public <T> ResponseEntity<T> postForEntity(String url, @Nullable Object request,
+											   ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+		Type type = responseType.getType();
+		RequestCallback requestCallback = httpEntityCallback(request, type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
+		return nonNull(execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables));
+	}
+
+	@Override
+	public <T> ResponseEntity<T> postForEntity(URI url, @Nullable Object request, ParameterizedTypeReference<T> responseType) throws RestClientException {
+
+		Type type = responseType.getType();
+		RequestCallback requestCallback = httpEntityCallback(requestEntity, type);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(type);
 		return nonNull(execute(url, HttpMethod.POST, requestCallback, responseExtractor));
 	}
 
