@@ -273,6 +273,29 @@ public class FormHttpMessageConverterTests {
 				.endsWith("><string>foo</string></MyBean>");
 	}
 
+	@Test
+	public void writeMultipartCharset() throws Exception {
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		parts.add("logo", logo);
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		Map<String, String> parameters = contentType.getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary");
+
+		this.converter.setCharset(StandardCharsets.ISO_8859_1);
+
+		outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		parameters = outputMessage.getHeaders().getContentType().getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary", "charset");
+		assertThat(parameters).containsEntry("charset", "ISO-8859-1");
+	}
+
 	private void assertCanRead(MediaType mediaType) {
 		assertCanRead(MultiValueMap.class, mediaType);
 	}
