@@ -74,8 +74,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	private boolean streaming;
 
-	private Scheduler blockingOperationScheduler = Schedulers.newBoundedElastic(Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE,
-			Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE, IDENTIFIER, 60, true);
+	private Scheduler blockingOperationScheduler = Schedulers.boundedElastic();
 
 	private Mono<Path> fileStorageDirectory = Mono.defer(this::defaultFileStorageDirectory).cache();
 
@@ -153,8 +152,9 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 
 	/**
 	 * Sets the Reactor {@link Scheduler} to be used for creating files and
-	 * directories, and writing to files. By default, a bounded scheduler is
-	 * created with default properties.
+	 * directories, and writing to files. By default,
+	 * {@link Schedulers#boundedElastic()} is used, but this property allows for
+	 * changing it to an externally managed scheduler.
 	 * <p>Note that this property is ignored when
 	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
