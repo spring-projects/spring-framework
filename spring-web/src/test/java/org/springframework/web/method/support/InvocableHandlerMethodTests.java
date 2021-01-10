@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.support;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * Unit tests for {@link InvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
+ * @author Rodolphe Lecocq
  */
 public class InvocableHandlerMethodTests {
 
@@ -156,6 +158,51 @@ public class InvocableHandlerMethodTests {
 			.withMessageContaining("Illegal argument");
 	}
 
+	@Test // gh-26317
+	public void resolveMatchedExceptionArguments() throws Exception {
+		//this.composite.addResolver(new StubArgumentResolver(IOException.class));
+
+		IOException matchedThrowable = new IOException("io-error");
+
+		// handler method should receive the matched exception as argument when it is the main exception
+		Object value = getInvocable(IOException.class).invokeForRequest(request, null,
+				matchedThrowable);
+		assertThat(value).isEqualTo("io-error");
+
+		// handler method should receive the matched exception as argument when it is the 1st cause
+		value = getInvocable(IOException.class).invokeForRequest(request, null,
+				new Exception(matchedThrowable));
+		assertThat(value).isEqualTo("io-error");
+
+		// handler method should receive the matched exception as argument when it is a cause with level > 1
+		value = getInvocable(IOException.class).invokeForRequest(request, null,
+				new Exception(new Exception(new Exception(matchedThrowable))));
+		assertThat(value).isEqualTo("io-error");
+	}
+
+	@Test // gh-26317
+	public void resolveMatchedExceptionAndMainExceptionArguments() throws Exception {
+		//this.composite.addResolver(new StubArgumentResolver(IOException.class));
+		//this.composite.addResolver(new StubArgumentResolver(IOException.class));
+
+		IOException matchedThrowable = new IOException("io-error");
+
+		// handler method should receive the main exception for both arguments
+		Object value = getInvocable(Exception.class, IOException.class).invokeForRequest(request, null,
+				matchedThrowable);
+		assertThat(value).isEqualTo("io-error-io-error");
+
+		// handler method should receive the main exception and the matched exception
+		value = getInvocable(Exception.class, IOException.class).invokeForRequest(request, null,
+				new Exception("main", matchedThrowable));
+		assertThat(value).isEqualTo("main-io-error");
+
+		// handler method should receive the main exception and the matched exception
+		value = getInvocable(Exception.class, IOException.class).invokeForRequest(request, null,
+				new Exception("main", new Exception("cause1", new Exception("cause2", matchedThrowable))));
+		assertThat(value).isEqualTo("main-io-error");
+	}
+
 	private InvocableHandlerMethod getInvocable(Class<?>... argTypes) {
 		Method method = ResolvableMethod.on(Handler.class).argTypes(argTypes).resolveMethod();
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
@@ -166,7 +213,6 @@ public class InvocableHandlerMethodTests {
 	private StubArgumentResolver getStubResolver(int index) {
 		return (StubArgumentResolver) this.composite.getResolvers().get(index);
 	}
-
 
 
 	@SuppressWarnings("unused")
@@ -181,6 +227,14 @@ public class InvocableHandlerMethodTests {
 
 		public void handleWithException(Throwable ex) throws Throwable {
 			throw ex;
+		}
+
+		public String handleExceptionCause(IOException cause) throws Exception {
+			return cause.getMessage();
+		}
+
+		public String handleExceptionCauseAndMain(Exception mainEx, IOException cause) throws Exception {
+			return mainEx.getMessage() + "-" + cause.getMessage();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Rodolphe Lecocq
  * @since 3.1
  */
 public class HandlerMethod {
@@ -412,10 +413,34 @@ public class HandlerMethod {
 	@Nullable
 	protected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {
 		if (!ObjectUtils.isEmpty(providedArgs)) {
+			boolean parameterIsThrowable = Throwable.class.isAssignableFrom(parameter.getParameterType());
 			for (Object providedArg : providedArgs) {
 				if (parameter.getParameterType().isInstance(providedArg)) {
 					return providedArg;
 				}
+				else if (parameterIsThrowable && providedArg instanceof Throwable) {
+					return findProvidedThrowableArgument(
+							parameter.getParameterType().asSubclass(Throwable.class),
+							((Throwable) providedArg).getCause());
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @since 5.3.3
+	 */
+	@Nullable
+	protected static Object findProvidedThrowableArgument(Class<? extends Throwable> parameterType,
+			@Nullable Throwable providedArg) {
+
+		if (providedArg != null) {
+			if (parameterType.isInstance(providedArg)) {
+				return providedArg;
+			}
+			else if (providedArg.getCause() != null) {
+				return findProvidedThrowableArgument(parameterType, providedArg.getCause());
 			}
 		}
 		return null;
