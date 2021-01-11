@@ -40,7 +40,9 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @author Juergen Hoeller
  * @since 1.1
  * @see HttpInvokerClientInterceptor#setHttpInvokerRequestExecutor
+ * @deprecated as of 5.3 (phasing out serialization-based remoting)
  */
+@Deprecated
 @FunctionalInterface
 public interface HttpInvokerRequestExecutor {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,9 @@ final class TestDispatcherServlet extends DispatcherServlet {
 				MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
 				Assert.notNull(mockRequest, "Expected MockHttpServletRequest");
 				asyncContext = (MockAsyncContext) mockRequest.getAsyncContext();
+				String requestClassName = request.getClass().getName();
 				Assert.notNull(asyncContext, () ->
-						"Outer request wrapper " + request.getClass().getName() + " has an AsyncContext," +
+						"Outer request wrapper " + requestClassName + " has an AsyncContext," +
 								"but it is not a MockAsyncContext, while the nested " +
 								mockRequest.getClass().getName() + " does not have an AsyncContext at all.");
 			}

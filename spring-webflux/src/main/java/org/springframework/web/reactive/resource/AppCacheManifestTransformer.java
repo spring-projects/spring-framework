@@ -65,7 +65,9 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Brian Clozel
  * @since 5.0
  * @see <a href="https://html.spec.whatwg.org/multipage/browsers.html#offline">HTML5 offline applications spec</a>
+ * @deprecated as of 5.3 since browser support is going away
  */
+@Deprecated
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";

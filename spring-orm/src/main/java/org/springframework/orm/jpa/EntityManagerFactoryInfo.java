@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.orm.jpa;
+
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -35,12 +37,6 @@ import org.springframework.lang.Nullable;
  * @since 2.0
  */
 public interface EntityManagerFactoryInfo {
-
-	/**
-	 * Return the raw underlying EntityManagerFactory.
-	 * @return the unadorned EntityManagerFactory (never {@code null})
-	 */
-	EntityManagerFactory getNativeEntityManagerFactory();
 
 	/**
 	 * Return the underlying PersistenceProvider that the underlying
@@ -104,5 +100,24 @@ public interface EntityManagerFactoryInfo {
 	 * <p>Proxies will be generated in this ClassLoader.
 	 */
 	ClassLoader getBeanClassLoader();
+
+	/**
+	 * Return the raw underlying EntityManagerFactory.
+	 * @return the unadorned EntityManagerFactory (never {@code null})
+	 */
+	EntityManagerFactory getNativeEntityManagerFactory();
+
+	/**
+	 * Create a native JPA EntityManager to be used as the framework-managed
+	 * resource behind an application-level EntityManager handle.
+	 * <p>This exposes a native {@code EntityManager} from the underlying
+	 * {@link #getNativeEntityManagerFactory() native EntityManagerFactory},
+	 * taking {@link JpaVendorAdapter#postProcessEntityManager(EntityManager)}
+	 * into account.
+	 * @since 5.3
+	 * @see #getNativeEntityManagerFactory()
+	 * @see EntityManagerFactory#createEntityManager()
+	 */
+	EntityManager createNativeEntityManager(@Nullable Map<?, ?> properties);
 
 }

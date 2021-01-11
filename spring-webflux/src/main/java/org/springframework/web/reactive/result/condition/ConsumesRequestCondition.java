@@ -29,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.reactive.CorsUtils;
@@ -75,39 +76,39 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
 	public ConsumesRequestCondition(String[] consumes, String[] headers) {
-		this.expressions = new ArrayList<>(parseExpressions(consumes, headers));
+		this.expressions = parseExpressions(consumes, headers);
 		if (this.expressions.size() > 1) {
 			Collections.sort(this.expressions);
 		}
 	}
 
-	/**
-	 * Private constructor for internal when creating matching conditions.
-	 * Note the expressions List is neither sorted nor deep copied.
-	 */
-	private ConsumesRequestCondition(List<ConsumeMediaTypeExpression> expressions) {
-		this.expressions = expressions;
-	}
-
-
-	private static Set<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>();
-		if (headers != null) {
+	private static List<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
+		Set<ConsumeMediaTypeExpression> result = null;
+		if (!ObjectUtils.isEmpty(headers)) {
 			for (String header : headers) {
 				HeadersRequestCondition.HeaderExpression expr = new HeadersRequestCondition.HeaderExpression(header);
 				if ("Content-Type".equalsIgnoreCase(expr.name)) {
+					result = (result != null ? result : new LinkedHashSet<>());
 					for (MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
 						result.add(new ConsumeMediaTypeExpression(mediaType, expr.isNegated));
 					}
 				}
 			}
 		}
-		if (consumes != null) {
+		if (!ObjectUtils.isEmpty(consumes)) {
+			result = (result != null ? result : new LinkedHashSet<>());
 			for (String consume : consumes) {
 				result.add(new ConsumeMediaTypeExpression(consume));
 			}
 		}
-		return result;
+		return (result != null ? new ArrayList<>(result) : Collections.emptyList());
+	}
+
+	/**
+	 * Private constructor for internal when creating matching conditions.
+	 */
+	private ConsumesRequestCondition(List<ConsumeMediaTypeExpression> expressions) {
+		this.expressions = expressions;
 	}
 
 

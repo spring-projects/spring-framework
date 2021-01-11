@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,18 @@ public class WebRequestDataBinderTests {
 		request.removeParameter("postProcessed");
 		binder.bind(new ServletWebRequest(request));
 		assertThat(target.isPostProcessed()).isFalse();
+	}
+
+	@Test // gh-25836
+	public void testFieldWithEmptyArrayIndex() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray[]", "ONE");
+		request.addParameter("stringArray[]", "TWO");
+		binder.bind(new ServletWebRequest(request));
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
 	}
 
 	@Test

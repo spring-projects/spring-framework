@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 import org.springframework.beans.factory.NamedBean;
+import org.springframework.lang.Nullable;
 
 /**
  * Convenient methods for creating advisors that may be used when autoproxying beans
@@ -110,6 +111,7 @@ public abstract class ExposeBeanNameAdvisors {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			if (!(mi instanceof ProxyMethodInvocation)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
@@ -134,6 +136,7 @@ public abstract class ExposeBeanNameAdvisors {
 		}
 
 		@Override
+		@Nullable
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			if (!(mi instanceof ProxyMethodInvocation)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);

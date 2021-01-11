@@ -316,6 +316,12 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public PooledDataBuffer touch(Object hint) {
+		this.byteBuf.touch(hint);
+		return this;
+	}
+
+	@Override
 	public boolean release() {
 		return this.byteBuf.release();
 	}

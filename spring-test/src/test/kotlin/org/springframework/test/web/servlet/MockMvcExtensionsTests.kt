@@ -18,6 +18,8 @@ package org.springframework.test.web.servlet
 
 import org.assertj.core.api.Assertions.*
 import org.hamcrest.CoreMatchers
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType.*
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.ModelAndView
 import reactor.core.publisher.Mono
 import java.security.Principal
 import java.util.*
@@ -50,7 +53,7 @@ class MockMvcExtensionsTests {
 			}
 			principal = Principal { "foo" }
 		}.andExpect {
-			status { isOk }
+			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
 			content { json("""{"someBoolean": false}""", false) }
@@ -62,7 +65,7 @@ class MockMvcExtensionsTests {
 	@Test
 	fun `request without MockHttpServletRequestDsl`() {
 		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee").andExpect {
-			status { isOk }
+			status { isOk() }
 		}.andDo {
 			print()
 		}
@@ -75,11 +78,14 @@ class MockMvcExtensionsTests {
 		val matcher = ResultMatcher { matcherInvoked = true }
 		val handler = ResultHandler { handlerInvoked = true }
 		mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee").andExpect {
-			status { isOk }
+			status { isOk() }
 		}.andExpect {
 			match(matcher)
 		}.andDo {
 			handle(handler)
+			handle {
+				matcherInvoked = true
+			}
 		}
 		assertThat(matcherInvoked).isTrue()
 		assertThat(handlerInvoked).isTrue()
@@ -95,7 +101,7 @@ class MockMvcExtensionsTests {
 				}
 				principal = Principal { "foo" }
 		}.andExpect {
-			status { isOk }
+			status { isOk() }
 			content { contentType(APPLICATION_JSON) }
 			jsonPath("$.name") { value("Lee") }
 			content { json("""{"someBoolean": false}""", false) }
@@ -114,7 +120,7 @@ class MockMvcExtensionsTests {
 			}
 		}.andExpect {
 			status {
-				isCreated
+				isCreated()
 			}
 		}
 	}
@@ -136,7 +142,7 @@ class MockMvcExtensionsTests {
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { model { attributeExists("name", "wrong") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrl("wrong/Url") }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { redirectedUrlPattern("wrong/Url") }
-			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { status { isAccepted } }
+			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { status { isAccepted() } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { view { name("wrongName") } }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { jsonPath("name") { value("wrong") } }
 		}
@@ -147,7 +153,7 @@ class MockMvcExtensionsTests {
 		mockMvc.get("/person/Clint") {
 			accept = APPLICATION_XML
 		}.andExpect {
-			status { isOk }
+			status { isOk() }
 			assertThatExceptionOfType(AssertionError::class.java).isThrownBy { xpath("//wrong") { nodeCount(1) } }
 		}.andDo {
 			print()
@@ -157,7 +163,17 @@ class MockMvcExtensionsTests {
 	@Test
 	fun asyncDispatch() {
 		mockMvc.get("/async").asyncDispatch().andExpect {
-			status { isOk }
+			status { isOk() }
+		}
+	}
+
+	@Test
+	fun modelAndView() {
+		mockMvc.get("/").andExpect {
+			model {
+				assertThatExceptionOfType(AssertionError::class.java).isThrownBy { attribute("foo", "bar") }
+				attribute("foo", "foo")
+			}
 		}
 	}
 
@@ -179,5 +195,8 @@ class MockMvcExtensionsTests {
 		fun getAsync(): Mono<Person> {
 			return Mono.just(Person("foo"))
 		}
+
+		@GetMapping("/")
+		fun index()  = ModelAndView("index", mapOf("foo" to "foo", "bar" to "bar"))
 	}
 }

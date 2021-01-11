@@ -51,37 +51,47 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.util.comparator.InstanceComparator;
 
 /**
  * Factory that can create Spring AOP Advisors given AspectJ classes from
- * classes honoring the AspectJ 5 annotation syntax, using reflection to
- * invoke the corresponding advice methods.
+ * classes honoring AspectJ's annotation syntax, using reflection to invoke the
+ * corresponding advice methods.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 2.0
  */
 @SuppressWarnings("serial")
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory implements Serializable {
 
-	private static final Comparator<Method> METHOD_COMPARATOR;
+	// Exclude @Pointcut methods
+	private static final MethodFilter adviceMethodFilter = ReflectionUtils.USER_DECLARED_METHODS
+			.and(method -> (AnnotationUtils.getAnnotation(method, Pointcut.class) == null));
+
+	private static final Comparator<Method> adviceMethodComparator;
 
 	static {
+		// Note: although @After is ordered before @AfterReturning and @AfterThrowing,
+		// an @After advice method will actually be invoked after @AfterReturning and
+		// @AfterThrowing methods due to the fact that AspectJAfterAdvice.invoke(MethodInvocation)
+		// invokes proceed() in a `try` block and only invokes the @After advice method
+		// in a corresponding `finally` block.
 		Comparator<Method> adviceKindComparator = new ConvertingComparator<>(
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				(Converter<Method, Annotation>) method -> {
-					AspectJAnnotation<?> annotation =
-						AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
-					return (annotation != null ? annotation.getAnnotation() : null);
+					AspectJAnnotation<?> ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+					return (ann != null ? ann.getAnnotation() : null);
 				});
 		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
-		METHOD_COMPARATOR = adviceKindComparator.thenComparing(methodNameComparator);
+		adviceMethodComparator = adviceKindComparator.thenComparing(methodNameComparator);
 	}
 
 
@@ -123,7 +133,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		List<Advisor> advisors = new ArrayList<>();
 		for (Method method : getAdvisorMethods(aspectClass)) {
-			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
+			// Prior to Spring Framework 5.2.7, advisors.size() was supplied as the declarationOrderInAspect
+			// to getAdvisor(...) to represent the "current position" in the declared methods list.
+			// However, since Java 7 the "current position" is not valid since the JDK no longer
+			// returns declared methods in the order in which they are declared in the source code.
+			// Thus, we now hard code the declarationOrderInAspect to 0 for all advice methods
+			// discovered via reflection in order to support reliable advice ordering across JVM launches.
+			// Specifically, a value of 0 aligns with the default value used in
+			// AspectJPrecedenceComparator.getAspectDeclarationOrder(Advisor).
+			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, 0, aspectName);
 			if (advisor != null) {
 				advisors.add(advisor);
 			}
@@ -147,15 +165,10 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
-		final List<Method> methods = new ArrayList<>();
-		ReflectionUtils.doWithMethods(aspectClass, method -> {
-			// Exclude pointcuts
-			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
-				methods.add(method);
-			}
-		}, ReflectionUtils.USER_DECLARED_METHODS);
+		List<Method> methods = new ArrayList<>();
+		ReflectionUtils.doWithMethods(aspectClass, methods::add, adviceMethodFilter);
 		if (methods.size() > 1) {
-			methods.sort(METHOD_COMPARATOR);
+			methods.sort(adviceMethodComparator);
 		}
 		return methods;
 	}

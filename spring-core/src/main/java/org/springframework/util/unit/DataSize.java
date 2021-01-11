@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util.unit;
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +49,8 @@ import org.springframework.util.StringUtils;
  * @since 5.1
  * @see DataUnit
  */
-public final class DataSize implements Comparable<DataSize> {
+@SuppressWarnings("serial")
+public final class DataSize implements Comparable<DataSize>, Serializable {
 
 	/**
 	 * The pattern for parsing.

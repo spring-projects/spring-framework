@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,44 +48,44 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFacto
  * @author Sam Brannen
  * @author Stephane Nicoll
  */
-public class JdbcNamespaceIntegrationTests {
+class JdbcNamespaceIntegrationTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void createEmbeddedDatabase() throws Exception {
+	void createEmbeddedDatabase() throws Exception {
 		assertCorrectSetup("jdbc-config.xml", "dataSource", "h2DataSource", "derbyDataSource");
 	}
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void createEmbeddedDatabaseAgain() throws Exception {
+	void createEmbeddedDatabaseAgain() throws Exception {
 		// If Derby isn't cleaned up properly this will fail...
 		assertCorrectSetup("jdbc-config.xml", "derbyDataSource");
 	}
 
 	@Test
-	public void createWithResourcePattern() throws Exception {
+	void createWithResourcePattern() throws Exception {
 		assertCorrectSetup("jdbc-config-pattern.xml", "dataSource");
 	}
 
 	@Test
-	public void createWithAnonymousDataSourceAndDefaultDatabaseName() throws Exception {
+	void createWithAnonymousDataSourceAndDefaultDatabaseName() throws Exception {
 		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-default-and-anonymous-datasource.xml",
 			url -> url.endsWith(DEFAULT_DATABASE_NAME));
 	}
 
 	@Test
-	public void createWithImplicitDatabaseName() throws Exception {
+	void createWithImplicitDatabaseName() throws Exception {
 		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-implicit.xml", url -> url.endsWith("dataSource"));
 	}
 
 	@Test
-	public void createWithExplicitDatabaseName() throws Exception {
+	void createWithExplicitDatabaseName() throws Exception {
 		assertCorrectSetupForSingleDataSource("jdbc-config-db-name-explicit.xml", url -> url.endsWith("customDbName"));
 	}
 
 	@Test
-	public void createWithGeneratedDatabaseName() throws Exception {
+	void createWithGeneratedDatabaseName() throws Exception {
 		Predicate<String> urlPredicate = url -> url.startsWith("jdbc:hsqldb:mem:");
 		urlPredicate.and(url -> !url.endsWith("dataSource"));
 		urlPredicate.and(url -> !url.endsWith("shouldBeOverriddenByGeneratedName"));
@@ -93,19 +93,18 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	public void createWithEndings() throws Exception {
+	void createWithEndings() throws Exception {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-endings-config.xml", 2, "dataSource");
 	}
 
 	@Test
-	public void createWithEndingsNested() throws Exception {
+	void createWithEndingsNested() throws Exception {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-endings-nested-config.xml", 2, "dataSource");
 	}
 
 	@Test
-	public void createAndDestroy() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-config.xml");
-		try {
+	void createAndDestroy() throws Exception {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
@@ -114,15 +113,11 @@ public class JdbcNamespaceIntegrationTests {
 			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
 					assertNumRowsInTestTable(template, 1));
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
-	public void createAndDestroyNestedWithHsql() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config.xml");
-		try {
+	void createAndDestroyNestedWithHsql() throws Exception {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
@@ -131,15 +126,11 @@ public class JdbcNamespaceIntegrationTests {
 			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
 					assertNumRowsInTestTable(template, 1));
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
-	public void createAndDestroyNestedWithH2() throws Exception {
-		ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config-h2.xml");
-		try {
+	void createAndDestroyNestedWithH2() throws Exception {
+		try (ClassPathXmlApplicationContext context = context("jdbc-destroy-nested-config-h2.xml")) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			JdbcTemplate template = new JdbcTemplate(dataSource);
 			assertNumRowsInTestTable(template, 1);
@@ -148,13 +139,10 @@ public class JdbcNamespaceIntegrationTests {
 			assertThatExceptionOfType(BadSqlGrammarException.class).isThrownBy(() ->
 					assertNumRowsInTestTable(template, 1));
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	@Test
-	public void multipleDataSourcesHaveDifferentDatabaseNames() throws Exception {
+	void multipleDataSourcesHaveDifferentDatabaseNames() throws Exception {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(new ClassPathResource(
 			"jdbc-config-multiple-datasources.xml", getClass()));
@@ -163,12 +151,12 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	@Test
-	public void initializeWithCustomSeparator() throws Exception {
+	void initializeWithCustomSeparator() throws Exception {
 		assertCorrectSetupAndCloseContext("jdbc-initialize-custom-separator.xml", 2, "dataSource");
 	}
 
 	@Test
-	public void embeddedWithCustomSeparator() throws Exception {
+	void embeddedWithCustomSeparator() throws Exception {
 		assertCorrectSetupAndCloseContext("jdbc-config-custom-separator.xml", 2, "dataSource");
 	}
 
@@ -192,8 +180,7 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	private void assertCorrectSetupAndCloseContext(String file, int count, String... dataSources) {
-		ConfigurableApplicationContext context = context(file);
-		try {
+		try (ConfigurableApplicationContext context = context(file)) {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
@@ -202,22 +189,15 @@ public class JdbcNamespaceIntegrationTests {
 				assertThat(adbDataSource.getUrl()).contains(dataSourceName);
 			}
 		}
-		finally {
-			context.close();
-		}
 	}
 
 	private void assertCorrectSetupForSingleDataSource(String file, Predicate<String> urlPredicate) {
-		ConfigurableApplicationContext context = context(file);
-		try {
+		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
 			assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
 			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
-		}
-		finally {
-			context.close();
 		}
 	}
 

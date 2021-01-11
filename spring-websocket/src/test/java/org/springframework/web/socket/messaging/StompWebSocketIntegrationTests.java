@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -59,6 +60,7 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.c
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
@@ -76,14 +78,11 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		super.setup(server, webSocketClient, testInfo);
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
-		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
 
-		SimpleController controller = this.wac.getBean(SimpleController.class);
-		try {
+		try (WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+			assertThat(session).isNotNull();
+			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -98,13 +97,10 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 				.headers("destination:/app/increment").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -117,16 +113,13 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).as("Expected STOMP MESSAGE, got " + payload).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -139,16 +132,13 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.contains(destHeader)).as("Expected STOMP destination=/app/number, got " + payload).isTrue();
 			assertThat(payload.contains("42")).as("Expected STOMP Payload=42, got " + payload).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -162,17 +152,14 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/exception").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
 			assertThat(payload.contains("destination:/user/queue/error\n")).isTrue();
 			assertThat(payload.endsWith("Got error: Bad input\0")).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -187,17 +174,14 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 				.headers("destination:/app/scopedBeanValue").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
-		WebSocketSession session = doHandshake(clientHandler, "/ws").get();
 
-		try {
+		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
 			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
 			assertThat(payload.contains("destination:/topic/scopedBeanValue\n")).isTrue();
 			assertThat(payload.endsWith("55\0")).isTrue();
-		}
-		finally {
-			session.close();
 		}
 	}
 
@@ -349,13 +333,13 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel() {
+		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 	}

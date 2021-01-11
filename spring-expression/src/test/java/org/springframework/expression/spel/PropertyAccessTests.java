@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.Person;
+import org.springframework.expression.spel.testresources.RecordPerson;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -189,6 +190,20 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 
 		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
 				parser.parseExpression("name='p3'").getValue(context, target));
+	}
+
+	@Test
+	public void propertyReadOnlyWithRecordStyle() {
+		EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+
+		Expression expr = parser.parseExpression("name");
+		RecordPerson target1 = new RecordPerson("p1");
+		assertThat(expr.getValue(context, target1)).isEqualTo("p1");
+		RecordPerson target2 = new RecordPerson("p2");
+		assertThat(expr.getValue(context, target2)).isEqualTo("p2");
+
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("name='p3'").getValue(context, target2));
 	}
 
 	@Test

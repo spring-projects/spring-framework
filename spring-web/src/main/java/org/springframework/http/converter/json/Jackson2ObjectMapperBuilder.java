@@ -21,11 +21,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -92,7 +92,7 @@ import org.springframework.util.xml.StaxUtils;
  * support for Kotlin classes and data classes</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
+ * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -105,7 +105,7 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private static volatile boolean kotlinWarningLogged = false;
+	private static volatile boolean kotlinWarningLogged;
 
 	private final Log logger = HttpLogging.forLogName(getClass());
 
@@ -143,7 +143,7 @@ public class Jackson2ObjectMapperBuilder {
 	private TypeResolverBuilder<?> defaultTyping;
 
 	@Nullable
-	private JsonInclude.Include serializationInclusion;
+	private JsonInclude.Value serializationInclusion;
 
 	@Nullable
 	private FilterProvider filters;
@@ -168,6 +168,9 @@ public class Jackson2ObjectMapperBuilder {
 
 	@Nullable
 	private Boolean defaultUseWrapper;
+
+	@Nullable
+	private Consumer<ObjectMapper> configurer;
 
 
 	/**
@@ -301,7 +304,16 @@ public class Jackson2ObjectMapperBuilder {
 	 * Set a custom inclusion strategy for serialization.
 	 * @see com.fasterxml.jackson.annotation.JsonInclude.Include
 	 */
-	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Include serializationInclusion) {
+	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Include inclusion) {
+		return serializationInclusion(JsonInclude.Value.construct(inclusion, inclusion));
+	}
+
+	/**
+	 * Set a custom inclusion strategy for serialization.
+	 * @since 5.3
+	 * @see com.fasterxml.jackson.annotation.JsonInclude.Value
+	 */
+	public Jackson2ObjectMapperBuilder serializationInclusion(JsonInclude.Value serializationInclusion) {
 		this.serializationInclusion = serializationInclusion;
 		return this;
 	}
@@ -516,7 +528,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules to
+	 * <p>Multiple invocations are not additive, the last one defines the modules to
 	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
@@ -533,7 +545,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Set a complete list of modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules to
+	 * <p>Multiple invocations are not additive, the last one defines the modules to
 	 * register.
 	 * <p>Note: If this is set, no finding of modules is going to happen - not by
 	 * Jackson, and not by Spring either (see {@link #findModulesViaServiceLoader}).
@@ -544,7 +556,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modules(List<Module> modules) {
-		this.modules = new LinkedList<>(modules);
+		this.modules = new ArrayList<>(modules);
 		this.findModulesViaServiceLoader = false;
 		this.findWellKnownModules = false;
 		return this;
@@ -552,14 +564,15 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules to be registered with the {@link ObjectMapper}.
-	 * Multiple invocations are not additive, the last one defines the modules
+	 * <p>Multiple invocations are not additive, the last one defines the modules
 	 * to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
-	 * <p>Specify either this or {@link #modules}, not both.
+	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @since 4.1.5
+	 * @see #modulesToInstall(Class...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modulesToInstall(Module... modules) {
@@ -570,18 +583,20 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Specify one or more modules by class to be registered with
-	 * the {@link ObjectMapper}. Multiple invocations are not additive,
-	 * the last one defines the modules to register.
+	 * the {@link ObjectMapper}.
+	 * <p>Multiple invocations are not additive, the last one defines the modules
+	 * to register.
 	 * <p>Modules specified here will be registered after
 	 * Spring's autodetection of JSR-310 and Joda-Time, or Jackson's
 	 * finding of modules (see {@link #findModulesViaServiceLoader}),
 	 * allowing to eventually override their configuration.
-	 * <p>Specify either this or {@link #modules}, not both.
+	 * <p>Specify either this or {@link #modules(Module...)}, not both.
 	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
-	@SuppressWarnings("unchecked")
-	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
+	@SafeVarargs
+	@SuppressWarnings("varargs")
+	public final Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
 		this.moduleClasses = modules;
 		this.findWellKnownModules = true;
 		return this;
@@ -627,6 +642,19 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder applicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+		return this;
+	}
+
+	/**
+	 * An option to apply additional customizations directly to the
+	 * {@code ObjectMapper} instances at the end, after all other config
+	 * properties of the builder have been applied.
+	 * @param configurer a configurer to apply. If several configurers are
+	 * registered, they will get applied in their registration order.
+	 * @since 5.3
+	 */
+	public Jackson2ObjectMapperBuilder postConfigurer(Consumer<ObjectMapper> configurer) {
+		this.configurer = (this.configurer != null ? this.configurer.andThen(configurer) : configurer);
 		return this;
 	}
 
@@ -703,7 +731,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setDefaultTyping(this.defaultTyping);
 		}
 		if (this.serializationInclusion != null) {
-			objectMapper.setSerializationInclusion(this.serializationInclusion);
+			objectMapper.setDefaultPropertyInclusion(this.serializationInclusion);
 		}
 
 		if (this.filters != null) {
@@ -730,6 +758,10 @@ public class Jackson2ObjectMapperBuilder {
 		else if (this.applicationContext != null) {
 			objectMapper.setHandlerInstantiator(
 					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
+		}
+
+		if (this.configurer != null) {
+			this.configurer.accept(objectMapper);
 		}
 	}
 
@@ -809,8 +841,8 @@ public class Jackson2ObjectMapperBuilder {
 			// jackson-datatype-jsr310 not available
 		}
 
-		// Joda-Time present?
-		if (ClassUtils.isPresent("org.joda.time.LocalDate", this.moduleClassLoader)) {
+		// Joda-Time 2.x present?
+		if (ClassUtils.isPresent("org.joda.time.YearMonth", this.moduleClassLoader)) {
 			try {
 				Class<? extends Module> jodaModuleClass = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);

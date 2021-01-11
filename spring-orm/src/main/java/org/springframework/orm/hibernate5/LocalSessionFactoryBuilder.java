@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.InfrastructureProxy;
@@ -76,12 +77,12 @@ import org.springframework.util.ClassUtils;
  * Typically combined with {@link HibernateTransactionManager} for declarative
  * transactions against the {@code SessionFactory} and its JDBC {@code DataSource}.
  *
- * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2/5.3, as of Spring 5.1.
- * Set up with Hibernate 5.2/5.3, this builder is also a convenient way to set up
+ * <p>Compatible with Hibernate 5.2/5.3/5.4, as of Spring 5.3.
+ * This Hibernate-specific factory builder can also be a convenient way to set up
  * a JPA {@code EntityManagerFactory} since the Hibernate {@code SessionFactory}
  * natively exposes the JPA {@code EntityManagerFactory} interface as well now.
  *
- * <p>This builder supports Hibernate 5.3 {@code BeanContainer} integration,
+ * <p>This builder supports Hibernate 5.3/5.4 {@code BeanContainer} integration,
  * {@link MetadataSources} from custom {@link BootstrapServiceRegistryBuilder}
  * setup, as well as other advanced Hibernate configuration options beyond the
  * standard JPA bootstrap contract.
@@ -162,23 +163,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		if (dataSource != null) {
 			getProperties().put(AvailableSettings.DATASOURCE, dataSource);
 		}
-
-		// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "ON_CLOSE");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 
 		getProperties().put(AvailableSettings.CLASSLOADERS, Collections.singleton(resourceLoader.getClassLoader()));
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
@@ -225,22 +211,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
-		// Hibernate 5.1/5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
-		try {
-			// Try Hibernate 5.2
-			AvailableSettings.class.getField("CONNECTION_HANDLING");
-			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
-		}
-		catch (NoSuchFieldException ex) {
-			// Try Hibernate 5.1
-			try {
-				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
-				getProperties().put("hibernate.connection.release_mode", "AFTER_STATEMENT");
-			}
-			catch (NoSuchFieldException ex2) {
-				// on Hibernate 5.0.x or lower - no need to change the default there
-			}
-		}
+		getProperties().put(AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY, "jta");
+		getProperties().put(AvailableSettings.CONNECTION_HANDLING,
+				PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT);
 
 		return this;
 	}
@@ -437,24 +410,23 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			try {
-				if (method.getName().equals("equals")) {
+			switch (method.getName()) {
+				case "equals":
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);
-				}
-				else if (method.getName().equals("hashCode")) {
+				case "hashCode":
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
-				}
-				else if (method.getName().equals("getProperties")) {
+				case "getProperties":
 					return getProperties();
-				}
-				else if (method.getName().equals("getWrappedObject")) {
+				case "getWrappedObject":
 					// Call coming in through InfrastructureProxy interface...
 					return getSessionFactory();
-				}
-				// Regular delegation to the target SessionFactory,
-				// enforcing its full initialization...
+			}
+
+			// Regular delegation to the target SessionFactory,
+			// enforcing its full initialization...
+			try {
 				return method.invoke(getSessionFactory(), args);
 			}
 			catch (InvocationTargetException ex) {

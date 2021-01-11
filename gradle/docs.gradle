@@ -3,7 +3,7 @@ configurations {
 }
 
 dependencies {
-	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.4.0.RELEASE")
+	asciidoctorExt("io.spring.asciidoctor:spring-asciidoctor-extensions-block-switch:0.5.0")
 }
 
 repositories {
@@ -106,11 +106,14 @@ dokka {
 		externalDocumentationLink {
 			url = new URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
 		}
+		externalDocumentationLink {
+			url = new URL("https://r2dbc.io/spec/0.8.3.RELEASE/api/")
+		}
 	}
 }
 
 task downloadResources(type: Download) {
-	def version = "0.2.1.RELEASE"
+	def version = "0.2.5"
 	src "https://repo.spring.io/release/io/spring/docresources/" +
 			"spring-doc-resources/$version/spring-doc-resources-${version}.zip"
 	dest project.file("$buildDir/docs/spring-doc-resources.zip")
@@ -124,35 +127,8 @@ task extractDocResources(type: Copy, dependsOn: downloadResources) {
 }
 
 asciidoctorj {
-	modules {
-		pdf {
-			version '1.5.0-beta.8'
-		}
-	}
+	version = '2.4.1'
 	fatalWarnings ".*"
-}
-
-/**
- * Produce the Spring Framework Reference documentation
- * from "src/docs/asciidoc" into  "build/asciidoc/html5"
- */
-asciidoctor {
-	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExt'
-	sources {
-		include '*.adoc'
-	}
-	outputDir "$buildDir/docs/ref-docs/"
-	resources {
-		from(sourceDir) {
-			include 'images/*', 'css/**', 'js/**'
-		}
-		from extractDocResources
-	}
-	logDocuments = true
-	outputOptions {
-		backends = ["html5", "pdf"]
-	}
 	options doctype: 'book', eruby: 'erubis'
 	attributes([
 			icons: 'font',
@@ -164,7 +140,7 @@ asciidoctor {
 			sectnums: '',
 			'source-highlighter': 'highlight.js',
 			highlightjsdir: 'js/highlight',
-			'highlightjs-theme': 'github', // 'googlecode',
+			'highlightjs-theme': 'googlecode',
 			stylesdir: 'css/',
 			stylesheet: 'stylesheet.css',
 			'spring-version': project.version
@@ -172,9 +148,43 @@ asciidoctor {
 }
 
 /**
+ * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
+ * in "build/docs/ref-docs/html5".
+ */
+asciidoctor {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
+	sources {
+		include '*.adoc'
+	}
+	outputDir "$buildDir/docs/ref-docs/html5"
+	logDocuments = true
+	resources {
+		from(sourceDir) {
+			include 'images/*.png', 'css/**', 'js/**'
+		}
+		from extractDocResources
+	}
+}
+
+/**
+ * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
+ * in "build/docs/ref-docs/pdf".
+ */
+asciidoctorPdf {
+	baseDirFollowsSourceDir()
+	configurations 'asciidoctorExt'
+	sources {
+		include '*.adoc'
+	}
+	outputDir "$buildDir/docs/ref-docs/pdf"
+	logDocuments = true
+}
+
+/**
  * Zip all docs (API and reference) into a single archive
  */
-task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
+task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', 'dokka']) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
 			"for deployment at https://docs.spring.io/spring-framework/docs."
@@ -187,11 +197,11 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'dokka']) {
 	from (api) {
 		into "javadoc-api"
 	}
-	from ("$asciidoctor.outputDir/html5") {
-		into "spring-framework-reference"
+	from ("$asciidoctor.outputDir") {
+		into "reference/html"
 	}
-	from ("$asciidoctor.outputDir/pdf") {
-		into "spring-framework-reference/pdf"
+	from ("$asciidoctorPdf.outputDir") {
+		into "reference/pdf"
 	}
 	from (dokka) {
 		into "kdoc-api"

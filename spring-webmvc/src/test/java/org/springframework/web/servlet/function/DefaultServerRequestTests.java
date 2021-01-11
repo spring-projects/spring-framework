@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.Part;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,37 +51,36 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.servlet.handler.PathPatternsTestUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
+import org.springframework.web.testfixture.servlet.MockPart;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest.get;
 
 /**
  * @author Arjen Poutsma
  * @since 5.1
  */
-public class DefaultServerRequestTests {
+class DefaultServerRequestTests {
 
 	private final List<HttpMessageConverter<?>> messageConverters = Collections.singletonList(
 			new StringHttpMessageConverter());
 
 	@Test
-	public void method() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("HEAD", "/");
-		DefaultServerRequest request =
-				new DefaultServerRequest(servletRequest, this.messageConverters);
+	void method() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("HEAD", "/", true);
+		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
 		assertThat(request.method()).isEqualTo(HttpMethod.HEAD);
 	}
 
 	@Test
-	public void uri() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void uri() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setServerName("example.com");
 		servletRequest.setScheme("https");
 		servletRequest.setServerPort(443);
@@ -92,8 +92,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void uriBuilder() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/path");
+	void uriBuilder() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/path", true);
 		servletRequest.setQueryString("a=1");
 
 		DefaultServerRequest request =
@@ -108,8 +108,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void attribute() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void attribute() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setAttribute("foo", "bar");
 
 		DefaultServerRequest request =
@@ -119,8 +119,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void params() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void params() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "bar");
 
 		DefaultServerRequest request =
@@ -130,8 +130,27 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void emptyQueryParam() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void multipartData() throws Exception {
+		MockPart formPart = new MockPart("form", "foo".getBytes(UTF_8));
+		MockPart filePart = new MockPart("file", "foo.txt", "foo".getBytes(UTF_8));
+
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("POST", "/", true);
+		servletRequest.addPart(formPart);
+		servletRequest.addPart(filePart);
+
+		DefaultServerRequest request =
+				new DefaultServerRequest(servletRequest, this.messageConverters);
+
+		MultiValueMap<String, Part> result = request.multipartData();
+
+		assertThat(result).hasSize(2);
+		assertThat(result.get("form")).containsExactly(formPart);
+		assertThat(result.get("file")).containsExactly(filePart);
+	}
+
+	@Test
+	void emptyQueryParam() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "");
 
 		DefaultServerRequest request =
@@ -141,8 +160,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void absentQueryParam() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void absentQueryParam() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setParameter("foo", "");
 
 		DefaultServerRequest request =
@@ -152,8 +171,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void pathVariable() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void pathVariable() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		servletRequest
 				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -165,8 +184,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void pathVariableNotFound() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void pathVariableNotFound() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		servletRequest
 				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -179,8 +198,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void pathVariables() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void pathVariables() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		servletRequest
 				.setAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, pathVariables);
@@ -192,7 +211,7 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void header() {
+	void header() {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		List<MediaType> accept =
 				Collections.singletonList(MediaType.APPLICATION_JSON);
@@ -208,7 +227,7 @@ public class DefaultServerRequestTests {
 		List<HttpRange> range = Collections.singletonList(HttpRange.createByteRange(0, 42));
 		httpHeaders.setRange(range);
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		httpHeaders.forEach(servletRequest::addHeader);
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 
@@ -226,10 +245,10 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void cookies() {
+	void cookies() {
 		Cookie cookie = new Cookie("foo", "bar");
 
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setCookies(cookie);
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,
@@ -243,8 +262,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void bodyClass() throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void bodyClass() throws Exception {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		servletRequest.setContent("foo".getBytes(UTF_8));
 
@@ -256,8 +275,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void bodyParameterizedTypeReference() throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void bodyParameterizedTypeReference() throws Exception {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		servletRequest.setContent("[\"foo\",\"bar\"]".getBytes(UTF_8));
 
@@ -271,8 +290,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void bodyUnacceptable() throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void bodyUnacceptable() throws Exception {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		servletRequest.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		servletRequest.setContent("foo".getBytes(UTF_8));
 
@@ -284,8 +303,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void session() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void session() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		MockHttpSession session = new MockHttpSession();
 		servletRequest.setSession(session);
 
@@ -297,8 +316,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@Test
-	public void principal() {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/");
+	void principal() {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
 		Principal principal = new Principal() {
 			@Override
 			public String getName() {
@@ -315,7 +334,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedTimestamp(String method) throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, now.toEpochMilli());
 
@@ -331,7 +350,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkModifiedTimestamp(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
@@ -345,7 +364,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedETag(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
 
@@ -361,7 +380,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedETagWithSeparatorChars(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "\"Foo, Bar\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
 
@@ -377,7 +396,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkModifiedETag(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String currentETag = "\"Foo\"";
 		String oldEtag = "Bar";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, oldEtag);
@@ -391,7 +410,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedUnpaddedETag(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "Foo";
 		String paddedEtag = String.format("\"%s\"", eTag);
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, paddedEtag);
@@ -408,7 +427,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkModifiedUnpaddedETag(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String currentETag = "Foo";
 		String oldEtag = "Bar";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, oldEtag);
@@ -422,7 +441,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedWildcardIsIgnored(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "*");
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
@@ -434,7 +453,7 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedETagAndTimestamp(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "\"Foo\"";
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
@@ -454,16 +473,12 @@ public class DefaultServerRequestTests {
 
 	@ParameterizedHttpMethodTest
 	void checkNotModifiedETagAndModifiedTimestamp(String method) {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String eTag = "\"Foo\"";
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, eTag);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
-		MockServerWebExchange exchange = MockServerWebExchange.from(get("/")
-				.ifNoneMatch(eTag)
-				.ifModifiedSince(oneMinuteAgo.toEpochMilli())
-				);
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
@@ -477,8 +492,8 @@ public class DefaultServerRequestTests {
 	}
 
 	@ParameterizedHttpMethodTest
-	void checkModifiedETagAndNotModifiedTimestamp(String method) throws Exception {
-		MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, "/");
+	void checkModifiedETagAndNotModifiedTimestamp(String method) {
+		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest(method, "/", true);
 		String currentETag = "\"Foo\"";
 		String oldEtag = "\"Bar\"";
 		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);

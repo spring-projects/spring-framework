@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
  * Read-only {@code Map<String, String>} implementation that is backed by system
  * properties or environment variables.
  *
- * <p>Used by {@link AbstractApplicationContext} when a {@link SecurityManager} prohibits
+ * <p>Used by {@link AbstractEnvironment} when a {@link SecurityManager} prohibits
  * access to {@link System#getProperties()} or {@link System#getenv()}. It is for this
  * reason that the implementations of {@link #keySet()}, {@link #entrySet()}, and
  * {@link #values()} always return empty even though {@link #get(Object)} may in fact

@@ -1887,9 +1887,10 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[256]", "");
-		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				binder.bind(mpvs))
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
+		assertThatExceptionOfType(InvalidPropertyException.class)
+			.isThrownBy(() -> binder.bind(mpvs))
+			.havingRootCause()
+			.isInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
@@ -1913,9 +1914,10 @@ public class DataBinderTests {
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("friends[16]", "");
-		assertThatExceptionOfType(InvalidPropertyException.class).isThrownBy(() ->
-				binder.bind(mpvs))
-			.satisfies(ex -> assertThat(ex.getRootCause()).isInstanceOf(IndexOutOfBoundsException.class));
+		assertThatExceptionOfType(InvalidPropertyException.class)
+			.isThrownBy(() -> binder.bind(mpvs))
+			.havingRootCause()
+			.isInstanceOf(IndexOutOfBoundsException.class);
 	}
 
 	@Test
@@ -1992,7 +1994,7 @@ public class DataBinderTests {
 		mpv.add("age", "invalid");
 		binder.bind(mpv);
 		assertThat(binder.getBindingResult().getFieldError("age").getCode()).isEqualTo("errors.typeMismatch");
-		assertThat(BeanWrapper.class.cast(binder.getInternalBindingResult().getPropertyAccessor()).getAutoGrowCollectionLimit()).isEqualTo(512);
+		assertThat(((BeanWrapper) binder.getInternalBindingResult().getPropertyAccessor()).getAutoGrowCollectionLimit()).isEqualTo(512);
 	}
 
 	@Test // SPR-15009
@@ -2048,8 +2050,17 @@ public class DataBinderTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				binder.setMessageCodesResolver(new DefaultMessageCodesResolver()))
 			.withMessageContaining("DataBinder is already initialized with MessageCodesResolver");
-
 	}
+
+	@Test // gh-24347
+	public void overrideBindingResultType() {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.initDirectFieldAccess();
+		binder.initBeanPropertyAccess();
+		assertThat(binder.getBindingResult()).isInstanceOf(BeanPropertyBindingResult.class);
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class BeanWithIntegerList {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,8 +185,9 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	 */
 	protected HttpURLConnection openConnection(URL url, @Nullable Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
-		if (!HttpURLConnection.class.isInstance(urlConnection)) {
-			throw new IllegalStateException("HttpURLConnection required for [" + url + "] but got: " + urlConnection);
+		if (!(urlConnection instanceof HttpURLConnection)) {
+			throw new IllegalStateException(
+					"HttpURLConnection required for [" + url + "] but got: " + urlConnection);
 		}
 		return (HttpURLConnection) urlConnection;
 	}
@@ -206,23 +207,13 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 			connection.setReadTimeout(this.readTimeout);
 		}
 
+		boolean mayWrite =
+				("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
+						"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod));
+
 		connection.setDoInput(true);
-
-		if ("GET".equals(httpMethod)) {
-			connection.setInstanceFollowRedirects(true);
-		}
-		else {
-			connection.setInstanceFollowRedirects(false);
-		}
-
-		if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
-				"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
-			connection.setDoOutput(true);
-		}
-		else {
-			connection.setDoOutput(false);
-		}
-
+		connection.setInstanceFollowRedirects("GET".equals(httpMethod));
+		connection.setDoOutput(mayWrite);
 		connection.setRequestMethod(httpMethod);
 	}
 

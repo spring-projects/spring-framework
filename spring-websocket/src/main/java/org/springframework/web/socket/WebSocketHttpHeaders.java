@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * Create a new instance.
 	 */
 	public WebSocketHttpHeaders() {
-		this(new HttpHeaders(), false);
+		this(new HttpHeaders());
 	}
 
 	/**
@@ -65,21 +65,17 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 * @param headers the HTTP headers to wrap
 	 */
 	public WebSocketHttpHeaders(HttpHeaders headers) {
-		this(headers, false);
-	}
-
-	/**
-	 * Private constructor that can create read-only {@code WebSocketHttpHeader} instances.
-	 */
-	private WebSocketHttpHeaders(HttpHeaders headers, boolean readOnly) {
-		this.headers = readOnly ? HttpHeaders.readOnlyHttpHeaders(headers) : headers;
+		this.headers = headers;
 	}
 
 	/**
 	 * Returns {@code WebSocketHttpHeaders} object that can only be read, not written to.
+	 * @deprecated as of 5.1.16, in favor of calling {@link #WebSocketHttpHeaders(HttpHeaders)}
+	 * with a read-only wrapper from {@link HttpHeaders#readOnlyHttpHeaders(HttpHeaders)}
 	 */
+	@Deprecated
 	public static WebSocketHttpHeaders readOnlyWebSocketHttpHeaders(WebSocketHttpHeaders headers) {
-		return new WebSocketHttpHeaders(headers, true);
+		return new WebSocketHttpHeaders(HttpHeaders.readOnlyHttpHeaders(headers));
 	}
 
 

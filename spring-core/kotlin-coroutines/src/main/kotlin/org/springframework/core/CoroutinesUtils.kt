@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingleOrNull
 import kotlinx.coroutines.reactor.asFlux
 
 import kotlinx.coroutines.reactor.mono
@@ -49,15 +49,7 @@ internal fun <T: Any> deferredToMono(source: Deferred<T>) =
  * @since 5.2
  */
 internal fun <T: Any> monoToDeferred(source: Mono<T>) =
-		GlobalScope.async(Dispatchers.Unconfined) { source.awaitFirstOrNull() }
-
-/**
- * Return {@code true} if the method is a suspending function.
- *
- * @author Sebastien Deleuze
- * @since 5.2.2
- */
-internal fun isSuspendingFunction(method: Method) = method.kotlinFunction!!.isSuspend
+		GlobalScope.async(Dispatchers.Unconfined) { source.awaitSingleOrNull() }
 
 /**
  * Invoke a suspending function and converts it to [Mono] or [reactor.core.publisher.Flux].
@@ -66,10 +58,10 @@ internal fun isSuspendingFunction(method: Method) = method.kotlinFunction!!.isSu
  * @since 5.2
  */
 @Suppress("UNCHECKED_CAST")
-internal fun invokeSuspendingFunction(method: Method, bean: Any, vararg args: Any?): Publisher<*> {
+fun invokeSuspendingFunction(method: Method, target: Any, vararg args: Any?): Publisher<*> {
 	val function = method.kotlinFunction!!
 	val mono = mono(Dispatchers.Unconfined) {
-		function.callSuspend(bean, *args.sliceArray(0..(args.size-2))).let { if (it == Unit) null else it }
+		function.callSuspend(target, *args.sliceArray(0..(args.size-2))).let { if (it == Unit) null else it }
 	}.onErrorMap(InvocationTargetException::class.java) { it.targetException }
 	return if (function.returnType.classifier == Flow::class) {
 		mono.flatMapMany { (it as Flow<Any>).asFlux() }

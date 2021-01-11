@@ -69,7 +69,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
+import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * Abstract base class for integration tests using the
@@ -79,7 +79,7 @@ import static org.springframework.core.testfixture.TestGroup.PERFORMANCE;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-@EnabledForTestGroups(PERFORMANCE)
+@EnabledForTestGroups(LONG_RUNNING)
 public abstract class AbstractSockJsIntegrationTests {
 
 	protected Log logger = LogFactory.getLog(getClass());

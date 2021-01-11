@@ -29,6 +29,7 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
@@ -55,6 +56,9 @@ import org.springframework.util.StringUtils;
  * @param <T> the type of objects in the input stream
  */
 public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
+
+	private static final Log logger = HttpLogging.forLogName(EncoderHttpMessageWriter.class);
+
 
 	private final Encoder<T> encoder;
 
@@ -124,17 +128,24 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 						return message.setComplete().then(Mono.empty());
 					}))
 					.flatMap(buffer -> {
+						Hints.touchDataBuffer(buffer, hints, logger);
 						message.getHeaders().setContentLength(buffer.readableByteCount());
 						return message.writeWith(Mono.just(buffer)
-								.doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release));
-					});
+								.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+					})
+					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
 		}
 
 		if (isStreamingMediaType(contentType)) {
-			return message.writeAndFlushWith(body.map(buffer ->
-					Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, PooledDataBuffer::release)));
+			return message.writeAndFlushWith(body.map(buffer -> {
+				Hints.touchDataBuffer(buffer, hints, logger);
+				return Mono.just(buffer).doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+			}));
 		}
 
+		if (logger.isDebugEnabled()) {
+			body = body.doOnNext(buffer -> Hints.touchDataBuffer(buffer, hints, logger));
+		}
 		return message.writeWith(body);
 	}
 
@@ -163,6 +174,9 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			return new MediaType(main, defaultType.getCharset());
 		}
 		return main;
+	}
+
+	private static void touch(DataBuffer buffer, Map<String, Object> hints) {
 	}
 
 	private boolean isStreamingMediaType(@Nullable MediaType mediaType) {

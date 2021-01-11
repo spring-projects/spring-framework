@@ -7,6 +7,9 @@
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports" />
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public" />
 
+	<!-- JMH benchmarks -->
+	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast" />
+
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
 	<suppress files="BeanCreationException" checks="MutableException"/>

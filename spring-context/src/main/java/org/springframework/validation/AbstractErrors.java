@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.validation;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -146,7 +146,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	@Override
 	public List<ObjectError> getAllErrors() {
-		List<ObjectError> result = new LinkedList<>();
+		List<ObjectError> result = new ArrayList<>();
 		result.addAll(getGlobalErrors());
 		result.addAll(getFieldErrors());
 		return Collections.unmodifiableList(result);
@@ -199,7 +199,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
 		List<FieldError> fieldErrors = getFieldErrors();
-		List<FieldError> result = new LinkedList<>();
+		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (FieldError error : fieldErrors) {
 			if (isMatchingFieldError(fixedField, error)) {

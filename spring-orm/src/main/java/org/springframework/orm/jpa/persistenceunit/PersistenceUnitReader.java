@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.persistenceunit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.SharedCacheMode;
@@ -123,20 +123,16 @@ final class PersistenceUnitReader {
 	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
+		List<SpringPersistenceUnitInfo> infos = new ArrayList<>(1);
 		String resourceLocation = null;
 		try {
 			for (String location : persistenceXmlLocations) {
 				Resource[] resources = this.resourcePatternResolver.getResources(location);
 				for (Resource resource : resources) {
 					resourceLocation = resource.toString();
-					InputStream stream = resource.getInputStream();
-					try {
+					try (InputStream stream = resource.getInputStream()) {
 						Document document = buildDocument(handler, stream);
 						parseDocument(resource, document, infos);
-					}
-					finally {
-						stream.close();
 					}
 				}
 			}

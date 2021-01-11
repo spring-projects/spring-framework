@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,18 @@ import org.springframework.context.annotation.Role;
  * @see EnableCaching
  * @see CachingConfigurationSelector
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 public class ProxyCachingConfiguration extends AbstractCachingConfiguration {
 
 	@Bean(name = CacheManagementConfigUtils.CACHE_ADVISOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public BeanFactoryCacheOperationSourceAdvisor cacheAdvisor() {
+	public BeanFactoryCacheOperationSourceAdvisor cacheAdvisor(
+			CacheOperationSource cacheOperationSource, CacheInterceptor cacheInterceptor) {
+
 		BeanFactoryCacheOperationSourceAdvisor advisor = new BeanFactoryCacheOperationSourceAdvisor();
-		advisor.setCacheOperationSource(cacheOperationSource());
-		advisor.setAdvice(cacheInterceptor());
+		advisor.setCacheOperationSource(cacheOperationSource);
+		advisor.setAdvice(cacheInterceptor);
 		if (this.enableCaching != null) {
 			advisor.setOrder(this.enableCaching.<Integer>getNumber("order"));
 		}
@@ -59,10 +61,10 @@ public class ProxyCachingConfiguration extends AbstractCachingConfiguration {
 
 	@Bean
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public CacheInterceptor cacheInterceptor() {
+	public CacheInterceptor cacheInterceptor(CacheOperationSource cacheOperationSource) {
 		CacheInterceptor interceptor = new CacheInterceptor();
 		interceptor.configure(this.errorHandler, this.keyGenerator, this.cacheResolver, this.cacheManager);
-		interceptor.setCacheOperationSource(cacheOperationSource());
+		interceptor.setCacheOperationSource(cacheOperationSource);
 		return interceptor;
 	}
 

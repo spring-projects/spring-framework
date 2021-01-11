@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -176,12 +178,15 @@ public class FormHttpMessageConverterTests {
 		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
 		parts.add("xml", entity);
 
+		Map<String, String> parameters = new LinkedHashMap<>(2);
+		parameters.put("charset", StandardCharsets.UTF_8.name());
+		parameters.put("foo", "bar");
+
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
+		this.converter.write(parts, new MediaType("multipart", "form-data", parameters), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
-		// SPR-17030
-		assertThat(contentType.getParameters()).containsKeys("charset", "boundary");
+		assertThat(contentType.getParameters()).containsKeys("charset", "boundary", "foo"); // gh-21568, gh-25839
 
 		// see if Commons FileUpload can read what we wrote
 		FileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -266,6 +271,29 @@ public class FormHttpMessageConverterTests {
 		assertThat(item.getString())
 				.startsWith("<MyBean")
 				.endsWith("><string>foo</string></MyBean>");
+	}
+
+	@Test
+	public void writeMultipartCharset() throws Exception {
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
+		parts.add("logo", logo);
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		Map<String, String> parameters = contentType.getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary");
+
+		this.converter.setCharset(StandardCharsets.ISO_8859_1);
+
+		outputMessage = new MockHttpOutputMessage();
+		this.converter.write(parts, MULTIPART_FORM_DATA, outputMessage);
+
+		parameters = outputMessage.getHeaders().getContentType().getParameters();
+		assertThat(parameters).containsOnlyKeys("boundary", "charset");
+		assertThat(parameters).containsEntry("charset", "ISO-8859-1");
 	}
 
 	private void assertCanRead(MediaType mediaType) {

@@ -128,10 +128,11 @@ By default, `@CrossOrigin` allows:
 * All headers.
 * All HTTP methods to which the controller method is mapped.
 
-
-`allowedCredentials` is not enabled by default, since that establishes a trust level
+`allowCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information (such as cookies and CSRF tokens) and
-should be used only where appropriate.
+should be used only where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 
@@ -245,7 +246,9 @@ By default global configuration enables the following:
 
 `allowedCredentials` is not enabled by default, since that establishes a trust level
 that exposes sensitive user-specific information( such as cookies and CSRF tokens) and
-should be used only where appropriate.
+should be used only where appropriate. When it is enabled either `allowOrigins` must be
+set to one or more specific domain (but not the special value `"*"`) or alternatively
+the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
 
 `maxAge` is set to 30 minutes.
 

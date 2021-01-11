@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,14 +169,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
 		this.charset = true;
-		updateContentTypeHeader();
+		updateContentTypePropertyAndHeader();
 	}
 
-	private void updateContentTypeHeader() {
+	private void updateContentTypePropertyAndHeader() {
 		if (this.contentType != null) {
 			String value = this.contentType;
 			if (this.charset && !this.contentType.toLowerCase().contains(CHARSET_PREFIX)) {
 				value = value + ';' + CHARSET_PREFIX + this.characterEncoding;
+				this.contentType = value;
 			}
 			doAddHeaderValue(HttpHeaders.CONTENT_TYPE, value, true);
 		}
@@ -280,7 +281,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 					this.charset = true;
 				}
 			}
-			updateContentTypeHeader();
+			updateContentTypePropertyAndHeader();
 		}
 	}
 
@@ -331,6 +332,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void reset() {
 		resetBuffer();
 		this.characterEncoding = null;
+		this.charset = false;
 		this.contentLength = 0;
 		this.contentType = null;
 		this.locale = Locale.getDefault();
@@ -424,7 +426,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
 	@Override
@@ -435,7 +437,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the primary value for the given header as a String, if any.
 	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
@@ -450,7 +452,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
 	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
@@ -638,10 +640,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
+			String contentLanguages = value.toString();
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_LANGUAGE, value.toString());
+			headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
 			Locale language = headers.getContentLanguage();
 			setLocale(language != null ? language : Locale.getDefault());
+			// Since setLocale() sets the Content-Language header to the given
+			// single Locale, we have to explicitly set the Content-Language header
+			// to the user-provided value.
+			doAddHeaderValue(HttpHeaders.CONTENT_LANGUAGE, contentLanguages, true);
 			return true;
 		}
 		else if (HttpHeaders.SET_COOKIE.equalsIgnoreCase(name)) {
@@ -660,12 +667,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
-		HeaderValueHolder header = this.headers.get(name);
 		Assert.notNull(value, "Header value must not be null");
-		if (header == null) {
-			header = new HeaderValueHolder();
-			this.headers.put(name, header);
-		}
+		HeaderValueHolder header = this.headers.computeIfAbsent(name, key -> new HeaderValueHolder());
 		if (replace) {
 			header.setValue(value);
 		}

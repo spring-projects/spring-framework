@@ -611,7 +611,7 @@ class AnnotatedElementUtilsTests {
 
 	/**
 	 * Bridge/bridged method setup code copied from
-	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 * {@link org.springframework.core.BridgeMethodResolverTests#withGenericParameter()}.
 	 * @since 4.2
 	 */
 	@Test

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +35,13 @@ import org.springframework.beans.factory.parsing.ReaderEventListener;
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List<DefaultsDefinition> defaults = new LinkedList<>();
+	private final List<DefaultsDefinition> defaults = new ArrayList<>();
 
 	private final Map<String, ComponentDefinition> componentDefinitions = new LinkedHashMap<>(8);
 
 	private final Map<String, List<AliasDefinition>> aliasMap = new LinkedHashMap<>(8);
 
-	private final List<ImportDefinition> imports = new LinkedList<>();
+	private final List<ImportDefinition> imports = new ArrayList<>();
 
 
 	@Override

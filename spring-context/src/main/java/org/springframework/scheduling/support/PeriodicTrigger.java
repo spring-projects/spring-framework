@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public class PeriodicTrigger implements Trigger {
 
 	private final TimeUnit timeUnit;
 
-	private volatile long initialDelay = 0;
+	private volatile long initialDelay;
 
-	private volatile boolean fixedRate = false;
+	private volatile boolean fixedRate;
 
 
 	/**
@@ -134,7 +134,7 @@ public class PeriodicTrigger implements Trigger {
 		Date lastExecution = triggerContext.lastScheduledExecutionTime();
 		Date lastCompletion = triggerContext.lastCompletionTime();
 		if (lastExecution == null || lastCompletion == null) {
-			return new Date(System.currentTimeMillis() + this.initialDelay);
+			return new Date(triggerContext.getClock().millis() + this.initialDelay);
 		}
 		if (this.fixedRate) {
 			return new Date(lastExecution.getTime() + this.period);

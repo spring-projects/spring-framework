@@ -49,7 +49,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -78,10 +77,6 @@ import org.springframework.util.Assert;
  * @see MultipartHttpMessageReader
  */
 public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implements HttpMessageReader<Part> {
-
-	// Static DataBufferFactory to copy from FileInputStream or wrap bytes[].
-	private static final DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
-
 
 	private int maxInMemorySize = 256 * 1024;
 
@@ -344,7 +339,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		private final LimitedPartBodyStreamStorageFactory storageFactory;
 
-		private final AtomicInteger terminated = new AtomicInteger(0);
+		private final AtomicInteger terminated = new AtomicInteger();
 
 		FluxSinkAdapterListener(
 				FluxSink<Part> sink, MultipartContext context, LimitedPartBodyStreamStorageFactory factory) {
@@ -441,7 +436,8 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 		@Override
 		public Flux<DataBuffer> content() {
-			return DataBufferUtils.readInputStream(getStorage()::getInputStream, bufferFactory, 4096);
+			return DataBufferUtils.readInputStream(
+					getStorage()::getInputStream, DefaultDataBufferFactory.sharedInstance, 4096);
 		}
 
 		protected StreamStorage getStorage() {
@@ -530,7 +526,7 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 		@Override
 		public Flux<DataBuffer> content() {
 			byte[] bytes = this.content.getBytes(getCharset());
-			return Flux.just(bufferFactory.wrap(bytes));
+			return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 		}
 
 		private Charset getCharset() {

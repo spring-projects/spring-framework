@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.springframework.http.HttpHeaders.CONTENT_LANGUAGE;
+import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
+import static org.springframework.http.HttpHeaders.LOCATION;
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 /**
  * Unit tests for {@link MockHttpServletResponse}.
@@ -55,7 +62,7 @@ class MockHttpServletResponseTests {
 		String contentType = "test/plain";
 		response.setContentType(contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
@@ -65,60 +72,80 @@ class MockHttpServletResponseTests {
 		response.setContentType(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 	}
 
 	@Test
 	void contentTypeHeader() {
 		String contentType = "test/plain";
-		response.addHeader("Content-Type", contentType);
+		response.setHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
 
 		response = new MockHttpServletResponse();
-		response.setHeader("Content-Type", contentType);
+		response.addHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	@Test
 	void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		response.setHeader("Content-Type", contentType);
+		response.setHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 
 		response = new MockHttpServletResponse();
-		response.addHeader("Content-Type", contentType);
+		response.addHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
 	@Test  // SPR-12677
 	void contentTypeHeaderWithMoreComplexCharsetSyntax() {
 		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
-		response.setHeader("Content-Type", contentType);
+		response.setHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 
 		response = new MockHttpServletResponse();
-		response.addHeader("Content-Type", contentType);
+		response.addHeader(CONTENT_TYPE, contentType);
 		assertThat(response.getContentType()).isEqualTo(contentType);
-		assertThat(response.getHeader("Content-Type")).isEqualTo(contentType);
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test  // gh-25281
+	void contentLanguageHeaderWithSingleValue() {
+		String contentLanguage = "it";
+		response.setHeader(CONTENT_LANGUAGE, contentLanguage);
+		assertSoftly(softly -> {
+			softly.assertThat(response.getHeader(CONTENT_LANGUAGE)).isEqualTo(contentLanguage);
+			softly.assertThat(response.getLocale()).isEqualTo(Locale.ITALIAN);
+		});
+	}
+
+	@Test  // gh-25281
+	void contentLanguageHeaderWithMultipleValues() {
+		String contentLanguage = "it, en";
+		response.setHeader(CONTENT_LANGUAGE, contentLanguage);
+		assertSoftly(softly -> {
+			softly.assertThat(response.getHeader(CONTENT_LANGUAGE)).isEqualTo(contentLanguage);
+			softly.assertThat(response.getLocale()).isEqualTo(Locale.ITALIAN);
+		});
 	}
 
 	@Test
 	void setContentTypeThenCharacterEncoding() {
 		response.setContentType("test/plain");
 		response.setCharacterEncoding("UTF-8");
-		assertThat(response.getContentType()).isEqualTo("test/plain");
-		assertThat(response.getHeader("Content-Type")).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
@@ -126,8 +153,8 @@ class MockHttpServletResponseTests {
 	void setCharacterEncodingThenContentType() {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("test/plain");
-		assertThat(response.getContentType()).isEqualTo("test/plain");
-		assertThat(response.getHeader("Content-Type")).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
 		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
@@ -135,21 +162,21 @@ class MockHttpServletResponseTests {
 	void contentLength() {
 		response.setContentLength(66);
 		assertThat(response.getContentLength()).isEqualTo(66);
-		assertThat(response.getHeader("Content-Length")).isEqualTo("66");
+		assertThat(response.getHeader(CONTENT_LENGTH)).isEqualTo("66");
 	}
 
 	@Test
 	void contentLengthHeader() {
-		response.addHeader("Content-Length", "66");
+		response.addHeader(CONTENT_LENGTH, "66");
 		assertThat(response.getContentLength()).isEqualTo(66);
-		assertThat(response.getHeader("Content-Length")).isEqualTo("66");
+		assertThat(response.getHeader(CONTENT_LENGTH)).isEqualTo("66");
 	}
 
 	@Test
 	void contentLengthIntHeader() {
-		response.addIntHeader("Content-Length", 66);
+		response.addIntHeader(CONTENT_LENGTH, 66);
 		assertThat(response.getContentLength()).isEqualTo(66);
-		assertThat(response.getHeader("Content-Length")).isEqualTo("66");
+		assertThat(response.getHeader(CONTENT_LENGTH)).isEqualTo("66");
 	}
 
 	@Test
@@ -173,7 +200,7 @@ class MockHttpServletResponseTests {
 
 		response.addCookie(cookie);
 
-		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(("foo=bar; Path=/path; Domain=example.com; " +
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("foo=bar; Path=/path; Domain=example.com; " +
 				"Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; " +
 				"Secure; HttpOnly"));
 	}
@@ -272,7 +299,7 @@ class MockHttpServletResponseTests {
 		String redirectUrl = "/redirect";
 		response.sendRedirect(redirectUrl);
 		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_MOVED_TEMPORARILY);
-		assertThat(response.getHeader("Location")).isEqualTo(redirectUrl);
+		assertThat(response.getHeader(LOCATION)).isEqualTo(redirectUrl);
 		assertThat(response.getRedirectedUrl()).isEqualTo(redirectUrl);
 		assertThat(response.isCommitted()).isTrue();
 	}
@@ -280,44 +307,43 @@ class MockHttpServletResponseTests {
 	@Test
 	void locationHeaderUpdatesGetRedirectedUrl() {
 		String redirectUrl = "/redirect";
-		response.setHeader("Location", redirectUrl);
+		response.setHeader(LOCATION, redirectUrl);
 		assertThat(response.getRedirectedUrl()).isEqualTo(redirectUrl);
 	}
 
 	@Test
 	void setDateHeader() {
-		response.setDateHeader("Last-Modified", 1437472800000L);
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
+		response.setDateHeader(LAST_MODIFIED, 1437472800000L);
+		assertThat(response.getHeader(LAST_MODIFIED)).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
 	}
 
 	@Test
 	void addDateHeader() {
-		response.addDateHeader("Last-Modified", 1437472800000L);
-		response.addDateHeader("Last-Modified", 1437472801000L);
-		assertThat(response.getHeaders("Last-Modified").get(0)).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
-		assertThat(response.getHeaders("Last-Modified").get(1)).isEqualTo("Tue, 21 Jul 2015 10:00:01 GMT");
+		response.addDateHeader(LAST_MODIFIED, 1437472800000L);
+		response.addDateHeader(LAST_MODIFIED, 1437472801000L);
+		assertThat(response.getHeaders(LAST_MODIFIED).get(0)).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
+		assertThat(response.getHeaders(LAST_MODIFIED).get(1)).isEqualTo("Tue, 21 Jul 2015 10:00:01 GMT");
 	}
 
 	@Test
 	void getDateHeader() {
 		long time = 1437472800000L;
-		response.setDateHeader("Last-Modified", time);
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
-		assertThat(response.getDateHeader("Last-Modified")).isEqualTo(time);
+		response.setDateHeader(LAST_MODIFIED, time);
+		assertThat(response.getHeader(LAST_MODIFIED)).isEqualTo("Tue, 21 Jul 2015 10:00:00 GMT");
+		assertThat(response.getDateHeader(LAST_MODIFIED)).isEqualTo(time);
 	}
 
 	@Test
 	void getInvalidDateHeader() {
-		response.setHeader("Last-Modified", "invalid");
-		assertThat(response.getHeader("Last-Modified")).isEqualTo("invalid");
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				response.getDateHeader("Last-Modified"));
+		response.setHeader(LAST_MODIFIED, "invalid");
+		assertThat(response.getHeader(LAST_MODIFIED)).isEqualTo("invalid");
+		assertThatIllegalArgumentException().isThrownBy(() -> response.getDateHeader(LAST_MODIFIED));
 	}
 
 	@Test  // SPR-16160
 	void getNonExistentDateHeader() {
-		assertThat(response.getHeader("Last-Modified")).isNull();
-		assertThat(response.getDateHeader("Last-Modified")).isEqualTo(-1);
+		assertThat(response.getHeader(LAST_MODIFIED)).isNull();
+		assertThat(response.getDateHeader(LAST_MODIFIED)).isEqualTo(-1);
 	}
 
 	@Test  // SPR-10414
@@ -331,7 +357,7 @@ class MockHttpServletResponseTests {
 	@SuppressWarnings("deprecation")
 	void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"Server Error");
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
 		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
@@ -340,12 +366,12 @@ class MockHttpServletResponseTests {
 	 */
 	@Test
 	void setCookieHeader() {
-		response.setHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		response.setHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
 		assertNumCookies(1);
 		assertPrimarySessionCookie("123");
 
 		// Setting the Set-Cookie header a 2nd time should overwrite the previous value
-		response.setHeader(HttpHeaders.SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
+		response.setHeader(SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
 		assertNumCookies(1);
 		assertPrimarySessionCookie("999");
 	}
@@ -357,9 +383,9 @@ class MockHttpServletResponseTests {
 	void setCookieHeaderWithExpiresAttribute() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
 				"HttpOnly; SameSite=Lax";
-		response.setHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		response.setHeader(SET_COOKIE, cookieValue);
 		assertNumCookies(1);
-		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
 	}
 
 	/**
@@ -368,9 +394,9 @@ class MockHttpServletResponseTests {
 	@Test
 	void setCookieHeaderWithZeroExpiresAttribute() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=0";
-		response.setHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		response.setHeader(SET_COOKIE, cookieValue);
 		assertNumCookies(1);
-		String header = response.getHeader(HttpHeaders.SET_COOKIE);
+		String header = response.getHeader(SET_COOKIE);
 		assertThat(header).isNotEqualTo(cookieValue);
 		// We don't assert the actual Expires value since it is based on the current time.
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
@@ -378,12 +404,12 @@ class MockHttpServletResponseTests {
 
 	@Test
 	void addCookieHeader() {
-		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
+		response.addHeader(SET_COOKIE, "SESSION=123; Path=/; Secure; HttpOnly; SameSite=Lax");
 		assertNumCookies(1);
 		assertPrimarySessionCookie("123");
 
 		// Adding a 2nd cookie header should result in 2 cookies.
-		response.addHeader(HttpHeaders.SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
+		response.addHeader(SET_COOKIE, "SESSION=999; Path=/; Secure; HttpOnly; SameSite=Lax");
 		assertNumCookies(2);
 		assertPrimarySessionCookie("123");
 		assertCookieValues("123", "999");
@@ -396,8 +422,8 @@ class MockHttpServletResponseTests {
 	void addCookieHeaderWithExpiresAttribute() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=Tue, 8 Oct 2019 19:50:00 GMT; Secure; " +
 				"HttpOnly; SameSite=Lax";
-		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
-		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(cookieValue);
+		response.addHeader(SET_COOKIE, cookieValue);
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(cookieValue);
 	}
 
 	/**
@@ -406,9 +432,9 @@ class MockHttpServletResponseTests {
 	@Test
 	void addCookieHeaderWithZeroExpiresAttribute() {
 		String cookieValue = "SESSION=123; Path=/; Max-Age=100; Expires=0";
-		response.addHeader(HttpHeaders.SET_COOKIE, cookieValue);
+		response.addHeader(SET_COOKIE, cookieValue);
 		assertNumCookies(1);
-		String header = response.getHeader(HttpHeaders.SET_COOKIE);
+		String header = response.getHeader(SET_COOKIE);
 		assertThat(header).isNotEqualTo(cookieValue);
 		// We don't assert the actual Expires value since it is based on the current time.
 		assertThat(header).startsWith("SESSION=123; Path=/; Max-Age=100; Expires=");
@@ -427,7 +453,7 @@ class MockHttpServletResponseTests {
 		response.addCookie(mockCookie);
 
 		assertNumCookies(1);
-		assertThat(response.getHeader(HttpHeaders.SET_COOKIE)).isEqualTo(("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
+		assertThat(response.getHeader(SET_COOKIE)).isEqualTo(("SESSION=123; Path=/; Domain=example.com; Max-Age=0; " +
 				"Expires=Thu, 01 Jan 1970 00:00:00 GMT; Secure; HttpOnly; SameSite=Lax"));
 
 		// Adding a 2nd Cookie should result in 2 Cookies.
@@ -453,6 +479,29 @@ class MockHttpServletResponseTests {
 		assertThat(cookie.getSecure()).isTrue();
 		assertThat(cookie.isHttpOnly()).isTrue();
 		assertThat(((MockCookie) cookie).getSameSite()).isEqualTo("Lax");
+	}
+
+	@Test  // gh-25501
+	void resetResetsCharset() {
+		assertThat(response.isCharset()).isFalse();
+		response.setCharacterEncoding("UTF-8");
+		assertThat(response.isCharset()).isTrue();
+		assertThat(response.getCharacterEncoding()).isEqualTo("UTF-8");
+		response.setContentType("text/plain");
+		assertThat(response.getContentType()).isEqualTo("text/plain;charset=UTF-8");
+		String contentTypeHeader = response.getHeader(CONTENT_TYPE);
+		assertThat(contentTypeHeader).isEqualTo("text/plain;charset=UTF-8");
+
+		response.reset();
+
+		assertThat(response.isCharset()).isFalse();
+		// Do not invoke setCharacterEncoding() since that sets the charset flag to true.
+		// response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/plain");
+		assertThat(response.isCharset()).isFalse(); // should still be false
+		assertThat(response.getContentType()).isEqualTo("text/plain");
+		contentTypeHeader = response.getHeader(CONTENT_TYPE);
+		assertThat(contentTypeHeader).isEqualTo("text/plain");
 	}
 
 }

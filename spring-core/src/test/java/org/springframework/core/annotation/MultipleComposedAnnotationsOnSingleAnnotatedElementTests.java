@@ -184,7 +184,7 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 
 	/**
 	 * Bridge/bridged method setup code copied from
-	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 * {@link org.springframework.core.BridgeMethodResolverTests#withGenericParameter()}.
 	 */
 	Method getBridgeMethod() throws NoSuchMethodException {
 		Method[] methods = StringGenericParameter.class.getMethods();

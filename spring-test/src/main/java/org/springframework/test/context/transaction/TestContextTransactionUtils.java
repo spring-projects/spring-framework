@@ -144,10 +144,10 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Look up the transaction manager by type and explicit name, if the supplied
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
-	 * <li>Attempt to look up the single transaction manager by type.
-	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
+	 * <li>Attempt to look up the single transaction manager by type.
+	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager by type and the
 	 * {@linkplain #DEFAULT_TRANSACTION_MANAGER_NAME default transaction manager
 	 * name}.
@@ -183,6 +183,19 @@ public abstract class TestContextTransactionUtils {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
 
+				// Look up single TransactionManagementConfigurer
+				Map<String, TransactionManagementConfigurer> configurers =
+						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
+				Assert.state(configurers.size() <= 1,
+						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
+				if (configurers.size() == 1) {
+					TransactionManager tm = configurers.values().iterator().next().annotationDrivenTransactionManager();
+					Assert.state(tm instanceof PlatformTransactionManager, () ->
+						"Transaction manager specified via TransactionManagementConfigurer " +
+						"is not a PlatformTransactionManager: " + tm);
+					return (PlatformTransactionManager) tm;
+				}
+
 				// Look up single bean by type
 				Map<String, PlatformTransactionManager> txMgrs =
 						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, PlatformTransactionManager.class);
@@ -196,19 +209,6 @@ public abstract class TestContextTransactionUtils {
 				}
 				catch (BeansException ex) {
 					logBeansException(testContext, ex, PlatformTransactionManager.class);
-				}
-
-				// Look up single TransactionManagementConfigurer
-				Map<String, TransactionManagementConfigurer> configurers =
-						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, TransactionManagementConfigurer.class);
-				Assert.state(configurers.size() <= 1,
-						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				if (configurers.size() == 1) {
-					TransactionManager tm = configurers.values().iterator().next().annotationDrivenTransactionManager();
-					Assert.state(tm instanceof PlatformTransactionManager, () ->
-						"Transaction manager specified via TransactionManagementConfigurer " +
-						"is not a PlatformTransactionManager: " + tm);
-					return (PlatformTransactionManager) tm;
 				}
 			}
 

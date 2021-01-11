@@ -187,6 +187,9 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 				CorsConfiguration config = (this.corsConfigurationSource != null ? this.corsConfigurationSource.getCorsConfiguration(exchange) : null);
 				CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
 				config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+				if (config != null) {
+					config.validateAllowCredentials();
+				}
 				if (!this.corsProcessor.process(config, exchange) || CorsUtils.isPreFlightRequest(request)) {
 					return REQUEST_HANDLED_HANDLER;
 				}

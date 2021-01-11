@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,16 @@ package org.springframework.web.reactive.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cache.Cache;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.resource.ResourceWebHandler;
@@ -47,6 +51,12 @@ public class ResourceHandlerRegistration {
 
 	@Nullable
 	private ResourceChainRegistration resourceChainRegistration;
+
+	private boolean useLastModified = true;
+
+	@Nullable
+	private Map<String, MediaType> mediaTypes;
+
 
 
 	/**
@@ -95,6 +105,18 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Set whether the {@link Resource#lastModified()} information should be used to drive HTTP responses.
+	 * <p>This configuration is set to {@code true} by default.
+	 * @param useLastModified whether the "last modified" resource information should be used.
+	 * @return the same {@link ResourceHandlerRegistration} instance, for chained method invocation
+	 * @since 5.3
+	 */
+	public ResourceHandlerRegistration setUseLastModified(boolean useLastModified) {
+		this.useLastModified = useLastModified;
+		return this;
+	}
+
+	/**
 	 * Configure a chain of resource resolvers and transformers to use. This
 	 * can be useful, for example, to apply a version strategy to resource URLs.
 	 * <p>If this method is not invoked, by default only a simple
@@ -133,6 +155,23 @@ public class ResourceHandlerRegistration {
 	}
 
 	/**
+	 * Add mappings between file extensions extracted from the filename of static
+	 * {@link Resource}s and the media types to use for the response.
+	 * <p>Use of this method is typically not necessary since mappings can be
+	 * also determined via {@link MediaTypeFactory#getMediaType(Resource)}.
+	 * @param mediaTypes media type mappings
+	 * @since 5.3.2
+	 */
+	public void setMediaTypes(Map<String, MediaType> mediaTypes) {
+		if (this.mediaTypes == null) {
+			this.mediaTypes = new HashMap<>(mediaTypes.size());
+		}
+		this.mediaTypes.clear();
+		this.mediaTypes.putAll(mediaTypes);
+	}
+
+
+	/**
 	 * Returns the URL path patterns for the resource handler.
 	 */
 	protected String[] getPathPatterns() {
@@ -152,6 +191,10 @@ public class ResourceHandlerRegistration {
 		}
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
+		}
+		handler.setUseLastModified(this.useLastModified);
+		if (this.mediaTypes != null) {
+			handler.setMediaTypes(this.mediaTypes);
 		}
 		return handler;
 	}

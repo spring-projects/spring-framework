@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.http.Part;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -115,7 +116,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 				HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 				if (servletRequest != null && MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
 					Collection<Part> parts = servletRequest.getParts();
-					LinkedHashMap<String, Part> result = new LinkedHashMap<>(parts.size());
+					LinkedHashMap<String, Part> result = CollectionUtils.newLinkedHashMap(parts.size());
 					for (Part part : parts) {
 						if (!result.containsKey(part.getName())) {
 							result.put(part.getName(), part);
@@ -127,7 +128,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			}
 			else {
 				Map<String, String[]> parameterMap = webRequest.getParameterMap();
-				Map<String, String> result = new LinkedHashMap<>(parameterMap.size());
+				Map<String, String> result = CollectionUtils.newLinkedHashMap(parameterMap.size());
 				parameterMap.forEach((key, values) -> {
 					if (values.length > 0) {
 						result.put(key, values[0]);

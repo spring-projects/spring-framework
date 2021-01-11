@@ -6,7 +6,7 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="org.springframework.web" level="debug" />
+		<Logger name="org.springframework.web" level="warn" />
 		<Logger name="org.springframework.beans" level="warn" />
 		<Logger name="org.springframework.binding" level="warn" />
 		<Logger name="org.springframework.http" level="warn" />

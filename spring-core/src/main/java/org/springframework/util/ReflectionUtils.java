@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -505,10 +505,13 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#equals(Object)
 	 */
 	public static boolean isEqualsMethod(@Nullable Method method) {
-		if (method == null || !method.getName().equals("equals")) {
+		if (method == null) {
 			return false;
 		}
 		if (method.getParameterCount() != 1) {
+			return false;
+		}
+		if (!method.getName().equals("equals")) {
 			return false;
 		}
 		return method.getParameterTypes()[0] == Object.class;
@@ -519,7 +522,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
+		return method != null && method.getParameterCount() == 0 && method.getName().equals("hashCode");
 	}
 
 	/**
@@ -527,7 +530,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(@Nullable Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
+		return (method != null && method.getParameterCount() == 0 && method.getName().equals("toString"));
 	}
 
 	/**
@@ -821,6 +824,19 @@ public abstract class ReflectionUtils {
 		 * @param method the method to check
 		 */
 		boolean matches(Method method);
+
+		/**
+		 * Create a composite filter based on this filter <em>and</em> the provided filter.
+		 * <p>If this filter does not match, the next filter will not be applied.
+		 * @param next the next {@code MethodFilter}
+		 * @return a composite {@code MethodFilter}
+		 * @throws IllegalArgumentException if the MethodFilter argument is {@code null}
+		 * @since 5.3.2
+		 */
+		default MethodFilter and(MethodFilter next) {
+			Assert.notNull(next, "Next MethodFilter must not be null");
+			return method -> matches(method) && next.matches(method);
+		}
 	}
 
 
@@ -849,6 +865,19 @@ public abstract class ReflectionUtils {
 		 * @param field the field to check
 		 */
 		boolean matches(Field field);
+
+		/**
+		 * Create a composite filter based on this filter <em>and</em> the provided filter.
+		 * <p>If this filter does not match, the next filter will not be applied.
+		 * @param next the next {@code FieldFilter}
+		 * @return a composite {@code FieldFilter}
+		 * @throws IllegalArgumentException if the FieldFilter argument is {@code null}
+		 * @since 5.3.2
+		 */
+		default FieldFilter and(FieldFilter next) {
+			Assert.notNull(next, "Next FieldFilter must not be null");
+			return field -> matches(field) && next.matches(field);
+		}
 	}
 
 }

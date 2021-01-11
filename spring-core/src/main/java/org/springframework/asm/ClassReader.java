@@ -101,6 +101,9 @@ public class ClassReader {
   // DontCheck(MemberName): can't be renamed (for backward binary compatibility).
   public final byte[] b;
 
+  /** The offset in bytes of the ClassFile's access_flags field. */
+  public final int header;
+
   /**
    * A byte array containing the JVMS ClassFile structure to be parsed. <i>The content of this array
    * must not be modified. This field is intended for {@link Attribute} sub classes, and is normally
@@ -147,9 +150,6 @@ public class ClassReader {
    */
   private final int maxStringLength;
 
-  /** The offset in bytes of the ClassFile's access_flags field. */
-  public final int header;
-
   // -----------------------------------------------------------------------------------------------
   // Constructors
   // -----------------------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ public class ClassReader {
     this.b = classFileBuffer;
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V15) {
+    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V17) {
       throw new IllegalArgumentException(
           "Unsupported class file major version " + readShort(classFileOffset + 6));
     }
@@ -415,7 +415,6 @@ public class ClassReader {
    * @param parsingOptions the options to use to parse this class. One or more of {@link
    *     #SKIP_CODE}, {@link #SKIP_DEBUG}, {@link #SKIP_FRAMES} or {@link #EXPAND_FRAMES}.
    */
-  @SuppressWarnings("deprecation")
   public void accept(
       final ClassVisitor classVisitor,
       final Attribute[] attributePrototypes,
@@ -468,8 +467,8 @@ public class ClassReader {
     String nestHostClass = null;
     // - The offset of the NestMembers attribute, or 0.
     int nestMembersOffset = 0;
-    // - The offset of the PermittedSubtypes attribute, or 0
-    int permittedSubtypesOffset = 0;
+    // - The offset of the PermittedSubclasses attribute, or 0
+    int permittedSubclassesOffset = 0;
     // - The offset of the Record attribute, or 0.
     int recordOffset = 0;
     // - The non standard attributes (linked with their {@link Attribute#nextAttribute} field).
@@ -494,8 +493,8 @@ public class ClassReader {
         nestHostClass = readClass(currentAttributeOffset, charBuffer);
       } else if (Constants.NEST_MEMBERS.equals(attributeName)) {
         nestMembersOffset = currentAttributeOffset;
-      } else if (Constants.PERMITTED_SUBTYPES.equals(attributeName)) {
-        permittedSubtypesOffset = currentAttributeOffset;
+      } else if (Constants.PERMITTED_SUBCLASSES.equals(attributeName)) {
+        permittedSubclassesOffset = currentAttributeOffset;
       } else if (Constants.SIGNATURE.equals(attributeName)) {
         signature = readUTF8(currentAttributeOffset, charBuffer);
       } else if (Constants.RUNTIME_VISIBLE_ANNOTATIONS.equals(attributeName)) {
@@ -507,6 +506,9 @@ public class ClassReader {
       } else if (Constants.SYNTHETIC.equals(attributeName)) {
         accessFlags |= Opcodes.ACC_SYNTHETIC;
       } else if (Constants.SOURCE_DEBUG_EXTENSION.equals(attributeName)) {
+        if (attributeLength > classFileBuffer.length - currentAttributeOffset) {
+          throw new IllegalArgumentException();
+        }
         sourceDebugExtension =
             readUtf(currentAttributeOffset, attributeLength, new char[attributeLength]);
       } else if (Constants.RUNTIME_INVISIBLE_ANNOTATIONS.equals(attributeName)) {
@@ -515,6 +517,7 @@ public class ClassReader {
         runtimeInvisibleTypeAnnotationsOffset = currentAttributeOffset;
       } else if (Constants.RECORD.equals(attributeName)) {
         recordOffset = currentAttributeOffset;
+        accessFlags |= Opcodes.ACC_RECORD;
       } else if (Constants.MODULE.equals(attributeName)) {
         moduleOffset = currentAttributeOffset;
       } else if (Constants.MODULE_MAIN_CLASS.equals(attributeName)) {
@@ -672,14 +675,14 @@ public class ClassReader {
       }
     }
 
-    // Visit the PermittedSubtypes attribute.
-    if (permittedSubtypesOffset != 0) {
-      int numberOfPermittedSubtypes = readUnsignedShort(permittedSubtypesOffset);
-      int currentPermittedSubtypeOffset = permittedSubtypesOffset + 2;
-      while (numberOfPermittedSubtypes-- > 0) {
-        classVisitor.visitPermittedSubtypeExperimental(
-            readClass(currentPermittedSubtypeOffset, charBuffer));
-        currentPermittedSubtypeOffset += 2;
+    // Visit the PermittedSubclasses attribute.
+    if (permittedSubclassesOffset != 0) {
+      int numberOfPermittedSubclasses = readUnsignedShort(permittedSubclassesOffset);
+      int currentPermittedSubclassesOffset = permittedSubclassesOffset + 2;
+      while (numberOfPermittedSubclasses-- > 0) {
+        classVisitor.visitPermittedSubclass(
+            readClass(currentPermittedSubclassesOffset, charBuffer));
+        currentPermittedSubclassesOffset += 2;
       }
     }
 
@@ -861,7 +864,6 @@ public class ClassReader {
    * @param recordComponentOffset the offset of the current record component.
    * @return the offset of the first byte following the record component.
    */
-  @SuppressWarnings("deprecation")
   private int readRecordComponent(
       final ClassVisitor classVisitor, final Context context, final int recordComponentOffset) {
     char[] charBuffer = context.charBuffer;
@@ -874,7 +876,6 @@ public class ClassReader {
     // Read the record component attributes (the variables are ordered as in Section 4.7 of the
     // JVMS).
 
-    int accessFlags = 0;
     // Attribute offsets exclude the attribute_name_index and attribute_length fields.
     // - The string corresponding to the Signature attribute, or null.
     String signature = null;
@@ -901,8 +902,6 @@ public class ClassReader {
       // typical classes).
       if (Constants.SIGNATURE.equals(attributeName)) {
         signature = readUTF8(currentOffset, charBuffer);
-      } else if (Constants.DEPRECATED.equals(attributeName)) {
-        accessFlags |= Opcodes.ACC_DEPRECATED;
       } else if (Constants.RUNTIME_VISIBLE_ANNOTATIONS.equals(attributeName)) {
         runtimeVisibleAnnotationsOffset = currentOffset;
       } else if (Constants.RUNTIME_VISIBLE_TYPE_ANNOTATIONS.equals(attributeName)) {
@@ -928,7 +927,7 @@ public class ClassReader {
     }
 
     RecordComponentVisitor recordComponentVisitor =
-        classVisitor.visitRecordComponentExperimental(accessFlags, name, descriptor, signature);
+        classVisitor.visitRecordComponent(name, descriptor, signature);
     if (recordComponentVisitor == null) {
       return currentOffset;
     }
@@ -944,8 +943,7 @@ public class ClassReader {
         // Parse num_element_value_pairs and element_value_pairs and visit these values.
         currentAnnotationOffset =
             readElementValues(
-                recordComponentVisitor.visitAnnotationExperimental(
-                    annotationDescriptor, /* visible = */ true),
+                recordComponentVisitor.visitAnnotation(annotationDescriptor, /* visible = */ true),
                 currentAnnotationOffset,
                 /* named = */ true,
                 charBuffer);
@@ -963,8 +961,7 @@ public class ClassReader {
         // Parse num_element_value_pairs and element_value_pairs and visit these values.
         currentAnnotationOffset =
             readElementValues(
-                recordComponentVisitor.visitAnnotationExperimental(
-                    annotationDescriptor, /* visible = */ false),
+                recordComponentVisitor.visitAnnotation(annotationDescriptor, /* visible = */ false),
                 currentAnnotationOffset,
                 /* named = */ true,
                 charBuffer);
@@ -984,7 +981,7 @@ public class ClassReader {
         // Parse num_element_value_pairs and element_value_pairs and visit these values.
         currentAnnotationOffset =
             readElementValues(
-                recordComponentVisitor.visitTypeAnnotationExperimental(
+                recordComponentVisitor.visitTypeAnnotation(
                     context.currentTypeAnnotationTarget,
                     context.currentTypeAnnotationTargetPath,
                     annotationDescriptor,
@@ -1008,7 +1005,7 @@ public class ClassReader {
         // Parse num_element_value_pairs and element_value_pairs and visit these values.
         currentAnnotationOffset =
             readElementValues(
-                recordComponentVisitor.visitTypeAnnotationExperimental(
+                recordComponentVisitor.visitTypeAnnotation(
                     context.currentTypeAnnotationTarget,
                     context.currentTypeAnnotationTargetPath,
                     annotationDescriptor,
@@ -1024,12 +1021,12 @@ public class ClassReader {
       // Copy and reset the nextAttribute field so that it can also be used in FieldWriter.
       Attribute nextAttribute = attributes.nextAttribute;
       attributes.nextAttribute = null;
-      recordComponentVisitor.visitAttributeExperimental(attributes);
+      recordComponentVisitor.visitAttribute(attributes);
       attributes = nextAttribute;
     }
 
     // Visit the end of the field.
-    recordComponentVisitor.visitEndExperimental();
+    recordComponentVisitor.visitEnd();
     return currentOffset;
   }
 
@@ -1522,6 +1519,9 @@ public class ClassReader {
     final int maxLocals = readUnsignedShort(currentOffset + 2);
     final int codeLength = readInt(currentOffset + 4);
     currentOffset += 8;
+    if (codeLength > classFileBuffer.length - currentOffset) {
+      throw new IllegalArgumentException();
+    }
 
     // Read the bytecode 'code' array to create a label for each referenced instruction.
     final int bytecodeStartOffset = currentOffset;
@@ -1531,113 +1531,113 @@ public class ClassReader {
       final int bytecodeOffset = currentOffset - bytecodeStartOffset;
       final int opcode = classBuffer[currentOffset] & 0xFF;
       switch (opcode) {
-        case Constants.NOP:
-        case Constants.ACONST_NULL:
-        case Constants.ICONST_M1:
-        case Constants.ICONST_0:
-        case Constants.ICONST_1:
-        case Constants.ICONST_2:
-        case Constants.ICONST_3:
-        case Constants.ICONST_4:
-        case Constants.ICONST_5:
-        case Constants.LCONST_0:
-        case Constants.LCONST_1:
-        case Constants.FCONST_0:
-        case Constants.FCONST_1:
-        case Constants.FCONST_2:
-        case Constants.DCONST_0:
-        case Constants.DCONST_1:
-        case Constants.IALOAD:
-        case Constants.LALOAD:
-        case Constants.FALOAD:
-        case Constants.DALOAD:
-        case Constants.AALOAD:
-        case Constants.BALOAD:
-        case Constants.CALOAD:
-        case Constants.SALOAD:
-        case Constants.IASTORE:
-        case Constants.LASTORE:
-        case Constants.FASTORE:
-        case Constants.DASTORE:
-        case Constants.AASTORE:
-        case Constants.BASTORE:
-        case Constants.CASTORE:
-        case Constants.SASTORE:
-        case Constants.POP:
-        case Constants.POP2:
-        case Constants.DUP:
-        case Constants.DUP_X1:
-        case Constants.DUP_X2:
-        case Constants.DUP2:
-        case Constants.DUP2_X1:
-        case Constants.DUP2_X2:
-        case Constants.SWAP:
-        case Constants.IADD:
-        case Constants.LADD:
-        case Constants.FADD:
-        case Constants.DADD:
-        case Constants.ISUB:
-        case Constants.LSUB:
-        case Constants.FSUB:
-        case Constants.DSUB:
-        case Constants.IMUL:
-        case Constants.LMUL:
-        case Constants.FMUL:
-        case Constants.DMUL:
-        case Constants.IDIV:
-        case Constants.LDIV:
-        case Constants.FDIV:
-        case Constants.DDIV:
-        case Constants.IREM:
-        case Constants.LREM:
-        case Constants.FREM:
-        case Constants.DREM:
-        case Constants.INEG:
-        case Constants.LNEG:
-        case Constants.FNEG:
-        case Constants.DNEG:
-        case Constants.ISHL:
-        case Constants.LSHL:
-        case Constants.ISHR:
-        case Constants.LSHR:
-        case Constants.IUSHR:
-        case Constants.LUSHR:
-        case Constants.IAND:
-        case Constants.LAND:
-        case Constants.IOR:
-        case Constants.LOR:
-        case Constants.IXOR:
-        case Constants.LXOR:
-        case Constants.I2L:
-        case Constants.I2F:
-        case Constants.I2D:
-        case Constants.L2I:
-        case Constants.L2F:
-        case Constants.L2D:
-        case Constants.F2I:
-        case Constants.F2L:
-        case Constants.F2D:
-        case Constants.D2I:
-        case Constants.D2L:
-        case Constants.D2F:
-        case Constants.I2B:
-        case Constants.I2C:
-        case Constants.I2S:
-        case Constants.LCMP:
-        case Constants.FCMPL:
-        case Constants.FCMPG:
-        case Constants.DCMPL:
-        case Constants.DCMPG:
-        case Constants.IRETURN:
-        case Constants.LRETURN:
-        case Constants.FRETURN:
-        case Constants.DRETURN:
-        case Constants.ARETURN:
-        case Constants.RETURN:
-        case Constants.ARRAYLENGTH:
-        case Constants.ATHROW:
-        case Constants.MONITORENTER:
-        case Constants.MONITOREXIT:
+        case Opcodes.NOP:
+        case Opcodes.ACONST_NULL:
+        case Opcodes.ICONST_M1:
+        case Opcodes.ICONST_0:
+        case Opcodes.ICONST_1:
+        case Opcodes.ICONST_2:
+        case Opcodes.ICONST_3:
+        case Opcodes.ICONST_4:
+        case Opcodes.ICONST_5:
+        case Opcodes.LCONST_0:
+        case Opcodes.LCONST_1:
+        case Opcodes.FCONST_0:
+        case Opcodes.FCONST_1:
+        case Opcodes.FCONST_2:
+        case Opcodes.DCONST_0:
+        case Opcodes.DCONST_1:
+        case Opcodes.IALOAD:
+        case Opcodes.LALOAD:
+        case Opcodes.FALOAD:
+        case Opcodes.DALOAD:
+        case Opcodes.AALOAD:
+        case Opcodes.BALOAD:
+        case Opcodes.CALOAD:
+        case Opcodes.SALOAD:
+        case Opcodes.IASTORE:
+        case Opcodes.LASTORE:
+        case Opcodes.FASTORE:
+        case Opcodes.DASTORE:
+        case Opcodes.AASTORE:
+        case Opcodes.BASTORE:
+        case Opcodes.CASTORE:
+        case Opcodes.SASTORE:
+        case Opcodes.POP:
+        case Opcodes.POP2:
+        case Opcodes.DUP:
+        case Opcodes.DUP_X1:
+        case Opcodes.DUP_X2:
+        case Opcodes.DUP2:
+        case Opcodes.DUP2_X1:
+        case Opcodes.DUP2_X2:
+        case Opcodes.SWAP:
+        case Opcodes.IADD:
+        case Opcodes.LADD:
+        case Opcodes.FADD:
+        case Opcodes.DADD:
+        case Opcodes.ISUB:
+        case Opcodes.LSUB:
+        case Opcodes.FSUB:
+        case Opcodes.DSUB:
+        case Opcodes.IMUL:
+        case Opcodes.LMUL:
+        case Opcodes.FMUL:
+        case Opcodes.DMUL:
+        case Opcodes.IDIV:
+        case Opcodes.LDIV:
+        case Opcodes.FDIV:
+        case Opcodes.DDIV:
+        case Opcodes.IREM:
+        case Opcodes.LREM:
+        case Opcodes.FREM:
+        case Opcodes.DREM:
+        case Opcodes.INEG:
+        case Opcodes.LNEG:
+        case Opcodes.FNEG:
+        case Opcodes.DNEG:
+        case Opcodes.ISHL:
+        case Opcodes.LSHL:
+        case Opcodes.ISHR:
+        case Opcodes.LSHR:
+        case Opcodes.IUSHR:
+        case Opcodes.LUSHR:
+        case Opcodes.IAND:
+        case Opcodes.LAND:
+        case Opcodes.IOR:
+        case Opcodes.LOR:
+        case Opcodes.IXOR:
+        case Opcodes.LXOR:
+        case Opcodes.I2L:
+        case Opcodes.I2F:
+        case Opcodes.I2D:
+        case Opcodes.L2I:
+        case Opcodes.L2F:
+        case Opcodes.L2D:
+        case Opcodes.F2I:
+        case Opcodes.F2L:
+        case Opcodes.F2D:
+        case Opcodes.D2I:
+        case Opcodes.D2L:
+        case Opcodes.D2F:
+        case Opcodes.I2B:
+        case Opcodes.I2C:
+        case Opcodes.I2S:
+        case Opcodes.LCMP:
+        case Opcodes.FCMPL:
+        case Opcodes.FCMPG:
+        case Opcodes.DCMPL:
+        case Opcodes.DCMPG:
+        case Opcodes.IRETURN:
+        case Opcodes.LRETURN:
+        case Opcodes.FRETURN:
+        case Opcodes.DRETURN:
+        case Opcodes.ARETURN:
+        case Opcodes.RETURN:
+        case Opcodes.ARRAYLENGTH:
+        case Opcodes.ATHROW:
+        case Opcodes.MONITORENTER:
+        case Opcodes.MONITOREXIT:
         case Constants.ILOAD_0:
         case Constants.ILOAD_1:
         case Constants.ILOAD_2:
@@ -1680,24 +1680,24 @@ public class ClassReader {
         case Constants.ASTORE_3:
           currentOffset += 1;
           break;
-        case Constants.IFEQ:
-        case Constants.IFNE:
-        case Constants.IFLT:
-        case Constants.IFGE:
-        case Constants.IFGT:
-        case Constants.IFLE:
-        case Constants.IF_ICMPEQ:
-        case Constants.IF_ICMPNE:
-        case Constants.IF_ICMPLT:
-        case Constants.IF_ICMPGE:
-        case Constants.IF_ICMPGT:
-        case Constants.IF_ICMPLE:
-        case Constants.IF_ACMPEQ:
-        case Constants.IF_ACMPNE:
-        case Constants.GOTO:
-        case Constants.JSR:
-        case Constants.IFNULL:
-        case Constants.IFNONNULL:
+        case Opcodes.IFEQ:
+        case Opcodes.IFNE:
+        case Opcodes.IFLT:
+        case Opcodes.IFGE:
+        case Opcodes.IFGT:
+        case Opcodes.IFLE:
+        case Opcodes.IF_ICMPEQ:
+        case Opcodes.IF_ICMPNE:
+        case Opcodes.IF_ICMPLT:
+        case Opcodes.IF_ICMPGE:
+        case Opcodes.IF_ICMPGT:
+        case Opcodes.IF_ICMPLE:
+        case Opcodes.IF_ACMPEQ:
+        case Opcodes.IF_ACMPNE:
+        case Opcodes.GOTO:
+        case Opcodes.JSR:
+        case Opcodes.IFNULL:
+        case Opcodes.IFNONNULL:
           createLabel(bytecodeOffset + readShort(currentOffset + 1), labels);
           currentOffset += 3;
           break;
@@ -1730,27 +1730,27 @@ public class ClassReader {
           break;
         case Constants.WIDE:
           switch (classBuffer[currentOffset + 1] & 0xFF) {
-            case Constants.ILOAD:
-            case Constants.FLOAD:
-            case Constants.ALOAD:
-            case Constants.LLOAD:
-            case Constants.DLOAD:
-            case Constants.ISTORE:
-            case Constants.FSTORE:
-            case Constants.ASTORE:
-            case Constants.LSTORE:
-            case Constants.DSTORE:
-            case Constants.RET:
+            case Opcodes.ILOAD:
+            case Opcodes.FLOAD:
+            case Opcodes.ALOAD:
+            case Opcodes.LLOAD:
+            case Opcodes.DLOAD:
+            case Opcodes.ISTORE:
+            case Opcodes.FSTORE:
+            case Opcodes.ASTORE:
+            case Opcodes.LSTORE:
+            case Opcodes.DSTORE:
+            case Opcodes.RET:
               currentOffset += 4;
               break;
-            case Constants.IINC:
+            case Opcodes.IINC:
               currentOffset += 6;
               break;
             default:
               throw new IllegalArgumentException();
           }
           break;
-        case Constants.TABLESWITCH:
+        case Opcodes.TABLESWITCH:
           // Skip 0 to 3 padding bytes.
           currentOffset += 4 - (bytecodeOffset & 3);
           // Read the default label and the number of table entries.
@@ -1763,7 +1763,7 @@ public class ClassReader {
             currentOffset += 4;
           }
           break;
-        case Constants.LOOKUPSWITCH:
+        case Opcodes.LOOKUPSWITCH:
           // Skip 0 to 3 padding bytes.
           currentOffset += 4 - (bytecodeOffset & 3);
           // Read the default label and the number of switch cases.
@@ -1776,44 +1776,44 @@ public class ClassReader {
             currentOffset += 8;
           }
           break;
-        case Constants.ILOAD:
-        case Constants.LLOAD:
-        case Constants.FLOAD:
-        case Constants.DLOAD:
-        case Constants.ALOAD:
-        case Constants.ISTORE:
-        case Constants.LSTORE:
-        case Constants.FSTORE:
-        case Constants.DSTORE:
-        case Constants.ASTORE:
-        case Constants.RET:
-        case Constants.BIPUSH:
-        case Constants.NEWARRAY:
-        case Constants.LDC:
+        case Opcodes.ILOAD:
+        case Opcodes.LLOAD:
+        case Opcodes.FLOAD:
+        case Opcodes.DLOAD:
+        case Opcodes.ALOAD:
+        case Opcodes.ISTORE:
+        case Opcodes.LSTORE:
+        case Opcodes.FSTORE:
+        case Opcodes.DSTORE:
+        case Opcodes.ASTORE:
+        case Opcodes.RET:
+        case Opcodes.BIPUSH:
+        case Opcodes.NEWARRAY:
+        case Opcodes.LDC:
           currentOffset += 2;
           break;
-        case Constants.SIPUSH:
+        case Opcodes.SIPUSH:
         case Constants.LDC_W:
         case Constants.LDC2_W:
-        case Constants.GETSTATIC:
-        case Constants.PUTSTATIC:
-        case Constants.GETFIELD:
-        case Constants.PUTFIELD:
-        case Constants.INVOKEVIRTUAL:
-        case Constants.INVOKESPECIAL:
-        case Constants.INVOKESTATIC:
-        case Constants.NEW:
-        case Constants.ANEWARRAY:
-        case Constants.CHECKCAST:
-        case Constants.INSTANCEOF:
-        case Constants.IINC:
+        case Opcodes.GETSTATIC:
+        case Opcodes.PUTSTATIC:
+        case Opcodes.GETFIELD:
+        case Opcodes.PUTFIELD:
+        case Opcodes.INVOKEVIRTUAL:
+        case Opcodes.INVOKESPECIAL:
+        case Opcodes.INVOKESTATIC:
+        case Opcodes.NEW:
+        case Opcodes.ANEWARRAY:
+        case Opcodes.CHECKCAST:
+        case Opcodes.INSTANCEOF:
+        case Opcodes.IINC:
           currentOffset += 3;
           break;
-        case Constants.INVOKEINTERFACE:
-        case Constants.INVOKEDYNAMIC:
+        case Opcodes.INVOKEINTERFACE:
+        case Opcodes.INVOKEDYNAMIC:
           currentOffset += 5;
           break;
-        case Constants.MULTIANEWARRAY:
+        case Opcodes.MULTIANEWARRAY:
           currentOffset += 4;
           break;
         default:
@@ -2080,113 +2080,113 @@ public class ClassReader {
       // Visit the instruction at this bytecode offset.
       int opcode = classBuffer[currentOffset] & 0xFF;
       switch (opcode) {
-        case Constants.NOP:
-        case Constants.ACONST_NULL:
-        case Constants.ICONST_M1:
-        case Constants.ICONST_0:
-        case Constants.ICONST_1:
-        case Constants.ICONST_2:
-        case Constants.ICONST_3:
-        case Constants.ICONST_4:
-        case Constants.ICONST_5:
-        case Constants.LCONST_0:
-        case Constants.LCONST_1:
-        case Constants.FCONST_0:
-        case Constants.FCONST_1:
-        case Constants.FCONST_2:
-        case Constants.DCONST_0:
-        case Constants.DCONST_1:
-        case Constants.IALOAD:
-        case Constants.LALOAD:
-        case Constants.FALOAD:
-        case Constants.DALOAD:
-        case Constants.AALOAD:
-        case Constants.BALOAD:
-        case Constants.CALOAD:
-        case Constants.SALOAD:
-        case Constants.IASTORE:
-        case Constants.LASTORE:
-        case Constants.FASTORE:
-        case Constants.DASTORE:
-        case Constants.AASTORE:
-        case Constants.BASTORE:
-        case Constants.CASTORE:
-        case Constants.SASTORE:
-        case Constants.POP:
-        case Constants.POP2:
-        case Constants.DUP:
-        case Constants.DUP_X1:
-        case Constants.DUP_X2:
-        case Constants.DUP2:
-        case Constants.DUP2_X1:
-        case Constants.DUP2_X2:
-        case Constants.SWAP:
-        case Constants.IADD:
-        case Constants.LADD:
-        case Constants.FADD:
-        case Constants.DADD:
-        case Constants.ISUB:
-        case Constants.LSUB:
-        case Constants.FSUB:
-        case Constants.DSUB:
-        case Constants.IMUL:
-        case Constants.LMUL:
-        case Constants.FMUL:
-        case Constants.DMUL:
-        case Constants.IDIV:
-        case Constants.LDIV:
-        case Constants.FDIV:
-        case Constants.DDIV:
-        case Constants.IREM:
-        case Constants.LREM:
-        case Constants.FREM:
-        case Constants.DREM:
-        case Constants.INEG:
-        case Constants.LNEG:
-        case Constants.FNEG:
-        case Constants.DNEG:
-        case Constants.ISHL:
-        case Constants.LSHL:
-        case Constants.ISHR:
-        case Constants.LSHR:
-        case Constants.IUSHR:
-        case Constants.LUSHR:
-        case Constants.IAND:
-        case Constants.LAND:
-        case Constants.IOR:
-        case Constants.LOR:
-        case Constants.IXOR:
-        case Constants.LXOR:
-        case Constants.I2L:
-        case Constants.I2F:
-        case Constants.I2D:
-        case Constants.L2I:
-        case Constants.L2F:
-        case Constants.L2D:
-        case Constants.F2I:
-        case Constants.F2L:
-        case Constants.F2D:
-        case Constants.D2I:
-        case Constants.D2L:
-        case Constants.D2F:
-        case Constants.I2B:
-        case Constants.I2C:
-        case Constants.I2S:
-        case Constants.LCMP:
-        case Constants.FCMPL:
-        case Constants.FCMPG:
-        case Constants.DCMPL:
-        case Constants.DCMPG:
-        case Constants.IRETURN:
-        case Constants.LRETURN:
-        case Constants.FRETURN:
-        case Constants.DRETURN:
-        case Constants.ARETURN:
-        case Constants.RETURN:
-        case Constants.ARRAYLENGTH:
-        case Constants.ATHROW:
-        case Constants.MONITORENTER:
-        case Constants.MONITOREXIT:
+        case Opcodes.NOP:
+        case Opcodes.ACONST_NULL:
+        case Opcodes.ICONST_M1:
+        case Opcodes.ICONST_0:
+        case Opcodes.ICONST_1:
+        case Opcodes.ICONST_2:
+        case Opcodes.ICONST_3:
+        case Opcodes.ICONST_4:
+        case Opcodes.ICONST_5:
+        case Opcodes.LCONST_0:
+        case Opcodes.LCONST_1:
+        case Opcodes.FCONST_0:
+        case Opcodes.FCONST_1:
+        case Opcodes.FCONST_2:
+        case Opcodes.DCONST_0:
+        case Opcodes.DCONST_1:
+        case Opcodes.IALOAD:
+        case Opcodes.LALOAD:
+        case Opcodes.FALOAD:
+        case Opcodes.DALOAD:
+        case Opcodes.AALOAD:
+        case Opcodes.BALOAD:
+        case Opcodes.CALOAD:
+        case Opcodes.SALOAD:
+        case Opcodes.IASTORE:
+        case Opcodes.LASTORE:
+        case Opcodes.FASTORE:
+        case Opcodes.DASTORE:
+        case Opcodes.AASTORE:
+        case Opcodes.BASTORE:
+        case Opcodes.CASTORE:
+        case Opcodes.SASTORE:
+        case Opcodes.POP:
+        case Opcodes.POP2:
+        case Opcodes.DUP:
+        case Opcodes.DUP_X1:
+        case Opcodes.DUP_X2:
+        case Opcodes.DUP2:
+        case Opcodes.DUP2_X1:
+        case Opcodes.DUP2_X2:
+        case Opcodes.SWAP:
+        case Opcodes.IADD:
+        case Opcodes.LADD:
+        case Opcodes.FADD:
+        case Opcodes.DADD:
+        case Opcodes.ISUB:
+        case Opcodes.LSUB:
+        case Opcodes.FSUB:
+        case Opcodes.DSUB:
+        case Opcodes.IMUL:
+        case Opcodes.LMUL:
+        case Opcodes.FMUL:
+        case Opcodes.DMUL:
+        case Opcodes.IDIV:
+        case Opcodes.LDIV:
+        case Opcodes.FDIV:
+        case Opcodes.DDIV:
+        case Opcodes.IREM:
+        case Opcodes.LREM:
+        case Opcodes.FREM:
+        case Opcodes.DREM:
+        case Opcodes.INEG:
+        case Opcodes.LNEG:
+        case Opcodes.FNEG:
+        case Opcodes.DNEG:
+        case Opcodes.ISHL:
+        case Opcodes.LSHL:
+        case Opcodes.ISHR:
+        case Opcodes.LSHR:
+        case Opcodes.IUSHR:
+        case Opcodes.LUSHR:
+        case Opcodes.IAND:
+        case Opcodes.LAND:
+        case Opcodes.IOR:
+        case Opcodes.LOR:
+        case Opcodes.IXOR:
+        case Opcodes.LXOR:
+        case Opcodes.I2L:
+        case Opcodes.I2F:
+        case Opcodes.I2D:
+        case Opcodes.L2I:
+        case Opcodes.L2F:
+        case Opcodes.L2D:
+        case Opcodes.F2I:
+        case Opcodes.F2L:
+        case Opcodes.F2D:
+        case Opcodes.D2I:
+        case Opcodes.D2L:
+        case Opcodes.D2F:
+        case Opcodes.I2B:
+        case Opcodes.I2C:
+        case Opcodes.I2S:
+        case Opcodes.LCMP:
+        case Opcodes.FCMPL:
+        case Opcodes.FCMPG:
+        case Opcodes.DCMPL:
+        case Opcodes.DCMPG:
+        case Opcodes.IRETURN:
+        case Opcodes.LRETURN:
+        case Opcodes.FRETURN:
+        case Opcodes.DRETURN:
+        case Opcodes.ARETURN:
+        case Opcodes.RETURN:
+        case Opcodes.ARRAYLENGTH:
+        case Opcodes.ATHROW:
+        case Opcodes.MONITORENTER:
+        case Opcodes.MONITOREXIT:
           methodVisitor.visitInsn(opcode);
           currentOffset += 1;
           break;
@@ -2238,24 +2238,24 @@ public class ClassReader {
           methodVisitor.visitVarInsn(Opcodes.ISTORE + (opcode >> 2), opcode & 0x3);
           currentOffset += 1;
           break;
-        case Constants.IFEQ:
-        case Constants.IFNE:
-        case Constants.IFLT:
-        case Constants.IFGE:
-        case Constants.IFGT:
-        case Constants.IFLE:
-        case Constants.IF_ICMPEQ:
-        case Constants.IF_ICMPNE:
-        case Constants.IF_ICMPLT:
-        case Constants.IF_ICMPGE:
-        case Constants.IF_ICMPGT:
-        case Constants.IF_ICMPLE:
-        case Constants.IF_ACMPEQ:
-        case Constants.IF_ACMPNE:
-        case Constants.GOTO:
-        case Constants.JSR:
-        case Constants.IFNULL:
-        case Constants.IFNONNULL:
+        case Opcodes.IFEQ:
+        case Opcodes.IFNE:
+        case Opcodes.IFLT:
+        case Opcodes.IFGE:
+        case Opcodes.IFGT:
+        case Opcodes.IFLE:
+        case Opcodes.IF_ICMPEQ:
+        case Opcodes.IF_ICMPNE:
+        case Opcodes.IF_ICMPLT:
+        case Opcodes.IF_ICMPGE:
+        case Opcodes.IF_ICMPGT:
+        case Opcodes.IF_ICMPLE:
+        case Opcodes.IF_ACMPEQ:
+        case Opcodes.IF_ACMPNE:
+        case Opcodes.GOTO:
+        case Opcodes.JSR:
+        case Opcodes.IFNULL:
+        case Opcodes.IFNONNULL:
           methodVisitor.visitJumpInsn(
               opcode, labels[currentBytecodeOffset + readShort(currentOffset + 1)]);
           currentOffset += 3;
@@ -2336,7 +2336,7 @@ public class ClassReader {
             currentOffset += 4;
           }
           break;
-        case Constants.TABLESWITCH:
+        case Opcodes.TABLESWITCH:
           {
             // Skip 0 to 3 padding bytes.
             currentOffset += 4 - (currentBytecodeOffset & 3);
@@ -2353,7 +2353,7 @@ public class ClassReader {
             methodVisitor.visitTableSwitchInsn(low, high, defaultLabel, table);
             break;
           }
-        case Constants.LOOKUPSWITCH:
+        case Opcodes.LOOKUPSWITCH:
           {
             // Skip 0 to 3 padding bytes.
             currentOffset += 4 - (currentBytecodeOffset & 3);
@@ -2371,30 +2371,30 @@ public class ClassReader {
             methodVisitor.visitLookupSwitchInsn(defaultLabel, keys, values);
             break;
           }
-        case Constants.ILOAD:
-        case Constants.LLOAD:
-        case Constants.FLOAD:
-        case Constants.DLOAD:
-        case Constants.ALOAD:
-        case Constants.ISTORE:
-        case Constants.LSTORE:
-        case Constants.FSTORE:
-        case Constants.DSTORE:
-        case Constants.ASTORE:
-        case Constants.RET:
+        case Opcodes.ILOAD:
+        case Opcodes.LLOAD:
+        case Opcodes.FLOAD:
+        case Opcodes.DLOAD:
+        case Opcodes.ALOAD:
+        case Opcodes.ISTORE:
+        case Opcodes.LSTORE:
+        case Opcodes.FSTORE:
+        case Opcodes.DSTORE:
+        case Opcodes.ASTORE:
+        case Opcodes.RET:
           methodVisitor.visitVarInsn(opcode, classBuffer[currentOffset + 1] & 0xFF);
           currentOffset += 2;
           break;
-        case Constants.BIPUSH:
-        case Constants.NEWARRAY:
+        case Opcodes.BIPUSH:
+        case Opcodes.NEWARRAY:
           methodVisitor.visitIntInsn(opcode, classBuffer[currentOffset + 1]);
           currentOffset += 2;
           break;
-        case Constants.SIPUSH:
+        case Opcodes.SIPUSH:
           methodVisitor.visitIntInsn(opcode, readShort(currentOffset + 1));
           currentOffset += 3;
           break;
-        case Constants.LDC:
+        case Opcodes.LDC:
           methodVisitor.visitLdcInsn(readConst(classBuffer[currentOffset + 1] & 0xFF, charBuffer));
           currentOffset += 2;
           break;
@@ -2403,14 +2403,14 @@ public class ClassReader {
           methodVisitor.visitLdcInsn(readConst(readUnsignedShort(currentOffset + 1), charBuffer));
           currentOffset += 3;
           break;
-        case Constants.GETSTATIC:
-        case Constants.PUTSTATIC:
-        case Constants.GETFIELD:
-        case Constants.PUTFIELD:
-        case Constants.INVOKEVIRTUAL:
-        case Constants.INVOKESPECIAL:
-        case Constants.INVOKESTATIC:
-        case Constants.INVOKEINTERFACE:
+        case Opcodes.GETSTATIC:
+        case Opcodes.PUTSTATIC:
+        case Opcodes.GETFIELD:
+        case Opcodes.PUTFIELD:
+        case Opcodes.INVOKEVIRTUAL:
+        case Opcodes.INVOKESPECIAL:
+        case Opcodes.INVOKESTATIC:
+        case Opcodes.INVOKEINTERFACE:
           {
             int cpInfoOffset = cpInfoOffsets[readUnsignedShort(currentOffset + 1)];
             int nameAndTypeCpInfoOffset = cpInfoOffsets[readUnsignedShort(cpInfoOffset + 2)];
@@ -2431,7 +2431,7 @@ public class ClassReader {
             }
             break;
           }
-        case Constants.INVOKEDYNAMIC:
+        case Opcodes.INVOKEDYNAMIC:
           {
             int cpInfoOffset = cpInfoOffsets[readUnsignedShort(currentOffset + 1)];
             int nameAndTypeCpInfoOffset = cpInfoOffsets[readUnsignedShort(cpInfoOffset + 2)];
@@ -2453,19 +2453,19 @@ public class ClassReader {
             currentOffset += 5;
             break;
           }
-        case Constants.NEW:
-        case Constants.ANEWARRAY:
-        case Constants.CHECKCAST:
-        case Constants.INSTANCEOF:
+        case Opcodes.NEW:
+        case Opcodes.ANEWARRAY:
+        case Opcodes.CHECKCAST:
+        case Opcodes.INSTANCEOF:
           methodVisitor.visitTypeInsn(opcode, readClass(currentOffset + 1, charBuffer));
           currentOffset += 3;
           break;
-        case Constants.IINC:
+        case Opcodes.IINC:
           methodVisitor.visitIincInsn(
               classBuffer[currentOffset + 1] & 0xFF, classBuffer[currentOffset + 2]);
           currentOffset += 3;
           break;
-        case Constants.MULTIANEWARRAY:
+        case Opcodes.MULTIANEWARRAY:
           methodVisitor.visitMultiANewArrayInsn(
               readClass(currentOffset + 1, charBuffer), classBuffer[currentOffset + 3] & 0xFF);
           currentOffset += 4;
@@ -2978,7 +2978,7 @@ public class ClassReader {
       // Parse the array_value array.
       while (numElementValuePairs-- > 0) {
         currentOffset =
-            readElementValue(annotationVisitor, currentOffset, /* named = */ null, charBuffer);
+            readElementValue(annotationVisitor, currentOffset, /* elementName= */ null, charBuffer);
       }
     }
     if (annotationVisitor != null) {
