@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ public class ResourceHandlerRegistration {
 
 	private final List<String> locationValues = new ArrayList<>();
 
+	private final List<Resource> locationsResources = new ArrayList<>();
+
 	@Nullable
 	private Integer cachePeriod;
 
@@ -82,8 +84,21 @@ public class ResourceHandlerRegistration {
 	 * @return the same {@link ResourceHandlerRegistration} instance, for
 	 * chained method invocation
 	 */
-	public ResourceHandlerRegistration addResourceLocations(String... resourceLocations) {
-		this.locationValues.addAll(Arrays.asList(resourceLocations));
+	public ResourceHandlerRegistration addResourceLocations(String... locations) {
+		this.locationValues.addAll(Arrays.asList(locations));
+		return this;
+	}
+
+	/**
+	 * Configure locations to serve static resources from based on pre-resolved
+	 * {@code Resource} references.
+	 * @param locations the resource locations to use
+	 * @return the same {@link ResourceHandlerRegistration} instance, for
+	 * chained method invocation
+	 * @since 5.3.3
+	 */
+	public ResourceHandlerRegistration addResourceLocations(Resource... locations) {
+		this.locationsResources.addAll(Arrays.asList(locations));
 		return this;
 	}
 
@@ -181,6 +196,7 @@ public class ResourceHandlerRegistration {
 			handler.setResourceTransformers(this.resourceChainRegistration.getResourceTransformers());
 		}
 		handler.setLocationValues(this.locationValues);
+		handler.setLocations(this.locationsResources);
 		if (this.cacheControl != null) {
 			handler.setCacheControl(this.cacheControl);
 		}
