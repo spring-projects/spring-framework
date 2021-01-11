@@ -34,6 +34,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 public abstract class AbstractExceptionHandlerMethodResolver {
@@ -138,7 +139,9 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			matches.sort(new ExceptionDepthComparator(exceptionType));
+			if (matches.size() > 1) {
+				matches.sort(new ExceptionDepthComparator(exceptionType));
+			}
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {

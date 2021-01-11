@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public class ExceptionHandlerMethodResolver {
@@ -179,7 +180,9 @@ public class ExceptionHandlerMethodResolver {
 			}
 		}
 		if (!matches.isEmpty()) {
-			matches.sort(new ExceptionDepthComparator(exceptionType));
+			if (matches.size() > 1) {
+				matches.sort(new ExceptionDepthComparator(exceptionType));
+			}
 			return this.mappedMethods.get(matches.get(0));
 		}
 		else {
