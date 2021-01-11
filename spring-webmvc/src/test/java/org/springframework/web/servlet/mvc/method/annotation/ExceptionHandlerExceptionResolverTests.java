@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Kazuki Shimizu
  * @author Brian Clozel
+ * @author Rodolphe Lecocq
  * @since 3.1
  */
 @SuppressWarnings("unused")
@@ -189,6 +190,18 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("IllegalArgumentException");
 	}
 
+	@Test  // gh-26317
+	void resolveExceptionResponseBodyMatchingCauseLevel2() throws UnsupportedEncodingException, NoSuchMethodException {
+		Exception ex = new Exception(new Exception(new IllegalArgumentException()));
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("IllegalArgumentException");
+	}
+
 	@Test
 	void resolveExceptionResponseWriter() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
@@ -257,6 +270,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertThat(this.response.getContentAsString()).isEqualTo("TestExceptionResolver: IllegalStateException");
 	}
 
+	@Test  // gh-26317
+	void resolveExceptionGlobalHandlerOrderedMatchingCauseLevel2() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		Exception ex = new Exception(new Exception(new IllegalStateException()));
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("TestExceptionResolver: IllegalStateException");
+	}
+
 	@Test  // SPR-12605
 	void resolveExceptionWithHandlerMethodArg() throws Exception {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyConfig.class);
@@ -294,14 +322,15 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.setApplicationContext(ctx);
 		this.resolver.afterPropertiesSet();
 
-		AssertionError err = new AssertionError("argh");
-		FatalBeanException ex = new FatalBeanException("wrapped", err);
+		AssertionError rootCause = new AssertionError("argh");
+		FatalBeanException cause = new FatalBeanException("wrapped", rootCause);
+		Exception ex = new Exception(cause);  // gh-26317
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertThat(mav).as("Exception was not handled").isNotNull();
 		assertThat(mav.isEmpty()).isTrue();
-		assertThat(this.response.getContentAsString()).isEqualTo(err.toString());
+		assertThat(this.response.getContentAsString()).isEqualTo(rootCause.toString());
 	}
 
 	@Test
@@ -311,6 +340,21 @@ public class ExceptionHandlerExceptionResolverTests {
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertThat(mav).as("Exception was not handled").isNotNull();
+		assertThat(mav.isEmpty()).isTrue();
+		assertThat(this.response.getContentAsString()).isEqualTo("BasePackageTestExceptionResolver: IllegalStateException");
+	}
+
+	@Test  // gh-26317
+	void resolveExceptionControllerAdviceHandlerMatchingCauseLevel2() throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
+		this.resolver.setApplicationContext(ctx);
+		this.resolver.afterPropertiesSet();
+
+		Exception ex = new Exception(new IllegalStateException());
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 

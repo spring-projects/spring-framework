@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -410,24 +410,27 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
+		ArrayList<Throwable> exceptions = new ArrayList<>();
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using @ExceptionHandler " + exceptionHandlerMethod);
 			}
-			Throwable cause = exception.getCause();
-			if (cause != null) {
-				// Expose cause as provided argument as well
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
+			// Expose causes as provided arguments as well
+			Throwable exToExpose = exception;
+			while (exToExpose != null) {
+				exceptions.add(exToExpose);
+				Throwable cause = exToExpose.getCause();
+				exToExpose = (cause != exToExpose ? cause : null);
 			}
-			else {
-				// Otherwise, just the given exception as-is
-				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
-			}
+			Object[] arguments = new Object[exceptions.size() + 1];
+			exceptions.toArray(arguments);  // efficient arraycopy call in ArrayList
+			arguments[arguments.length - 1] = handlerMethod;
+			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, arguments);
 		}
 		catch (Throwable invocationEx) {
-			// Any other than the original exception (or its cause) is unintended here,
+			// Any other than the original exception (or a cause) is unintended here,
 			// probably an accident (e.g. failed assertion or the like).
-			if (invocationEx != exception && invocationEx != exception.getCause() && logger.isWarnEnabled()) {
+			if (!exceptions.contains(invocationEx) && logger.isWarnEnabled()) {
 				logger.warn("Failure in @ExceptionHandler " + exceptionHandlerMethod, invocationEx);
 			}
 			// Continue with default processing of the original exception...
