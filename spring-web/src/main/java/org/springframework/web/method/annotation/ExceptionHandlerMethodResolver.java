@@ -125,7 +125,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given exception.
-	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
@@ -136,7 +136,7 @@ public class ExceptionHandlerMethodResolver {
 
 	/**
 	 * Find a {@link Method} to handle the given Throwable.
-	 * Use {@link ExceptionDepthComparator} if more than one match is found.
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exception the exception
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 * @since 5.0
@@ -156,6 +156,7 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Find a {@link Method} to handle the given exception type. This can be
 	 * useful if an {@link Exception} instance is not available (e.g. for tools).
+	 * <p>Uses {@link ExceptionDepthComparator} if more than one match is found.
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
@@ -170,7 +171,8 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	/**
-	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
+	 * Return the {@link Method} mapped to the given exception type, or
+	 * {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<>();
@@ -191,8 +193,9 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	/**
-	 * For the NO_MATCHING_EXCEPTION_HANDLER_METHOD constant.
+	 * For the {@link #NO_MATCHING_EXCEPTION_HANDLER_METHOD} constant.
  	 */
+	@SuppressWarnings("unused")
 	private void noMatchingExceptionHandler() {
 	}
 
