@@ -4584,6 +4584,52 @@ context. Note that support for the `@DirtiesContext` annotation is provided by t
 `DirtiesContextBeforeModesTestExecutionListener` and the
 `DirtiesContextTestExecutionListener`, which are enabled by default.
 
+.ApplicationContext lifecycle and console logging
+[NOTE]
+====
+When you need to debug a test executed with the Spring TestContext Framework, it can be
+useful to analyze the console output (that is, output to the `SYSOUT` and `SYSERR`
+streams). Some build tools and IDEs are able to associate console output with a given
+test; however, some console output cannot be easily associated with a given test.
+
+With regard to console logging triggered by the Spring Framework itself or by components
+registered in the `ApplicationContext`, it is important to understand the lifecycle of an
+`ApplicationContext` that has been loaded by the Spring TestContext Framework within a
+test suite.
+
+The `ApplicationContext` for a test is typically loaded when an instance of the test
+class is being prepared -- for example, to perform dependency injection into `@Autowired`
+fields of the test instance. This means that any console logging triggered during the
+initialization of the `ApplicationContext` typically cannot be associated with an
+individual test method. However, if the context is closed immediately before the
+execution of a test method according to <<spring-testing-annotation-dirtiescontext>>
+semantics, a new instance of the context will be loaded just prior to execution of the
+test method. In the latter scenario, an IDE or build tool may potentially associate
+console logging with the individual test method.
+
+The `ApplicationContext` for a test can be closed via one of the following scenarios.
+
+* The context is closed according to `@DirtiesContext` semantics.
+* The context is closed because it has been automatically evicted from the cache
+  according to the LRU eviction policy.
+* The context is closed via a JVM shutdown hook when the JVM for the test suite
+  terminates.
+
+If the context is closed according to `@DirtiesContext` semantics after a particular test
+method, an IDE or build tool may potentially associate console logging with the
+individual test method. If the context is closed according to `@DirtiesContext` semantics
+after a test class, any console logging triggered during the shutdown of the
+`ApplicationContext` cannot be associated with an individual test method. Similarly, any
+console logging triggered during the shutdown phase via a JVM shutdown hook cannot be
+associated with an individual test method.
+
+When a Spring `ApplicationContext` is closed via a JVM shutdown hook, callbacks executed
+during the shutdown phase are executed on a thread named `SpringContextShutdownHook`. So,
+if you wish to disable console logging triggered when the `ApplicationContext` is closed
+via a JVM shutdown hook, you may be able to register a custom filter with your logging
+framework that allows you to ignore any logging initiated by that thread.
+====
+
 [[testcontext-ctx-management-ctx-hierarchies]]
 ===== Context Hierarchies
 
