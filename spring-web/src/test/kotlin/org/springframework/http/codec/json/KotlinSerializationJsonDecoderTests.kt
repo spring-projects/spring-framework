@@ -19,6 +19,7 @@ package org.springframework.http.codec.json
 import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.testfixture.codec.AbstractDecoderTests
@@ -58,6 +59,7 @@ class KotlinSerializationJsonDecoderTests : AbstractDecoderTests<KotlinSerializa
 		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(List::class.java, Pojo::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_JSON)).isTrue()
 		Assertions.assertThat(decoder.canDecode(ResolvableType.forClassWithGenerics(ArrayList::class.java, Int::class.java), MediaType.APPLICATION_PDF)).isFalse()
+		Assertions.assertThat(decoder.canDecode(ResolvableType.forClass(Ordered::class.java), MediaType.APPLICATION_JSON)).isFalse()
 	}
 
 	@Test

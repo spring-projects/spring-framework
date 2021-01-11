@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 import kotlinx.serialization.SerializersKt;
+import kotlinx.serialization.descriptors.PolymorphicKind;
 import kotlinx.serialization.json.Json;
 
 import org.springframework.core.GenericTypeResolver;
@@ -43,7 +44,9 @@ import org.springframework.util.StreamUtils;
  * that can read and write JSON using
  * <a href="https://github.com/Kotlin/kotlinx.serialization">kotlinx.serialization</a>.
  *
- * <p>This converter can be used to bind {@code @Serializable} Kotlin classes.
+ * <p>This converter can be used to bind {@code @Serializable} Kotlin classes,
+ * <a href="https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/polymorphism.md#open-polymorphism">open polymorphic serialization</a>
+ * is not supported.
  * It supports {@code application/json} and {@code application/*+json} with
  * various character sets, {@code UTF-8} being the default.
  *
@@ -182,6 +185,9 @@ public class KotlinSerializationJsonHttpMessageConverter extends AbstractGeneric
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
 			serializer = SerializersKt.serializer(type);
+			if (serializer.getDescriptor().getKind().equals(PolymorphicKind.OPEN.INSTANCE)) {
+				throw new UnsupportedOperationException("Open polymorphic serialization is not supported yet");
+			}
 			serializerCache.put(type, serializer);
 		}
 		return serializer;
