@@ -57,6 +57,7 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.support.ServletContextResource;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
@@ -445,6 +446,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 					location = location.substring(endIndex + 1);
 				}
 				Resource resource = applicationContext.getResource(location);
+				if (location.equals("/") && !(resource instanceof ServletContextResource)) {
+					throw new IllegalStateException(
+							"The String-based location \"/\" should be relative to the web application root " +
+									"but resolved to a Resource of type: " + resource.getClass() + ". " +
+									"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
+				}
 				this.locationsToUse.add(resource);
 				if (charset != null) {
 					if (!(resource instanceof UrlResource)) {

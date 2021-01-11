@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -721,6 +723,25 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getContentLength()).isEqualTo(17);
 		assertThat(this.response.containsHeader("Last-Modified")).isFalse();
 		assertThat(this.response.getContentAsString()).isEqualTo("h1 { color:red; }");
+	}
+
+	@Test
+	public void servletContextRootValidation() {
+		StaticWebApplicationContext context = new StaticWebApplicationContext() {
+			@Override
+			public Resource getResource(String location) {
+				return new FileSystemResource("/");
+			}
+		};
+
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setLocationValues(Collections.singletonList("/"));
+		handler.setApplicationContext(context);
+
+		assertThatIllegalStateException().isThrownBy(handler::afterPropertiesSet)
+				.withMessage("The String-based location \"/\" should be relative to the web application root but " +
+						"resolved to a Resource of type: class org.springframework.core.io.FileSystemResource. " +
+						"If this is intentional, please pass it as a pre-configured Resource via setLocations.");
 	}
 
 
