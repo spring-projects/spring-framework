@@ -2222,6 +2222,17 @@ This can be the case for `Long`, `UUID`, and other target types. If you want to 
 to be injected, either use the `required` flag on the argument annotation, or declare the
 argument as `@Nullable`.
 
+[NOTE]
+====
+As of 5.3, non-null arguments will be enforced even after type conversion. If your handler
+method intends to accept a null value as well, either declare your argument as `@Nullable`
+or mark it as `required=false` in the corresponding `@RequestParam` etc annotation. This is
+a best practice and the recommended solution for regressions encountered in a 5.3 upgrade.
+
+Alternatively, you may specifically handle e.g. the resulting `MissingPathVariableException`
+in the case of a required `@PathVariable`. A null value after conversion will be treated like
+an empty original value, so the corresponding `Missing...Exception` variants will be thrown.
+====
 
 
 [[mvc-ann-matrix-variables]]
@@ -3683,14 +3694,15 @@ controller-specific `Formatter` implementations, as the following example shows:
 	}
 ----
 
-The exception may match against a top-level exception being propagated (that is, a direct
-`IOException` being thrown) or against the immediate cause within a top-level wrapper exception
-(for example, an `IOException` wrapped inside an `IllegalStateException`).
+The exception may match against a top-level exception being propagated (e.g. a direct
+`IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
+an `IOException` wrapped inside an `IllegalStateException`). As of 5.3, this can match
+at arbitrary cause levels, whereas previously only an immediate cause was considered.
 
 For matching exception types, preferably declare the target exception as a method argument,
-as the preceding example shows. When multiple exception methods match, a root exception match is generally
-preferred to a cause exception match. More specifically, the `ExceptionDepthComparator` is
-used to sort exceptions based on their depth from the thrown exception type.
+as the preceding example shows. When multiple exception methods match, a root exception match is
+generally preferred to a cause exception match. More specifically, the `ExceptionDepthComparator`
+is used to sort exceptions based on their depth from the thrown exception type.
 
 Alternatively, the annotation declaration may narrow the exception types to match,
 as the following example shows:

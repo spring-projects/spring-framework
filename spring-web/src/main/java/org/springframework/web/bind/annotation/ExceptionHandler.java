@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ import java.lang.annotation.Target;
  * <li>An exception argument: declared as a general Exception or as a more
  * specific exception. This also serves as a mapping hint if the annotation
  * itself does not narrow the exception types through its {@link #value()}.
+ * You may refer to a top-level exception being propagated or to a nested
+ * cause within a wrapper exception. As of 5.3, any cause level is being
+ * exposed, whereas previously only an immediate cause was considered.
  * <li>Request and/or response objects (typically from the Servlet API).
  * You may choose any specific request/response type, e.g.
  * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}.
