@@ -6,8 +6,8 @@ pluginManagement {
 }
 
 plugins {
-	id "com.gradle.enterprise" version "3.2"
-	id "io.spring.gradle-enterprise-conventions" version "0.0.2"
+	id "com.gradle.enterprise" version "3.5.1"
+	id "io.spring.ge.conventions" version "0.0.7"
 }
 
 include "spring-aop"
