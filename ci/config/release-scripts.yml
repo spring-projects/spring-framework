@@ -3,7 +3,7 @@ logging:
     io.spring.concourse: DEBUG
 distribute:
   optional-deployments:
-    - '.*\\.zip'
+    - '.*\.zip'
 spring:
   main:
     banner-mode: off
