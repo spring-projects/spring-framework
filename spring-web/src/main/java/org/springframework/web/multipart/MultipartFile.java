@@ -56,7 +56,9 @@ public interface MultipartFile extends InputStreamSource {
 	 * <p><strong>Note:</strong> Please keep in mind this filename is supplied
 	 * by the client and should not be used blindly. In addition to not using
 	 * the directory portion, the file name could also contain characters such
-	 * as ".." and others that can be used maliciously.
+	 * as ".." and others that can be used maliciously. It is recommended to not
+	 * use this filename directly. Preferably generate a unique one and save
+	 * this one one somewhere for reference, if necessary.
 	 * @return the original filename, or the empty String if no file has been chosen
 	 * in the multipart form, or {@code null} if not defined or not available
 	 * @see org.apache.commons.fileupload.FileItem#getName()
