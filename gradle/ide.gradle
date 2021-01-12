@@ -55,14 +55,6 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 }
 
-// Ensure that test fixture dependencies are handled properly in Gradle 6.7.
-// Bug fixed in Gradle 6.8: https://github.com/gradle/gradle/issues/14932 
-eclipse.classpath.file.whenMerged {
-	entries.findAll { it instanceof ProjectDependency }.each {
-		it.entryAttributes.remove('without_test_code')
-	}
-}
-
 // Ensure that JMH sources and resources are treated as test classpath entries
 // so that they can see test fixtures.
 // https://github.com/melix/jmh-gradle-plugin/issues/157
