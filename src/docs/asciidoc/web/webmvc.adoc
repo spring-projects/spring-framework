@@ -3316,7 +3316,14 @@ See <<mvc-ann-jackson>> for details.
 
 Spring MVC supports using a single value <<mvc-ann-async-reactive-types, reactive type>>
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
-types for the body.
+types for the body. This allows the following types of async responses:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.
 
 
 [[mvc-ann-jackson]]
