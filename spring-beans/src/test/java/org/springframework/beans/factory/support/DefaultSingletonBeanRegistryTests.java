@@ -17,11 +17,17 @@
 package org.springframework.beans.factory.support;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
+import org.springframework.beans.testfixture.beans.Father;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -99,6 +105,60 @@ public class DefaultSingletonBeanRegistryTests {
 		assertThat(beanRegistry.isDependent("a", "a")).isFalse();
 		assertThat(beanRegistry.isDependent("b", "b")).isTrue();
 		assertThat(beanRegistry.isDependent("c", "c")).isTrue();
+	}
+
+	@Test
+	public void testGetLazySingleton() throws InterruptedException {
+		testGetSingleton("father");
+	}
+
+	@Test
+	public void testGetNonLazySingleton() throws InterruptedException {
+		testGetSingleton("father-non-lazy");
+	}
+
+	private void testGetSingleton(String fatherBeanName) throws InterruptedException {
+
+		CountDownLatch countDownLatch = new CountDownLatch(2);
+		AtomicInteger occurExceptionCount = new AtomicInteger(0);
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+		reader.loadBeanDefinitions(new ClassPathResource("DefaultSingletonBeanRegistryTests.xml", getClass()));
+
+		// Just for testing, you should use a thread pool
+		new Thread(() -> {
+			Father father = beanFactory.getBean(fatherBeanName, Father.class);
+			try {
+				Assert.notNull(father, "father Shouldn't be null");
+				Assert.notNull(father.getSon(), "son Shouldn't be null");
+			} catch (Exception e) {
+				occurExceptionCount.incrementAndGet();
+				System.out.println(Thread.currentThread().getName());
+				e.printStackTrace();
+			}
+			countDownLatch.countDown();
+		}, "first-thread").start();
+
+		Thread.sleep(1000);
+
+		// Just for testing, you should use a thread pool
+		new Thread(() -> {
+			Father father = beanFactory.getBean(fatherBeanName, Father.class);
+			try {
+				Assert.notNull(father, "father Shouldn't be null");
+				Assert.notNull(father.getSon(), "son Shouldn't be null");
+			} catch (Exception e) {
+				occurExceptionCount.incrementAndGet();
+				System.out.println(Thread.currentThread().getName());
+				e.printStackTrace();
+			}
+			countDownLatch.countDown();
+		}, "second-thread").start();
+
+		while (countDownLatch.getCount() != 0) {
+
+		}
+		Assert.isTrue(occurExceptionCount.get() == 0, "Throwing an exception in the sub-thread that gets the bean");
 	}
 
 }

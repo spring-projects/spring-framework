@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<bean id="mother" class="org.springframework.beans.testfixture.beans.Mother" lazy-init="true">
+	</bean>
+
+	<bean id="father" class="org.springframework.beans.testfixture.beans.Father" lazy-init="true">
+		<property name="son" ref="son"/>
+	</bean>
+
+	<bean id="son" class="org.springframework.beans.testfixture.beans.Son" lazy-init="true">
+		<property name="father" ref="father"/>
+		<property name="mother" ref="mother"/>
+	</bean>
+
+
+	<bean id="mother-non-lazy" class="org.springframework.beans.testfixture.beans.Mother" lazy-init="false">
+	</bean>
+
+	<bean id="father-non-lazy" class="org.springframework.beans.testfixture.beans.Father" lazy-init="false">
+		<property name="son" ref="son-non-lazy"/>
+	</bean>
+
+	<bean id="son-non-lazy" class="org.springframework.beans.testfixture.beans.Son" lazy-init="false">
+		<property name="father" ref="father-non-lazy"/>
+		<property name="mother" ref="mother-non-lazy"/>
+	</bean>
+
+
+</beans>
